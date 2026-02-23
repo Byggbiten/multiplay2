@@ -12,7 +12,7 @@ const Sound = (() => {
   let ctx = null;
 
   function getCtx() {
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!ctx) ctx = new (window.AudioContext || window['webkitAudioContext'])();
     return ctx;
   }
 
@@ -164,7 +164,7 @@ const Store = {
 const Router = (() => {
   let current = 'screen-home';
 
-  function show(screenId, opts = {}) {
+  function show(screenId) {
     // Göm alla skärmar
     document.querySelectorAll('.screen').forEach(s => {
       s.classList.remove('active');
@@ -432,4 +432,10 @@ const App = (() => {
 })();
 
 /* Initiera när DOM är redo */
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+  // PWA: registrera service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+});
