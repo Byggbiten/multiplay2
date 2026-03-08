@@ -753,17 +753,17 @@ const ClockGame = (() => {
       const [hh, mm] = text.split(':');
       return b(hh) + k(':') + r(mm);
     }
-    // "halv X" (30 min) → "halv" svart, timme blå
+    // "halv X" (30 min) → "halv" röd (minutbeskrivning), timme blå
     let match = text.match(/^halv (.+)$/);
-    if (match) return k('halv ') + b(match[1]);
+    if (match) return r('halv ') + b(match[1]);
 
-    // "X över halv Y"
+    // "X över halv Y" → minut röd, "över" svart, "halv" röd, timme blå
     match = text.match(/^(.+?) över halv (.+)$/);
-    if (match) return r(match[1]) + k(' över halv ') + b(match[2]);
+    if (match) return r(match[1]) + k(' över ') + r('halv ') + b(match[2]);
 
-    // "X i halv Y"
+    // "X i halv Y" → minut röd, "i" svart, "halv" röd, timme blå
     match = text.match(/^(.+?) i halv (.+)$/);
-    if (match) return r(match[1]) + k(' i halv ') + b(match[2]);
+    if (match) return r(match[1]) + k(' i ') + r('halv ') + b(match[2]);
 
     // "X över Y"
     match = text.match(/^(.+?) över (.+)$/);
