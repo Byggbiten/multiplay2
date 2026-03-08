@@ -15,12 +15,13 @@ const NpMatteMuntligt = (() => {
   let score        = 0;
   let attempts     = 0;         // per fråga
   let lastTableData = null;     // för återanvändning i oral-frågor
+  let inputLocked = false;
 
   const MAX_ATTEMPTS = 2;
   const NP_STATS_KEY = id => `np_matte_muntligt_stats_${id}`;
 
   /* ── Data-pooler ────────────────────────────────────── */
-  const NAMES = ['Mira','Ali','Noah','Iris','Elsa','Nova','Ahmed','Vera','Gabriel','Troj','Mika','Liam','Saga','Wilma','Yusuf','Nora'];
+  const NAMES = ['Mira', 'Dennis', 'Zelda', 'Nova', 'Hilma', 'Alva', 'Moa', 'Johanna', 'Julian', 'Belle'];
 
   const TABLE_THEMES = [
     { name:'böcker',      unit:'böcker',  emoji:'📚', range:[3,30]   },
@@ -144,6 +145,7 @@ const NpMatteMuntligt = (() => {
      FRÅGEKORT-RENDERING
   ══════════════════════════════════════════════════════ */
   function renderQuestion(q) {
+    inputLocked = false;
     const root = document.getElementById('np-matte-muntligt-root');
     const pct  = Math.round((currentIdx / 10) * 100);
 
@@ -162,22 +164,35 @@ const NpMatteMuntligt = (() => {
         #np-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:var(--np-primary); }
         #np-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(124,58,237,0.15); overflow:hidden; flex-shrink:0; }
         #np-prog-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--np-primary),var(--np-secondary)); transition:width 0.4s; }
-        /* ── Main ── */
-        #np-main { flex:1; display:flex; flex-direction:column; padding:8px; gap:8px; overflow:hidden; min-height:0; }
-        /* ── Top: visual + canvas always side-by-side ── */
-        #np-top-panel { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; }
+        /* ── Main: two-column grid, left=content, right=canvas ── */
+        #np-main {
+          flex:1; display:grid;
+          grid-template-columns:55fr 45fr;
+          gap:8px; padding:8px;
+          overflow:hidden; min-height:0; height:100%;
+        }
+        @media (orientation:portrait) {
+          #np-main { grid-template-columns:1fr 1fr; }
+        }
+        /* LEFT column */
+        #np-left-col {
+          display:flex; flex-direction:column; gap:6px;
+          overflow-y:auto; min-height:0;
+        }
         #np-visual-panel {
           background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
           padding:10px; border:1.5px solid rgba(124,58,237,0.12);
-          overflow-y:auto; min-height:0;
+          flex-shrink:0;
         }
+        /* RIGHT column: canvas fills full height */
         #np-scratch-panel {
           background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
           padding:8px; border:1.5px solid rgba(124,58,237,0.12);
-          display:flex; flex-direction:column; gap:5px; min-height:0;
+          display:flex; flex-direction:column; gap:5px;
+          height:100%; min-height:0;
         }
         #np-canvas {
-          flex:1; width:100%; min-height:80px; display:block;
+          flex:1; width:100%; display:block;
           touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:1.5px dashed rgba(124,58,237,0.25);
           background:rgba(255,255,255,0.7);
@@ -189,8 +204,7 @@ const NpMatteMuntligt = (() => {
         }
         .np-tool-btn.active       { background:var(--np-primary); color:#fff; border-color:var(--np-primary); }
         .np-tool-btn:not(.active) { background:var(--np-light);   color:var(--np-primary); }
-        /* ── Bottom ── */
-        #np-bottom { flex-shrink:0; display:flex; flex-direction:column; gap:5px; }
+        /* question + answers + hints */
         .np-question-text { font-size:var(--text-base); font-weight:800; color:var(--color-text); padding:4px 6px; line-height:1.4; }
         /* choice: 2×2 grid */
         .np-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
@@ -233,27 +247,14 @@ const NpMatteMuntligt = (() => {
         <div id="np-prog-wrap"><div id="np-prog-fill" style="width:${pct}%"></div></div>
       </div>
 
-      <!-- Main area -->
+      <!-- Main area: two-column grid -->
       <div id="np-main">
 
-        <!-- Top panel: visual LEFT, canvas RIGHT -->
-        <div id="np-top-panel">
+        <!-- LEFT column: visual + question + answers + hints -->
+        <div id="np-left-col">
           <div id="np-visual-panel">
             ${q.visual ? renderVisual(q.visual) : `<div style="color:#c084fc;font-size:2rem;text-align:center;padding-top:8px">${q.emoji}</div>`}
           </div>
-          <div id="np-scratch-panel">
-            <div style="font-size:10px;font-weight:800;color:var(--np-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
-            <canvas id="np-canvas"></canvas>
-            <div class="np-canvas-tools">
-              <button id="np-tool-draw" class="np-tool-btn active" onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
-              <button id="np-tool-erase" class="np-tool-btn" onclick="NpMatteMuntligt.toggleEraser(true)">🧹 Sudd</button>
-              <button class="np-tool-btn" onclick="NpMatteMuntligt.clearCanvas()">🗑️ Rensa</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom: question + answers + hints -->
-        <div id="np-bottom">
           <div class="np-question-text">${q.question}</div>
           <div id="np-answer-area">${renderAnswerArea(q)}</div>
           <div id="np-feedback"></div>
@@ -265,6 +266,17 @@ const NpMatteMuntligt = (() => {
           </div>
           <div id="hint-box" style="display:none;padding:8px 10px;background:rgba(251,191,36,0.1);border-radius:var(--radius-md);border:1.5px solid rgba(251,191,36,0.3);font-weight:700;color:#92400e;font-size:var(--text-sm)">${q.hint}</div>
           <div id="adult-box" style="display:none;padding:8px 10px;background:rgba(96,165,250,0.08);border-radius:var(--radius-md);border:1.5px solid rgba(96,165,250,0.25);font-weight:700;color:#1d4ed8;font-size:var(--text-sm)">${q.adultTip}</div>
+        </div>
+
+        <!-- RIGHT column: canvas full height -->
+        <div id="np-scratch-panel">
+          <div style="font-size:10px;font-weight:800;color:var(--np-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <canvas id="np-canvas"></canvas>
+          <div class="np-canvas-tools">
+            <button id="np-tool-draw" class="np-tool-btn active" onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
+            <button id="np-tool-erase" class="np-tool-btn" onclick="NpMatteMuntligt.toggleEraser(true)">🧹 Sudd</button>
+            <button class="np-tool-btn" onclick="NpMatteMuntligt.clearCanvas()">🗑️ Rensa</button>
+          </div>
         </div>
 
       </div>
@@ -451,6 +463,8 @@ const NpMatteMuntligt = (() => {
      SVAR-HANTERING
   ══════════════════════════════════════════════════════ */
   function handleChoice(idx, chosen) {
+    if (inputLocked) return;
+    inputLocked = true;
     const q = questions[currentIdx];
     const correct = String(q.correctAnswer);
     const isCorrect = chosen === correct;
@@ -458,6 +472,8 @@ const NpMatteMuntligt = (() => {
   }
 
   function handleFreeInput() {
+    if (inputLocked) return;
+    inputLocked = true;
     const q = questions[currentIdx];
     const correct = String(q.correctAnswer);
     const isCorrect = freeInput === correct;
@@ -465,6 +481,8 @@ const NpMatteMuntligt = (() => {
   }
 
   function handleOral() {
+    if (inputLocked) return;
+    inputLocked = true;
     // Oral räknas alltid som rätt
     handleAnswer(true, 'oral', 'oral', 'oral', null);
   }
@@ -638,7 +656,7 @@ const NpMatteMuntligt = (() => {
     const chosen = type || types[Math.floor(Math.random() * types.length)];
 
     if (chosen === 'confetti') {
-      App.Confetti.burst(80);
+      App.Confetti.burst(240);
       return;
     }
 
@@ -654,7 +672,7 @@ const NpMatteMuntligt = (() => {
     };
 
     const pool = sets[chosen] || sets.stars;
-    const count = chosen === 'balls' ? 20 : 35;
+    const count = chosen === 'balls' ? 60 : 105;
 
     for (let i = 0; i < count; i++) {
       const el = document.createElement('span');
@@ -662,7 +680,7 @@ const NpMatteMuntligt = (() => {
       el.textContent = pool[Math.floor(Math.random() * pool.length)];
       el.style.cssText = `
         left:${Math.random()*100}%;
-        font-size:${14 + Math.random()*18}px;
+        font-size:${14 + Math.random()*30}px;
         animation-duration:${1.2 + Math.random()*2}s;
         animation-delay:${Math.random()*0.4}s;
       `;
@@ -676,7 +694,7 @@ const NpMatteMuntligt = (() => {
   ══════════════════════════════════════════════════════ */
   function showResults() {
     App.Sound.play('fanfare');
-    App.Confetti.burst(100);
+    App.Confetti.burst(250);
     saveStats();
 
     const root = document.getElementById('np-matte-muntligt-root');

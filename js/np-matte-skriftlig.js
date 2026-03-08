@@ -13,6 +13,7 @@ const NpMatteSkriftlig = (() => {
   let score     = 0;
   let attempts  = 0;
   let currentQ  = null;
+  let inputLocked = false;
 
   /* Canvas */
   let canvas, ctx, drawing = false, erasing = false;
@@ -31,7 +32,7 @@ const NpMatteSkriftlig = (() => {
   let fillAnswers = [];          // fillSign: answers per sub-question
 
   /* ── Data pools ─────────────────────────────────────────── */
-  const NAMES = ['Mira','Ali','Noah','Iris','Elsa','Nova','Ahmed','Vera','Gabriel','Troj','Mika','Liam','Saga','Wilma','Yusuf','Nora','Omar','Ayla','Isak','Sami'];
+  const NAMES = ['Mira', 'Dennis', 'Zelda', 'Nova', 'Hilma', 'Alva', 'Moa', 'Johanna', 'Julian', 'Belle'];
   const CONTEXTS = [
     { place: 'skolgården',   things: 'elever'   },
     { place: 'biblioteket',  things: 'böcker'   },
@@ -139,6 +140,7 @@ const NpMatteSkriftlig = (() => {
     if (qIndex >= questions.length) { showResults(); return; }
     currentQ = questions[qIndex];
     attempts = 0;
+    inputLocked = false;
     resetAnswerState();
 
     root().innerHTML = buildQuestionLayout();
@@ -167,19 +169,24 @@ const NpMatteSkriftlig = (() => {
         #nps-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:#2563eb; }
         #nps-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(37,99,235,0.15); overflow:hidden; flex-shrink:0; }
         #nps-prog-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#2563eb,#06b6d4); transition:width 0.4s; }
-        #nps-main { flex:1; display:flex; flex-direction:column; padding:8px; gap:8px; overflow:hidden; min-height:0; }
-        #nps-top-panel { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; }
+        #nps-main {
+          flex:1; display:grid; grid-template-columns:55fr 45fr;
+          padding:8px; gap:8px; overflow:hidden; min-height:0; height:100%;
+        }
+        #nps-left-col {
+          display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-height:0;
+        }
         #nps-visual-panel {
           background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:10px; border:1.5px solid rgba(37,99,235,0.12); overflow-y:auto; min-height:0;
+          padding:10px; border:1.5px solid rgba(37,99,235,0.12); flex-shrink:0;
         }
         #nps-scratch-panel {
           background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
           padding:8px; border:1.5px solid rgba(37,99,235,0.12);
-          display:flex; flex-direction:column; gap:5px; min-height:0;
+          display:flex; flex-direction:column; gap:5px; height:100%; min-height:0;
         }
         #nps-canvas {
-          flex:1; width:100%; min-height:80px; display:block;
+          flex:1; width:100%; display:block;
           touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25);
           background:#f8fbff;
@@ -224,11 +231,11 @@ const NpMatteSkriftlig = (() => {
         <div id="nps-prog-wrap"><div id="nps-prog-fill" style="width:${pct}%"></div></div>
       </div>
 
-      <!-- Main -->
+      <!-- Main: left col = question+answers, right col = canvas -->
       <div id="nps-main">
 
-        <!-- Top: visual LEFT, canvas RIGHT -->
-        <div id="nps-top-panel">
+        <!-- Left column: question, visual, answer area, feedback -->
+        <div id="nps-left-col">
           <div id="nps-visual-panel">
             <div style="font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;opacity:0.7">
               ${getCategoryLabel(currentQ.cat)}
@@ -241,21 +248,21 @@ const NpMatteSkriftlig = (() => {
               💡 ${esc(currentQ.hint || '')}
             </div>
           </div>
-          <div id="nps-scratch-panel">
-            <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
-            <canvas id="nps-canvas"></canvas>
-            <div style="display:flex;gap:5px;flex-shrink:0">
-              <button id="nps-tool-draw" class="nps-tool-btn active" onclick="NpMatteSkriftlig.toggleEraser(false)">🖊️ Rita</button>
-              <button id="nps-tool-erase" class="nps-tool-btn" onclick="NpMatteSkriftlig.toggleEraser(true)">🧹 Sudd</button>
-              <button class="nps-tool-btn" onclick="NpMatteSkriftlig.clearCanvas()">🗑️ Rensa</button>
-            </div>
+          <div id="nps-bottom">
+            <div id="nps-answer-area"></div>
+            <div id="nps-feedback"></div>
           </div>
         </div>
 
-        <!-- Bottom: answers + feedback -->
-        <div id="nps-bottom">
-          <div id="nps-answer-area"></div>
-          <div id="nps-feedback"></div>
+        <!-- Right column: canvas full height -->
+        <div id="nps-scratch-panel">
+          <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <canvas id="nps-canvas"></canvas>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button id="nps-tool-draw" class="nps-tool-btn active" onclick="NpMatteSkriftlig.toggleEraser(false)">🖊️ Rita</button>
+            <button id="nps-tool-erase" class="nps-tool-btn" onclick="NpMatteSkriftlig.toggleEraser(true)">🧹 Sudd</button>
+            <button class="nps-tool-btn" onclick="NpMatteSkriftlig.clearCanvas()">🗑️ Rensa</button>
+          </div>
         </div>
 
       </div>
@@ -582,7 +589,9 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitFree() {
-    if (!npadValue) return;
+    if (inputLocked) return;
+    inputLocked = true;
+    if (!npadValue) { inputLocked = false; return; }
     handleAnswer(parseInt(npadValue, 10));
   }
 
@@ -596,6 +605,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitChoice(i) {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer(i);
   }
 
@@ -645,6 +656,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitTrueFalse() {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer(tfAnswers);
   }
 
@@ -694,6 +707,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitMultiChoice() {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer([...mcSelected].sort((a,b)=>a-b));
   }
 
@@ -745,7 +760,7 @@ const NpMatteSkriftlig = (() => {
   }
 
   function npadPress(key) {
-    if (key === '✓') { submitFree(); return; }
+    if (key === '✓') { if (inputLocked) return; submitFree(); return; }
     if (currentQ && currentQ.answerType === 'multi-free') {
       const f = currentQ.fields[mfActiveIdx];
       if (f && f.prefilled !== undefined) return;
@@ -770,6 +785,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitMultiFree() {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer(mfValues.map(v => parseInt(v, 10)));
   }
 
@@ -838,7 +855,9 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitOrder() {
-    if (orderPlaced.length < currentQ.numbers.length) return;
+    if (inputLocked) return;
+    inputLocked = true;
+    if (orderPlaced.length < currentQ.numbers.length) { inputLocked = false; return; }
     handleAnswer([...orderPlaced]);
   }
 
@@ -887,6 +906,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitFillSign() {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer(fillAnswers.map(a => a.op1));
   }
 
@@ -943,6 +964,8 @@ const NpMatteSkriftlig = (() => {
   }
 
   function submitMatch() {
+    if (inputLocked) return;
+    inputLocked = true;
     handleAnswer(matchPairs);
   }
 
@@ -1044,18 +1067,16 @@ const NpMatteSkriftlig = (() => {
   function celebrationBurst() {
     const type = rnd(0, 5);
     if (typeof App !== 'undefined' && App.Confetti) {
-      if (type === 0) App.Confetti.burst(15);
-      else if (type === 1) App.Confetti.burst(8);
-      else App.Confetti.burst(5);
+      if (type === 0) App.Confetti.burst(45);
+      else if (type === 1) App.Confetti.burst(24);
+      else App.Confetti.burst(15);
     }
   }
 
   /* ── Results ─────────────────────────────────────────────── */
   function showResults() {
     saveStats();
-    if (score >= questions.length) {
-      if (typeof App !== 'undefined' && App.Confetti) App.Confetti.burst(40);
-    }
+    if (typeof App !== 'undefined' && App.Confetti) App.Confetti.burst(250);
     const pct = Math.round((score / questions.length) * 100);
     const medal = score === questions.length ? '🥇' : score >= questions.length * 0.75 ? '🥈' : score >= questions.length * 0.5 ? '🥉' : '💪';
     const msg   = score === questions.length ? 'Perfekt! Du klarade allt!' :
@@ -1294,24 +1315,36 @@ const NpMatteSkriftlig = (() => {
     const obj   = pick(['kulor','knappar','godisbitar','stenar','löv']);
     const emoji = ['🔵','🔴','🟢'];
     const colors= ['blå','röda','gröna'];
-    const counts= [rnd(2, 6), rnd(2, 6), rnd(2, 6)];
-    const total = counts.reduce((a,b)=>a+b,0);
 
-    // Statements (always 4)
+    // Generate counts ensuring no ties for max/min (so störst/minst statements are unambiguous)
+    let counts;
+    do {
+      counts = [rnd(2, 6), rnd(2, 6), rnd(2, 6)];
+    } while (
+      // retry if max is tied (more than one color shares the highest count)
+      counts.filter(c => c === Math.max(...counts)).length > 1 ||
+      // retry if min is tied (more than one color shares the lowest count)
+      counts.filter(c => c === Math.min(...counts)).length > 1
+    );
+
     const maxI = counts.indexOf(Math.max(...counts));
     const minI = counts.indexOf(Math.min(...counts));
+
+    // "lika stor chans" statement: pick two indices and check if they're equal
+    const [cmpI1, cmpI2] = [0, 1]; // always compare blå vs röda
+    const likaStort = counts[cmpI1] === counts[cmpI2];
 
     const stmts = [
       `Det är störst chans att ta en ${colors[maxI]} ${obj.slice(0,-1)}.`,
       `Det är minst chans att ta en ${colors[minI]} ${obj.slice(0,-1)}.`,
-      `Det är lika stor chans att ta ${colors[0]} som ${colors[1]}.`,
+      `Det är lika stor chans att ta ${colors[cmpI1]} som ${colors[cmpI2]}.`,
       `Det är störst chans att ta en ${colors[minI]} ${obj.slice(0,-1)}.`,
     ];
     const correct = [
-      'sant',
-      'sant',
-      counts[0] === counts[1] ? 'sant' : 'falskt',
-      'falskt',
+      'sant',   // strict max → always true after loop guard
+      'sant',   // strict min → always true after loop guard
+      likaStort ? 'sant' : 'falskt',
+      'falskt', // minI does NOT have the most → always false
     ];
 
     return {
@@ -1326,15 +1359,24 @@ const NpMatteSkriftlig = (() => {
 
   /* ── Kat 7: Textuppgift subtraktion ───────────────────── */
   function genSubText() {
-    const ctx   = pick(CONTEXTS);
+    // Use context-appropriate attribute pairs to avoid illogical combos
+    const scenarios = [
+      { place: 'fruktkorgen',   things: 'äpplen',   cat1: 'röda',      cat2: 'gröna'     },
+      { place: 'biblioteket',   things: 'böcker',   cat1: 'utlånade',  cat2: 'kvar'      },
+      { place: 'klassrummet',   things: 'pennor',   cat1: 'stora',     cat2: 'små'       },
+      { place: 'leklådan',      things: 'leksaker', cat1: 'stora',     cat2: 'små'       },
+      { place: 'garaget',       things: 'cyklar',   cat1: 'stora',     cat2: 'små'       },
+      { place: 'skolgården',    things: 'elever',   cat1: 'inne',      cat2: 'ute'       },
+      { place: 'idrottshallen', things: 'bollar',   cat1: 'röda',      cat2: 'blå'       },
+      { place: 'trädgården',    things: 'blommor',  cat1: 'röda',      cat2: 'gula'      },
+    ];
+    const sc    = pick(scenarios);
     const total = rnd(40, 99);
     const part  = rnd(15, total - 10);
     const ans   = total - part;
-    const cat1  = pick(['stora','röda','tunga','gamla']);
-    const cat2  = pick(['små','blå','lätta','nya']);
     return {
       cat: 'subText', answerType: 'free',
-      question: `Det finns ${total} ${ctx.things} på ${ctx.place}. ${part} är ${cat1}. Resten är ${cat2}. Hur många ${cat2} ${ctx.things} finns det?`,
+      question: `Det finns ${total} ${sc.things} på ${sc.place}. ${part} är ${sc.cat1}. Resten är ${sc.cat2}. Hur många ${sc.cat2} ${sc.things} finns det?`,
       answer: ans,
       hint: `Subtrahera: ${total} − ${part} = ?`,
     };
@@ -1399,14 +1441,14 @@ const NpMatteSkriftlig = (() => {
 
   /* ── Kat 10: Multiplikation i kontext ─────────────────── */
   function genMulContext() {
-    const ctx   = pick(CONTEXTS);
-    const n     = rnd(2, 6);
-    const per   = rnd(2, 10);
-    const ans   = n * per;
-    const name  = pick(NAMES);
+    const n   = rnd(2, 6);
+    const per = rnd(2, 10);
+    const ans = n * per;
+    const subjects = ['barn','elever','kompisar'];
+    const objects  = ['äpplen','pennor','kort','klistermärken','karameller'];
     return {
       cat: 'mulContext', answerType: 'free',
-      question: `${n} ${ctx.things.slice(0,-1) || 'barn'} tar ${per} ${pick(['äpplen','pennor','kort','steg','klister'])} var. Hur många är det sammanlagt?`,
+      question: `${n} ${pick(subjects)} tar ${per} ${pick(objects)} var. Hur många är det sammanlagt?`,
       answer: ans,
       hint: `Multiplicera: ${n} × ${per} = ?`,
     };

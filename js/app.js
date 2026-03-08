@@ -68,9 +68,9 @@ const Sound = (() => {
 /* ── Konfetti ─────────────────────────────────────────── */
 const Confetti = (() => {
   const COLORS = ['#c084fc','#f472b6','#fb923c','#fbbf24','#4ade80','#60a5fa','#f87171'];
-  const SHAPES = ['●','★','♥','✿','◆'];
+  const SHAPES = ['●','★','♥','✿','◆','🦄','🌈','🎉','🎊','💖','🦋','🍭','⭐','💫','✨','🌸','🐱','🐶','🦊','🎀','👑'];
 
-  function burst(count = 60) {
+  function burst(count = 180) {
     const container = document.getElementById('confetti-container');
     container.innerHTML = '';
     for (let i = 0; i < count; i++) {
@@ -80,13 +80,13 @@ const Confetti = (() => {
       el.style.cssText = `
         left: ${Math.random() * 100}%;
         color: ${COLORS[Math.floor(Math.random() * COLORS.length)]};
-        font-size: ${8 + Math.random() * 14}px;
-        animation-duration: ${1.5 + Math.random() * 2}s;
+        font-size: ${10 + Math.random() * 24}px;
+        animation-duration: ${2 + Math.random() * 3}s;
         animation-delay: ${Math.random() * 0.5}s;
       `;
       container.appendChild(el);
     }
-    setTimeout(() => { container.innerHTML = ''; }, 3500);
+    setTimeout(() => { container.innerHTML = ''; }, 5000);
   }
 
   return { burst };

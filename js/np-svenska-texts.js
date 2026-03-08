@@ -11,39 +11,39 @@ const NARRATIVE_TEXTS = [
     id: 'story_birthday',
     type: 'narrative',
     title: 'Födelsedagspresenten',
-    text: `Erik skulle fylla nio år på lördag. Han hade länge drömt om en ny cykel. Hans gamla cykel var rostig och den vänstra bromsen fungerade inte.
-Redan på fredagskvällen försökte Erik lista ut vad presenten kunde vara. Han smög ner i källaren med sin ficklampa. Under en stor filt låg något som liknade en cykel. Det luktade nytt gummi och metall.
-På lördagsmorgonen väcktes Erik av att hela familjen sjöng för honom. Hans bror Marko och hans kompis Susanne stod vid sängen med ett paket.
+    text: `Dennis skulle fylla nio år på lördag. Han hade länge drömt om en ny cykel. Hans gamla cykel var rostig och den vänstra bromsen fungerade inte.
+Redan på fredagskvällen försökte Dennis lista ut vad presenten kunde vara. Han smög ner i källaren med sin ficklampa. Under en stor filt låg något som liknade en cykel. Det luktade nytt gummi och metall.
+På lördagsmorgonen väcktes Dennis av att hela familjen sjöng för honom. Hans bror Julian och hans kompis Zelda stod vid sängen med ett paket.
 "Det är inte cykeln," sade pappa och log konstigt. "Cyklar kostar för mycket pengar."
-Erik öppnade paketet. Det var nya cykelhandskar och en hjälm i grönt och gult.
+Dennis öppnade paketet. Det var nya cykelhandskar och en hjälm i grönt och gult.
 "Men nu kan du gå ner i källaren," sade pappa.
-Erik sprang nerför trappan. Pappa drog av filten. Där stod en glänsande röd cykel med silver stänkskärmar.
-"Jag visste det!" skrek Erik. "Det luktade ny cykel!"
-Resten av dagen cyklade Erik, Marko och Susanne nerför den branta backen vid skogen. Det var den bästa födelsedag Erik någonsin hade haft.`,
-    characters: ['Erik', 'Marko', 'Susanne', 'pappa', 'bror'],
+Dennis sprang nerför trappan. Pappa drog av filten. Där stod en glänsande röd cykel med silver stänkskärmar.
+"Jag visste det!" skrek Dennis. "Det luktade ny cykel!"
+Resten av dagen cyklade Dennis, Julian och Zelda nerför den branta backen vid skogen. Det var den bästa födelsedag Dennis någonsin hade haft.`,
+    characters: ['Dennis', 'Julian', 'Zelda', 'pappa', 'bror'],
     questions: {
       locate: [
-        { q: 'Hur många år fyller Erik?', options: ['Sju år', 'Åtta år', 'Nio år', 'Tio år'], correct: 2 },
+        { q: 'Hur många år fyller Dennis?', options: ['Sju år', 'Åtta år', 'Nio år', 'Tio år'], correct: 2 },
         { q: 'Vilken färg hade den nya cykeln?', options: ['Blå', 'Grön', 'Röd', 'Gul'], correct: 2 },
-        { q: 'Vad var fel på Eriks gamla cykel?', options: ['Det saknades ett hjul', 'Den vänstra bromsen fungerade inte', 'Sadeln var trasig', 'Styret var böjt'], correct: 1 }
+        { q: 'Vad var fel på Dennis gamla cykel?', options: ['Det saknades ett hjul', 'Den vänstra bromsen fungerade inte', 'Sadeln var trasig', 'Styret var böjt'], correct: 1 }
       ],
       interpret: [
-        { q: 'Varför sade pappa att cyklar kostar för mycket?', options: ['Han hade inte råd', 'Han ville att Erik inte skulle gissa presenten', 'Han ville att Erik skulle spara sina egna pengar', 'Han hade glömt köpa en cykel'], correct: 1 },
-        { q: 'Hur visste Erik att det var en cykel under filten?', options: ['Han hade sett pappa köpa den', 'Marko hade berättat det', 'Det luktade nytt gummi och han såg formen', 'Han hade läst ett kvitto'], correct: 2 }
+        { q: 'Varför sade pappa att cyklar kostar för mycket?', options: ['Han hade inte råd', 'Han ville att Dennis inte skulle gissa presenten', 'Han ville att Dennis skulle spara sina egna pengar', 'Han hade glömt köpa en cykel'], correct: 1 },
+        { q: 'Hur visste Dennis att det var en cykel under filten?', options: ['Han hade sett pappa köpa den', 'Julian hade berättat det', 'Det luktade nytt gummi och han såg formen', 'Han hade läst ett kvitto'], correct: 2 }
       ],
       order: {
         events: [
-          'Erik smög ner i källaren med ficklampan.',
-          'Familjen sjöng för Erik på morgonen.',
-          'Erik öppnade paketet med handskar och hjälm.',
+          'Dennis smög ner i källaren med ficklampan.',
+          'Familjen sjöng för Dennis på morgonen.',
+          'Dennis öppnade paketet med handskar och hjälm.',
           'Pappa drog av filten och avslöjade den röda cykeln.'
         ],
         correctOrder: [0, 1, 2, 3]
       },
       whoDidWhat: {
         q: 'Vilka cyklade nerför den branta backen vid skogen?',
-        allNames: ['Erik', 'Marko', 'Susanne', 'pappa', 'mamma'],
-        correctNames: ['Erik', 'Marko', 'Susanne']
+        allNames: ['Dennis', 'Julian', 'Zelda', 'pappa', 'mamma'],
+        correctNames: ['Dennis', 'Julian', 'Zelda']
       },
       detailPick: {
         q: 'Vilka saker nämns i texten?',
@@ -51,9 +51,9 @@ Resten av dagen cyklade Erik, Marko och Susanne nerför den branta backen vid sk
         correct: [0, 1, 3, 5]
       },
       summaries: {
-        bad: 'Erik fick en cykel i present.',
-        medium: 'Erik fyllde nio år och fick en röd cykel i present av sin pappa. Han hade gissat att den stod i källaren.',
-        good: 'Erik fyllde nio år och hoppades på en ny cykel. Han smög ner i källaren och kände att det luktade nytt gummi under en stor filt. Pappa låtsades att cyklar kostade för mycket – men till slut avslöjades den glänsande röda cykeln, och Erik skrek att han visste det hela tiden.'
+        bad: 'Dennis fick en cykel i present.',
+        medium: 'Dennis fyllde nio år och fick en röd cykel i present av sin pappa. Han hade gissat att den stod i källaren.',
+        good: 'Dennis fyllde nio år och hoppades på en ny cykel. Han smög ner i källaren och kände att det luktade nytt gummi under en stor filt. Pappa låtsades att cyklar kostade för mycket – men till slut avslöjades den glänsande röda cykeln, och Dennis skrek att han visste det hela tiden.'
       }
     }
   },
@@ -517,7 +517,7 @@ På bussen hem sov Iris med snäckor i knäet. Wilma och Sam pratade om att komm
       },
       whoDidWhat: {
         q: 'Vilka hittade maneten nära vattenbrynet?',
-        allNames: ['Wilma', 'Sam', 'Iris', 'fröken Bergström', 'Erik'],
+        allNames: ['Wilma', 'Sam', 'Iris', 'fröken Bergström', 'Dennis'],
         correctNames: ['Wilma', 'Sam', 'Iris']
       },
       detailPick: {
@@ -917,68 +917,204 @@ const WORD_IN_SENTENCE_POOL = [
 /* ── STAVNING & INTERPUNKTION (Kat 12) ──────────────────── */
 const SPELLING_POOL = [
   {
-    correct: 'Erik gick till skolan med sin ryggsäck.',
-    wrong: [
-      'erik gick till skolan med sin ryggsäck.',
-      'Erik gick till skolan med sin ryggsäck',
-      'Erik gick till Skolan med sin ryggsäck.'
-    ]
-  },
-  {
-    correct: 'Hunden sprang snabbt genom parken.',
-    wrong: [
-      'hunden sprang snabbt genom parken.',
-      'Hunden sprang snabbt genom parken',
-      'Hunden sprang snabbt genum parken.'
-    ]
-  },
-  {
     correct: 'Fröken Andersson läste en saga för klassen.',
-    wrong: [
+    options: [
+      'Fröken Andersson läste en saga för klassen.',
       'fröken Andersson läste en saga för klassen.',
-      'Fröken Andersson läste en saga för klassen',
-      'Fröken Andersson läste en saga för Klassen.'
-    ]
+      'Fröken Andersson läste en saka för klassen.',
+      'Fröken Andersson läste en saga för klassen,'
+    ],
+    answer: 0
   },
   {
-    correct: 'Det regnade mycket under hela veckan.',
-    wrong: [
-      'det regnade mycket under hela veckan.',
-      'Det regnade mycket under hela veckan',
-      'Det rägnade mycket under hela veckan.'
-    ]
+    correct: 'Katten satt på taket och tittade på fåglarna.',
+    options: [
+      'Katten satt på taket och tittade på fåglarna.',
+      'katten satt på taket och tittade på fåglarna.',
+      'Katten satt på tacket och tittade på fåglarna.',
+      'Katten satt på taket och tittade på fåglarna,'
+    ],
+    answer: 0
   },
   {
-    correct: 'Maja hittade en gammal karta i källaren.',
-    wrong: [
-      'maja hittade en gammal karta i källaren.',
-      'Maja hittade en gammal karta i källaren',
-      'Maja hittade en gammal karta i källaren!'
-    ]
+    correct: 'Barnen lekte i parken hela eftermiddagen.',
+    options: [
+      'barnen lekte i parken hela eftermiddagen.',
+      'Barnen lekte i Parken hela eftermiddagen.',
+      'Barnen lekte i parken hela eftermiddagen.',
+      'Barnen lekte i parken hela eftermidagen.'
+    ],
+    answer: 2
   },
   {
-    correct: 'Solen skiner starkt på sommaren.',
-    wrong: [
-      'solen skiner starkt på sommaren.',
-      'Solen skiner starkt på sommaren',
-      'Solen skinner starkt på sommaren.'
-    ]
+    correct: 'Hunden sprang snabbt genom skogen.',
+    options: [
+      'Hunden sprang snabbt genom skogen.',
+      'hunden sprang snabbt genom skogen.',
+      'Hunden språng snabbt genom skogen.',
+      'Hunden sprang snabbt genom skoogen.'
+    ],
+    answer: 0
   },
   {
-    correct: 'Katten satt på taket och tittade ner.',
-    wrong: [
-      'katten satt på taket och tittade ner.',
-      'Katten satt på taket och tittade ner',
-      'Katten satt på Taket och tittade ner.'
-    ]
+    correct: 'Ella åt frukost med sin familj varje morgon.',
+    options: [
+      'ella åt frukost med sin familj varje morgon.',
+      'Ella åt frukost med sin familj varje morgon.',
+      'Ella åt frukost med sin Familj varje morgon.',
+      'Ella åt frukost med sin familj varje mornon.'
+    ],
+    answer: 1
   },
   {
-    correct: 'Barnen lekte i trädgården efter middagen.',
-    wrong: [
-      'barnen lekte i trädgården efter middagen.',
-      'Barnen lekte i trädgården efter middagen',
-      'Barnen lekte i trädgården efter middagen?'
-    ]
+    correct: 'Det var soligt och varmt ute på sommaren.',
+    options: [
+      'Det var soligt och varmt ute på sommaren.',
+      'det var soligt och varmt ute på sommaren.',
+      'Det var soligt och varmt ute på sommaren,',
+      'Det var solligt och varmt ute på sommaren.'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Läraren skrev på tavlan med en röd krita.',
+    options: [
+      'läraren skrev på tavlan med en röd krita.',
+      'Läraren skrev på Tavlan med en röd krita.',
+      'Läraren skrev på tavlan med en röd krita.',
+      'Läraren skreev på tavlan med en röd krita.'
+    ],
+    answer: 2
+  },
+  {
+    correct: 'Mira hittade ett mynt på marken utanför skolan.',
+    options: [
+      'Mira hittade ett mynt på marken utanför skolan.',
+      'mira hittade ett mynt på marken utanför skolan.',
+      'Mira hittade ett mynt på Marken utanför skolan.',
+      'Mira hittade ett mynt på marken utanför skolan,'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Julian klättrade högt upp i trädet vid lekplatsen.',
+    options: [
+      'julian klättrade högt upp i trädet vid lekplatsen.',
+      'Julian klättrade högt upp i trädet vid lekplatsen.',
+      'Julian klättrade högt upp i Trädet vid lekplatsen.',
+      'Julian klättrade högt upp i trädet vid lekplaatsen.'
+    ],
+    answer: 1
+  },
+  {
+    correct: 'Snön föll sakta och lade sig som ett vitt täcke.',
+    options: [
+      'Snön föll sakta och lade sig som ett vitt täcke.',
+      'snön föll sakta och lade sig som ett vitt täcke.',
+      'Snön föll sakta och lade sig som ett vitt täcke,',
+      'Snön föll sakta och lade sig som ett vitt täcke?'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Johanna köpte en bok på biblioteket i går.',
+    options: [
+      'johanna köpte en bok på biblioteket i går.',
+      'Johanna köpte en bok på Biblioteket i går.',
+      'Johanna köpte en bok på biblioteket i går.',
+      'Johanna köpte en bock på biblioteket i går.'
+    ],
+    answer: 2
+  },
+  {
+    correct: 'Nova och Alva sjöng en sång tillsammans på festen.',
+    options: [
+      'Nova och Alva sjöng en sång tillsammans på festen.',
+      'nova och alva sjöng en sång tillsammans på festen.',
+      'Nova och Alva sjöng en sång tillsammans på festen,',
+      'Nova och Alva sjöng en sång tillsampans på festen.'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Dennis hittade en gammal karta i farmorns källare.',
+    options: [
+      'dennis hittade en gammal karta i farmorns källare.',
+      'Dennis hittade en gammal karta i Farmorns källare.',
+      'Dennis hittade en gammal karta i farmorns källare.',
+      'Dennis hittade en gammål karta i farmorns källare.'
+    ],
+    answer: 2
+  },
+  {
+    correct: 'Zelda målade ett stort regnbågsfärgat hus.',
+    options: [
+      'Zelda målade ett stort regnbågsfärgat hus.',
+      'zelda målade ett stort regnbågsfärgat hus.',
+      'Zelda målade ett stort regnbågsfärgat hus,',
+      'Zelda målade ett stort regnbågsfärgt hus.'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Hilma packade sin ryggsäck inför skolutflykten.',
+    options: [
+      'hilma packade sin ryggsäck inför skolutflykten.',
+      'Hilma packade sin ryggsäck inför skolutflykten.',
+      'Hilma packade sin Ryggsäck inför skolutflykten.',
+      'Hilma packade sin ryggsäck inför skolutfylkten.'
+    ],
+    answer: 1
+  },
+  {
+    correct: 'Björnen sov hela vintern i sin håla i skogen.',
+    options: [
+      'björnen sov hela vintern i sin håla i skogen.',
+      'Björnen sov hela Vintern i sin håla i skogen.',
+      'Björnen sov hela vintern i sin håla i skogen.',
+      'Björnen sov hela vintern i sin håla i skoogen.'
+    ],
+    answer: 2
+  },
+  {
+    correct: 'Fisken simmade i det klara blåa vattnet.',
+    options: [
+      'fisken simmade i det klara blåa vattnet.',
+      'Fisken simmade i det klara blåa vattnet.',
+      'Fisken simmade i det Klara blåa vattnet.',
+      'Fisken simmade i det klara blåa vattnet,'
+    ],
+    answer: 1
+  },
+  {
+    correct: 'Moa läste sin favoritbok innan hon somnade.',
+    options: [
+      'moa läste sin favoritbok innan hon somnade.',
+      'Moa läste sin favoritbok innan hon somnade.',
+      'Moa läste sin Favoritbok innan hon somnade.',
+      'Moa läste sin favoritbock innan hon somnade.'
+    ],
+    answer: 1
+  },
+  {
+    correct: 'Belle hjälpte sin mamma att laga middag.',
+    options: [
+      'Belle hjälpte sin mamma att laga middag.',
+      'belle hjälpte sin mamma att laga middag.',
+      'Belle hjälpte sin Mamma att laga middag.',
+      'Belle hjälpte sin mamma att laga midade.'
+    ],
+    answer: 0
+  },
+  {
+    correct: 'Solen gick ner bakom bergen när kvällen kom.',
+    options: [
+      'solen gick ner bakom bergen när kvällen kom.',
+      'Solen gick ner bakom Bergen när kvällen kom.',
+      'Solen gick ner bakom bergen när kvällen kom.',
+      'Solen gick ner bakom bergen när kvällen kom,'
+    ],
+    answer: 2
   }
 ];
 

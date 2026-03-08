@@ -16,6 +16,8 @@ const NpSvenska = (() => {
   let orderSelected = []; // Ordna-händelser: vald ordning
   let multiSelected = new Set(); // Multi-choice: valda index
   let isReadMode = false; // Visar texten i fullskärm
+  let inputLocked = false;
+  let usedSpellingIndices = new Set(); // Förhindra upprepade stavningsfrågor
   let canvasEl = null, canvasCtx = null, tool = 'pen';
   let isDrawing = false, lastX = 0, lastY = 0;
 
@@ -331,7 +333,7 @@ const NpSvenska = (() => {
             border-radius:14px;background:linear-gradient(135deg,#d1fae5,#ede9fe)">📝</div>
           <div style="flex:1">
             <div style="font-family:var(--font-heading);font-size:20px;color:var(--svk-primary,#059669)">Läsförståelse &amp; språk</div>
-            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">12 frågor – texter, begrepp och stavning 🔍</div>
+            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">17 frågor – texter, begrepp och stavning 🔍</div>
           </div>
           <div style="font-size:20px;opacity:0.5">›</div>
         </div>
@@ -372,6 +374,7 @@ const NpSvenska = (() => {
     qIdx    = 0;
     score   = 0;
     answers = [];
+    usedSpellingIndices = new Set();
     isReadMode = true;
     Router.show('screen-np-svenska-prov');
     renderReadMode(story, () => { isReadMode = false; renderQuestion(); });
@@ -416,6 +419,7 @@ const NpSvenska = (() => {
   */
 
   function renderQuestion() {
+    inputLocked = false;
     attempts = 0;
     orderSelected = [];
     multiSelected = new Set();
@@ -430,7 +434,7 @@ const NpSvenska = (() => {
 
   function renderQ() {
     const root = document.getElementById('np-svenska-prov-root');
-    const pct = Math.round((qIdx / 12) * 100);
+    const pct = Math.round((qIdx / 17) * 100);
     const categoryLabels = [
       'Lokalisera information',
       'Tolka och integrera',
@@ -443,6 +447,11 @@ const NpSvenska = (() => {
       'Dra slutsats',
       'Välj bästa sammanfattning',
       'Stödord – rätt mening',
+      'Stavning & interpunktion',
+      'Stavning & interpunktion',
+      'Stavning & interpunktion',
+      'Stavning & interpunktion',
+      'Stavning & interpunktion',
       'Stavning & interpunktion'
     ];
     const label = categoryLabels[qIdx] || '';
@@ -464,17 +473,10 @@ const NpSvenska = (() => {
         <div class="svk-qa-panel">
           <div class="svk-question-area" id="svk-qa"></div>
           <div id="svk-feedback"></div>
-          <div class="svk-canvas-strip">
-            <button class="svk-canvas-btn active" id="svk-pen-btn" onclick="NpSvenska.setTool('pen')">✏️ Rita</button>
-            <button class="svk-canvas-btn" id="svk-sudd-btn" onclick="NpSvenska.setTool('eraser')">🧹 Sudd</button>
-            <div class="svk-canvas-wrap"><canvas id="svk-canvas"></canvas></div>
-            <button class="svk-canvas-btn" onclick="NpSvenska.clearCanvas()">🗑️ Rensa</button>
-          </div>
         </div>
       </div>
     `;
 
-    initCanvas();
     renderQContent();
   }
 
@@ -494,7 +496,12 @@ const NpSvenska = (() => {
       case 8: renderChoice(qa, factual.questions.inference, 'Dra slutsats'); break;
       case 9: renderSummary(qa, factual, 'Faktatext'); break;
       case 10: renderWordInSentence(qa); break;
-      case 11: renderSpelling(qa); break;
+      case 11:
+      case 12:
+      case 13:
+      case 14:
+      case 15:
+      case 16: renderSpelling(qa); break;
     }
   }
 
@@ -516,6 +523,8 @@ const NpSvenska = (() => {
   }
 
   function handleChoice(idx, correct, btn, item) {
+    if (inputLocked) return;
+    inputLocked = true;
     const allBtns = document.querySelectorAll('.svk-choice');
     const isCorrect = idx === correct;
     if (isCorrect) {
@@ -536,6 +545,7 @@ const NpSvenska = (() => {
       } else {
         btn.classList.add('disabled');
         showFeedback(false, 'Försök igen!');
+        inputLocked = false;
       }
     }
   }
@@ -564,6 +574,8 @@ const NpSvenska = (() => {
   }
 
   function handleSummaryChoice(isBest, clickedDiv, cards, container, goodText) {
+    if (inputLocked) return;
+    inputLocked = true;
     const allCards = container.querySelectorAll('.svk-summary-card');
     allCards.forEach(c => c.style.pointerEvents = 'none');
     if (isBest) {
@@ -642,6 +654,8 @@ const NpSvenska = (() => {
   }
 
   function checkOrder(correctOrder, eventTexts) {
+    if (inputLocked) return;
+    inputLocked = true;
     const isCorrect = orderSelected.every((val, i) => val === correctOrder[i]);
     const evBtns = document.querySelectorAll('.svk-order-event');
     const slots  = document.querySelectorAll('.svk-order-slot');
@@ -712,6 +726,8 @@ const NpSvenska = (() => {
           btn.classList.add('selected');
         }
         if (multiSelected.size === requiredCount) {
+          if (inputLocked) return;
+          inputLocked = true;
           const { correct, correctIndices } = checkFn(multiSelected);
           const allBtns = container.querySelectorAll('.svk-multi-item');
           allBtns.forEach((b, j) => {
@@ -748,8 +764,14 @@ const NpSvenska = (() => {
 
   /* ── Stavning & interpunktion ────────────────────────────── */
   function renderSpelling(qa) {
-    const item = pick(SPELLING_POOL);
-    const options = shuffle([item.correct, ...item.wrong]);
+    // Välj ett oanvänt stavningsobjekt; återställ om poolen är slut
+    let availableIndices = SPELLING_POOL.map((_, i) => i).filter(i => !usedSpellingIndices.has(i));
+    if (availableIndices.length === 0) { usedSpellingIndices = new Set(); availableIndices = SPELLING_POOL.map((_, i) => i); }
+    const chosenIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+    usedSpellingIndices.add(chosenIdx);
+    const item = SPELLING_POOL[chosenIdx];
+    // item.options contains all 4 alternatives (including the correct one); shuffle for randomness
+    const options = shuffle(item.options ? [...item.options] : [item.correct, ...(item.wrong || [])]);
     const correctIdx = options.indexOf(item.correct);
     qa.innerHTML = `
       <div class="svk-q-label">Stavning &amp; interpunktion</div>
@@ -771,7 +793,8 @@ const NpSvenska = (() => {
     const labels = [
       'Lokalisera info','Tolka/integrera','Ordna händelser','Vem gjorde vad?',
       'Vilka saker nämns?','Sammanfattning (berättande)','Lokalisera info (fakta)',
-      'Förstå begrepp','Dra slutsats','Sammanfattning (fakta)','Stödord','Stavning'
+      'Förstå begrepp','Dra slutsats','Sammanfattning (fakta)','Stödord',
+      'Stavning','Stavning','Stavning','Stavning','Stavning','Stavning'
     ];
     if (correct) score++;
     answers.push({ category: labels[qIdx] || `Fråga ${qIdx+1}`, correct });
@@ -789,7 +812,7 @@ const NpSvenska = (() => {
     }
     if (correct) {
       App.Sound.play('correct');
-      if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 15 });
+      if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 45 });
     } else {
       App.Sound.play('wrong');
     }
@@ -798,7 +821,7 @@ const NpSvenska = (() => {
   function scheduleNext(delay) {
     setTimeout(() => {
       qIdx++;
-      if (qIdx >= 12) { showResult(); return; }
+      if (qIdx >= 17) { showResult(); return; }
       renderQuestion();
     }, delay || 1400);
   }
@@ -811,13 +834,13 @@ const NpSvenska = (() => {
       date: new Date().toISOString(),
       type: 'prov',
       score,
-      total: 12,
+      total: 17,
       textsUsed: [story.id, factual.id],
       answers
     });
 
     const root = document.getElementById('np-svenska-prov-root');
-    const stars = score >= 10 ? '🌟🌟🌟' : score >= 7 ? '⭐⭐' : '⭐';
+    const stars = score >= 15 ? '🌟🌟🌟' : score >= 11 ? '⭐⭐' : '⭐';
     root.innerHTML = `
       <div class="svk-header">
         <button class="svk-btn-back" onclick="NpSvenska.showSelectScreen()">Tillbaka</button>
@@ -827,9 +850,9 @@ const NpSvenska = (() => {
       <div class="svk-result-area">
         <div style="text-align:center;padding:16px 0">
           <div style="font-size:3rem">${stars}</div>
-          <div style="font-family:var(--font-heading);font-size:28px;color:var(--svk-primary,#059669)">${score} av 12</div>
+          <div style="font-family:var(--font-heading);font-size:28px;color:var(--svk-primary,#059669)">${score} av 17</div>
           <div style="font-size:14px;color:#64748b;font-weight:700;margin-top:4px">
-            ${score === 12 ? 'Perfekt! Du är en stjaärna! 🎉' : score >= 9 ? 'Bra jobbat! 💪' : 'Fortsätt öva! 📚'}
+            ${score === 17 ? 'Perfekt! Du är en stjärna! 🎉' : score >= 13 ? 'Bra jobbat! 💪' : 'Fortsätt öva! 📚'}
           </div>
         </div>
         ${answers.map(a => `
@@ -843,9 +866,9 @@ const NpSvenska = (() => {
       </div>
     `;
 
-    if (score >= 10) {
+    if (score >= 11) {
       App.Sound.play('win');
-      if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 60 });
+      if (typeof App.Confetti !== 'undefined') App.Confetti.burst(250);
     }
   }
 
@@ -1014,7 +1037,7 @@ const NpSvenska = (() => {
     };
     appendLog(entry);
     App.Sound.play('win');
-    if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 40 });
+    if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 120 });
     showBookView(entry, () => showWriteSelect());
   }
 
@@ -1076,7 +1099,7 @@ const NpSvenska = (() => {
     };
     appendLog(entry);
     App.Sound.play('win');
-    if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 40 });
+    if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 120 });
     showBookView(entry, () => showWriteSelect());
   }
 
