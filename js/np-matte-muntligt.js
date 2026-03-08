@@ -513,6 +513,7 @@ const NpMatteMuntligt = (() => {
           }
         }, 2500);
       } else {
+        inputLocked = false;
         showWrongRetry(type, optIdx);
       }
     }

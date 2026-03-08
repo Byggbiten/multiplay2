@@ -28,7 +28,7 @@ const NpSvenska = (() => {
     s.id = 'svk-rs';
     s.textContent = `
       #screen-np-svenska-prov, #screen-np-svenska-skriva {
-        display:flex; flex-direction:column; height:100%; overflow:hidden;
+        flex-direction:column; height:100vh; overflow:hidden;
         background:var(--svk-bg,linear-gradient(135deg,#ecfdf5 0%,#eff6ff 50%,#fdf4ff 100%));
       }
       .svk-header {

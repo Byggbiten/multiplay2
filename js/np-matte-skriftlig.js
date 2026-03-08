@@ -984,6 +984,7 @@ const NpMatteSkriftlig = (() => {
       showFeedback(false, true);
       setTimeout(() => nextQuestion(), 2200);
     } else {
+      inputLocked = false;
       showFeedback(false, false);
     }
   }
