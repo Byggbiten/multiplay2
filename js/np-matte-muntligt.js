@@ -149,6 +149,71 @@ const NpMatteMuntligt = (() => {
     const progressPct = Math.round(progress * 100);
 
     root.innerHTML = `
+      <style id="np-rs">
+        #screen-np-matte-muntligt { max-width:100%!important; width:100%!important; }
+        #np-matte-muntligt-root   { display:flex; flex-direction:column; height:100%; }
+        #np-game-grid {
+          display:flex; flex-direction:column; flex:1;
+          overflow-y:auto; padding:var(--space-2); gap:var(--space-2);
+        }
+        .np-question-text {
+          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
+          padding:var(--space-3) var(--space-4); border-left:4px solid var(--np-primary);
+          font-size:var(--text-lg); font-weight:800; color:var(--color-text);
+          animation:slide-up 0.4s var(--ease-smooth);
+        }
+        .np-canvas-wrap {
+          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
+          padding:var(--space-2); border:2px solid rgba(124,58,237,0.15);
+          display:flex; flex-direction:column; gap:var(--space-1);
+        }
+        #np-canvas {
+          width:100%; height:120px; display:block; touch-action:none;
+          border-radius:var(--radius-md); border:2px dashed rgba(124,58,237,0.3);
+          background:rgba(255,255,255,0.7); cursor:crosshair;
+        }
+        .np-canvas-tools { display:flex; gap:var(--space-1); }
+        .np-tool-btn {
+          flex:1; height:34px; border-radius:var(--radius-md);
+          font-weight:800; font-size:var(--text-xs); cursor:pointer;
+          border:2px solid rgba(124,58,237,0.3); transition:all 0.15s;
+        }
+        .np-tool-btn.active  { background:var(--np-primary); color:white; border-color:var(--np-primary); }
+        .np-tool-btn:not(.active) { background:var(--np-light); color:var(--np-primary); }
+        .np-hint-bar { display:flex; gap:var(--space-1); }
+        .np-hint-btn {
+          flex:1; padding:var(--space-2) var(--space-2); border-radius:var(--radius-md);
+          font-weight:800; font-size:var(--text-xs); cursor:pointer; text-align:left;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .np-numpad-grid {
+          display:grid; grid-template-columns:repeat(3,60px);
+          gap:6px; justify-content:center;
+        }
+        .np-numpad-btn {
+          width:60px; height:60px; border-radius:var(--radius-full);
+          font-size:var(--text-xl); font-weight:900; cursor:pointer;
+          box-shadow:var(--shadow-sm); transition:transform 0.1s;
+        }
+        @media (orientation:landscape) and (min-width:768px) {
+          #screen-np-matte-muntligt { max-width:100%!important; }
+          #np-game-grid {
+            display:grid; grid-template-columns:55fr 45fr;
+            gap:var(--space-3); overflow:hidden; padding:var(--space-3); flex:1;
+          }
+          .np-left-col, .np-right-col {
+            overflow-y:auto; display:flex; flex-direction:column;
+            gap:var(--space-2); min-height:0;
+          }
+          .np-right-col { flex:1; }
+          .np-canvas-wrap { flex:1; min-height:0; }
+          #np-canvas { height:100%; min-height:80px; }
+          .np-question-text { font-size:var(--text-xl); }
+          .np-numpad-grid { grid-template-columns:repeat(3,56px); gap:5px; }
+          .np-numpad-btn  { width:56px; height:56px; font-size:var(--text-lg); }
+        }
+      </style>
+
       <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
         <button class="btn-back" style="background:var(--np-light);color:var(--np-primary)"
           onclick="NpMatteMuntligt.confirmAbort()">Avbryt</button>
@@ -157,12 +222,12 @@ const NpMatteMuntligt = (() => {
       </div>
 
       <!-- Progress -->
-      <div style="padding:var(--space-3) var(--space-4) 0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="padding:var(--space-2) var(--space-3) 0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="font-weight:800;font-size:var(--text-sm);color:var(--np-primary)">
             Fråga ${currentIdx + 1} av 10
           </span>
-          <span style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700">
+          <span style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:700">
             ${q.category}
           </span>
         </div>
@@ -174,113 +239,66 @@ const NpMatteMuntligt = (() => {
         </div>
       </div>
 
-      <!-- Scrollable content -->
-      <div style="flex:1;overflow-y:auto;padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
+      <!-- Tvåkolumns-grid -->
+      <div id="np-game-grid">
 
-        <!-- Visuellt stöd -->
-        ${q.visual ? `<div id="np-visual" style="
-          background:rgba(255,255,255,0.85);
-          border-radius:var(--radius-lg);
-          padding:var(--space-4);
-          border:2px solid rgba(124,58,237,0.15);
-          overflow-x:auto;
-        ">${renderVisual(q.visual)}</div>` : ''}
+        <!-- Vänster kolumn: visuellt + fråga + hints -->
+        <div class="np-left-col">
 
-        <!-- Frågetext -->
-        <div style="
-          background:rgba(255,255,255,0.9);
-          border-radius:var(--radius-lg);
-          padding:var(--space-5);
-          border-left:4px solid var(--np-primary);
-          font-size:var(--text-xl);
-          font-weight:800;
-          color:var(--color-text);
-          animation:slide-up 0.4s var(--ease-smooth);
-        ">${q.question}</div>
+          ${q.visual ? `<div id="np-visual" style="
+            background:rgba(255,255,255,0.85);border-radius:var(--radius-lg);
+            padding:var(--space-3);border:2px solid rgba(124,58,237,0.15);overflow-x:auto;
+          ">${renderVisual(q.visual)}</div>` : ''}
 
-        <!-- Svaryta -->
-        <div id="np-answer-area">
-          ${renderAnswerArea(q)}
-        </div>
+          <div class="np-question-text">${q.question}</div>
 
-        <!-- Kladdyta -->
-        <div style="
-          background:rgba(255,255,255,0.85);
-          border-radius:var(--radius-lg);
-          padding:var(--space-3);
-          border:2px solid rgba(124,58,237,0.15);
-        ">
-          <div style="
-            font-size:var(--text-xs);font-weight:800;
-            color:var(--np-primary);margin-bottom:var(--space-2);
-            text-transform:uppercase;letter-spacing:0.06em;
-          ">✏️ Kladd</div>
-          <canvas id="np-canvas" style="
-            width:100%;height:200px;display:block;
-            touch-action:none;
-            border-radius:var(--radius-md);
-            border:2px dashed rgba(124,58,237,0.3);
-            background:rgba(255,255,255,0.7);
-            cursor:crosshair;
-          "></canvas>
-          <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
-            <button style="
-              flex:1;height:40px;border-radius:var(--radius-md);
-              background:var(--np-light);color:var(--np-primary);
-              border:none;font-weight:800;font-size:var(--text-sm);
-              cursor:pointer;
-            " onclick="NpMatteMuntligt.clearCanvas()">🗑️ Sudda allt</button>
+          <!-- Ledtråd & Vuxenstöd – kompakt rad -->
+          <div class="np-hint-bar">
+            <button class="np-hint-btn" style="
+              background:rgba(251,191,36,0.15);border:2px solid rgba(251,191,36,0.4);color:#92400e;
+            " onclick="NpMatteMuntligt.toggleHint('hint-box')">💡 Ledtråd</button>
+            <button class="np-hint-btn" style="
+              background:rgba(96,165,250,0.1);border:2px solid rgba(96,165,250,0.3);color:#1d4ed8;
+            " onclick="NpMatteMuntligt.toggleHint('adult-box')">👨‍👩‍👧 Vuxen</button>
           </div>
-        </div>
-
-        <!-- Ledtråd & Vuxenstöd -->
-        <div style="display:flex;flex-direction:column;gap:var(--space-2)">
-          <button style="
-            width:100%;padding:var(--space-3);
-            border-radius:var(--radius-md);
-            background:rgba(251,191,36,0.15);
-            border:2px solid rgba(251,191,36,0.4);
-            color:#92400e;font-weight:800;font-size:var(--text-sm);
-            cursor:pointer;text-align:left;
-          " onclick="NpMatteMuntligt.toggleHint('hint-box')">
-            💡 Visa ledtråd
-          </button>
           <div id="hint-box" style="
-            display:none;
-            padding:var(--space-4);
-            background:rgba(251,191,36,0.1);
-            border-radius:var(--radius-md);
-            border:2px solid rgba(251,191,36,0.3);
-            font-weight:700;color:#92400e;
-            font-size:var(--text-sm);
+            display:none;padding:var(--space-3);background:rgba(251,191,36,0.1);
+            border-radius:var(--radius-md);border:2px solid rgba(251,191,36,0.3);
+            font-weight:700;color:#92400e;font-size:var(--text-sm);
           ">${q.hint}</div>
-
-          <button style="
-            width:100%;padding:var(--space-3);
-            border-radius:var(--radius-md);
-            background:rgba(96,165,250,0.1);
-            border:2px solid rgba(96,165,250,0.3);
-            color:#1d4ed8;font-weight:800;font-size:var(--text-sm);
-            cursor:pointer;text-align:left;
-          " onclick="NpMatteMuntligt.toggleHint('adult-box')">
-            👨‍👩‍👧 Tips till vuxen
-          </button>
           <div id="adult-box" style="
-            display:none;
-            padding:var(--space-4);
-            background:rgba(96,165,250,0.08);
-            border-radius:var(--radius-md);
-            border:2px solid rgba(96,165,250,0.25);
-            font-weight:700;color:#1d4ed8;
-            font-size:var(--text-sm);
+            display:none;padding:var(--space-3);background:rgba(96,165,250,0.08);
+            border-radius:var(--radius-md);border:2px solid rgba(96,165,250,0.25);
+            font-weight:700;color:#1d4ed8;font-size:var(--text-sm);
           ">${q.adultTip}</div>
+
+          <!-- Feedback (portrait: in left col) -->
+          <div id="np-feedback" style="display:none"></div>
         </div>
 
-        <!-- Feedback-yta -->
-        <div id="np-feedback" style="display:none"></div>
+        <!-- Höger kolumn: svar + kladd -->
+        <div class="np-right-col">
 
-        <!-- Extra padding i botten -->
-        <div style="height:var(--space-8)"></div>
+          <div id="np-answer-area">
+            ${renderAnswerArea(q)}
+          </div>
+
+          <!-- Kladdyta -->
+          <div class="np-canvas-wrap">
+            <div style="font-size:var(--text-xs);font-weight:800;color:var(--np-primary);
+              text-transform:uppercase;letter-spacing:0.06em;">✏️ Kladd</div>
+            <canvas id="np-canvas"></canvas>
+            <div class="np-canvas-tools">
+              <button id="np-tool-draw" class="np-tool-btn active"
+                onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
+              <button id="np-tool-erase" class="np-tool-btn"
+                onclick="NpMatteMuntligt.toggleEraser(true)">🧹 Sudd</button>
+              <button class="np-tool-btn"
+                onclick="NpMatteMuntligt.clearCanvas()">🗑️ Rensa</button>
+            </div>
+          </div>
+
+        </div>
       </div>
     `;
 
@@ -371,22 +389,12 @@ const NpMatteMuntligt = (() => {
     freeInput = '';
     const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','OK'];
     return `
-      <div style="
-        display:grid;grid-template-columns:repeat(3,72px);
-        gap:var(--space-2);justify-content:center;
-      ">
+      <div class="np-numpad-grid">
         ${keys.map(k => `
-          <button style="
-            width:72px;height:72px;
-            border-radius:var(--radius-full);
+          <button class="np-numpad-btn" style="
             background:${k==='OK'?'linear-gradient(135deg,var(--np-primary),var(--np-secondary))':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'rgba(255,255,255,0.9)'};
             color:${k==='OK'||k==='⌫'?'white':'var(--np-primary)'};
             border:2px solid ${k==='OK'?'var(--np-primary)':k==='⌫'?'#ef4444':'rgba(124,58,237,0.2)'};
-            font-size:var(--text-2xl);
-            font-weight:900;
-            cursor:pointer;
-            box-shadow:var(--shadow-sm);
-            transition:transform 0.1s;
           "
             onmousedown="this.style.transform='scale(0.93)'"
             onmouseup="this.style.transform=''"
@@ -415,25 +423,29 @@ const NpMatteMuntligt = (() => {
   /* ══════════════════════════════════════════════════════
      CANVAS – KLADDYTA
   ══════════════════════════════════════════════════════ */
-  let drawing = false;
-  let canvasCtx = null;
-  let lastX = 0;
-  let lastY = 0;
+  let drawing    = false;
+  let canvasCtx  = null;
+  let lastX      = 0;
+  let lastY      = 0;
+  let eraserMode = false;
 
   function setupCanvas() {
     const canvas = document.getElementById('np-canvas');
     if (!canvas) return;
+    eraserMode = false;
 
-    // Sätt faktisk pixelstorlek
-    const rect = canvas.getBoundingClientRect();
-    canvas.width  = rect.width  || 300;
-    canvas.height = 200;
-    canvasCtx = canvas.getContext('2d');
+    // Vänta en frame så CSS-layout är klar, hämta sedan actual rendered size
+    requestAnimationFrame(() => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = rect.width  || 300;
+      canvas.height = rect.height || 120;
+      canvasCtx = canvas.getContext('2d');
 
-    canvas.addEventListener('pointerdown',  startDraw);
-    canvas.addEventListener('pointermove',  doDraw);
-    canvas.addEventListener('pointerup',    endDraw);
-    canvas.addEventListener('pointercancel',endDraw);
+      canvas.addEventListener('pointerdown',  startDraw);
+      canvas.addEventListener('pointermove',  doDraw);
+      canvas.addEventListener('pointerup',    endDraw);
+      canvas.addEventListener('pointercancel',endDraw);
+    });
   }
 
   function startDraw(e) {
@@ -441,22 +453,31 @@ const NpMatteMuntligt = (() => {
     const rect = e.target.getBoundingClientRect();
     lastX = e.clientX - rect.left;
     lastY = e.clientY - rect.top;
-    canvasCtx.beginPath();
-    canvasCtx.moveTo(lastX, lastY);
+    if (canvasCtx) {
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(lastX, lastY);
+    }
     e.preventDefault();
   }
 
   function doDraw(e) {
-    if (!drawing) return;
+    if (!drawing || !canvasCtx) return;
     e.preventDefault();
     const rect = e.target.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const pressure = e.pressure || 0.5;
-    canvasCtx.lineWidth   = 2 + pressure * 4;
-    canvasCtx.lineCap     = 'round';
-    canvasCtx.lineJoin    = 'round';
-    canvasCtx.strokeStyle = '#7c3aed';
+
+    if (eraserMode) {
+      canvasCtx.globalCompositeOperation = 'destination-out';
+      canvasCtx.lineWidth   = 20;
+    } else {
+      canvasCtx.globalCompositeOperation = 'source-over';
+      canvasCtx.lineWidth   = 2 + pressure * 4;
+      canvasCtx.strokeStyle = '#7c3aed';
+    }
+    canvasCtx.lineCap   = 'round';
+    canvasCtx.lineJoin  = 'round';
     canvasCtx.lineTo(x, y);
     canvasCtx.stroke();
     canvasCtx.beginPath();
@@ -471,6 +492,15 @@ const NpMatteMuntligt = (() => {
       const canvas = document.getElementById('np-canvas');
       if (canvas) canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     }
+  }
+
+  function toggleEraser(enable) {
+    eraserMode = enable;
+    const drawBtn  = document.getElementById('np-tool-draw');
+    const eraseBtn = document.getElementById('np-tool-erase');
+    if (drawBtn)  drawBtn.className  = 'np-tool-btn' + (enable ? '' : ' active');
+    if (eraseBtn) eraseBtn.className = 'np-tool-btn' + (enable ? ' active' : '');
+    App.Sound.play('click');
   }
 
   /* ══════════════════════════════════════════════════════
@@ -1380,6 +1410,7 @@ const NpMatteMuntligt = (() => {
     handleOral,
     toggleHint,
     clearCanvas,
+    toggleEraser,
     confirmAbort,
   };
 })();
