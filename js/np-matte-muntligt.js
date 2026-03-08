@@ -644,6 +644,7 @@ const NpMatteMuntligt = (() => {
   /* ── Avbryt-bekräftelse ─────────────────────────────── */
   function confirmAbort() {
     if (confirm('Avbryt spelet och gå tillbaka?')) {
+      document.getElementById('np-matte-muntligt-root').innerHTML = '';
       NationellaHub.showMatteSelect();
     }
   }

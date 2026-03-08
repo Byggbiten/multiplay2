@@ -1122,6 +1122,7 @@ const NpMatteSkriftlig = (() => {
 
   function confirmBack() {
     if (confirm('Avsluta provet? Ditt resultat sparas inte.')) {
+      root().innerHTML = '';
       NationellaHub.showMatteSelect();
     }
   }
