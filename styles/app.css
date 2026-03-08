@@ -58,6 +58,14 @@
   --friends-light:     #fef3c7;
   --friends-glow:      rgba(221, 214, 254, 0.6);
 
+  /* --- Nationella Prov-färger --- */
+  --np-bg:        linear-gradient(135deg, #fef9c3 0%, #fce7f3 50%, #ede9fe 100%);
+  --np-primary:   #7c3aed;
+  --np-secondary: #f472b6;
+  --np-accent:    #fbbf24;
+  --np-light:     #fef3c7;
+  --np-glow:      rgba(124, 58, 237, 0.4);
+
   /* --- Typografi --- */
   --font-heading: 'Bubblegum Sans', cursive;
   --font-body:    'Nunito', sans-serif;

@@ -310,6 +310,7 @@ const App = (() => {
       multiplication: 'screen-multiplication',
       clock:          'screen-clock',
       friends:        'screen-friends',
+      nationella:     'screen-nationella-select',
     };
 
     const screen = screenMap[game];
@@ -323,6 +324,8 @@ const App = (() => {
       ClockGame.init(currentProfile);
     } else if (game === 'friends' && typeof FriendsGame !== 'undefined') {
       FriendsGame.init(currentProfile);
+    } else if (game === 'nationella' && typeof NationellaHub !== 'undefined') {
+      NationellaHub.init(currentProfile);
     }
   }
 

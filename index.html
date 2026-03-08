@@ -163,14 +163,17 @@
     .game-mult  { background: linear-gradient(135deg, #fdf4ff 0%, #ede9fe 100%); }
     .game-clock { background: linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%); }
     .game-friends { background: linear-gradient(135deg, #fdf4ff 0%, #fef9c3 100%); }
+    .game-np { background: linear-gradient(135deg, #fef9c3 0%, #fce7f3 100%); }
 
     .game-mult  .game-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
     .game-clock .game-icon { background: linear-gradient(135deg, #dbeafe, #fef3c7); }
     .game-friends .game-icon { background: linear-gradient(135deg, #ede9fe, #fef9c3); }
+    .game-np .game-icon { background: linear-gradient(135deg, #fef9c3, #fce7f3); }
 
     .game-mult  .game-name { color: var(--mult-primary); }
     .game-clock .game-name { color: var(--clock-primary); }
     .game-friends .game-name { color: var(--friends-primary); }
+    .game-np .game-name { color: var(--np-primary); }
 
     /* Stäng-knapp i delete-modal */
     .profile-delete-list {
@@ -330,6 +333,15 @@
         <div class="game-arrow">›</div>
       </div>
 
+      <div class="card-game game-np" onclick="App.startGame('nationella')" role="button" tabindex="0">
+        <div class="game-icon">📝</div>
+        <div class="game-info">
+          <div class="game-name">Nationella Prov</div>
+          <div class="game-desc">Träna inför nationella proven i åk 3 🎯</div>
+        </div>
+        <div class="game-arrow">›</div>
+      </div>
+
     </div>
 
   </section>
@@ -353,6 +365,27 @@
   ══════════════════════════════════════ -->
   <section id="screen-friends" class="screen screen-friends" role="main">
     <div id="friends-root"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SKÄRM 7: NATIONELLA PROV – ÄMNESVAL
+  ══════════════════════════════════════ -->
+  <section id="screen-nationella-select" class="screen" role="main">
+    <div id="nationella-root"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SKÄRM 8: NP MATTE – DELMODUL-VAL
+  ══════════════════════════════════════ -->
+  <section id="screen-np-matte-select" class="screen" role="main">
+    <div id="np-matte-select-root"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SKÄRM 9: NP MATTE MUNTLIGT – SPELET
+  ══════════════════════════════════════ -->
+  <section id="screen-np-matte-muntligt" class="screen" role="main">
+    <div id="np-matte-muntligt-root"></div>
   </section>
 
 </div><!-- /app-wrapper -->
@@ -397,6 +430,8 @@
 <script src="js/multiplication.js"></script>
 <script src="js/clock.js"></script>
 <script src="js/tenfriends.js"></script>
+<script src="js/np-matte-muntligt.js"></script>
+<script src="js/nationella.js"></script>
 
 </body>
 </html>
