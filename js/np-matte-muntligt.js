@@ -145,160 +145,128 @@ const NpMatteMuntligt = (() => {
   ══════════════════════════════════════════════════════ */
   function renderQuestion(q) {
     const root = document.getElementById('np-matte-muntligt-root');
-    const progress = currentIdx / 10;
-    const progressPct = Math.round(progress * 100);
+    const pct  = Math.round((currentIdx / 10) * 100);
 
     root.innerHTML = `
       <style id="np-rs">
-        #screen-np-matte-muntligt { max-width:100%!important; width:100%!important; }
-        #np-matte-muntligt-root   { display:flex; flex-direction:column; height:100%; }
-        #np-game-grid {
-          display:flex; flex-direction:column; flex:1;
-          overflow-y:auto; padding:var(--space-2); gap:var(--space-2);
+        #screen-np-matte-muntligt,
+        #np-matte-muntligt-root {
+          max-width:100%!important; width:100%!important;
+          height:100%; display:flex; flex-direction:column; overflow:hidden;
         }
-        .np-question-text {
-          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
-          padding:var(--space-3) var(--space-4); border-left:4px solid var(--np-primary);
-          font-size:var(--text-lg); font-weight:800; color:var(--color-text);
-          animation:slide-up 0.4s var(--ease-smooth);
+        /* ── Compact header ── */
+        #np-hdr {
+          display:flex; align-items:center; gap:8px; flex-shrink:0;
+          padding:5px 10px; border-bottom:1px solid rgba(124,58,237,0.15); min-height:44px;
         }
-        .np-canvas-wrap {
+        #np-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:var(--np-primary); }
+        #np-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(124,58,237,0.15); overflow:hidden; flex-shrink:0; }
+        #np-prog-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--np-primary),var(--np-secondary)); transition:width 0.4s; }
+        /* ── Main ── */
+        #np-main { flex:1; display:flex; flex-direction:column; padding:8px; gap:8px; overflow:hidden; min-height:0; }
+        /* ── Top: visual + canvas always side-by-side ── */
+        #np-top-panel { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; }
+        #np-visual-panel {
           background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:var(--space-2); border:2px solid rgba(124,58,237,0.15);
-          display:flex; flex-direction:column; gap:var(--space-1);
+          padding:10px; border:1.5px solid rgba(124,58,237,0.12);
+          overflow-y:auto; min-height:0;
+        }
+        #np-scratch-panel {
+          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
+          padding:8px; border:1.5px solid rgba(124,58,237,0.12);
+          display:flex; flex-direction:column; gap:5px; min-height:0;
         }
         #np-canvas {
-          width:100%; height:120px; display:block; touch-action:none;
-          border-radius:var(--radius-md); border:2px dashed rgba(124,58,237,0.3);
-          background:rgba(255,255,255,0.7); cursor:crosshair;
+          flex:1; width:100%; min-height:80px; display:block;
+          touch-action:none; cursor:crosshair;
+          border-radius:var(--radius-md); border:1.5px dashed rgba(124,58,237,0.25);
+          background:rgba(255,255,255,0.7);
         }
-        .np-canvas-tools { display:flex; gap:var(--space-1); }
+        .np-canvas-tools { display:flex; gap:5px; flex-shrink:0; }
         .np-tool-btn {
-          flex:1; height:34px; border-radius:var(--radius-md);
-          font-weight:800; font-size:var(--text-xs); cursor:pointer;
-          border:2px solid rgba(124,58,237,0.3); transition:all 0.15s;
+          flex:1; height:30px; border-radius:var(--radius-md); font-weight:800;
+          font-size:11px; cursor:pointer; border:1.5px solid rgba(124,58,237,0.3); transition:all 0.15s;
         }
-        .np-tool-btn.active  { background:var(--np-primary); color:white; border-color:var(--np-primary); }
-        .np-tool-btn:not(.active) { background:var(--np-light); color:var(--np-primary); }
-        .np-hint-bar { display:flex; gap:var(--space-1); }
-        .np-hint-btn {
-          flex:1; padding:var(--space-2) var(--space-2); border-radius:var(--radius-md);
-          font-weight:800; font-size:var(--text-xs); cursor:pointer; text-align:left;
-          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        .np-tool-btn.active       { background:var(--np-primary); color:#fff; border-color:var(--np-primary); }
+        .np-tool-btn:not(.active) { background:var(--np-light);   color:var(--np-primary); }
+        /* ── Bottom ── */
+        #np-bottom { flex-shrink:0; display:flex; flex-direction:column; gap:5px; }
+        .np-question-text { font-size:var(--text-base); font-weight:800; color:var(--color-text); padding:4px 6px; line-height:1.4; }
+        /* choice: 2×2 grid */
+        .np-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+        .np-choice-btn {
+          height:46px; border-radius:var(--radius-md); background:rgba(255,255,255,0.9);
+          border:2px solid rgba(124,58,237,0.22); color:var(--np-primary);
+          font-size:var(--text-base); font-weight:800; cursor:pointer;
+          transition:all 0.15s var(--ease-smooth); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px;
         }
-        .np-numpad-grid {
-          display:grid; grid-template-columns:repeat(3,60px);
-          gap:6px; justify-content:center;
-        }
+        .np-choice-btn:hover, .np-choice-btn:active { background:rgba(124,58,237,0.1); }
+        /* numpad: compact 52px */
+        .np-numpad-grid { display:grid; grid-template-columns:repeat(3,52px); gap:5px; justify-content:center; }
         .np-numpad-btn {
-          width:60px; height:60px; border-radius:var(--radius-full);
-          font-size:var(--text-xl); font-weight:900; cursor:pointer;
+          width:52px; height:52px; border-radius:var(--radius-full);
+          font-size:var(--text-lg); font-weight:900; cursor:pointer;
           box-shadow:var(--shadow-sm); transition:transform 0.1s;
         }
-        @media (orientation:landscape) and (min-width:768px) {
-          #screen-np-matte-muntligt { max-width:100%!important; }
-          #np-game-grid {
-            display:grid; grid-template-columns:55fr 45fr;
-            gap:var(--space-3); overflow:hidden; padding:var(--space-3); flex:1;
-          }
-          .np-left-col, .np-right-col {
-            overflow-y:auto; display:flex; flex-direction:column;
-            gap:var(--space-2); min-height:0;
-          }
-          .np-right-col { flex:1; }
-          .np-canvas-wrap { flex:1; min-height:0; }
-          #np-canvas { height:100%; min-height:80px; }
-          .np-question-text { font-size:var(--text-xl); }
-          .np-numpad-grid { grid-template-columns:repeat(3,56px); gap:5px; }
-          .np-numpad-btn  { width:56px; height:56px; font-size:var(--text-lg); }
+        /* free display */
+        #np-free-display {
+          font-size:var(--text-4xl); font-weight:900; color:var(--np-primary); min-height:52px;
+          display:flex; align-items:center; justify-content:center;
+          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
+          border:2.5px solid rgba(124,58,237,0.3); width:100%; letter-spacing:0.05em;
         }
+        /* hint bar */
+        .np-hint-bar { display:flex; gap:5px; }
+        .np-hint-btn {
+          flex:1; height:32px; border-radius:var(--radius-md); font-weight:800;
+          font-size:11px; cursor:pointer; border-width:1.5px; border-style:solid;
+        }
+        #np-feedback { min-height:0; }
       </style>
 
-      <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
-        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary)"
+      <!-- Compact header -->
+      <div id="np-hdr">
+        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary);flex-shrink:0;padding:4px 10px;font-size:13px"
           onclick="NpMatteMuntligt.confirmAbort()">Avbryt</button>
-        <span class="header-title" style="color:var(--np-primary)">${q.emoji} ${q.category}</span>
-        <div style="width:80px"></div>
+        <div class="hdr-cat">${q.emoji} ${q.category}</div>
+        <span style="font-size:11px;font-weight:800;color:var(--np-primary);flex-shrink:0">${currentIdx+1}/10</span>
+        <div id="np-prog-wrap"><div id="np-prog-fill" style="width:${pct}%"></div></div>
       </div>
 
-      <!-- Progress -->
-      <div style="padding:var(--space-2) var(--space-3) 0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-weight:800;font-size:var(--text-sm);color:var(--np-primary)">
-            Fråga ${currentIdx + 1} av 10
-          </span>
-          <span style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:700">
-            ${q.category}
-          </span>
-        </div>
-        <div class="progress-container" style="background:rgba(124,58,237,0.15)">
-          <div class="progress-fill" style="
-            width:${progressPct}%;
-            background:linear-gradient(90deg,var(--np-primary),var(--np-secondary));
-          "></div>
-        </div>
-      </div>
+      <!-- Main area -->
+      <div id="np-main">
 
-      <!-- Tvåkolumns-grid -->
-      <div id="np-game-grid">
-
-        <!-- Vänster kolumn: visuellt + fråga + hints -->
-        <div class="np-left-col">
-
-          ${q.visual ? `<div id="np-visual" style="
-            background:rgba(255,255,255,0.85);border-radius:var(--radius-lg);
-            padding:var(--space-3);border:2px solid rgba(124,58,237,0.15);overflow-x:auto;
-          ">${renderVisual(q.visual)}</div>` : ''}
-
-          <div class="np-question-text">${q.question}</div>
-
-          <!-- Ledtråd & Vuxenstöd – kompakt rad -->
-          <div class="np-hint-bar">
-            <button class="np-hint-btn" style="
-              background:rgba(251,191,36,0.15);border:2px solid rgba(251,191,36,0.4);color:#92400e;
-            " onclick="NpMatteMuntligt.toggleHint('hint-box')">💡 Ledtråd</button>
-            <button class="np-hint-btn" style="
-              background:rgba(96,165,250,0.1);border:2px solid rgba(96,165,250,0.3);color:#1d4ed8;
-            " onclick="NpMatteMuntligt.toggleHint('adult-box')">👨‍👩‍👧 Vuxen</button>
+        <!-- Top panel: visual LEFT, canvas RIGHT -->
+        <div id="np-top-panel">
+          <div id="np-visual-panel">
+            ${q.visual ? renderVisual(q.visual) : `<div style="color:#c084fc;font-size:2rem;text-align:center;padding-top:8px">${q.emoji}</div>`}
           </div>
-          <div id="hint-box" style="
-            display:none;padding:var(--space-3);background:rgba(251,191,36,0.1);
-            border-radius:var(--radius-md);border:2px solid rgba(251,191,36,0.3);
-            font-weight:700;color:#92400e;font-size:var(--text-sm);
-          ">${q.hint}</div>
-          <div id="adult-box" style="
-            display:none;padding:var(--space-3);background:rgba(96,165,250,0.08);
-            border-radius:var(--radius-md);border:2px solid rgba(96,165,250,0.25);
-            font-weight:700;color:#1d4ed8;font-size:var(--text-sm);
-          ">${q.adultTip}</div>
-
-          <!-- Feedback (portrait: in left col) -->
-          <div id="np-feedback" style="display:none"></div>
-        </div>
-
-        <!-- Höger kolumn: svar + kladd -->
-        <div class="np-right-col">
-
-          <div id="np-answer-area">
-            ${renderAnswerArea(q)}
-          </div>
-
-          <!-- Kladdyta -->
-          <div class="np-canvas-wrap">
-            <div style="font-size:var(--text-xs);font-weight:800;color:var(--np-primary);
-              text-transform:uppercase;letter-spacing:0.06em;">✏️ Kladd</div>
+          <div id="np-scratch-panel">
+            <div style="font-size:10px;font-weight:800;color:var(--np-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
             <canvas id="np-canvas"></canvas>
             <div class="np-canvas-tools">
-              <button id="np-tool-draw" class="np-tool-btn active"
-                onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
-              <button id="np-tool-erase" class="np-tool-btn"
-                onclick="NpMatteMuntligt.toggleEraser(true)">🧹 Sudd</button>
-              <button class="np-tool-btn"
-                onclick="NpMatteMuntligt.clearCanvas()">🗑️ Rensa</button>
+              <button id="np-tool-draw" class="np-tool-btn active" onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
+              <button id="np-tool-erase" class="np-tool-btn" onclick="NpMatteMuntligt.toggleEraser(true)">🧹 Sudd</button>
+              <button class="np-tool-btn" onclick="NpMatteMuntligt.clearCanvas()">🗑️ Rensa</button>
             </div>
           </div>
-
         </div>
+
+        <!-- Bottom: question + answers + hints -->
+        <div id="np-bottom">
+          <div class="np-question-text">${q.question}</div>
+          <div id="np-answer-area">${renderAnswerArea(q)}</div>
+          <div id="np-feedback"></div>
+          <div class="np-hint-bar">
+            <button class="np-hint-btn" style="background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.4);color:#92400e"
+              onclick="NpMatteMuntligt.toggleHint('hint-box')">💡 Ledtråd</button>
+            <button class="np-hint-btn" style="background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.3);color:#1d4ed8"
+              onclick="NpMatteMuntligt.toggleHint('adult-box')">👨‍👩‍👧 Vuxen</button>
+          </div>
+          <div id="hint-box" style="display:none;padding:8px 10px;background:rgba(251,191,36,0.1);border-radius:var(--radius-md);border:1.5px solid rgba(251,191,36,0.3);font-weight:700;color:#92400e;font-size:var(--text-sm)">${q.hint}</div>
+          <div id="adult-box" style="display:none;padding:8px 10px;background:rgba(96,165,250,0.08);border-radius:var(--radius-md);border:1.5px solid rgba(96,165,250,0.25);font-weight:700;color:#1d4ed8;font-size:var(--text-sm)">${q.adultTip}</div>
+        </div>
+
       </div>
     `;
 
@@ -309,23 +277,9 @@ const NpMatteMuntligt = (() => {
   function renderAnswerArea(q) {
     if (q.answerType === 'choice') {
       return `
-        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+        <div class="np-choice-grid">
           ${q.options.map((opt, i) => `
-            <button id="np-opt-${i}" class="btn" style="
-              width:100%;min-height:64px;
-              background:rgba(255,255,255,0.9);
-              border:2.5px solid rgba(124,58,237,0.25);
-              color:var(--np-primary);
-              font-size:var(--text-xl);
-              font-weight:800;
-              border-radius:var(--radius-lg);
-              text-align:left;
-              padding:var(--space-4) var(--space-5);
-              cursor:pointer;
-              transition:all 0.15s var(--ease-smooth);
-            "
-              onmouseenter="this.style.background='rgba(124,58,237,0.08)'"
-              onmouseleave="this.style.background='rgba(255,255,255,0.9)'"
+            <button id="np-opt-${i}" class="np-choice-btn"
               onclick="NpMatteMuntligt.handleChoice(${i},'${escStr(String(opt))}')">
               ${escHtml(String(opt))}
             </button>
@@ -336,18 +290,8 @@ const NpMatteMuntligt = (() => {
 
     if (q.answerType === 'free') {
       return `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-3)">
-          <div id="np-free-display" style="
-            font-size:var(--text-5xl);
-            font-weight:900;
-            color:var(--np-primary);
-            min-height:72px;
-            display:flex;align-items:center;justify-content:center;
-            background:rgba(255,255,255,0.9);
-            border-radius:var(--radius-lg);
-            border:3px solid rgba(124,58,237,0.3);
-            width:100%;letter-spacing:0.05em;
-          ">_</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div id="np-free-display">_</div>
           ${renderNumpad()}
         </div>
       `;
@@ -396,8 +340,8 @@ const NpMatteMuntligt = (() => {
             color:${k==='OK'||k==='⌫'?'white':'var(--np-primary)'};
             border:2px solid ${k==='OK'?'var(--np-primary)':k==='⌫'?'#ef4444':'rgba(124,58,237,0.2)'};
           "
-            onmousedown="this.style.transform='scale(0.93)'"
-            onmouseup="this.style.transform=''"
+            onpointerdown="this.style.transform='scale(0.91)'"
+            onpointerup="this.style.transform=''"
             onclick="NpMatteMuntligt.numpadPress('${k}')">
             ${k}
           </button>

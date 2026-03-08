@@ -147,92 +147,118 @@ const NpMatteSkriftlig = (() => {
         setupCanvas();
         renderVisual(currentQ);
         renderAnswerArea(currentQ);
-        applyIpadLayout();
       });
     });
   }
 
   function buildQuestionLayout() {
-    const prog = Math.round(((qIndex) / questions.length) * 100);
+    const pct = Math.round((qIndex / questions.length) * 100);
     return `
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back" style="background:#eff6ff;color:#2563eb"
+      <style id="nps-rs">
+        #screen-np-matte-skriftlig,
+        #np-matte-skriftlig-root {
+          max-width:100%!important; width:100%!important;
+          height:100%; display:flex; flex-direction:column; overflow:hidden;
+        }
+        #nps-hdr {
+          display:flex; align-items:center; gap:8px; flex-shrink:0;
+          padding:5px 10px; border-bottom:1px solid rgba(37,99,235,0.15); min-height:44px;
+        }
+        #nps-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:#2563eb; }
+        #nps-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(37,99,235,0.15); overflow:hidden; flex-shrink:0; }
+        #nps-prog-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#2563eb,#06b6d4); transition:width 0.4s; }
+        #nps-main { flex:1; display:flex; flex-direction:column; padding:8px; gap:8px; overflow:hidden; min-height:0; }
+        #nps-top-panel { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; min-height:0; }
+        #nps-visual-panel {
+          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
+          padding:10px; border:1.5px solid rgba(37,99,235,0.12); overflow-y:auto; min-height:0;
+        }
+        #nps-scratch-panel {
+          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
+          padding:8px; border:1.5px solid rgba(37,99,235,0.12);
+          display:flex; flex-direction:column; gap:5px; min-height:0;
+        }
+        #nps-canvas {
+          flex:1; width:100%; min-height:80px; display:block;
+          touch-action:none; cursor:crosshair;
+          border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25);
+          background:#f8fbff;
+        }
+        .nps-tool-btn {
+          flex:1; height:30px; border-radius:var(--radius-md); font-weight:800;
+          font-size:11px; cursor:pointer; border:1.5px solid rgba(37,99,235,0.3); transition:all 0.15s;
+        }
+        .nps-tool-btn.active       { background:#2563eb; color:#fff; border-color:#2563eb; }
+        .nps-tool-btn:not(.active) { background:#eff6ff; color:#2563eb; }
+        #nps-bottom { flex-shrink:0; display:flex; flex-direction:column; gap:5px; }
+        .nps-question-text { font-size:var(--text-base); font-weight:800; color:var(--color-text); padding:4px 6px; line-height:1.4; }
+        .nps-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+        .nps-choice-btn {
+          height:46px; border-radius:var(--radius-md); background:rgba(255,255,255,0.9);
+          border:2px solid rgba(37,99,235,0.22); color:#1e3a8a;
+          font-size:var(--text-base); font-weight:800; cursor:pointer;
+          transition:all 0.15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px;
+        }
+        .nps-choice-btn:hover, .nps-choice-btn:active { background:rgba(37,99,235,0.1); }
+        .nps-numpad-grid { display:grid; grid-template-columns:repeat(3,52px); gap:5px; justify-content:center; }
+        .nps-numpad-btn {
+          width:52px; height:52px; border-radius:var(--radius-full);
+          font-size:var(--text-lg); font-weight:900; cursor:pointer;
+          box-shadow:var(--shadow-sm); transition:transform 0.1s;
+        }
+        #nps-npad-display {
+          font-size:var(--text-4xl); font-weight:900; color:#1e3a8a; min-height:52px;
+          display:flex; align-items:center; justify-content:center;
+          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
+          border:2.5px solid rgba(37,99,235,0.3); width:100%; letter-spacing:0.05em;
+        }
+        #nps-feedback { min-height:0; }
+      </style>
+
+      <!-- Compact header -->
+      <div id="nps-hdr">
+        <button class="btn-back" style="background:#eff6ff;color:#2563eb;flex-shrink:0;padding:4px 10px;font-size:13px"
           onclick="NpMatteSkriftlig.confirmBack()">Avsluta</button>
-        <span class="header-title" style="color:#2563eb">Uppgift ${qIndex+1} / ${questions.length}</span>
-        <div style="width:80px"></div>
+        <div class="hdr-cat">${getCategoryEmoji(currentQ.cat)} ${getCategoryLabel(currentQ.cat)}</div>
+        <span style="font-size:11px;font-weight:800;color:#2563eb;flex-shrink:0">${qIndex+1}/${questions.length}</span>
+        <div id="nps-prog-wrap"><div id="nps-prog-fill" style="width:${pct}%"></div></div>
       </div>
 
-      <!-- Progress -->
-      <div style="padding:0 var(--space-4);margin-top:4px">
-        <div style="height:10px;border-radius:var(--radius-full);background:rgba(37,99,235,0.1);overflow:hidden">
-          <div style="height:100%;width:${prog}%;background:linear-gradient(90deg,#2563eb,#06b6d4);
-            border-radius:var(--radius-full);transition:width 0.4s ease"></div>
-        </div>
-      </div>
+      <!-- Main -->
+      <div id="nps-main">
 
-      <!-- Two-column wrapper (iPad) -->
-      <div id="nps-game-area" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-3) var(--space-4)">
-
-        <!-- Left col: question + visual -->
-        <div id="nps-left-col">
-          <!-- Category label -->
-          <div style="font-size:var(--text-xs);font-weight:800;color:#2563eb;opacity:0.7;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px">
-            ${getCategoryEmoji(currentQ.cat)} ${getCategoryLabel(currentQ.cat)}
-          </div>
-          <!-- Question text -->
-          <div id="nps-question-text" style="font-size:var(--text-lg);font-weight:800;color:var(--color-text);line-height:1.4;margin-bottom:var(--space-3)">
-            ${currentQ.question}
-          </div>
-          <!-- Visual -->
-          <div id="nps-visual" style="margin-bottom:var(--space-3)"></div>
-          <!-- Hint -->
-          <div id="nps-hint" style="display:none;background:#eff6ff;border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-sm);font-weight:700;color:#1d4ed8;margin-bottom:var(--space-3)">
-            💡 ${esc(currentQ.hint || '')}
-          </div>
-          <!-- Canvas -->
-          <div style="margin-bottom:var(--space-3)">
-            <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)">
-              <span style="font-size:var(--text-xs);font-weight:800;color:#2563eb;opacity:0.7">✏️ KLADDYTA</span>
-              <button id="nps-btn-erase" onclick="NpMatteSkriftlig.toggleEraser()"
-                style="font-size:var(--text-xs);padding:2px 8px;border-radius:var(--radius-full);
-                border:1.5px solid #2563eb;background:transparent;color:#2563eb;cursor:pointer;font-weight:800">
-                Sudda
-              </button>
-              <button onclick="NpMatteSkriftlig.clearCanvas()"
-                style="font-size:var(--text-xs);padding:2px 8px;border-radius:var(--radius-full);
-                border:1.5px solid rgba(37,99,235,0.4);background:transparent;color:#2563eb;cursor:pointer;font-weight:800">
-                Rensa
-              </button>
+        <!-- Top: visual LEFT, canvas RIGHT -->
+        <div id="nps-top-panel">
+          <div id="nps-visual-panel">
+            <div style="font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;opacity:0.7">
+              ${getCategoryLabel(currentQ.cat)}
             </div>
-            <canvas id="nps-canvas" style="width:100%;border-radius:var(--radius-md);
-              border:1.5px solid rgba(37,99,235,0.2);background:#f8fbff;cursor:crosshair;
-              touch-action:none;display:block"></canvas>
+            <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);line-height:1.4;margin-bottom:8px">
+              ${currentQ.question}
+            </div>
+            <div id="nps-visual"></div>
+            <div id="nps-hint" style="display:none;margin-top:6px;padding:8px 10px;background:#eff6ff;border-radius:var(--radius-md);border:1.5px solid rgba(37,99,235,0.2);font-size:var(--text-sm);font-weight:700;color:#1d4ed8">
+              💡 ${esc(currentQ.hint || '')}
+            </div>
+          </div>
+          <div id="nps-scratch-panel">
+            <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+            <canvas id="nps-canvas"></canvas>
+            <div style="display:flex;gap:5px;flex-shrink:0">
+              <button id="nps-tool-draw" class="nps-tool-btn active" onclick="NpMatteSkriftlig.toggleEraser(false)">🖊️ Rita</button>
+              <button id="nps-tool-erase" class="nps-tool-btn" onclick="NpMatteSkriftlig.toggleEraser(true)">🧹 Sudd</button>
+              <button class="nps-tool-btn" onclick="NpMatteSkriftlig.clearCanvas()">🗑️ Rensa</button>
+            </div>
           </div>
         </div>
 
-        <!-- Right col: answer area -->
-        <div id="nps-right-col">
+        <!-- Bottom: answers + feedback -->
+        <div id="nps-bottom">
           <div id="nps-answer-area"></div>
-          <div id="nps-feedback" style="min-height:40px;margin-top:var(--space-2)"></div>
+          <div id="nps-feedback"></div>
         </div>
 
       </div>
-    `;
-  }
-
-  function applyIpadLayout() {
-    let el = document.getElementById('nps-rs');
-    if (!el) {
-      el = document.createElement('style');
-      el.id = 'nps-rs';
-      document.head.appendChild(el);
-    }
-    el.textContent = `
-      @media (min-width:768px) and (orientation:landscape) {
-        #nps-game-area { flex-direction:row !important; align-items:flex-start; }
-        #nps-left-col  { flex:1.1; }
-        #nps-right-col { flex:1; min-width:280px; }
-      }
     `;
   }
 
@@ -240,18 +266,19 @@ const NpMatteSkriftlig = (() => {
   function setupCanvas() {
     canvas = document.getElementById('nps-canvas');
     if (!canvas) return;
-    ctx = canvas.getContext('2d');
-    const w = canvas.offsetWidth || 300;
-    const h = Math.max(140, Math.round(w * 0.32));
-    canvas.width  = w;
-    canvas.height = h;
-    canvas.style.height = h + 'px';
     erasing = false;
 
-    canvas.addEventListener('pointerdown', onPD);
-    canvas.addEventListener('pointermove', onPM);
-    canvas.addEventListener('pointerup',   onPU);
-    canvas.addEventListener('pointercancel', onPU);
+    requestAnimationFrame(() => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = rect.width  || 300;
+      canvas.height = rect.height || 160;
+      ctx = canvas.getContext('2d');
+
+      canvas.addEventListener('pointerdown', onPD);
+      canvas.addEventListener('pointermove', onPM);
+      canvas.addEventListener('pointerup',   onPU);
+      canvas.addEventListener('pointercancel', onPU);
+    });
   }
 
   function onPD(e) {
@@ -292,14 +319,12 @@ const NpMatteSkriftlig = (() => {
   }
   function onPU(e) { drawing = false; }
 
-  function toggleEraser() {
-    erasing = !erasing;
-    const btn = document.getElementById('nps-btn-erase');
-    if (btn) {
-      btn.style.background = erasing ? '#2563eb' : 'transparent';
-      btn.style.color      = erasing ? '#fff'    : '#2563eb';
-      btn.textContent      = erasing ? 'Penna'   : 'Sudda';
-    }
+  function toggleEraser(enable) {
+    erasing = enable;
+    const drawBtn  = document.getElementById('nps-tool-draw');
+    const eraseBtn = document.getElementById('nps-tool-erase');
+    if (drawBtn)  drawBtn.className  = 'nps-tool-btn' + (enable ? '' : ' active');
+    if (eraseBtn) eraseBtn.className = 'nps-tool-btn' + (enable ? ' active' : '');
   }
   function clearCanvas() {
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -522,11 +547,11 @@ const NpMatteSkriftlig = (() => {
     const el = document.getElementById('nps-answer-area');
     if (!el) return;
     switch (q.answerType) {
-      case 'free':        el.innerHTML = buildNumpad(); bindNumpad(); break;
+      case 'free':        el.innerHTML = buildNumpad(); break;
       case 'choice':      el.innerHTML = buildChoices(q); break;
       case 'truefalse':   el.innerHTML = buildTrueFalse(q); break;
       case 'multi-choice':el.innerHTML = buildMultiChoice(q); break;
-      case 'multi-free':  el.innerHTML = buildMultiFree(q); bindNumpad('nps-mf-numpad'); break;
+      case 'multi-free':  el.innerHTML = buildMultiFree(q); break;
       case 'order':       el.innerHTML = buildOrder(q); break;
       case 'fillSign':    el.innerHTML = buildFillSign(q); break;
       case 'match':       el.innerHTML = buildMatch(q); break;
@@ -535,51 +560,25 @@ const NpMatteSkriftlig = (() => {
 
   /* ── Numpad ─────────────────────────────────────────────── */
   function buildNumpad(id = 'nps-numpad') {
+    const keys = ['7','8','9','4','5','6','1','2','3','⌫','0','✓'];
     return `
-      <div style="display:flex;flex-direction:column;gap:var(--space-3)">
-        <div id="nps-npad-display" style="font-size:var(--text-4xl);font-weight:900;text-align:center;
-          min-height:56px;color:#1e3a8a;letter-spacing:0.05em;background:rgba(255,255,255,0.8);
-          border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);border:2px solid rgba(37,99,235,0.2)">
-          ${npadValue || '...'}
-        </div>
-        <div id="${id}" style="display:grid;grid-template-columns:repeat(3,72px);gap:8px;justify-content:center">
-          ${[7,8,9,4,5,6,1,2,3].map(n =>
-            `<button onclick="NpMatteSkriftlig.npadPress('${n}')"
-              style="width:72px;height:72px;border-radius:var(--radius-full);border:none;
-              background:rgba(37,99,235,0.08);font-size:var(--text-2xl);font-weight:800;
-              color:#1e3a8a;cursor:pointer;transition:transform 0.1s,background 0.1s"
-              onpointerdown="this.style.transform='scale(0.9)';this.style.background='rgba(37,99,235,0.2)'"
-              onpointerup="this.style.transform='';this.style.background='rgba(37,99,235,0.08)'">${n}</button>`
-          ).join('')}
-          <button onclick="NpMatteSkriftlig.npadPress('del')"
-            style="width:72px;height:72px;border-radius:var(--radius-full);border:none;
-            background:rgba(239,68,68,0.1);font-size:var(--text-xl);font-weight:800;
-            color:#dc2626;cursor:pointer"
-            onpointerdown="this.style.transform='scale(0.9)'" onpointerup="this.style.transform=''">⌫</button>
-          <button onclick="NpMatteSkriftlig.npadPress('0')"
-            style="width:72px;height:72px;border-radius:var(--radius-full);border:none;
-            background:rgba(37,99,235,0.08);font-size:var(--text-2xl);font-weight:800;
-            color:#1e3a8a;cursor:pointer"
-            onpointerdown="this.style.transform='scale(0.9)'" onpointerup="this.style.transform=''">0</button>
-          <button onclick="NpMatteSkriftlig.submitFree()"
-            style="width:72px;height:72px;border-radius:var(--radius-full);border:none;
-            background:linear-gradient(135deg,#2563eb,#06b6d4);font-size:var(--text-lg);font-weight:800;
-            color:#fff;cursor:pointer"
-            onpointerdown="this.style.transform='scale(0.9)'" onpointerup="this.style.transform=''">✓</button>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div id="nps-npad-display">${npadValue || '...'}</div>
+        <div class="nps-numpad-grid" id="${id}">
+          ${keys.map(k => `
+            <button class="nps-numpad-btn" style="
+              background:${k==='✓'?'linear-gradient(135deg,#2563eb,#06b6d4)':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'rgba(255,255,255,0.9)'};
+              color:${k==='✓'||k==='⌫'?'white':'#1e3a8a'};
+              border:2px solid ${k==='✓'?'#2563eb':k==='⌫'?'#ef4444':'rgba(37,99,235,0.2)'};
+            "
+              onpointerdown="this.style.transform='scale(0.91)'"
+              onpointerup="this.style.transform=''"
+              onclick="NpMatteSkriftlig.npadPress('${k}')">
+              ${k}
+            </button>
+          `).join('')}
         </div>
       </div>`;
-  }
-
-  function bindNumpad() { /* event delegation already via inline onclick */ }
-
-  function npadPress(key) {
-    if (key === 'del') {
-      npadValue = npadValue.slice(0, -1);
-    } else if (npadValue.length < 6) {
-      npadValue += key;
-    }
-    const disp = document.getElementById('nps-npad-display');
-    if (disp) disp.textContent = npadValue || '...';
   }
 
   function submitFree() {
@@ -589,15 +588,10 @@ const NpMatteSkriftlig = (() => {
 
   /* ── Choice ─────────────────────────────────────────────── */
   function buildChoices(q) {
-    return `<div style="display:flex;flex-direction:column;gap:var(--space-2)">` +
+    return `<div class="nps-choice-grid">` +
       q.choices.map((c, i) =>
-        `<button onclick="NpMatteSkriftlig.submitChoice(${i})"
-          style="padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.2);
-          background:rgba(255,255,255,0.85);font-size:var(--text-base);font-weight:800;
-          color:#1e3a8a;cursor:pointer;text-align:left;transition:all 0.15s"
-          onmouseenter="this.style.background='rgba(37,99,235,0.08)'"
-          onmouseleave="this.style.background='rgba(255,255,255,0.85)'"
-          id="nps-choice-${i}">${esc(String(c))}</button>`
+        `<button class="nps-choice-btn" id="nps-choice-${i}"
+          onclick="NpMatteSkriftlig.submitChoice(${i})">${esc(String(c))}</button>`
       ).join('') + '</div>';
   }
 
@@ -750,14 +744,12 @@ const NpMatteSkriftlig = (() => {
     if (disp) disp.textContent = mfValues[i] || '...';
   }
 
-  // Override npadPress for multi-free
-  const _origNpadPress = npadPress;
-
   function npadPress(key) {
+    if (key === '✓') { submitFree(); return; }
     if (currentQ && currentQ.answerType === 'multi-free') {
       const f = currentQ.fields[mfActiveIdx];
       if (f && f.prefilled !== undefined) return;
-      if (key === 'del') {
+      if (key === '⌫') {
         mfValues[mfActiveIdx] = (mfValues[mfActiveIdx] || '').slice(0, -1);
       } else if ((mfValues[mfActiveIdx] || '').length < 4) {
         mfValues[mfActiveIdx] = (mfValues[mfActiveIdx] || '') + key;
@@ -767,7 +759,7 @@ const NpMatteSkriftlig = (() => {
       const disp = document.getElementById('nps-npad-display');
       if (disp) disp.textContent = mfValues[mfActiveIdx] || '...';
     } else {
-      if (key === 'del') {
+      if (key === '⌫') {
         npadValue = npadValue.slice(0, -1);
       } else if (npadValue.length < 6) {
         npadValue += key;
