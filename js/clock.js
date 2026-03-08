@@ -175,11 +175,11 @@ const ClockGame = (() => {
 
     // Digital
     const digitalEl = document.getElementById('digital-display');
-    if (digitalEl) digitalEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    if (digitalEl) digitalEl.innerHTML = colorizeTimeText(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
 
     // Text
     const textEl = document.getElementById('text-display');
-    if (textEl) textEl.textContent = timeToSwedish(h, m);
+    if (textEl) textEl.innerHTML = colorizeTimeText(timeToSwedish(h, m));
 
     // Kontroller
     const ch = document.getElementById('ctrl-h');
