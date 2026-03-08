@@ -23,13 +23,13 @@ const NpMatteMuntligt = (() => {
   const NAMES = ['Mira','Ali','Noah','Iris','Elsa','Nova','Ahmed','Vera','Gabriel','Troj','Mika','Liam','Saga','Wilma','Yusuf','Nora'];
 
   const TABLE_THEMES = [
-    { name:'böcker',      unit:'böcker',  emoji:'📚', range:[3,15]   },
+    { name:'böcker',      unit:'böcker',  emoji:'📚', range:[3,30]   },
     { name:'hopp',        unit:'cm',      emoji:'🏃', range:[100,200]},
-    { name:'glassar',     unit:'glassar', emoji:'🍦', range:[2,12]   },
+    { name:'glassar',     unit:'glassar', emoji:'🍦', range:[2,30]   },
     { name:'djurröster',  unit:'röster',  emoji:'🐾', range:[5,25]   },
     { name:'poäng',       unit:'poäng',   emoji:'🏅', range:[10,50]  },
     { name:'klossar',     unit:'klossar', emoji:'🧱', range:[8,30]   },
-    { name:'frukter',     unit:'frukter', emoji:'🍎', range:[4,18]   },
+    { name:'frukter',     unit:'frukter', emoji:'🍎', range:[4,30]   },
     { name:'längder',     unit:'cm',      emoji:'📏', range:[80,180] },
   ];
 
@@ -42,7 +42,7 @@ const NpMatteMuntligt = (() => {
   ];
 
   const CONTEXTS = ['kulor','klossar','äpplen','stjärnor','godisbitar','kort'];
-  const EVEN_NUMS = [6,8,10,12,14,16,18,20,24,30,40,50];
+  const EVEN_NUMS = [6,8,10,12,14,16,18,20,24,30,40,50,60,80,100,150,200,300];
   const BAR_COLORS = ['#7c3aed','#f472b6','#fbbf24','#4ade80','#60a5fa','#fb923c'];
 
   /* ── Fråge-ordning ──────────────────────────────────── */
@@ -51,12 +51,12 @@ const NpMatteMuntligt = (() => {
     'chart',         // 2. Läsa av diagram
     'mostleast',     // 3. Flest eller färst
     'moreorfewer',   // 4. Fler eller färre
-    'oral',          // 5. Berätta hur du tänker (mitt i)
+    'addition3',     // 5. Addition med tresiffriga tal
     'probability',   // 6. Sannolikhet och chans
     'together',      // 7. Tillsammans
     'double',        // 8. Dubblering
     'half',          // 9. Halvering
-    'oral',          // 10. Berätta hur du tänker (avslutning)
+    'subtraction3',  // 10. Subtraktion med tresiffriga tal
   ];
 
   /* ══════════════════════════════════════════════════════
@@ -785,13 +785,14 @@ const NpMatteMuntligt = (() => {
     `;
   }
 
-  function getCategoryLabel(type, idx) {
+  function getCategoryLabel(type) {
     const map = {
       table: 'Läsa av tabell',
       chart: 'Läsa av diagram',
       mostleast: 'Flest eller färst',
       moreorfewer: 'Fler eller färre',
-      oral: idx === 4 ? 'Berätta hur du tänker (mitten)' : 'Berätta hur du tänker (avslut)',
+      addition3: 'Addition med tresiffriga tal',
+      subtraction3: 'Subtraktion med tresiffriga tal',
       probability: 'Sannolikhet och chans',
       together: 'Tillsammans',
       double: 'Dubblering',
@@ -800,11 +801,11 @@ const NpMatteMuntligt = (() => {
     return map[type] || type;
   }
 
-  function getCategoryEmoji(type, idx) {
+  function getCategoryEmoji(type) {
     const map = {
       table: '📊', chart: '📈', mostleast: '🏆',
-      moreorfewer: '➕', oral: '🗣️', probability: '🎲',
-      together: '🤝', double: '✖️', half: '➗',
+      moreorfewer: '➕', addition3: '🧮', subtraction3: '➖',
+      probability: '🎲', together: '🤝', double: '✖️', half: '➗',
     };
     return map[type] || '📝';
   }
@@ -1021,12 +1022,13 @@ const NpMatteMuntligt = (() => {
       case 'chart':      return genChart();
       case 'mostleast':  return genMostLeast();
       case 'moreorfewer':return genMoreOrFewer();
-      case 'oral':       return genOral();
+      case 'addition3':  return genAddition3();
+      case 'subtraction3':return genSubtraction3();
       case 'probability':return genProbability();
       case 'together':   return genTogether();
       case 'double':     return genDouble();
       case 'half':       return genHalf();
-      default:           return genOral();
+      default:           return genTable();
     }
   }
 
@@ -1099,7 +1101,7 @@ const NpMatteMuntligt = (() => {
   function genChart() {
     const theme = pick(CHART_THEMES);
     const items = [...theme.items];
-    const vals  = items.map(() => rnd(2, 20));
+    const vals  = items.map(() => rnd(2, 50));
     const bars  = items.map((label, i) => ({ label, value: vals[i] }));
 
     const chartData = {
@@ -1198,26 +1200,6 @@ const NpMatteMuntligt = (() => {
     };
   }
 
-  /* ── 5. Oral (Berätta hur du tänker) ───────────────── */
-  function genOral() {
-    const prompts = [
-      { q: 'Berätta för den vuxna hur du tänkte när du löste det.', hint: 'Tänk högt! Det finns inget fel sätt.', adult: 'Låt barnet förklara med egna ord. Ställ följdfrågor: "Hur tänkte du?" "Kan du räkna på ett annat sätt?"' },
-      { q: 'Förklara med ord hur du räknade.', hint: 'Berätta steg för steg – det är magiskt att kunna förklara!', adult: 'Uppmuntra barnet att använda matematiska ord. Fråga: "Vad räknade du först? Vad kom sen?"' },
-      { q: 'Kan du visa med ord hur du löste uppgiften?', hint: 'Tänk på stegen: Vad visste du? Vad behövde du räkna?', adult: 'Lyssna aktivt. Om barnet fastnar, fråga: "Vad stod det i frågan?" Räknas alltid som rätt.' },
-    ];
-    const p = pick(prompts);
-    return {
-      category: 'Berätta hur du tänker',
-      emoji: '🗣️',
-      visual: null,
-      question: p.q,
-      answerType: 'oral',
-      correctAnswer: 'oral',
-      hint: p.hint,
-      adultTip: p.adult,
-    };
-  }
-
   /* ── 6. Sannolikhet och chans ───────────────────────── */
   function genProbability() {
     const type = pick(['bags','spinner']);
@@ -1285,7 +1267,7 @@ const NpMatteMuntligt = (() => {
     const theme = pick(TABLE_THEMES);
     const count = rnd(2, 4);
     const names = pickN(NAMES, count);
-    const vals  = names.map(() => rnd(theme.range[0], Math.min(theme.range[1], theme.range[0]+20)));
+    const vals  = names.map(() => rnd(theme.range[0], theme.range[1]));
     const rows  = names.map((n, i) => ({ label: n, value: vals[i] }));
     const tableData = { col1: 'Namn', col2: `Antal ${theme.unit}`, rows };
     const sum = vals.reduce((s, v) => s + v, 0);
@@ -1306,7 +1288,7 @@ const NpMatteMuntligt = (() => {
   function genDouble() {
     const name = pick(NAMES);
     const ctx  = pick(CONTEXTS);
-    const val  = rnd(3, 25);
+    const val  = rnd(3, 150);
     const ans  = val * 2;
 
     return {
@@ -1336,6 +1318,40 @@ const NpMatteMuntligt = (() => {
       correctAnswer: String(ans),
       hint: `Hälften = dela i två lika delar. ${val} ÷ 2 = ?`,
       adultTip: `Barnet tränar halvering (÷2). Fråga: "Hur visste du att de är lika?" Koppla till dubblering: "Om hälften av 12 är 6 – vad är dubbelt med 6?"`,
+    };
+  }
+
+  /* ── 5. Addition med tresiffriga tal ───────────────── */
+  function genAddition3() {
+    let a, b;
+    do { a = rnd(100, 399); b = rnd(100, 299); } while (a + b > 699);
+    const ans = a + b;
+    return {
+      category: 'Addition',
+      emoji: '🧮',
+      visual: null,
+      question: `Hur mycket är ${a} + ${b}?`,
+      answerType: 'free',
+      correctAnswer: String(ans),
+      hint: 'Börja med entalen, sedan tiotalen, sedan hundratalen.',
+      adultTip: 'Barnet tränar addition med tresiffriga tal. Fråga: "Hur tänkte du?" Kolla om de hanterar minnessiffra.',
+    };
+  }
+
+  /* ── 10. Subtraktion med tresiffriga tal ────────────── */
+  function genSubtraction3() {
+    let a, b;
+    do { a = rnd(200, 600); b = rnd(100, 299); } while (b >= a || (a - b) < 50);
+    const ans = a - b;
+    return {
+      category: 'Subtraktion',
+      emoji: '➖',
+      visual: null,
+      question: `Hur mycket är ${a} − ${b}?`,
+      answerType: 'free',
+      correctAnswer: String(ans),
+      hint: 'Börja med entalen. Behöver du låna från tiotalen?',
+      adultTip: 'Barnet tränar subtraktion med tresiffriga tal. Fråga: "Behövde du låna?" Kolla om de hanterar lån korrekt.',
     };
   }
 
