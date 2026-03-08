@@ -58,13 +58,21 @@
   --friends-light:     #fef3c7;
   --friends-glow:      rgba(221, 214, 254, 0.6);
 
-  /* --- Nationella Prov-färger --- */
+  /* --- Nationella Prov-färger (muntlig, lila) --- */
   --np-bg:        linear-gradient(135deg, #fef9c3 0%, #fce7f3 50%, #ede9fe 100%);
   --np-primary:   #7c3aed;
   --np-secondary: #f472b6;
   --np-accent:    #fbbf24;
   --np-light:     #fef3c7;
   --np-glow:      rgba(124, 58, 237, 0.4);
+
+  /* --- Nationella Prov-färger (skriftlig, blå) --- */
+  --nps-bg:        linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #ecfeff 100%);
+  --nps-primary:   #2563eb;
+  --nps-secondary: #0891b2;
+  --nps-accent:    #06b6d4;
+  --nps-light:     #eff6ff;
+  --nps-glow:      rgba(37, 99, 235, 0.4);
 
   /* --- Typografi --- */
   --font-heading: 'Bubblegum Sans', cursive;

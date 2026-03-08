@@ -157,35 +157,33 @@ const NationellaHub = (() => {
           <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
         </div>
 
-        <!-- Skriftlig del (placeholder) -->
+        <!-- Skriftlig del (aktiv) -->
         <div class="card" style="
           display:flex;align-items:center;gap:var(--space-5);
-          padding:var(--space-5);
-          background:rgba(200,200,200,0.15);
-          border:2px dashed rgba(150,150,150,0.3);
-          opacity:0.6;
-          cursor:not-allowed;
-        ">
+          padding:var(--space-5);cursor:pointer;
+          background:linear-gradient(135deg,#eff6ff 0%,#ecfeff 100%);
+          border:2px solid rgba(37,99,235,0.2);
+          transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s;
+        "
+          onclick="NationellaHub.startMatteSkriftlig()"
+          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
+          onmouseleave="this.style.transform='';this.style.boxShadow=''"
+          role="button" tabindex="0">
           <div style="
             font-size:2.5rem;width:64px;height:64px;
             display:flex;align-items:center;justify-content:center;
             border-radius:var(--radius-lg);
-            background:rgba(200,200,200,0.2);
+            background:linear-gradient(135deg,#eff6ff,#ecfeff);
           ">✏️</div>
           <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:#999">
+            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:#2563eb">
               Skriftlig del Åk 3
             </div>
-            <div style="font-size:var(--text-sm);color:#bbb;font-weight:700;margin-top:4px">
-              Kommer snart! 🔜
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">
+              20 uppgifter – tabeller, diagram och mer 📝
             </div>
           </div>
-          <div style="
-            font-size:var(--text-xs);font-weight:800;
-            background:rgba(150,150,150,0.2);color:#aaa;
-            padding:4px 10px;border-radius:var(--radius-full);
-            white-space:nowrap;
-          ">Kommer snart</div>
+          <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
         </div>
 
       </div>
@@ -202,6 +200,15 @@ const NationellaHub = (() => {
     }
   }
 
+  /* ── Starta Matte Skriftlig ───────────────────────────── */
+  function startMatteSkriftlig() {
+    App.Sound.play('click');
+    Router.show('screen-np-matte-skriftlig');
+    if (typeof NpMatteSkriftlig !== 'undefined') {
+      NpMatteSkriftlig.init(profile);
+    }
+  }
+
   /* ── Hjälp ───────────────────────────────────────────── */
   function escHtml(str) {
     return String(str)
@@ -211,5 +218,5 @@ const NationellaHub = (() => {
       .replace(/"/g, '&quot;');
   }
 
-  return { init, showSubjectSelect, showMatteSelect, startMatteMuntligt };
+  return { init, showSubjectSelect, showMatteSelect, startMatteMuntligt, startMatteSkriftlig };
 })();
