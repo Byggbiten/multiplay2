@@ -74,6 +74,14 @@
   --nps-light:     #eff6ff;
   --nps-glow:      rgba(37, 99, 235, 0.4);
 
+  /* --- NP Svenska (grön) --- */
+  --svk-bg:        linear-gradient(135deg, #ecfdf5 0%, #eff6ff 50%, #fdf4ff 100%);
+  --svk-primary:   #059669;
+  --svk-secondary: #7c3aed;
+  --svk-accent:    #fbbf24;
+  --svk-light:     #d1fae5;
+  --svk-glow:      rgba(5, 150, 105, 0.4);
+
   /* --- Typografi --- */
   --font-heading: 'Bubblegum Sans', cursive;
   --font-body:    'Nunito', sans-serif;
