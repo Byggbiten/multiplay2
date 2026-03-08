@@ -90,7 +90,7 @@ const ClockGame = (() => {
               transform-origin="110 110"/>
             <!-- Minutvisare -->
             <line id="hand-minute" x1="110" y1="110" x2="110" y2="40"
-              stroke="var(--clock-secondary)" stroke-width="4" stroke-linecap="round"
+              stroke="#ef4444" stroke-width="4" stroke-linecap="round"
               transform-origin="110 110"/>
             <!-- Mittpunkt -->
             <circle cx="110" cy="110" r="7" fill="var(--clock-primary)"/>
@@ -331,9 +331,9 @@ const ClockGame = (() => {
             const textColors = ['var(--clock-primary)','var(--clock-secondary)','#166534','var(--mult-primary)'];
             return `
               <button class="answer-option" id="opt-${i}"
-                style="border-color:rgba(59,130,246,0.3);color:${textColors[i]};background:${colors[i]}"
+                style="border-color:rgba(59,130,246,0.3);background:${colors[i]}"
                 onclick="ClockGame._handleReadChoice(${i},'${escSQ(opt)}','${escSQ(correct)}',${qIdx},${TOTAL})">
-                ${opt}
+                ${colorizeTimeText(opt)}
               </button>
             `;
           }).join('')}
@@ -410,8 +410,8 @@ const ClockGame = (() => {
         </div>
         <div style="padding:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
           <p style="font-weight:800;color:var(--clock-primary);font-size:var(--text-lg);text-align:center">Ställ klockan till:</p>
-          <div style="font-family:var(--font-heading);font-size:var(--text-4xl);color:var(--clock-secondary);padding:var(--space-4) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">
-            "${text}"
+          <div style="font-family:var(--font-heading);font-size:var(--text-4xl);padding:var(--space-4) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">
+            ${colorizeTimeText(text)}
           </div>
 
           ${type === 'analog'
@@ -622,14 +622,14 @@ const ClockGame = (() => {
         <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}"
           stroke="var(--clock-primary)" stroke-width="5" stroke-linecap="round"/>
         <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
-          stroke="var(--clock-secondary)" stroke-width="3" stroke-linecap="round"/>
+          stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
         <circle cx="${cx}" cy="${cy}" r="5" fill="var(--clock-primary)"/>
         <circle cx="${cx}" cy="${cy}" r="2" fill="white"/>
       </svg>
     `;
   }
 
-  function drawSettingClock(h, m, hColor = 'var(--clock-primary)', mColor = 'var(--clock-secondary)') {
+  function drawSettingClock(h, m, hColor = '#3b82f6', mColor = '#ef4444') {
     return drawAnalogClockColored(h, m, 180, hColor, mColor);
   }
 
@@ -740,6 +740,42 @@ const ClockGame = (() => {
     if (pct >= 70)   return { emoji: '🥈', msg: 'Jättebra jobbat!' };
     if (pct >= 50)   return { emoji: '👍', msg: 'Bra start! Fortsätt öva!' };
     return { emoji: '💪', msg: 'Fortsätt öva på klockan!' };
+  }
+
+  /* ── Färgkoda tidstext pedagogiskt ─────────────────── */
+  function colorizeTimeText(text) {
+    const b = s => `<span style="color:#3b82f6;font-weight:900">${s}</span>`;
+    const r = s => `<span style="color:#ef4444;font-weight:900">${s}</span>`;
+    const k = s => `<span style="color:#1e293b;font-weight:800">${s}</span>`;
+
+    // Digital: "23:45" → timme blå, kolon svart, minut röd
+    if (/^\d{2}:\d{2}$/.test(text)) {
+      const [hh, mm] = text.split(':');
+      return b(hh) + k(':') + r(mm);
+    }
+    // "halv X" (30 min) → "halv" svart, timme blå
+    let match = text.match(/^halv (.+)$/);
+    if (match) return k('halv ') + b(match[1]);
+
+    // "X över halv Y"
+    match = text.match(/^(.+?) över halv (.+)$/);
+    if (match) return r(match[1]) + k(' över halv ') + b(match[2]);
+
+    // "X i halv Y"
+    match = text.match(/^(.+?) i halv (.+)$/);
+    if (match) return r(match[1]) + k(' i halv ') + b(match[2]);
+
+    // "X över Y"
+    match = text.match(/^(.+?) över (.+)$/);
+    if (match) return r(match[1]) + k(' över ') + b(match[2]);
+
+    // "X i Y"
+    match = text.match(/^(.+?) i (.+)$/);
+    if (match) return r(match[1]) + k(' i ') + b(match[2]);
+
+    // Bara timme (m=0), inkl. "tolv (tolv)"-format
+    const hourOnly = text.replace(/\s*\(.*\)$/, '');
+    return b(hourOnly);
   }
 
   function escSQ(s) { return String(s).replace(/'/g, "\\'"); }
