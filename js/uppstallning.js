@@ -34,6 +34,7 @@ const UppstallningGame = (() => {
   let exInput       = '';
   let exColData     = []; // preprocessad per-kolumn data från buildDemoSteps
   let helpMode      = true; // true = med hjälp, false = utan hjälp
+  let exTenAnimDone = [];
 
   /* Canvas */
   let upCanvas = null, upCtx = null;
@@ -353,12 +354,23 @@ const UppstallningGame = (() => {
     if (mode === 'addition') {
       let carryVal = 0;
       for (let c = 0; c < maxC; c++) {
-        const sum = da[c] + db[c] + carryVal;
+        const a = da[c], b = db[c];
+        const effectiveA = a + carryVal;
+        const sum = effectiveA + b;
         const ans = sum % 10;
-        const next = sum > 9 ? 1 : 0;
-        steps.push({ type:'add_show', col:c, da:da[c], db:db[c], carry_in:carryVal, sum, ans, next_carry:next });
-        steps.push({ type:'add_drop', col:c, ans, next_carry:next });
-        carryVal = next;
+        const nextCarry = sum > 9 ? 1 : 0;
+        steps.push({ type:'add_highlight', col:c });
+        if (sum > 9) {
+          const behover = 10 - effectiveA;
+          const kvar = b - behover;
+          steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
+          steps.push({ type:'add_complement', col:c, a, b, carry_in:carryVal,
+                       effectiveA, behover, kvar, ans, nextCarry });
+          steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
+        } else {
+          steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
+        }
+        carryVal = nextCarry;
       }
       if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
     } else {
@@ -395,19 +407,25 @@ const UppstallningGame = (() => {
   function preprocessExSteps(steps) {
     const result = [];
     for (let c = 0; c < colCount; c++) {
-      const cantStep  = steps.find(s => (s.type === 'sub_cant' || s.type === 'sub_cant_double') && s.col === c);
-      const flipStep  = steps.find(s => s.type === 'sub_flip_borrow' && s.col === c);
-      const tenStep   = steps.find(s => s.type === 'sub_ten_minus'   && s.col === c);
-      const calcStep  = steps.find(s => s.type === 'sub_calc'        && s.col === c);
-      const dropStep  = steps.find(s => s.type === 'add_drop'        && s.col === c);
-      const interStep = steps.find(s => s.type === 'sub_borrow'      && s.mainCol === c);
+      const cantStep    = steps.find(s => (s.type === 'sub_cant' || s.type === 'sub_cant_double') && s.col === c);
+      const flipStep    = steps.find(s => s.type === 'sub_flip_borrow' && s.col === c);
+      const tenStep     = steps.find(s => s.type === 'sub_ten_minus'   && s.col === c);
+      const calcStep    = steps.find(s => s.type === 'sub_calc'        && s.col === c);
+      const interStep   = steps.find(s => s.type === 'sub_borrow'      && s.mainCol === c);
+      const overStep    = steps.find(s => s.type === 'add_over9'       && s.col === c);
+      const compStep    = steps.find(s => s.type === 'add_complement'  && s.col === c);
+      const resultStep  = steps.find(s => (s.type === 'add_result' || s.type === 'add_simple') && s.col === c);
       result[c] = {
-        correctAnswer: tenStep?.ans ?? calcStep?.diff ?? dropStep?.ans ?? 0,
-        nextCarry:     dropStep?.next_carry ?? 0,
-        needsBorrow:   !!cantStep,
-        isDouble:      cantStep?.type === 'sub_cant_double',
-        flipStep:      flipStep  || null,
-        interStep:     interStep || null,
+        correctAnswer:   tenStep?.ans ?? calcStep?.diff ?? resultStep?.ans ?? 0,
+        nextCarry:       resultStep?.nextCarry ?? 0,
+        needsBorrow:     !!cantStep,
+        isDouble:        cantStep?.type === 'sub_cant_double',
+        flipStep:        flipStep   || null,
+        interStep:       interStep  || null,
+        needsTenFriend:  !!overStep,
+        overStep:        overStep   || null,
+        complementStep:  compStep   || null,
+        resultStep:      resultStep || null,
       };
     }
     return result;
@@ -457,33 +475,93 @@ const UppstallningGame = (() => {
   }
 
   function executeStep(step, cb) {
-    if (step.type === 'add_show') {
+    if (step.type === 'add_highlight') {
       highlightCol(step.col);
       setTimeout(cb, 50);
 
-    } else if (step.type === 'add_drop') {
+    } else if (step.type === 'add_over9') {
       highlightCol(step.col);
       const colKey = COL_KEYS[step.col];
-      const ansCell = document.getElementById(`ans-${colKey}`);
-      if (ansCell) {
-        ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
-        ansCell.classList.add('filled');
-        ansCell.style.borderColor = PVC[colKey];
+      ['row-a','row-b'].forEach(row => {
+        const el = document.getElementById(`cell-${row}-${colKey}`);
+        if (el) el.classList.add('problem-cell');
+      });
+      setTimeout(() => {
+        ['row-a','row-b'].forEach(row => {
+          const el = document.getElementById(`cell-${row}-${colKey}`);
+          if (el) el.classList.remove('problem-cell');
+        });
+        cb();
+      }, 1200);
+
+    } else if (step.type === 'add_complement') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      // t=0: stryk undre, visa kvar
+      const dwB = document.getElementById(`dw-b-${colKey}`);
+      if (dwB) {
+        dwB.classList.add('crossed');
+        const sp = document.createElement('span');
+        sp.className = 'small-new-digit';
+        sp.style.color = '#d97706';
+        sp.textContent = step.kvar;
+        dwB.appendChild(sp);
       }
-      demoAns[step.col] = step.ans;
-      App.Sound.play('correct');
-      if (step.next_carry && step.col + 1 < colCount) {
-        playCarrySound();
-        setTimeout(() => {
+      // t=400: stryk övre, visa "10"
+      setTimeout(() => {
+        const dwA = document.getElementById(`dw-a-${colKey}`);
+        if (dwA) {
+          dwA.classList.add('crossed');
+          const sp = document.createElement('span');
+          sp.className = 'small-new-digit';
+          sp.style.color = '#d97706';
+          sp.textContent = '10';
+          dwA.appendChild(sp);
+        }
+      }, 400);
+      // t=800: token flyger, carry uppdateras
+      setTimeout(() => {
+        if (step.nextCarry && step.col + 1 < colCount) {
+          playCarrySound();
           animateCarryToken(step.col, step.col + 1, () => {
             demoCarries[step.col + 1] = 1;
             updateCarryRow();
-            setTimeout(cb, 200);
+            setTimeout(cb, 300);
           });
-        }, 500);
-      } else {
+        } else {
+          setTimeout(cb, 400);
+        }
+      }, 800);
+
+    } else if (step.type === 'add_result') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      setTimeout(() => {
+        const ansCell = document.getElementById(`ans-${colKey}`);
+        if (ansCell) {
+          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
+          ansCell.classList.add('filled');
+          ansCell.style.borderColor = PVC[colKey];
+        }
+        demoAns[step.col] = step.ans;
+        App.Sound.play('correct');
         setTimeout(cb, 700);
-      }
+      }, 300);
+
+    } else if (step.type === 'add_simple') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      setTimeout(() => {
+        const ansCell = document.getElementById(`ans-${colKey}`);
+        if (ansCell) {
+          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
+          ansCell.classList.add('filled');
+          ansCell.style.borderColor = PVC[colKey];
+        }
+        demoAns[step.col] = step.ans;
+        App.Sound.play('correct');
+        setTimeout(cb, 700);
+      }, 300);
 
     } else if (step.type === 'add_overflow') {
       App.Sound.play('correct');
@@ -656,21 +734,23 @@ const UppstallningGame = (() => {
     if (!step) { area.innerHTML = ''; return; }
 
     let html = '';
-    if (step.type === 'add_show') {
+    if (step.type === 'add_highlight') {
+      html = '';
+    } else if (step.type === 'add_over9') {
       const ck = COL_KEYS[step.col];
-      const ci = step.carry_in;
-      const ciStr = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
-      if (step.sum > 9) {
-        html = `<span style="color:${PVC[ck]}">${step.da}</span> + <span style="color:${PVC[ck]}">${step.db}</span>${ciStr} = <strong>${step.sum}</strong><br>
-          Skriv <strong style="color:${PVC[ck]}">${step.ans}</strong>, minns <strong style="color:#d97706">1</strong> till nästa kolumn 💭`;
-      } else {
-        html = `<span style="color:${PVC[ck]}">${step.da}</span> + <span style="color:${PVC[ck]}">${step.db}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
-      }
-    } else if (step.type === 'add_drop') {
+      const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span> (minne)` : '';
+      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr}... Hmm, det blir mer än 9! 🤔`;
+    } else if (step.type === 'add_complement') {
       const ck = COL_KEYS[step.col];
-      html = step.next_carry
-        ? `<strong style="color:${PVC[ck]}">${step.ans}</strong> går ner i svaret. <strong style="color:#d97706">1</strong> flyger upp till minnessiffran! 🚀`
-        : `<strong style="color:${PVC[ck]}">${step.ans}</strong> går ner i svaret ✅`;
+      html = `<span style="color:${PVC[ck]}">${step.effectiveA}</span> behöver <strong>${step.behover}</strong> till för att bli 10.<br>
+        Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>. Kvar: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong> 💡`;
+    } else if (step.type === 'add_result') {
+      const ck = COL_KEYS[step.col];
+      html = `Kvar blir <strong style="color:${PVC[ck]}">${step.kvar}</strong>. 10:an skickades upp som minnessiffra! ✅`;
+    } else if (step.type === 'add_simple') {
+      const ck = COL_KEYS[step.col];
+      const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span>` : '';
+      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
     } else if (step.type === 'add_overflow') {
       html = `Minnessiffran <strong style="color:${PVC.hundratal}">${step.digit}</strong> skrivs längst till vänster!`;
 
@@ -1013,6 +1093,7 @@ const UppstallningGame = (() => {
     demoCarryUsed  = [false, false, false];
     demoAns        = [null, null, null, null];
     demoBorrowTens = [false, false, false];
+    exTenAnimDone  = [false, false, false];
     renderExLayout();
   }
 
@@ -1056,12 +1137,13 @@ const UppstallningGame = (() => {
   }
 
   function showExColUI(col) {
-    const colKey      = COL_KEYS[col];
-    const needsBorrow = helpMode && !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
+    const colKey         = COL_KEYS[col];
+    const needsBorrow    = helpMode && !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
+    const needsTenFriend = helpMode && !!(exColData[col]?.needsTenFriend) && !exTenAnimDone[col];
 
     const bubble = document.getElementById('ex-bubble');
     if (bubble) {
-      const msg = exBubbleMsg(col, needsBorrow);
+      const msg = exBubbleMsg(col, needsBorrow, needsTenFriend);
       bubble.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
     }
 
@@ -1072,6 +1154,10 @@ const UppstallningGame = (() => {
       ui.innerHTML = `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
         style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
         👆 Tryck här för att låna!</button>`;
+    } else if (needsTenFriend) {
+      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exContinueAdd()"
+        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
+        👆 Tryck här för att se hur! 🔢</button>`;
     } else {
       ui.innerHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
         <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
@@ -1086,7 +1172,7 @@ const UppstallningGame = (() => {
     }
   }
 
-  function exBubbleMsg(col, needsBorrow) {
+  function exBubbleMsg(col, needsBorrow, needsTenFriend) {
     if (!helpMode) return '';
     const ck   = COL_KEYS[col];
     const aVal = demoEffA[col];
@@ -1096,6 +1182,13 @@ const UppstallningGame = (() => {
       msg = exColData[col]?.isDouble
         ? `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
         : `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Du behöver låna.</span>`;
+    } else if (needsTenFriend) {
+      const over = exColData[col].overStep;
+      const ciStr = over.carry_in ? ` + <span style="color:#d97706">${over.carry_in}</span>` : '';
+      msg = `<span style="color:${PVC[ck]}">${over.a}</span> + <span style="color:${PVC[ck]}">${over.b}</span>${ciStr}... Det blir mer än 9! 🤔 Se hur vi gör!`;
+    } else if (exColData[col]?.needsTenFriend && exTenAnimDone[col]) {
+      const comp = exColData[col].complementStep;
+      msg = `Kvar: <strong style="color:${PVC[ck]}">${comp.b}</strong> − <strong>${comp.behover}</strong> = ? Fyll i!`;
     } else if (demoBorrowTens[col]) {
       const diff = exColData[col]?.flipStep?.diff ?? (bVal - aVal + 10);
       msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
@@ -1139,7 +1232,7 @@ const UppstallningGame = (() => {
         ansCell.classList.remove('active-col');
       }
       if (demoBorrowTens[exCurrentCol]) useBorrowTen(exCurrentCol);
-      if (mode === 'addition' && exColData[exCurrentCol].nextCarry && exCurrentCol + 1 < colCount) {
+      if (mode === 'addition' && exColData[exCurrentCol].nextCarry && !exColData[exCurrentCol].needsTenFriend && exCurrentCol + 1 < colCount) {
         playCarrySound();
         setTimeout(() => {
           animateCarryToken(exCurrentCol, exCurrentCol + 1, () => {
@@ -1216,6 +1309,20 @@ const UppstallningGame = (() => {
         showExColUI(c);
       });
     }
+  }
+
+  function exContinueAdd() {
+    if (exInputLocked) return;
+    const c       = exCurrentCol;
+    const colData = exColData[c];
+    const btn     = document.getElementById('ex-continue-btn');
+    if (btn) btn.disabled = true;
+    exInputLocked = true;
+    executeStep(colData.complementStep, () => {
+      exTenAnimDone[c] = true;
+      exInputLocked = false;
+      showExColUI(c);
+    });
   }
 
   function exCheckDone() {
@@ -1418,7 +1525,7 @@ const UppstallningGame = (() => {
     init, showModeSelect, setDifficulty,
     startDemo, demoNextStep,
     startExercise, showHelpSelect, setHelpMode,
-    exPress, exDoBorrow, exContinueBorrow,
+    exPress, exDoBorrow, exContinueBorrow, exContinueAdd,
     upToggleEraser, upClearCanvas,
     goBack,
   };
