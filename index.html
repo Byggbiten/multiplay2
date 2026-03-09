@@ -174,6 +174,9 @@
     .game-clock .game-name { color: var(--clock-primary); }
     .game-friends .game-name { color: var(--friends-primary); }
     .game-np .game-name { color: var(--np-primary); }
+    .game-pv { background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%); }
+    .game-pv .game-icon { background: linear-gradient(135deg, #fde68a, #bfdbfe); }
+    .game-pv .game-name { color: var(--pv-primary); }
 
     /* Stäng-knapp i delete-modal */
     .profile-delete-list {
@@ -342,6 +345,15 @@
         <div class="game-arrow">›</div>
       </div>
 
+      <div class="card-game game-pv" onclick="App.startGame('addsub')" role="button" tabindex="0">
+        <div class="game-icon">➕➖</div>
+        <div class="game-info">
+          <div class="game-name">Addition & Subtraktion</div>
+          <div class="game-desc">Platsvärde, uppställning & minnessiffra 📐</div>
+        </div>
+        <div class="game-arrow">›</div>
+      </div>
+
     </div>
 
   </section>
@@ -416,6 +428,20 @@
     <div id="np-svenska-skriva-root" style="display:flex;flex-direction:column;height:100%"></div>
   </section>
 
+  <!-- ══════════════════════════════════════
+       SKÄRM 14: ADDITION & SUBTRAKTION – HUB
+  ══════════════════════════════════════ -->
+  <section id="screen-addsub" class="screen screen-addsub" role="main">
+    <div id="addsub-root"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SKÄRM 15: UPPSTÄLLNING
+  ══════════════════════════════════════ -->
+  <section id="screen-uppstallning" class="screen screen-addsub" role="main">
+    <div id="uppstallning-root"></div>
+  </section>
+
 </div><!-- /app-wrapper -->
 
 <!-- ══════════════════════════════════════
@@ -463,6 +489,8 @@
 <script src="js/np-svenska-texts.js"></script>
 <script src="js/np-svenska.js"></script>
 <script src="js/nationella.js"></script>
+<script src="js/platsvarde.js"></script>
+<script src="js/uppstallning.js"></script>
 
 </body>
 </html>

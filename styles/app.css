@@ -82,6 +82,14 @@
   --svk-light:     #d1fae5;
   --svk-glow:      rgba(5, 150, 105, 0.4);
 
+  /* --- Addition & Subtraktion (platsvärde) --- */
+  --pv-bg:        linear-gradient(135deg, #fef3c7 0%, #dbeafe 50%, #d1fae5 100%);
+  --pv-primary:   #2563eb;
+  --pv-secondary: #059669;
+  --pv-accent:    #f59e0b;
+  --pv-light:     #eff6ff;
+  --pv-glow:      rgba(37, 99, 235, 0.4);
+
   /* --- Typografi --- */
   --font-heading: 'Bubblegum Sans', cursive;
   --font-body:    'Nunito', sans-serif;
@@ -1433,6 +1441,7 @@ p { line-height: 1.6; }
 .screen-multiplication { background: var(--mult-bg); }
 .screen-clock          { background: var(--clock-bg); }
 .screen-friends        { background: var(--friends-bg); }
+.screen-addsub         { background: var(--pv-bg); }
 
 /* Spelfärger på knappar */
 .screen-multiplication .btn-primary {

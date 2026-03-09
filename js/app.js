@@ -311,6 +311,7 @@ const App = (() => {
       clock:          'screen-clock',
       friends:        'screen-friends',
       nationella:     'screen-nationella-select',
+      addsub:         'screen-addsub',
     };
 
     const screen = screenMap[game];
@@ -326,6 +327,8 @@ const App = (() => {
       FriendsGame.init(currentProfile);
     } else if (game === 'nationella' && typeof NationellaHub !== 'undefined') {
       NationellaHub.init(currentProfile);
+    } else if (game === 'addsub' && typeof PlatsvardeGame !== 'undefined') {
+      PlatsvardeGame.init(currentProfile);
     }
   }
 
