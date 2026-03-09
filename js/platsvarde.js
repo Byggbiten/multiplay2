@@ -242,6 +242,8 @@ const PlatsvardeGame = (() => {
 
     root.innerHTML = `
       <style id="pv-rs">
+        #screen-addsub { max-width:100% !important; width:100% !important; padding:0 !important; }
+        #screen-addsub .app-header { max-width:100% !important; }
         #addsub-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
         #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
         #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
@@ -257,7 +259,7 @@ const PlatsvardeGame = (() => {
         .pv-card { background:rgba(255,255,255,0.9); border-radius:var(--radius-lg); padding:10px;
           border:1.5px solid rgba(37,99,235,0.12); }
         .pv-digit-row { display:flex; justify-content:center; gap:10px; margin:8px 0; }
-        .pv-digit-box { display:flex; flex-direction:column; align-items:center; gap:4px; width:72px;
+        .pv-digit-box { display:flex; flex-direction:column; align-items:center; gap:4px; width:clamp(52px,10vw,80px);
           border-radius:var(--radius-lg); padding:10px 0; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s;
           border-width:2.5px; border-style:solid; }
         .pv-digit-box:hover { transform:scale(1.08); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
@@ -266,12 +268,12 @@ const PlatsvardeGame = (() => {
           border:2px solid rgba(37,99,235,0.22); color:var(--pv-primary); font-size:var(--text-base);
           font-weight:800; cursor:pointer; transition:all 0.15s; }
         .pv-choice-btn:hover { background:rgba(37,99,235,0.1); }
-        .pv-decomp-field { width:52px; height:52px; border-radius:var(--radius-md); font-size:var(--text-2xl);
+        .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
           cursor:pointer; transition:all 0.15s; background:rgba(255,255,255,0.9); }
         .pv-decomp-field.active { outline:3px solid var(--pv-primary); }
-        .pv-numpad { display:grid; grid-template-columns:repeat(3,48px); gap:6px; justify-content:center; margin-top:8px; }
-        .pv-nk { width:48px; height:48px; border-radius:var(--radius-full); font-size:var(--text-base); font-weight:900;
+        .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(40px,8vw,52px)); gap:6px; justify-content:center; margin-top:8px; }
+        .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full); font-size:var(--text-base); font-weight:900;
           cursor:pointer; background:rgba(255,255,255,0.9); border:1.5px solid rgba(37,99,235,0.3);
           color:var(--pv-primary); transition:transform 0.1s; }
         .pv-nk:hover { transform:scale(1.1); }
@@ -280,7 +282,7 @@ const PlatsvardeGame = (() => {
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
         .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
           cursor:pointer; border:2px solid rgba(37,99,235,0.3); background:rgba(255,255,255,0.9); transition:all 0.15s; }
-        .pv-slot { width:64px; height:44px; border-radius:var(--radius-md); border:2px dashed rgba(37,99,235,0.3);
+        .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md); border:2px dashed rgba(37,99,235,0.3);
           display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-sm);
           font-weight:800; color:rgba(37,99,235,0.4); }
         .pv-slot.filled { background:rgba(37,99,235,0.1); border:2px solid var(--pv-primary); color:var(--pv-primary); }

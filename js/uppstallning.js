@@ -50,15 +50,21 @@ const UppstallningGame = (() => {
 
   /* ── CSS (injected once per view) ──────────────────────── */
   const BASE_CSS = `
+    /* Helskärmslayout – överskriver app.css max-width */
+    #screen-addsub, #screen-uppstallning {
+      max-width:100% !important; width:100% !important; padding:0 !important; }
+    #screen-addsub .app-header, #screen-uppstallning .app-header { max-width:100% !important; }
+
     #uppstallning-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-    #up-main { flex:1; display:flex; flex-direction:row; overflow:hidden; min-height:0; }
-    #up-left { flex:55; display:flex; flex-direction:column; gap:8px;
-               overflow-y:auto; padding:8px; min-height:0; padding-bottom:12px; }
-    #up-right { flex:45; display:flex; flex-direction:column; padding:8px; gap:5px; min-height:0; }
+    #up-main { flex:1; display:flex; overflow:hidden; min-height:0; }
+    #up-left { flex:1; display:flex; flex-direction:column; gap:8px;
+               overflow-y:auto; padding:clamp(6px,1.5vw,12px); min-height:0; padding-bottom:12px; }
+    #up-right { flex:1; display:flex; flex-direction:column; padding:clamp(6px,1.5vw,12px); gap:5px; min-height:0; }
+    @media (orientation:landscape) { #up-main { flex-direction:row; } }
     @media (orientation:portrait) {
       #up-main { flex-direction:column; }
       #up-left { flex:1; }
-      #up-right { flex:0 0 38vh; }
+      #up-right { flex:0 0 35vh; min-height:120px; }
     }
     .up-btn { cursor:pointer; border:none; border-radius:12px; font-weight:800;
       transition:transform 0.15s,box-shadow 0.15s; }
@@ -75,11 +81,11 @@ const UppstallningGame = (() => {
 
     /* Uppställningstabell */
     #up-table-wrap { position:relative; background:rgba(255,255,255,0.93);
-      border-radius:16px; padding:14px 10px 10px; border:2px solid rgba(37,99,235,0.12); }
-    .up-table { border-collapse:separate; border-spacing:7px; margin:0 auto; }
-    .col-cell { width:62px; height:62px; border-radius:11px; position:relative;
+      border-radius:16px; padding:clamp(8px,1.5vw,16px); border:2px solid rgba(37,99,235,0.12); width:100%; }
+    .up-table { border-collapse:separate; border-spacing:clamp(4px,1vw,8px); margin:0 auto; }
+    .col-cell { width:clamp(46px,8vw,74px); height:clamp(46px,8vw,74px); border-radius:11px; position:relative;
       display:flex; align-items:center; justify-content:center;
-      font-size:2.4rem; font-weight:900;
+      font-size:clamp(1.6rem,4vw,3rem); font-weight:900;
       border:2px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.92);
       overflow:visible; }
     .col-cell.dim { opacity:0.28; }
@@ -87,11 +93,11 @@ const UppstallningGame = (() => {
     .col-cell.glow-tiotal   { animation:glow-b 1.1s ease-in-out infinite; border-color:#3b82f6; }
     .col-cell.glow-hundratal{ animation:glow-r 1.1s ease-in-out infinite; border-color:#ef4444; }
     .col-cell.problem-cell  { animation:prob-pulse 0.55s ease-in-out infinite; }
-    .carry-cell { width:62px; height:26px; border-radius:6px; display:flex;
-      align-items:center; justify-content:center; font-size:0.95rem; font-weight:900;
+    .carry-cell { width:clamp(46px,8vw,74px); height:clamp(20px,3vw,28px); border-radius:6px; display:flex;
+      align-items:center; justify-content:center; font-size:clamp(0.7rem,1.5vw,0.95rem); font-weight:900;
       color:#d97706; background:rgba(251,191,36,0.13); }
-    .ans-cell { width:62px; height:62px; border-radius:11px; display:flex;
-      align-items:center; justify-content:center; font-size:2.4rem; font-weight:900;
+    .ans-cell { width:clamp(46px,8vw,74px); height:clamp(46px,8vw,74px); border-radius:11px; display:flex;
+      align-items:center; justify-content:center; font-size:clamp(1.6rem,4vw,3rem); font-weight:900;
       border:2.5px dashed rgba(37,99,235,0.28); background:rgba(255,255,255,0.7); }
     .ans-cell.active-col { border-style:solid; border-color:var(--pv-primary);
       background:rgba(37,99,235,0.07); }
@@ -106,28 +112,31 @@ const UppstallningGame = (() => {
       animation:strike-draw 0.42s ease-out 0.05s forwards; }
     .dw.carry-crossed::after { background:#d97706; }
     .digit-new { position:absolute; top:-24px; left:50%; transform:translateX(-50%);
-      font-size:0.88rem; font-weight:900; pointer-events:none; white-space:nowrap;
+      font-size:clamp(0.75rem,1.5vw,0.92rem); font-weight:900; pointer-events:none; white-space:nowrap;
       animation:fade-up 0.4s ease-out 0.45s both; }
-    .small-new-digit { position:absolute; bottom:2px; right:4px; font-size:0.78rem;
-      font-weight:900; pointer-events:none; z-index:2; }
+    .small-new-digit { position:absolute; bottom:2px; right:4px;
+      font-size:clamp(0.58rem,1.2vw,0.78rem); font-weight:900; pointer-events:none; z-index:2; }
 
     /* Borrow-ten wrapper och marker */
     .bt-wrap { height:30px; position:relative; display:flex; align-items:flex-end;
       justify-content:center; }
     .borrow-ten { position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-      font-size:0.85rem; font-weight:900; color:#dc2626; background:#fee2e2;
-      border:1.5px solid #ef4444; border-radius:6px; padding:1px 5px;
+      font-size:clamp(0.7rem,1.5vw,0.88rem); font-weight:900; color:#dc2626; background:#fee2e2;
+      border:1.5px solid #ef4444; border-radius:6px; padding:1px clamp(4px,0.8vw,6px);
       pointer-events:none; animation:land-bounce 0.45s ease-out both; white-space:nowrap; }
     .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
 
     /* Tankebubbla */
-    .thought-bubble { background:#fff; border-radius:16px; padding:12px 18px;
-      box-shadow:0 2px 12px rgba(0,0,0,0.10); font-weight:800; font-size:1.15rem;
+    .thought-bubble { background:#fff; border-radius:16px;
+      padding:clamp(8px,1.5vw,14px) clamp(10px,2vw,18px);
+      box-shadow:0 2px 12px rgba(0,0,0,0.10); font-weight:800;
+      font-size:clamp(0.92rem,2vw,1.15rem);
       border:2px solid rgba(37,99,235,0.16); animation:bubble-in 0.3s ease-out; line-height:1.5; }
 
     /* Numpad i övningsläge */
-    .ex-numpad { display:grid; grid-template-columns:repeat(5,46px); gap:5px; justify-content:center; }
-    .ex-nk { width:46px; height:46px; border-radius:50%; font-size:1.1rem; font-weight:900;
+    .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(38px,7vw,48px)); gap:5px; justify-content:center; }
+    .ex-nk { width:clamp(38px,7vw,48px); height:clamp(38px,7vw,48px); border-radius:50%;
+      font-size:clamp(0.95rem,2vw,1.1rem); font-weight:900;
       cursor:pointer; background:rgba(255,255,255,0.92); border:1.5px solid rgba(37,99,235,0.3);
       color:var(--pv-primary); transition:transform 0.1s; }
     .ex-nk:hover { transform:scale(1.12); }
@@ -136,7 +145,7 @@ const UppstallningGame = (() => {
     .up-scratch { background:rgba(255,255,255,0.85); border-radius:14px;
       border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column;
       gap:5px; flex:1; min-height:0; padding:8px; }
-    .up-canvas { flex:1; min-height:150px; width:100%; display:block; touch-action:none;
+    .up-canvas { flex:1; min-height:120px; width:100%; display:block; touch-action:none;
       cursor:crosshair; border-radius:10px; border:2px dashed rgba(37,99,235,0.25);
       background:rgba(255,255,255,0.8); }
 
@@ -490,7 +499,12 @@ const UppstallningGame = (() => {
           // Ersätt befintlig digit-new (om dubbellån lämnade en) med srcNew
           const existing = srcDw.querySelector('.digit-new');
           if (existing) {
-            existing.textContent = step.srcNew;
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = `position:absolute;top:-24px;left:50%;transform:translateX(-50%);display:flex;gap:3px;align-items:center;pointer-events:none;white-space:nowrap;`;
+            wrapper.innerHTML =
+              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;text-decoration:line-through;opacity:0.4">${existing.textContent}</span>` +
+              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;animation:land-bounce 0.45s ease-out both">${step.srcNew}</span>`;
+            existing.replaceWith(wrapper);
           } else {
             const sp = document.createElement('span');
             sp.className = 'digit-new';
