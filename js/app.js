@@ -437,11 +437,68 @@ const App = (() => {
   };
 })();
 
+/* ── PWA-uppdatering ──────────────────────────────────── */
+function checkForUpdate() {
+  if (!('serviceWorker' in navigator)) {
+    showUpdateToast('Service Worker stöds inte i den här webbläsaren.', 3000);
+    return;
+  }
+
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (!reg) {
+      showUpdateToast('Du kör senaste versionen ✅', 2000);
+      return;
+    }
+    reg.update().then(() => {
+      if (reg.waiting) {
+        showUpdateToast('Uppdatering hittad, laddar om...', 1500, true);
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      } else if (reg.installing) {
+        showUpdateToast('Uppdatering hittad, laddar om...', 1500, true);
+      } else {
+        showUpdateToast('Du kör senaste versionen ✅', 2000);
+      }
+    }).catch(() => {
+      showUpdateToast('Kunde inte söka uppdatering (offline?)', 2500);
+    });
+  });
+}
+
+function showUpdateToast(msg, duration, willReload) {
+  duration  = duration  || 2000;
+  willReload = willReload || false;
+  const existing = document.getElementById('update-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'update-toast';
+  toast.textContent = msg;
+  toast.style.cssText = [
+    'position:fixed', 'bottom:72px', 'left:50%', 'transform:translateX(-50%)',
+    'background:rgba(30,41,59,0.95)', 'color:#fff', 'padding:10px 22px',
+    'border-radius:24px', 'font-size:14px', 'font-weight:700',
+    'box-shadow:0 4px 20px rgba(0,0,0,0.3)', 'z-index:9999',
+    'white-space:nowrap', 'max-width:90vw', 'text-align:center',
+    'transition:opacity 0.3s',
+  ].join(';');
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      toast.remove();
+      if (willReload) window.location.reload();
+    }, 350);
+  }, duration);
+}
+
 /* Initiera när DOM är redo */
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
   // PWA: registrera service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
+    // Lyssna på controller-byte → ladda om automatiskt
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      showUpdateToast('Uppdatering hittad, laddar om...', 1200, true);
+    });
   }
 });
