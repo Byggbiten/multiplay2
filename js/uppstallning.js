@@ -352,16 +352,15 @@ const UppstallningGame = (() => {
           const isDouble = c + 1 < maxC && effA[c+1] === 0 && c + 2 < maxC;
           steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant',
             col:c, a:effA[c], b:db[c] });
-          steps.push({ type:'sub_flip', col:c, a:effA[c], b:db[c], diff });
           if (isDouble) {
-            // Låna H → T
+            // Mellanlån H → T (separat steg, T visar nytt värde)
             steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1,
               srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
             effA[c+2]--; effA[c+1] += 10;
           }
-          // Låna T (eller H om dubbel-lånat) → E
-          steps.push({ type:'sub_borrow', srcCol:c+1, dstCol:c,
-            srcNew:effA[c+1]-1, dstNew:null, mainCol:c });
+          // sub_flip + T→E lån i ETT steg
+          steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff,
+            srcCol:c+1, srcNew:effA[c+1]-1 });
           effA[c+1]--;
           steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
         } else {
@@ -467,9 +466,10 @@ const UppstallningGame = (() => {
         cb();
       }, 1100);
 
-    } else if (step.type === 'sub_flip') {
+    } else if (step.type === 'sub_flip_borrow') {
+      // Fas 1 (t=0): stryk A och B i aktiva kolumnen
       const colKey = COL_KEYS[step.col];
-      // Stryk A-siffran, visa diff i hörnet
+      const srcKey = COL_KEYS[step.srcCol];
       const dwA = document.getElementById(`dw-a-${colKey}`);
       if (dwA) {
         dwA.classList.add('crossed');
@@ -479,16 +479,38 @@ const UppstallningGame = (() => {
         sp.textContent = step.diff;
         dwA.appendChild(sp);
       }
-      // Stryk B-siffran
       const dwB = document.getElementById(`dw-b-${colKey}`);
       if (dwB) dwB.classList.add('crossed');
-      // Visa borrow-ten efter en liten paus
+      // Fas 2 (t=500ms): stryk src-kolumnen, visa srcNew
       setTimeout(() => {
-        showBorrowTen(step.col);
-        setTimeout(cb, 500);
-      }, 600);
+        playBorrowSound();
+        const srcDw = document.getElementById(`dw-a-${srcKey}`);
+        if (srcDw) {
+          srcDw.classList.add('crossed');
+          // Ersätt befintlig digit-new (om dubbellån lämnade en) med srcNew
+          const existing = srcDw.querySelector('.digit-new');
+          if (existing) {
+            existing.textContent = step.srcNew;
+          } else {
+            const sp = document.createElement('span');
+            sp.className = 'digit-new';
+            sp.style.color = PVC[srcKey];
+            sp.textContent = step.srcNew;
+            srcDw.appendChild(sp);
+          }
+        }
+        demoEffA[step.srcCol] = step.srcNew;
+        // Fas 3 (t=1000ms): token flyger + borrow-ten visas
+        setTimeout(() => {
+          showBorrowTen(step.col);
+          animateBorrowToken(step.srcCol, step.col, null, () => {
+            setTimeout(cb, 300);
+          });
+        }, 500);
+      }, 500);
 
     } else if (step.type === 'sub_borrow') {
+      // Mellanlån (H→T vid dubbellån) — separat steg
       playBorrowSound();
       const srcKey = COL_KEYS[step.srcCol];
       const dstKey = COL_KEYS[step.dstCol];
@@ -504,19 +526,16 @@ const UppstallningGame = (() => {
       demoEffA[step.srcCol] = step.srcNew;
       setTimeout(() => {
         animateBorrowToken(step.srcCol, step.dstCol, null, () => {
-          // Om dstNew är satt (mellanlån vid dubbellån) – visa det ovan dst-cellen
-          if (step.dstNew !== null) {
-            const dstDw = document.getElementById(`dw-a-${dstKey}`);
-            if (dstDw) {
-              dstDw.classList.add('crossed');
-              const sp2 = document.createElement('span');
-              sp2.className = 'digit-new';
-              sp2.style.color = PVC[dstKey];
-              sp2.textContent = step.dstNew;
-              dstDw.appendChild(sp2);
-            }
-            demoEffA[step.dstCol] = step.dstNew;
+          const dstDw = document.getElementById(`dw-a-${dstKey}`);
+          if (dstDw) {
+            dstDw.classList.add('crossed');
+            const sp2 = document.createElement('span');
+            sp2.className = 'digit-new';
+            sp2.style.color = PVC[dstKey];
+            sp2.textContent = step.dstNew;
+            dstDw.appendChild(sp2);
           }
+          demoEffA[step.dstCol] = step.dstNew;
           setTimeout(cb, 300);
         });
       }, 400);
@@ -615,13 +634,16 @@ const UppstallningGame = (() => {
       const ck = COL_KEYS[step.col];
       html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte!</span><br>
         Tiotalet är 0 — vi måste låna från hundratalet! 🔄`;
-    } else if (step.type === 'sub_flip') {
+    } else if (step.type === 'sub_flip_borrow') {
       const ck = COL_KEYS[step.col];
-      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong>${step.diff}</strong><br>
-        Lånar en <strong style="color:#dc2626">10:a</strong> → svaret blir <strong>10 − ${step.diff} = ${10-step.diff}</strong> 💡`;
+      const sk = COL_KEYS[step.srcCol];
+      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong>${step.diff}</strong>, lånar 1 från <strong style="color:${PVC[sk]}">${step.srcNew+1}</strong> → <strong style="color:${PVC[sk]}">${step.srcNew}</strong><br>
+        Svaret blir <strong style="color:${PVC[ck]}">10 − ${step.diff} = ${10-step.diff}</strong> 💡`;
     } else if (step.type === 'sub_borrow') {
       const sKey = COL_KEYS[step.srcCol];
-      html = `<span style="color:${PVC[sKey]}">${step.srcNew + 1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNew}</strong> (ger iväg ett tiotal till nästa kolumn) ✅`;
+      const dKey = COL_KEYS[step.dstCol];
+      html = `<span style="color:${PVC[sKey]}">${step.srcNew+1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNew}</strong> (ger ett tiotal till T)<br>
+        T: <span style="color:${PVC[dKey]}">${step.dstNew-10}</span> → <strong style="color:${PVC[dKey]}">${step.dstNew}</strong> ✅`;
     } else if (step.type === 'sub_ten_minus') {
       const ck = COL_KEYS[step.col];
       html = `<strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong> ✅`;
