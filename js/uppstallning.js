@@ -23,6 +23,7 @@ const UppstallningGame = (() => {
   let demoCarries = [];           // carry row values [0=ental,1=tiotal,2=hundratal]
   let demoCarryUsed = [];         // whether carry[c] has been consumed
   let demoAns     = [null,null,null,null]; // filled answer digits
+  let demoBorrowTens = [false, false, false]; // borrow-ten markers active per col
 
   /* Exercise */
   let exerciseIdx   = 0;
@@ -33,6 +34,7 @@ const UppstallningGame = (() => {
   let exEffA        = [];
   let exEffB        = [];
   let exCarries     = [];
+  let exBorrowTens  = [false, false, false]; // borrow-ten markers for exercise mode
   let exInput       = '';
 
   /* Canvas */
@@ -106,6 +108,17 @@ const UppstallningGame = (() => {
     .digit-new { position:absolute; top:-24px; left:50%; transform:translateX(-50%);
       font-size:0.88rem; font-weight:900; pointer-events:none; white-space:nowrap;
       animation:fade-up 0.4s ease-out 0.45s both; }
+    .small-new-digit { position:absolute; bottom:2px; right:4px; font-size:0.78rem;
+      font-weight:900; pointer-events:none; z-index:2; }
+
+    /* Borrow-ten wrapper och marker */
+    .bt-wrap { height:30px; position:relative; display:flex; align-items:flex-end;
+      justify-content:center; }
+    .borrow-ten { position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+      font-size:0.85rem; font-weight:900; color:#dc2626; background:#fee2e2;
+      border:1.5px solid #ef4444; border-radius:6px; padding:1px 5px;
+      pointer-events:none; animation:land-bounce 0.45s ease-out both; white-space:nowrap; }
+    .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
 
     /* Tankebubbla */
     .thought-bubble { background:#fff; border-radius:16px; padding:12px 18px;
@@ -142,9 +155,9 @@ const UppstallningGame = (() => {
       100% { transform:translateY(0); opacity:1; }
     }
     @keyframes land-bounce {
-      0%   { transform:scale(0.3); opacity:0; }
-      65%  { transform:scale(1.25); opacity:1; }
-      100% { transform:scale(1); opacity:1; }
+      0%   { transform:translateX(-50%) scale(0.3); opacity:0; }
+      65%  { transform:translateX(-50%) scale(1.25); opacity:1; }
+      100% { transform:translateX(-50%) scale(1); opacity:1; }
     }
     @keyframes glow-g {
       0%,100% { box-shadow:0 0 8px rgba(34,197,94,0.3); }
@@ -301,13 +314,14 @@ const UppstallningGame = (() => {
   function startDemo() {
     App.Sound.play('click');
     generatePair();
-    demoStep      = 0;
-    stepLocked    = false;
-    demoEffA      = [...digs(numA)];
-    demoCarries   = [0, 0, 0];
-    demoCarryUsed = [false, false, false];
-    demoAns       = [null, null, null, null];
-    demoSteps     = buildDemoSteps();
+    demoStep       = 0;
+    stepLocked     = false;
+    demoEffA       = [...digs(numA)];
+    demoCarries    = [0, 0, 0];
+    demoCarryUsed  = [false, false, false];
+    demoAns        = [null, null, null, null];
+    demoBorrowTens = [false, false, false];
+    demoSteps      = buildDemoSteps();
     renderDemoView();
   }
 
@@ -323,39 +337,36 @@ const UppstallningGame = (() => {
         const sum = da[c] + db[c] + carryVal;
         const ans = sum % 10;
         const next = sum > 9 ? 1 : 0;
-        // Steg 1: visa beräkning i tankebubbla
         steps.push({ type:'add_show', col:c, da:da[c], db:db[c], carry_in:carryVal, sum, ans, next_carry:next });
-        // Steg 2: animera ner svar (+ carry om det behövs)
         steps.push({ type:'add_drop', col:c, ans, next_carry:next });
         carryVal = next;
       }
       if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
     } else {
+      // Kompletteringsmetoden
       const effA = [...da];
       for (let c = 0; c < maxC; c++) {
+        steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
         if (effA[c] < db[c]) {
-          // Behöver låna
-          if (c + 1 < maxC && effA[c + 1] === 0 && c + 2 < maxC) {
-            // Dubbellån: tiotal=0, måste låna från hundratal first
-            steps.push({ type:'sub_announce', col:c, effA:effA[c], db:db[c], double:true });
-            // Lån från hundratal → tiotal
-            steps.push({ type:'sub_borrow', srcCol:c+2, srcNewVal:effA[c+2]-1,
-              dstCol:c+1, dstNewVal:effA[c+1]+10, col:c });
+          const diff = db[c] - effA[c];
+          const isDouble = c + 1 < maxC && effA[c+1] === 0 && c + 2 < maxC;
+          steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant',
+            col:c, a:effA[c], b:db[c] });
+          steps.push({ type:'sub_flip', col:c, a:effA[c], b:db[c], diff });
+          if (isDouble) {
+            // Låna H → T
+            steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1,
+              srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
             effA[c+2]--; effA[c+1] += 10;
-            // Lån från tiotal → ental
-            steps.push({ type:'sub_borrow', srcCol:c+1, srcNewVal:effA[c+1]-1,
-              dstCol:c, dstNewVal:effA[c]+10, col:c });
-            effA[c+1]--; effA[c] += 10;
-          } else {
-            // Enkelt lån
-            steps.push({ type:'sub_announce', col:c, effA:effA[c], db:db[c], double:false });
-            steps.push({ type:'sub_borrow', srcCol:c+1, srcNewVal:effA[c+1]-1,
-              dstCol:c, dstNewVal:effA[c]+10, col:c });
-            effA[c+1]--; effA[c] += 10;
           }
+          // Låna T (eller H om dubbel-lånat) → E
+          steps.push({ type:'sub_borrow', srcCol:c+1, dstCol:c,
+            srcNew:effA[c+1]-1, dstNew:null, mainCol:c });
+          effA[c+1]--;
+          steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
+        } else {
+          steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
         }
-        const diff = effA[c] - db[c];
-        steps.push({ type:'sub_calc', col:c, effA:effA[c], db:db[c], diff });
       }
     }
     steps.push({ type:'done' });
@@ -407,14 +418,12 @@ const UppstallningGame = (() => {
 
   function executeStep(step, cb) {
     if (step.type === 'add_show') {
-      // Highlight column + show bubble — no DOM animation, just cb
       highlightCol(step.col);
       setTimeout(cb, 50);
 
     } else if (step.type === 'add_drop') {
       highlightCol(step.col);
       const colKey = COL_KEYS[step.col];
-      // Drop answer digit
       const ansCell = document.getElementById(`ans-${colKey}`);
       if (ansCell) {
         ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
@@ -423,7 +432,6 @@ const UppstallningGame = (() => {
       }
       demoAns[step.col] = step.ans;
       App.Sound.play('correct');
-      // If carry, animate carry token
       if (step.next_carry && step.col + 1 < colCount) {
         playCarrySound();
         setTimeout(() => {
@@ -441,54 +449,94 @@ const UppstallningGame = (() => {
       App.Sound.play('correct');
       setTimeout(cb, 400);
 
-    } else if (step.type === 'sub_announce') {
-      // Red flash on col
+    } else if (step.type === 'sub_highlight') {
+      highlightCol(step.col);
+      setTimeout(cb, 50);
+
+    } else if (step.type === 'sub_cant' || step.type === 'sub_cant_double') {
       const colKey = COL_KEYS[step.col];
-      ['row-a','row-b','ans'].forEach(row => {
-        const el = document.getElementById(row === 'ans' ? `ans-${colKey}` : `cell-${row}-${colKey}`);
+      ['row-a','row-b'].forEach(row => {
+        const el = document.getElementById(`cell-${row}-${colKey}`);
         if (el) el.classList.add('problem-cell');
       });
       setTimeout(() => {
-        ['row-a','row-b','ans'].forEach(row => {
-          const el = document.getElementById(row === 'ans' ? `ans-${colKey}` : `cell-${row}-${colKey}`);
+        ['row-a','row-b'].forEach(row => {
+          const el = document.getElementById(`cell-${row}-${colKey}`);
           if (el) el.classList.remove('problem-cell');
         });
         cb();
-      }, 1200);
+      }, 1100);
+
+    } else if (step.type === 'sub_flip') {
+      const colKey = COL_KEYS[step.col];
+      // Stryk A-siffran, visa diff i hörnet
+      const dwA = document.getElementById(`dw-a-${colKey}`);
+      if (dwA) {
+        dwA.classList.add('crossed');
+        const sp = document.createElement('span');
+        sp.className = 'small-new-digit';
+        sp.style.color = '#dc2626';
+        sp.textContent = step.diff;
+        dwA.appendChild(sp);
+      }
+      // Stryk B-siffran
+      const dwB = document.getElementById(`dw-b-${colKey}`);
+      if (dwB) dwB.classList.add('crossed');
+      // Visa borrow-ten efter en liten paus
+      setTimeout(() => {
+        showBorrowTen(step.col);
+        setTimeout(cb, 500);
+      }, 600);
 
     } else if (step.type === 'sub_borrow') {
       playBorrowSound();
-      // Strike srcCol, show srcNewVal above. Also update dstCol to show dstNewVal.
       const srcKey = COL_KEYS[step.srcCol];
       const dstKey = COL_KEYS[step.dstCol];
       const srcDw = document.getElementById(`dw-a-${srcKey}`);
       if (srcDw) {
         srcDw.classList.add('crossed');
-        const newSpan = document.createElement('span');
-        newSpan.className = 'digit-new';
-        newSpan.style.color = PVC[srcKey];
-        newSpan.textContent = step.srcNewVal;
-        srcDw.appendChild(newSpan);
+        const sp = document.createElement('span');
+        sp.className = 'digit-new';
+        sp.style.color = PVC[srcKey];
+        sp.textContent = step.srcNew;
+        srcDw.appendChild(sp);
       }
-      // Update demoEffA
-      demoEffA[step.srcCol] = step.srcNewVal;
-      demoEffA[step.dstCol] = step.dstNewVal;
-      // Animate borrow token
+      demoEffA[step.srcCol] = step.srcNew;
       setTimeout(() => {
-        animateBorrowToken(step.srcCol, step.dstCol, step.dstNewVal, () => {
-          // Update dst cell display
-          const dstDw = document.getElementById(`dw-a-${dstKey}`);
-          if (dstDw) {
-            dstDw.classList.add('crossed');
-            const newDstSpan = document.createElement('span');
-            newDstSpan.className = 'digit-new';
-            newDstSpan.style.color = PVC[dstKey];
-            newDstSpan.textContent = step.dstNewVal;
-            dstDw.appendChild(newDstSpan);
+        animateBorrowToken(step.srcCol, step.dstCol, null, () => {
+          // Om dstNew är satt (mellanlån vid dubbellån) – visa det ovan dst-cellen
+          if (step.dstNew !== null) {
+            const dstDw = document.getElementById(`dw-a-${dstKey}`);
+            if (dstDw) {
+              dstDw.classList.add('crossed');
+              const sp2 = document.createElement('span');
+              sp2.className = 'digit-new';
+              sp2.style.color = PVC[dstKey];
+              sp2.textContent = step.dstNew;
+              dstDw.appendChild(sp2);
+            }
+            demoEffA[step.dstCol] = step.dstNew;
           }
           setTimeout(cb, 300);
         });
-      }, 500);
+      }, 400);
+
+    } else if (step.type === 'sub_ten_minus') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      // Kryssa av borrow-ten-markören
+      useBorrowTen(step.col);
+      setTimeout(() => {
+        const ansCell = document.getElementById(`ans-${colKey}`);
+        if (ansCell) {
+          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
+          ansCell.classList.add('filled');
+          ansCell.style.borderColor = PVC[colKey];
+        }
+        demoAns[step.col] = step.ans;
+        App.Sound.play('correct');
+        setTimeout(cb, 700);
+      }, 400);
 
     } else if (step.type === 'sub_calc') {
       highlightCol(step.col);
@@ -550,23 +598,36 @@ const UppstallningGame = (() => {
         : `<strong style="color:${PVC[ck]}">${step.ans}</strong> går ner i svaret ✅`;
     } else if (step.type === 'add_overflow') {
       html = `Minnessiffran <strong style="color:${PVC.hundratal}">${step.digit}</strong> skrivs längst till vänster!`;
-    } else if (step.type === 'sub_announce') {
+
+    } else if (step.type === 'sub_highlight') {
       const ck = COL_KEYS[step.col];
-      if (step.double) {
-        html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> går inte!</span><br>
-          Tiotalet är 0 — vi måste låna från hundratalet! 🔄`;
+      const colName = step.col === 0 ? 'E (ental)' : step.col === 1 ? 'T (tiotal)' : 'H (hundratal)';
+      if (step.a >= step.b) {
+        html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — det går! ✅`;
       } else {
-        html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> går inte!</span><br>
-          Vi måste låna från nästa kolumn! 🔄`;
+        html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — hmm...`;
       }
+    } else if (step.type === 'sub_cant') {
+      const ck = COL_KEYS[step.col];
+      html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte!</span><br>
+        Vi lånar ett tiotal från nästa kolumn 🔄`;
+    } else if (step.type === 'sub_cant_double') {
+      const ck = COL_KEYS[step.col];
+      html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte!</span><br>
+        Tiotalet är 0 — vi måste låna från hundratalet! 🔄`;
+    } else if (step.type === 'sub_flip') {
+      const ck = COL_KEYS[step.col];
+      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong>${step.diff}</strong><br>
+        Lånar en <strong style="color:#dc2626">10:a</strong> → svaret blir <strong>10 − ${step.diff} = ${10-step.diff}</strong> 💡`;
     } else if (step.type === 'sub_borrow') {
       const sKey = COL_KEYS[step.srcCol];
-      const dKey = COL_KEYS[step.dstCol];
-      html = `<span style="color:${PVC[sKey]}">${demoEffA[step.srcCol] + 1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNewVal}</strong> (ger iväg ett tiotal)<br>
-        <span style="color:${PVC[dKey]}">${demoEffA[step.dstCol] - 10}</span> → <strong style="color:${PVC[dKey]}">${step.dstNewVal}</strong> (tar emot ett tiotal) ✅`;
+      html = `<span style="color:${PVC[sKey]}">${step.srcNew + 1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNew}</strong> (ger iväg ett tiotal till nästa kolumn) ✅`;
+    } else if (step.type === 'sub_ten_minus') {
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong> ✅`;
     } else if (step.type === 'sub_calc') {
       const ck = COL_KEYS[step.col];
-      html = `<strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+      html = `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
     } else if (step.type === 'done') {
       html = `Klart! 🎉 ${numA} ${mode==='addition'?'+':'−'} ${numB} = <strong>${mode==='addition'?numA+numB:numA-numB}</strong>`;
     }
@@ -622,6 +683,26 @@ const UppstallningGame = (() => {
         el.textContent = '';
       }
     }
+  }
+
+  /* ── Borrow-ten hjälpare ────────────────────────────────── */
+  function showBorrowTen(col) {
+    const key = COL_KEYS[col];
+    const wrap = document.getElementById(`bt-wrap-${key}`);
+    if (!wrap) return;
+    const el = document.createElement('div');
+    el.id = `borrow-ten-${key}`;
+    el.className = 'borrow-ten';
+    el.textContent = '10';
+    wrap.appendChild(el);
+    demoBorrowTens[col] = true;
+  }
+
+  function useBorrowTen(col) {
+    const key = COL_KEYS[col];
+    const el = document.getElementById(`borrow-ten-${key}`);
+    if (el) el.classList.add('used');
+    demoBorrowTens[col] = false;
   }
 
   /* ── Animera carry-token ────────────────────────────────── */
@@ -709,7 +790,6 @@ const UppstallningGame = (() => {
   function buildTableHTML() {
     const da = digs(numA), db = digs(numB);
     const maxC = colCount;
-    // Columns from left (highest) to right (ental)
     const cols = [];
     for (let c = maxC - 1; c >= 0; c--) cols.push({ key: COL_KEYS[c], label: COL_LABELS[c], idx: c });
 
@@ -717,7 +797,6 @@ const UppstallningGame = (() => {
     const showA = c => c < String(numA).length ? da[c] : null;
     const showB = c => c < String(numB).length ? db[c] : null;
 
-    // Carry row (hidden at start, shown when carries appear)
     const carryRowHTML = mode === 'addition' ? `
       <tr>
         <td style="font-size:11px;font-weight:800;color:#d97706;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
@@ -729,7 +808,8 @@ const UppstallningGame = (() => {
 
     const rowA = cols.map(c => {
       const v = showA(c.idx);
-      return `<td style="text-align:center">
+      return `<td style="text-align:center;vertical-align:bottom">
+        <div class="bt-wrap" id="bt-wrap-${c.key}"></div>
         <div class="col-cell" id="cell-row-a-${c.key}" style="border-color:${PVC[c.key]}">
           <div class="dw" id="dw-a-${c.key}">
             <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
@@ -742,7 +822,9 @@ const UppstallningGame = (() => {
       const v = showB(c.idx);
       return `<td style="text-align:center">
         <div class="col-cell" id="cell-row-b-${c.key}" style="border-color:${PVC[c.key]}">
-          <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
+          <div class="dw" id="dw-b-${c.key}">
+            <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
+          </div>
         </div>
       </td>`;
     }).join('');
@@ -807,6 +889,7 @@ const UppstallningGame = (() => {
     exEffA        = [...digs(numA)];
     exEffB        = [...digs(numB)];
     exCarries     = [0, 0, 0];
+    exBorrowTens  = [false, false, false];
     renderExView();
   }
 
@@ -815,8 +898,10 @@ const UppstallningGame = (() => {
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
     const colKey = COL_KEYS[exCurrentCol];
+    // needsBorrow: behöver låna OCH har inte redan lånat (borrow-ten inte aktiv)
     const needsBorrow = mode === 'subtraction'
-      && exEffA[exCurrentCol] < exEffB[exCurrentCol];
+      && exEffA[exCurrentCol] < exEffB[exCurrentCol]
+      && !exBorrowTens[exCurrentCol];
 
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
@@ -872,25 +957,33 @@ const UppstallningGame = (() => {
       </tr>` : '';
 
     const rowA = cols.map(c => {
-      const v = exEffA[c.idx];
       const isCur = c.idx === exCurrentCol;
       const isFilled = exAnswers[c.idx] !== null;
-      return `<td style="text-align:center">
+      const hasBt = exBorrowTens[c.idx]; // borrow-ten aktiv för denna kolumn
+      // Visa ursprungssiffran (exEffA - 10 om borrow-ten) struken, annars normalt
+      const dispVal = hasBt ? (exEffA[c.idx] - 10) : exEffA[c.idx];
+      const showVal = String(numA).length > c.idx ? dispVal : '';
+      return `<td style="text-align:center;vertical-align:bottom">
+        <div class="bt-wrap" id="ex-bt-wrap-${c.key}">
+          ${hasBt ? '<div class="borrow-ten" style="animation:none">10</div>' : ''}
+        </div>
         <div class="col-cell${isCur ? ' glow-'+c.key : isFilled ? ' dim' : ''}"
           style="border-color:${PVC[c.key]}" id="ex-a-${c.key}">
-          <div class="dw" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${String(numA).length > c.idx ? v : ''}</span>
+          <div class="dw${hasBt ? ' crossed' : ''}" id="ex-dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${showVal}</span>
           </div>
         </div>
       </td>`;
     }).join('');
 
     const rowB = cols.map(c => {
-      const v = exEffB[c.idx];
       const isCur = c.idx === exCurrentCol;
+      const v = exEffB[c.idx];
       return `<td style="text-align:center">
         <div class="col-cell${!isCur ? ' dim' : ''}" style="border-color:${PVC[c.key]}">
-          <span style="color:${PVC[c.key]}">${String(numB).length > c.idx ? v : ''}</span>
+          <div class="dw" id="ex-dw-b-${c.key}">
+            <span style="color:${PVC[c.key]}">${String(numB).length > c.idx ? v : ''}</span>
+          </div>
         </div>
       </td>`;
     }).join('');
@@ -942,6 +1035,11 @@ const UppstallningGame = (() => {
       msg = isDouble
         ? `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
         : `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
+    } else if (exBorrowTens[exCurrentCol]) {
+      // Kompletteringsmetoden: visa 10 − diff
+      const origA = exEffA[exCurrentCol] - 10;
+      const diff = exEffB[exCurrentCol] - origA;
+      msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
     } else if (mode === 'addition') {
       const ci = exCarries[exCurrentCol] || 0;
       const extra = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
@@ -961,11 +1059,9 @@ const UppstallningGame = (() => {
     } else if (exInput.length < 1) {
       exInput = key;
     }
-    // Update display
     const colKey = COL_KEYS[exCurrentCol];
     const ansEl = document.getElementById(`ex-ans-${colKey}`);
     if (ansEl) ansEl.querySelector('span').textContent = exInput || '';
-    // Auto-submit after entering 1 digit
     if (exInput.length === 1) {
       setTimeout(() => { if (!exInputLocked && exInput.length === 1) exSubmitCol(); }, 350);
     }
@@ -975,16 +1071,25 @@ const UppstallningGame = (() => {
     if (exInputLocked || !exInput) return;
     exInputLocked = true;
     const ci = (mode === 'addition' ? exCarries[exCurrentCol] : 0) || 0;
-    const correctFull = mode === 'addition'
-      ? exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci
-      : exEffA[exCurrentCol] - exEffB[exCurrentCol];
+
+    let correctFull;
+    if (mode === 'addition') {
+      correctFull = exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci;
+    } else if (exBorrowTens[exCurrentCol]) {
+      // Kompletteringsmetoden: exEffA[c] = orig+10, så orig = exEffA[c]-10
+      const origA = exEffA[exCurrentCol] - 10;
+      const diff = exEffB[exCurrentCol] - origA;
+      correctFull = 10 - diff;
+    } else {
+      correctFull = exEffA[exCurrentCol] - exEffB[exCurrentCol];
+    }
     const correctDigit = ((correctFull % 10) + 10) % 10;
 
     if (parseInt(exInput) === correctDigit) {
       exAnswers[exCurrentCol] = correctDigit;
+      exBorrowTens[exCurrentCol] = false; // rensa borrow-ten markör
       exInput = '';
       App.Sound.play('correct');
-      // Handle carry for addition
       if (mode === 'addition' && correctFull > 9 && exCurrentCol + 1 < colCount) {
         exCarries[exCurrentCol + 1] = 1;
         playCarrySound();
@@ -1005,7 +1110,7 @@ const UppstallningGame = (() => {
       const fb = document.getElementById('ex-feedback');
       if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
         border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
-        color:#92400e;text-align:center">Hmm, prova igen! Vad är ${exEffA[exCurrentCol]} ${mode==='addition'?'+':'−'} ${exEffB[exCurrentCol]}? 💪</div>`;
+        color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
       const ansEl = document.getElementById(`ex-ans-${COL_KEYS[exCurrentCol]}`);
       if (ansEl) ansEl.querySelector('span').textContent = '';
     }
@@ -1023,17 +1128,18 @@ const UppstallningGame = (() => {
     const isDouble = exEffA[c + 1] === 0 && c + 2 < colCount;
 
     if (isDouble) {
-      // Step 1: borrow from H to T
+      // Steg 1: låna H → T (traditionellt: T får +10)
       setTimeout(() => {
-        animateExBorrow(c + 2, c + 1, exEffA[c + 2] - 1, exEffA[c + 1] + 10, () => {
-          exEffA[c + 2]--;
-          exEffA[c + 1] += 10;
+        animateExBorrow(c + 2, c + 1, exEffA[c+2]-1, exEffA[c+1]+10, () => {
+          exEffA[c+2]--;
+          exEffA[c+1] += 10;
           playBorrowSound();
-          // Step 2: borrow from T to E
+          // Steg 2: låna T → E (kompletteringsmetoden: sätt borrow-ten, +10 på E)
           setTimeout(() => {
-            animateExBorrow(c + 1, c, exEffA[c + 1] - 1, exEffA[c] + 10, () => {
-              exEffA[c + 1]--;
+            animateExBorrow(c+1, c, exEffA[c+1]-1, exEffA[c]+10, () => {
+              exEffA[c+1]--;
               exEffA[c] += 10;
+              exBorrowTens[c] = true;
               exInputLocked = false;
               renderExView();
             });
@@ -1041,9 +1147,10 @@ const UppstallningGame = (() => {
         });
       }, 300);
     } else {
-      animateExBorrow(c + 1, c, exEffA[c + 1] - 1, exEffA[c] + 10, () => {
-        exEffA[c + 1]--;
+      animateExBorrow(c+1, c, exEffA[c+1]-1, exEffA[c]+10, () => {
+        exEffA[c+1]--;
         exEffA[c] += 10;
+        exBorrowTens[c] = true;
         exInputLocked = false;
         renderExView();
       });
@@ -1062,7 +1169,6 @@ const UppstallningGame = (() => {
       sp.textContent = srcNew;
       srcDw.appendChild(sp);
     }
-    // Animate token
     const wrap = document.getElementById('up-table-wrap');
     const srcCell = document.getElementById(`ex-a-${srcKey}`);
     const dstCell = document.getElementById(`ex-a-${dstKey}`);
@@ -1089,10 +1195,10 @@ const UppstallningGame = (() => {
       setTimeout(() => { tok.style.opacity='0'; tok.style.transition+=',opacity 0.3s'; }, 750);
       setTimeout(() => { tok.remove(); }, 1100);
     }
-    // Update dst display after 0.8s
+    // Uppdatera dst-cell display efter 0.8s
     setTimeout(() => {
       const dstDw = document.getElementById(`ex-dw-a-${dstKey}`);
-      if (dstDw) {
+      if (dstDw && dstNew !== null) {
         dstDw.classList.add('crossed');
         const sp2 = document.createElement('span');
         sp2.className = 'digit-new';
