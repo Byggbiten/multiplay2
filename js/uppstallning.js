@@ -485,11 +485,18 @@ const UppstallningGame = (() => {
         const sp = document.createElement('span');
         sp.className = 'small-new-digit';
         sp.style.color = '#dc2626';
-        sp.textContent = step.diff;
+        sp.textContent = 0;
         dwA.appendChild(sp);
       }
       const dwB = document.getElementById(`dw-b-${colKey}`);
-      if (dwB) dwB.classList.add('crossed');
+      if (dwB) {
+        dwB.classList.add('crossed');
+        const sp = document.createElement('span');
+        sp.className = 'small-new-digit';
+        sp.style.color = '#dc2626';
+        sp.textContent = step.diff;
+        dwB.appendChild(sp);
+      }
       // Fas 2 (t=500ms): stryk src-kolumnen, visa srcNew
       setTimeout(() => {
         playBorrowSound();
