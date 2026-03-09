@@ -109,19 +109,18 @@ const UppstallningGame = (() => {
       transform:rotate(-22deg) scaleX(0); transform-origin:left center;
       animation:strike-draw 0.42s ease-out 0.05s forwards; }
     .dw.carry-crossed::after { background:#d97706; }
-    .digit-new { position:absolute; top:-24px; left:50%; transform:translateX(-50%);
-      font-size:clamp(0.75rem,1.5vw,0.92rem); font-weight:900; pointer-events:none; white-space:nowrap;
-      animation:fade-up 0.4s ease-out 0.45s both; }
+    .digit-new { font-size:clamp(0.75rem,1.5vw,0.92rem); font-weight:900; pointer-events:none; white-space:nowrap;
+      animation:fade-up-flex 0.4s ease-out 0.45s both; }
     .small-new-digit { position:absolute; bottom:2px; right:4px;
       font-size:clamp(0.58rem,1.2vw,0.78rem); font-weight:900; pointer-events:none; z-index:2; }
 
     /* Borrow-ten wrapper och marker */
-    .bt-wrap { height:30px; position:relative; display:flex; align-items:flex-end;
-      justify-content:center; }
-    .borrow-ten { position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-      font-size:clamp(0.7rem,1.5vw,0.88rem); font-weight:900; color:#dc2626; background:#fee2e2;
+    .bt-wrap { position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      pointer-events:none; padding-bottom:2px; z-index:5; }
+    .borrow-ten { font-size:clamp(0.7rem,1.5vw,0.88rem); font-weight:900; color:#dc2626; background:#fee2e2;
       border:1.5px solid #ef4444; border-radius:6px; padding:1px clamp(4px,0.8vw,6px);
-      pointer-events:none; animation:land-bounce 0.45s ease-out both; white-space:nowrap; }
+      pointer-events:none; animation:land-bounce-flex 0.45s ease-out both; white-space:nowrap; }
     .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
 
     /* Tankebubbla */
@@ -165,6 +164,15 @@ const UppstallningGame = (() => {
       0%   { transform:translateX(-50%) scale(0.3); opacity:0; }
       65%  { transform:translateX(-50%) scale(1.25); opacity:1; }
       100% { transform:translateX(-50%) scale(1); opacity:1; }
+    }
+    @keyframes land-bounce-flex {
+      0%   { transform:scale(0.3); opacity:0; }
+      65%  { transform:scale(1.25); opacity:1; }
+      100% { transform:scale(1); opacity:1; }
+    }
+    @keyframes fade-up-flex {
+      from { opacity:0; transform:translateY(8px); }
+      to   { opacity:1; transform:translateY(0); }
     }
     @keyframes glow-g {
       0%,100% { box-shadow:0 0 8px rgba(34,197,94,0.3); }
@@ -527,21 +535,22 @@ const UppstallningGame = (() => {
         const srcDw = document.getElementById(`dw-a-${srcKey}`);
         if (srcDw) {
           srcDw.classList.add('crossed');
-          // Ersätt befintlig digit-new (om dubbellån lämnade en) med srcNew
-          const existing = srcDw.querySelector('.digit-new');
+          // Ersätt befintlig digit-new (i bt-wrap, om dubbellån lämnade en) med srcNew
+          const srcBtWrap = document.getElementById(`bt-wrap-${srcKey}`);
+          const existing = srcBtWrap ? srcBtWrap.querySelector('.digit-new') : null;
           if (existing) {
             const wrapper = document.createElement('div');
-            wrapper.style.cssText = `position:absolute;top:-24px;left:50%;transform:translateX(-50%);display:flex;gap:3px;align-items:center;pointer-events:none;white-space:nowrap;`;
+            wrapper.style.cssText = `display:flex;gap:3px;align-items:center;pointer-events:none;white-space:nowrap;`;
             wrapper.innerHTML =
               `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;text-decoration:line-through;opacity:0.4">${existing.textContent}</span>` +
-              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;animation:land-bounce 0.45s ease-out both">${step.srcNew}</span>`;
+              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;animation:land-bounce-flex 0.45s ease-out both">${step.srcNew}</span>`;
             existing.replaceWith(wrapper);
           } else {
             const sp = document.createElement('span');
             sp.className = 'digit-new';
             sp.style.color = PVC[srcKey];
             sp.textContent = step.srcNew;
-            srcDw.appendChild(sp);
+            if (srcBtWrap) srcBtWrap.appendChild(sp); else srcDw.appendChild(sp);
           }
         }
         demoEffA[step.srcCol] = step.srcNew;
@@ -566,7 +575,8 @@ const UppstallningGame = (() => {
         sp.className = 'digit-new';
         sp.style.color = PVC[srcKey];
         sp.textContent = step.srcNew;
-        srcDw.appendChild(sp);
+        const srcBtWrap = document.getElementById(`bt-wrap-${srcKey}`);
+        if (srcBtWrap) srcBtWrap.appendChild(sp); else srcDw.appendChild(sp);
       }
       demoEffA[step.srcCol] = step.srcNew;
       setTimeout(() => {
@@ -578,7 +588,8 @@ const UppstallningGame = (() => {
             sp2.className = 'digit-new';
             sp2.style.color = PVC[dstKey];
             sp2.textContent = step.dstNew;
-            dstDw.appendChild(sp2);
+            const dstBtWrap = document.getElementById(`bt-wrap-${dstKey}`);
+            if (dstBtWrap) dstBtWrap.appendChild(sp2); else dstDw.appendChild(sp2);
           }
           demoEffA[step.dstCol] = step.dstNew;
           setTimeout(cb, 300);
@@ -876,8 +887,8 @@ const UppstallningGame = (() => {
     const rowA = cols.map(c => {
       const v = showA(c.idx);
       return `<td style="text-align:center;vertical-align:bottom">
-        <div class="bt-wrap" id="bt-wrap-${c.key}"></div>
         <div class="col-cell" id="cell-row-a-${c.key}" style="border-color:${PVC[c.key]}">
+          <div class="bt-wrap" id="bt-wrap-${c.key}"></div>
           <div class="dw" id="dw-a-${c.key}">
             <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
           </div>
