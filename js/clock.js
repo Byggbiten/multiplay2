@@ -62,8 +62,8 @@ const ClockGame = (() => {
         "></div>
 
         <!-- Analog klocka -->
-        <div style="position:relative;width:220px;height:220px;margin:0 auto">
-          <svg id="clock-svg" width="220" height="220" viewBox="0 0 220 220" style="filter:drop-shadow(0 8px 24px rgba(59,130,246,0.3))">
+        <div style="position:relative;width:clamp(200px,40vw,400px);height:clamp(200px,40vw,400px);margin:0 auto">
+          <svg id="clock-svg" width="100%" height="100%" viewBox="0 0 220 220" style="filter:drop-shadow(0 8px 24px rgba(59,130,246,0.3))">
             <!-- Urtavla -->
             <circle cx="110" cy="110" r="105" fill="white" stroke="var(--clock-primary)" stroke-width="6"/>
             <circle cx="110" cy="110" r="100" fill="white" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>

@@ -127,37 +127,45 @@
       font-weight: 700;
     }
 
-    .game-cards { display: flex; flex-direction: column; gap: var(--space-4); }
+    .game-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(clamp(140px,30vw,280px), 1fr));
+      gap: clamp(8px,2vw,16px);
+      padding: clamp(8px,2vw,16px);
+      width: 100%;
+    }
 
-    .card-game { display: flex; align-items: center; gap: var(--space-5); }
+    .card-game {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      min-height: clamp(100px,15vh,180px);
+      text-align: center;
+    }
     .game-icon {
-      font-size: 3rem;
-      flex-shrink: 0;
-      width: 70px; height: 70px;
+      font-size: clamp(2rem,5vw,3.5rem);
       display: flex; align-items: center; justify-content: center;
       border-radius: var(--radius-lg);
       transition: transform var(--duration-normal) var(--ease-bounce);
+      width: auto; height: auto; padding: var(--space-2);
     }
     .card-game:hover .game-icon { transform: scale(1.15) rotate(8deg); }
 
-    .game-info { flex: 1; }
+    .game-info { flex: unset; }
     .game-name {
       font-family: var(--font-heading);
-      font-size: var(--text-2xl);
+      font-size: clamp(1rem,2.5vw,1.5rem);
       line-height: 1.2;
     }
     .game-desc {
-      font-size: var(--text-sm);
+      font-size: clamp(0.75rem,1.5vw,0.95rem);
       color: var(--color-text-muted);
       font-weight: 700;
       margin-top: var(--space-1);
     }
-    .game-arrow {
-      font-size: var(--text-2xl);
-      opacity: 0.5;
-      transition: all var(--duration-fast) var(--ease-bounce);
-    }
-    .card-game:hover .game-arrow { opacity: 1; transform: translateX(4px); }
+    .game-arrow { display: none; }
 
     /* Spelkort-färger */
     .game-mult  { background: linear-gradient(135deg, #fdf4ff 0%, #ede9fe 100%); }
@@ -317,7 +325,7 @@
       </div>
     </div>
 
-    <div class="game-cards container">
+    <div class="game-cards">
 
       <div class="card-game game-mult" onclick="App.startGame('multiplication')" role="button" tabindex="0">
         <div class="game-icon">✖️</div>

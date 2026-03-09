@@ -53,7 +53,7 @@ const FriendsGame = (() => {
 
         <!-- Lila siffra (övre) -->
         <div style="
-          width:100px;height:100px;
+          width:clamp(70px,15vw,120px);height:clamp(70px,15vw,120px);
           border-radius:var(--radius-full);
           background:linear-gradient(135deg,var(--friends-primary),var(--color-primary));
           display:flex;align-items:center;justify-content:center;
@@ -77,7 +77,7 @@ const FriendsGame = (() => {
 
         <!-- Gul siffra (nedre) -->
         <div style="
-          width:100px;height:100px;
+          width:clamp(70px,15vw,120px);height:clamp(70px,15vw,120px);
           border-radius:var(--radius-full);
           background:linear-gradient(135deg,var(--friends-secondary),#fde68a);
           display:flex;align-items:center;justify-content:center;
@@ -196,9 +196,9 @@ const FriendsGame = (() => {
         cls = 'ten-cell empty';
         label = '';
       }
-      cells += `<div class="${cls}" style="width:44px;height:44px;" title="${label}"></div>`;
+      cells += `<div class="${cls}" style="width:clamp(32px,5vw,50px);height:clamp(32px,5vw,50px);" title="${label}"></div>`;
     }
-    return `<div class="ten-grid" style="max-width:260px;gap:var(--space-2)">${cells}</div>`;
+    return `<div class="ten-grid" style="max-width:clamp(200px,45vw,380px);gap:var(--space-2)">${cells}</div>`;
   }
 
   /* ── Kontroller ────────────────────────────────────── */
