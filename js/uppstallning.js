@@ -1163,8 +1163,17 @@ const UppstallningGame = (() => {
     exInputLocked = true;
     const btn = document.getElementById('ex-borrow-btn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Lånar...'; }
-    playBorrowSound();
+
     const colData = exColData[c];
+    const flip    = colData.flipStep;
+    const ck      = COL_KEYS[c];
+
+    // Visa förklaringsbubbla 2s innan animation
+    const bubble = document.getElementById('ex-bubble');
+    if (bubble && flip) {
+      bubble.innerHTML = `<div class="thought-bubble">Vi vänder om: <strong style="color:${PVC[ck]}">${flip.b}</strong> − <strong style="color:${PVC[ck]}">${flip.a}</strong> = <strong>${flip.diff}</strong>. Svaret blir <strong style="color:${PVC[ck]}">10 − ${flip.diff} = ${10-flip.diff}</strong> 💡</div>`;
+    }
+
     if (colData.isDouble) {
       setTimeout(() => {
         executeStep(colData.interStep, () => {
@@ -1176,14 +1185,14 @@ const UppstallningGame = (() => {
             });
           }, 300);
         });
-      }, 200);
+      }, 2000);
     } else {
       setTimeout(() => {
         executeStep(colData.flipStep, () => {
           exInputLocked = false;
           showExColUI(c);
         });
-      }, 200);
+      }, 2000);
     }
   }
 
