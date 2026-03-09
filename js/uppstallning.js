@@ -134,8 +134,8 @@ const UppstallningGame = (() => {
       border:2px solid rgba(37,99,235,0.16); animation:bubble-in 0.3s ease-out; line-height:1.5; }
 
     /* Numpad i övningsläge */
-    .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(38px,7vw,48px)); gap:5px; justify-content:center; }
-    .ex-nk { width:clamp(38px,7vw,48px); height:clamp(38px,7vw,48px); border-radius:50%;
+    .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(40px,7vw,60px)); gap:5px; justify-content:center; }
+    .ex-nk { width:clamp(40px,7vw,60px); height:clamp(40px,7vw,60px); border-radius:50%;
       font-size:clamp(0.95rem,2vw,1.1rem); font-weight:900;
       cursor:pointer; background:rgba(255,255,255,0.92); border:1.5px solid rgba(37,99,235,0.3);
       color:var(--pv-primary); transition:transform 0.1s; }
@@ -967,9 +967,8 @@ const UppstallningGame = (() => {
                   Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
                 </div>
                 <div class="ex-numpad">
-                  ${[1,2,3,4,5,6,7,8,9,'⌫',0,''].map(k => k === ''
-                    ? '<div></div>'
-                    : `<button class="ex-nk" onclick="UppstallningGame.exPress(${JSON.stringify(String(k))})">${k}</button>`
+                  ${[1,2,3,4,5,6,7,8,9,0].map(k =>
+                    `<button class="ex-nk" onclick="UppstallningGame.exPress('${k}')">${k}</button>`
                   ).join('')}
                 </div>
               </div>`}
@@ -1097,17 +1096,11 @@ const UppstallningGame = (() => {
     if (exInputLocked) return;
     const fb = document.getElementById('ex-feedback');
     if (fb) fb.innerHTML = '';
-    if (key === '⌫') {
-      exInput = exInput.slice(0, -1);
-    } else if (exInput.length < 1) {
-      exInput = key;
-    }
+    exInput = key;
     const colKey = COL_KEYS[exCurrentCol];
     const ansEl = document.getElementById(`ex-ans-${colKey}`);
-    if (ansEl) ansEl.querySelector('span').textContent = exInput || '';
-    if (exInput.length === 1) {
-      setTimeout(() => { if (!exInputLocked && exInput.length === 1) exSubmitCol(); }, 350);
-    }
+    if (ansEl) ansEl.querySelector('span').textContent = key;
+    exSubmitCol();
   }
 
   function exSubmitCol() {
