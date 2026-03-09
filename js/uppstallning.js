@@ -36,6 +36,9 @@ const UppstallningGame = (() => {
   let exCarries     = [];
   let exBorrowTens  = [false, false, false]; // borrow-ten markers for exercise mode
   let exInput       = '';
+  let exOrigA       = [];                    // original A-siffror, aldrig modifierade
+  let exBorrowedFrom = [false, false, false]; // vilka kolumner lånade ifrån (T/H)
+  let helpMode      = true;                  // true = med hjälp, false = utan hjälp
 
   /* Canvas */
   let upCanvas = null, upCtx = null;
@@ -187,6 +190,10 @@ const UppstallningGame = (() => {
     @keyframes bubble-in {
       from { transform:scale(0.75) translateY(6px); opacity:0; }
       to   { transform:scale(1) translateY(0); opacity:1; }
+    }
+    @keyframes borrow-glow {
+      0%,100% { box-shadow: 0 4px 12px rgba(245,158,11,0.5); }
+      50%      { box-shadow: 0 6px 28px rgba(245,158,11,0.95); }
     }
   `;
 
@@ -920,6 +927,48 @@ const UppstallningGame = (() => {
     App.Sound.play('click');
     exerciseIdx = 0;
     exScore     = 0;
+    showHelpSelect();
+  }
+
+  function showHelpSelect() {
+    const root = document.getElementById('uppstallning-root');
+    const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
+    const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
+    root.innerHTML = `
+      <style id="up-base">${BASE_CSS}</style>
+      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
+        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
+          onclick="UppstallningGame.goBack()">Tillbaka</button>
+        <span class="header-title" style="color:${modeColor}">${modeLabel} – Övning</span>
+        <div style="width:80px"></div>
+      </div>
+      <div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px">
+        <div style="font-family:var(--font-heading);font-size:1.4rem;color:var(--pv-primary);text-align:center">Hur vill du räkna?</div>
+        <div class="up-card" style="width:100%;background:linear-gradient(135deg,#eff6ff,#dbeafe)"
+          onclick="UppstallningGame.setHelpMode(true)">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:2.5rem">🤝</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:1.2rem;color:var(--pv-primary)">Med hjälp</div>
+              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Ledtrådar, låna-knapp och kompletteringsmetoden</div>
+            </div>
+          </div>
+        </div>
+        <div class="up-card" style="width:100%;background:linear-gradient(135deg,#f0fdf4,#dcfce7)"
+          onclick="UppstallningGame.setHelpMode(false)">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:2.5rem">💪</div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:1.2rem;color:#166534">Utan hjälp</div>
+              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Räkna på egen hand – ingen ledtråd</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function setHelpMode(on) {
+    helpMode = on;
     newExProblem();
   }
 
@@ -933,6 +982,8 @@ const UppstallningGame = (() => {
     exEffB        = [...digs(numB)];
     exCarries     = [0, 0, 0];
     exBorrowTens  = [false, false, false];
+    exOrigA       = [...digs(numA)];
+    exBorrowedFrom = [false, false, false];
     renderExView();
   }
 
@@ -941,10 +992,21 @@ const UppstallningGame = (() => {
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
     const colKey = COL_KEYS[exCurrentCol];
-    // needsBorrow: behöver låna OCH har inte redan lånat (borrow-ten inte aktiv)
-    const needsBorrow = mode === 'subtraction'
+    // needsBorrow: behöver låna OCH har inte redan lånat OCH är i hjälpläge
+    const needsBorrow = helpMode && mode === 'subtraction'
       && exEffA[exCurrentCol] < exEffB[exCurrentCol]
       && !exBorrowTens[exCurrentCol];
+
+    const numpadHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+        <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
+          Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
+        </div>
+        <div class="ex-numpad">
+          ${[1,2,3,4,5,6,7,8,9,0].map(k =>
+            `<button class="ex-nk" onclick="UppstallningGame.exPress('${k}')">${k}</button>`
+          ).join('')}
+        </div>
+      </div>`;
 
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
@@ -957,21 +1019,12 @@ const UppstallningGame = (() => {
       <div id="up-main">
         <div id="up-left">
           <div id="up-table-wrap">${buildExTableHTML()}</div>
-          <div id="ex-bubble">${exBubbleHTML(needsBorrow)}</div>
+          ${helpMode ? `<div id="ex-bubble">${exBubbleHTML(needsBorrow)}</div>` : ''}
           ${needsBorrow
             ? `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
-                style="width:100%;height:48px;background:#fef3c7;color:#d97706;border:2px solid #f59e0b;font-size:1rem;border-radius:14px">
-                💡 Låna från nästa kolumn</button>`
-            : `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
-                <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
-                  Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
-                </div>
-                <div class="ex-numpad">
-                  ${[1,2,3,4,5,6,7,8,9,0].map(k =>
-                    `<button class="ex-nk" onclick="UppstallningGame.exPress('${k}')">${k}</button>`
-                  ).join('')}
-                </div>
-              </div>`}
+                style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
+                👆 Tryck här för att låna!</button>`
+            : numpadHTML}
           <div id="ex-feedback"></div>
         </div>
         <div id="up-right">
@@ -1001,31 +1054,58 @@ const UppstallningGame = (() => {
     const rowA = cols.map(c => {
       const isCur = c.idx === exCurrentCol;
       const isFilled = exAnswers[c.idx] !== null;
-      const hasBt = exBorrowTens[c.idx]; // borrow-ten aktiv för denna kolumn
-      // Visa ursprungssiffran (exEffA - 10 om borrow-ten) struken, annars normalt
-      const dispVal = hasBt ? (exEffA[c.idx] - 10) : exEffA[c.idx];
-      const showVal = String(numA).length > c.idx ? dispVal : '';
+      const hasBt = exBorrowTens[c.idx];         // kolumnen mottog lån (+10)
+      const wasBorrowedFrom = exBorrowedFrom[c.idx]; // kolumnen lånade ut (-1)
+      const showVal = String(numA).length > c.idx ? exOrigA[c.idx] : '';
+      let dwInner;
+      if (hasBt) {
+        // Övre siffra struken + liten "0" nere till höger
+        dwInner = `<div class="dw crossed" id="ex-dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${showVal}</span>
+            <span class="small-new-digit" style="color:${PVC[c.key]}">0</span>
+          </div>`;
+      } else if (wasBorrowedFrom) {
+        // Käll-kolumn struken + liten ny siffra nere till höger
+        dwInner = `<div class="dw crossed" id="ex-dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${showVal}</span>
+            <span class="small-new-digit" style="color:${PVC[c.key]}">${exEffA[c.idx]}</span>
+          </div>`;
+      } else {
+        dwInner = `<div class="dw" id="ex-dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${showVal}</span>
+          </div>`;
+      }
       return `<td style="text-align:center;vertical-align:bottom">
         <div class="bt-wrap" id="ex-bt-wrap-${c.key}">
           ${hasBt ? '<div class="borrow-ten" style="animation:none">10</div>' : ''}
         </div>
         <div class="col-cell${isCur ? ' glow-'+c.key : isFilled ? ' dim' : ''}"
           style="border-color:${PVC[c.key]}" id="ex-a-${c.key}">
-          <div class="dw${hasBt ? ' crossed' : ''}" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${showVal}</span>
-          </div>
+          ${dwInner}
         </div>
       </td>`;
     }).join('');
 
     const rowB = cols.map(c => {
       const isCur = c.idx === exCurrentCol;
+      const hasBt = exBorrowTens[c.idx];
       const v = exEffB[c.idx];
+      const showBVal = String(numB).length > c.idx ? v : '';
+      let bInner;
+      if (hasBt) {
+        const diff = v - exOrigA[c.idx]; // komplettering: B minus ursprungs-A
+        bInner = `<div class="dw crossed" id="ex-dw-b-${c.key}">
+            <span style="color:${PVC[c.key]}">${showBVal}</span>
+            <span class="small-new-digit" style="color:#ef4444">${diff}</span>
+          </div>`;
+      } else {
+        bInner = `<div class="dw" id="ex-dw-b-${c.key}">
+            <span style="color:${PVC[c.key]}">${showBVal}</span>
+          </div>`;
+      }
       return `<td style="text-align:center">
         <div class="col-cell${!isCur ? ' dim' : ''}" style="border-color:${PVC[c.key]}">
-          <div class="dw" id="ex-dw-b-${c.key}">
-            <span style="color:${PVC[c.key]}">${String(numB).length > c.idx ? v : ''}</span>
-          </div>
+          ${bInner}
         </div>
       </td>`;
     }).join('');
@@ -1070,16 +1150,17 @@ const UppstallningGame = (() => {
   }
 
   function exBubbleHTML(needsBorrow) {
+    if (!helpMode) return '';
     const ck = COL_KEYS[exCurrentCol];
     let msg = '';
     if (needsBorrow) {
       const isDouble = exCurrentCol + 1 < colCount && exEffA[exCurrentCol + 1] === 0;
       msg = isDouble
-        ? `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
-        : `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
+        ? `<span style="color:#ef4444">⚠️ ${exOrigA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
+        : `<span style="color:#ef4444">⚠️ ${exOrigA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
     } else if (exBorrowTens[exCurrentCol]) {
       // Kompletteringsmetoden: visa 10 − diff
-      const origA = exEffA[exCurrentCol] - 10;
+      const origA = exOrigA[exCurrentCol];
       const diff = exEffB[exCurrentCol] - origA;
       msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
     } else if (mode === 'addition') {
@@ -1106,20 +1187,27 @@ const UppstallningGame = (() => {
   function exSubmitCol() {
     if (exInputLocked || !exInput) return;
     exInputLocked = true;
-    const ci = (mode === 'addition' ? exCarries[exCurrentCol] : 0) || 0;
 
-    let correctFull;
-    if (mode === 'addition') {
-      correctFull = exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci;
-    } else if (exBorrowTens[exCurrentCol]) {
-      // Kompletteringsmetoden: exEffA[c] = orig+10, så orig = exEffA[c]-10
-      const origA = exEffA[exCurrentCol] - 10;
-      const diff = exEffB[exCurrentCol] - origA;
-      correctFull = 10 - diff;
+    let correctDigit;
+    if (!helpMode) {
+      // Utan hjälp: jämför mot facit-siffra kolumn för kolumn
+      const answer = mode === 'addition' ? numA + numB : numA - numB;
+      correctDigit = digs(answer)[exCurrentCol];
     } else {
-      correctFull = exEffA[exCurrentCol] - exEffB[exCurrentCol];
+      const ci = (mode === 'addition' ? exCarries[exCurrentCol] : 0) || 0;
+      let correctFull;
+      if (mode === 'addition') {
+        correctFull = exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci;
+      } else if (exBorrowTens[exCurrentCol]) {
+        // Kompletteringsmetoden: origA + diff = B, svar = 10 - diff
+        const origA = exOrigA[exCurrentCol];
+        const diff = exEffB[exCurrentCol] - origA;
+        correctFull = 10 - diff;
+      } else {
+        correctFull = exEffA[exCurrentCol] - exEffB[exCurrentCol];
+      }
+      correctDigit = ((correctFull % 10) + 10) % 10;
     }
-    const correctDigit = ((correctFull % 10) + 10) % 10;
 
     if (parseInt(exInput) === correctDigit) {
       exAnswers[exCurrentCol] = correctDigit;
@@ -1164,17 +1252,19 @@ const UppstallningGame = (() => {
     const isDouble = exEffA[c + 1] === 0 && c + 2 < colCount;
 
     if (isDouble) {
-      // Steg 1: låna H → T (traditionellt: T får +10)
+      // Steg 1: låna H → T (H:s siffra minskar med 1)
       setTimeout(() => {
-        animateExBorrow(c + 2, c + 1, exEffA[c+2]-1, exEffA[c+1]+10, () => {
+        animateExBorrow(c + 2, c + 1, exEffA[c+2]-1, () => {
           exEffA[c+2]--;
           exEffA[c+1] += 10;
+          exBorrowedFrom[c+2] = true;
           playBorrowSound();
           // Steg 2: låna T → E (kompletteringsmetoden: sätt borrow-ten, +10 på E)
           setTimeout(() => {
-            animateExBorrow(c+1, c, exEffA[c+1]-1, exEffA[c]+10, () => {
+            animateExBorrow(c+1, c, exEffA[c+1]-1, () => {
               exEffA[c+1]--;
               exEffA[c] += 10;
+              exBorrowedFrom[c+1] = true;
               exBorrowTens[c] = true;
               exInputLocked = false;
               renderExView();
@@ -1183,9 +1273,10 @@ const UppstallningGame = (() => {
         });
       }, 300);
     } else {
-      animateExBorrow(c+1, c, exEffA[c+1]-1, exEffA[c]+10, () => {
+      animateExBorrow(c+1, c, exEffA[c+1]-1, () => {
         exEffA[c+1]--;
         exEffA[c] += 10;
+        exBorrowedFrom[c+1] = true;
         exBorrowTens[c] = true;
         exInputLocked = false;
         renderExView();
@@ -1193,14 +1284,14 @@ const UppstallningGame = (() => {
     }
   }
 
-  function animateExBorrow(srcCol, dstCol, srcNew, dstNew, cb) {
+  function animateExBorrow(srcCol, dstCol, srcNew, cb) {
     const srcKey = COL_KEYS[srcCol];
     const dstKey = COL_KEYS[dstCol];
     const srcDw = document.getElementById(`ex-dw-a-${srcKey}`);
     if (srcDw) {
       srcDw.classList.add('crossed');
       const sp = document.createElement('span');
-      sp.className = 'digit-new';
+      sp.className = 'small-new-digit';
       sp.style.color = PVC[srcKey];
       sp.textContent = srcNew;
       srcDw.appendChild(sp);
@@ -1231,19 +1322,8 @@ const UppstallningGame = (() => {
       setTimeout(() => { tok.style.opacity='0'; tok.style.transition+=',opacity 0.3s'; }, 750);
       setTimeout(() => { tok.remove(); }, 1100);
     }
-    // Uppdatera dst-cell display efter 0.8s
-    setTimeout(() => {
-      const dstDw = document.getElementById(`ex-dw-a-${dstKey}`);
-      if (dstDw && dstNew !== null) {
-        dstDw.classList.add('crossed');
-        const sp2 = document.createElement('span');
-        sp2.className = 'digit-new';
-        sp2.style.color = PVC[dstKey];
-        sp2.textContent = dstNew;
-        dstDw.appendChild(sp2);
-      }
-      setTimeout(cb, 500);
-    }, 800);
+    // renderExView (via cb) hanterar dst-cell – vänta tills token-animation är klar
+    setTimeout(cb, 1300);
   }
 
   function exCheckDone() {
@@ -1445,7 +1525,8 @@ const UppstallningGame = (() => {
   return {
     init, showModeSelect, setDifficulty,
     startDemo, demoNextStep,
-    startExercise, exPress, exDoBorrow,
+    startExercise, showHelpSelect, setHelpMode,
+    exPress, exDoBorrow,
     upToggleEraser, upClearCanvas,
     goBack,
   };
