@@ -4,6 +4,9 @@
    ============================================================ */
 'use strict';
 
+/* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
+const APP_VERSION = 'v4';
+
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
 
@@ -493,6 +496,9 @@ function showUpdateToast(msg, duration, willReload) {
 /* Initiera när DOM är redo */
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
+  // Sätt versionsnummer på uppdateringsknappen
+  const updateBtn = document.getElementById('update-btn');
+  if (updateBtn) updateBtn.textContent = `🔄 Sök uppdatering (${APP_VERSION})`;
   // PWA: registrera service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
