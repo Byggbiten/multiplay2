@@ -1168,31 +1168,42 @@ const UppstallningGame = (() => {
     const flip    = colData.flipStep;
     const ck      = COL_KEYS[c];
 
-    // Visa förklaringsbubbla 2s innan animation
+    // Visa förklaringsbubbla (utan svar – barnet ska räkna ut det själv)
     const bubble = document.getElementById('ex-bubble');
     if (bubble && flip) {
-      bubble.innerHTML = `<div class="thought-bubble">Vi vänder om: <strong style="color:${PVC[ck]}">${flip.b}</strong> − <strong style="color:${PVC[ck]}">${flip.a}</strong> = <strong>${flip.diff}</strong>. Svaret blir <strong style="color:${PVC[ck]}">10 − ${flip.diff} = ${10-flip.diff}</strong> 💡</div>`;
+      bubble.innerHTML = `<div class="thought-bubble">Vi vänder om: <strong style="color:${PVC[ck]}">${flip.b}</strong> − <strong style="color:${PVC[ck]}">${flip.a}</strong> = <strong>${flip.diff}</strong>. Nu måste vi räkna ut <strong style="color:#dc2626">10 − ${flip.diff}</strong> för att få svaret! 💡</div>`;
     }
 
+    // Visa "Fortsätt"-knapp istället för tidsbaserad paus
+    const ui = document.getElementById('ex-col-ui');
+    if (ui) {
+      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exContinueBorrow()"
+        style="width:100%;height:54px;background:var(--pv-primary);color:#fff;font-size:1rem;border-radius:14px">
+        Fortsätt ▶️</button>`;
+    }
+  }
+
+  function exContinueBorrow() {
+    const c       = exCurrentCol;
+    const colData = exColData[c];
+    const btn     = document.getElementById('ex-continue-btn');
+    if (btn) btn.disabled = true;
+
     if (colData.isDouble) {
-      setTimeout(() => {
-        executeStep(colData.interStep, () => {
-          playBorrowSound();
-          setTimeout(() => {
-            executeStep(colData.flipStep, () => {
-              exInputLocked = false;
-              showExColUI(c);
-            });
-          }, 300);
-        });
-      }, 2000);
+      executeStep(colData.interStep, () => {
+        playBorrowSound();
+        setTimeout(() => {
+          executeStep(colData.flipStep, () => {
+            exInputLocked = false;
+            showExColUI(c);
+          });
+        }, 300);
+      });
     } else {
-      setTimeout(() => {
-        executeStep(colData.flipStep, () => {
-          exInputLocked = false;
-          showExColUI(c);
-        });
-      }, 2000);
+      executeStep(colData.flipStep, () => {
+        exInputLocked = false;
+        showExColUI(c);
+      });
     }
   }
 
@@ -1396,7 +1407,7 @@ const UppstallningGame = (() => {
     init, showModeSelect, setDifficulty,
     startDemo, demoNextStep,
     startExercise, showHelpSelect, setHelpMode,
-    exPress, exDoBorrow,
+    exPress, exDoBorrow, exContinueBorrow,
     upToggleEraser, upClearCanvas,
     goBack,
   };
