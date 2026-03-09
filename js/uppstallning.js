@@ -7,32 +7,33 @@
 const UppstallningGame = (() => {
 
   /* ── State ─────────────────────────────────────────────── */
-  let profile     = null;
-  let mode        = 'addition'; // 'addition' | 'subtraction'
-  let subMode     = 'demo';     // 'demo' | 'exercise'
-  let difficulty  = 'medium';   // 'easy' | 'medium' | 'hard'
+  let profile    = null;
+  let mode       = 'addition';
 
-  /* Current problem */
-  let numA = 0, numB = 0, result = 0;
-  let carries = [];   // carries[col] for addition: 0 or 1
-  let borrows = [];   // borrows[col] for subtraction
-  let colCount = 3;   // 2 or 3 columns
+  let difficulty = 'medium';
 
-  /* Demo state */
+  let numA = 0, numB = 0;
+  let colCount = 3;
+
+  /* Demo */
   let demoStep    = 0;
   let demoSteps   = [];
+  let stepLocked  = false;        // locked during animation
+  let demoEffA    = [];           // current display values for row A
+  let demoCarries = [];           // carry row values [0=ental,1=tiotal,2=hundratal]
+  let demoCarryUsed = [];         // whether carry[c] has been consumed
+  let demoAns     = [null,null,null,null]; // filled answer digits
 
-  /* Exercise state */
-  let exerciseIdx    = 0;
-  let exScore        = 0;
-  let exAttempts     = 0;   // per column
-  let exCurrentCol   = 0;   // which column (right=0=ental)
-  let exInputLocked  = false;
-  let exAnswers      = [];  // filled answers per col (index 0=ental)
-  let exBorrowed     = [];  // borrow applied per col
-  let exEffA         = [];  // effective digits of A (after borrows)
-  let exEffB         = [];  // effective digits of B
-  let exCarries      = [];  // carries[col]
+  /* Exercise */
+  let exerciseIdx   = 0;
+  let exScore       = 0;
+  let exCurrentCol  = 0;
+  let exInputLocked = false;
+  let exAnswers     = [];
+  let exEffA        = [];
+  let exEffB        = [];
+  let exCarries     = [];
+  let exInput       = '';
 
   /* Canvas */
   let upCanvas = null, upCtx = null;
@@ -40,10 +41,132 @@ const UppstallningGame = (() => {
   let upLastX = 0, upLastY = 0;
 
   /* ── Konstanter ─────────────────────────────────────────── */
-  const PV_COLORS = { ental: '#22c55e', tiotal: '#3b82f6', hundratal: '#ef4444' };
-  const COL_KEYS  = ['ental', 'tiotal', 'hundratal'];
-  const COL_LABELS = ['E', 'T', 'H'];
-  const LOG_KEY = id => `uppstallning_log_${id}`;
+  const PVC = { ental: '#22c55e', tiotal: '#3b82f6', hundratal: '#ef4444' };
+  const COL_KEYS   = ['ental','tiotal','hundratal'];
+  const COL_LABELS = ['E','T','H'];
+  const LOG_KEY    = id => `uppstallning_log_${id}`;
+
+  /* ── CSS (injected once per view) ──────────────────────── */
+  const BASE_CSS = `
+    #uppstallning-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+    #up-main { flex:1; display:flex; flex-direction:row; overflow:hidden; min-height:0; }
+    #up-left { flex:55; display:flex; flex-direction:column; gap:8px;
+               overflow-y:auto; padding:8px; min-height:0; padding-bottom:12px; }
+    #up-right { flex:45; display:flex; flex-direction:column; padding:8px; gap:5px; min-height:0; }
+    @media (orientation:portrait) {
+      #up-main { flex-direction:column; }
+      #up-left { flex:1; }
+      #up-right { flex:0 0 38vh; }
+    }
+    .up-btn { cursor:pointer; border:none; border-radius:12px; font-weight:800;
+      transition:transform 0.15s,box-shadow 0.15s; }
+    .up-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+    .up-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
+    .up-card { background:rgba(255,255,255,0.92); border-radius:16px; padding:20px;
+      border:2px solid rgba(37,99,235,0.15); cursor:pointer;
+      transition:transform 0.2s,box-shadow 0.2s; }
+    .up-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.12); }
+    .diff-btn { padding:8px 18px; border-radius:999px; font-weight:800; font-size:13px;
+      cursor:pointer; border:2px solid rgba(37,99,235,0.3);
+      background:var(--pv-light); color:var(--pv-primary); transition:all 0.15s; }
+    .diff-btn.active { background:var(--pv-primary); color:#fff; border-color:var(--pv-primary); }
+
+    /* Uppställningstabell */
+    #up-table-wrap { position:relative; background:rgba(255,255,255,0.93);
+      border-radius:16px; padding:14px 10px 10px; border:2px solid rgba(37,99,235,0.12); }
+    .up-table { border-collapse:separate; border-spacing:7px; margin:0 auto; }
+    .col-cell { width:62px; height:62px; border-radius:11px; position:relative;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.4rem; font-weight:900;
+      border:2px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.92);
+      overflow:visible; }
+    .col-cell.dim { opacity:0.28; }
+    .col-cell.glow-ental    { animation:glow-g 1.1s ease-in-out infinite; border-color:#22c55e; }
+    .col-cell.glow-tiotal   { animation:glow-b 1.1s ease-in-out infinite; border-color:#3b82f6; }
+    .col-cell.glow-hundratal{ animation:glow-r 1.1s ease-in-out infinite; border-color:#ef4444; }
+    .col-cell.problem-cell  { animation:prob-pulse 0.55s ease-in-out infinite; }
+    .carry-cell { width:62px; height:26px; border-radius:6px; display:flex;
+      align-items:center; justify-content:center; font-size:0.95rem; font-weight:900;
+      color:#d97706; background:rgba(251,191,36,0.13); }
+    .ans-cell { width:62px; height:62px; border-radius:11px; display:flex;
+      align-items:center; justify-content:center; font-size:2.4rem; font-weight:900;
+      border:2.5px dashed rgba(37,99,235,0.28); background:rgba(255,255,255,0.7); }
+    .ans-cell.active-col { border-style:solid; border-color:var(--pv-primary);
+      background:rgba(37,99,235,0.07); }
+    .ans-cell.filled { border-style:solid; }
+
+    /* Diagonal streck */
+    .dw { position:relative; display:inline-flex; align-items:center; justify-content:center;
+      width:100%; height:100%; }
+    .dw.crossed::after { content:''; position:absolute; left:4px; right:4px; top:50%;
+      height:3px; background:#ef4444; border-radius:2px;
+      transform:rotate(-22deg) scaleX(0); transform-origin:left center;
+      animation:strike-draw 0.42s ease-out 0.05s forwards; }
+    .dw.carry-crossed::after { background:#d97706; }
+    .digit-new { position:absolute; top:-24px; left:50%; transform:translateX(-50%);
+      font-size:0.88rem; font-weight:900; pointer-events:none; white-space:nowrap;
+      animation:fade-up 0.4s ease-out 0.45s both; }
+
+    /* Tankebubbla */
+    .thought-bubble { background:#fff; border-radius:16px; padding:12px 18px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.10); font-weight:800; font-size:1.15rem;
+      border:2px solid rgba(37,99,235,0.16); animation:bubble-in 0.3s ease-out; line-height:1.5; }
+
+    /* Numpad i övningsläge */
+    .ex-numpad { display:grid; grid-template-columns:repeat(5,46px); gap:5px; justify-content:center; }
+    .ex-nk { width:46px; height:46px; border-radius:50%; font-size:1.1rem; font-weight:900;
+      cursor:pointer; background:rgba(255,255,255,0.92); border:1.5px solid rgba(37,99,235,0.3);
+      color:var(--pv-primary); transition:transform 0.1s; }
+    .ex-nk:hover { transform:scale(1.12); }
+
+    /* Canvas */
+    .up-scratch { background:rgba(255,255,255,0.85); border-radius:14px;
+      border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column;
+      gap:5px; flex:1; min-height:0; padding:8px; }
+    .up-canvas { flex:1; min-height:150px; width:100%; display:block; touch-action:none;
+      cursor:crosshair; border-radius:10px; border:2px dashed rgba(37,99,235,0.25);
+      background:rgba(255,255,255,0.8); }
+
+    /* Keyframes */
+    @keyframes strike-draw {
+      from { transform:rotate(-22deg) scaleX(0); }
+      to   { transform:rotate(-22deg) scaleX(1); }
+    }
+    @keyframes fade-up {
+      from { opacity:0; transform:translateX(-50%) translateY(8px); }
+      to   { opacity:1; transform:translateX(-50%) translateY(0); }
+    }
+    @keyframes drop-down {
+      0%   { transform:translateY(-20px); opacity:0; }
+      65%  { transform:translateY(4px); opacity:1; }
+      100% { transform:translateY(0); opacity:1; }
+    }
+    @keyframes land-bounce {
+      0%   { transform:scale(0.3); opacity:0; }
+      65%  { transform:scale(1.25); opacity:1; }
+      100% { transform:scale(1); opacity:1; }
+    }
+    @keyframes glow-g {
+      0%,100% { box-shadow:0 0 8px rgba(34,197,94,0.3); }
+      50%      { box-shadow:0 0 22px rgba(34,197,94,0.7); }
+    }
+    @keyframes glow-b {
+      0%,100% { box-shadow:0 0 8px rgba(59,130,246,0.3); }
+      50%      { box-shadow:0 0 22px rgba(59,130,246,0.7); }
+    }
+    @keyframes glow-r {
+      0%,100% { box-shadow:0 0 8px rgba(239,68,68,0.3); }
+      50%      { box-shadow:0 0 22px rgba(239,68,68,0.7); }
+    }
+    @keyframes prob-pulse {
+      0%,100% { border-color:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.4); }
+      50%      { border-color:#ef4444; box-shadow:0 0 18px rgba(239,68,68,0.8); }
+    }
+    @keyframes bubble-in {
+      from { transform:scale(0.75) translateY(6px); opacity:0; }
+      to   { transform:scale(1) translateY(0); opacity:1; }
+    }
+  `;
 
   /* ── Init ───────────────────────────────────────────────── */
   function init(p, m) {
@@ -53,7 +176,7 @@ const UppstallningGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════
-     VÄLJ-SKÄRM: Demo vs Övning + Svårighetsgrad
+     VÄLJ-SKÄRM
   ══════════════════════════════════════════════════════════ */
   function showModeSelect() {
     const root = document.getElementById('uppstallning-root');
@@ -64,112 +187,14 @@ const UppstallningGame = (() => {
       : 'linear-gradient(135deg,#fdf4ff,#fef3c7)';
 
     root.innerHTML = `
-      <style id="up-base">
-        #uppstallning-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-        .up-btn { cursor:pointer; border:none; border-radius:var(--radius-md); font-weight:800;
-          transition:transform 0.15s, box-shadow 0.15s; }
-        .up-btn:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
-        .up-card { background:rgba(255,255,255,0.92); border-radius:var(--radius-lg); padding:var(--space-5);
-          border:2px solid rgba(37,99,235,0.15); cursor:pointer;
-          transition:transform 0.2s var(--ease-bounce), box-shadow 0.2s; }
-        .up-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
-        .diff-btn { padding:8px 18px; border-radius:var(--radius-full); font-weight:800; font-size:13px;
-          cursor:pointer; border:2px solid rgba(37,99,235,0.3);
-          background:var(--pv-light); color:var(--pv-primary); transition:all 0.15s; }
-        .diff-btn.active { background:var(--pv-primary); color:#fff; border-color:var(--pv-primary); }
-        @keyframes carry-over {
-          0%   { transform: translate(0,0) scale(1); opacity:1; }
-          30%  { transform: translate(0,-30px) scale(1.3); opacity:1; }
-          70%  { transform: translate(-64px,-60px) scale(0.9); opacity:1; }
-          100% { transform: translate(-64px,-80px) scale(0.7); opacity:0; }
-        }
-        @keyframes drop-down {
-          0%   { transform: translateY(-22px); opacity:0; }
-          60%  { transform: translateY(4px); opacity:1; }
-          100% { transform: translateY(0); opacity:1; }
-        }
-        @keyframes land-bounce {
-          0%   { transform: scale(0.4); opacity:0; }
-          65%  { transform: scale(1.25); opacity:1; }
-          100% { transform: scale(1); opacity:1; }
-        }
-        @keyframes glow-green {
-          0%,100% { box-shadow: 0 0 8px rgba(34,197,94,0.3); }
-          50%      { box-shadow: 0 0 22px rgba(34,197,94,0.7); }
-        }
-        @keyframes glow-blue {
-          0%,100% { box-shadow: 0 0 8px rgba(59,130,246,0.3); }
-          50%      { box-shadow: 0 0 22px rgba(59,130,246,0.7); }
-        }
-        @keyframes glow-red {
-          0%,100% { box-shadow: 0 0 8px rgba(239,68,68,0.3); }
-          50%      { box-shadow: 0 0 22px rgba(239,68,68,0.7); }
-        }
-        @keyframes borrow-lift {
-          0%   { transform: translate(0,0) scale(1); opacity:1; }
-          40%  { transform: translate(0,-22px) scale(1.3); opacity:1; }
-          100% { transform: translate(64px,36px) scale(0.8); opacity:0; }
-        }
-        @keyframes digit-shrink-swap {
-          0%   { transform: scale(1); opacity:1; }
-          50%  { transform: scale(0.4); opacity:0.4; }
-          100% { transform: scale(1); opacity:1; }
-        }
-        @keyframes digit-grow-swap {
-          0%   { transform: scale(1); }
-          50%  { transform: scale(1.5); }
-          100% { transform: scale(1); }
-        }
-        @keyframes problem-pulse {
-          0%,100% { border-color: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.3); }
-          50%      { border-color: #ef4444; box-shadow: 0 0 18px rgba(239,68,68,0.7); }
-        }
-        @keyframes bubble-in {
-          0%   { transform: scale(0.7) translateY(8px); opacity:0; }
-          100% { transform: scale(1) translateY(0); opacity:1; }
-        }
-        .thought-bubble { background:#fff; border-radius:12px; padding:10px 16px;
-          box-shadow: 0 4px 18px rgba(0,0,0,0.14); font-weight:800; font-size:15px;
-          animation: bubble-in 0.35s var(--ease-bounce);
-          border:2px solid rgba(37,99,235,0.18); }
-        .col-cell { width:60px; height:60px; border-radius:10px; display:flex;
-          align-items:center; justify-content:center; font-size:1.9rem;
-          font-weight:900; border:2px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.92); }
-        .col-cell.active-glow-ental    { animation: glow-green 1s ease-in-out infinite; border-color:#22c55e; }
-        .col-cell.active-glow-tiotal   { animation: glow-blue  1s ease-in-out infinite; border-color:#3b82f6; }
-        .col-cell.active-glow-hundratal{ animation: glow-red   1s ease-in-out infinite; border-color:#ef4444; }
-        .col-cell.problem-cell { animation: problem-pulse 0.6s ease-in-out infinite; }
-        .carry-cell { width:60px; height:28px; border-radius:6px; display:flex;
-          align-items:center; justify-content:center; font-size:0.85rem;
-          font-weight:900; color:#d97706; background:rgba(251,191,36,0.15); }
-        .answer-input-cell { width:60px; height:60px; border-radius:10px; display:flex;
-          align-items:center; justify-content:center; font-size:1.9rem;
-          font-weight:900; border:2.5px dashed rgba(37,99,235,0.3);
-          background:rgba(255,255,255,0.7); }
-        .answer-input-cell.active-col { border-style:solid; border-color:var(--pv-primary);
-          background:rgba(37,99,235,0.07); }
-        .answer-input-cell.filled { border-style:solid; background:rgba(255,255,255,0.95); }
-        .numpad-grid { display:grid; grid-template-columns:repeat(5,44px); gap:5px; justify-content:center; }
-        .nk { width:44px; height:44px; border-radius:50%; font-size:var(--text-base); font-weight:900;
-          cursor:pointer; background:rgba(255,255,255,0.92); border:1.5px solid rgba(37,99,235,0.3);
-          color:var(--pv-primary); transition:transform 0.1s; }
-        .nk:hover { transform:scale(1.12); }
-        .up-scratch { background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column;
-          gap:5px; height:100%; min-height:0; padding:8px; }
-        .up-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
-          border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25);
-          background:rgba(255,255,255,0.7); }
-      </style>
-
+      <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
         <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
           onclick="UppstallningGame.goBack()">Tillbaka</button>
         <span class="header-title" style="color:${modeColor}">${modeLabel}</span>
         <div style="width:80px"></div>
       </div>
-
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4);overflow-y:auto">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
         <div class="player-banner">
           <div class="avatar avatar-lg">${profile.avatar}</div>
           <div class="player-info">
@@ -177,44 +202,35 @@ const UppstallningGame = (() => {
             <div class="player-tagline">Välj läge och svårighetsgrad 🎯</div>
           </div>
         </div>
-
-        <!-- Svårighetsgrad -->
-        <div style="background:rgba(255,255,255,0.9);border-radius:var(--radius-lg);padding:var(--space-4);border:2px solid rgba(37,99,235,0.1)">
-          <div style="font-weight:800;font-size:13px;color:var(--pv-primary);margin-bottom:var(--space-3);text-transform:uppercase;letter-spacing:0.05em">Svårighetsgrad</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:14px;border:2px solid rgba(37,99,235,0.1)">
+          <div style="font-weight:800;font-size:12px;color:var(--pv-primary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Svårighetsgrad</div>
+          <div style="display:flex;gap:8px">
             <button class="diff-btn ${difficulty==='easy'?'active':''}" onclick="UppstallningGame.setDifficulty('easy',this)">Lätt</button>
             <button class="diff-btn ${difficulty==='medium'?'active':''}" onclick="UppstallningGame.setDifficulty('medium',this)">Medium</button>
             <button class="diff-btn ${difficulty==='hard'?'active':''}" onclick="UppstallningGame.setDifficulty('hard',this)">Svårt</button>
           </div>
         </div>
-
-        <!-- Demo -->
         <div class="up-card" style="background:${modeBg}" onclick="UppstallningGame.startDemo()">
-          <div style="display:flex;align-items:center;gap:var(--space-4)">
-            <div style="font-size:2.5rem;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
-              border-radius:var(--radius-lg);background:rgba(255,255,255,0.7)">👀</div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(255,255,255,0.7)">👀</div>
             <div style="flex:1">
-              <div style="font-family:var(--font-heading);font-size:var(--text-xl);color:${modeColor}">Titta och lär</div>
-              <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">Se varje steg animerat</div>
+              <div style="font-family:var(--font-heading);font-size:1.3rem;color:${modeColor}">Titta och lär</div>
+              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Se varje steg animerat – tryck "Nästa steg"</div>
             </div>
-            <div style="font-size:var(--text-2xl);opacity:0.4">›</div>
+            <div style="font-size:1.5rem;opacity:0.4">›</div>
           </div>
         </div>
-
-        <!-- Övning -->
         <div class="up-card" onclick="UppstallningGame.startExercise()">
-          <div style="display:flex;align-items:center;gap:var(--space-4)">
-            <div style="font-size:2.5rem;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
-              border-radius:var(--radius-lg);background:rgba(255,255,255,0.7)">✏️</div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(255,255,255,0.7)">✏️</div>
             <div style="flex:1">
-              <div style="font-family:var(--font-heading);font-size:var(--text-xl);color:var(--pv-primary)">Räkna själv</div>
-              <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">Fyll i svar kolumn för kolumn</div>
+              <div style="font-family:var(--font-heading);font-size:1.3rem;color:var(--pv-primary)">Räkna själv</div>
+              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Fyll i svar kolumn för kolumn</div>
             </div>
-            <div style="font-size:var(--text-2xl);opacity:0.4">›</div>
+            <div style="font-size:1.5rem;opacity:0.4">›</div>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     Router.show('screen-uppstallning');
   }
 
@@ -232,496 +248,544 @@ const UppstallningGame = (() => {
     let a, b;
     if (mode === 'addition') {
       if (difficulty === 'easy') {
-        // 2-siffriga, summa < 100, ibland minnessiffra
-        do { a = 10 + Math.floor(Math.random()*40); b = 10 + Math.floor(Math.random()*40); }
-        while (a + b >= 100);
+        do { a = 10 + rnd(40); b = 10 + rnd(40); } while (a + b >= 100);
       } else if (difficulty === 'medium') {
-        a = 100 + Math.floor(Math.random()*400);
-        b = 100 + Math.floor(Math.random()*300);
+        a = 100 + rnd(400); b = 100 + rnd(300);
       } else {
-        // Svårt: garantera minst 1 minnessiffra
-        do {
-          a = 200 + Math.floor(Math.random()*400);
-          b = 200 + Math.floor(Math.random()*300);
-        } while (!hasCarry(a, b));
+        do { a = 200 + rnd(400); b = 200 + rnd(300); } while (!hasCarry(a,b));
       }
     } else {
-      // Subtraktion: a > b alltid
       if (difficulty === 'easy') {
-        do { a = 30 + Math.floor(Math.random()*70); b = 10 + Math.floor(Math.random()*20); }
-        while (a <= b);
+        do { a = 30 + rnd(70); b = 10 + rnd(20); } while (a <= b);
       } else if (difficulty === 'medium') {
-        do { a = 200 + Math.floor(Math.random()*400); b = 100 + Math.floor(Math.random()*200); }
-        while (a <= b);
+        do { a = 200 + rnd(400); b = 100 + rnd(200); } while (a <= b);
       } else {
-        // Svårt: garantera minst 1 lån
-        do {
-          a = 300 + Math.floor(Math.random()*600);
-          b = 150 + Math.floor(Math.random()*300);
-        } while (a <= b || !hasBorrow(a, b));
-      }
-    }
-    numA = a; numB = b;
-    result = mode === 'addition' ? a + b : a - b;
-
-    // Avgör antal kolumner
-    colCount = (numA >= 100 || numB >= 100 || result >= 100) ? 3 : 2;
-
-    // Beräkna carries (addition)
-    carries = [0, 0, 0];
-    if (mode === 'addition') {
-      const da = digits(numA), db = digits(numB);
-      for (let c = 0; c < 3; c++) {
-        const sum = da[c] + db[c] + (c > 0 ? carries[c-1] : 0);
-        carries[c] = sum > 9 ? 1 : 0;
-      }
-    }
-
-    // Beräkna borrows (subtraktion)
-    borrows = [0, 0, 0];
-    if (mode === 'subtraction') {
-      const da = digits(numA), db = digits(numB);
-      let effA = [...da];
-      for (let c = 0; c < 3; c++) {
-        if (effA[c] < db[c]) {
-          borrows[c] = 1;
-          effA[c] += 10;
-          if (c + 1 < 3) effA[c + 1]--;
+        // Garantera minst 1 lån. 50% chans att tiotalet=0 (dubbellån).
+        if (Math.random() < 0.5) {
+          do {
+            const hA = 3 + rnd(7), eA = 1 + rnd(4);
+            a = hA * 100 + 0 * 10 + eA;
+            const hB = 1 + rnd(hA - 1), tB = 1 + rnd(5), eB = eA + 3 + rnd(5);
+            b = hB * 100 + tB * 10 + Math.min(eB, 9);
+          } while (a <= b);
+        } else {
+          do { a = 300 + rnd(600); b = 150 + rnd(300); }
+          while (a <= b || !hasBorrow(a,b));
         }
       }
     }
+    numA = a; numB = b;
+    colCount = (numA >= 100 || numB >= 100 || Math.abs(numA - numB) >= 100) ? 3 : 2;
   }
 
   function hasCarry(a, b) {
-    const da = digits(a), db = digits(b);
-    for (let c = 0; c < 3; c++) {
-      if (da[c] + db[c] > 9) return true;
-    }
+    const da = digs(a), db = digs(b);
+    for (let c = 0; c < 3; c++) if (da[c] + db[c] > 9) return true;
     return false;
   }
 
   function hasBorrow(a, b) {
-    const da = digits(a), db = digits(b);
+    const da = digs(a), db = digs(b);
     return da[0] < db[0] || da[1] < db[1];
   }
 
-  // Returns [ental, tiotal, hundratal]
-  function digits(n) {
-    return [n % 10, Math.floor(n / 10) % 10, Math.floor(n / 100) % 10];
+  function digs(n) { // [ental, tiotal, hundratal]
+    return [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
   }
 
-  function getMaxCol() {
-    return colCount; // 2 or 3
-  }
+  function rnd(n) { return Math.floor(Math.random() * n); }
 
   /* ══════════════════════════════════════════════════════════
      DEMO-LÄGE
   ══════════════════════════════════════════════════════════ */
   function startDemo() {
     App.Sound.play('click');
-    subMode = 'demo';
     generatePair();
-    demoStep  = 0;
-    demoSteps = buildDemoSteps();
-    renderDemo();
+    demoStep      = 0;
+    stepLocked    = false;
+    demoEffA      = [...digs(numA)];
+    demoCarries   = [0, 0, 0];
+    demoCarryUsed = [false, false, false];
+    demoAns       = [null, null, null, null];
+    demoSteps     = buildDemoSteps();
+    renderDemoView();
   }
 
+  /* ── Steg-byggare ───────────────────────────────────────── */
   function buildDemoSteps() {
     const steps = [];
-    const da = digits(numA), db = digits(numB);
+    const da = [...digs(numA)], db = digs(numB);
+    const maxC = colCount;
 
     if (mode === 'addition') {
       let carryVal = 0;
-      for (let c = 0; c < getMaxCol(); c++) {
-        const colKey = COL_KEYS[c];
+      for (let c = 0; c < maxC; c++) {
         const sum = da[c] + db[c] + carryVal;
         const ans = sum % 10;
-        const nextCarry = sum > 9 ? 1 : 0;
-        steps.push({ col: c, colKey, da: da[c], db: db[c], carry_in: carryVal, sum, ans, next_carry: nextCarry, type: 'addition' });
-        carryVal = nextCarry;
+        const next = sum > 9 ? 1 : 0;
+        // Steg 1: visa beräkning i tankebubbla
+        steps.push({ type:'add_show', col:c, da:da[c], db:db[c], carry_in:carryVal, sum, ans, next_carry:next });
+        // Steg 2: animera ner svar (+ carry om det behövs)
+        steps.push({ type:'add_drop', col:c, ans, next_carry:next });
+        carryVal = next;
       }
-      if (carryVal) {
-        steps.push({ col: getMaxCol(), colKey: 'extra', da: 0, db: 0, carry_in: carryVal, sum: carryVal, ans: carryVal, next_carry: 0, type: 'addition_carry_final' });
-      }
+      if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
     } else {
-      // Subtraction — compute with borrows
-      let effA = [...da];
-      let effB = [...db];
-      const borrowDone = [false, false, false];
-
-      for (let c = 0; c < getMaxCol(); c++) {
-        const colKey = COL_KEYS[c];
-        const needsBorrow = effA[c] < effB[c];
-        if (needsBorrow) {
-          steps.push({ col: c, colKey, effA: effA[c], effB: effB[c], type: 'borrow', origA: effA[c] });
-          effA[c] += 10;
-          effA[c + 1]--;
-          borrowDone[c] = true;
+      const effA = [...da];
+      for (let c = 0; c < maxC; c++) {
+        if (effA[c] < db[c]) {
+          // Behöver låna
+          if (c + 1 < maxC && effA[c + 1] === 0 && c + 2 < maxC) {
+            // Dubbellån: tiotal=0, måste låna från hundratal first
+            steps.push({ type:'sub_announce', col:c, effA:effA[c], db:db[c], double:true });
+            // Lån från hundratal → tiotal
+            steps.push({ type:'sub_borrow', srcCol:c+2, srcNewVal:effA[c+2]-1,
+              dstCol:c+1, dstNewVal:effA[c+1]+10, col:c });
+            effA[c+2]--; effA[c+1] += 10;
+            // Lån från tiotal → ental
+            steps.push({ type:'sub_borrow', srcCol:c+1, srcNewVal:effA[c+1]-1,
+              dstCol:c, dstNewVal:effA[c]+10, col:c });
+            effA[c+1]--; effA[c] += 10;
+          } else {
+            // Enkelt lån
+            steps.push({ type:'sub_announce', col:c, effA:effA[c], db:db[c], double:false });
+            steps.push({ type:'sub_borrow', srcCol:c+1, srcNewVal:effA[c+1]-1,
+              dstCol:c, dstNewVal:effA[c]+10, col:c });
+            effA[c+1]--; effA[c] += 10;
+          }
         }
-        const diff = effA[c] - effB[c];
-        steps.push({ col: c, colKey, effA: effA[c], effB: effB[c], diff, type: 'subtraction', hasBorrow: borrowDone[c] });
+        const diff = effA[c] - db[c];
+        steps.push({ type:'sub_calc', col:c, effA:effA[c], db:db[c], diff });
       }
     }
-
-    steps.push({ type: 'done' });
+    steps.push({ type:'done' });
     return steps;
   }
 
-  function renderDemo() {
+  /* ── Render demo-vy ─────────────────────────────────────── */
+  function renderDemoView() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
 
-    // Build answer display (which cols are filled so far)
-    const answersSoFar = computeAnswersSoFar();
-
     root.innerHTML = `
+      <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
         <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
           onclick="UppstallningGame.goBack()">Avsluta</button>
         <span class="header-title" style="color:${modeColor}">${modeLabel} – Demo</span>
         <div style="width:80px"></div>
       </div>
-
-      <div style="flex:1;display:grid;grid-template-columns:55fr 45fr;gap:8px;padding:8px;overflow:hidden;min-height:0">
-        <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:0;padding-bottom:8px">
-          ${renderUpstallningTable(answersSoFar)}
-          <div id="up-bubble-area"></div>
-          <div id="up-step-btn-area">
-            ${renderStepButton()}
-          </div>
+      <div id="up-main">
+        <div id="up-left">
+          <div id="up-table-wrap">${buildTableHTML()}</div>
+          <div id="up-bubble"></div>
+          <div id="up-next-area">${nextBtnHTML()}</div>
         </div>
-        <div class="up-scratch">
-          <div style="font-size:10px;font-weight:800;color:var(--pv-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
-          <canvas id="up-canvas" class="up-canvas"></canvas>
-          <div style="display:flex;gap:5px;flex-shrink:0">
-            <button onclick="UppstallningGame.upToggleEraser(false)" id="up-draw"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-primary);color:#fff;border:1.5px solid var(--pv-primary)">🖊️ Rita</button>
-            <button onclick="UppstallningGame.upToggleEraser(true)" id="up-erase"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🧹 Sudd</button>
-            <button onclick="UppstallningGame.upClearCanvas()"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🗑️ Rensa</button>
-          </div>
+        <div id="up-right">
+          ${scratchHTML()}
         </div>
-      </div>
-    `;
+      </div>`;
 
     setupCanvas('up-canvas');
-    highlightDemoColumn();
+    showStepBubble();
   }
 
-  function computeAnswersSoFar() {
-    // Figure out which answer cells are filled based on demoStep
-    const ans = [null, null, null, null]; // 4 slots max
-    if (mode === 'addition') {
-      let stepIdx = 0, carryVal = 0;
-      const da = digits(numA), db = digits(numB);
-      for (let c = 0; c < getMaxCol(); c++) {
-        const sum = da[c] + db[c] + carryVal;
-        if (stepIdx < demoStep) {
-          ans[c] = sum % 10;
-        }
-        carryVal = sum > 9 ? 1 : 0;
-        stepIdx++;
+  /* ── Nästa steg ─────────────────────────────────────────── */
+  function demoNextStep() {
+    if (stepLocked) return;
+    const step = demoSteps[demoStep];
+    if (!step || step.type === 'done') return;
+    lockStep();
+    executeStep(step, () => {
+      demoStep++;
+      unlockStep();
+      showStepBubble();
+      refreshNextBtn();
+    });
+  }
+
+  function executeStep(step, cb) {
+    if (step.type === 'add_show') {
+      // Highlight column + show bubble — no DOM animation, just cb
+      highlightCol(step.col);
+      setTimeout(cb, 50);
+
+    } else if (step.type === 'add_drop') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      // Drop answer digit
+      const ansCell = document.getElementById(`ans-${colKey}`);
+      if (ansCell) {
+        ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
+        ansCell.classList.add('filled');
+        ansCell.style.borderColor = PVC[colKey];
       }
-      if (carryVal && stepIdx < demoStep) ans[getMaxCol()] = carryVal;
+      demoAns[step.col] = step.ans;
+      App.Sound.play('correct');
+      // If carry, animate carry token
+      if (step.next_carry && step.col + 1 < colCount) {
+        playCarrySound();
+        setTimeout(() => {
+          animateCarryToken(step.col, step.col + 1, () => {
+            demoCarries[step.col + 1] = 1;
+            updateCarryRow();
+            setTimeout(cb, 200);
+          });
+        }, 500);
+      } else {
+        setTimeout(cb, 700);
+      }
+
+    } else if (step.type === 'add_overflow') {
+      App.Sound.play('correct');
+      setTimeout(cb, 400);
+
+    } else if (step.type === 'sub_announce') {
+      // Red flash on col
+      const colKey = COL_KEYS[step.col];
+      ['row-a','row-b','ans'].forEach(row => {
+        const el = document.getElementById(row === 'ans' ? `ans-${colKey}` : `cell-${row}-${colKey}`);
+        if (el) el.classList.add('problem-cell');
+      });
+      setTimeout(() => {
+        ['row-a','row-b','ans'].forEach(row => {
+          const el = document.getElementById(row === 'ans' ? `ans-${colKey}` : `cell-${row}-${colKey}`);
+          if (el) el.classList.remove('problem-cell');
+        });
+        cb();
+      }, 1200);
+
+    } else if (step.type === 'sub_borrow') {
+      playBorrowSound();
+      // Strike srcCol, show srcNewVal above. Also update dstCol to show dstNewVal.
+      const srcKey = COL_KEYS[step.srcCol];
+      const dstKey = COL_KEYS[step.dstCol];
+      const srcDw = document.getElementById(`dw-a-${srcKey}`);
+      if (srcDw) {
+        srcDw.classList.add('crossed');
+        const newSpan = document.createElement('span');
+        newSpan.className = 'digit-new';
+        newSpan.style.color = PVC[srcKey];
+        newSpan.textContent = step.srcNewVal;
+        srcDw.appendChild(newSpan);
+      }
+      // Update demoEffA
+      demoEffA[step.srcCol] = step.srcNewVal;
+      demoEffA[step.dstCol] = step.dstNewVal;
+      // Animate borrow token
+      setTimeout(() => {
+        animateBorrowToken(step.srcCol, step.dstCol, step.dstNewVal, () => {
+          // Update dst cell display
+          const dstDw = document.getElementById(`dw-a-${dstKey}`);
+          if (dstDw) {
+            dstDw.classList.add('crossed');
+            const newDstSpan = document.createElement('span');
+            newDstSpan.className = 'digit-new';
+            newDstSpan.style.color = PVC[dstKey];
+            newDstSpan.textContent = step.dstNewVal;
+            dstDw.appendChild(newDstSpan);
+          }
+          setTimeout(cb, 300);
+        });
+      }, 500);
+
+    } else if (step.type === 'sub_calc') {
+      highlightCol(step.col);
+      const colKey = COL_KEYS[step.col];
+      setTimeout(() => {
+        const ansCell = document.getElementById(`ans-${colKey}`);
+        if (ansCell) {
+          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.diff}</span>`;
+          ansCell.classList.add('filled');
+          ansCell.style.borderColor = PVC[colKey];
+        }
+        demoAns[step.col] = step.diff;
+        App.Sound.play('correct');
+        setTimeout(cb, 700);
+      }, 300);
+
     } else {
-      const da = digits(numA), db = digits(numB);
-      let effA = [...da];
-      let stepIdx = 0;
-      for (let c = 0; c < getMaxCol(); c++) {
-        const needsBorrow = effA[c] < db[c];
-        if (needsBorrow) { stepIdx++; effA[c] += 10; effA[c+1]--; }
-        if (stepIdx < demoStep) {
-          ans[c] = effA[c] - db[c];
-        }
-        stepIdx++;
-      }
+      cb();
     }
-    return ans;
   }
 
-  function renderStepButton() {
+  /* ── Highlight aktiv kolumn ─────────────────────────────── */
+  function highlightCol(col) {
+    const colKey = COL_KEYS[col];
+    for (let c = 0; c < colCount; c++) {
+      const ck = COL_KEYS[c];
+      ['row-a','row-b'].forEach(row => {
+        const el = document.getElementById(`cell-${row}-${ck}`);
+        if (!el) return;
+        el.classList.remove('glow-ental','glow-tiotal','glow-hundratal','dim');
+        if (c === col) el.classList.add(`glow-${colKey}`);
+        else el.classList.add('dim');
+      });
+    }
+  }
+
+  /* ── Tankebubbla ────────────────────────────────────────── */
+  function showStepBubble() {
+    const area = document.getElementById('up-bubble');
+    if (!area) return;
+    const step = demoSteps[demoStep];
+    if (!step) { area.innerHTML = ''; return; }
+
+    let html = '';
+    if (step.type === 'add_show') {
+      const ck = COL_KEYS[step.col];
+      const ci = step.carry_in;
+      const ciStr = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
+      if (step.sum > 9) {
+        html = `<span style="color:${PVC[ck]}">${step.da}</span> + <span style="color:${PVC[ck]}">${step.db}</span>${ciStr} = <strong>${step.sum}</strong><br>
+          Skriv <strong style="color:${PVC[ck]}">${step.ans}</strong>, minns <strong style="color:#d97706">1</strong> till nästa kolumn 💭`;
+      } else {
+        html = `<span style="color:${PVC[ck]}">${step.da}</span> + <span style="color:${PVC[ck]}">${step.db}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
+      }
+    } else if (step.type === 'add_drop') {
+      const ck = COL_KEYS[step.col];
+      html = step.next_carry
+        ? `<strong style="color:${PVC[ck]}">${step.ans}</strong> går ner i svaret. <strong style="color:#d97706">1</strong> flyger upp till minnessiffran! 🚀`
+        : `<strong style="color:${PVC[ck]}">${step.ans}</strong> går ner i svaret ✅`;
+    } else if (step.type === 'add_overflow') {
+      html = `Minnessiffran <strong style="color:${PVC.hundratal}">${step.digit}</strong> skrivs längst till vänster!`;
+    } else if (step.type === 'sub_announce') {
+      const ck = COL_KEYS[step.col];
+      if (step.double) {
+        html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> går inte!</span><br>
+          Tiotalet är 0 — vi måste låna från hundratalet! 🔄`;
+      } else {
+        html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> går inte!</span><br>
+          Vi måste låna från nästa kolumn! 🔄`;
+      }
+    } else if (step.type === 'sub_borrow') {
+      const sKey = COL_KEYS[step.srcCol];
+      const dKey = COL_KEYS[step.dstCol];
+      html = `<span style="color:${PVC[sKey]}">${demoEffA[step.srcCol] + 1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNewVal}</strong> (ger iväg ett tiotal)<br>
+        <span style="color:${PVC[dKey]}">${demoEffA[step.dstCol] - 10}</span> → <strong style="color:${PVC[dKey]}">${step.dstNewVal}</strong> (tar emot ett tiotal) ✅`;
+    } else if (step.type === 'sub_calc') {
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.effA}</strong> − <strong style="color:${PVC[ck]}">${step.db}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+    } else if (step.type === 'done') {
+      html = `Klart! 🎉 ${numA} ${mode==='addition'?'+':'−'} ${numB} = <strong>${mode==='addition'?numA+numB:numA-numB}</strong>`;
+    }
+
+    area.innerHTML = html ? `<div class="thought-bubble">${html}</div>` : '';
+  }
+
+  function refreshNextBtn() {
+    const area = document.getElementById('up-next-area');
+    if (area) area.innerHTML = nextBtnHTML();
+  }
+
+  function nextBtnHTML() {
     const step = demoSteps[demoStep];
     if (!step) return '';
     if (step.type === 'done') {
-      return `
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="up-btn" onclick="UppstallningGame.startDemo()"
-            style="flex:1;height:48px;background:var(--pv-primary);color:#fff;font-size:var(--text-base)">🔄 Ny uppgift</button>
-          <button class="up-btn" onclick="UppstallningGame.goBack()"
-            style="flex:1;height:48px;background:var(--pv-light);color:var(--pv-primary);border:2px solid rgba(37,99,235,0.3);font-size:var(--text-base)">↩ Tillbaka</button>
-        </div>`;
+      return `<div style="display:flex;gap:8px">
+        <button class="up-btn" style="flex:1;height:50px;background:var(--pv-primary);color:#fff;font-size:1rem"
+          onclick="UppstallningGame.startDemo()">🔄 Ny uppgift</button>
+        <button class="up-btn" style="flex:1;height:50px;background:var(--pv-light);color:var(--pv-primary);border:2px solid rgba(37,99,235,0.3);font-size:1rem"
+          onclick="UppstallningGame.goBack()">↩ Tillbaka</button>
+      </div>`;
     }
-    return `
-      <button class="up-btn" onclick="UppstallningGame.demoNextStep()"
-        style="width:100%;height:52px;background:var(--pv-primary);color:#fff;font-size:var(--text-lg);
-        border-radius:var(--radius-lg)">Nästa steg ▶️</button>`;
+    return `<button id="up-next-btn" class="up-btn" onclick="UppstallningGame.demoNextStep()"
+      style="width:100%;height:54px;background:var(--pv-primary);color:#fff;font-size:1.1rem;border-radius:14px"
+      ${stepLocked ? 'disabled' : ''}>Nästa steg ▶️</button>`;
   }
 
-  function highlightDemoColumn() {
-    const step = demoSteps[demoStep];
-    if (!step || step.type === 'done') return;
-    const colKey = step.colKey;
-    if (!colKey || colKey === 'extra') return;
-
-    // Add glow to cells in this column
-    ['row-a','row-b','row-ans'].forEach(row => {
-      const cell = document.getElementById(`cell-${row}-${colKey}`);
-      if (cell) {
-        // Dim others
-        ['ental','tiotal','hundratal'].forEach(ck => {
-          const c2 = document.getElementById(`cell-${row}-${ck}`);
-          if (c2) c2.style.opacity = ck === colKey ? '1' : '0.3';
-        });
-        // Glow on active
-        if (step.type !== 'borrow') {
-          cell.classList.add(`active-glow-${colKey}`);
-        } else {
-          cell.classList.add('problem-cell');
-        }
-      }
-    });
-
-    showThoughtBubble(step);
+  function lockStep() {
+    stepLocked = true;
+    const btn = document.getElementById('up-next-btn');
+    if (btn) btn.disabled = true;
   }
 
-  function showThoughtBubble(step) {
-    const area = document.getElementById('up-bubble-area');
-    if (!area) return;
-    let text = '';
-    if (step.type === 'addition') {
-      const ci = step.carry_in;
-      if (step.sum > 9) {
-        const extra = ci ? ` + ${ci} (minne)` : '';
-        text = `${step.da} + ${step.db}${extra} = ${step.sum}<br>
-          Skriv <strong style="color:${PV_COLORS[step.colKey]}">${step.ans}</strong>, minns
-          <strong style="color:#d97706">1</strong> till nästa kolumn 💭`;
+  function unlockStep() {
+    stepLocked = false;
+    const btn = document.getElementById('up-next-btn');
+    if (btn) btn.disabled = false;
+  }
+
+  /* ── Carry-rad ──────────────────────────────────────────── */
+  function updateCarryRow() {
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`carry-${COL_KEYS[c]}`);
+      if (!el) continue;
+      const val = demoCarries[c];
+      const used = demoCarryUsed[c];
+      if (val) {
+        el.innerHTML = used
+          ? `<span class="dw carry-crossed" style="color:#d97706;opacity:0.4"><span>${val}</span></span>`
+          : `<span style="animation:land-bounce 0.45s ease-out both;display:inline-block">${val}</span>`;
       } else {
-        const extra = ci ? ` + ${ci} (minne)` : '';
-        text = `${step.da} + ${step.db}${extra} = <strong style="color:${PV_COLORS[step.colKey]}">${step.sum}</strong>`;
+        el.textContent = '';
       }
-    } else if (step.type === 'borrow') {
-      text = `<span style="color:#ef4444">⚠️ ${step.origA} &lt; ${step.effB}!</span><br>Vi behöver låna från nästa kolumn.`;
-    } else if (step.type === 'subtraction') {
-      text = step.hasBorrow
-        ? `(Lånade: ${step.effA}) − ${step.effB} = <strong style="color:${PV_COLORS[step.colKey]}">${step.diff}</strong>`
-        : `${step.effA} − ${step.effB} = <strong style="color:${PV_COLORS[step.colKey]}">${step.diff}</strong>`;
-    } else if (step.type === 'addition_carry_final') {
-      text = `Minnessiffran blir <strong style="color:${PV_COLORS.hundratal}">${step.ans}</strong> — skriv den i svaret!`;
-    }
-
-    area.innerHTML = text
-      ? `<div class="thought-bubble">${text}</div>`
-      : '';
-  }
-
-  function demoNextStep() {
-    const step = demoSteps[demoStep];
-    if (!step) return;
-
-    if (step.type === 'addition') {
-      if (step.next_carry) {
-        playCarrySound();
-        animateCarry(step.colKey, step.ans, () => {
-          demoStep++;
-          refreshDemoTable();
-        });
-      } else {
-        App.Sound.play('correct');
-        animateDropDown(step.colKey, step.ans, () => {
-          demoStep++;
-          refreshDemoTable();
-        });
-      }
-    } else if (step.type === 'addition_carry_final') {
-      App.Sound.play('correct');
-      demoStep++;
-      refreshDemoTable();
-    } else if (step.type === 'borrow') {
-      playBorrowSound();
-      animateBorrow(step.col, () => {
-        demoStep++;
-        refreshDemoTable();
-      });
-    } else if (step.type === 'subtraction') {
-      App.Sound.play('correct');
-      animateDropDown(step.colKey, step.diff, () => {
-        demoStep++;
-        refreshDemoTable();
-      });
-    } else if (step.type === 'done') {
-      App.Confetti.burst(80);
-      App.Sound.play('fanfare');
-      refreshDemoTable();
     }
   }
 
-  function refreshDemoTable() {
-    const answersSoFar = computeAnswersSoFar();
-    const tableEl = document.getElementById('up-table-wrap');
-    if (tableEl) tableEl.innerHTML = buildTableHTML(answersSoFar);
+  /* ── Animera carry-token ────────────────────────────────── */
+  function animateCarryToken(fromCol, toCol, cb) {
+    const srcKey = COL_KEYS[fromCol];
+    const dstKey = COL_KEYS[toCol];
+    const wrap = document.getElementById('up-table-wrap');
+    const srcCell = document.getElementById(`cell-row-a-${srcKey}`) ||
+                    document.getElementById(`ans-${srcKey}`);
+    const dstCarry = document.getElementById(`carry-${dstKey}`);
+    if (!wrap || !srcCell || !dstCarry) { setTimeout(cb, 300); return; }
 
-    const btnArea = document.getElementById('up-step-btn-area');
-    if (btnArea) btnArea.innerHTML = renderStepButton();
+    const wRect = wrap.getBoundingClientRect();
+    const sRect = srcCell.getBoundingClientRect();
+    const dRect = dstCarry.getBoundingClientRect();
 
-    highlightDemoColumn();
+    const token = document.createElement('div');
+    token.textContent = '1';
+    token.style.cssText = `position:absolute;
+      left:${sRect.left - wRect.left + sRect.width/2 - 14}px;
+      top:${sRect.top - wRect.top + sRect.height/2 - 14}px;
+      width:28px;height:28px;border-radius:50%;
+      background:#fde68a;border:2px solid #d97706;
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.9rem;font-weight:900;color:#d97706;
+      pointer-events:none;z-index:20;
+      transition:left 0.7s cubic-bezier(0.25,0.46,0.45,0.94),
+                 top 0.7s cubic-bezier(0.25,0.46,0.45,0.94);`;
+    wrap.style.position = 'relative';
+    wrap.appendChild(token);
+    playCarrySound();
 
-    const step = demoSteps[demoStep];
-    if (step && step.type === 'done') {
-      App.Confetti.burst(80);
-      App.Sound.play('fanfare');
-    }
-  }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      token.style.left = `${dRect.left - wRect.left + dRect.width/2 - 14}px`;
+      token.style.top  = `${dRect.top  - wRect.top  + dRect.height/2 - 14}px`;
+    }));
 
-  /* ── Animationer ────────────────────────────────────────── */
-  function animateCarry(fromColKey, ansDigit, cb) {
-    // Drop the answer digit first
-    const ansCell = document.getElementById(`cell-row-ans-${fromColKey}`);
-    if (ansCell) {
-      ansCell.innerHTML = `<span style="color:${PV_COLORS[fromColKey]};animation:drop-down 0.5s ease-out both">${ansDigit}</span>`;
-    }
-    // Animate carry label
-    const carryCell = document.getElementById(`carry-cell-${fromColKey}`);
-    if (carryCell) {
-      setTimeout(() => {
-        carryCell.innerHTML = `<span style="animation:land-bounce 0.5s var(--ease-bounce) both;display:inline-block">1</span>`;
-      }, 400);
-    }
-    setTimeout(cb, 1200);
-  }
-
-  function animateDropDown(colKey, digit, cb) {
-    const ansCell = document.getElementById(`cell-row-ans-${colKey}`);
-    if (ansCell) {
-      ansCell.innerHTML = `<span style="color:${PV_COLORS[colKey]};animation:drop-down 0.6s ease-out both;display:inline-block">${digit}</span>`;
-    }
-    setTimeout(cb, 900);
-  }
-
-  function animateBorrow(col, cb) {
-    const colKey  = COL_KEYS[col];
-    const srcKey  = COL_KEYS[col + 1]; // column we borrow from
-    const da = digits(numA);
-
-    // Flash the source cell
-    const srcCell = document.getElementById(`cell-row-a-${srcKey}`);
-    if (srcCell) {
-      srcCell.style.animation = 'digit-shrink-swap 0.6s ease-in-out';
-      setTimeout(() => {
-        if (srcCell) {
-          srcCell.innerHTML = `<span style="color:${PV_COLORS[srcKey]}">${da[col+1]-1}</span>`;
-          srcCell.style.animation = '';
-        }
-      }, 500);
-    }
-
-    // Grow the destination cell
     setTimeout(() => {
-      const dstCell = document.getElementById(`cell-row-a-${colKey}`);
-      if (dstCell) {
-        dstCell.style.animation = 'digit-grow-swap 0.5s ease-in-out';
-        setTimeout(() => {
-          if (dstCell) {
-            dstCell.innerHTML = `<span style="color:${PV_COLORS[colKey]}">${da[col]+10}</span>`;
-            dstCell.style.animation = '';
-          }
-        }, 400);
-      }
-    }, 300);
-
-    setTimeout(cb, 1100);
+      token.style.opacity = '0';
+      token.style.transition += ',opacity 0.3s';
+      setTimeout(() => { token.remove(); cb(); }, 350);
+    }, 750);
   }
 
-  /* ── Tabell-rendering ───────────────────────────────────── */
-  function renderUpstallningTable(answersSoFar) {
-    return `<div id="up-table-wrap" style="background:rgba(255,255,255,0.9);border-radius:var(--radius-lg);
-      padding:var(--space-4);border:2px solid rgba(37,99,235,0.12)">
-      ${buildTableHTML(answersSoFar)}
-    </div>`;
+  /* ── Animera borrow-token ───────────────────────────────── */
+  function animateBorrowToken(srcCol, dstCol, _label, cb) {
+    const srcKey = COL_KEYS[srcCol];
+    const dstKey = COL_KEYS[dstCol];
+    const wrap = document.getElementById('up-table-wrap');
+    const srcCell = document.getElementById(`cell-row-a-${srcKey}`);
+    const dstCell = document.getElementById(`cell-row-a-${dstKey}`);
+    if (!wrap || !srcCell || !dstCell) { setTimeout(cb, 300); return; }
+
+    const wRect  = wrap.getBoundingClientRect();
+    const sRect  = srcCell.getBoundingClientRect();
+    const dRect  = dstCell.getBoundingClientRect();
+
+    const token = document.createElement('div');
+    token.textContent = '+10';
+    token.style.cssText = `position:absolute;
+      left:${sRect.left - wRect.left + sRect.width/2 - 18}px;
+      top:${sRect.top - wRect.top + sRect.height/2 - 14}px;
+      padding:3px 7px;border-radius:999px;
+      background:#fee2e2;border:2px solid #ef4444;
+      font-size:0.85rem;font-weight:900;color:#dc2626;
+      pointer-events:none;z-index:20;
+      transition:left 0.75s cubic-bezier(0.25,0.46,0.45,0.94),
+                 top 0.75s cubic-bezier(0.25,0.46,0.45,0.94);`;
+    wrap.style.position = 'relative';
+    wrap.appendChild(token);
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      token.style.left = `${dRect.left - wRect.left + dRect.width/2 - 18}px`;
+      token.style.top  = `${dRect.top  - wRect.top  + dRect.height/2 - 14}px`;
+    }));
+
+    setTimeout(() => {
+      token.style.opacity = '0';
+      token.style.transition += ',opacity 0.3s';
+      setTimeout(() => { token.remove(); cb(); }, 350);
+    }, 800);
   }
 
-  function buildTableHTML(answersSoFar) {
-    const da = digits(numA), db = digits(numB);
-    const maxC = getMaxCol();
-    // Columns shown: for 2-digit use tiotal+ental, for 3-digit use all 3
-    const cols = maxC === 2
-      ? [{ key:'tiotal', label:'T', idx:1 }, { key:'ental', label:'E', idx:0 }]
-      : [{ key:'hundratal', label:'H', idx:2 }, { key:'tiotal', label:'T', idx:1 }, { key:'ental', label:'E', idx:0 }];
+  /* ── Tabell HTML ────────────────────────────────────────── */
+  function buildTableHTML() {
+    const da = digs(numA), db = digs(numB);
+    const maxC = colCount;
+    // Columns from left (highest) to right (ental)
+    const cols = [];
+    for (let c = maxC - 1; c >= 0; c--) cols.push({ key: COL_KEYS[c], label: COL_LABELS[c], idx: c });
 
-    const opSymbol = mode === 'addition' ? '+' : '−';
+    const op = mode === 'addition' ? '+' : '−';
+    const showA = c => c < String(numA).length ? da[c] : null;
+    const showB = c => c < String(numB).length ? db[c] : null;
 
-    // Carry row (addition only)
-    let carryRowHTML = '';
-    if (mode === 'addition') {
-      carryRowHTML = `
-        <tr>
-          <td style="padding-right:6px;font-size:11px;color:#d97706;font-weight:800;text-align:right">minne:</td>
-          ${cols.map(c => {
-            const showCarry = c.idx < maxC - 1 && carries[c.idx];
-            return `<td style="text-align:center">
-              <div class="carry-cell" id="carry-cell-${c.key}">${showCarry ? '1' : ''}</div>
-            </td>`;
-          }).join('')}
-          <td></td>
-        </tr>`;
-    }
+    // Carry row (hidden at start, shown when carries appear)
+    const carryRowHTML = mode === 'addition' ? `
+      <tr>
+        <td style="font-size:11px;font-weight:800;color:#d97706;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
+        ${cols.map(c => `<td style="text-align:center">
+          <div class="carry-cell" id="carry-${c.key}"></div>
+        </td>`).join('')}
+        <td></td>
+      </tr>` : '';
 
-    // Build answer cells
-    const answerCells = cols.map(c => {
-      const val = answersSoFar[c.idx];
+    const rowA = cols.map(c => {
+      const v = showA(c.idx);
       return `<td style="text-align:center">
-        <div class="col-cell" id="cell-row-ans-${c.key}" style="border-color:${PV_COLORS[c.key]}">
-          <span style="color:${PV_COLORS[c.key]}">${val !== null ? val : ''}</span>
+        <div class="col-cell" id="cell-row-a-${c.key}" style="border-color:${PVC[c.key]}">
+          <div class="dw" id="dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
+          </div>
+        </div>
+      </td>`;
+    }).join('');
+
+    const rowB = cols.map(c => {
+      const v = showB(c.idx);
+      return `<td style="text-align:center">
+        <div class="col-cell" id="cell-row-b-${c.key}" style="border-color:${PVC[c.key]}">
+          <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
+        </div>
+      </td>`;
+    }).join('');
+
+    const ansRow = cols.map(c => {
+      const v = demoAns[c.idx];
+      const filled = v !== null;
+      return `<td style="text-align:center">
+        <div class="ans-cell${filled?' filled':''}" id="ans-${c.key}"
+          style="${filled?'border-color:'+PVC[c.key]+';border-style:solid':''}">
+          ${filled ? `<span style="color:${PVC[c.key]}">${v}</span>` : ''}
         </div>
       </td>`;
     }).join('');
 
     return `
-      <table style="border-collapse:separate;border-spacing:6px;margin:0 auto">
+      <table class="up-table">
         <thead>
           <tr>
             <td></td>
-            ${cols.map(c => `<th style="text-align:center;font-size:13px;font-weight:900;color:${PV_COLORS[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
+            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
             <td></td>
           </tr>
         </thead>
         <tbody>
           ${carryRowHTML}
           <tr>
-            <td style="padding-right:6px;font-size:13px;color:var(--color-text-muted);text-align:right"></td>
-            ${cols.map(c => `<td style="text-align:center">
-              <div class="col-cell" id="cell-row-a-${c.key}" style="border-color:${PV_COLORS[c.key]}">
-                <span style="color:${PV_COLORS[c.key]}">${c.idx < String(numA).length ? da[c.idx] : ''}</span>
-              </div>
-            </td>`).join('')}
-            <td></td>
+            <td></td>${rowA}<td></td>
           </tr>
           <tr>
-            <td style="padding-right:6px;font-size:1.5rem;font-weight:900;color:#666;text-align:right">${opSymbol}</td>
-            ${cols.map(c => `<td style="text-align:center">
-              <div class="col-cell" id="cell-row-b-${c.key}" style="border-color:${PV_COLORS[c.key]}">
-                <span style="color:${PV_COLORS[c.key]}">${c.idx < String(numB).length ? db[c.idx] : ''}</span>
-              </div>
-            </td>`).join('')}
-            <td></td>
+            <td style="font-size:1.8rem;font-weight:900;color:#555;text-align:right;padding-right:6px">${op}</td>
+            ${rowB}<td></td>
           </tr>
           <tr>
-            <td colspan="${cols.length+2}" style="padding:2px 0">
+            <td colspan="${cols.length + 2}" style="padding:2px 0">
               <div style="height:3px;background:linear-gradient(90deg,transparent,#374151,transparent);border-radius:2px"></div>
             </td>
           </tr>
           <tr>
-            <td style="padding-right:6px"></td>
-            ${answerCells}
-            <td></td>
+            <td></td>${ansRow}<td></td>
           </tr>
         </tbody>
-      </table>
-    `;
+      </table>`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -729,450 +793,417 @@ const UppstallningGame = (() => {
   ══════════════════════════════════════════════════════════ */
   function startExercise() {
     App.Sound.play('click');
-    subMode      = 'exercise';
-    exerciseIdx  = 0;
-    exScore      = 0;
-    newExerciseProblem();
+    exerciseIdx = 0;
+    exScore     = 0;
+    newExProblem();
   }
 
-  function newExerciseProblem() {
+  function newExProblem() {
     generatePair();
-    exAttempts    = 0;
-    exCurrentCol  = 0; // start with ental (rightmost)
+    exCurrentCol  = 0;
     exInputLocked = false;
+    exInput       = '';
     exAnswers     = [null, null, null];
-    exBorrowed    = [false, false, false];
+    exEffA        = [...digs(numA)];
+    exEffB        = [...digs(numB)];
     exCarries     = [0, 0, 0];
-
-    // For subtraction pre-compute effective values & borrows
-    const da = digits(numA), db = digits(numB);
-    exEffA = [...da];
-    exEffB = [...db];
-
-    renderExercise();
+    renderExView();
   }
 
-  function renderExercise() {
+  function renderExView() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
+    const colKey = COL_KEYS[exCurrentCol];
+    const needsBorrow = mode === 'subtraction'
+      && exEffA[exCurrentCol] < exEffB[exCurrentCol];
 
     root.innerHTML = `
+      <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
         <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
           onclick="UppstallningGame.goBack()">Avsluta</button>
         <span class="header-title" style="color:${modeColor}">${modeLabel} – Övning</span>
         <div style="font-size:12px;font-weight:800;color:var(--color-text-muted)">${exerciseIdx+1}/5</div>
       </div>
-
-      <div style="flex:1;display:grid;grid-template-columns:55fr 45fr;gap:8px;padding:8px;overflow:hidden;min-height:0">
-        <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:0;padding-bottom:8px">
-          ${renderExTable()}
-          <div id="ex-bubble"></div>
-          <div id="ex-numpad-area">
-            ${renderNumpad()}
-          </div>
-          <div id="ex-feedback"></div>
-          ${mode === 'subtraction' && !exBorrowed[exCurrentCol] && exEffA[exCurrentCol] < exEffB[exCurrentCol]
-            ? `<button class="up-btn" onclick="UppstallningGame.exDoBorrow()"
-                style="width:100%;height:46px;background:#fef3c7;color:#d97706;border:2px solid #f59e0b;font-size:var(--text-base)">
+      <div id="up-main">
+        <div id="up-left">
+          <div id="up-table-wrap">${buildExTableHTML()}</div>
+          <div id="ex-bubble">${exBubbleHTML(needsBorrow)}</div>
+          ${needsBorrow
+            ? `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
+                style="width:100%;height:48px;background:#fef3c7;color:#d97706;border:2px solid #f59e0b;font-size:1rem;border-radius:14px">
                 💡 Låna från nästa kolumn</button>`
-            : ''}
+            : `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+                <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
+                  Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
+                </div>
+                <div class="ex-numpad">
+                  ${[1,2,3,4,5,6,7,8,9,'⌫',0,''].map(k => k === ''
+                    ? '<div></div>'
+                    : `<button class="ex-nk" onclick="UppstallningGame.exPress(${JSON.stringify(String(k))})">${k}</button>`
+                  ).join('')}
+                </div>
+              </div>`}
+          <div id="ex-feedback"></div>
         </div>
-        <div class="up-scratch">
-          <div style="font-size:10px;font-weight:800;color:var(--pv-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
-          <canvas id="up-canvas" class="up-canvas"></canvas>
-          <div style="display:flex;gap:5px;flex-shrink:0">
-            <button onclick="UppstallningGame.upToggleEraser(false)" id="up-draw"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-primary);color:#fff;border:1.5px solid var(--pv-primary)">🖊️ Rita</button>
-            <button onclick="UppstallningGame.upToggleEraser(true)" id="up-erase"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🧹 Sudd</button>
-            <button onclick="UppstallningGame.upClearCanvas()"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🗑️ Rensa</button>
-          </div>
+        <div id="up-right">
+          ${scratchHTML()}
         </div>
-      </div>
-    `;
+      </div>`;
 
     setupCanvas('up-canvas');
-    updateExBubble();
   }
 
-  function renderExTable() {
-    const maxC = getMaxCol();
-    const cols = maxC === 2
-      ? [{ key:'tiotal', label:'T', idx:1 }, { key:'ental', label:'E', idx:0 }]
-      : [{ key:'hundratal', label:'H', idx:2 }, { key:'tiotal', label:'T', idx:1 }, { key:'ental', label:'E', idx:0 }];
+  function buildExTableHTML() {
+    const maxC = colCount;
+    const cols = [];
+    for (let c = maxC - 1; c >= 0; c--) cols.push({ key: COL_KEYS[c], label: COL_LABELS[c], idx: c });
 
-    const opSymbol = mode === 'addition' ? '+' : '−';
-    const da = digits(numA), db = digits(numB);
+    const op = mode === 'addition' ? '+' : '−';
 
-    const answerCells = cols.map(c => {
-      const val = exAnswers[c.idx];
-      const isActive = c.idx === exCurrentCol && val === null;
-      const isFilled = val !== null;
-      let cls = 'answer-input-cell';
-      if (isActive) cls += ' active-col';
-      if (isFilled) cls += ' filled';
+    const carryRow = mode === 'addition' ? `
+      <tr>
+        <td style="font-size:11px;font-weight:800;color:#d97706;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
+        ${cols.map(c => `<td style="text-align:center">
+          <div class="carry-cell" id="ex-carry-${c.key}">${exCarries[c.idx] ? '1' : ''}</div>
+        </td>`).join('')}
+        <td></td>
+      </tr>` : '';
+
+    const rowA = cols.map(c => {
+      const v = exEffA[c.idx];
+      const isCur = c.idx === exCurrentCol;
+      const isFilled = exAnswers[c.idx] !== null;
       return `<td style="text-align:center">
-        <div class="${cls}" id="ex-ans-${c.key}" style="${isFilled?'border-color:'+PV_COLORS[c.key]:isActive?'':''}">
-          <span style="color:${PV_COLORS[c.key]}">${val !== null ? val : (isActive ? '?' : '')}</span>
+        <div class="col-cell${isCur ? ' glow-'+c.key : isFilled ? ' dim' : ''}"
+          style="border-color:${PVC[c.key]}" id="ex-a-${c.key}">
+          <div class="dw" id="ex-dw-a-${c.key}">
+            <span style="color:${PVC[c.key]}">${String(numA).length > c.idx ? v : ''}</span>
+          </div>
         </div>
       </td>`;
     }).join('');
 
-    // Carry row for addition
-    let carryRowHTML = '';
-    if (mode === 'addition') {
-      carryRowHTML = `<tr>
-        <td style="font-size:11px;color:#d97706;font-weight:800;text-align:right;padding-right:6px">minne:</td>
-        ${cols.map(c => {
-          const show = exCarries[c.idx];
-          return `<td style="text-align:center">
-            <div class="carry-cell" id="ex-carry-${c.key}">${show ? '1' : ''}</div>
-          </td>`;
-        }).join('')}
-        <td></td>
-      </tr>`;
-    }
+    const rowB = cols.map(c => {
+      const v = exEffB[c.idx];
+      const isCur = c.idx === exCurrentCol;
+      return `<td style="text-align:center">
+        <div class="col-cell${!isCur ? ' dim' : ''}" style="border-color:${PVC[c.key]}">
+          <span style="color:${PVC[c.key]}">${String(numB).length > c.idx ? v : ''}</span>
+        </div>
+      </td>`;
+    }).join('');
 
-    // Effective A (after borrows for subtraction)
-    const showEffA = (idx) => {
-      if (mode === 'subtraction' && exBorrowed[idx]) return exEffA[idx];
-      return digits(numA)[idx];
-    };
+    const ansRow = cols.map(c => {
+      const v = exAnswers[c.idx];
+      const isCur = c.idx === exCurrentCol;
+      const filled = v !== null;
+      return `<td style="text-align:center">
+        <div class="ans-cell${isCur ? ' active-col' : ''}${filled ? ' filled' : ''}"
+          id="ex-ans-${c.key}"
+          style="${filled ? 'border-color:'+PVC[c.key]+';border-style:solid' : ''}">
+          <span style="color:${PVC[c.key]}">${v !== null ? v : (isCur && exInput ? exInput : '')}</span>
+        </div>
+      </td>`;
+    }).join('');
 
-    return `<div style="background:rgba(255,255,255,0.9);border-radius:var(--radius-lg);
-      padding:var(--space-4);border:2px solid rgba(37,99,235,0.12)">
-      <table style="border-collapse:separate;border-spacing:6px;margin:0 auto">
+    return `
+      <table class="up-table">
         <thead>
           <tr>
             <td></td>
-            ${cols.map(c => `<th style="text-align:center;font-size:13px;font-weight:900;color:${PV_COLORS[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
+            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
             <td></td>
           </tr>
         </thead>
         <tbody>
-          ${carryRowHTML}
+          ${carryRow}
+          <tr><td></td>${rowA}<td></td></tr>
           <tr>
-            <td></td>
-            ${cols.map(c => `<td style="text-align:center">
-              <div class="col-cell ${c.idx===exCurrentCol?'active-glow-'+c.key:''}"
-                style="border-color:${PV_COLORS[c.key]};opacity:${c.idx===exCurrentCol?1:c.idx<exCurrentCol?0.5:1}">
-                <span style="color:${PV_COLORS[c.key]}" id="ex-a-${c.key}">${c.idx < String(numA).length ? showEffA(c.idx) : ''}</span>
-              </div>
-            </td>`).join('')}
-            <td></td>
+            <td style="font-size:1.8rem;font-weight:900;color:#555;text-align:right;padding-right:6px">${op}</td>
+            ${rowB}<td></td>
           </tr>
           <tr>
-            <td style="font-size:1.5rem;font-weight:900;color:#666;text-align:right;padding-right:6px">${opSymbol}</td>
-            ${cols.map(c => `<td style="text-align:center">
-              <div class="col-cell" style="border-color:${PV_COLORS[c.key]};opacity:${c.idx===exCurrentCol?1:c.idx<exCurrentCol?0.5:1}">
-                <span style="color:${PV_COLORS[c.key]}">${c.idx < String(numB).length ? db[c.idx] : ''}</span>
-              </div>
-            </td>`).join('')}
-            <td></td>
-          </tr>
-          <tr>
-            <td colspan="${cols.length+2}" style="padding:2px 0">
+            <td colspan="${cols.length + 2}" style="padding:2px 0">
               <div style="height:3px;background:linear-gradient(90deg,transparent,#374151,transparent);border-radius:2px"></div>
             </td>
           </tr>
-          <tr>
-            <td></td>
-            ${answerCells}
-            <td></td>
-          </tr>
+          <tr><td></td>${ansRow}<td></td></tr>
         </tbody>
-      </table>
-    </div>`;
+      </table>`;
   }
 
-  function renderNumpad() {
-    const colKey = COL_KEYS[exCurrentCol];
-    return `
-      <div style="background:rgba(255,255,255,0.9);border-radius:var(--radius-lg);padding:var(--space-3);border:2px solid rgba(37,99,235,0.1)">
-        <div style="font-size:11px;font-weight:800;color:${PV_COLORS[colKey]};text-align:center;margin-bottom:6px;text-transform:uppercase">
-          Fyll i ${COL_LABELS[exCurrentCol] === 'E' ? 'entalet' : COL_LABELS[exCurrentCol] === 'T' ? 'tiotalet' : 'hundratalet'}
-        </div>
-        <div class="numpad-grid">
-          ${[1,2,3,4,5,6,7,8,9,'⌫',0,''].map(k => k === ''
-            ? '<div></div>'
-            : `<button class="nk" onclick="UppstallningGame.exNumpadPress(${JSON.stringify(String(k))})">${k}</button>`
-          ).join('')}
-        </div>
-      </div>`;
-  }
-
-  function updateExBubble() {
-    const area = document.getElementById('ex-bubble');
-    if (!area) return;
-    const colKey = COL_KEYS[exCurrentCol];
-    const da = exEffA, db = exEffB;
-
+  function exBubbleHTML(needsBorrow) {
+    const ck = COL_KEYS[exCurrentCol];
     let msg = '';
-    if (mode === 'addition') {
+    if (needsBorrow) {
+      const isDouble = exCurrentCol + 1 < colCount && exEffA[exCurrentCol + 1] === 0;
+      msg = isDouble
+        ? `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
+        : `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
+    } else if (mode === 'addition') {
       const ci = exCarries[exCurrentCol] || 0;
-      const extra = ci ? ` + ${ci} (minne)` : '';
-      msg = `Vad är <strong style="color:${PV_COLORS[colKey]}">${da[exCurrentCol]}</strong> + <strong style="color:${PV_COLORS[colKey]}">${db[exCurrentCol]}</strong>${extra}?`;
+      const extra = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
+      msg = `Vad är <strong style="color:${PVC[ck]}">${exEffA[exCurrentCol]}</strong> + <strong style="color:${PVC[ck]}">${exEffB[exCurrentCol]}</strong>${extra}?`;
     } else {
-      if (da[exCurrentCol] < db[exCurrentCol] && !exBorrowed[exCurrentCol]) {
-        msg = `<span style="color:#ef4444">⚠️ ${da[exCurrentCol]} är mindre än ${db[exCurrentCol]}!</span><br>Tryck "Låna" för att låna från nästa kolumn.`;
-      } else {
-        msg = `Vad är <strong style="color:${PV_COLORS[colKey]}">${da[exCurrentCol]}</strong> − <strong style="color:${PV_COLORS[colKey]}">${db[exCurrentCol]}</strong>?`;
-      }
+      msg = `Vad är <strong style="color:${PVC[ck]}">${exEffA[exCurrentCol]}</strong> − <strong style="color:${PVC[ck]}">${exEffB[exCurrentCol]}</strong>?`;
     }
-    area.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
+    return msg ? `<div class="thought-bubble">${msg}</div>` : '';
   }
 
-  let exCurrentInput = '';
-
-  function exNumpadPress(key) {
+  function exPress(key) {
     if (exInputLocked) return;
     const fb = document.getElementById('ex-feedback');
     if (fb) fb.innerHTML = '';
-
     if (key === '⌫') {
-      exCurrentInput = exCurrentInput.slice(0, -1);
-    } else {
-      if (exCurrentInput.length < 2) exCurrentInput += key;
+      exInput = exInput.slice(0, -1);
+    } else if (exInput.length < 1) {
+      exInput = key;
     }
-
-    // Show current input in active answer cell
+    // Update display
     const colKey = COL_KEYS[exCurrentCol];
     const ansEl = document.getElementById(`ex-ans-${colKey}`);
-    if (ansEl) {
-      ansEl.querySelector('span').textContent = exCurrentInput || '?';
-    }
-
-    // Auto-submit when 1 digit entered (or 2 digits for carry check)
-    if (exCurrentInput.length === 1) {
-      // For addition: if the correct column result >9, user might enter just the unit digit
-      // Submit immediately after 1 digit
-      setTimeout(() => { if (!exInputLocked) exSubmitCol(); }, 400);
+    if (ansEl) ansEl.querySelector('span').textContent = exInput || '';
+    // Auto-submit after entering 1 digit
+    if (exInput.length === 1) {
+      setTimeout(() => { if (!exInputLocked && exInput.length === 1) exSubmitCol(); }, 350);
     }
   }
 
   function exSubmitCol() {
-    if (exInputLocked || !exCurrentInput) return;
+    if (exInputLocked || !exInput) return;
     exInputLocked = true;
-    const colKey = COL_KEYS[exCurrentCol];
-    const da = exEffA, db = exEffB;
+    const ci = (mode === 'addition' ? exCarries[exCurrentCol] : 0) || 0;
+    const correctFull = mode === 'addition'
+      ? exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci
+      : exEffA[exCurrentCol] - exEffB[exCurrentCol];
+    const correctDigit = ((correctFull % 10) + 10) % 10;
 
-    let correctAns;
-    if (mode === 'addition') {
-      const ci = exCarries[exCurrentCol] || 0;
-      const sum = da[exCurrentCol] + db[exCurrentCol] + ci;
-      correctAns = sum % 10;
-      // Check if carry needed
-      if (sum > 9 && exCurrentCol + 1 < getMaxCol()) {
-        exCarries[exCurrentCol + 1] = (exCarries[exCurrentCol + 1] || 0) + 1;
-      }
-    } else {
-      correctAns = da[exCurrentCol] - db[exCurrentCol];
-    }
-
-    const userAns = parseInt(exCurrentInput);
-
-    if (userAns === correctAns) {
-      // Correct!
-      exAnswers[exCurrentCol] = correctAns;
-      exAttempts = 0;
-      exCurrentInput = '';
+    if (parseInt(exInput) === correctDigit) {
+      exAnswers[exCurrentCol] = correctDigit;
+      exInput = '';
       App.Sound.play('correct');
-
-      // Carry animation?
-      if (mode === 'addition') {
-        const ci = exCarries[exCurrentCol] || 0;
-        const sum = digits(numA)[exCurrentCol] + digits(numB)[exCurrentCol] + (ci > 0 ? 1 : 0);
-        if (sum > 9 && exCurrentCol + 1 < getMaxCol()) {
-          playCarrySound();
-        }
+      // Handle carry for addition
+      if (mode === 'addition' && correctFull > 9 && exCurrentCol + 1 < colCount) {
+        exCarries[exCurrentCol + 1] = 1;
+        playCarrySound();
       }
-
-      celebrationSmall();
-
-      // Check if done
-      const nextCol = exCurrentCol + 1;
-      if (nextCol >= getMaxCol()) {
-        // All columns done — handle overflow carry for addition
-        if (mode === 'addition') {
-          const lastCarry = exCarries[getMaxCol()] || 0;
-          if (lastCarry && getMaxCol() < 3) {
-            exAnswers[getMaxCol()] = lastCarry;
-          }
-        }
-        setTimeout(exShowResult, 1000);
+      smallBurst();
+      const next = exCurrentCol + 1;
+      if (next >= colCount) {
+        setTimeout(exCheckDone, 900);
       } else {
-        exCurrentCol = nextCol;
+        exCurrentCol = next;
         exInputLocked = false;
-        renderExercise();
+        renderExView();
       }
     } else {
-      exAttempts++;
-      exCurrentInput = '';
+      App.Sound.play('wrong');
+      exInput = '';
       exInputLocked = false;
-
-      if (exAttempts >= 2) {
-        // Show answer and move on
-        App.Sound.play('wrong');
-        const fb = document.getElementById('ex-feedback');
-        if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #f59e0b;
-          border-radius:var(--radius-md);padding:var(--space-3);font-weight:800;color:#92400e;text-align:center">
-          Svaret är <strong style="color:${PV_COLORS[colKey]}">${correctAns}</strong></div>`;
-        exAnswers[exCurrentCol] = correctAns;
-        exAttempts = 0;
-
-        setTimeout(() => {
-          const nextCol = exCurrentCol + 1;
-          if (nextCol >= getMaxCol()) {
-            exShowResult();
-          } else {
-            exCurrentCol = nextCol;
-            exInputLocked = false;
-            renderExercise();
-          }
-        }, 1800);
-      } else {
-        App.Sound.play('wrong');
-        const fb = document.getElementById('ex-feedback');
-        if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #f59e0b;
-          border-radius:var(--radius-md);padding:var(--space-3);font-weight:800;color:#92400e;text-align:center">
-          Hmm, prova igen! 💪</div>`;
-      }
+      const fb = document.getElementById('ex-feedback');
+      if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
+        border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
+        color:#92400e;text-align:center">Hmm, prova igen! Vad är ${exEffA[exCurrentCol]} ${mode==='addition'?'+':'−'} ${exEffB[exCurrentCol]}? 💪</div>`;
+      const ansEl = document.getElementById(`ex-ans-${COL_KEYS[exCurrentCol]}`);
+      if (ansEl) ansEl.querySelector('span').textContent = '';
     }
   }
 
   function exDoBorrow() {
     if (exInputLocked) return;
     const c = exCurrentCol;
-    if (c + 1 >= 3) return;
-
+    if (c + 1 >= colCount) return;
+    exInputLocked = true;
+    const btn = document.getElementById('ex-borrow-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Lånar...'; }
     playBorrowSound();
-    exBorrowed[c] = true;
-    exEffA[c] += 10;
-    exEffA[c + 1] = Math.max(0, exEffA[c + 1] - 1);
 
-    renderExercise();
+    const isDouble = exEffA[c + 1] === 0 && c + 2 < colCount;
+
+    if (isDouble) {
+      // Step 1: borrow from H to T
+      setTimeout(() => {
+        animateExBorrow(c + 2, c + 1, exEffA[c + 2] - 1, exEffA[c + 1] + 10, () => {
+          exEffA[c + 2]--;
+          exEffA[c + 1] += 10;
+          playBorrowSound();
+          // Step 2: borrow from T to E
+          setTimeout(() => {
+            animateExBorrow(c + 1, c, exEffA[c + 1] - 1, exEffA[c] + 10, () => {
+              exEffA[c + 1]--;
+              exEffA[c] += 10;
+              exInputLocked = false;
+              renderExView();
+            });
+          }, 500);
+        });
+      }, 300);
+    } else {
+      animateExBorrow(c + 1, c, exEffA[c + 1] - 1, exEffA[c] + 10, () => {
+        exEffA[c + 1]--;
+        exEffA[c] += 10;
+        exInputLocked = false;
+        renderExView();
+      });
+    }
   }
 
-  function exShowResult() {
-    // Did user get the correct final answer?
-    const dr = digits(result);
+  function animateExBorrow(srcCol, dstCol, srcNew, dstNew, cb) {
+    const srcKey = COL_KEYS[srcCol];
+    const dstKey = COL_KEYS[dstCol];
+    const srcDw = document.getElementById(`ex-dw-a-${srcKey}`);
+    if (srcDw) {
+      srcDw.classList.add('crossed');
+      const sp = document.createElement('span');
+      sp.className = 'digit-new';
+      sp.style.color = PVC[srcKey];
+      sp.textContent = srcNew;
+      srcDw.appendChild(sp);
+    }
+    // Animate token
+    const wrap = document.getElementById('up-table-wrap');
+    const srcCell = document.getElementById(`ex-a-${srcKey}`);
+    const dstCell = document.getElementById(`ex-a-${dstKey}`);
+    if (wrap && srcCell && dstCell) {
+      const wRect = wrap.getBoundingClientRect();
+      const sRect = srcCell.getBoundingClientRect();
+      const dRect = dstCell.getBoundingClientRect();
+      const tok = document.createElement('div');
+      tok.textContent = '+10';
+      tok.style.cssText = `position:absolute;
+        left:${sRect.left-wRect.left+sRect.width/2-18}px;
+        top:${sRect.top-wRect.top+sRect.height/2-14}px;
+        padding:3px 7px;border-radius:999px;
+        background:#fee2e2;border:2px solid #ef4444;
+        font-size:0.85rem;font-weight:900;color:#dc2626;
+        pointer-events:none;z-index:20;
+        transition:left 0.7s ease,top 0.7s ease;`;
+      wrap.style.position = 'relative';
+      wrap.appendChild(tok);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        tok.style.left = `${dRect.left-wRect.left+dRect.width/2-18}px`;
+        tok.style.top  = `${dRect.top-wRect.top+dRect.height/2-14}px`;
+      }));
+      setTimeout(() => { tok.style.opacity='0'; tok.style.transition+=',opacity 0.3s'; }, 750);
+      setTimeout(() => { tok.remove(); }, 1100);
+    }
+    // Update dst display after 0.8s
+    setTimeout(() => {
+      const dstDw = document.getElementById(`ex-dw-a-${dstKey}`);
+      if (dstDw) {
+        dstDw.classList.add('crossed');
+        const sp2 = document.createElement('span');
+        sp2.className = 'digit-new';
+        sp2.style.color = PVC[dstKey];
+        sp2.textContent = dstNew;
+        dstDw.appendChild(sp2);
+      }
+      setTimeout(cb, 500);
+    }, 800);
+  }
+
+  function exCheckDone() {
+    const dr = digs(mode === 'addition' ? numA + numB : numA - numB);
     let correct = true;
-    for (let c = 0; c < getMaxCol(); c++) {
+    for (let c = 0; c < colCount; c++) {
       if (exAnswers[c] !== dr[c]) { correct = false; break; }
     }
-    if (correct) exScore++;
+    if (correct) { exScore++; App.Sound.play('correct'); smallBurst(); }
+    else App.Sound.play('wrong');
 
     exerciseIdx++;
     if (exerciseIdx >= 5) {
-      showExerciseFinalResults();
+      showExResults();
     } else {
-      // Quick result feedback then next problem
-      const root = document.getElementById('uppstallning-root');
-      const hdr = root.querySelector('.app-header');
-      const area = document.createElement('div');
-      area.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99';
-      area.innerHTML = `<div style="background:${correct?'#dcfce7':'#fef9c3'};border:2px solid ${correct?'#22c55e':'#f59e0b'};
-        border-radius:var(--radius-lg);padding:var(--space-3) var(--space-5);font-weight:800;
-        color:${correct?'#166534':'#92400e'};font-size:var(--text-lg)">
-        ${correct?'✅ Rätt!':'💪 Nästa!'} Uppgift ${exerciseIdx}/5</div>`;
-      document.body.appendChild(area);
-      if (correct) celebrationSmall();
-      setTimeout(() => {
-        area.remove();
-        newExerciseProblem();
-      }, 1200);
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99';
+      toast.innerHTML = `<div style="background:${correct?'#dcfce7':'#fef9c3'};border:2px solid ${correct?'#22c55e':'#f59e0b'};
+        border-radius:999px;padding:10px 22px;font-weight:800;color:${correct?'#166534':'#92400e'};font-size:1rem">
+        ${correct ? '✅ Rätt!' : '💪 Nästa!'} Uppgift ${exerciseIdx}/5</div>`;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); newExProblem(); }, 1100);
     }
   }
 
-  function showExerciseFinalResults() {
+  function showExResults() {
     App.Sound.play(exScore >= 4 ? 'fanfare' : 'correct');
     if (exScore === 5) App.Confetti.burst(160);
     saveLog(exScore, 5);
-
     const root = document.getElementById('uppstallning-root');
     const emoji = exScore === 5 ? '🌟' : exScore >= 4 ? '🥇' : exScore >= 3 ? '🥈' : '💪';
     const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
-    const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-
     root.innerHTML = `
+      <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
         <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
           onclick="UppstallningGame.goBack()">Tillbaka</button>
         <span class="header-title" style="color:var(--pv-primary)">🏆 Resultat</span>
         <div style="width:80px"></div>
       </div>
-      <div style="padding:var(--space-6);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
+      <div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px">
         <div style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));
-          border-radius:var(--radius-xl);padding:var(--space-8) var(--space-6);text-align:center;
-          color:white;width:100%;animation:bounce-in 0.6s var(--ease-bounce)">
-          <div style="font-size:4rem;margin-bottom:var(--space-3)">${emoji}</div>
-          <div style="font-family:var(--font-heading);font-size:var(--text-2xl)">${msg}</div>
-          <div style="font-size:var(--text-5xl);font-weight:900;margin:var(--space-3) 0">
-            ${exScore} <span style="font-size:var(--text-2xl);opacity:0.8">av 5</span>
+          border-radius:20px;padding:32px 24px;text-align:center;color:white;width:100%;animation:bounce-in 0.6s var(--ease-bounce)">
+          <div style="font-size:4rem;margin-bottom:12px">${emoji}</div>
+          <div style="font-family:var(--font-heading);font-size:1.6rem">${msg}</div>
+          <div style="font-size:3rem;font-weight:900;margin:12px 0">
+            ${exScore} <span style="font-size:1.5rem;opacity:0.8">av 5</span>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
+        <div style="display:flex;flex-direction:column;gap:12px;width:100%">
           <button class="btn btn-lg up-btn" style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));color:white;border:none"
             onclick="UppstallningGame.startExercise()">🔄 Spela igen</button>
           <button class="btn btn-ghost up-btn" style="border-color:var(--pv-primary);color:var(--pv-primary)"
             onclick="UppstallningGame.goBack()">↩ Välj läge</button>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
-  /* ── Celebration burst (liten) ──────────────────────────── */
-  function celebrationSmall() {
-    const container = document.getElementById('confetti-container');
-    if (!container) return;
-    const shapes = ['⭐','💫','✨','🌟','🎉','💙','💚','🔢'];
-    for (let i = 0; i < 30; i++) {
-      const el = document.createElement('span');
-      el.className = 'confetti-piece';
-      el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
-      el.style.cssText = `left:${Math.random()*100}%;font-size:${12+Math.random()*14}px;
-        animation-duration:${1.2+Math.random()*1.5}s;animation-delay:${Math.random()*0.2}s`;
-      container.appendChild(el);
-    }
-    setTimeout(() => {
-      if (container) {
-        const pieces = container.querySelectorAll('.confetti-piece');
-        pieces.forEach(p => p.remove());
-      }
-    }, 2500);
+  /* ── Scratch HTML ───────────────────────────────────────── */
+  function scratchHTML() {
+    return `<div class="up-scratch">
+      <div style="font-size:10px;font-weight:800;color:var(--pv-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+      <canvas id="up-canvas" class="up-canvas"></canvas>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button onclick="UppstallningGame.upToggleEraser(false)" id="up-draw"
+          style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
+          cursor:pointer;background:var(--pv-primary);color:#fff;border:1.5px solid var(--pv-primary)">🖊️ Rita</button>
+        <button onclick="UppstallningGame.upToggleEraser(true)" id="up-erase"
+          style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
+          cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🧹 Sudd</button>
+        <button onclick="UppstallningGame.upClearCanvas()"
+          style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
+          cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🗑️ Rensa</button>
+      </div>
+    </div>`;
   }
 
   /* ── Ljud ───────────────────────────────────────────────── */
   function playCarrySound() {
     try {
       const ac = new (window.AudioContext || window['webkitAudioContext'])();
-      const osc = ac.createOscillator(), gain = ac.createGain();
-      osc.connect(gain); gain.connect(ac.destination);
-      osc.frequency.setValueAtTime(400, ac.currentTime);
-      osc.frequency.linearRampToValueAtTime(800, ac.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.18, ac.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.25);
-      osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.25);
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.setValueAtTime(400, ac.currentTime);
+      o.frequency.linearRampToValueAtTime(800, ac.currentTime + 0.2);
+      g.gain.setValueAtTime(0.18, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.25);
+      o.start(ac.currentTime); o.stop(ac.currentTime + 0.25);
     } catch (_) {}
   }
 
   function playBorrowSound() {
     try {
       const ac = new (window.AudioContext || window['webkitAudioContext'])();
-      const osc = ac.createOscillator(), gain = ac.createGain();
-      osc.type = 'triangle';
-      osc.connect(gain); gain.connect(ac.destination);
-      osc.frequency.setValueAtTime(500, ac.currentTime);
-      osc.frequency.linearRampToValueAtTime(250, ac.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.2, ac.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
-      osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.35);
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle';
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.setValueAtTime(500, ac.currentTime);
+      o.frequency.linearRampToValueAtTime(250, ac.currentTime + 0.32);
+      g.gain.setValueAtTime(0.2, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.38);
+      o.start(ac.currentTime); o.stop(ac.currentTime + 0.38);
     } catch (_) {}
   }
 
@@ -1183,12 +1214,12 @@ const UppstallningGame = (() => {
     upErasing = false;
     requestAnimationFrame(() => {
       const r = upCanvas.getBoundingClientRect();
-      upCanvas.width  = r.width  || 300;
-      upCanvas.height = r.height || 200;
+      upCanvas.width  = Math.max(r.width  || 300, 300);
+      upCanvas.height = Math.max(r.height || 200, 200);
       upCtx = upCanvas.getContext('2d');
-      upCanvas.addEventListener('pointerdown',  upPD);
-      upCanvas.addEventListener('pointermove',  upPM);
-      upCanvas.addEventListener('pointerup',    upPU);
+      upCanvas.addEventListener('pointerdown',   upPD);
+      upCanvas.addEventListener('pointermove',   upPM);
+      upCanvas.addEventListener('pointerup',     upPU);
       upCanvas.addEventListener('pointercancel', upPU);
     });
   }
@@ -1207,14 +1238,9 @@ const UppstallningGame = (() => {
     const r = upCanvas.getBoundingClientRect();
     const x = (e.clientX - r.left) * (upCanvas.width / r.width);
     const y = (e.clientY - r.top)  * (upCanvas.height / r.height);
-    if (upErasing) {
-      upCtx.globalCompositeOperation = 'destination-out';
-      upCtx.lineWidth = 20;
-    } else {
-      upCtx.globalCompositeOperation = 'source-over';
-      upCtx.lineWidth = 2 + (e.pressure || 0.5) * 3;
-      upCtx.strokeStyle = '#3b82f6';
-    }
+    upCtx.globalCompositeOperation = upErasing ? 'destination-out' : 'source-over';
+    upCtx.lineWidth = upErasing ? 20 : 2 + (e.pressure || 0.5) * 3;
+    upCtx.strokeStyle = '#3b82f6';
     upCtx.lineCap = 'round'; upCtx.lineJoin = 'round';
     upCtx.beginPath(); upCtx.moveTo(upLastX, upLastY);
     upCtx.lineTo(x, y); upCtx.stroke();
@@ -1233,6 +1259,22 @@ const UppstallningGame = (() => {
 
   function upClearCanvas() {
     if (upCtx && upCanvas) upCtx.clearRect(0, 0, upCanvas.width, upCanvas.height);
+  }
+
+  /* ── Konfetti (liten burst) ─────────────────────────────── */
+  function smallBurst() {
+    const c = document.getElementById('confetti-container');
+    if (!c) return;
+    const sh = ['⭐','💫','✨','🌟','🎉','💙','💚'];
+    for (let i = 0; i < 28; i++) {
+      const el = document.createElement('span');
+      el.className = 'confetti-piece';
+      el.textContent = sh[Math.floor(Math.random() * sh.length)];
+      el.style.cssText = `left:${Math.random()*100}%;font-size:${12+Math.random()*14}px;
+        animation-duration:${1.2+Math.random()*1.5}s;animation-delay:${Math.random()*0.2}s`;
+      c.appendChild(el);
+    }
+    setTimeout(() => { c.querySelectorAll('.confetti-piece').forEach(p => p.remove()); }, 2500);
   }
 
   /* ── Navigation ─────────────────────────────────────────── */
@@ -1259,16 +1301,10 @@ const UppstallningGame = (() => {
 
   /* ── Publik API ─────────────────────────────────────────── */
   return {
-    init,
-    showModeSelect,
-    setDifficulty,
-    startDemo,
-    startExercise,
-    demoNextStep,
-    exNumpadPress,
-    exDoBorrow,
-    upToggleEraser,
-    upClearCanvas,
+    init, showModeSelect, setDifficulty,
+    startDemo, demoNextStep,
+    startExercise, exPress, exDoBorrow,
+    upToggleEraser, upClearCanvas,
     goBack,
   };
 })();

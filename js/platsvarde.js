@@ -243,11 +243,15 @@ const PlatsvardeGame = (() => {
     root.innerHTML = `
       <style id="pv-rs">
         #addsub-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-        #pv-main { flex:1; display:grid; grid-template-columns:55fr 45fr; gap:8px; padding:8px; overflow:hidden; min-height:0; }
-        @media (orientation:portrait) { #pv-main { grid-template-columns:1fr 1fr; } }
-        #pv-left { display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
-        #pv-scratch { background:rgba(255,255,255,0.85); border-radius:var(--radius-lg); padding:8px;
-          border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column; gap:5px; height:100%; min-height:0; }
+        #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
+        #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
+        #pv-scratch { flex:45; background:rgba(255,255,255,0.85); border-radius:var(--radius-lg); padding:8px;
+          border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column; gap:5px; min-height:0; }
+        @media (orientation:portrait) {
+          #pv-main { flex-direction:column; }
+          #pv-left { flex:1; }
+          #pv-scratch { flex:0 0 40vh; }
+        }
         #pv-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25); background:rgba(255,255,255,0.7); }
         .pv-card { background:rgba(255,255,255,0.9); border-radius:var(--radius-lg); padding:10px;
@@ -266,11 +270,13 @@ const PlatsvardeGame = (() => {
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
           cursor:pointer; transition:all 0.15s; background:rgba(255,255,255,0.9); }
         .pv-decomp-field.active { outline:3px solid var(--pv-primary); }
-        .pv-numpad { display:grid; grid-template-columns:repeat(6,38px); gap:4px; justify-content:center; margin-top:6px; }
-        .pv-nk { width:38px; height:38px; border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:900;
+        .pv-numpad { display:grid; grid-template-columns:repeat(3,48px); gap:6px; justify-content:center; margin-top:8px; }
+        .pv-nk { width:48px; height:48px; border-radius:var(--radius-full); font-size:var(--text-base); font-weight:900;
           cursor:pointer; background:rgba(255,255,255,0.9); border:1.5px solid rgba(37,99,235,0.3);
           color:var(--pv-primary); transition:transform 0.1s; }
         .pv-nk:hover { transform:scale(1.1); }
+        .pv-nk-del { background:#fee2e2; border-color:#ef4444; color:#dc2626; }
+        .pv-nk-ok  { background:var(--pv-primary); border-color:var(--pv-primary); color:#fff; }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
         .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
           cursor:pointer; border:2px solid rgba(37,99,235,0.3); background:rgba(255,255,255,0.9); transition:all 0.15s; }
@@ -335,6 +341,13 @@ const PlatsvardeGame = (() => {
   }
 
   /* ── Render-hjälpare ────────────────────────────────────── */
+  function renderMonoColor(n, color, size) {
+    size = size || '1.25rem';
+    return String(n).split('').map(d =>
+      `<span style="color:${color};font-weight:900;font-size:${size}">${d}</span>`
+    ).join('');
+  }
+
   function coloredDigit(d, pos) {
     return `<span style="color:${PV_COLORS[pos]};font-weight:900">${d}</span>`;
   }
@@ -384,7 +397,7 @@ const PlatsvardeGame = (() => {
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
             <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
-              ${renderColoredNumber(opt, '1.25rem')}
+              ${renderMonoColor(opt, PV_COLORS[q.target], '1.25rem')}
             </button>
           `).join('')}
         </div>
@@ -460,7 +473,8 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-numpad">
           ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
-            <button class="pv-nk" onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
+            <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
+              onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
           `).join('')}
         </div>
       </div>
