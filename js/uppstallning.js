@@ -36,7 +36,7 @@ const UppstallningGame = (() => {
   let exCarries     = [];
   let exBorrowTens  = [false, false, false]; // borrow-ten markers for exercise mode
   let exInput       = '';
-  let exOrigA       = [];                    // original A-siffror, aldrig modifierade
+  let exColData     = [];                    // preprocessad per-kolumn data från buildDemoSteps
   let exBorrowedFrom = [false, false, false]; // vilka kolumner lånade ifrån (T/H)
   let helpMode      = true;                  // true = med hjälp, false = utan hjälp
 
@@ -386,6 +386,28 @@ const UppstallningGame = (() => {
     }
     steps.push({ type:'done' });
     return steps;
+  }
+
+  /* ── Preprocessa steg → per-kolumn övningsdata ──────────── */
+  function preprocessExSteps(steps) {
+    const result = [];
+    for (let c = 0; c < colCount; c++) {
+      const cantStep  = steps.find(s => (s.type === 'sub_cant' || s.type === 'sub_cant_double') && s.col === c);
+      const flipStep  = steps.find(s => s.type === 'sub_flip_borrow' && s.col === c);
+      const tenStep   = steps.find(s => s.type === 'sub_ten_minus'   && s.col === c);
+      const calcStep  = steps.find(s => s.type === 'sub_calc'        && s.col === c);
+      const dropStep  = steps.find(s => s.type === 'add_drop'        && s.col === c);
+      const interStep = steps.find(s => s.type === 'sub_borrow'      && s.mainCol === c);
+      result[c] = {
+        correctAnswer: tenStep?.ans ?? calcStep?.diff ?? dropStep?.ans ?? 0,
+        nextCarry:     dropStep?.next_carry ?? 0,
+        needsBorrow:   !!cantStep,
+        isDouble:      cantStep?.type === 'sub_cant_double',
+        flipStep:      flipStep  || null,
+        interStep:     interStep || null,
+      };
+    }
+    return result;
   }
 
   /* ── Render demo-vy ─────────────────────────────────────── */
@@ -982,8 +1004,8 @@ const UppstallningGame = (() => {
     exEffB        = [...digs(numB)];
     exCarries     = [0, 0, 0];
     exBorrowTens  = [false, false, false];
-    exOrigA       = [...digs(numA)];
     exBorrowedFrom = [false, false, false];
+    exColData     = preprocessExSteps(buildDemoSteps());
     renderExView();
   }
 
@@ -992,9 +1014,9 @@ const UppstallningGame = (() => {
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
     const colKey = COL_KEYS[exCurrentCol];
-    // needsBorrow: behöver låna OCH har inte redan lånat OCH är i hjälpläge
-    const needsBorrow = helpMode && mode === 'subtraction'
-      && exEffA[exCurrentCol] < exEffB[exCurrentCol]
+    // needsBorrow: kolumnen kräver lån (enligt steg-data) OCH lånet ej gjort OCH hjälpläge
+    const needsBorrow = helpMode
+      && !!(exColData[exCurrentCol]?.needsBorrow)
       && !exBorrowTens[exCurrentCol];
 
     const numpadHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
@@ -1056,12 +1078,16 @@ const UppstallningGame = (() => {
       const isFilled = exAnswers[c.idx] !== null;
       const hasBt = exBorrowTens[c.idx];         // kolumnen mottog lån (+10)
       const wasBorrowedFrom = exBorrowedFrom[c.idx]; // kolumnen lånade ut (-1)
-      const showVal = String(numA).length > c.idx ? exOrigA[c.idx] : '';
+      // hasBt: exEffA[c]=origEffA+10 → origEffA = exEffA[c]-10 (korrekt även vid flerlån)
+      const aBeforeBorrow = hasBt ? exEffA[c.idx] - 10 : 0;
+      const showVal = String(numA).length > c.idx
+        ? (hasBt ? aBeforeBorrow : (wasBorrowedFrom ? exEffA[c.idx] + 1 : exEffA[c.idx]))
+        : '';
       let dwInner;
       if (hasBt) {
-        // Övre siffra struken + liten "0" nere till höger
+        // Övre siffra (effektiv A innan lån) struken + liten "0" nere till höger
         dwInner = `<div class="dw crossed" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${showVal}</span>
+            <span style="color:${PVC[c.key]}">${aBeforeBorrow}</span>
             <span class="small-new-digit" style="color:${PVC[c.key]}">0</span>
           </div>`;
       } else if (wasBorrowedFrom) {
@@ -1093,7 +1119,7 @@ const UppstallningGame = (() => {
       const showBVal = String(numB).length > c.idx ? v : '';
       let bInner;
       if (hasBt) {
-        const diff = v - exOrigA[c.idx]; // komplettering: B minus ursprungs-A
+        const diff = exColData[c.idx]?.flipStep?.diff ?? (v - (exEffA[c.idx] - 10));
         bInner = `<div class="dw crossed" id="ex-dw-b-${c.key}">
             <span style="color:${PVC[c.key]}">${showBVal}</span>
             <span class="small-new-digit" style="color:#ef4444">${diff}</span>
@@ -1154,14 +1180,13 @@ const UppstallningGame = (() => {
     const ck = COL_KEYS[exCurrentCol];
     let msg = '';
     if (needsBorrow) {
-      const isDouble = exCurrentCol + 1 < colCount && exEffA[exCurrentCol + 1] === 0;
+      const isDouble = exColData[exCurrentCol]?.isDouble;
       msg = isDouble
-        ? `<span style="color:#ef4444">⚠️ ${exOrigA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
-        : `<span style="color:#ef4444">⚠️ ${exOrigA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
+        ? `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
+        : `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
     } else if (exBorrowTens[exCurrentCol]) {
-      // Kompletteringsmetoden: visa 10 − diff
-      const origA = exOrigA[exCurrentCol];
-      const diff = exEffB[exCurrentCol] - origA;
+      // Kompletteringsmetoden: hämta diff från steg-data (korrekt effektiv A vid lånetillfället)
+      const diff = exColData[exCurrentCol]?.flipStep?.diff ?? (exEffB[exCurrentCol] - (exEffA[exCurrentCol] - 10));
       msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
     } else if (mode === 'addition') {
       const ci = exCarries[exCurrentCol] || 0;
@@ -1188,33 +1213,15 @@ const UppstallningGame = (() => {
     if (exInputLocked || !exInput) return;
     exInputLocked = true;
 
-    let correctDigit;
-    if (!helpMode) {
-      // Utan hjälp: jämför mot facit-siffra kolumn för kolumn
-      const answer = mode === 'addition' ? numA + numB : numA - numB;
-      correctDigit = digs(answer)[exCurrentCol];
-    } else {
-      const ci = (mode === 'addition' ? exCarries[exCurrentCol] : 0) || 0;
-      let correctFull;
-      if (mode === 'addition') {
-        correctFull = exEffA[exCurrentCol] + exEffB[exCurrentCol] + ci;
-      } else if (exBorrowTens[exCurrentCol]) {
-        // Kompletteringsmetoden: origA + diff = B, svar = 10 - diff
-        const origA = exOrigA[exCurrentCol];
-        const diff = exEffB[exCurrentCol] - origA;
-        correctFull = 10 - diff;
-      } else {
-        correctFull = exEffA[exCurrentCol] - exEffB[exCurrentCol];
-      }
-      correctDigit = ((correctFull % 10) + 10) % 10;
-    }
+    // Rätt svar hämtas alltid från steg-data (samma motor som demo-läget)
+    const correctDigit = exColData[exCurrentCol].correctAnswer;
 
     if (parseInt(exInput) === correctDigit) {
       exAnswers[exCurrentCol] = correctDigit;
       exBorrowTens[exCurrentCol] = false; // rensa borrow-ten markör
       exInput = '';
       App.Sound.play('correct');
-      if (mode === 'addition' && correctFull > 9 && exCurrentCol + 1 < colCount) {
+      if (mode === 'addition' && exColData[exCurrentCol].nextCarry && exCurrentCol + 1 < colCount) {
         exCarries[exCurrentCol + 1] = 1;
         playCarrySound();
       }
@@ -1249,22 +1256,25 @@ const UppstallningGame = (() => {
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Lånar...'; }
     playBorrowSound();
 
-    const isDouble = exEffA[c + 1] === 0 && c + 2 < colCount;
+    const colData  = exColData[c];
+    const isDouble = colData.isDouble;
 
     if (isDouble) {
-      // Steg 1: låna H → T (H:s siffra minskar med 1)
+      const inter = colData.interStep;   // sub_borrow: H→T
+      const flip  = colData.flipStep;    // sub_flip_borrow: T→E
+      // Steg 1: låna H → T
       setTimeout(() => {
-        animateExBorrow(c + 2, c + 1, exEffA[c+2]-1, () => {
-          exEffA[c+2]--;
-          exEffA[c+1] += 10;
-          exBorrowedFrom[c+2] = true;
+        animateExBorrow(inter.srcCol, inter.dstCol, inter.srcNew, () => {
+          exEffA[inter.srcCol] = inter.srcNew;
+          exEffA[inter.dstCol] = inter.dstNew;
+          exBorrowedFrom[inter.srcCol] = true;
           playBorrowSound();
-          // Steg 2: låna T → E (kompletteringsmetoden: sätt borrow-ten, +10 på E)
+          // Steg 2: låna T → E
           setTimeout(() => {
-            animateExBorrow(c+1, c, exEffA[c+1]-1, () => {
-              exEffA[c+1]--;
+            animateExBorrow(flip.srcCol, c, flip.srcNew, () => {
+              exEffA[flip.srcCol] = flip.srcNew;
               exEffA[c] += 10;
-              exBorrowedFrom[c+1] = true;
+              exBorrowedFrom[flip.srcCol] = true;
               exBorrowTens[c] = true;
               exInputLocked = false;
               renderExView();
@@ -1273,10 +1283,11 @@ const UppstallningGame = (() => {
         });
       }, 300);
     } else {
-      animateExBorrow(c+1, c, exEffA[c+1]-1, () => {
-        exEffA[c+1]--;
+      const flip = colData.flipStep;     // sub_flip_borrow: srcCol→c
+      animateExBorrow(flip.srcCol, c, flip.srcNew, () => {
+        exEffA[flip.srcCol] = flip.srcNew;
         exEffA[c] += 10;
-        exBorrowedFrom[c+1] = true;
+        exBorrowedFrom[flip.srcCol] = true;
         exBorrowTens[c] = true;
         exInputLocked = false;
         renderExView();
