@@ -31,14 +31,9 @@ const UppstallningGame = (() => {
   let exCurrentCol  = 0;
   let exInputLocked = false;
   let exAnswers     = [];
-  let exEffA        = [];
-  let exEffB        = [];
-  let exCarries     = [];
-  let exBorrowTens  = [false, false, false]; // borrow-ten markers for exercise mode
   let exInput       = '';
-  let exColData     = [];                    // preprocessad per-kolumn data från buildDemoSteps
-  let exBorrowedFrom = [false, false, false]; // vilka kolumner lånade ifrån (T/H)
-  let helpMode      = true;                  // true = med hjälp, false = utan hjälp
+  let exColData     = []; // preprocessad per-kolumn data från buildDemoSteps
+  let helpMode      = true; // true = med hjälp, false = utan hjälp
 
   /* Canvas */
   let upCanvas = null, upCtx = null;
@@ -1000,36 +995,20 @@ const UppstallningGame = (() => {
     exInputLocked = false;
     exInput       = '';
     exAnswers     = [null, null, null];
-    exEffA        = [...digs(numA)];
-    exEffB        = [...digs(numB)];
-    exCarries     = [0, 0, 0];
-    exBorrowTens  = [false, false, false];
-    exBorrowedFrom = [false, false, false];
     exColData     = preprocessExSteps(buildDemoSteps());
-    renderExView();
+    // Initiera delad demo-state som executeStep/highlightCol/showBorrowTen använder
+    demoEffA       = [...digs(numA)];
+    demoCarries    = [0, 0, 0];
+    demoCarryUsed  = [false, false, false];
+    demoAns        = [null, null, null, null];
+    demoBorrowTens = [false, false, false];
+    renderExLayout();
   }
 
-  function renderExView() {
+  function renderExLayout() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
     const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
-    const colKey = COL_KEYS[exCurrentCol];
-    // needsBorrow: kolumnen kräver lån (enligt steg-data) OCH lånet ej gjort OCH hjälpläge
-    const needsBorrow = helpMode
-      && !!(exColData[exCurrentCol]?.needsBorrow)
-      && !exBorrowTens[exCurrentCol];
-
-    const numpadHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
-        <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
-          Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
-        </div>
-        <div class="ex-numpad">
-          ${[1,2,3,4,5,6,7,8,9,0].map(k =>
-            `<button class="ex-nk" onclick="UppstallningGame.exPress('${k}')">${k}</button>`
-          ).join('')}
-        </div>
-      </div>`;
-
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
@@ -1040,162 +1019,83 @@ const UppstallningGame = (() => {
       </div>
       <div id="up-main">
         <div id="up-left">
-          <div id="up-table-wrap">${buildExTableHTML()}</div>
-          ${helpMode ? `<div id="ex-bubble">${exBubbleHTML(needsBorrow)}</div>` : ''}
-          ${needsBorrow
-            ? `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
-                style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
-                👆 Tryck här för att låna!</button>`
-            : numpadHTML}
+          <div id="up-table-wrap">${buildTableHTML()}</div>
+          ${helpMode ? '<div id="ex-bubble"></div>' : ''}
+          <div id="ex-col-ui"></div>
           <div id="ex-feedback"></div>
         </div>
         <div id="up-right">
           ${scratchHTML()}
         </div>
       </div>`;
-
     setupCanvas('up-canvas');
+    advanceToColumn(0);
   }
 
-  function buildExTableHTML() {
-    const maxC = colCount;
-    const cols = [];
-    for (let c = maxC - 1; c >= 0; c--) cols.push({ key: COL_KEYS[c], label: COL_LABELS[c], idx: c });
-
-    const op = mode === 'addition' ? '+' : '−';
-
-    const carryRow = mode === 'addition' ? `
-      <tr>
-        <td style="font-size:11px;font-weight:800;color:#d97706;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
-        ${cols.map(c => `<td style="text-align:center">
-          <div class="carry-cell" id="ex-carry-${c.key}">${exCarries[c.idx] ? '1' : ''}</div>
-        </td>`).join('')}
-        <td></td>
-      </tr>` : '';
-
-    const rowA = cols.map(c => {
-      const isCur = c.idx === exCurrentCol;
-      const isFilled = exAnswers[c.idx] !== null;
-      const hasBt = exBorrowTens[c.idx];         // kolumnen mottog lån (+10)
-      const wasBorrowedFrom = exBorrowedFrom[c.idx]; // kolumnen lånade ut (-1)
-      // hasBt: exEffA[c]=origEffA+10 → origEffA = exEffA[c]-10 (korrekt även vid flerlån)
-      const aBeforeBorrow = hasBt ? exEffA[c.idx] - 10 : 0;
-      const showVal = String(numA).length > c.idx
-        ? (hasBt ? aBeforeBorrow : (wasBorrowedFrom ? exEffA[c.idx] + 1 : exEffA[c.idx]))
-        : '';
-      let dwInner;
-      if (hasBt) {
-        // Övre siffra (effektiv A innan lån) struken + liten "0" nere till höger
-        dwInner = `<div class="dw crossed" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${aBeforeBorrow}</span>
-            <span class="small-new-digit" style="color:${PVC[c.key]}">0</span>
-          </div>`;
-      } else if (wasBorrowedFrom) {
-        // Käll-kolumn struken + liten ny siffra nere till höger
-        dwInner = `<div class="dw crossed" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${showVal}</span>
-            <span class="small-new-digit" style="color:${PVC[c.key]}">${exEffA[c.idx]}</span>
-          </div>`;
-      } else {
-        dwInner = `<div class="dw" id="ex-dw-a-${c.key}">
-            <span style="color:${PVC[c.key]}">${showVal}</span>
-          </div>`;
-      }
-      return `<td style="text-align:center;vertical-align:bottom">
-        <div class="bt-wrap" id="ex-bt-wrap-${c.key}">
-          ${hasBt ? '<div class="borrow-ten" style="animation:none">10</div>' : ''}
-        </div>
-        <div class="col-cell${isCur ? ' glow-'+c.key : isFilled ? ' dim' : ''}"
-          style="border-color:${PVC[c.key]}" id="ex-a-${c.key}">
-          ${dwInner}
-        </div>
-      </td>`;
-    }).join('');
-
-    const rowB = cols.map(c => {
-      const isCur = c.idx === exCurrentCol;
-      const hasBt = exBorrowTens[c.idx];
-      const v = exEffB[c.idx];
-      const showBVal = String(numB).length > c.idx ? v : '';
-      let bInner;
-      if (hasBt) {
-        const diff = exColData[c.idx]?.flipStep?.diff ?? (v - (exEffA[c.idx] - 10));
-        bInner = `<div class="dw crossed" id="ex-dw-b-${c.key}">
-            <span style="color:${PVC[c.key]}">${showBVal}</span>
-            <span class="small-new-digit" style="color:#ef4444">${diff}</span>
-          </div>`;
-      } else {
-        bInner = `<div class="dw" id="ex-dw-b-${c.key}">
-            <span style="color:${PVC[c.key]}">${showBVal}</span>
-          </div>`;
-      }
-      return `<td style="text-align:center">
-        <div class="col-cell${!isCur ? ' dim' : ''}" style="border-color:${PVC[c.key]}">
-          ${bInner}
-        </div>
-      </td>`;
-    }).join('');
-
-    const ansRow = cols.map(c => {
-      const v = exAnswers[c.idx];
-      const isCur = c.idx === exCurrentCol;
-      const filled = v !== null;
-      return `<td style="text-align:center">
-        <div class="ans-cell${isCur ? ' active-col' : ''}${filled ? ' filled' : ''}"
-          id="ex-ans-${c.key}"
-          style="${filled ? 'border-color:'+PVC[c.key]+';border-style:solid' : ''}">
-          <span style="color:${PVC[c.key]}">${v !== null ? v : (isCur && exInput ? exInput : '')}</span>
-        </div>
-      </td>`;
-    }).join('');
-
-    return `
-      <table class="up-table">
-        <thead>
-          <tr>
-            <td></td>
-            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
-            <td></td>
-          </tr>
-        </thead>
-        <tbody>
-          ${carryRow}
-          <tr><td></td>${rowA}<td></td></tr>
-          <tr>
-            <td style="font-size:1.8rem;font-weight:900;color:#555;text-align:right;padding-right:6px">${op}</td>
-            ${rowB}<td></td>
-          </tr>
-          <tr>
-            <td colspan="${cols.length + 2}" style="padding:2px 0">
-              <div style="height:3px;background:linear-gradient(90deg,transparent,#374151,transparent);border-radius:2px"></div>
-            </td>
-          </tr>
-          <tr><td></td>${ansRow}<td></td></tr>
-        </tbody>
-      </table>`;
+  function advanceToColumn(col) {
+    exCurrentCol  = col;
+    exInputLocked = false;
+    exInput       = '';
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+      if (el) el.classList.toggle('active-col', c === col);
+    }
+    highlightCol(col);
+    showExColUI(col);
   }
 
-  function exBubbleHTML(needsBorrow) {
+  function showExColUI(col) {
+    const colKey      = COL_KEYS[col];
+    const needsBorrow = helpMode && !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
+
+    const bubble = document.getElementById('ex-bubble');
+    if (bubble) {
+      const msg = exBubbleMsg(col, needsBorrow);
+      bubble.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
+    }
+
+    const ui = document.getElementById('ex-col-ui');
+    if (!ui) return;
+
+    if (needsBorrow) {
+      ui.innerHTML = `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
+        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
+        👆 Tryck här för att låna!</button>`;
+    } else {
+      ui.innerHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+        <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
+          Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
+        </div>
+        <div class="ex-numpad">
+          ${[1,2,3,4,5,6,7,8,9,0].map(k =>
+            `<button class="ex-nk" onclick="UppstallningGame.exPress('${k}')">${k}</button>`
+          ).join('')}
+        </div>
+      </div>`;
+    }
+  }
+
+  function exBubbleMsg(col, needsBorrow) {
     if (!helpMode) return '';
-    const ck = COL_KEYS[exCurrentCol];
+    const ck   = COL_KEYS[col];
+    const aVal = demoEffA[col];
+    const bVal = digs(numB)[col];
     let msg = '';
     if (needsBorrow) {
-      const isDouble = exColData[exCurrentCol]?.isDouble;
-      msg = isDouble
-        ? `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
-        : `<span style="color:#ef4444">⚠️ ${exEffA[exCurrentCol]} − ${exEffB[exCurrentCol]} går inte! Du behöver låna.</span>`;
-    } else if (exBorrowTens[exCurrentCol]) {
-      // Kompletteringsmetoden: hämta diff från steg-data (korrekt effektiv A vid lånetillfället)
-      const diff = exColData[exCurrentCol]?.flipStep?.diff ?? (exEffB[exCurrentCol] - (exEffA[exCurrentCol] - 10));
+      msg = exColData[col]?.isDouble
+        ? `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
+        : `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Du behöver låna.</span>`;
+    } else if (demoBorrowTens[col]) {
+      const diff = exColData[col]?.flipStep?.diff ?? (bVal - aVal + 10);
       msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
     } else if (mode === 'addition') {
-      const ci = exCarries[exCurrentCol] || 0;
+      const ci    = demoCarries[col] || 0;
       const extra = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
-      msg = `Vad är <strong style="color:${PVC[ck]}">${exEffA[exCurrentCol]}</strong> + <strong style="color:${PVC[ck]}">${exEffB[exCurrentCol]}</strong>${extra}?`;
+      msg = `Vad är <strong style="color:${PVC[ck]}">${aVal}</strong> + <strong style="color:${PVC[ck]}">${bVal}</strong>${extra}?`;
     } else {
-      msg = `Vad är <strong style="color:${PVC[ck]}">${exEffA[exCurrentCol]}</strong> − <strong style="color:${PVC[ck]}">${exEffB[exCurrentCol]}</strong>?`;
+      msg = `Vad är <strong style="color:${PVC[ck]}">${aVal}</strong> − <strong style="color:${PVC[ck]}">${bVal}</strong>?`;
     }
-    return msg ? `<div class="thought-bubble">${msg}</div>` : '';
+    return msg;
   }
 
   function exPress(key) {
@@ -1203,9 +1103,9 @@ const UppstallningGame = (() => {
     const fb = document.getElementById('ex-feedback');
     if (fb) fb.innerHTML = '';
     exInput = key;
-    const colKey = COL_KEYS[exCurrentCol];
-    const ansEl = document.getElementById(`ex-ans-${colKey}`);
-    if (ansEl) ansEl.querySelector('span').textContent = key;
+    const colKey  = COL_KEYS[exCurrentCol];
+    const ansCell = document.getElementById(`ans-${colKey}`);
+    if (ansCell) ansCell.innerHTML = `<span style="color:${PVC[colKey]}">${key}</span>`;
     exSubmitCol();
   }
 
@@ -1213,26 +1113,36 @@ const UppstallningGame = (() => {
     if (exInputLocked || !exInput) return;
     exInputLocked = true;
 
-    // Rätt svar hämtas alltid från steg-data (samma motor som demo-läget)
     const correctDigit = exColData[exCurrentCol].correctAnswer;
+    const colKey       = COL_KEYS[exCurrentCol];
 
     if (parseInt(exInput) === correctDigit) {
       exAnswers[exCurrentCol] = correctDigit;
-      exBorrowTens[exCurrentCol] = false; // rensa borrow-ten markör
       exInput = '';
       App.Sound.play('correct');
+      const ansCell = document.getElementById(`ans-${colKey}`);
+      if (ansCell) {
+        ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${correctDigit}</span>`;
+        ansCell.classList.add('filled');
+        ansCell.style.borderColor = PVC[colKey];
+        ansCell.classList.remove('active-col');
+      }
+      if (demoBorrowTens[exCurrentCol]) useBorrowTen(exCurrentCol);
       if (mode === 'addition' && exColData[exCurrentCol].nextCarry && exCurrentCol + 1 < colCount) {
-        exCarries[exCurrentCol + 1] = 1;
         playCarrySound();
+        setTimeout(() => {
+          animateCarryToken(exCurrentCol, exCurrentCol + 1, () => {
+            demoCarries[exCurrentCol + 1] = 1;
+            updateCarryRow();
+          });
+        }, 400);
       }
       smallBurst();
       const next = exCurrentCol + 1;
       if (next >= colCount) {
         setTimeout(exCheckDone, 900);
       } else {
-        exCurrentCol = next;
-        exInputLocked = false;
-        renderExView();
+        setTimeout(() => advanceToColumn(next), 400);
       }
     } else {
       App.Sound.play('wrong');
@@ -1242,99 +1152,39 @@ const UppstallningGame = (() => {
       if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
         border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
         color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
-      const ansEl = document.getElementById(`ex-ans-${COL_KEYS[exCurrentCol]}`);
-      if (ansEl) ansEl.querySelector('span').textContent = '';
+      const ansCell = document.getElementById(`ans-${colKey}`);
+      if (ansCell) ansCell.innerHTML = '';
     }
   }
 
   function exDoBorrow() {
     if (exInputLocked) return;
     const c = exCurrentCol;
-    if (c + 1 >= colCount) return;
     exInputLocked = true;
     const btn = document.getElementById('ex-borrow-btn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Lånar...'; }
     playBorrowSound();
-
-    const colData  = exColData[c];
-    const isDouble = colData.isDouble;
-
-    if (isDouble) {
-      const inter = colData.interStep;   // sub_borrow: H→T
-      const flip  = colData.flipStep;    // sub_flip_borrow: T→E
-      // Steg 1: låna H → T
+    const colData = exColData[c];
+    if (colData.isDouble) {
       setTimeout(() => {
-        animateExBorrow(inter.srcCol, inter.dstCol, inter.srcNew, () => {
-          exEffA[inter.srcCol] = inter.srcNew;
-          exEffA[inter.dstCol] = inter.dstNew;
-          exBorrowedFrom[inter.srcCol] = true;
+        executeStep(colData.interStep, () => {
           playBorrowSound();
-          // Steg 2: låna T → E
           setTimeout(() => {
-            animateExBorrow(flip.srcCol, c, flip.srcNew, () => {
-              exEffA[flip.srcCol] = flip.srcNew;
-              exEffA[c] += 10;
-              exBorrowedFrom[flip.srcCol] = true;
-              exBorrowTens[c] = true;
+            executeStep(colData.flipStep, () => {
               exInputLocked = false;
-              renderExView();
+              showExColUI(c);
             });
-          }, 500);
+          }, 300);
         });
-      }, 300);
+      }, 200);
     } else {
-      const flip = colData.flipStep;     // sub_flip_borrow: srcCol→c
-      animateExBorrow(flip.srcCol, c, flip.srcNew, () => {
-        exEffA[flip.srcCol] = flip.srcNew;
-        exEffA[c] += 10;
-        exBorrowedFrom[flip.srcCol] = true;
-        exBorrowTens[c] = true;
-        exInputLocked = false;
-        renderExView();
-      });
+      setTimeout(() => {
+        executeStep(colData.flipStep, () => {
+          exInputLocked = false;
+          showExColUI(c);
+        });
+      }, 200);
     }
-  }
-
-  function animateExBorrow(srcCol, dstCol, srcNew, cb) {
-    const srcKey = COL_KEYS[srcCol];
-    const dstKey = COL_KEYS[dstCol];
-    const srcDw = document.getElementById(`ex-dw-a-${srcKey}`);
-    if (srcDw) {
-      srcDw.classList.add('crossed');
-      const sp = document.createElement('span');
-      sp.className = 'small-new-digit';
-      sp.style.color = PVC[srcKey];
-      sp.textContent = srcNew;
-      srcDw.appendChild(sp);
-    }
-    const wrap = document.getElementById('up-table-wrap');
-    const srcCell = document.getElementById(`ex-a-${srcKey}`);
-    const dstCell = document.getElementById(`ex-a-${dstKey}`);
-    if (wrap && srcCell && dstCell) {
-      const wRect = wrap.getBoundingClientRect();
-      const sRect = srcCell.getBoundingClientRect();
-      const dRect = dstCell.getBoundingClientRect();
-      const tok = document.createElement('div');
-      tok.textContent = '+10';
-      tok.style.cssText = `position:absolute;
-        left:${sRect.left-wRect.left+sRect.width/2-18}px;
-        top:${sRect.top-wRect.top+sRect.height/2-14}px;
-        padding:3px 7px;border-radius:999px;
-        background:#fee2e2;border:2px solid #ef4444;
-        font-size:0.85rem;font-weight:900;color:#dc2626;
-        pointer-events:none;z-index:20;
-        transition:left 0.7s ease,top 0.7s ease;`;
-      wrap.style.position = 'relative';
-      wrap.appendChild(tok);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        tok.style.left = `${dRect.left-wRect.left+dRect.width/2-18}px`;
-        tok.style.top  = `${dRect.top-wRect.top+dRect.height/2-14}px`;
-      }));
-      setTimeout(() => { tok.style.opacity='0'; tok.style.transition+=',opacity 0.3s'; }, 750);
-      setTimeout(() => { tok.remove(); }, 1100);
-    }
-    // renderExView (via cb) hanterar dst-cell – vänta tills token-animation är klar
-    setTimeout(cb, 1300);
   }
 
   function exCheckDone() {
