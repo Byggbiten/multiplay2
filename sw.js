@@ -29,6 +29,11 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
+// Tillåter sidan att be SW ta över direkt (backup om skipWaiting i install inte räckte)
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>

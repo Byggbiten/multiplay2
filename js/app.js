@@ -452,13 +452,42 @@ function checkForUpdate() {
       showUpdateToast('Du kör senaste versionen ✅', 2000);
       return;
     }
+
+    // Helper: be SW ta över och ladda om sidan
+    function activateAndReload(sw) {
+      sw.postMessage({ type: 'SKIP_WAITING' });
+      // controllerchange-lyssnaren sköter reload, men som backup:
+      setTimeout(doReload, 2500);
+    }
+
+    // Om en ny SW redan väntar (ovanligt p.g.a. skipWaiting i install, men kan hända)
+    if (reg.waiting) {
+      showUpdateToast('Uppdatering hittad – laddar om...', 1400, true);
+      activateAndReload(reg.waiting);
+      return;
+    }
+
+    // Lyssna på ny SW som hittas under reg.update()
+    reg.addEventListener('updatefound', function onFound() {
+      reg.removeEventListener('updatefound', onFound);
+      const newSW = reg.installing;
+      if (!newSW) return;
+      showUpdateToast('Uppdatering hittad – installerar...', 30000);
+      newSW.addEventListener('statechange', function() {
+        if (this.state === 'installed' && reg.waiting) {
+          // Hamnade i waiting (borde inte hända med skipWaiting i install)
+          showUpdateToast('Uppdatering klar – laddar om...', 1400, true);
+          activateAndReload(reg.waiting);
+        }
+        // Om skipWaiting i install gäller går den direkt installed→activating→activated
+        // och controllerchange-lyssnaren hanterar reload
+      });
+    });
+
     reg.update().then(() => {
-      if (reg.waiting) {
-        showUpdateToast('Uppdatering hittad, laddar om...', 1500, true);
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      } else if (reg.installing) {
-        showUpdateToast('Uppdatering hittad, laddar om...', 1500, true);
-      } else {
+      // reg.update() kan resolva innan installation börjar —
+      // updatefound-lyssnaren ovan fångar det. Om inget hittades:
+      if (!reg.waiting && !reg.installing) {
         showUpdateToast('Du kör senaste versionen ✅', 2000);
       }
     }).catch(() => {
@@ -467,8 +496,13 @@ function checkForUpdate() {
   });
 }
 
+function doReload() {
+  // window.location.reload() är opålitligt i iOS PWA standalone-läge
+  window.location.href = window.location.href;
+}
+
 function showUpdateToast(msg, duration, willReload) {
-  duration  = duration  || 2000;
+  duration   = duration   || 2000;
   willReload = willReload || false;
   const existing = document.getElementById('update-toast');
   if (existing) existing.remove();
@@ -488,7 +522,7 @@ function showUpdateToast(msg, duration, willReload) {
     toast.style.opacity = '0';
     setTimeout(() => {
       toast.remove();
-      if (willReload) window.location.reload();
+      if (willReload) doReload();
     }, 350);
   }, duration);
 }
@@ -502,9 +536,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // PWA: registrera service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
-    // Lyssna på controller-byte → ladda om automatiskt
+    // Ny SW tog över → ladda om sidan direkt
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      showUpdateToast('Uppdatering hittad, laddar om...', 1200, true);
+      doReload();
     });
   }
 });
