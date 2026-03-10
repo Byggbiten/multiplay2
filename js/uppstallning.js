@@ -766,7 +766,11 @@ const UppstallningGame = (() => {
       }
     } else if (step.type === 'add_cross') {
       const ck = COL_KEYS[step.col];
-      html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.effectiveA}</span> → <strong>10</strong> ✏️`;
+      if (step.carry_in) {
+        html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:#d97706">${step.carry_in}</span> minne + <strong>${step.behover}</strong> lån = 10) ✏️`;
+      } else {
+        html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <strong>${step.behover}</strong> lån = 10) ✏️`;
+      }
     } else if (step.type === 'add_carry_fly') {
       html = `10:an skickas upp som minnessiffra! ⬆️`;
     } else if (step.type === 'add_result') {
