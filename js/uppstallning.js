@@ -754,12 +754,16 @@ const UppstallningGame = (() => {
       html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr}... Hmm, det blir mer än 9! 🤔`;
     } else if (step.type === 'add_explain') {
       const ck = COL_KEYS[step.col];
-      const ciStr = step.carry_in
-        ? ` (med <span style="color:#d97706">${step.carry_in}</span> i minne = <strong>${step.effectiveA}</strong>)`
-        : '';
-      html = `<span style="color:${PVC[ck]}">${step.effectiveA}</span>:ans 10-kompis är <strong>${step.behover}</strong>.${ciStr}<br>
-        Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong>.<br>
-        Så <span style="color:${PVC[ck]}">${step.b}</span> blir <strong>${step.kvar}</strong> och <span style="color:${PVC[ck]}">${step.effectiveA}</span> blir <strong>10</strong>! 💡`;
+      if (step.carry_in) {
+        html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:#d97706">${step.carry_in}</span> = <strong>${step.effectiveA}</strong> (<span style="color:#d97706">${step.carry_in}</span>:an är minnessiffran).<br>
+          <span style="color:${PVC[ck]}">${step.effectiveA}</span>:ans 10-kompis är <strong>${step.behover}</strong>.<br>
+          Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${step.b}</span>:an blir <strong>${step.kvar}</strong>).<br>
+          Så <span style="color:${PVC[ck]}">${step.b}</span> blir <strong>${step.kvar}</strong> och <span style="color:${PVC[ck]}">${step.a}</span>:an blir <strong>10</strong>! 💡`;
+      } else {
+        html = `<span style="color:${PVC[ck]}">${step.effectiveA}</span>:ans 10-kompis är <strong>${step.behover}</strong>.<br>
+          Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${step.b}</span>:an blir <strong>${step.kvar}</strong>).<br>
+          Så <span style="color:${PVC[ck]}">${step.b}</span> blir <strong>${step.kvar}</strong> och <span style="color:${PVC[ck]}">${step.effectiveA}</span> blir <strong>10</strong>! 💡`;
+      }
     } else if (step.type === 'add_cross') {
       const ck = COL_KEYS[step.col];
       html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.effectiveA}</span> → <strong>10</strong> ✏️`;
@@ -1230,12 +1234,16 @@ const UppstallningGame = (() => {
 
     } else if (isTenFriend && tenPhase === 1) {
       const exp = exColData[col].explainStep;
-      const ciStr = exp.carry_in
-        ? ` (med <span style="color:#d97706">${exp.carry_in}</span> i minne = <strong>${exp.effectiveA}</strong>)`
-        : '';
-      msg = `<span style="color:${PVC[ck]}">${exp.effectiveA}</span>:ans 10-kompis är <strong>${exp.behover}</strong>.${ciStr}<br>
-        Vi tar <strong>${exp.behover}</strong> från <span style="color:${PVC[ck]}">${exp.b}</span>: ${exp.b} − ${exp.behover} = <strong>${exp.kvar}</strong>.<br>
-        Så <span style="color:${PVC[ck]}">${exp.b}</span> blir <strong>${exp.kvar}</strong> och <span style="color:${PVC[ck]}">${exp.effectiveA}</span> blir <strong>10</strong>! 💡`;
+      if (exp.carry_in) {
+        msg = `<span style="color:${PVC[ck]}">${exp.a}</span> + <span style="color:#d97706">${exp.carry_in}</span> = <strong>${exp.effectiveA}</strong> (<span style="color:#d97706">${exp.carry_in}</span>:an är minnessiffran).<br>
+          <span style="color:${PVC[ck]}">${exp.effectiveA}</span>:ans 10-kompis är <strong>${exp.behover}</strong>.<br>
+          Vi tar <strong>${exp.behover}</strong> från <span style="color:${PVC[ck]}">${exp.b}</span>: ${exp.b} − ${exp.behover} = <strong>${exp.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${exp.b}</span>:an blir <strong>${exp.kvar}</strong>).<br>
+          Så <span style="color:${PVC[ck]}">${exp.b}</span> blir <strong>${exp.kvar}</strong> och <span style="color:${PVC[ck]}">${exp.a}</span>:an blir <strong>10</strong>! 💡`;
+      } else {
+        msg = `<span style="color:${PVC[ck]}">${exp.effectiveA}</span>:ans 10-kompis är <strong>${exp.behover}</strong>.<br>
+          Vi tar <strong>${exp.behover}</strong> från <span style="color:${PVC[ck]}">${exp.b}</span>: ${exp.b} − ${exp.behover} = <strong>${exp.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${exp.b}</span>:an blir <strong>${exp.kvar}</strong>).<br>
+          Så <span style="color:${PVC[ck]}">${exp.b}</span> blir <strong>${exp.kvar}</strong> och <span style="color:${PVC[ck]}">${exp.effectiveA}</span> blir <strong>10</strong>! 💡`;
+      }
 
     } else if (isTenFriend && tenPhase === 2) {
       msg = `Bra! Nu skickar vi 10:an som minnessiffra! ⬆️`;
