@@ -36,6 +36,11 @@ const UppstallningGame = (() => {
   let helpMode      = true; // true = med hjälp, false = utan hjälp
   let exTenPhase = [];  // 0=visa "Tryck för att se", 1=visa förklaring, 2=animation körd, 3=carry körd
 
+  /* Free mode (utan hjälp) */
+  let exFreeValues       = [null, null, null];
+  let exFreeActiveCol    = 0;
+  let exFreeFirstAttempt = true;
+
   /* Canvas */
   let upCanvas = null, upCtx = null;
   let upDrawing = false, upErasing = false;
@@ -101,6 +106,8 @@ const UppstallningGame = (() => {
     .ans-cell.active-col { border-style:solid; border-color:var(--pv-primary);
       background:rgba(37,99,235,0.07); }
     .ans-cell.filled { border-style:solid; }
+    .ans-cell.wrong { border:2.5px solid #ef4444 !important; background:rgba(239,68,68,0.1) !important; }
+    .ans-cell.clickable { cursor:pointer; }
 
     /* Diagonal streck */
     .dw { position:relative; display:inline-flex; align-items:center; justify-content:center;
@@ -1123,6 +1130,9 @@ const UppstallningGame = (() => {
     demoAns        = [null, null, null, null];
     demoBorrowTens = [false, false, false];
     exTenPhase     = [0, 0, 0];
+    exFreeValues       = [null, null, null];
+    exFreeActiveCol    = 0;
+    exFreeFirstAttempt = true;
     renderExLayout();
   }
 
@@ -1150,7 +1160,11 @@ const UppstallningGame = (() => {
         </div>
       </div>`;
     setupCanvas('up-canvas');
-    advanceToColumn(0);
+    if (helpMode) {
+      advanceToColumn(0);
+    } else {
+      exFreeInit();
+    }
   }
 
   function advanceToColumn(col) {
@@ -1166,9 +1180,32 @@ const UppstallningGame = (() => {
   }
 
   function showExColUI(col) {
+    const ui = document.getElementById('ex-col-ui');
+    if (!ui) return;
+
+    /* ── Free mode (utan hjälp) ───────────────────────── */
+    if (!helpMode) {
+      const colKey = COL_KEYS[exFreeActiveCol];
+      ui.innerHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+        <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
+          Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
+        </div>
+        <div class="ex-numpad">
+          ${[1,2,3,4,5,6,7,8,9,0].map(k =>
+            `<button class="ex-nk" onclick="UppstallningGame.exFreePress('${k}')">${k}</button>`
+          ).join('')}
+        </div>
+        <button class="up-btn" onclick="UppstallningGame.exFreeSubmit()"
+          style="width:100%;height:48px;margin-top:10px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:1rem;border-radius:14px">
+          Klar ✓</button>
+      </div>`;
+      return;
+    }
+
+    /* ── Help mode (med hjälp) — oförändrad ───────────── */
     const colKey      = COL_KEYS[col];
-    const needsBorrow = helpMode && !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
-    const isTenFriend = helpMode && !!(exColData[col]?.needsTenFriend);
+    const needsBorrow = !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
+    const isTenFriend = !!(exColData[col]?.needsTenFriend);
     const tenPhase    = exTenPhase[col] || 0;
 
     const bubble = document.getElementById('ex-bubble');
@@ -1176,9 +1213,6 @@ const UppstallningGame = (() => {
       const msg = exBubbleMsg(col, needsBorrow, isTenFriend, tenPhase);
       bubble.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
     }
-
-    const ui = document.getElementById('ex-col-ui');
-    if (!ui) return;
 
     if (needsBorrow) {
       // Subtraktion-lån (oförändrad)
@@ -1423,6 +1457,96 @@ const UppstallningGame = (() => {
     });
   }
 
+  /* ── Free mode funktioner (utan hjälp) ────────────────── */
+  function exFreeInit() {
+    exFreeActiveCol = 0;
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+      if (el) {
+        el.classList.add('clickable');
+        el.classList.toggle('active-col', c === 0);
+        el.onclick = () => exFreeSelectCol(c);
+      }
+    }
+    showExColUI(0);
+  }
+
+  function exFreeSelectCol(col) {
+    exFreeActiveCol = col;
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+      if (el) {
+        el.classList.toggle('active-col', c === col);
+        if (c === col) el.classList.remove('wrong');
+      }
+    }
+    showExColUI(col);
+  }
+
+  function exFreePress(key) {
+    if (exInputLocked) return;
+    const col    = exFreeActiveCol;
+    const colKey = COL_KEYS[col];
+    exFreeValues[col] = parseInt(key);
+    const ansCell = document.getElementById(`ans-${colKey}`);
+    if (ansCell) {
+      ansCell.innerHTML = `<span style="color:${PVC[colKey]}">${key}</span>`;
+      ansCell.classList.remove('wrong');
+    }
+  }
+
+  function exFreeSubmit() {
+    if (exInputLocked) return;
+    exInputLocked = true;
+
+    let correctCount = 0;
+    for (let c = 0; c < colCount; c++) {
+      const colKey  = COL_KEYS[c];
+      const ansCell = document.getElementById(`ans-${colKey}`);
+      const correct = exFreeValues[c] === exColData[c].correctAnswer;
+      if (!ansCell) continue;
+
+      if (correct) {
+        correctCount++;
+        ansCell.classList.remove('wrong');
+        ansCell.classList.add('filled');
+        ansCell.style.borderColor = PVC[colKey];
+        ansCell.style.borderStyle = 'solid';
+        ansCell.innerHTML = `<span style="color:${PVC[colKey]}">${exFreeValues[c]}</span>`;
+        ansCell.onclick = null;
+        ansCell.classList.remove('clickable', 'active-col');
+      } else {
+        ansCell.classList.add('wrong');
+        ansCell.classList.remove('filled');
+      }
+    }
+
+    if (correctCount === colCount) {
+      // Alla rätt
+      if (exFreeFirstAttempt) exScore++;
+      for (let c = 0; c < colCount; c++) exAnswers[c] = exFreeValues[c];
+      App.Sound.play('correct');
+      smallBurst();
+      setTimeout(exCheckDone, 900);
+    } else {
+      // Fel
+      exFreeFirstAttempt = false;
+      App.Sound.play('wrong');
+      exInputLocked = false;
+      const fb = document.getElementById('ex-feedback');
+      if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
+        border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
+        color:#92400e;text-align:center">${correctCount} av ${colCount} rätt! Rätta de röda rutorna 💪</div>`;
+      // Välj första felaktiga rutan
+      for (let c = 0; c < colCount; c++) {
+        if (exFreeValues[c] !== exColData[c].correctAnswer) {
+          exFreeSelectCol(c);
+          break;
+        }
+      }
+    }
+  }
+
   function exCheckDone() {
     const dr = digs(mode === 'addition' ? numA + numB : numA - numB);
     let correct = true;
@@ -1625,6 +1749,7 @@ const UppstallningGame = (() => {
     startExercise, showHelpSelect, setHelpMode,
     exPress, exDoBorrow, exContinueBorrow,
     exTenStep1, exTenStep2, exTenStep3,
+    exFreeSelectCol, exFreePress, exFreeSubmit,
     upToggleEraser, upClearCanvas,
     goBack,
   };
