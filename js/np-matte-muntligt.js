@@ -1043,7 +1043,9 @@ const NpMatteMuntligt = (() => {
   function genTable() {
     const theme = pick(TABLE_THEMES);
     const names = pickN(NAMES, 4);
-    const vals  = names.map(() => rnd(theme.range[0], theme.range[1]));
+    let vals;
+    do { vals = names.map(() => rnd(theme.range[0], theme.range[1])); }
+    while (new Set(vals).size < 4);
     const rows  = names.map((n, i) => ({ label: n, value: vals[i] }));
 
     const tableData = {
@@ -1095,7 +1097,9 @@ const NpMatteMuntligt = (() => {
   function genChart() {
     const theme = pick(CHART_THEMES);
     const items = [...theme.items];
-    const vals  = items.map(() => rnd(2, 50));
+    let vals;
+    do { vals = items.map(() => rnd(2, 50)); }
+    while (new Set(vals).size < items.length);
     const bars  = items.map((label, i) => ({ label, value: vals[i] }));
 
     const chartData = {
@@ -1119,7 +1123,8 @@ const NpMatteMuntligt = (() => {
       correctAnswer = items[minI];
       options = shuffle([...items]);
     } else {
-      const [i1, i2] = pickN([0,1,2,3], 2);
+      let i1, i2;
+      do { [i1, i2] = pickN([0,1,2,3], 2); } while (vals[i1] === vals[i2]);
       const diff = Math.abs(vals[i1] - vals[i2]);
       question = `Hur många fler röster fick ${items[i1]} än ${items[i2]}?`;
       correctAnswer = String(diff);
@@ -1143,7 +1148,9 @@ const NpMatteMuntligt = (() => {
   function genMostLeast() {
     const theme = pick(TABLE_THEMES);
     const names = pickN(NAMES, 4);
-    const vals  = names.map(() => rnd(theme.range[0], theme.range[1]));
+    let vals;
+    do { vals = names.map(() => rnd(theme.range[0], theme.range[1])); }
+    while (new Set(vals).size < 4);
     const rows  = names.map((n, i) => ({ label: n, value: vals[i] }));
     const tableData = { col1: 'Namn', col2: `Antal ${theme.unit}`, rows };
 
@@ -1176,7 +1183,8 @@ const NpMatteMuntligt = (() => {
     const rows  = names.map((n, i) => ({ label: n, value: vals[i] }));
     const tableData = { col1: 'Namn', col2: `Antal ${theme.unit}`, rows };
 
-    const [i1, i2] = pickN([0,1,2,3], 2);
+    let i1, i2;
+    do { [i1, i2] = pickN([0,1,2,3], 2); } while (vals[i1] === vals[i2]);
     const diff = Math.abs(vals[i1] - vals[i2]);
     const [bigger, smaller] = vals[i1] >= vals[i2]
       ? [names[i1], names[i2]]
@@ -1282,7 +1290,7 @@ const NpMatteMuntligt = (() => {
   function genDouble() {
     const name = pick(NAMES);
     const ctx  = pick(CONTEXTS);
-    const val  = rnd(3, 150);
+    const val  = rnd(3, 50);
     const ans  = val * 2;
 
     return {

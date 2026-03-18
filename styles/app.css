@@ -171,6 +171,8 @@ body {
   color: var(--color-text);
   background: var(--bg-app);
   background-attachment: fixed;
+  -webkit-user-select: none;
+  user-select: none;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;

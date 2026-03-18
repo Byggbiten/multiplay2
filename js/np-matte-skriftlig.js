@@ -760,7 +760,18 @@ const NpMatteSkriftlig = (() => {
   }
 
   function npadPress(key) {
-    if (key === '✓') { if (inputLocked) return; submitFree(); return; }
+    if (key === '✓') {
+      if (inputLocked) return;
+      // multi-free: ✓ hoppar till nästa tomma fält, eller submittar om alla fyllda
+      if (currentQ && currentQ.answerType === 'multi-free') {
+        const nextEmpty = currentQ.fields.findIndex((f, i) => f.prefilled === undefined && !mfValues[i]);
+        if (nextEmpty >= 0) { mfFocus(nextEmpty); return; }
+        submitMultiFree();
+        return;
+      }
+      submitFree();
+      return;
+    }
     if (currentQ && currentQ.answerType === 'multi-free') {
       const f = currentQ.fields[mfActiveIdx];
       if (f && f.prefilled !== undefined) return;
@@ -1314,7 +1325,9 @@ const NpMatteSkriftlig = (() => {
 
   /* ── Kat 6: Sant/Falskt sannolikhet ───────────────────── */
   function genTruefalseProb() {
+    const SINGULAR = { kulor:'kula', knappar:'knapp', godisbitar:'godisbit', stenar:'sten', löv:'löv' };
     const obj   = pick(['kulor','knappar','godisbitar','stenar','löv']);
+    const singular = SINGULAR[obj] || obj;
     const emoji = ['🔵','🔴','🟢'];
     const colors= ['blå','röda','gröna'];
 
@@ -1337,10 +1350,10 @@ const NpMatteSkriftlig = (() => {
     const likaStort = counts[cmpI1] === counts[cmpI2];
 
     const stmts = [
-      `Det är störst chans att ta en ${colors[maxI]} ${obj.slice(0,-1)}.`,
-      `Det är minst chans att ta en ${colors[minI]} ${obj.slice(0,-1)}.`,
+      `Det är störst chans att ta en ${colors[maxI]} ${singular}.`,
+      `Det är minst chans att ta en ${colors[minI]} ${singular}.`,
       `Det är lika stor chans att ta ${colors[cmpI1]} som ${colors[cmpI2]}.`,
-      `Det är störst chans att ta en ${colors[minI]} ${obj.slice(0,-1)}.`,
+      `Det är störst chans att ta en ${colors[minI]} ${singular}.`,
     ];
     const correct = [
       'sant',   // strict max → always true after loop guard
@@ -1397,11 +1410,13 @@ const NpMatteSkriftlig = (() => {
       `${perGroup}+`.repeat(groups - 1) + perGroup,
       `${total}÷${groups}`,
     ];
-    // Distractors
+    // Distractors — filter out any that match correct expressions
     const distract = [
       `${total}−${groups}`,
       `${groups}+${perGroup}`,
       `${total}÷${perGroup}`,
+      `${total}+${groups}`,
+      `${perGroup}·${total}`,
     ].filter(d => !corrExprs.includes(d));
 
     const allExprs = shuffle([...corrExprs, ...distract.slice(0, 3)]);
@@ -1596,8 +1611,9 @@ const NpMatteSkriftlig = (() => {
   /* ── Kat 17: Halvering + subtraktion ──────────────────── */
   function genHalfSub() {
     const total = rnd(6, 15) * 2;
-    const x     = rnd(2, 8);
-    const ans   = total / 2 - x;
+    const half  = total / 2;
+    const x     = rnd(1, half - 1);
+    const ans   = half - x;
     const name1 = pick(NAMES);
     const name2 = pick(NAMES.filter(n => n !== name1));
     const obj   = pick(['äpplen','klistermärken','kort','pennor','karameller']);

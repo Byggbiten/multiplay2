@@ -620,6 +620,35 @@ const NpSvenska = (() => {
     const eventsEl = document.getElementById('svk-events');
     const slotsEl  = document.getElementById('svk-slots');
 
+    // Hjälpfunktion: uppdatera alla slots utifrån orderSelected
+    function refreshSlots() {
+      for (let i = 0; i < eventTexts.length; i++) {
+        const slot = slotsEl.children[i];
+        if (i < orderSelected.length) {
+          slot.classList.add('filled');
+          slot.innerHTML = `<span style="font-weight:800;color:#059669;font-size:12px">${i+1}.</span> <span>${esc(eventTexts[orderSelected[i]])}</span>`;
+          slot.style.cursor = 'pointer';
+          slot.onclick = () => undoFromSlot(i);
+        } else {
+          slot.classList.remove('filled');
+          slot.innerHTML = `<span style="color:#94a3b8;font-size:12px">${i+1}.</span> <span>–</span>`;
+          slot.style.cursor = 'default';
+          slot.onclick = null;
+        }
+      }
+    }
+
+    // Ångra: klicka på en placerad slot → ta bort den och alla efter
+    function undoFromSlot(pos) {
+      if (inputLocked) return;
+      const removed = orderSelected.splice(pos);
+      removed.forEach(idx => {
+        const btn = eventsEl.querySelector(`[data-idx="${idx}"]`);
+        if (btn) btn.classList.remove('placed');
+      });
+      refreshSlots();
+    }
+
     // Skapa platshållare
     for (let i = 0; i < eventTexts.length; i++) {
       const slot = document.createElement('div');
@@ -636,14 +665,13 @@ const NpSvenska = (() => {
       btn.dataset.idx = origIdx;
       btn.textContent = eventTexts[origIdx];
       btn.onclick = () => {
+        if (inputLocked) return;
         if (btn.classList.contains('placed')) return;
         const pos = orderSelected.length;
         if (pos >= eventTexts.length) return;
         orderSelected.push(origIdx);
         btn.classList.add('placed');
-        const slot = slotsEl.children[pos];
-        slot.classList.add('filled');
-        slot.innerHTML = `<span style="font-weight:800;color:#059669;font-size:12px">${pos+1}.</span> <span>${esc(eventTexts[origIdx])}</span>`;
+        refreshSlots();
 
         if (orderSelected.length === eventTexts.length) {
           checkOrder(ord.correctOrder, eventTexts);
