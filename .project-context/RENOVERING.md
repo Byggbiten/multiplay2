@@ -70,6 +70,25 @@ skriver bara filer; kodgranskare på korrekthetskritisk logik före commit;
 live-verifiering i iPad-viewport (768×1024) per UI-slice; commit per slice
 med svensk rubrik. Designen är låst efter Fas 2 — granskare avvisar drift.
 
+## BASBYTE (Dennis beslut 2026-07-02, senare samma dag)
+
+Repot har TVÅ lineages: `main` (rika versionen, v21 2026-03-18: 11 moduler
+inkl Uppställning/Plus & Minus, Platsvärde, NP-modulerna) och `master`
+(3-spels-omskrivning, maj 2026). **Dennis: main är riktiga appen.**
+Konsekvenser:
+- Renoveringen byter bas till main-lineagen. Fundamentet (shared.js +
+  buggfixar, byggt mot master) PORTERAS till main — de tre spelmodulerna
+  är nära identiska mellan lineages så porteringen är hanterbar.
+- Akut-patch av Uppställnings fria läge görs direkt på main (worktree
+  `~/arbetskopia/apps/Multiplay-main`): dubbel poängräkning, smart markör
+  (auto-hopp, valfri ordning), Klar-gating, ≥1000-guard, ledande nollor.
+- Designlabbet omfattar även Uppställning/Platsvärde/NP-modulerna vid
+  implementation (Fas 3), inte bara de fyra spelen.
+
 ## Statuslogg
 
 - 2026-07-02: Renovering beslutad. Fas 0 påbörjad.
+- 2026-07-02: Uppställning-undersökning: fritt läge (v21) har dubbel
+  poängräkning (kan visa "10 av 5"), ingen auto-markör, Klar-utan-gating,
+  ≥1000-svar utan tusentalsruta, ledande-noll-krav. Smart markör-modell
+  beslutad. Basbyte till main beslutat.
