@@ -26,17 +26,14 @@ const MultGame = (() => {
   }
 
   function saveStats(s) {
-    localStorage.setItem(STATS_KEY(profile.id), JSON.stringify(s));
+    MP.safeSetItem(STATS_KEY(profile.id), JSON.stringify(s));
   }
 
-  function getLog() {
-    try { return JSON.parse(localStorage.getItem(LOG_KEY(profile.id))) || []; }
-    catch(_) { return []; }
+  function sessionLog() {
+    return MP.createLog(LOG_KEY(profile.id), 50);
   }
 
-  function saveLog(l) {
-    localStorage.setItem(LOG_KEY(profile.id), JSON.stringify(l));
-  }
+  function getLog() { return sessionLog().get(); }
 
   function recordAnswer(table, multiplier, correct) {
     const stats = getStats();
@@ -58,20 +55,17 @@ const MultGame = (() => {
     return Math.round((cor / tot) * 100);
   }
 
-  function getMedal(pct) {
-    if (pct === null) return '';
-    if (pct >= 95) return '🥇';
-    if (pct >= 85) return '🥈';
-    if (pct >= 75) return '🥉';
-    return '';
+  function addSessionLog(entry) {
+    sessionLog().add(entry);
   }
 
-  function addSessionLog(entry) {
-    const log = getLog();
-    log.unshift({ ...entry, id: Date.now(), date: new Date().toISOString() });
-    if (log.length > 50) log.pop();
-    saveLog(log);
-  }
+  // Resultatnivå → befintlig CSS-klass
+  const RESULT_CLS = {
+    excellent: 'result-excellent',
+    good:      'result-good',
+    ok:        'result-ok',
+    practice:  'result-tryagain',
+  };
 
   /* ── Init ──────────────────────────────────────────── */
   function init(p) {
@@ -139,7 +133,7 @@ const MultGame = (() => {
         <div class="grid-3" style="gap:var(--space-3)">
           ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => {
             const p = pct(t);
-            const medal = getMedal(p);
+            const medal = MP.getMedal(p);
             return `
               <div class="table-card" onclick="MultGame.selectTable(${t})" tabindex="0" role="button" aria-label="${t}:ans tabell">
                 ${medal ? `<div class="table-medal">${medal}</div>` : ''}
@@ -162,7 +156,8 @@ const MultGame = (() => {
     timer.seconds = minutes * 60;
     timer.active  = true;
     sessionStart  = Date.now();
-    document.getElementById('btn-stop-timer').style.display = '';
+    const stopBtn = document.getElementById('btn-stop-timer');
+    if (stopBtn) stopBtn.style.display = '';
     timer.id = setInterval(() => {
       timer.seconds--;
       updateTimerDisplay();
@@ -198,6 +193,7 @@ const MultGame = (() => {
     App.Confetti.burst(80);
     App.Sound.play('fanfare');
     const elapsed = sessionStart ? Math.round((Date.now() - sessionStart) / 60000) : minutes;
+    addSessionLog({ type: 'timer', minutes: elapsed });
     showModal(`
       <div style="text-align:center">
         <div style="font-size:4rem;margin-bottom:var(--space-4)">🎉</div>
@@ -356,18 +352,18 @@ const MultGame = (() => {
 
   /* ── Kör en träningssession ────────────────────────── */
   function runTrainingSession(table, sequence, showAnswer) {
-    let queueIdx   = 0;
-    let mistakes   = [];   // tal som besvarats fel
-    let phase      = 'show';  // 'show' | 'ask'
-    let total      = sequence.length;
-    let correct    = 0;
+    // Träning (showAnswer): repetition av fel-tal i slutet. Test: ingen repetition.
+    const quiz = MP.createRetryQuiz(sequence, { endReview: showAnswer });
+    let phase  = showAnswer ? 'show' : 'ask';  // 'show' | 'ask'
 
     function renderQ() {
-      const mult = mistakes.length > 0 ? mistakes[0] : sequence[queueIdx];
+      const mult = quiz.current();
+      if (mult === null) { showTrainingResult(table, quiz.stats()); return; }
       const ans  = table * mult;
       const root = document.getElementById('mult-root');
 
-      const progress = Math.min(1, (correct) / total);
+      const prog     = quiz.progress();
+      const progress = prog.total > 0 ? Math.min(1, prog.answered / prog.total) : 0;
 
       if (phase === 'show') {
         // Visa svaret först
@@ -379,7 +375,7 @@ const MultGame = (() => {
           </div>
           <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
             <div class="progress-label">
-              <span>Framsteg</span><span>${correct}/${total}</span>
+              <span>Framsteg</span><span>${prog.answered}/${prog.total}</span>
             </div>
             <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
           </div>
@@ -405,7 +401,7 @@ const MultGame = (() => {
           </div>
           <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
             <div class="progress-label">
-              <span>Framsteg</span><span>${correct}/${total}</span>
+              <span>Framsteg</span><span>${prog.answered}/${prog.total}</span>
             </div>
             <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
           </div>
@@ -415,18 +411,12 @@ const MultGame = (() => {
             </div>
             ${buildAnswerUI(table, mult, ans, (wasCorrect) => {
               recordAnswer(table, mult, wasCorrect);
-              if (wasCorrect) {
-                correct++;
-                if (mistakes.length > 0) mistakes.shift();
-                else queueIdx++;
-                if (queueIdx >= sequence.length && mistakes.length === 0) {
-                  showTrainingResult(table, correct, total);
-                  return;
-                }
-                if (showAnswer) { phase = 'show'; }
-              } else {
-                if (!mistakes.includes(mult)) mistakes.push(mult);
+              quiz.answer(wasCorrect);
+              if (quiz.isDone()) {
+                showTrainingResult(table, quiz.stats());
+                return;
               }
+              if (wasCorrect && showAnswer) { phase = 'show'; }
               renderQ();
             })}
           </div>
@@ -445,17 +435,14 @@ const MultGame = (() => {
     App.Sound.play('click');
     const seq = [];
     for (let m = rangeMin; m <= rangeMax; m++) seq.push(m);
-    // Blanda
-    for (let i = seq.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [seq[i], seq[j]] = [seq[j], seq[i]];
-    }
-    runTrainingSession(table, seq, false);
+    runTrainingSession(table, MP.shuffle(seq), false);
   }
 
   /* ── Resultat efter träning ────────────────────────── */
-  function showTrainingResult(table, correct, total) {
-    const pct = Math.round((correct / total) * 100);
+  function showTrainingResult(table, stats) {
+    const correct = stats.firstTryCorrect;
+    const total   = stats.total;
+    const pct     = stats.pct;
     App.Sound.play(pct >= 80 ? 'fanfare' : 'correct');
     if (pct === 100) App.Confetti.burst(80);
 
@@ -465,8 +452,8 @@ const MultGame = (() => {
       rangeMin, rangeMax, mode: answerMode
     });
 
-    const { emoji, msg } = getResultFeedback(pct);
-    const cls = pct >= 90 ? 'result-excellent' : pct >= 70 ? 'result-good' : pct >= 50 ? 'result-ok' : 'result-tryagain';
+    const { emoji, msg } = MP.feedbackMessage(pct);
+    const cls = RESULT_CLS[MP.resultTier(pct)];
 
     const root = document.getElementById('mult-root');
     root.innerHTML = `
@@ -476,7 +463,7 @@ const MultGame = (() => {
           <div class="result-score">${pct}%</div>
           <div class="result-message">${msg}</div>
           <div class="result-sub">${correct} rätt av ${total}</div>
-          ${getMedal(pct) ? `<div style="font-size:3rem;margin-top:var(--space-4);animation:sparkle 1.5s infinite">${getMedal(pct)}</div>` : ''}
+          ${MP.getMedal(pct) ? `<div style="font-size:3rem;margin-top:var(--space-4);animation:sparkle 1.5s infinite">${MP.getMedal(pct)}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%;margin-top:var(--space-8)">
           <button class="btn btn-primary btn-lg w-full" onclick="MultGame.startTest(${table})">
@@ -573,26 +560,20 @@ const MultGame = (() => {
       selected.forEach(t => {
         for (let m = rangeMin; m <= rangeMax; m++) questions.push({ table: t, mult: m });
       });
-      // Blanda
-      for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questions[i], questions[j]] = [questions[j], questions[i]];
-      }
-      runCustomSession(questions, selected);
+      runCustomSession(MP.shuffle(questions), selected);
     };
   }
 
   function runCustomSession(questions, tables) {
-    let idx      = 0;
-    let mistakes = [];
-    let correct  = 0;
-    const total  = questions.length;
+    const quiz = MP.createRetryQuiz(questions);
 
     function renderQ() {
-      const q   = mistakes.length > 0 ? mistakes[0] : questions[idx];
+      const q = quiz.current();
+      if (q === null) { showCustomResult(quiz.stats(), tables); return; }
       const ans = q.table * q.mult;
       const root = document.getElementById('mult-root');
-      const progress = Math.min(1, correct / total);
+      const prog     = quiz.progress();
+      const progress = prog.total > 0 ? Math.min(1, prog.answered / prog.total) : 0;
 
       root.innerHTML = `
         <div class="app-header">
@@ -602,7 +583,7 @@ const MultGame = (() => {
         </div>
         <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
           <div class="progress-label">
-            <span>${tables.join(', ')}-tabellerna</span><span>${correct}/${total}</span>
+            <span>${tables.join(', ')}-tabellerna</span><span>${prog.answered}/${prog.total}</span>
           </div>
           <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
         </div>
@@ -612,14 +593,9 @@ const MultGame = (() => {
           </div>
           ${buildAnswerUI(q.table, q.mult, ans, (wasCorrect) => {
             recordAnswer(q.table, q.mult, wasCorrect);
-            if (wasCorrect) {
-              correct++;
-              if (mistakes.length > 0) mistakes.shift(); else idx++;
-              if (idx >= questions.length && mistakes.length === 0) {
-                showCustomResult(correct, total, tables); return;
-              }
-            } else {
-              if (!mistakes.find(x => x.table === q.table && x.mult === q.mult)) mistakes.push(q);
+            quiz.answer(wasCorrect);
+            if (quiz.isDone()) {
+              showCustomResult(quiz.stats(), tables); return;
             }
             renderQ();
           })}
@@ -631,13 +607,15 @@ const MultGame = (() => {
     renderQ();
   }
 
-  function showCustomResult(correct, total, tables) {
-    const pct = Math.round((correct / total) * 100);
+  function showCustomResult(stats, tables) {
+    const correct = stats.firstTryCorrect;
+    const total   = stats.total;
+    const pct     = stats.pct;
     App.Sound.play(pct >= 80 ? 'fanfare' : 'correct');
     if (pct === 100) App.Confetti.burst(80);
     addSessionLog({ type: 'custom', tables, correct, total, pct, rangeMin, rangeMax });
-    const { emoji, msg } = getResultFeedback(pct);
-    const cls = pct >= 90 ? 'result-excellent' : pct >= 70 ? 'result-good' : pct >= 50 ? 'result-ok' : 'result-tryagain';
+    const { emoji, msg } = MP.feedbackMessage(pct);
+    const cls = RESULT_CLS[MP.resultTier(pct)];
     const root = document.getElementById('mult-root');
     root.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center;padding:var(--space-8) var(--space-4)">
@@ -685,7 +663,7 @@ const MultGame = (() => {
         <div class="grid-3" style="gap:var(--space-2)">
           ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => {
             const p = getTablePercent(t);
-            const medal = getMedal(p);
+            const medal = MP.getMedal(p);
             return `
               <div class="table-card" style="cursor:default">
                 ${medal ? `<div class="table-medal">${medal}</div>` : ''}
@@ -751,14 +729,19 @@ const MultGame = (() => {
       const d = new Date(e.date);
       const dateStr = d.toLocaleDateString('sv-SE', { day:'numeric', month:'short' });
       const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
-      const label = e.type === 'custom' ? `Eget prov (${e.tables?.join(',')})` : `${e.table}:an`;
+      const label = e.type === 'timer'
+        ? `⏰ Timerträning`
+        : e.type === 'custom' ? `Eget prov (${e.tables?.join(',')})` : `${e.table}:an`;
+      const value = e.type === 'timer'
+        ? `<span class="stat-value" style="color:var(--color-accent)">${e.minutes} min</span>`
+        : `<span class="stat-value" style="color:${e.pct>=80?'var(--color-success)':'var(--color-accent)'}">${e.pct}%</span>`;
       return `
         <div class="stat-row">
           <div>
             <div style="font-weight:800;font-size:var(--text-sm)">${label} ${i===0?'<span style="color:var(--color-secondary);font-size:var(--text-xs)">NY!</span>':''}</div>
             <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${dateStr} ${timeStr}</div>
           </div>
-          <span class="stat-value" style="color:${e.pct>=80?'var(--color-success)':'var(--color-accent)'}">${e.pct}%</span>
+          ${value}
         </div>
       `;
     }).join('');
@@ -831,9 +814,17 @@ const MultGame = (() => {
       const d = new Date(e.date);
       const dateStr = d.toLocaleDateString('sv-SE', { weekday:'short', day:'numeric', month:'short' });
       const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
-      const label   = e.type === 'custom'
+      const label   = e.type === 'timer'
+        ? `⏰ Timerträning`
+        : e.type === 'custom'
         ? `🎲 Eget prov (${e.tables?.join(', ')})`
         : `✖️ ${e.table}:ans tabell`;
+      const value   = e.type === 'timer'
+        ? `<div style="font-size:var(--text-2xl);font-weight:900;color:var(--color-accent)">${e.minutes} min</div>`
+        : `<div style="font-size:var(--text-2xl);font-weight:900;color:${e.pct>=80?'var(--color-success)':e.pct>=60?'var(--color-accent)':'var(--color-error)'}">${e.pct}%</div>`;
+      const sub     = e.type === 'timer'
+        ? `Tidsträning i ${e.minutes} minut${e.minutes !== 1 ? 'er' : ''}`
+        : `${e.correct} rätt av ${e.total} | Intervall ${e.rangeMin}–${e.rangeMax}`;
       return `
         <div class="card" style="padding:var(--space-4)">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
@@ -841,9 +832,9 @@ const MultGame = (() => {
               <div style="font-weight:800;font-size:var(--text-base)">${label} ${i===0?'<span style="background:var(--color-secondary);color:white;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800">NY!</span>':''}</div>
               <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${dateStr} kl. ${timeStr}</div>
             </div>
-            <div style="font-size:var(--text-2xl);font-weight:900;color:${e.pct>=80?'var(--color-success)':e.pct>=60?'var(--color-accent)':'var(--color-error)'}">${e.pct}%</div>
+            ${value}
           </div>
-          <div style="font-size:var(--text-sm);color:var(--color-text-muted)">${e.correct} rätt av ${e.total} | Intervall ${e.rangeMin}–${e.rangeMax}</div>
+          <div style="font-size:var(--text-sm);color:var(--color-text-muted)">${sub}</div>
         </div>
       `;
     }).join('');
@@ -962,15 +953,6 @@ const MultGame = (() => {
     setTimeout(() => el.remove(), 900);
   }
 
-  /* ── Hjälpfunktioner ───────────────────────────────── */
-  function getResultFeedback(pct) {
-    if (pct === 100) return { emoji: '🌟', msg: 'PERFEKT! Du är en stjärna!' };
-    if (pct >= 90)   return { emoji: '🥇', msg: 'Fantastiskt bra!' };
-    if (pct >= 75)   return { emoji: '🥈', msg: 'Jättebra jobbat!' };
-    if (pct >= 60)   return { emoji: '👍', msg: 'Bra försök! Fortsätt träna!' };
-    return { emoji: '💪', msg: 'Fortsätt träna, det går bättre snart!' };
-  }
-
   /* ── Publik API ────────────────────────────────────── */
   return {
     init,
@@ -1027,6 +1009,7 @@ const MultGame = (() => {
       } else if (key === 'ok') {
         if (_freeVal === '') return;
         const guess      = parseInt(_freeVal);
+        _freeVal = ''; // direkt-nollställning: guarden ovan blockerar dubbel-OK under feedback
         const wasCorrect = guess === _freeAns;
         App.Sound.play(wasCorrect ? 'correct' : 'wrong');
         flashFeedback(wasCorrect);

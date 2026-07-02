@@ -14,17 +14,21 @@ const FriendsGame = (() => {
   const LOG_KEY  = id => `friends_log_${id}`;
 
   /* ── Logg ──────────────────────────────────────────── */
-  function getLog() {
-    try { return JSON.parse(localStorage.getItem(LOG_KEY(profile.id))) || []; }
-    catch(_) { return []; }
+  function sessionLog() {
+    return MP.createLog(LOG_KEY(profile.id), 40);
   }
 
-  function addLog(entry) {
-    const log = getLog();
-    log.unshift({ ...entry, id: Date.now(), date: new Date().toISOString() });
-    if (log.length > 40) log.pop();
-    localStorage.setItem(LOG_KEY(profile.id), JSON.stringify(log));
-  }
+  function getLog() { return sessionLog().get(); }
+
+  function addLog(entry) { sessionLog().add(entry); }
+
+  // Resultatnivå → befintlig CSS-klass
+  const RESULT_CLS = {
+    excellent: 'result-excellent',
+    good:      'result-good',
+    ok:        'result-ok',
+    practice:  'result-tryagain',
+  };
 
   /* ══════════════════════════════════════════════════════
      INIT
@@ -232,43 +236,27 @@ const FriendsGame = (() => {
   function startTest() {
     App.Sound.play('click');
     // Bygg frågor: 0–10 blandade
-    const numbers = [0,1,2,3,4,5,6,7,8,9,10];
-    // Blanda
-    for (let i = numbers.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i+1));
-      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-    }
-    const questions = numbers.slice(0, 10);
-    runTest(questions, 0, []);
+    const questions = MP.shuffle([0,1,2,3,4,5,6,7,8,9,10]).slice(0, 10);
+    runTest(questions);
   }
 
-  function runTest(questions, qIdx, results) {
+  function runTest(questions) {
     const TOTAL = questions.length;
+    const quiz = MP.createRetryQuiz(questions);
+    const results = [];          // första försöket per fråga (avgör poängen)
+    const firstTried = new Set();
 
-    // Hantera fel-loop: om vi är vid slutet men har fel
-    if (qIdx >= TOTAL) {
-      const wrong = results.filter(r => !r.correct);
-      if (wrong.length > 0) {
-        // Kör om felaktiga
-        const retryNums = wrong.map(r => r.n);
-        for (let i = retryNums.length-1; i > 0; i--) {
-          const j = Math.floor(Math.random()*(i+1));
-          [retryNums[i], retryNums[j]] = [retryNums[j], retryNums[i]];
-        }
-        runTest(retryNums, 0, results);
-        return;
-      }
-      showTestResult(results);
-      return;
-    }
+    function render() {
+      const n = quiz.current();
+      if (n === null) { showTestResult(quiz.stats(), results); return; }
 
-    const n    = questions[qIdx];
-    const corr = 10 - n;
+      const corr = 10 - n;
 
-    const root = document.getElementById('friends-root');
-    const progress = qIdx / TOTAL;
+      const root = document.getElementById('friends-root');
+      const prog = quiz.progress();
+      const progress = prog.answered / TOTAL;
 
-    root.innerHTML = `
+      root.innerHTML = `
       <div class="app-header">
         <button class="btn-back" style="background:var(--friends-accent);color:var(--friends-primary)" onclick="FriendsGame.renderPractice()">Avbryt</button>
         <span class="header-title" style="color:var(--friends-primary)">🤝 10-Kompisar Test</span>
@@ -276,7 +264,7 @@ const FriendsGame = (() => {
       </div>
       <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
         <div class="progress-label" style="color:var(--friends-primary)">
-          <span>Fråga ${Math.min(qIdx+1,TOTAL)} av ${TOTAL}</span>
+          <span>Fråga ${Math.min(prog.answered+1,TOTAL)} av ${TOTAL}</span>
         </div>
         <div class="progress-container" style="background:var(--friends-accent)">
           <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--friends-primary),var(--color-primary))"></div>
@@ -324,7 +312,7 @@ const FriendsGame = (() => {
                 color:var(--friends-primary);
                 padding:var(--space-5);
               "
-              onclick="FriendsGame._handleAnswer(${opt},${corr},${qIdx})">
+              onclick="FriendsGame._handleAnswer(${opt})">
               ${opt}
             </button>
           `).join('')}
@@ -333,35 +321,37 @@ const FriendsGame = (() => {
       </div>
     `;
 
-    FriendsGame._handleAnswer = (chosen, correct, qi) => {
-      const wasCorrect = chosen === correct;
-      App.Sound.play(wasCorrect ? 'correct' : 'wrong');
+      FriendsGame._handleAnswer = (chosen) => {
+        const wasCorrect = chosen === corr;
+        App.Sound.play(wasCorrect ? 'correct' : 'wrong');
 
-      // Visuell feedback på knappar
-      document.querySelectorAll('.answer-option').forEach(btn => {
-        btn.disabled = true;
-        const val = parseInt(btn.textContent.trim());
-        if (val === correct) btn.classList.add('correct');
-        else if (val === chosen && !wasCorrect) btn.classList.add('wrong');
-      });
+        // Visuell feedback på knappar
+        document.querySelectorAll('.answer-option').forEach(btn => {
+          btn.disabled = true;
+          const val = parseInt(btn.textContent.trim());
+          if (val === corr) btn.classList.add('correct');
+          else if (val === chosen && !wasCorrect) btn.classList.add('wrong');
+        });
 
-      // Flash
-      const flash = document.createElement('div');
-      flash.className = 'feedback-overlay';
-      flash.innerHTML = `<div class="feedback-emoji">${wasCorrect ? '✅' : '❌'}</div>`;
-      document.body.appendChild(flash);
-      setTimeout(() => flash.remove(), 900);
+        // Flash
+        const flash = document.createElement('div');
+        flash.className = 'feedback-overlay';
+        flash.innerHTML = `<div class="feedback-emoji">${wasCorrect ? '✅' : '❌'}</div>`;
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 900);
 
-      const newResults = [...results, { n, chosen, correct: wasCorrect }];
-
-      setTimeout(() => {
-        if (!wasCorrect) {
-          runTest(questions, qi, newResults); // Gör om
-        } else {
-          runTest(questions, qi + 1, newResults);
+        // Första försöket på denna fråga avgör poängen
+        if (!firstTried.has(n)) {
+          firstTried.add(n);
+          results.push({ n, chosen, correct: wasCorrect });
         }
-      }, wasCorrect ? 700 : 1400);
-    };
+        quiz.answer(wasCorrect);
+
+        setTimeout(render, wasCorrect ? 700 : 1400);
+      };
+    }
+
+    render();
   }
 
   /* ── Generera svarsalternativ ─────────────────────── */
@@ -379,23 +369,19 @@ const FriendsGame = (() => {
   /* ══════════════════════════════════════════════════════
      TESTRESULTAT
   ══════════════════════════════════════════════════════ */
-  function showTestResult(results) {
-    // Räkna unika rätta (inte retries)
-    const uniqueResults = {};
-    results.forEach(r => {
-      if (!uniqueResults[r.n] || r.correct) uniqueResults[r.n] = r.correct;
-    });
-    const totalCorrect = Object.values(uniqueResults).filter(Boolean).length;
-    const total        = 10;
-    const pct          = Math.round((totalCorrect / total) * 100);
+  function showTestResult(stats, results) {
+    // Första försöket per fråga avgör poängen
+    const totalCorrect = stats.firstTryCorrect;
+    const total        = stats.total;
+    const pct          = stats.pct;
 
     App.Sound.play(pct >= 80 ? 'fanfare' : 'correct');
     if (pct === 100) App.Confetti.burst(80);
 
     addLog({ totalCorrect, total, pct, results });
 
-    const { emoji, msg } = getResultFeedback(totalCorrect);
-    const cls = pct >= 90 ? 'result-excellent' : pct >= 70 ? 'result-good' : pct >= 50 ? 'result-ok' : 'result-tryagain';
+    const { emoji, msg } = MP.feedbackMessage(pct);
+    const cls = RESULT_CLS[MP.resultTier(pct)];
 
     const root = document.getElementById('friends-root');
     root.innerHTML = `
@@ -417,15 +403,15 @@ const FriendsGame = (() => {
         <div class="card w-full" style="padding:var(--space-4)">
           <div style="font-weight:800;color:var(--friends-primary);margin-bottom:var(--space-3)">Detaljresultat</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-2)">
-            ${Object.entries(uniqueResults).map(([n, correct]) => `
+            ${results.map(r => `
               <div style="
                 text-align:center;padding:var(--space-2);
                 border-radius:var(--radius-md);
-                background:${correct?'linear-gradient(135deg,#dcfce7,#bbf7d0)':'linear-gradient(135deg,#fee2e2,#fecaca)'};
-                border:2px solid ${correct?'var(--color-success-dark)':'var(--color-error-dark)'};
+                background:${r.correct?'linear-gradient(135deg,#dcfce7,#bbf7d0)':'linear-gradient(135deg,#fee2e2,#fecaca)'};
+                border:2px solid ${r.correct?'var(--color-success-dark)':'var(--color-error-dark)'};
               ">
-                <div style="font-weight:900;font-size:var(--text-base)">${n} + ${10-parseInt(n)}</div>
-                <div style="font-size:var(--text-xl)">${correct?'✓':'✗'}</div>
+                <div style="font-weight:900;font-size:var(--text-base)">${r.n} + ${10 - r.n}</div>
+                <div style="font-size:var(--text-xl)">${r.correct?'✓':'✗'}</div>
               </div>
             `).join('')}
           </div>
@@ -501,14 +487,6 @@ const FriendsGame = (() => {
         }).join('')}
       </div>
     `;
-  }
-
-  /* ── Resultattext ──────────────────────────────────── */
-  function getResultFeedback(correct) {
-    if (correct >= 9)  return { emoji: '🌟', msg: 'Fantastiskt! Du är en mästare på 10-kompisar!' };
-    if (correct >= 7)  return { emoji: '💪', msg: 'Bra jobbat! Du är på rätt väg!' };
-    if (correct >= 5)  return { emoji: '📚', msg: 'Bra försök! Fortsätt träna!' };
-    return { emoji: '🎯', msg: 'Fortsätt träna! Du kommer att bli bättre!' };
   }
 
   /* ── Publik API ────────────────────────────────────── */

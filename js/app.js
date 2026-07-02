@@ -122,7 +122,7 @@ const Store = {
   },
 
   save(profiles) {
-    localStorage.setItem(this.KEY, JSON.stringify(profiles));
+    MP.safeSetItem(this.KEY, JSON.stringify(profiles));
   },
 
   getProfiles() { return this.load(); },
@@ -144,6 +144,10 @@ const Store = {
   deleteProfile(id) {
     const profiles = this.load().filter(p => p.id !== id);
     this.save(profiles);
+    // Rensa även profilens speldata
+    [`mult_stats_${id}`, `mult_log_${id}`, `clock_log_${id}`, `friends_log_${id}`].forEach(key => {
+      try { localStorage.removeItem(key); } catch (_) { /* ignorera */ }
+    });
   },
 
   getProfile(id) {
@@ -248,7 +252,7 @@ const App = (() => {
           <div class="profile-meta">Skapad ${formatDate(p.created)}</div>
         </div>
         <div class="profile-actions" onclick="event.stopPropagation()">
-          <button class="btn-delete-profile" onclick="App.confirmDeleteProfile('${p.id}','${escapeHtml(p.name)}')" title="Ta bort profil" aria-label="Ta bort ${escapeHtml(p.name)}">🗑️</button>
+          <button class="btn-delete-profile" onclick="App.confirmDeleteProfile('${p.id}')" title="Ta bort profil" aria-label="Ta bort ${escapeHtml(p.name)}">🗑️</button>
         </div>
       </div>
     `).join('');
@@ -306,6 +310,9 @@ const App = (() => {
     if (!currentProfile) { showHome(); return; }
     Sound.play('click');
 
+    // Stoppa ev. löpande Mult-timer vid spelbyte
+    if (typeof MultGame !== 'undefined' && MultGame.stopTimer) MultGame.stopTimer();
+
     const screenMap = {
       multiplication: 'screen-multiplication',
       clock:          'screen-clock',
@@ -327,6 +334,8 @@ const App = (() => {
   }
 
   function goBackToGameSelect() {
+    // Stoppa ev. löpande Mult-timer när spelet lämnas
+    if (typeof MultGame !== 'undefined' && MultGame.stopTimer) MultGame.stopTimer();
     showGameSelect();
   }
 
@@ -338,7 +347,7 @@ const App = (() => {
       <div class="delete-profile-row">
         <div class="avatar avatar-sm">${p.avatar}</div>
         <div class="delete-name">${escapeHtml(p.name)}</div>
-        <button class="btn btn-danger btn-sm" onclick="App.confirmDeleteProfile('${p.id}','${escapeHtml(p.name)}')">
+        <button class="btn btn-danger btn-sm" onclick="App.confirmDeleteProfile('${p.id}')">
           🗑️ Ta bort
         </button>
       </div>
@@ -350,10 +359,12 @@ const App = (() => {
     document.getElementById('modal-delete-profiles').classList.add('hidden');
   }
 
-  function confirmDeleteProfile(id, name) {
+  function confirmDeleteProfile(id) {
+    const profile = Store.getProfile(id);
+    if (!profile) return;
     hideDeleteProfiles();
     document.getElementById('confirm-delete-msg').textContent =
-      `Vill du ta bort profilen "${name}"? All data raderas permanent!`;
+      `Vill du ta bort profilen "${profile.name}"? All data raderas permanent!`;
     document.getElementById('btn-confirm-delete-yes').onclick = () => {
       Store.deleteProfile(id);
       hideConfirmDelete();
@@ -393,11 +404,7 @@ const App = (() => {
   function getCurrentProfile() { return currentProfile; }
 
   function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    return MP.escapeHtml(str);
   }
 
   function formatDate(iso) {
