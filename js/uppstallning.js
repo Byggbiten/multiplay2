@@ -499,8 +499,9 @@ const UppstallningGame = (() => {
         } else {
           steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
         }
-        // Minnet i kolumn c är nu ANVÄNT → eget strykningssteg (v30)
-        if (carryVal) steps.push({ type:'add_mem_strike', col:c });
+        // Minnet i kolumn c är nu ANVÄNT → eget strykningssteg (v30).
+        // SISTA kolumnens minne stryks inte (Dennis: inget kommande att förväxla med)
+        if (carryVal && c < colCount - 1) steps.push({ type:'add_mem_strike', col:c });
         carryVal = nextCarry;
       }
       if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
@@ -1493,8 +1494,10 @@ const UppstallningGame = (() => {
         if (next >= colCount) exCheckDone();
         else advanceToColumn(next);
       };
-      if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]) {
-        // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det
+      if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]
+          && col < colCount - 1) {
+        // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det.
+        // Sista kolumnens minne undantas (Dennis: inget kommande att förväxla med)
         memMoments++;
         setTimeout(() => {
           memPhase = { kind:'strike', col, cont: proceed };
