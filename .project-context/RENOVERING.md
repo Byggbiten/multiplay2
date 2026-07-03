@@ -63,6 +63,19 @@ synlig radera-knapp på touch, konsekvent historik-åtkomst, inline-styles → k
 - Klart när alla tal besvarats rätt minst en gång. Terminering garanterad.
 - `pct = firstTryCorrect/total`, aldrig >100. Progress = avklarade tal/total.
 
+## Designlagar (Dennis 2026-07-03 — gäller målbilden OCH implementationen)
+
+1. **En vy = en skärm, ingen scroll.** Varje vy ska rymmas i viewporten i
+   valt läge. iPad porträtt + landskap: absolut krav. Mobil 390px: stark
+   strävan (klockan, testflöden, spelväljare, resultat MÅSTE rymmas).
+   Klockmodulen är viktigast av alla. UI-testas per vy × läge (labAudit()).
+2. **Klockans färgkodning (pedagogik):** timvisare BLÅ (#3b82f6, tjock/kort),
+   minutvisare RÖD (#ef4444, tunn/lång); digital tid = timsiffror blå,
+   kolon mörk, minutsiffror röda; svensk tidstext = timord blå, minutord
+   röda (inkl "halv"), bindeord mörka. Barnet ska SE sambandet
+   visare ↔ digital ↔ text via färgerna. Referens: colorizeTimeText,
+   clock.js:745–779 (main-lineagen).
+
 ## Arbetsmetod
 
 GO v3:s BYGG-TEAM tillämpad här: orkestrerare kör allt shell; subagenter
@@ -92,3 +105,15 @@ Konsekvenser:
   poängräkning (kan visa "10 av 5"), ingen auto-markör, Klar-utan-gating,
   ≥1000-svar utan tusentalsruta, ledande-noll-krav. Smart markör-modell
   beslutad. Basbyte till main beslutat.
+- 2026-07-02 (kväll): FAS 1 KLAR på master: shared.js + vitest (45 gröna)
+  + alla buggfixar, kodgranskad (2 Tier 2-fynd åtgärdade: dubbeltrycks-
+  guards) + live-verifierad (mult 92 %, klocka 8/10, tiokompisar 9/10 med
+  avsiktliga fel — inga krascher/loopar). Placeholder-ikoner genererade
+  (riktiga görs efter designlås). Committad lokalt; push av master väntar
+  på Dennis. FAS 2-ARTEFAKT klar: design-lab/index.html — väntar på
+  Dennis godkännande/låsning. UPPSTÄLLNING-PATCHEN (v22, smart markör)
+  kodgranskad GODKÄND, live-verifierad (4 av 5 med rättat fel) och
+  PUSHAD LIVE till origin/main (GitHub Pages). Kvar till nästa session:
+  portera fundamentet till main-lineagen (efter designlås), Fas 3–5.
+  Live-siten bekräftad = main-lineagen (v21→v22); zip:en i publicerat/
+  apps/main är 3-spels-omskrivningen, INTE live-versionen.
