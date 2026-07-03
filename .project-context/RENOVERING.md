@@ -85,9 +85,12 @@ med svensk rubrik. Designen är låst efter Fas 2 — granskare avvisar drift.
 
 ## BASBYTE (Dennis beslut 2026-07-02, senare samma dag)
 
-Repot har TVÅ lineages: `main` (rika versionen, v21 2026-03-18: 11 moduler
-inkl Uppställning/Plus & Minus, Platsvärde, NP-modulerna) och `master`
-(3-spels-omskrivning, maj 2026). **Dennis: main är riktiga appen.**
+**Historik-klargörande 2026-07-03:** det finns bara EN utvecklingslinje.
+`origin/master` är en äldre punkt på main-linjen (verifierat ancestor).
+Lokala arbetskopian var utcheckad vid tidiga 3-spels-läget (2661eec) —
+inte en separat omskrivning. Renoveringscommittarna ligger därför på en
+gammal bas och är pushade till branchen **`renovering`** på GitHub
+(origin/master lämnad orörd). `main` = riktiga appen (Dennis beslut):
 Konsekvenser:
 - Renoveringen byter bas till main-lineagen. Fundamentet (shared.js +
   buggfixar, byggt mot master) PORTERAS till main — de tre spelmodulerna
