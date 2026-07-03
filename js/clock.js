@@ -16,17 +16,21 @@ const ClockGame = (() => {
   const LOG_KEY  = id => `clock_log_${id}`;
 
   /* ── Logg ──────────────────────────────────────────── */
-  function getLog() {
-    try { return JSON.parse(localStorage.getItem(LOG_KEY(profile.id))) || []; }
-    catch(_) { return []; }
+  function sessionLog() {
+    return MP.createLog(LOG_KEY(profile.id), 40);
   }
 
-  function addLog(entry) {
-    const log = getLog();
-    log.unshift({ ...entry, id: Date.now(), date: new Date().toISOString() });
-    if (log.length > 40) log.pop();
-    localStorage.setItem(LOG_KEY(profile.id), JSON.stringify(log));
-  }
+  function getLog() { return sessionLog().get(); }
+
+  function addLog(entry) { sessionLog().add(entry); }
+
+  // Resultatnivå → befintlig CSS-klass
+  const RESULT_CLS = {
+    excellent: 'result-excellent',
+    good:      'result-good',
+    ok:        'result-ok',
+    practice:  'result-tryagain',
+  };
 
   /* ══════════════════════════════════════════════════════
      INIT
@@ -179,7 +183,7 @@ const ClockGame = (() => {
 
     // Text
     const textEl = document.getElementById('text-display');
-    if (textEl) textEl.innerHTML = colorizeTimeText(timeToSwedish(h, m));
+    if (textEl) textEl.innerHTML = colorizeTimeText(MP.timeToSwedish(h, m));
 
     // Kontroller
     const ch = document.getElementById('ctrl-h');
@@ -270,130 +274,127 @@ const ClockGame = (() => {
   function startTestWithType(type) {
     clockType = type;
     App.Sound.play('click');
-    runReadingTest(type, [], 0);
+    // Förgenerera frågorna så samma fråga kan ställas om vid fel
+    runReadingTest(type, generateQuestions(type, 5), generateQuestions(type, 5));
   }
 
-  function runReadingTest(type, results, qIdx) {
-    const TOTAL = 5;
-    if (qIdx >= TOTAL && results.every(r => r.correct)) {
-      // Alla rätt – gå till del 2
-      runSettingTest(type, results, 0);
-      return;
+  /* Slumpa frågetider (fem-minutersintervall).
+     Digital: 0–23 (svensk digital standard). Analog: 1–12. */
+  function generateQuestions(type, count) {
+    const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
+    const qs = [];
+    for (let i = 0; i < count; i++) {
+      const h = type === 'digital'
+        ? Math.floor(Math.random() * 24)
+        : Math.floor(Math.random() * 12) + 1;
+      const m = minutes[Math.floor(Math.random() * minutes.length)];
+      qs.push({ h, m });
     }
-    if (qIdx >= TOTAL) {
-      // Kolla om vi har felbehov
-      const wrong = results.filter(r => !r.correct);
-      if (wrong.length > 0) {
-        // Returnera felaktiga frågor
-        runReadingTest(type, results, results.length - wrong.length + (TOTAL - wrong.length));
-        return;
-      }
-      runSettingTest(type, results, 0);
-      return;
+    return qs;
+  }
+
+  function runReadingTest(type, questions, settingQuestions) {
+    const TOTAL = questions.length;
+    const quiz = MP.createRetryQuiz(questions);
+    const results = [];          // första försöket per fråga (avgör poängen)
+    const firstTried = new Set();
+
+    function render() {
+      const q = quiz.current();
+      if (q === null) { runSettingTest(type, results, settingQuestions); return; }
+
+      const correct = MP.timeToSwedish(q.h, q.m);
+      const options = generateTimeOptions(q.h, q.m, correct);
+
+      const root = document.getElementById('clock-root');
+      const prog = quiz.progress();
+      const progress = prog.answered / TOTAL;
+
+      root.innerHTML = `
+        <div class="app-header">
+          <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.showTestSetup()">Avbryt</button>
+          <span class="header-title" style="color:var(--clock-primary)">Del 1 – Läsa klockan</span>
+          <div style="width:64px"></div>
+        </div>
+        <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
+          <div class="progress-label" style="color:var(--clock-primary)">
+            <span>Fråga ${Math.min(prog.answered+1,TOTAL)} av ${TOTAL}</span>
+          </div>
+          <div class="progress-container" style="background:var(--clock-light)">
+            <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--clock-primary),var(--clock-accent))"></div>
+          </div>
+        </div>
+        <div style="padding:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
+          <p style="font-weight:800;color:var(--clock-primary);font-size:var(--text-lg)">Vad visar klockan?</p>
+
+          ${type === 'analog'
+            ? drawAnalogClock(q.h, q.m, 180)
+            : `<div style="font-family:var(--font-heading);font-size:var(--text-6xl);color:var(--clock-primary);letter-spacing:0.08em;padding:var(--space-6) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">${String(q.h).padStart(2,'0')}:${String(q.m).padStart(2,'0')}</div>`
+          }
+
+          <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
+            ${options.map((opt, i) => {
+              const colors = ['#eff6ff','#fef3c7','#f0fdf4','#fdf4ff'];
+              return `
+                <button class="answer-option" id="opt-${i}"
+                  style="border-color:rgba(59,130,246,0.3);background:${colors[i]}"
+                  onclick="ClockGame._handleReadChoice(${i})">
+                  ${colorizeTimeText(opt)}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      ClockGame._handleReadChoice = (idx) => {
+        const chosen = options[idx];
+        const wasCorrect = chosen === correct;
+        App.Sound.play(wasCorrect ? 'correct' : 'wrong');
+
+        document.querySelectorAll('.answer-option').forEach((btn, i) => {
+          btn.disabled = true;
+          if (options[i] === correct)   btn.classList.add('correct');
+          if (i === idx && !wasCorrect) btn.classList.add('wrong');
+        });
+
+        // Första försöket på denna fråga avgör poängen
+        if (!firstTried.has(q)) {
+          firstTried.add(q);
+          results.push({ h: q.h, m: q.m, chosen, correct: wasCorrect });
+        }
+        quiz.answer(wasCorrect);
+
+        setTimeout(render, wasCorrect ? 700 : 1400);
+      };
     }
 
-    // Generera tid (fem-minutersintervall)
-    const h = Math.floor(Math.random() * 12) + 1;
-    const m = [0,5,10,15,20,25,30,35,40,45,50,55][Math.floor(Math.random()*12)];
-    const correct = timeToSwedish(h, m);
-
-    // Generera fel alternativ
-    const options = generateTimeOptions(h, m, correct);
-
-    const root = document.getElementById('clock-root');
-    const progress = qIdx / TOTAL;
-
-    root.innerHTML = `
-      <div class="app-header">
-        <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.showTestSetup()">Avbryt</button>
-        <span class="header-title" style="color:var(--clock-primary)">Del 1 – Läsa klockan</span>
-        <div style="width:64px"></div>
-      </div>
-      <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-        <div class="progress-label" style="color:var(--clock-primary)">
-          <span>Fråga ${Math.min(qIdx+1,TOTAL)} av ${TOTAL}</span>
-        </div>
-        <div class="progress-container" style="background:var(--clock-light)">
-          <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--clock-primary),var(--clock-accent))"></div>
-        </div>
-      </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
-        <p style="font-weight:800;color:var(--clock-primary);font-size:var(--text-lg)">Vad visar klockan?</p>
-
-        ${type === 'analog'
-          ? drawAnalogClock(h, m, 180)
-          : `<div style="font-family:var(--font-heading);font-size:var(--text-6xl);color:var(--clock-primary);letter-spacing:0.08em;padding:var(--space-6) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>`
-        }
-
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
-          ${options.map((opt, i) => {
-            const colors = ['#eff6ff','#fef3c7','#f0fdf4','#fdf4ff'];
-            const textColors = ['var(--clock-primary)','var(--clock-secondary)','#166534','var(--mult-primary)'];
-            return `
-              <button class="answer-option" id="opt-${i}"
-                style="border-color:rgba(59,130,246,0.3);background:${colors[i]}"
-                onclick="ClockGame._handleReadChoice(${i},'${escSQ(opt)}','${escSQ(correct)}',${qIdx},${TOTAL})">
-                ${colorizeTimeText(opt)}
-              </button>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-
-    ClockGame._handleReadChoice = (idx, chosen, corr, qi, total) => {
-      const wasCorrect = chosen === corr;
-      App.Sound.play(wasCorrect ? 'correct' : 'wrong');
-
-      document.querySelectorAll('.answer-option').forEach((btn, i) => {
-        btn.disabled = true;
-        if (options[i] === corr)   btn.classList.add('correct');
-        if (i === idx && !wasCorrect) btn.classList.add('wrong');
-      });
-
-      const newResults = [...results, { h, m, chosen, correct: wasCorrect }];
-
-      setTimeout(() => {
-        if (!wasCorrect) {
-          runReadingTest(type, newResults, qi); // gör om om fel
-        } else {
-          runReadingTest(type, newResults, qi + 1);
-        }
-      }, wasCorrect ? 700 : 1400);
-    };
+    render();
   }
 
   /* ══════════════════════════════════════════════════════
      TEST – DEL 2: STÄLLA KLOCKAN (5 frågor)
   ══════════════════════════════════════════════════════ */
-  function runSettingTest(type, part1Results, qIdx) {
-    const TOTAL = 5;
-
-    if (qIdx >= TOTAL) {
-      // Kontrollera att alla svar är korrekta i en slutpass
-      const part2 = ClockGame._part2Results || [];
-      const wrong = part2.filter(r => !r.correct);
-      if (wrong.length > 0) {
-        ClockGame._retryQueue = [...wrong];
-        runSettingTest(type, part1Results, qIdx - wrong.length);
-        return;
-      }
-      showTestResult(type, part1Results, part2);
-      return;
-    }
-
-    const h = Math.floor(Math.random() * 12) + 1;
-    const m = [0,5,10,15,20,25,30,35,40,45,50,55][Math.floor(Math.random()*12)];
-    const text = timeToSwedish(h, m);
-
-    if (!ClockGame._part2Results || qIdx === 0) ClockGame._part2Results = [];
+  function runSettingTest(type, part1Results, questions) {
+    const TOTAL = questions.length;
+    const quiz = MP.createRetryQuiz(questions);
+    const results = [];          // första försöket per fråga (avgör poängen)
+    const firstTried = new Set();
 
     let settingH = 12, settingM = 0;
 
-    const root = document.getElementById('clock-root');
-    const progress = (5 + qIdx) / 10;
+    function render() {
+      const q = quiz.current();
+      if (q === null) { showTestResult(type, part1Results, results); return; }
 
-    function renderSetting() {
+      // Nollställ inställningen inför varje fråga (även omfråga efter fel)
+      settingH = 12; settingM = 0;
+
+      const text = MP.timeToSwedish(q.h, q.m);
+      const root = document.getElementById('clock-root');
+      const prog = quiz.progress();
+      const progress = (5 + prog.answered) / 10;
+
       root.innerHTML = `
         <div class="app-header">
           <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.showTestSetup()">Avbryt</button>
@@ -402,7 +403,7 @@ const ClockGame = (() => {
         </div>
         <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
           <div class="progress-label" style="color:var(--clock-primary)">
-            <span>Fråga ${Math.min(qIdx+1,TOTAL)+5} av 10</span>
+            <span>Fråga ${Math.min(prog.answered+1,TOTAL)+5} av 10</span>
           </div>
           <div class="progress-container" style="background:var(--clock-light)">
             <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--clock-primary),var(--clock-accent))"></div>
@@ -447,15 +448,20 @@ const ClockGame = (() => {
               </div>`
           }
 
-          <button class="btn btn-lg w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white" onclick="ClockGame._lockSetting(${h},${m},${qIdx})">
+          <button class="btn btn-lg w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white" onclick="ClockGame._lockSetting()">
             ✅ OK – Lås svar
           </button>
         </div>
       `;
 
       ClockGame._adjustSetting = (part, delta) => {
-        if (part === 'h') settingH = ((settingH - 1 + delta) + 12) % 12 + 1;
-        else settingM = ((settingM + delta) + 60) % 60;
+        if (part === 'h') {
+          // Digital: 0–23 (svensk digital standard). Analog: 1–12.
+          if (type === 'digital') settingH = ((settingH + delta) + 24) % 24;
+          else settingH = ((settingH - 1 + delta) + 12) % 12 + 1;
+        } else {
+          settingM = ((settingM + delta) + 60) % 60;
+        }
         App.Sound.play('click');
         if (type === 'analog') {
           document.getElementById('setting-clock-wrap').innerHTML = drawSettingClock(settingH, settingM);
@@ -464,24 +470,35 @@ const ClockGame = (() => {
         }
       };
 
-      ClockGame._lockSetting = (correctH, correctM, qi) => {
-        const wasCorrect = settingH === correctH && settingM === correctM;
+      let lockGuard = false; // återställs vid varje render — blockerar dubbeltryck under feedback
+      ClockGame._lockSetting = () => {
+        if (lockGuard) return;
+        lockGuard = true;
+        // Tidtexten skiljer inte på fm/em – jämför timmen modulo 12
+        const wasCorrect = (settingH % 12) === (q.h % 12) && settingM === q.m;
         App.Sound.play(wasCorrect ? 'correct' : 'wrong');
-        ClockGame._part2Results.push({ h: correctH, m: correctM, setH: settingH, setM: settingM, correct: wasCorrect });
+
+        if (!firstTried.has(q)) {
+          firstTried.add(q);
+          results.push({ h: q.h, m: q.m, setH: settingH, setM: settingM, correct: wasCorrect });
+        }
+        quiz.answer(wasCorrect);
 
         if (!wasCorrect) {
-          // Visa korrekt svar kort
+          // Visa korrekt svar kort, ställ sedan om SAMMA fråga
           if (type === 'analog') {
-            document.getElementById('setting-clock-wrap').innerHTML = drawSettingClock(correctH, correctM, '#ef4444', '#22c55e');
+            document.getElementById('setting-clock-wrap').innerHTML = drawSettingClock(q.h, q.m, '#ef4444', '#22c55e');
+          } else {
+            document.getElementById('digital-setting-wrap').innerHTML = drawDigitalSetting(q.h, q.m);
           }
-          setTimeout(() => runSettingTest(type, part1Results, qi), 1500);
+          setTimeout(render, 1500);
         } else {
-          setTimeout(() => runSettingTest(type, part1Results, qi + 1), 700);
+          setTimeout(render, 700);
         }
       };
     }
 
-    renderSetting();
+    render();
   }
 
   /* ══════════════════════════════════════════════════════
@@ -497,8 +514,8 @@ const ClockGame = (() => {
 
     addLog({ type: clockType, totalCorrect, total, pct, part1, part2 });
 
-    const cls = pct >= 90 ? 'result-excellent' : pct >= 70 ? 'result-good' : pct >= 50 ? 'result-ok' : 'result-tryagain';
-    const { emoji, msg } = getResultFeedback(pct);
+    const cls = RESULT_CLS[MP.resultTier(pct)];
+    const { emoji, msg } = MP.feedbackMessage(pct);
 
     const root = document.getElementById('clock-root');
     root.innerHTML = `
@@ -522,13 +539,13 @@ const ClockGame = (() => {
           ${part1.slice(0,5).map(r => `
             <div class="stat-row">
               <span>${String(r.h).padStart(2,'0')}:${String(r.m).padStart(2,'0')}</span>
-              <span style="color:${r.correct?'var(--color-success)':'var(--color-error)'}">${r.correct?'✓':'✗'} ${timeToSwedish(r.h,r.m)}</span>
+              <span style="color:${r.correct?'var(--color-success)':'var(--color-error)'}">${r.correct?'✓':'✗'} ${MP.timeToSwedish(r.h,r.m)}</span>
             </div>
           `).join('')}
           <div style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-size:var(--text-sm);font-weight:800;color:var(--color-text-muted)">Del 2 – Ställa klockan</div>
           ${part2.slice(0,5).map(r => `
             <div class="stat-row">
-              <span>${timeToSwedish(r.h,r.m)}</span>
+              <span>${MP.timeToSwedish(r.h,r.m)}</span>
               <span style="color:${r.correct?'var(--color-success)':'var(--color-error)'}">${r.correct?'✓ Rätt':'✗ '+String(r.setH).padStart(2,'0')+':'+String(r.setM).padStart(2,'0')}</span>
             </div>
           `).join('')}
@@ -674,50 +691,6 @@ const ClockGame = (() => {
     `;
   }
 
-  /* ══════════════════════════════════════════════════════
-     TIDTEXTER PÅ SVENSKA
-  ══════════════════════════════════════════════════════ */
-  function timeToSwedish(h, m) {
-    const hourNames = ['tolv','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv'];
-    const h12 = h % 12;
-    const nextH = (h12 % 12) + 1;
-
-    if (m === 0)  return `${hourNames[h12]} (${h12===0?'tolv':hourNames[h12]})`;
-    if (m === 0)  return hourNames[h12];
-    if (m === 5)  return `fem över ${hourNames[h12]}`;
-    if (m === 10) return `tio över ${hourNames[h12]}`;
-    if (m === 15) return `kvart över ${hourNames[h12]}`;
-    if (m === 20) return `tjugo över ${hourNames[h12]}`;
-    if (m === 25) return `fem i halv ${hourNames[nextH]}`;
-    if (m === 30) return `halv ${hourNames[nextH]}`;
-    if (m === 35) return `fem över halv ${hourNames[nextH]}`;
-    if (m === 40) return `tjugo i ${hourNames[nextH]}`;
-    if (m === 45) return `kvart i ${hourNames[nextH]}`;
-    if (m === 50) return `tio i ${hourNames[nextH]}`;
-    if (m === 55) return `fem i ${hourNames[nextH]}`;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  }
-
-  function timeToSwedishSimple(h, m) {
-    // Enklare form utan parentes
-    const hourNames = ['tolv','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv'];
-    const h12 = h % 12;
-    const nextH = (h12 % 12) + 1;
-    if (m === 0)  return hourNames[h12];
-    if (m === 5)  return `fem över ${hourNames[h12]}`;
-    if (m === 10) return `tio över ${hourNames[h12]}`;
-    if (m === 15) return `kvart över ${hourNames[h12]}`;
-    if (m === 20) return `tjugo över ${hourNames[h12]}`;
-    if (m === 25) return `fem i halv ${hourNames[nextH]}`;
-    if (m === 30) return `halv ${hourNames[nextH]}`;
-    if (m === 35) return `fem över halv ${hourNames[nextH]}`;
-    if (m === 40) return `tjugo i ${hourNames[nextH]}`;
-    if (m === 45) return `kvart i ${hourNames[nextH]}`;
-    if (m === 50) return `tio i ${hourNames[nextH]}`;
-    if (m === 55) return `fem i ${hourNames[nextH]}`;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  }
-
   /* ── Generera svarsalternativ ─────────────────────── */
   function generateTimeOptions(h, m, correctText) {
     const opts = [correctText];
@@ -727,19 +700,10 @@ const ClockGame = (() => {
       attempts++;
       const rh = Math.floor(Math.random() * 12) + 1;
       const rm = minutes[Math.floor(Math.random() * minutes.length)];
-      const txt = timeToSwedish(rh, rm);
+      const txt = MP.timeToSwedish(rh, rm);
       if (!opts.includes(txt)) opts.push(txt);
     }
     return opts.sort(() => Math.random() - 0.5);
-  }
-
-  /* ── Hjälp ─────────────────────────────────────────── */
-  function getResultFeedback(pct) {
-    if (pct === 100) return { emoji: '🌟', msg: 'PERFEKT! Du kan klockan! 🎉' };
-    if (pct >= 90)   return { emoji: '🥇', msg: 'Fantastiskt bra!' };
-    if (pct >= 70)   return { emoji: '🥈', msg: 'Jättebra jobbat!' };
-    if (pct >= 50)   return { emoji: '👍', msg: 'Bra start! Fortsätt öva!' };
-    return { emoji: '💪', msg: 'Fortsätt öva på klockan!' };
   }
 
   /* ── Färgkoda tidstext pedagogiskt ─────────────────── */
@@ -773,12 +737,10 @@ const ClockGame = (() => {
     match = text.match(/^(.+?) i (.+)$/);
     if (match) return r(match[1]) + k(' i ') + b(match[2]);
 
-    // Bara timme (m=0), inkl. "tolv (tolv)"-format
+    // Bara timme (m=0); tål även äldre "tolv (tolv)"-format
     const hourOnly = text.replace(/\s*\(.*\)$/, '');
     return b(hourOnly);
   }
-
-  function escSQ(s) { return String(s).replace(/'/g, "\\'"); }
 
   /* ── Publik API ────────────────────────────────────── */
   return {
@@ -795,7 +757,5 @@ const ClockGame = (() => {
     _handleReadChoice: null,
     _adjustSetting: null,
     _lockSetting: null,
-    _part2Results: null,
-    _retryQueue: null,
   };
 })();
