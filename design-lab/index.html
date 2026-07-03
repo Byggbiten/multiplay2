@@ -13,6 +13,9 @@
    Barnmagi × Apple-polish. En fil, inga beroenden utom fonts.
    Runda 2: no-scroll i alla enhetslägen, alla fem spel,
    klockans färgpedagogik (blå timme / röd minut), lättare GPU.
+   Runda 3 (DESIGNLÅS 2026-07-03): innehållet FYLLER skärmen —
+   flex-tillväxt + space-evenly i basen, uppskalade nyckel-
+   komponenter i iPad-porträtt. Aldrig overflow (labAudit = []).
    ============================================================ */
 
 :root{
@@ -287,10 +290,11 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 .hero small{display:block;color:var(--ink-soft);font-size:13px;font-weight:700;margin-top:3px}
 .hero .btn{flex-shrink:0;margin-left:auto}
 
-/* Colspan-grid: 3 stående kort + 2 breda — allt ryms utan scroll */
-.games{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+/* Colspan-grid: 3 stående kort + 2 breda — fyller höjden utan scroll */
+.games{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;flex:1;align-content:space-evenly}
 .gcard{
   position:relative;text-align:left;padding:16px 18px;border-radius:var(--r-lg);overflow:hidden;grid-column:span 3;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
   background:var(--glass);border:1px solid var(--glass-line);
   box-shadow:var(--shadow-panel);transition:transform .3s var(--spring),box-shadow .3s;
 }
@@ -313,7 +317,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 @keyframes newPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 
 /* Breda spelkort (NP + Addition & Subtraktion): liggande rad */
-.gcard-wide{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:12px 20px}
+.gcard-wide{grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:14px;padding:12px 20px}
 .gcard-wide .g-emoji{margin:0;font-size:32px}
 .gcard-wide h3{font-size:19px}
 .gcard-wide p{margin:1px 0 0}
@@ -358,9 +362,10 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 .timer-row .chip{min-height:38px;padding:7px 14px;font-size:13.5px}
 
 .tables-panel{flex:1;min-height:0;display:flex;flex-direction:column}
-.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;align-content:start}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;flex:1;align-content:space-evenly}
 .tcard{
   position:relative;padding:12px 8px 10px;border-radius:20px;text-align:center;
+  display:flex;flex-direction:column;justify-content:center;
   background:var(--glass-strong);border:1px solid var(--glass-line);
   box-shadow:var(--shadow-panel);transition:transform .28s var(--spring),box-shadow .28s;
 }
@@ -383,7 +388,8 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   font-weight:900;font-size:15px;color:var(--deep)}
 .timer-pill svg{width:18px;height:18px;color:var(--acc)}
 
-.qcard{text-align:center;padding:26px 20px 22px;margin-top:14px}
+.qcard{text-align:center;padding:26px 20px 22px;margin-top:14px;
+  flex:1;display:flex;flex-direction:column;justify-content:center}
 .qtask{font-family:var(--font-head);font-weight:800;font-size:clamp(46px,9cqw,76px);line-height:1;color:var(--deep);letter-spacing:2px}
 .qtask .qx{color:var(--acc2);margin:0 10px}
 .qtask .qeq{color:var(--acc);opacity:.85}
@@ -460,7 +466,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 .col-progress .pbar{flex:1}
 .col-progress b{font-family:var(--font-head);font-size:18px;color:var(--deep);white-space:nowrap}
 
-.colgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;align-content:start}
+.colgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;flex:1;align-content:space-evenly}
 .cc{border-radius:22px;padding:3px;position:relative;transition:transform .3s var(--spring)}
 .cc:hover{transform:translateY(-5px) rotate(-1deg) scale(1.03)}
 .cc.rar-vanlig{background:linear-gradient(135deg,#f9a8d4,#c4b5fd);box-shadow:0 8px 22px rgba(196,181,253,.4)}
@@ -499,7 +505,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
    ============================================================ */
 .clock-cols{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
 .clock-right{display:flex;flex-direction:column;gap:12px}
-.clock-panel{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 16px}
+.clock-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px 16px;flex:1}
 .clock-svg{width:min(272px,100%);height:auto;filter:drop-shadow(0 12px 30px rgba(47,111,228,.26))}
 #hHand,#mHand{transform-box:view-box;transform-origin:50% 50%;transition:transform .5s var(--spring)}
 
@@ -544,6 +550,9 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
    8) ADDITION & SUBTRAKTION-HUB (NY VY)
    ============================================================ */
 .addsub-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+/* Fyll-skärmen: centrera innehållsgruppen (header kvar i topp) */
+#scr-addsub .addsub-grid{margin-top:auto}
+#scr-addsub .wrap>.panel{margin-bottom:auto}
 .acard{
   display:flex;align-items:center;gap:16px;text-align:left;padding:14px 20px;width:100%;
   background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r-lg);
@@ -604,6 +613,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   .hero small{display:none}
   .hero .btn{min-height:44px;font-size:14px;padding:10px 16px}
   .games{gap:9px}
+  .gcard:not(.gcard-wide){min-height:168px}
   .gcard{padding:12px 13px}
   .gcard .g-emoji{font-size:27px;margin-bottom:5px}
   .gcard h3{font-size:15.5px}
@@ -661,7 +671,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   .col-hint{display:none}
 
   .clock-panel{padding:13px 10px;gap:9px}
-  .clock-svg{width:min(206px,62cqw)}
+  .clock-svg{width:min(250px,64cqw)}
   .period-chips .chip{min-height:33px;font-size:11.5px;padding:6px 10px}
   .timepanel{padding:11px 13px}
   .digi{font-size:35px}
@@ -687,15 +697,80 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   .diff-chips .dlbl{font-size:10px}
 }
 
-/* iPad (≥700): tvåkolumn i hub + klocka = luftigt OCH utan scroll */
+/* iPad (≥700): tvåkolumn i hub — kolumnerna FYLLER höjden */
 @container app (min-width:700px){
-  .hub-cols{display:grid;grid-template-columns:300px 1fr;align-items:start}
-  .clock-cols{display:grid;grid-template-columns:1.02fr 1fr;align-items:start}
+  .hub-cols{display:grid;grid-template-columns:300px 1fr;align-items:stretch}
+  .hub-side>.panel{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .hub-side .timer-row .chips{flex:0 0 auto;align-content:center}
+  .tcard{min-height:132px}
   .addsub-grid{grid-template-columns:repeat(3,1fr)}
   .acard{flex-direction:column;text-align:center;padding:20px 14px 16px;gap:10px}
   .acard .astat{margin:2px auto 0}
   .acard .chev{display:none}
   .aico{width:64px;height:64px;font-size:32px}
+}
+
+/* iPad porträtt (700–899): innehållet FYLLER höjden (DESIGNLÅS).
+   Klockan staplas med STOR klocka; nyckelkomponenter skalas upp. */
+@container app (min-width:700px) and (max-width:899px){
+  /* Klockan — pedagogikens centrum: stor centrerad klocka + luftiga paneler */
+  .clock-svg{width:min(340px,100%)}
+  .period-chips .chip{min-height:44px;font-size:14px;padding:9px 16px}
+  .timepanel{padding:20px 18px}
+  .digi{font-size:56px}
+  .svline{font-size:25px;margin-top:8px}
+  .legend{font-size:13px;margin-top:10px}
+  .spin-panel{padding:12px 22px}
+  .spinrow{padding:10px 0}
+  .spin-ctrls .icnbtn{width:52px;height:52px}
+  .spin-val{font-size:28px;min-width:52px}
+  .clock-actions .icnbtn{width:58px;height:58px}
+  .clock-actions .btn{min-height:58px;font-size:17px}
+
+  /* Gångertabellen — större kontroller + tabellkort */
+  .hub-side .seg.app-seg button{min-height:52px;font-size:14px;padding:8px 10px;white-space:nowrap}
+  .hub-side .panel{padding:22px 20px}
+  .dual{height:46px}
+  .range-lab b{font-size:16px}
+  .range-lab span{font-size:22px}
+  .timer-row .chip{min-height:46px;font-size:14.5px}
+  .hub-side .btn-lg{min-height:68px;font-size:19px}
+  .tcard{min-height:150px}
+  .tcard .tnum{font-size:28px}
+  .tcard .tpct{font-size:13px}
+
+  /* Spelväljaren — korten växer i höjd */
+  .gcard:not(.gcard-wide){min-height:232px}
+  .gcard{padding:20px 22px}
+  .gcard .g-emoji{font-size:42px}
+  .gcard h3{font-size:22px}
+  .gcard p{font-size:14.5px}
+  .hero-in{padding:20px 26px}
+  .hero-emoji{font-size:54px}
+
+  /* Testflödet — större uppgift + svarsknappar */
+  .qtask{font-size:84px}
+  .ans{min-height:88px;font-size:34px}
+  .answers{gap:15px}
+
+  /* Samlingen — större kort */
+  .colgrid{gap:14px}
+  .cc-in{padding:18px 10px 12px;gap:6px}
+  .cc-emoji{font-size:46px}
+  .cc-name{font-size:16px}
+  .cc-locked{gap:7px}
+  .cc-q{font-size:40px}
+
+  /* Hem + Addition & Subtraktion — varsam uppskalning */
+  .profiles{gap:16px}
+  .pcard{padding:20px 26px}
+  .pcard .pav{width:74px;height:74px;font-size:38px}
+  .acard{padding:26px 16px 20px;gap:12px}
+  .aico{width:76px;height:76px;font-size:38px}
+  .acard b{font-size:21px}
+  .diff-chips .chip{min-height:64px}
+  .diff-chips .dnum{font-size:18px}
+  .diff-chips .dlbl{font-size:12px}
 }
 
 /* iPad landskap (≥900): bredare arbetsyta, 3 stående spelkort i rad */
@@ -706,11 +781,14 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   .hub-cols{grid-template-columns:330px 1fr}
   .games .gcard{grid-column:span 2}
   .games .gcard-wide{grid-column:span 4}
+  .gcard:not(.gcard-wide){min-height:188px}
   .tgrid{grid-template-columns:repeat(4,1fr)}
   .colgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
   .qtask{font-size:64px}
   .qcard{padding:22px 20px 18px}
-  .clock-svg{width:min(300px,100%)}
+  .clock-cols{display:grid;grid-template-columns:1.02fr 1fr;align-items:stretch}
+  .clock-right .timepanel,.clock-right .spin-panel{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .clock-svg{width:min(400px,100%)}
   .res-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:center}
   .newcard{margin:0 auto}
   .res-pct{font-size:88px}
@@ -728,7 +806,7 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 
 <!-- LABB-VERKTYGSRAD -->
 <div class="lab-bar">
-  <span class="lab-brand">Multiplay <small>designlabb · målbild v2</small></span>
+  <span class="lab-brand">Multiplay <small>målbild v2.1 · LÅST</small></span>
   <div class="seg" id="labSeg">
     <span class="ind"></span>
     <button data-mode="ipadp" class="on">iPad porträtt</button>
