@@ -67,6 +67,23 @@ sitt ×; multdiv följer åk 4-bokens notation). Demo visar alla tre
 faserna. Hjälpläge nivå 4: numpad per delproduktsiffra + additionsfasen.
 Fritt läge: barnet skriver slutsvaret.
 
+## Hjälplägets frågeflöde + livlinor (Dennis 2026-07-03, v31)
+
+**Tvåstegsfrågan** (ersätter "Vad är 4 · 7 + 1 (minne)?" — för långt tänk):
+1. Först BARA tabellfrågan: "Vad är 4 · 7?" → barnet svarar 28.
+2. Om minnessiffra finns: retorisk påminnelse som eget steg: "Har vi
+   någon minnessiffra som ska med? 👀 Just det — 1:an! Vad blir
+   28 + 1?" → barnet svarar 29. Utan minne: bara steg 1.
+Gäller alla kolumnfrågor med carryIn (även nivå 4:s additionsfas:
+"Vad är 6 + 4?" → minnespåminnelsen separat).
+
+**Livlinor:** 2 st per övningsrunda (5 uppgifter, hjälpläget — gäller
+även division). Knapp "🛟 Livlina (X kvar)" synlig vid varje fråga;
+disabled när 0 kvar. Klick → svaret VISAS i bubblan ("4 · 7 = 28 —
+skriv in det själv! ✍️") MEN barnet MÅSTE skriva in det på numpaden
+(pedagogik: se + skriva själv = fastnar; aldrig bläddra förbi).
+Ingen poängpåverkan. Räknaren nollställs per runda.
+
 ## Kort division
 
 Layout: divisorn till vänster, lodrätt avskiljare, täljaren till höger.
@@ -112,6 +129,13 @@ den framräknade stegsekvensen, annars slumpa om.
   (mönstret från additionens exTenStep1–3), numpad per delsvar, fel →
   mild "prova igen" utan poängstraff, INGET facit-avslöjande i
   divisionens frågor ("Hur många 4:or i 16?" — svaret sägs inte).
+  **Divisionens papperstänk (motsvarar minnessiffrorna):** mellanresten
+  är divisionens levande anteckning — efter kvotsiffran frågas "Blir
+  något över? 9 − 8 = ?" → barnet svarar resten → sedan PLACERA-fas:
+  "Var ska resten stå?" → barnet TAPPAR platsen framför nästa
+  täljarsiffra → liten röd ¹ skrivs (samma .mem-digit-pennstil).
+  Rester stryks INTE (som på papper — de uppgår i nästa tal: "nu har
+  vi 16"). Livlinorna (2/runda) gäller även divisionens frågor.
 - **Utan hjälp:** miniräknar-fältet (v27-mönstret): svaret skrivs
   vänster→höger, ⌫, Klar gated (≥1 siffra), max 4 siffror, +1 poäng
   endast helrätt första Klar, 5 uppgifter, samma resultatvy.
