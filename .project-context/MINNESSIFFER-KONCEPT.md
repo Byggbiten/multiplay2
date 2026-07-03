@@ -51,6 +51,13 @@ Nya faser i hjälpkön (deterministiska steg, inga races):
 - MINNESMÄSTARE ⭐: klaras ALLA placera+stryk-moment i passet utan
   fel-tap/vägledning → stjärna + "Minnesmästare!" i resultatvyn.
   Aldrig något negativt vid miss — bara utebliven bonus.
+- **SISTA minnessiffran undantas (Dennis 2026-07-03):** minnessiffran
+  vars användning sker i uppgiftens SISTA beräkningssteg behöver inte
+  strykas (inget kommande att förväxla med) — stryk-fasen skippas där,
+  i både demo och hjälpläge, och momentet räknas inte i Minnesmästare.
+  Alla minnessiffror FÖRE den sista har kvar strykkravet. (Nivå 4:
+  delprodukternas minnen är aldrig "sista" — bara additionsfasens
+  sista minne kan vara det.)
 
 ## Fria läget — frivillig minnesspalt + smart feedback
 
