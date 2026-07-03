@@ -558,6 +558,12 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
 .acard .astat{margin-left:auto;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;
   color:var(--deep);background:color-mix(in srgb,var(--acc) 10%,white 60%);padding:5px 12px;border-radius:var(--r-full)}
 .acard .chev{color:var(--acc);flex-shrink:0}
+/* Svårighetsgrad 1–4: kompakta tvåraders-chips, 4 i rad */
+.diff-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.diff-chips .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;min-height:50px;padding:7px 5px;border-radius:var(--r-lg)}
+.diff-chips .dnum{font-family:var(--font-head);font-weight:700;font-size:16px;line-height:1.1}
+.diff-chips .dlbl{font-size:11px;font-weight:800;opacity:.9;line-height:1.1;white-space:nowrap}
 
 /* ============================================================
    KONFETTI + STJÄRNREGN (event-styrt, självstädande)
@@ -675,6 +681,10 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
   .acard b{font-size:16px}
   .acard small{font-size:11.5px}
   .acard .astat{display:none}
+  .diff-chips{grid-template-columns:repeat(2,1fr);gap:7px}
+  .diff-chips .chip{min-height:44px;padding:5px 4px}
+  .diff-chips .dnum{font-size:14.5px}
+  .diff-chips .dlbl{font-size:10px}
 }
 
 /* iPad (≥700): tvåkolumn i hub + klocka = luftigt OCH utan scroll */
@@ -1134,10 +1144,11 @@ svg.icn{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stro
           <svg class="icn" viewBox="0 0 24 24" style="color:var(--acc)"><path d="M12 4v16M4 12h16" opacity="0"/><path d="M6 16l4-8 3 6 2-3 3 5"/></svg>
           Svårighetsgrad
         </div>
-        <div class="chips" id="diffChips">
-          <button class="chip on">🌱 Lätt · tal 0–20</button>
-          <button class="chip">🌿 Medel · tvåsiffrigt</button>
-          <button class="chip">🌳 Svår · med minnessiffra</button>
+        <div class="chips diff-chips" id="diffChips">
+          <button class="chip"><span class="dnum">1 🌱</span><span class="dlbl">Tal 0–20</span></button>
+          <button class="chip on"><span class="dnum">2 🌿</span><span class="dlbl">Tvåsiffrigt</span></button>
+          <button class="chip"><span class="dnum">3 🌾</span><span class="dlbl">Över hundra</span></button>
+          <button class="chip"><span class="dnum">4 🌳</span><span class="dlbl">Minnessiffra &amp; lån</span></button>
         </div>
       </div>
     </div>
