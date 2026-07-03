@@ -65,14 +65,22 @@ const UppstallningGame = (() => {
     #uppstallning-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
     #uppstallning-root .app-header { padding:4px 12px 0; margin-bottom:0; flex-shrink:0; }
     #up-main { flex:1; display:flex; overflow:hidden; min-height:0; }
-    #up-left { flex:1; display:flex; flex-direction:column; gap:8px;
+    #up-left { display:flex; flex-direction:column; gap:8px;
                overflow-y:auto; padding:clamp(6px,1.5vw,12px); min-height:0; padding-bottom:12px; }
-    #up-right { flex:1; display:flex; flex-direction:column; padding:clamp(6px,1.5vw,12px); gap:5px; min-height:0; }
-    @media (orientation:landscape) { #up-main { flex-direction:row; } }
+    #up-right { display:flex; flex-direction:column; padding:clamp(6px,1.5vw,12px); gap:5px; min-height:0; }
+    /* Kladd-lagen (Fas 3.2): kladden fyller ALL ledig yta i sin riktning.
+       Landskap: uppgiftskolumnen får en stabil bredd (ej innehållsstyrd, så
+       canvasens CSS-yta inte fladdrar mellan steg) — kladden tar resten.
+       Porträtt: uppgiftsstacken tar sin naturliga höjd — kladden tar resten. */
+    @media (orientation:landscape) {
+      #up-main { flex-direction:row; }
+      #up-left  { flex:0 0 clamp(340px,45%,560px); }
+      #up-right { flex:1 1 0; min-width:0; }
+    }
     @media (orientation:portrait) {
       #up-main { flex-direction:column; }
-      #up-left { flex:1; }
-      #up-right { flex:0 0 35vh; min-height:120px; }
+      #up-left  { flex:0 1 auto; }
+      #up-right { flex:1 1 0; min-height:150px; }
     }
     .up-btn { cursor:pointer; border:none; border-radius:var(--radius-md); font-weight:800;
       font-family:var(--font-body);
@@ -188,7 +196,7 @@ const UppstallningGame = (() => {
       border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
       display:flex; flex-direction:column;
       gap:5px; flex:1; min-height:0; padding:8px; }
-    .up-canvas { flex:1; min-height:120px; width:100%; display:block; touch-action:none;
+    .up-canvas { flex:1; min-height:60px; width:100%; display:block; touch-action:none;
       cursor:crosshair; border-radius:10px;
       border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
       background:rgba(255,255,255,0.8); }
@@ -1814,20 +1822,45 @@ const UppstallningGame = (() => {
   }
 
   /* ── Canvas ─────────────────────────────────────────────── */
+  let upResizeObs = null;
+
   function setupCanvas(id) {
-    upCanvas = document.getElementById(id);
+    const el = document.getElementById(id);
+    if (upResizeObs) { upResizeObs.disconnect(); upResizeObs = null; }
+    upCanvas = el;
     if (!upCanvas) return;
     upErasing = false;
     requestAnimationFrame(() => {
+      if (!upCanvas || !upCanvas.isConnected) return;
       const r = upCanvas.getBoundingClientRect();
-      upCanvas.width  = Math.max(r.width  || 300, 300);
-      upCanvas.height = Math.max(r.height || 200, 200);
+      upCanvas.width  = Math.max(Math.round(r.width)  || 300, 60);
+      upCanvas.height = Math.max(Math.round(r.height) || 200, 60);
       upCtx = upCanvas.getContext('2d');
       upCanvas.addEventListener('pointerdown',   upPD);
       upCanvas.addEventListener('pointermove',   upPM);
       upCanvas.addEventListener('pointerup',     upPU);
       upCanvas.addEventListener('pointercancel', upPU);
+      /* Kladden flex-växer nu dynamiskt (bubblor/feedback ändrar layouten) —
+         håll bitmappen i synk med CSS-ytan så pennan aldrig förvrängs. */
+      if (typeof ResizeObserver !== 'undefined') {
+        upResizeObs = new ResizeObserver(() => upSyncBitmap());
+        upResizeObs.observe(upCanvas);
+      }
     });
+  }
+
+  function upSyncBitmap() {
+    if (!upCanvas || !upCtx || !upCanvas.isConnected) return;
+    const w = Math.round(upCanvas.clientWidth);
+    const h = Math.round(upCanvas.clientHeight);
+    if (!w || !h) return;
+    if (Math.abs(w - upCanvas.width) < 2 && Math.abs(h - upCanvas.height) < 2) return;
+    /* Bevara det ritade: kopiera ut, ändra bitmapp, kopiera tillbaka oskalat */
+    const tmp = document.createElement('canvas');
+    tmp.width = upCanvas.width; tmp.height = upCanvas.height;
+    tmp.getContext('2d').drawImage(upCanvas, 0, 0);
+    upCanvas.width = w; upCanvas.height = h;
+    upCtx.drawImage(tmp, 0, 0);
   }
 
   function upPD(e) {

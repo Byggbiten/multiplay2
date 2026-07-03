@@ -182,6 +182,14 @@ const NpMatteSkriftlig = (() => {
           flex:1; display:grid; grid-template-columns:55fr 45fr;
           padding:8px; gap:8px; overflow:hidden; min-height:0; height:100%;
         }
+        /* Kladd-lagen (Fas 3.2): i porträtt staplas innehåll överst och
+           kladden flex-växer in i ALL kvarvarande yta (fyller, skapar aldrig
+           overflow — krymper ner till min-height på små skärmar). */
+        @media (orientation:portrait) {
+          #nps-main { display:flex; flex-direction:column; }
+          #nps-left-col { flex:0 1 auto; }
+          #nps-scratch-panel { flex:1 1 0; height:auto; min-height:140px; }
+        }
         #nps-left-col {
           display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-height:0;
         }
@@ -195,7 +203,7 @@ const NpMatteSkriftlig = (() => {
           display:flex; flex-direction:column; gap:5px; height:100%; min-height:0;
         }
         #nps-canvas {
-          flex:1; width:100%; display:block;
+          flex:1; min-height:40px; width:100%; display:block;
           touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:1.5px dashed color-mix(in srgb, var(--accent) 25%, transparent);
           background:rgba(255,255,255,0.7);
@@ -231,6 +239,13 @@ const NpMatteSkriftlig = (() => {
           border:2.5px solid color-mix(in srgb, var(--accent) 30%, transparent); width:100%; letter-spacing:0.05em;
         }
         #nps-feedback { min-height:0; }
+        .nps-active-cell { outline:3px solid var(--accent);
+          animation:nps-free-glow 1.2s ease-in-out infinite; }
+        .nps-guide-pulse { animation:nps-free-glow 0.8s ease-in-out 2; }
+        @keyframes nps-free-glow {
+          0%,100% { box-shadow:0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
+          50%      { box-shadow:0 0 20px color-mix(in srgb, var(--accent) 75%, transparent); }
+        }
       </style>
 
       <!-- Compact header -->
@@ -281,22 +296,46 @@ const NpMatteSkriftlig = (() => {
   }
 
   /* ── Canvas ──────────────────────────────────────────────── */
+  let canvasResizeObs = null;
+
   function setupCanvas() {
+    if (canvasResizeObs) { canvasResizeObs.disconnect(); canvasResizeObs = null; }
     canvas = document.getElementById('nps-canvas');
     if (!canvas) return;
     erasing = false;
 
     requestAnimationFrame(() => {
+      if (!canvas || !canvas.isConnected) return;
       const rect = canvas.getBoundingClientRect();
-      canvas.width  = rect.width  || 300;
-      canvas.height = rect.height || 160;
+      canvas.width  = Math.round(rect.width)  || 300;
+      canvas.height = Math.round(rect.height) || 160;
       ctx = canvas.getContext('2d');
 
       canvas.addEventListener('pointerdown', onPD);
       canvas.addEventListener('pointermove', onPM);
       canvas.addEventListener('pointerup',   onPU);
       canvas.addEventListener('pointercancel', onPU);
+      /* Kladd-lagen: kladdytan flex-växer dynamiskt (hint/feedback ändrar
+         layouten i porträtt) — håll bitmappen i synk med CSS-ytan. */
+      if (typeof ResizeObserver !== 'undefined') {
+        canvasResizeObs = new ResizeObserver(() => syncCanvasBitmap());
+        canvasResizeObs.observe(canvas);
+      }
     });
+  }
+
+  function syncCanvasBitmap() {
+    if (!canvas || !ctx || !canvas.isConnected) return;
+    const w = Math.round(canvas.clientWidth);
+    const h = Math.round(canvas.clientHeight);
+    if (!w || !h) return;
+    if (Math.abs(w - canvas.width) < 2 && Math.abs(h - canvas.height) < 2) return;
+    /* Bevara det ritade: kopiera ut, ändra bitmapp, kopiera tillbaka oskalat */
+    const tmp = document.createElement('canvas');
+    tmp.width = canvas.width; tmp.height = canvas.height;
+    tmp.getContext('2d').drawImage(canvas, 0, 0);
+    canvas.width = w; canvas.height = h;
+    ctx.drawImage(tmp, 0, 0);
   }
 
   function onPD(e) {
@@ -726,32 +765,36 @@ const NpMatteSkriftlig = (() => {
   /* ── Multi-free ──────────────────────────────────────────── */
   function buildMultiFree(q) {
     mfValues = new Array(q.fields.length).fill('');
-    mfActiveIdx = 0;
+
+    // Mark prefilled
+    q.fields.forEach((f, i) => { if (f.prefilled !== undefined) mfValues[i] = String(f.prefilled); });
+
+    // Find first editable — den markeras aktiv direkt
+    mfActiveIdx = q.fields.findIndex(f => f.prefilled === undefined);
+    if (mfActiveIdx < 0) mfActiveIdx = 0;
+
     let tableHtml = `<table style="border-collapse:collapse;margin-bottom:var(--space-3);width:100%;
       background:var(--glass-strong);border-radius:var(--radius-md);overflow:hidden;
       border:1.5px solid color-mix(in srgb, var(--accent) 15%, transparent)"><thead><tr>`;
     q.fields.forEach(f => { tableHtml += `<th style="padding:6px 12px;font-size:var(--text-sm);background:color-mix(in srgb, var(--accent) 8%, transparent)">${esc(f.label)}</th>`; });
     tableHtml += '</tr></thead><tbody><tr>';
     q.fields.forEach((f, i) => {
+      const editable = f.prefilled === undefined;
+      const active   = editable && i === mfActiveIdx;
       tableHtml += `<td style="padding:8px;text-align:center">
-        <div id="nps-mf-cell-${i}" class="num" onclick="NpMatteSkriftlig.mfFocus(${i})"
+        <div id="nps-mf-cell-${i}" class="num${active ? ' nps-active-cell' : ''}" onclick="NpMatteSkriftlig.mfFocus(${i})"
           style="min-width:60px;height:44px;border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
-          background:${i===0?'color-mix(in srgb, var(--accent) 8%, transparent)':'#fff'};display:flex;align-items:center;
-          justify-content:center;font-size:var(--text-xl);font-weight:900;color:var(--deep);cursor:pointer">
+          background:${active?'color-mix(in srgb, var(--accent) 8%, transparent)':'#fff'};display:flex;align-items:center;
+          justify-content:center;font-size:var(--text-xl);font-weight:900;color:var(--deep);cursor:${editable?'pointer':'default'}">
           ${f.prefilled !== undefined ? f.prefilled : '...'}
         </div></td>`;
     });
     tableHtml += '</tr></tbody></table>';
 
-    // Mark prefilled
-    q.fields.forEach((f, i) => { if (f.prefilled !== undefined) mfValues[i] = String(f.prefilled); });
-
-    // Find first editable
-    mfActiveIdx = q.fields.findIndex(f => f.prefilled === undefined);
-    if (mfActiveIdx < 0) mfActiveIdx = 0;
-
+    const ready = q.fields.every((f, i) => f.prefilled !== undefined || mfValues[i]);
     return tableHtml + buildNumpad('nps-mf-numpad') +
-      `<button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)"
+      `<button class="btn btn-primary btn-block btn-sm" id="nps-mf-confirm"
+        style="margin-top:var(--space-3);${ready ? '' : 'opacity:0.5'}" ${ready ? '' : 'disabled'}
         onclick="NpMatteSkriftlig.submitMultiFree()">
         Bekräfta svar ✓</button>`;
   }
@@ -762,11 +805,22 @@ const NpMatteSkriftlig = (() => {
     currentQ.fields.forEach((f, j) => {
       const cell = document.getElementById(`nps-mf-cell-${j}`);
       if (cell && f.prefilled === undefined) {
-        cell.style.background = j === i ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : '#fff';
+        const active = j === i;
+        cell.style.background = active ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : '#fff';
+        cell.classList.toggle('nps-active-cell', active);
       }
     });
     const disp = document.getElementById('nps-npad-display');
     if (disp) disp.textContent = mfValues[i] || '...';
+  }
+
+  function mfUpdateConfirm() {
+    const confirm = document.getElementById('nps-mf-confirm');
+    if (!confirm || !currentQ) return;
+    const ready = currentQ.fields.every((f, i) => f.prefilled !== undefined || mfValues[i]);
+    confirm.style.opacity = ready ? '1' : '0.5';
+    if (ready) confirm.removeAttribute('disabled');
+    else confirm.setAttribute('disabled', '');
   }
 
   function npadPress(key) {
@@ -794,6 +848,7 @@ const NpMatteSkriftlig = (() => {
       if (cell) cell.textContent = mfValues[mfActiveIdx] || '...';
       const disp = document.getElementById('nps-npad-display');
       if (disp) disp.textContent = mfValues[mfActiveIdx] || '...';
+      mfUpdateConfirm();
     } else {
       if (key === '⌫') {
         npadValue = npadValue.slice(0, -1);
@@ -807,6 +862,8 @@ const NpMatteSkriftlig = (() => {
 
   function submitMultiFree() {
     if (inputLocked) return;
+    // Aldrig fel försök på tomma fält
+    if (currentQ.fields.some((f, i) => f.prefilled === undefined && !mfValues[i])) return;
     inputLocked = true;
     handleAnswer(mfValues.map(v => parseInt(v, 10)));
   }
@@ -890,9 +947,9 @@ const NpMatteSkriftlig = (() => {
           padding:var(--space-3);border:1.5px solid color-mix(in srgb, var(--accent) 15%, transparent)">
           <div class="num" style="display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-head);font-size:var(--text-2xl);font-weight:900;color:var(--deep);margin-bottom:var(--space-2)">
             <span>${sq.a}</span>
-            <div id="nps-fs-${i}-0" onclick="NpMatteSkriftlig.fsSelect(${i},0)"
+            <div id="nps-fs-${i}-0"
               style="width:40px;height:40px;border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 40%, transparent);
-              background:color-mix(in srgb, var(--accent) 5%, transparent);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--text-xl)">
+              background:color-mix(in srgb, var(--accent) 5%, transparent);display:flex;align-items:center;justify-content:center;font-size:var(--text-xl)">
               ?</div>
             <span>${sq.b}</span>
             <span>=</span>
@@ -909,22 +966,27 @@ const NpMatteSkriftlig = (() => {
         </div>`;
     });
     html += '</div>';
-    html += `<button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)"
+    html += `<button class="btn btn-primary btn-block btn-sm" id="nps-fs-confirm"
+      style="margin-top:var(--space-3);opacity:0.5" disabled
       onclick="NpMatteSkriftlig.submitFillSign()">
       Bekräfta svar ✓</button>`;
     return html;
   }
 
-  let fsActiveSlot = { qi: 0, pos: 0 };
-  function fsSelect(qi, pos) { fsActiveSlot = { qi, pos }; }
   function fsSign(qi, sign) {
     fillAnswers[qi].op1 = sign;
     const el = document.getElementById(`nps-fs-${qi}-0`);
     if (el) { el.textContent = sign; el.style.background = 'color-mix(in srgb, var(--accent) 15%, transparent)'; el.style.color='var(--accent)'; }
+    const confirm = document.getElementById('nps-fs-confirm');
+    if (confirm && fillAnswers.every(a => a.op1 !== null)) {
+      confirm.style.opacity = '1';
+      confirm.removeAttribute('disabled');
+    }
   }
 
   function submitFillSign() {
     if (inputLocked) return;
+    if (fillAnswers.some(a => a.op1 === null)) return; // aldrig fel försök på tomt svar
     inputLocked = true;
     handleAnswer(fillAnswers.map(a => a.op1));
   }
@@ -950,7 +1012,10 @@ const NpMatteSkriftlig = (() => {
         ${esc(ex)}</button>`;
     });
     html += `</div>
-      <button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)" id="nps-match-confirm"
+      <div id="nps-match-hint" style="min-height:18px;margin-top:6px;font-size:var(--text-xs);
+        font-weight:800;color:var(--accent);text-align:center"></div>
+      <button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-2);opacity:0.5"
+        id="nps-match-confirm" disabled
         onclick="NpMatteSkriftlig.submitMatch()">
         Bekräfta ✓</button>`;
     return html;
@@ -958,14 +1023,30 @@ const NpMatteSkriftlig = (() => {
 
   function matchPickLeft(i) {
     matchLeft = i;
+    const hint = document.getElementById('nps-match-hint');
+    if (hint) hint.textContent = '';
     currentQ.events.forEach((_, j) => {
       const b = document.getElementById(`nps-ml-${j}`);
       if (b) b.style.outline = j===i ? '3px solid var(--accent)' : 'none';
     });
   }
 
+  /* Barnet tryckte i höger kolumn utan vald vänster-rad: mild vägledning
+     istället för tyst ignorering. */
+  function matchGuideLeft() {
+    const hint = document.getElementById('nps-match-hint');
+    if (hint) hint.textContent = 'Välj en räknehändelse först 👈';
+    currentQ.events.forEach((_, j) => {
+      const b = document.getElementById(`nps-ml-${j}`);
+      if (!b) return;
+      b.classList.remove('nps-guide-pulse');
+      void b.offsetWidth; // starta om animationen
+      b.classList.add('nps-guide-pulse');
+    });
+  }
+
   function matchPickRight(i) {
-    if (matchLeft === null) return;
+    if (matchLeft === null) { matchGuideLeft(); return; }
     // Remove previous pair for this left
     matchPairs[matchLeft] = i;
     matchLeft = null;
@@ -978,10 +1059,16 @@ const NpMatteSkriftlig = (() => {
       if (lBtn) { lBtn.style.background = c; lBtn.style.color='#fff'; lBtn.style.outline='none'; }
       if (rBtn) { rBtn.style.background = c; rBtn.style.color='#fff'; }
     });
+    const confirm = document.getElementById('nps-match-confirm');
+    if (confirm && Object.keys(matchPairs).length === currentQ.events.length) {
+      confirm.style.opacity = '1';
+      confirm.removeAttribute('disabled');
+    }
   }
 
   function submitMatch() {
     if (inputLocked) return;
+    if (Object.keys(matchPairs).length < currentQ.events.length) return; // aldrig fel försök på ofullständigt
     inputLocked = true;
     handleAnswer(matchPairs);
   }
@@ -1755,7 +1842,7 @@ const NpMatteSkriftlig = (() => {
     mcToggle, submitMultiChoice,
     mfFocus, submitMultiFree,
     orderPick, orderUndo, submitOrder,
-    fsSelect, fsSign, submitFillSign,
+    fsSign, submitFillSign,
     matchPickLeft, matchPickRight, submitMatch,
   };
 })();

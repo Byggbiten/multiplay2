@@ -39,36 +39,86 @@ const PlatsvardeGame = (() => {
   /* ══════════════════════════════════════════════════════════
      VÄLJ-SKÄRM
   ══════════════════════════════════════════════════════════ */
+  function readHubLog(key, filter) {
+    try {
+      let log = JSON.parse(localStorage.getItem(key)) || [];
+      if (filter) log = log.filter(filter);
+      return log.length ? { latest: log[0], count: log.length } : null;
+    } catch (_) { return null; }
+  }
+
+  function hubStatusHtml(s) {
+    if (!s || !s.latest || !s.latest.total) {
+      return `<span class="astat astat-new">Ny! ✨</span>`;
+    }
+    const pct   = Math.max(0, Math.min(100, Math.round(s.latest.score / s.latest.total * 100)));
+    const medal = pct === 100 ? '🥇' : pct >= 75 ? '🥈' : pct >= 50 ? '🥉' : '💪';
+    const pass  = s.count === 1 ? '1 pass' : `${s.count} pass`;
+    return `
+      <span class="astat num">${medal} Senast ${s.latest.score}/${s.latest.total} · ${pass}</span>
+      <span class="abar"><i style="width:${pct}%"></i></span>`;
+  }
+
   function showSelect() {
     const root = document.getElementById('addsub-root');
+    const pid  = profile.id;
     const cards = [
       { icon: '🧮', label: 'Platsvärde',            desc: 'Hundratal, tiotal och ental',
-        onclick: 'PlatsvardeGame.startPlatsvarde()' },
+        onclick: 'PlatsvardeGame.startPlatsvarde()',
+        stat: readHubLog(LOG_KEY(pid)) },
       { icon: '➕', label: 'Uppställd addition',    desc: 'Räkna uppställt med minnessiffra',
-        onclick: "PlatsvardeGame.startUppstallning('addition')" },
+        onclick: "PlatsvardeGame.startUppstallning('addition')",
+        stat: readHubLog(`uppstallning_log_${pid}`, e => e.mode === 'addition') },
       { icon: '➖', label: 'Uppställd subtraktion', desc: 'Låna från tiotalet',
-        onclick: "PlatsvardeGame.startUppstallning('subtraction')" },
+        onclick: "PlatsvardeGame.startUppstallning('subtraction')",
+        stat: readHubLog(`uppstallning_log_${pid}`, e => e.mode === 'subtraction') },
     ];
 
     root.innerHTML = `
       <style id="pv-hub-css">
-        .as-hub-grid { display:grid; grid-template-columns:1fr; gap:12px;
-          margin-top:auto; margin-bottom:auto; }
-        .acard { display:flex; align-items:center; gap:16px; text-align:left;
-          padding:14px 20px; width:100%;
+        .as-hub { flex:1; min-height:0; width:100%; display:flex; flex-direction:column;
+          justify-content:center; align-items:center; gap:clamp(12px,2.2vh,22px); }
+        .as-hub .section-title { width:100%; padding:0; flex-shrink:0; }
+        .as-hub .me-chip { flex-shrink:0; }
+        .as-cards { width:100%; flex:1; min-height:0; max-height:min(58vh,540px);
+          display:grid; grid-template-columns:1fr; grid-auto-rows:1fr;
+          gap:clamp(10px,1.8vh,18px); }
+        .acard { display:flex; align-items:center; gap:clamp(14px,2vw,20px); text-align:left;
+          width:100%; min-height:clamp(84px,13vh,140px);
+          padding:clamp(12px,2vh,20px) clamp(16px,2.5vw,24px);
           background:var(--glass); border:1px solid var(--glass-line);
           border-radius:var(--radius-lg); box-shadow:var(--shadow-panel);
           cursor:pointer; transition:transform .3s var(--spring), box-shadow .3s; }
         .acard:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 16px 40px var(--glow); }
         .acard:active { transform:scale(.98); }
-        .aico { width:58px; height:58px; border-radius:18px; display:grid; place-items:center;
-          font-size:29px; flex-shrink:0;
+        .aico { width:clamp(56px,9vh,84px); height:clamp(56px,9vh,84px);
+          border-radius:22px; display:grid; place-items:center;
+          font-size:clamp(28px,4.6vh,44px); flex-shrink:0;
           background:linear-gradient(135deg,var(--tint),#fff);
           border:1px solid var(--glass-line); box-shadow:0 4px 12px var(--glow); }
-        .acard b { font-family:var(--font-head); font-weight:700; font-size:19px;
-          color:var(--deep); display:block; line-height:1.15; }
-        .acard small { color:var(--ink-soft); font-size:13px; font-weight:700; }
-        .acard .chev { color:var(--accent); flex-shrink:0; width:24px; height:24px; margin-left:auto; }
+        .acard-body { flex:1; min-width:0; display:flex; flex-direction:column;
+          align-items:flex-start; gap:2px; }
+        .acard b { font-family:var(--font-head); font-weight:700;
+          font-size:clamp(18px,2.6vh,23px); color:var(--deep); line-height:1.15; }
+        .acard small { color:var(--ink-soft); font-size:clamp(12px,1.7vh,14.5px); font-weight:700; }
+        .astat { display:inline-flex; align-items:center; gap:6px; margin-top:6px;
+          font-size:12.5px; font-weight:800; color:var(--deep);
+          background:color-mix(in srgb, var(--accent) 10%, white 60%);
+          padding:4px 12px; border-radius:var(--radius-full); }
+        .astat-new { background:linear-gradient(135deg,var(--accent),var(--accent-light));
+          color:#fff; }
+        .abar { width:min(220px,70%); height:6px; margin-top:7px; border-radius:99px;
+          background:color-mix(in srgb, var(--accent) 14%, white 50%); overflow:hidden; }
+        .abar i { display:block; height:100%; border-radius:inherit;
+          background:linear-gradient(90deg,var(--accent),var(--accent-light)); }
+        .acard .chev { color:var(--accent); flex-shrink:0; width:26px; height:26px; margin-left:auto; }
+        @media (min-width:1000px) {
+          .as-cards { grid-template-columns:repeat(3,1fr); max-height:min(54vh,460px); }
+          .acard { flex-direction:column; justify-content:center; text-align:center;
+            gap:clamp(10px,2vh,18px); min-height:0; }
+          .acard-body { flex:0 0 auto; align-items:center; text-align:center; }
+          .acard .chev { display:none; }
+        }
       </style>
       <div class="floaties"><span style="top:6%;right:8%">✨</span><span style="bottom:10%;left:5%;animation-delay:2s">🍀</span></div>
       <div class="app-header">
@@ -77,18 +127,25 @@ const PlatsvardeGame = (() => {
         <span style="width:52px"></span>
       </div>
       <div class="wrap">
-        <div class="me-chip" style="align-self:center">
-          <span class="avatar avatar-sm">${profile.avatar}</span>
-          <b>${escHtml(profile.name)}</b>
-        </div>
-        <div class="as-hub-grid">
-          ${cards.map(c => `
-            <button class="acard" onclick="${c.onclick}">
-              <span class="aico">${c.icon}</span>
-              <span><b>${c.label}</b><small>${c.desc}</small></span>
-              <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-            </button>
-          `).join('')}
+        <div class="as-hub">
+          <div class="me-chip">
+            <span class="avatar avatar-sm">${profile.avatar}</span>
+            <b>${escHtml(profile.name)}</b>
+          </div>
+          <div class="section-title">Vad vill du träna?</div>
+          <div class="as-cards">
+            ${cards.map(c => `
+              <button class="acard" onclick="${c.onclick}">
+                <span class="aico">${c.icon}</span>
+                <span class="acard-body">
+                  <b>${c.label}</b>
+                  <small>${c.desc}</small>
+                  ${hubStatusHtml(c.stat)}
+                </span>
+                <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+              </button>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -273,8 +330,20 @@ const PlatsvardeGame = (() => {
         .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
           font-family:var(--font-head); font-variant-numeric:tabular-nums;
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
-          cursor:pointer; transition:all 0.15s; background:var(--glass-strong); }
-        .pv-decomp-field.active { outline:3px solid var(--accent); }
+          cursor:pointer; transition:all 0.15s; background:var(--glass-strong); position:relative; }
+        .pv-decomp-field.active { outline:3px solid var(--accent);
+          animation:pv-free-glow 1.2s ease-in-out infinite; }
+        .pv-free-arrow { position:absolute; bottom:calc(100% + 2px); left:50%;
+          transform:translateX(-50%); font-size:clamp(1rem,2.2vw,1.3rem);
+          pointer-events:none; z-index:6; animation:pv-arrow-bounce 0.9s ease-in-out infinite; }
+        @keyframes pv-free-glow {
+          0%,100% { box-shadow:0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
+          50%      { box-shadow:0 0 20px color-mix(in srgb, var(--accent) 75%, transparent); }
+        }
+        @keyframes pv-arrow-bounce {
+          0%,100% { transform:translateX(-50%) translateY(0); }
+          50%      { transform:translateX(-50%) translateY(-7px); }
+        }
         .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(40px,8vw,52px)); gap:6px; justify-content:center; margin-top:8px; }
         .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full);
           font-size:var(--text-base); font-family:var(--font-head); font-weight:900;
@@ -285,16 +354,21 @@ const PlatsvardeGame = (() => {
         .pv-nk-del { background:#fee2e2; border-color:#ef4444; color:#dc2626; }
         .pv-nk-ok  { background:linear-gradient(135deg,var(--accent),var(--accent-light));
           border-color:transparent; color:#fff; box-shadow:0 4px 12px var(--glow); }
+        .pv-nk:disabled { opacity:0.5; cursor:default; box-shadow:none; }
+        .pv-nk:disabled:hover { transform:none; }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
         .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
           cursor:pointer; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
           background:var(--glass-strong); transition:all 0.25s var(--spring); }
+        .pv-order-btn.placed { opacity:0.45; border-style:dashed; border-color:var(--accent);
+          outline:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+          background:color-mix(in srgb, var(--accent) 8%, transparent); }
         .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md);
           border:2px dashed color-mix(in srgb, var(--accent) 32%, transparent);
           display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-sm);
           font-weight:800; color:color-mix(in srgb, var(--accent) 45%, transparent); }
         .pv-slot.filled { background:color-mix(in srgb, var(--accent) 10%, transparent);
-          border:2px solid var(--accent); color:var(--accent); }
+          border:2px solid var(--accent); color:var(--accent); cursor:pointer; }
       </style>
 
       <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:5px 10px;
@@ -333,6 +407,7 @@ const PlatsvardeGame = (() => {
       </div>
     `;
     setupCanvas();
+    if (q.type === 'B2') setDecompActive(0); // markera hundratal aktivt direkt
   }
 
   function renderQContent(q) {
@@ -484,6 +559,7 @@ const PlatsvardeGame = (() => {
         <div class="pv-numpad">
           ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
             <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
+              ${k==='✓' ? 'id="pv-dc-ok" disabled' : ''}
               onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
           `).join('')}
         </div>
@@ -575,12 +651,21 @@ const PlatsvardeGame = (() => {
             </button>
           `).join('')}
         </div>
-        <button onclick="PlatsvardeGame.submitOrder()"
-          style="width:100%;margin-top:6px;height:40px;border-radius:var(--radius-full);
-          background:linear-gradient(135deg,var(--accent),var(--accent-light));color:white;border:none;
-          font-weight:800;cursor:pointer;box-shadow:0 4px 12px var(--glow)">
-          ✓ Klar
-        </button>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button onclick="PlatsvardeGame.orderUndo()"
+            style="flex:1;height:40px;border-radius:var(--radius-full);
+            background:var(--tint);color:var(--deep);
+            border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-weight:800;cursor:pointer">
+            ↩ Ångra
+          </button>
+          <button id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
+            style="flex:2;height:40px;border-radius:var(--radius-full);
+            background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--deep);border:none;
+            font-weight:800;cursor:pointer;opacity:0.5">
+            ✓ Klar
+          </button>
+        </div>
       </div>
     `;
   }
@@ -612,27 +697,51 @@ const PlatsvardeGame = (() => {
     decompActive = idx;
     [0, 1, 2].forEach(i => {
       const el = document.getElementById(`pv-dc-${i}`);
-      if (el) el.classList.toggle('active', i === idx);
+      if (!el) return;
+      const active = i === idx;
+      el.classList.toggle('active', active);
+      let arrow = el.querySelector('.pv-free-arrow');
+      if (active && !arrow) {
+        arrow = document.createElement('span');
+        arrow.className = 'pv-free-arrow';
+        arrow.textContent = '👇';
+        el.appendChild(arrow);
+      } else if (!active && arrow) {
+        arrow.remove();
+      }
     });
+  }
+
+  function updateDecompOk() {
+    const ok = document.getElementById('pv-dc-ok');
+    if (!ok) return;
+    const ready = decompAnswers.every(v => v !== '');
+    ok.disabled = !ready;
   }
 
   function decompPress(key) {
     if (inputLocked) return;
     if (key === '✓') { submitDecomp(); return; }
     if (key === '⌫') {
+      // Tomt aktivt fält? Backa till föregående (som uppställnings sudd).
+      if (decompAnswers[decompActive] === '' && decompActive > 0) {
+        setDecompActive(decompActive - 1);
+      }
       decompAnswers[decompActive] = '';
     } else {
       decompAnswers[decompActive] = key;
-      if (decompActive < 2) { decompActive++; setDecompActive(decompActive); }
+      if (decompActive < 2) { setDecompActive(decompActive + 1); }
     }
     [0, 1, 2].forEach(i => {
       const v = document.getElementById(`pv-dc-val-${i}`);
       if (v) v.textContent = decompAnswers[i] || '?';
     });
+    updateDecompOk();
   }
 
   function submitDecomp() {
     if (inputLocked) return;
+    if (decompAnswers.some(v => v === '')) return; // aldrig fel försök på tomt ✓
     inputLocked = true;
     const { h, t, e } = currentQ.correct;
     const isCorrect = parseInt(decompAnswers[0]) === h
@@ -652,25 +761,45 @@ const PlatsvardeGame = (() => {
     updateOrderUI();
   }
 
+  function orderUndo() {
+    if (inputLocked) return;
+    if (orderPlaced.length === 0) return;
+    orderPlaced.pop(); // tar bort SENAST placerade (samma mönster som np-skriftlig)
+    updateOrderUI();
+  }
+
   function updateOrderUI() {
     [0, 1, 2, 3].forEach(i => {
       const slot = document.getElementById(`pv-slot-${i}`);
       if (!slot) return;
       if (orderPlaced[i] !== undefined) {
+        const num = orderPlaced[i];
         slot.className = 'pv-slot filled';
-        slot.innerHTML = renderColoredNumber(orderPlaced[i], '0.9rem');
+        slot.innerHTML = renderColoredNumber(num, '0.9rem');
+        slot.onclick = () => handleOrderClick(num); // klick på fylld slot tar bort talet
       } else {
         slot.className = 'pv-slot';
         slot.textContent = '?';
+        slot.onclick = null;
       }
     });
     currentQ.nums.forEach(n => {
       const btn = document.getElementById(`pv-ob-${n}`);
       if (!btn) return;
-      const placed = orderPlaced.includes(n);
-      btn.style.opacity = placed ? '0.35' : '1';
-      btn.style.pointerEvents = placed ? 'none' : 'auto';
+      // Placerade knappar förblir klickbara: klick tar tillbaka talet (ångra)
+      btn.classList.toggle('placed', orderPlaced.includes(n));
     });
+    const confirm = document.getElementById('pv-order-confirm');
+    if (confirm) {
+      const ready = orderPlaced.length === 4;
+      confirm.disabled = !ready;
+      confirm.style.opacity = ready ? '1' : '0.5';
+      confirm.style.background = ready
+        ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
+        : 'color-mix(in srgb, var(--accent) 15%, transparent)';
+      confirm.style.color = ready ? '#fff' : 'var(--deep)';
+      confirm.style.boxShadow = ready ? '0 4px 12px var(--glow)' : 'none';
+    }
   }
 
   function submitOrder() {
@@ -887,7 +1016,7 @@ const PlatsvardeGame = (() => {
     init, showSelect, startPlatsvarde, startUppstallning,
     handleChoice, handleDigitClick,
     setDecompActive, decompPress, submitDecomp,
-    handleOrderClick, submitOrder,
+    handleOrderClick, orderUndo, submitOrder,
     pvToggleEraser, pvClearCanvas,
     confirmAbort,
   };

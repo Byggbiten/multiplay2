@@ -10,7 +10,7 @@ const FriendsGame = (() => {
 
   /* ── Tillstånd ─────────────────────────────────────── */
   let profile    = null;
-  let practiceN  = 5;   // Det lila talet (0–10)
+  let practiceN  = 5;   // Det lila talet (1–9; paren 0+10/10+0 utgår)
 
   const LOG_KEY  = id => `friends_log_${id}`;
 
@@ -36,10 +36,10 @@ const FriendsGame = (() => {
     /* Ekvationsraden: lila bubbla + gul bubbla = 10 */
     .fr-eq { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.8vw, 16px); }
     .fr-bubble {
-      width: clamp(52px, 9vh, 80px); height: clamp(52px, 9vh, 80px);
+      width: clamp(56px, 11vh, 112px); height: clamp(56px, 11vh, 112px);
       border-radius: 50%; display: grid; place-items: center;
       font-family: var(--font-head); font-weight: 800;
-      font-size: clamp(26px, 4.6vh, 40px); line-height: 1; user-select: none;
+      font-size: clamp(28px, 5.6vh, 56px); line-height: 1; user-select: none;
     }
     .fr-bubble-purple {
       background: linear-gradient(135deg, #6d28d9, #a78bfa);
@@ -57,17 +57,26 @@ const FriendsGame = (() => {
     }
     .fr-op {
       font-family: var(--font-head); font-weight: 800;
-      font-size: clamp(22px, 4vh, 34px); color: var(--deep);
+      font-size: clamp(24px, 4.8vh, 46px); color: var(--deep);
     }
     .fr-sum {
-      min-width: clamp(52px, 9vh, 80px); height: clamp(52px, 9vh, 80px);
+      min-width: clamp(56px, 11vh, 112px); height: clamp(56px, 11vh, 112px);
       padding: 0 clamp(10px, 2vw, 18px); border-radius: var(--radius-full);
       display: grid; place-items: center;
       font-family: var(--font-head); font-weight: 800;
-      font-size: clamp(26px, 4.6vh, 40px); line-height: 1; user-select: none;
+      font-size: clamp(28px, 5.6vh, 56px); line-height: 1; user-select: none;
       background: var(--glass-strong); color: var(--deep);
       border: 3px solid var(--accent-2); box-shadow: 0 6px 20px rgba(217, 119, 6, 0.25);
     }
+
+    /* Monumental variant för testfrågan — uppgiften äger skärmen */
+    .fr-eq-big .fr-bubble, .fr-eq-big .fr-sum {
+      width: clamp(60px, min(13vh, 20vw), 132px);
+      height: clamp(60px, min(13vh, 20vw), 132px);
+    }
+    .fr-eq-big .fr-sum { min-width: clamp(60px, min(13vh, 20vw), 132px); padding: 0 clamp(8px, 1.6vw, 16px); }
+    .fr-eq-big .fr-bubble, .fr-eq-big .fr-sum { font-size: clamp(32px, 6.6vh, 66px); }
+    .fr-eq-big .fr-op { font-size: clamp(26px, 5.4vh, 54px); }
 
     /* Tio-rutnätet — pedagogikens hjärta, uppskalat */
     .fr-gridcard {
@@ -77,15 +86,15 @@ const FriendsGame = (() => {
     }
     #friends-root .ten-grid { max-width: none; gap: clamp(6px, 1.2vh, 12px); }
     #friends-root .ten-cell {
-      width: clamp(38px, min(8.5vh, 9vw), 68px);
+      width: clamp(42px, min(10.5vh, 15vw), 100px);
       display: grid; place-items: center;
       font-family: var(--font-head); font-weight: 800;
-      font-size: clamp(14px, 2.6vh, 24px); line-height: 1; user-select: none;
+      font-size: clamp(16px, 3.2vh, 34px); line-height: 1; user-select: none;
     }
     #friends-root .ten-cell.filled-purple { color: #fff; }
     #friends-root .ten-cell.filled-yellow { color: var(--choco); }
-    .fr-grid-sm .ten-cell { width: clamp(28px, min(5.5vh, 7vw), 46px) !important;
-      font-size: clamp(11px, 2vh, 17px) !important; }
+    .fr-grid-sm .ten-cell { width: clamp(30px, min(6vh, 8vw), 52px) !important;
+      font-size: clamp(12px, 2.2vh, 19px) !important; }
     @keyframes fr-pop { 0% { transform: scale(0.55); } 65% { transform: scale(1.18); } }
     #friends-root .fr-flip { animation: fr-pop 0.38s var(--spring); }
 
@@ -106,28 +115,44 @@ const FriendsGame = (() => {
     .fr-controls .icon-btn { color: var(--accent); }
     .fr-start { min-width: 220px; }
 
-    /* Testvyn */
-    .fr-progress-row { display: flex; align-items: center; gap: var(--space-3); width: 100%; }
-    .fr-progress-row .progress-bar { flex: 1; }
-    .fr-qcount { font-weight: 900; font-size: var(--text-sm); color: var(--deep); white-space: nowrap; }
+    /* Testvyn — quiz-mallen: progress som kapsel i headern, inget eget band */
+    #friends-root .header-progress {
+      display: inline-flex; align-items: center; gap: clamp(6px, 1vw, 10px);
+      padding: 8px clamp(10px, 1.6vw, 16px); border-radius: var(--radius-full);
+      background: var(--glass-strong); border: 2px solid var(--glass-line);
+      box-shadow: var(--shadow-panel); flex-shrink: 0; white-space: nowrap;
+      font-family: var(--font-head); font-weight: 800;
+      font-size: clamp(13px, 2vh, 16px); color: var(--deep);
+    }
+    #friends-root .header-progress .fr-hp-bar {
+      width: clamp(34px, 6vw, 64px); height: 8px; border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.7); border: 1px solid var(--glass-line); overflow: hidden;
+    }
+    #friends-root .header-progress .fr-hp-bar i {
+      display: block; height: 100%; border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transition: width 0.4s var(--spring);
+    }
     .fr-prompt {
-      font-size: clamp(11px, 1.8vh, 14px); font-weight: 800; letter-spacing: 0.08em;
+      font-size: clamp(11px, 1.8vh, 15px); font-weight: 800; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--ink-soft); text-align: center;
     }
     .fr-answers {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: clamp(8px, 1.5vh, 14px); width: 100%; max-width: 520px;
+      display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr;
+      gap: clamp(10px, 1.8vh, 18px); width: 100%; max-width: 620px;
+      flex: 1 1 auto; min-height: 0; max-height: clamp(190px, 38vh, 420px);
     }
     #friends-root .fr-answers .answer-option {
-      padding: clamp(10px, 2vh, 18px);
-      font-size: clamp(24px, 4.2vh, 34px); font-weight: 800;
+      height: 100%; min-height: 64px;
+      padding: clamp(8px, 1.6vh, 16px);
+      font-size: clamp(30px, 6vh, 56px); font-weight: 800;
     }
 
     /* Resultatvyn */
     .fr-pctsign { font-size: 0.45em; }
     .fr-detailcard { padding: clamp(10px, 2vh, 18px); }
     #friends-root .card-title svg { color: var(--accent); }
-    .fr-detail-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(4px, 1vh, 8px); }
+    .fr-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(4px, 1vh, 8px); }
     .fr-detail {
       text-align: center; padding: clamp(4px, 1vh, 8px) 2px;
       border-radius: var(--radius-md); font-family: var(--font-head);
@@ -203,14 +228,14 @@ const FriendsGame = (() => {
           <div>
             <div class="fr-label">Alla 10-kompisar 💛</div>
             <div class="fr-pairs">
-              ${[0,1,2,3,4,5,6,7,8,9,10].map(n => `
+              ${[1,2,3,4,5,6,7,8,9].map(n => `
                 <button class="chip num${n === practiceN ? ' chip-active' : ''}" id="fr-chip-${n}"
                   onclick="FriendsGame.setN(${n})">${n} + ${10 - n}</button>
               `).join('')}
             </div>
           </div>
 
-          <!-- Kontroller -->
+          <!-- Kontroller + starta test (kompakt rad) -->
           <div class="fr-controls">
             <button class="icon-btn" aria-label="Minska" title="Minska" onclick="FriendsGame.adjustN(-1)">${SVG_MINUS}</button>
             <button class="icon-btn" aria-label="Återställ" title="Återställ" onclick="FriendsGame.resetN()">
@@ -220,13 +245,11 @@ const FriendsGame = (() => {
             <button class="icon-btn" aria-label="Öka" title="Öka" onclick="FriendsGame.adjustN(1)">
               <svg class="icn"><use href="#i-plus"/></svg>
             </button>
+            <button class="btn btn-primary btn-lg fr-start" onclick="FriendsGame.startTest()">
+              <svg class="icn"><use href="#i-play"/></svg>
+              Starta test!
+            </button>
           </div>
-
-          <!-- Starta test -->
-          <button class="btn btn-primary btn-lg fr-start" onclick="FriendsGame.startTest()">
-            <svg class="icn"><use href="#i-play"/></svg>
-            Starta test!
-          </button>
 
         </div>
       </div>
@@ -268,15 +291,15 @@ const FriendsGame = (() => {
     }
     popEl(document.getElementById('purple-number'), practiceN);
     popEl(document.getElementById('yellow-number'), companion);
-    for (let n = 0; n <= 10; n++) {
+    for (let n = 1; n <= 9; n++) {
       const chip = document.getElementById(`fr-chip-${n}`);
       if (chip) chip.classList.toggle('chip-active', n === practiceN);
     }
   }
 
-  /* ── Kontroller ────────────────────────────────────── */
+  /* ── Kontroller (talområde 1–9) ────────────────────── */
   function adjustN(delta) {
-    practiceN = Math.max(0, Math.min(10, practiceN + delta));
+    practiceN = Math.max(1, Math.min(9, practiceN + delta));
     App.Sound.play('click');
     patchPractice();
   }
@@ -288,24 +311,24 @@ const FriendsGame = (() => {
   }
 
   function resetN() {
-    practiceN = 0;
+    practiceN = 1;
     App.Sound.play('click');
     patchPractice();
   }
 
   function randomN() {
-    practiceN = Math.floor(Math.random() * 11);
+    practiceN = Math.floor(Math.random() * 9) + 1;
     App.Sound.play('click');
     patchPractice();
   }
 
   /* ══════════════════════════════════════════════════════
-     TESTLÄGE – 10 FRÅGOR
+     TESTLÄGE – 9 FRÅGOR
   ══════════════════════════════════════════════════════ */
   function startTest() {
     App.Sound.play('click');
-    // Bygg frågor: 0–10 blandade
-    const questions = MP.shuffle([0,1,2,3,4,5,6,7,8,9,10]).slice(0, 10);
+    // Bygg frågor: 1–9 blandade (aldrig 0 eller 10)
+    const questions = MP.shuffle([1,2,3,4,5,6,7,8,9]);
     runTest(questions);
   }
 
@@ -330,20 +353,18 @@ const FriendsGame = (() => {
       <div class="app-header">
         <button class="btn-back" onclick="FriendsGame.renderPractice()">Avbryt</button>
         <span class="header-title">10-Kompisar · Test</span>
-        <span class="fr-spacer"></span>
+        <span class="header-progress num" aria-label="Fråga ${Math.min(prog.answered + 1, TOTAL)} av ${TOTAL}">
+          ${Math.min(prog.answered + 1, TOTAL)} av ${TOTAL}
+          <span class="fr-hp-bar"><i style="width:${Math.round(progress * 100)}%"></i></span>
+        </span>
       </div>
 
       <div class="wrap">
-        <div class="fr-progress-row">
-          <span class="fr-qcount num">Fråga ${Math.min(prog.answered + 1, TOTAL)} av ${TOTAL}</span>
-          <div class="progress-bar"><i style="width:${Math.round(progress * 100)}%"></i></div>
-        </div>
-
         <div class="fr-stage">
 
-          <!-- Frågan -->
+          <!-- Frågan — monumental -->
           <div class="fr-prompt">Vad är kompisen till...</div>
-          <div class="fr-eq">
+          <div class="fr-eq fr-eq-big">
             <span class="fr-bubble fr-bubble-purple num">${n}</span>
             <span class="fr-op">+</span>
             <span class="fr-bubble fr-bubble-q num">?</span>
@@ -399,13 +420,13 @@ const FriendsGame = (() => {
     render();
   }
 
-  /* ── Generera svarsalternativ ─────────────────────── */
+  /* ── Generera svarsalternativ (1–9, aldrig 0/10) ───── */
   function generateFriendsOptions(correct) {
     const opts = new Set([correct]);
     while (opts.size < 4) {
       const delta = Math.floor(Math.random() * 4) + 1;
       const sign  = Math.random() < 0.5 ? 1 : -1;
-      const val   = Math.max(0, Math.min(10, correct + delta * sign));
+      const val   = Math.max(1, Math.min(9, correct + delta * sign));
       opts.add(val);
     }
     return [...opts].sort(() => Math.random() - 0.5);

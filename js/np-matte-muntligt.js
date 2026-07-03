@@ -163,8 +163,13 @@ const NpMatteMuntligt = (() => {
           gap:8px; padding:8px;
           overflow:hidden; min-height:0; height:100%;
         }
+        /* Kladd-lagen (Fas 3.2): i porträtt staplas innehåll överst och
+           kladden flex-växer in i ALL kvarvarande yta (fyller, skapar aldrig
+           overflow — krymper ner till min-height på små skärmar). */
         @media (orientation:portrait) {
-          #np-main { grid-template-columns:1fr 1fr; }
+          #np-main { display:flex; flex-direction:column; }
+          #np-left-col { flex:0 1 auto; }
+          #np-scratch-panel { flex:1 1 0; height:auto; min-height:140px; }
         }
         /* LEFT column */
         #np-left-col {
@@ -184,7 +189,7 @@ const NpMatteMuntligt = (() => {
           height:100%; min-height:0;
         }
         #np-canvas {
-          flex:1; width:100%; display:block;
+          flex:1; min-height:40px; width:100%; display:block;
           touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:1.5px dashed color-mix(in srgb, var(--accent) 25%, transparent);
           background:rgba(255,255,255,0.7);
@@ -374,23 +379,48 @@ const NpMatteMuntligt = (() => {
   let lastY      = 0;
   let eraserMode = false;
 
+  let canvasResizeObs = null;
+
   function setupCanvas() {
+    if (canvasResizeObs) { canvasResizeObs.disconnect(); canvasResizeObs = null; }
     const canvas = document.getElementById('np-canvas');
     if (!canvas) return;
     eraserMode = false;
 
     // Vänta en frame så CSS-layout är klar, hämta sedan actual rendered size
     requestAnimationFrame(() => {
+      if (!canvas.isConnected) return;
       const rect = canvas.getBoundingClientRect();
-      canvas.width  = rect.width  || 300;
-      canvas.height = rect.height || 120;
+      canvas.width  = Math.round(rect.width)  || 300;
+      canvas.height = Math.round(rect.height) || 120;
       canvasCtx = canvas.getContext('2d');
 
       canvas.addEventListener('pointerdown',  startDraw);
       canvas.addEventListener('pointermove',  doDraw);
       canvas.addEventListener('pointerup',    endDraw);
       canvas.addEventListener('pointercancel',endDraw);
+      /* Kladd-lagen: kladdytan flex-växer dynamiskt (hint/vuxen-boxar och
+         feedback ändrar layouten i porträtt). Rit-koden mappar pekarkoordinater
+         1:1 mot bitmappen, så bitmappen MÅSTE följa CSS-ytan exakt. */
+      if (typeof ResizeObserver !== 'undefined') {
+        canvasResizeObs = new ResizeObserver(() => syncCanvasBitmap(canvas));
+        canvasResizeObs.observe(canvas);
+      }
     });
+  }
+
+  function syncCanvasBitmap(canvas) {
+    if (!canvas || !canvasCtx || !canvas.isConnected) return;
+    const w = Math.round(canvas.clientWidth);
+    const h = Math.round(canvas.clientHeight);
+    if (!w || !h) return;
+    if (Math.abs(w - canvas.width) < 2 && Math.abs(h - canvas.height) < 2) return;
+    /* Bevara det ritade: kopiera ut, ändra bitmapp, kopiera tillbaka oskalat */
+    const tmp = document.createElement('canvas');
+    tmp.width = canvas.width; tmp.height = canvas.height;
+    tmp.getContext('2d').drawImage(canvas, 0, 0);
+    canvas.width = w; canvas.height = h;
+    canvasCtx.drawImage(tmp, 0, 0);
   }
 
   function startDraw(e) {

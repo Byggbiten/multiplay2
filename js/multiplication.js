@@ -21,8 +21,8 @@ const MultGame = (() => {
     /* Layout-hjälpare */
     #mult-root .mult-gap{gap:12px}
     #mult-root .mult-spacer{width:52px;flex:0 0 auto}
-    #mult-root .mult-hdr-actions{display:flex;gap:8px;flex:0 0 auto}
-    #mult-root .mult-hdr-slot{min-width:52px;display:flex;justify-content:flex-end;flex:0 0 auto}
+    #mult-root .mult-hdr-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+    #mult-root .app-header .header-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #mult-root .mult-timer-slot{display:flex;justify-content:center;margin-bottom:8px}
     #mult-root .mult-timer-slot:empty{display:none;margin:0}
     #mult-root .mult-sub{text-align:center;color:var(--ink-soft);font-weight:700;font-size:14px}
@@ -45,9 +45,14 @@ const MultGame = (() => {
     #mult-root .timer-row>b svg{width:19px;height:19px;color:var(--accent)}
     #mult-root .timer-row .chips{flex:1;min-width:0;flex-wrap:wrap}
     #mult-root .timer-row .chip{min-height:38px;padding:7px 12px;font-size:13px;white-space:nowrap}
+    #mult-root .hub-shortcuts{display:none}
     @media (min-width:700px){
       #mult-root .hub-cols{display:grid;grid-template-columns:minmax(260px,320px) 1fr;align-items:stretch}
       #mult-root .tgrid .table-card{min-height:118px}
+      /* Balansera vänsterkolumnen (landskap 1180: inget dött band under CTA:n) */
+      #mult-root .hub-side{justify-content:space-between}
+      #mult-root .hub-shortcuts{display:flex;gap:10px}
+      #mult-root .hub-shortcuts .btn{flex:1;min-height:52px}
     }
     @media (max-width:430px){
       #mult-root .tgrid{grid-template-columns:repeat(4,1fr);gap:8px}
@@ -55,8 +60,14 @@ const MultGame = (() => {
       #mult-root .timer-row .chip{min-height:34px;padding:6px 9px;font-size:12px}
     }
 
-    /* Inställningsvy */
-    #mult-root .mult-setup{gap:14px;max-width:520px;margin:0 auto;width:100%}
+    /* Inställningsvy (lägesval) – uppskalad + centrerad, fyller kolumnen */
+    #mult-root .mult-setup{gap:clamp(14px,2.4vh,26px);max-width:560px;margin:0 auto;width:100%}
+    #mult-root .mult-setup .card{padding:clamp(16px,2.4vh,26px) clamp(16px,3vw,26px)}
+    #mult-root .mult-setup .card-title{font-size:clamp(15px,2.2vh,19px)}
+    #mult-root .mult-setup .segmented button{min-height:clamp(52px,7vh,64px);font-size:clamp(15px,2vh,18px)}
+    #mult-root .mult-setup .mult-stack{gap:clamp(10px,1.8vh,16px)}
+    #mult-root .mult-setup .mult-stack .btn{min-height:clamp(60px,9vh,86px);font-size:clamp(17px,2.4vh,21px);border-radius:22px}
+    #mult-root .mult-setup .mult-sub{font-size:clamp(14px,2vh,17px)}
 
     /* Lär dig-vy */
     #mult-root .mult-learn{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex:1;min-height:0;align-content:space-evenly}
@@ -64,19 +75,30 @@ const MultGame = (() => {
     #mult-root .ml-q{font-size:17px;font-weight:800;color:var(--ink-soft)}
     #mult-root .ml-a{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--deep)}
 
-    /* Quiz-vyer */
-    #mult-root .mq-plabel{display:flex;justify-content:space-between;font-weight:900;font-size:14px;color:var(--deep);margin-bottom:6px}
-    #mult-root .mq-main{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px;width:100%;max-width:620px;margin:0 auto}
-    #mult-root .mq-qcard{text-align:center;padding:22px 18px}
-    #mult-root .mq-task{font-family:var(--font-head);font-weight:800;font-size:clamp(40px,8vw,68px);line-height:1;color:var(--deep);letter-spacing:2px}
-    #mult-root .mq-x{color:var(--accent-2);margin:0 10px}
+    /* Quiz-vyer (v26: uppgiften äger skärmen) */
+    /* Progress-kapsel i headern (modulvariant av .header-progress) */
+    #mult-root .header-progress{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:64px;padding:8px 13px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel);font-family:var(--font-head);font-weight:800;font-size:15px;line-height:1;color:var(--deep);flex:0 0 auto}
+    #mult-root .header-progress .hp-bar{width:100%;min-width:40px;height:4px;border-radius:999px;background:rgba(93,63,158,.15);overflow:hidden}
+    #mult-root .header-progress .hp-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s var(--spring)}
+    #mult-root .mult-timer-hdr:empty{display:none}
+    #mult-root .mq-main{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(12px,2vh,20px);width:100%;max-width:720px;margin:0 auto}
+    /* Frågehero: växer i all ledig yta, monumental typografi som skalar med skärmhöjd */
+    #mult-root .q-hero.mq-qcard{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(4px,1vh,12px);padding:clamp(12px,3vh,30px) 18px}
+    #mult-root .mq-task{font-family:var(--font-head);font-weight:800;font-size:clamp(44px,min(14vh,19vw),120px);line-height:1;color:var(--deep);letter-spacing:2px}
+    #mult-root .mq-x{color:var(--accent-2);margin:0 .18em}
     #mult-root .mq-eq{color:var(--accent);opacity:.85}
-    #mult-root .mq-ans{font-family:var(--font-head);font-weight:800;font-size:clamp(34px,7vw,56px);color:var(--accent);margin-top:8px}
-    #mult-root .mq-hint{color:var(--ink-soft);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-    #mult-root .mq-answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
-    #mult-root .mult-free{width:100%;display:flex;flex-direction:column;gap:14px;align-items:center}
-    #mult-root .mult-free .numpad{width:100%;max-width:340px}
-    #mult-root .mult-free-display{width:100%;max-width:340px;height:68px;display:flex;align-items:center;justify-content:center;border-radius:20px;border:3px solid var(--accent-light);background:rgba(255,255,255,.92);font-family:var(--font-head);font-size:2rem;font-weight:800;color:var(--deep);transition:all .15s}
+    #mult-root .mq-ans{font-family:var(--font-head);font-weight:800;font-size:clamp(34px,min(10vh,15vw),88px);line-height:1.1;color:var(--accent)}
+    #mult-root .mq-hint{color:var(--ink-soft);font-weight:800;font-size:clamp(13px,1.9vh,16px);text-transform:uppercase;letter-spacing:.08em}
+    #mult-root .mq-cta{flex:0 0 auto;min-height:clamp(58px,9vh,78px);font-size:clamp(17px,2.6vh,22px)}
+    /* Svarsytor: fyller nedre delen (tumzon) och skalar med höjden */
+    #mult-root .q-answers-fill.mq-answers{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.8vh,16px);width:100%;flex:0 0 auto}
+    #mult-root .q-answers-fill .answer-option{min-height:clamp(64px,11vh,116px);font-size:clamp(24px,4.6vh,42px);border-radius:24px}
+    #mult-root .mult-free{width:100%;display:flex;flex-direction:column;gap:clamp(10px,1.6vh,16px);align-items:center;flex:0 0 auto}
+    #mult-root .mult-free .numpad{width:100%;max-width:min(460px,92vw);gap:clamp(8px,1.4vh,14px)}
+    #mult-root .mult-free .numpad-key{height:clamp(52px,8vh,80px);font-size:clamp(20px,3.4vh,30px)}
+    #mult-root .mult-free .numpad-key.key-delete{font-size:clamp(18px,3vh,26px)}
+    #mult-root .mult-free .numpad-key.key-ok{font-size:clamp(15px,2.4vh,21px)}
+    #mult-root .mult-free-display{width:100%;max-width:min(460px,92vw);height:clamp(56px,9vh,84px);flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:20px;border:3px solid var(--accent-light);background:rgba(255,255,255,.92);font-family:var(--font-head);font-size:clamp(28px,5vh,44px);font-weight:800;color:var(--deep);transition:all .15s}
 
     /* Statistik & logg */
     #mult-root .mult-stats-cols{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
@@ -248,6 +270,18 @@ const MultGame = (() => {
               <svg class="icn" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.2" fill="currentColor" stroke="none"/></svg>
               Gör ett eget Matteprov
             </button>
+
+            <!-- GENVÄGAR (fyllnad ≥700px – mobilen har header-ikonerna) -->
+            <div class="hub-shortcuts">
+              <button class="btn btn-secondary" onclick="MultGame.showStats()">
+                <svg class="icn"><use href="#i-stats"/></svg>
+                Statistik
+              </button>
+              <button class="btn btn-secondary" onclick="MultGame.showLog()">
+                <svg class="icn"><use href="#i-history"/></svg>
+                Sessionslogg
+              </button>
+            </div>
           </div>
 
           <!-- TABELL-GRID -->
@@ -368,12 +402,15 @@ const MultGame = (() => {
           <div class="card-title">Steg 2 – Välj aktivitet</div>
           <div class="mult-stack">
             <button class="btn btn-secondary btn-block" onclick="MultGame.startLearn(${table})">
+              <svg class="icn" viewBox="0 0 24 24"><path d="M12 5.5C10.5 4 8.4 3.5 6 3.5c-1 0-2 .15-3 .5v14.5c1-.35 2-.5 3-.5 2.4 0 4.5.5 6 2 1.5-1.5 3.6-2 6-2 1 0 2 .15 3 .5V4c-1-.35-2-.5-3-.5-2.4 0-4.5.5-6 2zm0 0v14.5"/></svg>
               Lär dig först
             </button>
             <button class="btn btn-primary btn-block" onclick="MultGame.startInteractive(${table})">
+              <svg class="icn"><use href="#i-play"/></svg>
               Interaktiv träning
             </button>
             <button class="btn btn-accent btn-block" onclick="MultGame.startTest(${table})">
+              <svg class="icn" viewBox="0 0 24 24"><path d="M13 2.5L4.5 13.5h6l-1 8L18 10.5h-6l1-8z"/></svg>
               Börja testa direkt
             </button>
           </div>
@@ -472,12 +509,14 @@ const MultGame = (() => {
         <div class="app-header">
           <button class="btn-back" onclick="MultGame.selectTable(${table})">Avbryt</button>
           <span class="header-title">${table}:ans tabell</span>
-          <span class="mult-hdr-slot" id="mult-timer-display"></span>
+          <div class="mult-hdr-actions">
+            <span class="mult-timer-hdr" id="mult-timer-display"></span>
+            <span class="header-progress num" role="progressbar" aria-valuenow="${prog.answered}" aria-valuemin="0" aria-valuemax="${prog.total}" aria-label="Framsteg">
+              <span>${prog.answered}/${prog.total}</span>
+              <span class="hp-bar"><i style="width:${Math.round(progress*100)}%"></i></span>
+            </span>
+          </div>
         </div>
-      `;
-      const progressHTML = `
-        <div class="mq-plabel num"><span>Framsteg</span><span>${prog.answered}/${prog.total}</span></div>
-        <div class="progress-bar"><i style="width:${Math.round(progress*100)}%"></i></div>
       `;
 
       if (phase === 'show') {
@@ -486,14 +525,13 @@ const MultGame = (() => {
           ${baseStyle()}
           ${headerHTML}
           <div class="wrap">
-            ${progressHTML}
             <div class="mq-main">
-              <div class="card mq-qcard">
+              <div class="card mq-qcard q-hero">
                 <div class="mq-hint">Kom ihåg detta! 📚</div>
                 <div class="mq-task num">${table}<span class="mq-x">×</span>${mult}</div>
                 <div class="mq-ans num">= ${ans}</div>
               </div>
-              <button class="btn btn-primary btn-lg btn-block" onclick="MultGame._trainingNext()">
+              <button class="btn btn-primary btn-lg btn-block mq-cta" onclick="MultGame._trainingNext()">
                 Jag förstår!
                 <svg class="icn"><use href="#i-play"/></svg>
               </button>
@@ -508,9 +546,8 @@ const MultGame = (() => {
           ${baseStyle()}
           ${headerHTML}
           <div class="wrap">
-            ${progressHTML}
             <div class="mq-main">
-              <div class="card mq-qcard">
+              <div class="card mq-qcard q-hero">
                 <div class="mq-task num">${table}<span class="mq-x">×</span>${mult}<span class="mq-eq">&nbsp;= ?</span></div>
               </div>
               ${buildAnswerUI(table, mult, ans, (wasCorrect) => {
@@ -684,13 +721,18 @@ const MultGame = (() => {
         <div class="app-header">
           <button class="btn-back" onclick="MultGame.showCustomTest()">Avbryt</button>
           <span class="header-title">Matteprov</span>
-          <span class="mult-hdr-slot" id="mult-timer-display"></span>
+          <div class="mult-hdr-actions">
+            <span class="mult-timer-hdr" id="mult-timer-display"></span>
+            <span class="header-progress num" role="progressbar" aria-valuenow="${prog.answered}" aria-valuemin="0" aria-valuemax="${prog.total}" aria-label="Framsteg">
+              <span>${prog.answered}/${prog.total}</span>
+              <span class="hp-bar"><i style="width:${Math.round(progress*100)}%"></i></span>
+            </span>
+          </div>
         </div>
         <div class="wrap">
-          <div class="mq-plabel num"><span>${tables.join(', ')}-tabellerna</span><span>${prog.answered}/${prog.total}</span></div>
-          <div class="progress-bar"><i style="width:${Math.round(progress*100)}%"></i></div>
           <div class="mq-main">
-            <div class="card mq-qcard">
+            <div class="card mq-qcard q-hero">
+              <div class="mq-hint num">${tables.join(', ')}-tabellerna</div>
               <div class="mq-task num">${q.table}<span class="mq-x">×</span>${q.mult}<span class="mq-eq">&nbsp;= ?</span></div>
             </div>
             ${buildAnswerUI(q.table, q.mult, ans, (wasCorrect) => {
@@ -997,7 +1039,7 @@ const MultGame = (() => {
     const options = generateOptions(correctAnswer);
     MultGame._choiceCallback = callback;
     return `
-      <div class="mq-answers" id="choice-options">
+      <div class="mq-answers q-answers-fill" id="choice-options">
         ${options.map(o => `
           <button class="answer-option num" onclick="MultGame._handleChoice(${o},${correctAnswer})" id="opt-${o}">
             ${o}

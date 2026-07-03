@@ -77,31 +77,47 @@ const ClockGame = (() => {
     .ck-actions .icon-btn{width:52px;height:52px;flex-shrink:0}
     .ck-actions .btn{flex:1;min-height:52px}
 
-    /* Testval */
-    .ck-choice-wrap{align-items:center;gap:18px}
-    .ck-hero{font-size:60px;text-align:center;animation:bounce-in .5s var(--spring)}
-    .ck-choice-title{font-family:var(--font-head);color:var(--deep);font-size:24px;text-align:center}
-    .ck-choice{display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px}
+    /* Header-progress-kapsel (v26 quiz-mall: ersätter frågebandet) */
+    #clock-root .header-progress{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.8);border:1.5px solid rgba(47,111,228,.22);box-shadow:var(--shadow-sm);font-weight:900;font-size:13.5px;color:var(--deep);white-space:nowrap;flex-shrink:0}
+    #clock-root .header-progress .progress-bar{width:54px;height:8px;flex:none}
+
+    /* Testval — skala med skärmhöjden, fyll som övningsvyn */
+    .ck-choice-wrap{align-items:center;gap:clamp(14px,3vh,34px)}
+    .ck-hero{font-size:clamp(54px,11vh,108px);line-height:1;text-align:center;animation:bounce-in .5s var(--spring)}
+    .ck-choice-title{font-family:var(--font-head);color:var(--deep);font-size:clamp(21px,3.6vh,34px);text-align:center}
+    .ck-choice{display:flex;flex-direction:column;gap:clamp(12px,2.2vh,24px);width:100%;max-width:640px}
+    .ck-choice .game-card-wide{min-height:clamp(86px,16vh,190px);padding:clamp(12px,2.4vh,26px) clamp(20px,3vw,34px)}
+    .ck-choice .game-emoji{font-size:clamp(30px,6vh,58px);margin:0}
+    .ck-choice h3{font-size:clamp(19px,3vh,30px)}
+    .ck-choice p{font-size:clamp(13px,2vh,17px)}
     .ck-chev{width:24px;height:24px;margin-left:auto;color:var(--ink-soft);flex-shrink:0}
 
-    /* Testflöde (Del 1 & 2) */
-    .ck-prog{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-    .ck-prog-label{font-weight:800;font-size:13px;color:var(--deep);white-space:nowrap}
-    .ck-prog .progress-bar{flex:1}
-    .ck-quiz{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px}
-    .ck-qpanel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-    .ck-qlabel{font-family:var(--font-head);font-weight:700;font-size:20px;color:var(--deep);text-align:center}
-    .ck-qsvg{width:min(46vw,232px);height:auto;filter:drop-shadow(0 10px 24px rgba(47,111,228,.22))}
-    .ck-digibox{font-family:var(--font-head);font-weight:800;font-size:clamp(36px,7vw,54px);letter-spacing:2px;line-height:1.05;padding:12px 28px;background:rgba(255,255,255,.92);border:2px solid rgba(47,111,228,.18);border-radius:22px;box-shadow:var(--shadow-md)}
-    .ck-target{font-size:clamp(20px,3.4vw,30px);letter-spacing:0;padding:10px 22px}
-    .ck-opts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:460px;margin:0 auto}
-    .ck-setctrl{display:flex;flex-direction:column;justify-content:center;gap:12px;width:100%;max-width:460px;margin:0 auto}
-    .ck-facit{font-weight:800;font-size:14px;color:#16a34a;text-align:center;margin-bottom:6px}
+    /* Testflöde (Del 1 & 2) — uppgiften äger skärmen (v26 quiz-mall):
+       klockan/tiden skalar med skärmhöjden, svaren/kontrollerna fyller nedre delen */
+    .ck-quiz{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,2vh,24px)}
+    .ck-qpanel,#clock-root .q-hero{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,1.6vh,18px)}
+    .ck-qlabel{font-family:var(--font-head);font-weight:700;font-size:clamp(17px,2.8vh,27px);color:var(--deep);text-align:center}
+    .ck-qsvg{width:min(41vh,84vw,540px);height:auto;filter:drop-shadow(0 10px 24px rgba(47,111,228,.22))}
+    #setting-clock-wrap .ck-qsvg{width:min(38vh,72vw,480px)}
+    .ck-digibox{font-family:var(--font-head);font-weight:800;font-size:clamp(44px,12vh,120px);letter-spacing:2px;line-height:1.05;padding:clamp(10px,2vh,22px) clamp(24px,5vw,48px);background:rgba(255,255,255,.92);border:2px solid rgba(47,111,228,.18);border-radius:22px;box-shadow:var(--shadow-md)}
+    #digital-setting-wrap .ck-digibox{font-size:clamp(48px,13vh,130px)}
+    .ck-target{font-size:clamp(19px,3.4vh,36px);letter-spacing:0;padding:8px 22px}
+    .ck-opts{display:flex;flex-direction:column;gap:clamp(9px,1.6vh,16px);width:100%;max-width:520px;margin:0 auto}
+    .ck-opts .answer-option{min-height:clamp(50px,8vh,96px);font-size:clamp(17px,2.9vh,28px)}
+    .ck-setctrl{display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.6vh,16px);width:100%;max-width:520px;margin:0 auto}
+    .ck-setctrl .ck-ctrls .icon-btn{width:48px;height:48px;min-height:48px}
+    .ck-setctrl .btn-lg{min-height:clamp(50px,8vh,64px)}
+    .ck-facit{font-weight:800;font-size:13px;color:#16a34a;text-align:center;margin-bottom:2px}
 
-    /* Resultat */
+    /* Resultat — skala upp och fyll (samma nivå som övningsvyn) */
     .ck-result{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+    #clock-root .result-pct{font-size:clamp(60px,14vh,140px)}
+    #clock-root .result-medal{font-size:clamp(40px,7vh,68px)}
+    #clock-root .result-msg{font-size:clamp(19px,3.2vh,32px)}
+    #clock-root .result-note{font-size:clamp(13px,2vh,18px)}
+    #clock-root .result-actions .btn{min-height:clamp(48px,7.5vh,62px);font-size:clamp(14px,2.2vh,18px)}
     .ck-detail{flex:1;min-height:0;overflow-y:auto}
-    .ck-detail .stat-row{padding:8px 12px;margin-bottom:6px}
+    .ck-detail .stat-row{padding:clamp(8px,1.4vh,14px) clamp(12px,1.8vw,18px);margin-bottom:clamp(6px,1vh,10px);font-size:clamp(14px,2vh,19px)}
     .ck-sec{font-size:12px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin:8px 0 6px}
     .c-ok{color:#16a34a}.c-mid{color:#d97706}.c-err{color:#dc2626}
 
@@ -133,12 +149,11 @@ const ClockGame = (() => {
       .ck-val{font-size:20px;min-width:38px}
       .ck-actions .icon-btn{width:46px;height:46px}
       .ck-actions .btn{min-height:46px;font-size:14.5px}
-      .ck-qsvg{width:min(52vw,190px)}
-      .ck-qlabel{font-size:16px}
-      .ck-digibox{font-size:34px;padding:9px 20px}
-      .ck-target{font-size:18px}
-      .ck-hero{font-size:48px}
-      .ck-choice-title{font-size:20px}
+      #clock-root .header-progress{min-height:36px;padding:6px 10px;gap:7px;font-size:12px}
+      #clock-root .header-progress .progress-bar{width:34px}
+      #clock-root .header-progress .hp-full{display:none}
+      #clock-root .app-header .header-title{font-size:clamp(17px,4.7vw,20px)}
+      .ck-setctrl .ck-ctrls .icon-btn{width:46px;height:46px;min-height:46px}
     }
 
     /* iPad porträtt 700–899: skala upp (designlag 2 – fyll skärmen) */
@@ -155,8 +170,11 @@ const ClockGame = (() => {
       .ck-val{font-size:28px;min-width:52px}
       .ck-actions .icon-btn{width:58px;height:58px}
       .ck-actions .btn{min-height:58px;font-size:17px}
-      .ck-qsvg{width:min(300px,44vw)}
-      .ck-qlabel{font-size:23px}
+      .ck-qsvg{width:min(44vh,62vw,560px)}
+      #setting-clock-wrap .ck-qsvg{width:min(40vh,56vw,470px)}
+      .ck-opts{max-width:640px}
+      .ck-setctrl{max-width:600px}
+      .ck-setctrl .ck-ctrls .icon-btn{width:56px;height:56px;min-height:56px}
     }
 
     /* iPad landskap / desktop ≥900: tvåkolumn */
@@ -164,9 +182,15 @@ const ClockGame = (() => {
       .ck-cols{display:grid;grid-template-columns:1.02fr 1fr;align-items:stretch}
       .ck-right .ck-timepanel,.ck-right .ck-spins{flex:1;display:flex;flex-direction:column;justify-content:center}
       #clock-root .ck-svg{width:min(400px,100%);height:auto}
-      .ck-quiz{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:22px}
-      .ck-opts,.ck-setctrl{margin:0}
-      .ck-qsvg{width:min(36vh,300px)}
+      .ck-quiz{display:grid;grid-template-columns:1.05fr 1fr;align-items:center;gap:clamp(20px,3vw,44px)}
+      .ck-opts,.ck-setctrl{margin:0;max-width:none}
+      .ck-qsvg{width:min(56vh,38vw,500px)}
+      #setting-clock-wrap .ck-qsvg{width:min(46vh,32vw,430px)}
+      .ck-opts .answer-option{min-height:clamp(64px,11vh,112px)}
+      .ck-setctrl .ck-ctrls .icon-btn{width:56px;height:56px;min-height:56px}
+      .ck-setctrl .ck-spins{padding:14px 24px}
+      .ck-setctrl .ck-spinrow{padding:14px 0}
+      .ck-setctrl .ck-spinrow b{font-size:19px}
       .ck-result{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px}
     }
   `;
@@ -184,22 +208,16 @@ const ClockGame = (() => {
   const ICON_CHECK   = `<svg class="icn" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>`;
 
   function headerHtml(title, backAction, opts = {}) {
-    const right = opts.history
-      ? `<button class="icon-btn" aria-label="Historik" onclick="ClockGame.showHistory()"><svg class="icn"><use href="#i-history"/></svg></button>`
-      : `<span class="hdr-spacer"></span>`;
+    const right = opts.progress
+      ? `<span class="header-progress num" aria-label="Fråga ${opts.progress.n} av ${opts.progress.total}"><span><span class="hp-full">Fråga </span>${opts.progress.n} av ${opts.progress.total}</span><span class="progress-bar"><i style="width:${opts.progress.pct}%"></i></span></span>`
+      : opts.history
+        ? `<button class="icon-btn" aria-label="Historik" onclick="ClockGame.showHistory()"><svg class="icn"><use href="#i-history"/></svg></button>`
+        : `<span class="hdr-spacer"></span>`;
     return `
       <div class="app-header">
         <button class="btn-back" onclick="${backAction}">${opts.backLabel || 'Tillbaka'}</button>
         <span class="header-title">${title}</span>
         ${right}
-      </div>`;
-  }
-
-  function progressHtml(label, pct) {
-    return `
-      <div class="ck-prog">
-        <span class="ck-prog-label num">${label}</span>
-        <div class="progress-bar"><i style="width:${pct}%"></i></div>
       </div>`;
   }
 
@@ -450,18 +468,20 @@ const ClockGame = (() => {
 
       root.innerHTML = `
         ${styleTag()}
-        ${headerHtml('Del 1 · Läsa klockan', 'ClockGame.showTestSetup()', { backLabel: 'Avbryt' })}
+        ${headerHtml('Del 1 · Läsa klockan', 'ClockGame.showTestSetup()', {
+          backLabel: 'Avbryt',
+          progress: { n: Math.min(prog.answered+1,TOTAL), total: TOTAL, pct: Math.round(progress*100) }
+        })}
         <div class="wrap">
-          ${progressHtml(`Fråga ${Math.min(prog.answered+1,TOTAL)} av ${TOTAL}`, Math.round(progress*100))}
           <div class="ck-quiz">
-            <div class="ck-qpanel">
+            <div class="ck-qpanel q-hero">
               <p class="ck-qlabel">Vad visar klockan?</p>
               ${type === 'analog'
                 ? drawAnalogClock(q.h, q.m)
                 : `<div class="ck-digibox num">${colorizeTimeText(`${p2(q.h)}:${p2(q.m)}`)}</div>`
               }
             </div>
-            <div class="ck-opts">
+            <div class="ck-opts q-answers-fill">
               ${options.map((opt, i) => `
                 <button class="answer-option" id="opt-${i}" onclick="ClockGame._handleReadChoice(${i})">
                   ${colorizeTimeText(opt)}
@@ -522,11 +542,13 @@ const ClockGame = (() => {
 
       root.innerHTML = `
         ${styleTag()}
-        ${headerHtml('Del 2 · Ställ klockan', 'ClockGame.showTestSetup()', { backLabel: 'Avbryt' })}
+        ${headerHtml('Del 2 · Ställ klockan', 'ClockGame.showTestSetup()', {
+          backLabel: 'Avbryt',
+          progress: { n: Math.min(prog.answered+1,TOTAL)+5, total: 10, pct: Math.round(progress*100) }
+        })}
         <div class="wrap">
-          ${progressHtml(`Fråga ${Math.min(prog.answered+1,TOTAL)+5} av 10`, Math.round(progress*100))}
           <div class="ck-quiz">
-            <div class="ck-qpanel">
+            <div class="ck-qpanel q-hero">
               <p class="ck-qlabel">Ställ klockan till:</p>
               <div class="ck-digibox ck-target">${colorizeTimeText(text)}</div>
               ${type === 'analog'
@@ -534,7 +556,7 @@ const ClockGame = (() => {
                 : `<div id="digital-setting-wrap">${drawDigitalSetting(settingH, settingM)}</div>`
               }
             </div>
-            <div class="ck-setctrl">
+            <div class="ck-setctrl q-answers-fill">
               ${spinnersHtml('ClockGame._adjustSetting', false)}
               <button class="btn btn-primary btn-lg" onclick="ClockGame._lockSetting()">
                 Lås svar

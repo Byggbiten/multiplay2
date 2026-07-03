@@ -1,4 +1,4 @@
-# Multiplay designsystem v25 — klasskatalog
+# Multiplay designsystem v26 — klasskatalog
 
 För modul-agenter i Fas 3 slice 2. Källa: `design-lab/index.html` (målbild
 v2.1, LÅST) + `.project-context/DESIGN-LOCK-MULTIPLAY.md`. Allt nedan finns i
@@ -6,7 +6,8 @@ v2.1, LÅST) + `.project-context/DESIGN-LOCK-MULTIPLAY.md`. Allt nedan finns i
 (uppstallning-mönstret) — rör ALDRIG app.css eller index.html.
 
 **Absoluta regler:** ingen `backdrop-filter` · en vy = en skärm utan scroll
-(768×1024, 1024×768, 390×844) · SVG som UI-ikoner, emoji endast som INNEHÅLL ·
+(1180×820, 820×1180, 390×844 + stress 390×664) · SVG som UI-ikoner, emoji
+endast som INNEHÅLL ·
 klockfärger tim BLÅ `#3b82f6` / minut RÖD `#ef4444` överallt ·
 spring-easing `var(--spring)` · ambient-animationer små/få/pausbara
 (`body.no-anim` pausar allt, `prefers-reduced-motion` respekteras).
@@ -57,6 +58,48 @@ auto` som nödventil — men målet är **0 px overflow**. Låt huvudpanelen ha
 `flex:1; min-height:0` och centrera med `.vcenter` eller
 `justify-content:center`. Grid som ska fylla höjd: `flex:1;
 align-content:space-evenly`.
+
+**Landskap ≥1100 (t.ex. iPad 1180×820):** `.screen` får beräknad symmetrisk
+sidopadding och `.wrap` breddas till max 1040 px, hårdcentrerad. Modulen
+behöver inte göra något — men panel/kolumn med egen `max-width` MÅSTE ha
+`margin-left/right:auto` (eller centrerande förälder), annars blir
+kompositionen osymmetrisk.
+
+## 2b. Quiz-mallen (FAS 3.2) — uppgiften äger skärmen
+
+Test-/frågevyer (mult/clock/tenfriends m.fl.) ska nå ≥55 % täckning:
+monumental typografi, stora svarsytor, progress som kapsel i headern
+(inget eget progressband). Tre generella klasser finns i app.css:
+
+| Klass | Användning |
+|---|---|
+| `.q-hero` | Frågekort som flex-växer och skalar med skärmhöjden. Frågetexten läggs direkt i elementet (Baloo, `clamp(2.5rem, 12vh, 6rem)`, tabular-nums, generös vh-baserad padding). Sekundär rad: `<span class="q-sub">…</span>` |
+| `.q-answers-fill` | Svarsgrid (2 kolumner) som flex-växer och fyller ledig höjd; radhöjd/knapphöjd `clamp(64px, 12vh, 120px)`, knapparna fyller sina rader. Använd med `.answer-option`-knappar |
+| `.header-progress` | Progress-kapsel i headerns HÖGERSEKTION (i stället för spacer): pill med `.progress-bar` + `.hp-label` |
+
+```html
+<div class="app-header">
+  <button class="btn-back" onclick="...">Tillbaka</button>
+  <span class="header-title">7:ans tabell</span>
+  <span class="header-progress">
+    <span class="progress-bar"><i style="width:40%"></i></span>
+    <span class="hp-label num">4/10</span>
+  </span>
+</div>
+<div class="wrap">
+  <div class="q-hero">7 × 8 = ?<span class="q-sub">Fråga 4 av 10</span></div>
+  <div class="q-answers-fill">
+    <button class="answer-option num">54</button>
+    <button class="answer-option num">56</button>
+    <button class="answer-option num">63</button>
+    <button class="answer-option num">48</button>
+  </div>
+</div>
+```
+
+Både `.q-hero` och `.q-answers-fill` är flex-barn — lägg dem direkt i
+`.wrap` (som är flex-kolumn) så delar de på höjden. Mobilanpassning av
+`.header-progress` ingår (≤430).
 
 ## 3. Komponentkatalog
 
@@ -159,9 +202,12 @@ går sönder — men nya vyer ska använda accentgruppen + nya tokens.
 
 ## 8. Checklista innan du lämnar en vy
 
-1. `body.no-anim` + mät `scrollHeight <= clientHeight + 2` i 768×1024,
-   1024×768 och 390×844 (labAudit-mönstret).
-2. Innehållet FYLLER skärmen (ingen topp-ankrad vy med tomrum under).
-3. Inga `backdrop-filter`, inga emoji-UI-ikoner, inga nya globala klasser.
-4. Alla id:n, `App.*`-onclick och modulens publika API oförändrade.
-5. Klockvyer: blå/röd-lagen i visare + digital + svensk text.
+1. `body.no-anim` + mät `scrollHeight <= clientHeight + 2` i 1180×820,
+   820×1180, 390×844 och stress 390×664 (labAudit-mönstret).
+2. Innehållet FYLLER skärmen (ingen topp-ankrad vy med tomrum under);
+   quiz-vyer ≥55 % täckning (quiz-mallen §2b), hubbar ≥50 %.
+3. Vid ≥1100: kompositionen ligger mittcentrerad med symmetriska
+   marginaler (paneler med egen max-width har margin auto).
+4. Inga `backdrop-filter`, inga emoji-UI-ikoner, inga nya globala klasser.
+5. Alla id:n, `App.*`-onclick och modulens publika API oförändrade.
+6. Klockvyer: blå/röd-lagen i visare + digital + svensk text.

@@ -1,5 +1,5 @@
 /* ============================================================
-   MULTIPLAY – Designsystem v25 · "Barnmagi × Apple-polish"
+   MULTIPLAY – Designsystem v26 · "Barnmagi × Apple-polish"
    Källa: design-lab/index.html (målbild v2.1, LÅST 2026-07-03)
    + DESIGN-LOCK-MULTIPLAY.md. Klasskatalog: docs/DESIGN-SYSTEM.md
    Regler: ingen backdrop-filter · en vy = en skärm · SVG som
@@ -1863,7 +1863,91 @@ svg.icn {
 .hero .btn { flex-shrink: 0; margin-left: auto; }
 
 /* ============================================================
-   34. KEYFRAMES
+   34. QUIZ-MALLEN — yteffektivitet (FAS 3.2)
+   Uppgiften äger skärmen: .q-hero (monumental fråga) +
+   .q-answers-fill (svarsgrid som fyller ledig höjd) +
+   .header-progress (progress-kapsel i headerns högersektion,
+   ersätter eget progressband). Se docs/DESIGN-SYSTEM.md.
+   ============================================================ */
+/* Frågekort som skalar med skärmhöjden. Frågetexten läggs direkt i
+   .q-hero (ärver typografin); sekundär rad i <span class="q-sub">. */
+.q-hero {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.5vh, 14px);
+  padding: clamp(18px, 5vh, 48px) clamp(20px, 4vw, 48px);
+  text-align: center;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-panel), inset 0 1px 0 rgba(255,255,255,0.9);
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 12vh, 6rem);
+  line-height: 1.05;
+  color: var(--deep);
+  font-variant-numeric: tabular-nums;
+}
+.q-hero .q-sub {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: clamp(0.95rem, 2.2vh, 1.25rem);
+  color: var(--ink-soft);
+}
+
+/* Svarsgrid som flex-växer i .wrap-kolumnen och fyller ledig höjd.
+   Knapparna fyller sina rader (radhöjd = clamp 64px–120px). */
+.q-answers-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: clamp(64px, 12vh, 120px);
+  gap: clamp(10px, 1.8vh, 18px);
+  align-content: center;
+}
+.q-answers-fill .answer-option,
+.q-answers-fill > button {
+  height: 100%;
+  min-height: clamp(64px, 12vh, 120px);
+  font-size: clamp(1.25rem, 3.6vh, 2rem);
+}
+
+/* Progress-kapsel för .app-header (läggs i headerns högersektion
+   i stället för spacer/eget band): pill med bar + etikett. */
+.header-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  box-shadow: var(--shadow-panel);
+  flex-shrink: 0;
+}
+.header-progress .progress-bar {
+  width: clamp(64px, 10vw, 140px);
+  height: 10px;
+}
+.header-progress .hp-label {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--deep);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   35. KEYFRAMES
    ============================================================ */
 /* Drill-in mellan vyer */
 @keyframes drill-fwd  { from { opacity: 0; transform: translateX(60px)  scale(0.985); } to { opacity: 1; transform: none; } }
@@ -1991,7 +2075,7 @@ svg.icn {
 }
 
 /* ============================================================
-   35. ANIMATIONSKLASSER (legacy – används av moduler)
+   36. ANIMATIONSKLASSER (legacy – används av moduler)
    ============================================================ */
 .animate-bounce-in   { animation: bounce-in var(--duration-slow) var(--spring); }
 .animate-float       { animation: float 4s ease-in-out infinite; }
@@ -2006,7 +2090,7 @@ svg.icn {
 .animate-heart-beat  { animation: heart-beat 1s ease-in-out infinite; }
 
 /* ============================================================
-   36. HJÄLPKLASSER
+   37. HJÄLPKLASSER
    ============================================================ */
 .hidden        { display: none !important; }
 .visible       { display: block !important; }
@@ -2027,7 +2111,7 @@ svg.icn {
 }
 
 /* ============================================================
-   37. SPEL-SPECIFIKA SKÄRMAR
+   38. SPEL-SPECIFIKA SKÄRMAR
    Temat (accentgruppen) sätts i sektion 2. Bakgrunder är
    numera EN gemensam regnbågsgradient (body) för alla vyer.
    ============================================================ */
@@ -2047,8 +2131,9 @@ svg.icn {
 }
 
 /* ============================================================
-   38. RESPONSIVT
-   Mobil ≤430 · iPad porträtt 700–899 · iPad landskap ≥900
+   39. RESPONSIVT
+   Mobil ≤430 · iPad porträtt 700–899 · iPad landskap ≥900 ·
+   modern iPad landskap/desktop ≥1100 (centrerad komposition)
    ============================================================ */
 @media (max-width: 430px) {
   .screen { padding: 14px 14px 16px; }
@@ -2086,6 +2171,9 @@ svg.icn {
   .game-new { font-size: 9.5px; padding: 3px 8px; }
 
   .card, .card-glass { padding: var(--space-3); }
+  .header-progress { min-height: 38px; padding: 5px 10px; gap: 7px; }
+  .header-progress .progress-bar { width: 56px; height: 8px; }
+  .header-progress .hp-label { font-size: 12px; }
   .chip { min-height: 36px; padding: 6px 12px; font-size: 12.5px; }
   .segmented button { min-height: 40px; font-size: 13px; }
   .answer-option { min-height: 56px; font-size: var(--text-lg); border-radius: 18px; }
@@ -2107,9 +2195,17 @@ svg.icn {
   .hero-inner { padding: 20px 26px; }
   .hero-emoji { font-size: 54px; }
 
-  .profiles { gap: 16px; }
-  .profile-card { padding: 20px 26px; }
-  .profile-card .avatar-md { width: 74px; height: 74px; font-size: 38px; }
+  /* Hem-vyn: dra ihop mitten-gruppen + skala upp profilkorten
+     (FAS 3.2 – mål ~45–50 % täckning i 820×1180, luftig entré behålls) */
+  .logo { font-size: clamp(52px, 8vw, 72px); }
+  .tagline { font-size: 20px; margin: 10px 0 30px; }
+  .profiles { gap: 18px; max-width: 660px; }
+  .profile-card { padding: 24px 30px; }
+  .profile-card .avatar-md { width: 88px; height: 88px; font-size: 46px; }
+  .profile-card .profile-name { font-size: 27px; }
+  .profile-card .profile-meta { font-size: 16px; }
+  .profile-card-new { min-height: 78px; font-size: 17px; }
+  .home-actions .btn-lg { min-height: 64px; font-size: 18px; }
 
   .answer-option { min-height: 84px; font-size: var(--text-2xl); }
   .table-card { min-height: 140px; }
@@ -2129,8 +2225,41 @@ svg.icn {
   #clock-svg { width: clamp(200px, 40vw, 400px); height: clamp(200px, 40vw, 400px); }
 }
 
+/* Hem-vyn på surfplatta/desktop: knappraden som EN rad tätt under
+   profilkorten (FAS 3.2 – dra ihop mitten-gruppen vertikalt) */
+@media (min-width: 700px) {
+  .home-actions {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 660px;
+    gap: var(--space-3);
+  }
+  .home-actions .btn-block { width: auto; }
+  .home-actions .btn-lg { padding: var(--space-4) var(--space-10); }
+  .update-link { margin-top: var(--space-4); }
+}
+
+/* Modern iPad landskap (1180×820) / desktop ≥1100: CENTRERAD komposition.
+   Rot till v25-asymmetrin: arbetsytan var inte hårt centrerad — layouter
+   som fyller hela skärmbredden (modulernas tvåkolumner) och paneler med
+   egen max-width utan margin:auto kunde landa osymmetriskt. Skärmens
+   sidopadding beräknas nu så att arbetsytan (max 1040 px) alltid ligger
+   exakt i mitten med symmetriska marginaler, och .wrap fyller den. */
+@media (min-width: 1100px) {
+  .screen {
+    padding-left:  max(48px, calc((100% - 1040px) / 2));
+    padding-right: max(48px, calc((100% - 1040px) / 2));
+  }
+  .wrap, .result-hero {
+    max-width: 1040px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ============================================================
-   39. REDUCED MOTION
+   40. REDUCED MOTION
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
