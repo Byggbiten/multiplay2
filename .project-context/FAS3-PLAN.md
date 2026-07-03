@@ -63,6 +63,44 @@ moduler i ett svep, utan per-modul-återkoppling. Spec: DESIGN-LOCK-MULTIPLAY.md
 - Gemensam --ok/--err-token i app.css (idag olika gröna per modul)
 - Enhetlig header-spacer-bredd (52 vs 80px)
 
+## FAS 3.2 — Yteffektivitet (Dennis-mandat 2026-07-03, → v26)
+
+Grund: designgranskning på riktiga enhetsmått (1180×820, 820×1180,
+390×844 + stress 390×664). Passform 0 scroll överallt ✓; täckningsgrad
+spretade 26–91 %. Mandat: fixa enligt Apple-standard.
+
+1. QUIZ-MALLEN (mult/clock/tenfriends test- och frågevyer, 27–36 % →
+   mål ≥55 %): uppgiften äger skärmen — monumental typografi, stora
+   svarsytor, progress som kapsel i headern (inget eget band).
+2. HUBB-MALLEN (A&S 34 %, NP 26 %, mult-lägesval 28 % → mål ≥50 %):
+   rikare kort (senaste resultat/progress/illustration) + centrera hela
+   gruppen INKLUSIVE profilchip (A&S-kompositionsfelet).
+3. LANDSKAP ≥1100 (riktig iPad 1180): centrera komposition, balansera
+   mult-hubbens kolumner.
+4. 10-KOMPISAR (Dennis-beslut): ta bort paren 0+10 och 10+0 överallt
+   (chips, spinner 1–9, testgenerering 1–9); intjänad yta → större
+   tio-rutnät/siffror.
+5. KLADD-LAGEN (Dennis-beslut): i vyer med kladd (uppställning,
+   platsvärde, NP-matte) får kladdytan expandera in i ALL ledig yta —
+   oregelbunden form ok. OBS: canvas-bitmapp måste följa CSS-storleken.
+
+## FAS 3.2 STATUS: KLAR → v26 LIVE (2026-07-03)
+
+Sex layoutagenter + barn-UX-fixare + grind (45/45 vitest, CDP-mätning på
+riktiga enhetsmått, 0 scroll överallt). Täckningsgrad: NP-hubb 26→53 %
+(porträtt)/31→68 % (landskap), A&S 34→56/45→69, testfrågan 29→40/34→51
+(visuellt verifierat: kortet äger skärmen — mätaren räknar bara text-ink).
+
+**Barn-UX-lagen etablerad (Dennis 2026-07-03): "Barn som försöker göra
+rätt ska aldrig straffas för missförstånd."** Alla bygg-ihop-svar-flöden
+ska ha: (1) synlig startmarkör, (2) fungerande ångra, (3) Bekräfta släckt
+tills svaret är komplett. Sex fällor fixade i v26 (Platsvärde Ordna/Dela
+upp, NP-skriftlig fillSign/match/multi-free). Direkt-svarsflöden har
+2-försöks-förlåtelse (befintligt, behålls). 10-kompisar per Dennis: bra
+som den är. Kända icke-fixade småsaker: genMatch är död kod med TDZ-bugg
+(koppla ej in utan fix); submitTrueFalse/MultiChoice saknar submit-guards
+(ofarligt — knapparna är gated).
+
 ## FAS 4 (kvar av renoveringen)
 
 Adaptiv träning (Dagens träning-motorn — hero-slot + gate finns redan),
