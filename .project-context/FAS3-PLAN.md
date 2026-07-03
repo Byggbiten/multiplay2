@@ -101,6 +101,17 @@ som den är. Kända icke-fixade småsaker: genMatch är död kod med TDZ-bugg
 (koppla ej in utan fix); submitTrueFalse/MultiChoice saknar submit-guards
 (ofarligt — knapparna är gated).
 
+## INMATNINGSBESLUT Uppställning "utan hjälp" (Dennis 2026-07-03 → v27)
+
+Fria lägets per-kolumn-rutor ERSÄTTS av miniräknar-modell: ETT svarsfält,
+siffror skrivs vänster→höger (högsta talsort först, som man skriver tal:
+876 = tryck 8, 7, 6), ⌫ tar sista, Klar gated tills ≥1 siffra, första
+Klar-trycket avgör poängen (befintlig semantik), fel → rött + redigera.
+Ledande-noll-låsningen behövs inte längre. "Med hjälp" och "Titta och
+lär" behålls EXAKT som de är (pedagogiken kräver kolumn-för-kolumn).
+Ersätter v22:s smarta markör I FRIA LÄGET — markör-mönstret lever kvar
+i Platsvärde Dela upp och är fortsatt standard för flerfältsinmatning.
+
 ## FAS 4 (kvar av renoveringen)
 
 Adaptiv träning (Dagens träning-motorn — hero-slot + gate finns redan),
