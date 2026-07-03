@@ -10,7 +10,7 @@ const UppstallningGame = (() => {
   let profile    = null;
   let mode       = 'addition';
 
-  let difficulty = 'medium';
+  let difficulty = 2; // Sifferskala 1–4 (1=🌱 Tal 0–20, 2=🌿 Tvåsiffrigt, 3=🌾 Över hundra, 4=🌳 Minnessiffra/lån)
 
   let numA = 0, numB = 0;
   let colCount = 3;
@@ -81,9 +81,15 @@ const UppstallningGame = (() => {
       border:2px solid rgba(37,99,235,0.15); cursor:pointer;
       transition:transform 0.2s,box-shadow 0.2s; }
     .up-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.12); }
-    .diff-btn { padding:8px 18px; border-radius:999px; font-weight:800; font-size:13px;
+    .diff-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    @media (max-width:480px) { .diff-row { grid-template-columns:repeat(2,1fr); } }
+    .diff-btn { padding:8px 6px; border-radius:14px; font-weight:800; font-size:13px;
       cursor:pointer; border:2px solid rgba(37,99,235,0.3);
-      background:var(--pv-light); color:var(--pv-primary); transition:all 0.15s; }
+      background:var(--pv-light); color:var(--pv-primary); transition:all 0.15s;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:2px; line-height:1.15; }
+    .diff-btn .diff-num  { font-size:1.05rem; font-weight:900; }
+    .diff-btn .diff-desc { font-size:10.5px; font-weight:800; opacity:0.85; }
     .diff-btn.active { background:var(--pv-primary); color:#fff; border-color:var(--pv-primary); }
 
     /* Uppställningstabell */
@@ -245,6 +251,19 @@ const UppstallningGame = (() => {
       ? 'linear-gradient(135deg,#fef9c3,#eff6ff)'
       : 'linear-gradient(135deg,#fdf4ff,#fef3c7)';
 
+    const levels = [
+      { n: 1, emoji: '🌱', desc: 'Tal 0–20' },
+      { n: 2, emoji: '🌿', desc: 'Tvåsiffrigt' },
+      { n: 3, emoji: '🌾', desc: 'Över hundra' },
+      { n: 4, emoji: '🌳', desc: mode === 'addition' ? 'Med minnessiffra' : 'Med lån' },
+    ];
+    const diffBtnsHTML = levels.map(l => `
+      <button class="diff-btn ${difficulty === l.n ? 'active' : ''}"
+        onclick="UppstallningGame.setDifficulty(${l.n},this)">
+        <span class="diff-num">${l.n} ${l.emoji}</span>
+        <span class="diff-desc">${l.desc}</span>
+      </button>`).join('');
+
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
       <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
@@ -263,11 +282,7 @@ const UppstallningGame = (() => {
         </div>
         <div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:14px;border:2px solid rgba(37,99,235,0.1)">
           <div style="font-weight:800;font-size:12px;color:var(--pv-primary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Svårighetsgrad</div>
-          <div style="display:flex;gap:8px">
-            <button class="diff-btn ${difficulty==='easy'?'active':''}" onclick="UppstallningGame.setDifficulty('easy',this)">Lätt</button>
-            <button class="diff-btn ${difficulty==='medium'?'active':''}" onclick="UppstallningGame.setDifficulty('medium',this)">Medium</button>
-            <button class="diff-btn ${difficulty==='hard'?'active':''}" onclick="UppstallningGame.setDifficulty('hard',this)">Svårt</button>
-          </div>
+          <div class="diff-row">${diffBtnsHTML}</div>
         </div>
         <div class="up-card" style="background:${modeBg}" onclick="UppstallningGame.startDemo()">
           <div style="display:flex;align-items:center;gap:16px">
@@ -293,8 +308,8 @@ const UppstallningGame = (() => {
     Router.show('screen-uppstallning');
   }
 
-  function setDifficulty(d, btn) {
-    difficulty = d;
+  function setDifficulty(n, btn) {
+    difficulty = n;
     document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     App.Sound.play('click');
@@ -306,20 +321,31 @@ const UppstallningGame = (() => {
   function generatePair() {
     let a, b;
     if (mode === 'addition') {
-      if (difficulty === 'easy') {
+      if (difficulty === 1) {
+        // Nivå 1 🌱: tal 0–20 (a,b ≥ 2, summa ≤ 20)
+        do { a = 2 + rnd(18); b = 2 + rnd(18); } while (a + b > 20);
+      } else if (difficulty === 2) {
+        // Nivå 2 🌿: tvåsiffrigt, summa < 100
         do { a = 10 + rnd(40); b = 10 + rnd(40); } while (a + b >= 100);
-      } else if (difficulty === 'medium') {
-        a = 100 + rnd(400); b = 100 + rnd(300);
+      } else if (difficulty === 3) {
+        // Nivå 3 🌾: två tvåsiffriga tal med summa över hundra (100–198)
+        do { a = 40 + rnd(60); b = 40 + rnd(60); } while (a + b < 100);
       } else {
+        // Nivå 4 🌳: tresiffrigt med garanterad minnessiffra
         do { a = 200 + rnd(400); b = 200 + rnd(300); } while (!hasCarry(a,b) || a + b >= 1000);
       }
     } else {
-      if (difficulty === 'easy') {
+      if (difficulty === 1) {
+        // Nivå 1 🌱: tal 0–20 (a 5–20, b 1 till a−1)
+        a = 5 + rnd(16); b = 1 + rnd(a - 1);
+      } else if (difficulty === 2) {
+        // Nivå 2 🌿: tvåsiffrigt
         do { a = 30 + rnd(70); b = 10 + rnd(20); } while (a <= b);
-      } else if (difficulty === 'medium') {
-        do { a = 200 + rnd(400); b = 100 + rnd(200); } while (a <= b);
+      } else if (difficulty === 3) {
+        // Nivå 3 🌾: över hundra — a 100–198, b tvåsiffrigt, differens 1–99 (lån över hundratalet)
+        do { a = 100 + rnd(99); b = 10 + rnd(90); } while (a - b < 1 || a - b > 99);
       } else {
-        // Garantera minst 1 lån. 50% chans att tiotalet=0 (dubbellån).
+        // Nivå 4 🌳: garantera minst 1 lån. 50% chans att tiotalet=0 (dubbellån).
         if (Math.random() < 0.5) {
           do {
             const hA = 3 + rnd(7), eA = 1 + rnd(4);
@@ -334,7 +360,8 @@ const UppstallningGame = (() => {
       }
     }
     numA = a; numB = b;
-    colCount = (numA >= 100 || numB >= 100 || Math.abs(numA - numB) >= 100) ? 3 : 2;
+    // Hundratalskolumn även när två tvåsiffriga tal ger tresiffrig summa (nivå 3-addition)
+    colCount = (numA >= 100 || numB >= 100 || (mode === 'addition' && numA + numB >= 100)) ? 3 : 2;
   }
 
   function hasCarry(a, b) {
