@@ -78,6 +78,9 @@
   /* Addition & Subtraktion / Platsvärde – grön/mint */
   --plus-acc: #0e9f6e; --plus-acc-l: #5fd4a7; --plus-acc2: #fb7185;
   --plus-deep: #065f46; --plus-glow2: rgba(95,212,167,.5); --plus-tint: #eefcf5;
+  /* Multiplikation & Division – turkos/teal + solgul accent (AA: deep på ljusa glas) */
+  --mdv-acc: #0d9488; --mdv-acc-l: #2dd4bf; --mdv-acc2: #f59e0b;
+  --mdv-deep: #0f5c54; --mdv-glow2: rgba(45,212,191,.5); --mdv-tint: #effbf8;
 
   /* --- Legacy per-modul-tokens (moduler använder dem inline – RÖR EJ värden
          som är lag-kritiska; modul-agenterna städar i Fas 3 slice 2) --- */
@@ -220,6 +223,11 @@
   --accent: var(--plus-acc); --accent-light: var(--plus-acc-l);
   --accent-2: var(--plus-acc2); --deep: var(--plus-deep);
   --glow: var(--plus-glow2); --tint: var(--plus-tint);
+}
+.theme-multdiv, .screen-multdiv, #multdiv-root {
+  --accent: var(--mdv-acc); --accent-light: var(--mdv-acc-l);
+  --accent-2: var(--mdv-acc2); --deep: var(--mdv-deep);
+  --glow: var(--mdv-glow2); --tint: var(--mdv-tint);
 }
 
 /* ============================================================
@@ -2182,6 +2190,22 @@ svg.icn {
   .result-medal { font-size: 44px; }
   .result-msg { font-size: 19px; }
   .result-actions .btn { min-height: 48px; font-size: 15px; padding: 10px 20px; }
+}
+
+/* v29: SEX spelkort (2×3 på mobil) — stresshöjden 390×664 kompakteras
+   så spelväljaren fortsatt ryms utan scroll (designlag: en vy = en skärm) */
+@media (max-width: 430px) and (max-height: 700px) {
+  .grid-cards { gap: 8px; }
+  .game-card:not(.game-card-wide) { min-height: 104px; }
+  .game-card { padding: 9px 11px 9px 15px; }
+  .game-card .game-emoji { font-size: 21px; margin-bottom: 3px; }
+  .game-card h3 { font-size: 13.5px; line-height: 1.15; }
+  .game-meta { font-size: 10px; padding: 3px 8px; margin-top: 4px; }
+  .hello { margin: 6px 0; font-size: 16px; }
+  .hero-inner { padding: 9px 14px; gap: 10px; }
+  .hero-emoji { font-size: 27px; }
+  .hero h2 { font-size: 16px; }
+  .hero p { font-size: 12px; }
 }
 
 /* iPad porträtt: innehållet FYLLER höjden (designlag 2) */

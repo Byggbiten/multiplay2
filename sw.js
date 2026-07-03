@@ -1,7 +1,7 @@
-﻿/* MULTIPLAY â€“ Service Worker (PWA offline-stÃ¶d) */
+/* MULTIPLAY – Service Worker (PWA offline-stöd) */
 
-// VIKTIGT: Ã–ka versionsnumret vid varje push (v2 â†’ v3 â†’ v4 osv)
-const CACHE_VERSION = 'v28';
+// VIKTIGT: Öka versionsnumret vid varje push (v2 → v3 → v4 osv)
+const CACHE_VERSION = 'v29';
 const CACHE = `multiplay-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -20,6 +20,7 @@ const ASSETS = [
   './js/np-svenska-texts.js',
   './js/platsvarde.js',
   './js/uppstallning.js',
+  './js/multdiv.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -32,7 +33,7 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// TillÃ¥ter sidan att be SW ta Ã¶ver direkt (backup om skipWaiting i install inte rÃ¤ckte)
+// Tillåter sidan att be SW ta över direkt (backup om skipWaiting i install inte räckte)
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
@@ -46,9 +47,9 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-/* Network-first (med cache-uppdatering) fÃ¶r navigationer och egna
-   .html/.js/.css â€“ appen uppdateras nÃ¤r nÃ¤tet finns, funkar offline.
-   Cache-first med runtime-caching fÃ¶r Ã¶vrigt (t.ex. Google Fonts).
+/* Network-first (med cache-uppdatering) för navigationer och egna
+   .html/.js/.css – appen uppdateras när nätet finns, funkar offline.
+   Cache-first med runtime-caching för övrigt (t.ex. Google Fonts).
    POST m.fl. cachas aldrig. */
 self.addEventListener('fetch', e => {
   const req = e.request;

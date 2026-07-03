@@ -187,13 +187,26 @@
           <span class="game-meta" data-game-status="nationella">Ny! ✨</span>
         </button>
 
-        <button class="game-card game-card-wide theme-plus" onclick="App.startGame('addsub')">
+        <button class="game-card theme-plus" onclick="App.startGame('addsub')">
           <span class="game-emoji">➕➖</span>
-          <span>
-            <h3>Addition &amp; Subtraktion</h3>
-            <p>Platsvärde, uppställning &amp; minnessiffra</p>
-          </span>
+          <h3>Addition &amp; Subtraktion</h3>
+          <p>Platsvärde, uppställning &amp; minnessiffra</p>
           <span class="game-meta" data-game-status="addsub">Ny! ✨</span>
+        </button>
+
+        <button class="game-card theme-multdiv" onclick="App.startGame('multdiv')">
+          <span class="game-emoji" aria-hidden="true" style="color:var(--accent)">
+            <svg viewBox="0 0 52 24" style="width:1.9em;height:0.9em;display:inline-block"
+              fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round">
+              <path d="M5 5l14 14M19 5L5 19"/>
+              <path d="M31 12h16"/>
+              <circle cx="39" cy="5" r="2.4" fill="currentColor" stroke="none"/>
+              <circle cx="39" cy="19" r="2.4" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <h3>Multiplikation &amp; Division</h3>
+          <p>Uppställning &amp; kort division</p>
+          <span class="game-meta" data-game-status="multdiv">Ny! ✨</span>
         </button>
 
       </div>
@@ -284,6 +297,13 @@
     <div id="uppstallning-root"></div>
   </section>
 
+  <!-- ══════════════════════════════════════
+       SKÄRM 16: MULTIPLIKATION & DIVISION
+  ══════════════════════════════════════ -->
+  <section id="screen-multdiv" class="screen screen-multdiv" role="main">
+    <div id="multdiv-root"></div>
+  </section>
+
 </div><!-- /app-wrapper -->
 
 <!-- ══════════════════════════════════════
@@ -334,6 +354,7 @@
 <script src="js/nationella.js"></script>
 <script src="js/platsvarde.js"></script>
 <script src="js/uppstallning.js"></script>
+<script src="js/multdiv.js"></script>
 
 </body>
 </html>
