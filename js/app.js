@@ -1,16 +1,16 @@
-/* ============================================================
-   MULTIPLAY – Huvud-applikation
+﻿/* ============================================================
+   MULTIPLAY â€“ Huvud-applikation
    Hanterar: routing, profiler, navigering, ljud, konfetti
    ============================================================ */
 'use strict';
 
-/* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v27';
+/* â”€â”€ App-version (matchar CACHE_VERSION i sw.js) â”€â”€â”€â”€â”€â”€ */
+const APP_VERSION = 'v28';
 
-/* ── Avatarer ─────────────────────────────────────────── */
-const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
+/* â”€â”€ Avatarer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const AVATARS = ['ðŸ¤–', 'â­', 'ðŸ‰', 'ðŸ¦Š', 'ðŸ§™', 'ðŸ§ ', 'ðŸ‘§', 'ðŸ‘½'];
 
-/* ── Ljud (Web Audio API) ─────────────────────────────── */
+/* â”€â”€ Ljud (Web Audio API) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const Sound = (() => {
   let ctx = null;
 
@@ -68,10 +68,10 @@ const Sound = (() => {
   return { play };
 })();
 
-/* ── Konfetti ─────────────────────────────────────────── */
+/* â”€â”€ Konfetti â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const Confetti = (() => {
   const COLORS = ['#c084fc','#f472b6','#fb923c','#fbbf24','#4ade80','#60a5fa','#f87171'];
-  const SHAPES = ['●','★','♥','✿','◆','🦄','🌈','🎉','🎊','💖','🦋','🍭','⭐','💫','✨','🌸','🐱','🐶','🦊','🎀','👑'];
+  const SHAPES = ['â—','â˜…','â™¥','âœ¿','â—†','ðŸ¦„','ðŸŒˆ','ðŸŽ‰','ðŸŽŠ','ðŸ’–','ðŸ¦‹','ðŸ­','â­','ðŸ’«','âœ¨','ðŸŒ¸','ðŸ±','ðŸ¶','ðŸ¦Š','ðŸŽ€','ðŸ‘‘'];
 
   function burst(count = 180) {
     const container = document.getElementById('confetti-container');
@@ -95,11 +95,11 @@ const Confetti = (() => {
   return { burst };
 })();
 
-/* ── Bakgrundsstjärnor ────────────────────────────────── */
+/* â”€â”€ BakgrundsstjÃ¤rnor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function initBgStars() {
   const container = document.getElementById('bg-stars');
   if (!container) return;
-  const stars = ['✨','🌟','⭐','💫','🌸','💕'];
+  const stars = ['âœ¨','ðŸŒŸ','â­','ðŸ’«','ðŸŒ¸','ðŸ’•'];
   for (let i = 0; i < 12; i++) {
     const el = document.createElement('div');
     el.className = 'bg-decoration';
@@ -115,7 +115,7 @@ function initBgStars() {
   }
 }
 
-/* ── LocalStorage-hjälp ───────────────────────────────── */
+/* â”€â”€ LocalStorage-hjÃ¤lp â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const Store = {
   KEY: 'multiplay_profiles',
 
@@ -147,7 +147,7 @@ const Store = {
   deleteProfile(id) {
     const profiles = this.load().filter(p => p.id !== id);
     this.save(profiles);
-    // Rensa även profilens speldata (ALLA moduler som sparar per profil-id)
+    // Rensa Ã¤ven profilens speldata (ALLA moduler som sparar per profil-id)
     [
       `mult_stats_${id}`,               // multiplication.js
       `mult_log_${id}`,                 // multiplication.js
@@ -177,12 +177,12 @@ const Store = {
   }
 };
 
-/* ── Routing / Screen-hantering ───────────────────────── */
+/* â”€â”€ Routing / Screen-hantering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const Router = (() => {
   let current = 'screen-home';
 
   function show(screenId) {
-    // Göm alla skärmar
+    // GÃ¶m alla skÃ¤rmar
     document.querySelectorAll('.screen').forEach(s => {
       s.classList.remove('active');
     });
@@ -203,14 +203,14 @@ const Router = (() => {
   return { show, getCurrent };
 })();
 
-/* ══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HUVUD-APP-OBJEKT
-══════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const App = (() => {
   let currentProfile = null;
   let selectedAvatar = AVATARS[0];
 
-  /* ── Init ─────────────────────────────────────────── */
+  /* â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function init() {
     initBgStars();
     renderAvatarPicker();
@@ -219,7 +219,7 @@ const App = (() => {
     showHome();
   }
 
-  /* ── Avatarväljare ────────────────────────────────── */
+  /* â”€â”€ AvatarvÃ¤ljare â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function renderAvatarPicker() {
     const picker = document.getElementById('avatar-picker');
     if (!picker) return;
@@ -241,8 +241,8 @@ const App = (() => {
     Sound.play('click');
   }
 
-  /* ── Loggläsning (statuschips + Dagens träning-villkor) ── */
-  /* Loggnycklar per modul – samma nycklar som Store.deleteProfile rensar */
+  /* â”€â”€ LogglÃ¤sning (statuschips + Dagens trÃ¤ning-villkor) â”€â”€ */
+  /* Loggnycklar per modul â€“ samma nycklar som Store.deleteProfile rensar */
   const GAME_LOG_KEYS = {
     multiplication: id => [`mult_log_${id}`],
     clock:          id => [`clock_log_${id}`],
@@ -266,15 +266,15 @@ const App = (() => {
     return allLogs(profileId).reduce((sum, log) => sum + log.length, 0);
   }
 
-  /* Dagens träning visas först när profilen har ≥2 spelade test totalt.
-     (Själva innehållet i Dagens träning byggs i Fas 4.) */
+  /* Dagens trÃ¤ning visas fÃ¶rst nÃ¤r profilen har â‰¥2 spelade test totalt.
+     (SjÃ¤lva innehÃ¥llet i Dagens trÃ¤ning byggs i Fas 4.) */
   function shouldShowDailyTraining(profile) {
     const p = profile || currentProfile;
     if (!p) return false;
     return countTotalTests(p.id) >= 2;
   }
 
-  /* Procent ur en loggpost oavsett modulens fältnamn */
+  /* Procent ur en loggpost oavsett modulens fÃ¤ltnamn */
   function entryPct(e) {
     if (!e) return null;
     if (typeof e.pct === 'number') return e.pct;
@@ -287,17 +287,17 @@ const App = (() => {
     return null;
   }
 
-  /* Statuschip-text för ett spelkort: senaste resultat eller "Ny! ✨".
-     Loggarna är nyast-först (unshift), så [0] är senaste posten. */
+  /* Statuschip-text fÃ¶r ett spelkort: senaste resultat eller "Ny! âœ¨".
+     Loggarna Ã¤r nyast-fÃ¶rst (unshift), sÃ¥ [0] Ã¤r senaste posten. */
   function gameStatusChip(game, profile) {
     const p = profile || currentProfile;
     const keyFn = GAME_LOG_KEYS[game];
-    if (!p || !keyFn) return 'Ny! ✨';
+    if (!p || !keyFn) return 'Ny! âœ¨';
 
     const logs = keyFn(p.id).map(readLog).filter(l => l.length > 0);
-    if (logs.length === 0) return 'Ny! ✨';
+    if (logs.length === 0) return 'Ny! âœ¨';
 
-    // Vid flera loggar (addsub): ta den färskaste av loggarnas senaste poster
+    // Vid flera loggar (addsub): ta den fÃ¤rskaste av loggarnas senaste poster
     const latest = logs
       .map(l => l[0])
       .sort((a, b) => new Date(b && b.date || 0) - new Date(a && a.date || 0))[0];
@@ -305,13 +305,13 @@ const App = (() => {
     const pct = entryPct(latest);
     if (pct === null) {
       const count = logs.reduce((sum, l) => sum + l.length, 0);
-      return `🎯 ${count} spelade`;
+      return `ðŸŽ¯ ${count} spelade`;
     }
     const medal = MP.getMedal(pct);
-    return `${medal || '⭐'} Senast ${pct} %`;
+    return `${medal || 'â­'} Senast ${pct} %`;
   }
 
-  /* "Spelade idag/igår/i förrgår/3 jun" */
+  /* "Spelade idag/igÃ¥r/i fÃ¶rrgÃ¥r/3 jun" */
   function lastPlayedText(profileId) {
     const dates = allLogs(profileId)
       .flatMap(log => log.map(e => e && e.date).filter(Boolean))
@@ -321,12 +321,12 @@ const App = (() => {
     const last = new Date(Math.max(...dates));
     const days = Math.floor((new Date().setHours(0,0,0,0) - new Date(last).setHours(0,0,0,0)) / 86400000);
     if (days <= 0) return 'Spelade idag';
-    if (days === 1) return 'Spelade igår';
-    if (days === 2) return 'Spelade i förrgår';
+    if (days === 1) return 'Spelade igÃ¥r';
+    if (days === 2) return 'Spelade i fÃ¶rrgÃ¥r';
     return 'Spelade ' + last.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
   }
 
-  /* Medaljräkning över alla loggar (🥉 vid ≥75 %) */
+  /* MedaljrÃ¤kning Ã¶ver alla loggar (ðŸ¥‰ vid â‰¥75 %) */
   function countMedals(profileId) {
     return allLogs(profileId)
       .flatMap(log => log)
@@ -337,11 +337,11 @@ const App = (() => {
   function profileMetaText(p) {
     const medals = countMedals(p.id);
     const played = lastPlayedText(p.id);
-    if (!played) return 'Ny spelare ✨';
-    return `🥇 ${medals} medalj${medals === 1 ? '' : 'er'} · ${played}`;
+    if (!played) return 'Ny spelare âœ¨';
+    return `ðŸ¥‡ ${medals} medalj${medals === 1 ? '' : 'er'} Â· ${played}`;
   }
 
-  /* ── Profilrendering ──────────────────────────────── */
+  /* â”€â”€ Profilrendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function renderProfiles() {
     const list = document.getElementById('profiles-list');
     const noMsg = document.getElementById('no-profiles-msg');
@@ -374,7 +374,7 @@ const App = (() => {
     `).join('');
   }
 
-  /* ── Navigation ───────────────────────────────────── */
+  /* â”€â”€ Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function showHome() {
     currentProfile = null;
     renderProfiles();
@@ -427,10 +427,10 @@ const App = (() => {
     Router.show('screen-game-select');
   }
 
-  /* Hero-slot i spelväljaren.
-     Villkor <2 test  → "kom igång"-kort som pekar mot spelen.
-     Villkor ≥2 test  → Dagens träning-slot; innehållet (adaptiv motor)
-     är Fas 4, så TILLS VIDARE visas kom igång-kortet med anpassad text. */
+  /* Hero-slot i spelvÃ¤ljaren.
+     Villkor <2 test  â†’ "kom igÃ¥ng"-kort som pekar mot spelen.
+     Villkor â‰¥2 test  â†’ Dagens trÃ¤ning-slot; innehÃ¥llet (adaptiv motor)
+     Ã¤r Fas 4, sÃ¥ TILLS VIDARE visas kom igÃ¥ng-kortet med anpassad text. */
   function renderHero() {
     const hero = document.getElementById('daily-hero');
     if (!hero || !currentProfile) return;
@@ -438,29 +438,29 @@ const App = (() => {
     if (shouldShowDailyTraining(currentProfile)) {
       hero.innerHTML = `
         <div class="hero-inner">
-          <span class="hero-emoji">🎯</span>
+          <span class="hero-emoji">ðŸŽ¯</span>
           <div>
-            <span class="hero-badge">✨ Smart träning</span>
-            <h2>Dagens träning</h2>
-            <p>Byggs just nu – snart tränar du på precis det du behöver! 🛠️</p>
-            <small>Fortsätt spela så länge – varje test gör din träning smartare 💜</small>
+            <span class="hero-badge">âœ¨ Smart trÃ¤ning</span>
+            <h2>Dagens trÃ¤ning</h2>
+            <p>Byggs just nu â€“ snart trÃ¤nar du pÃ¥ precis det du behÃ¶ver! ðŸ› ï¸</p>
+            <small>FortsÃ¤tt spela sÃ¥ lÃ¤nge â€“ varje test gÃ¶r din trÃ¤ning smartare ðŸ’œ</small>
           </div>
         </div>`;
     } else {
       hero.innerHTML = `
         <div class="hero-inner">
-          <span class="hero-emoji">🚀</span>
+          <span class="hero-emoji">ðŸš€</span>
           <div>
-            <span class="hero-badge">✨ Kom igång</span>
-            <h2>Kom igång!</h2>
-            <p>Välj ett spel här nedanför och kör dina två första test 🌟</p>
-            <small>Sen låser du upp Dagens träning – smart träning på just dina tal</small>
+            <span class="hero-badge">âœ¨ Kom igÃ¥ng</span>
+            <h2>Kom igÃ¥ng!</h2>
+            <p>VÃ¤lj ett spel hÃ¤r nedanfÃ¶r och kÃ¶r dina tvÃ¥ fÃ¶rsta test ðŸŒŸ</p>
+            <small>Sen lÃ¥ser du upp Dagens trÃ¤ning â€“ smart trÃ¤ning pÃ¥ just dina tal</small>
           </div>
         </div>`;
     }
   }
 
-  /* Fyll spelkortens statuschips (senaste resultat eller "Ny! ✨") */
+  /* Fyll spelkortens statuschips (senaste resultat eller "Ny! âœ¨") */
   function renderGameStatus() {
     document.querySelectorAll('[data-game-status]').forEach(el => {
       el.textContent = gameStatusChip(el.dataset.gameStatus, currentProfile);
@@ -471,7 +471,7 @@ const App = (() => {
     if (!currentProfile) { showHome(); return; }
     Sound.play('click');
 
-    // Stoppa ev. löpande Mult-timer vid spelbyte (gäller ALLA spel i routingen)
+    // Stoppa ev. lÃ¶pande Mult-timer vid spelbyte (gÃ¤ller ALLA spel i routingen)
     if (typeof MultGame !== 'undefined' && MultGame.stopTimer) MultGame.stopTimer();
 
     const screenMap = {
@@ -501,12 +501,12 @@ const App = (() => {
   }
 
   function goBackToGameSelect() {
-    // Stoppa ev. löpande Mult-timer när spelet lämnas
+    // Stoppa ev. lÃ¶pande Mult-timer nÃ¤r spelet lÃ¤mnas
     if (typeof MultGame !== 'undefined' && MultGame.stopTimer) MultGame.stopTimer();
     showGameSelect();
   }
 
-  /* ── Ta bort profiler ─────────────────────────────── */
+  /* â”€â”€ Ta bort profiler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function showDeleteProfiles() {
     const profiles = Store.getProfiles();
     const list = document.getElementById('delete-profiles-list');
@@ -544,7 +544,7 @@ const App = (() => {
     document.getElementById('modal-confirm-delete').classList.add('hidden');
   }
 
-  /* ── Tangentbordsnavigation ───────────────────────── */
+  /* â”€â”€ Tangentbordsnavigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function setupKeyboardNav() {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
@@ -557,7 +557,7 @@ const App = (() => {
       }
     });
 
-    // Klick utanför modal stänger
+    // Klick utanfÃ¶r modal stÃ¤nger
     ['modal-delete-profiles','modal-confirm-delete'].forEach(id => {
       document.getElementById(id).addEventListener('click', function(e) {
         if (e.target === this) {
@@ -567,7 +567,7 @@ const App = (() => {
     });
   }
 
-  /* ── Hjälpfunktioner ──────────────────────────────── */
+  /* â”€â”€ HjÃ¤lpfunktioner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function getCurrentProfile() { return currentProfile; }
 
   function escapeHtml(str) {
@@ -581,7 +581,7 @@ const App = (() => {
     } catch(_) { return ''; }
   }
 
-  /* ── Publik API ───────────────────────────────────── */
+  /* â”€â”€ Publik API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   return {
     init,
     showHome,
@@ -599,7 +599,7 @@ const App = (() => {
     getCurrentProfile,
     shouldShowDailyTraining,
     gameStatusChip,
-    // Hjälpfunktioner tillgängliga för moduler
+    // HjÃ¤lpfunktioner tillgÃ¤ngliga fÃ¶r moduler
     Sound,
     Confetti,
     Store,
@@ -607,64 +607,64 @@ const App = (() => {
   };
 })();
 
-/* ── PWA-uppdatering ──────────────────────────────────── */
+/* â”€â”€ PWA-uppdatering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function checkForUpdate() {
   if (!('serviceWorker' in navigator)) {
-    showUpdateToast('Service Worker stöds inte i den här webbläsaren.', 3000);
+    showUpdateToast('Service Worker stÃ¶ds inte i den hÃ¤r webblÃ¤saren.', 3000);
     return;
   }
 
   navigator.serviceWorker.getRegistration().then(reg => {
     if (!reg) {
-      showUpdateToast('Du kör senaste versionen ✅', 2000);
+      showUpdateToast('Du kÃ¶r senaste versionen âœ…', 2000);
       return;
     }
 
-    // Helper: be SW ta över och ladda om sidan
+    // Helper: be SW ta Ã¶ver och ladda om sidan
     function activateAndReload(sw) {
       sw.postMessage({ type: 'SKIP_WAITING' });
-      // controllerchange-lyssnaren sköter reload, men som backup:
+      // controllerchange-lyssnaren skÃ¶ter reload, men som backup:
       setTimeout(doReload, 2500);
     }
 
-    // Om en ny SW redan väntar (ovanligt p.g.a. skipWaiting i install, men kan hända)
+    // Om en ny SW redan vÃ¤ntar (ovanligt p.g.a. skipWaiting i install, men kan hÃ¤nda)
     if (reg.waiting) {
-      showUpdateToast('Uppdatering hittad – laddar om...', 1400, true);
+      showUpdateToast('Uppdatering hittad â€“ laddar om...', 1400, true);
       activateAndReload(reg.waiting);
       return;
     }
 
-    // Lyssna på ny SW som hittas under reg.update()
+    // Lyssna pÃ¥ ny SW som hittas under reg.update()
     reg.addEventListener('updatefound', function onFound() {
       reg.removeEventListener('updatefound', onFound);
       const newSW = reg.installing;
       if (!newSW) return;
-      showUpdateToast('Uppdatering hittad – installerar...', 30000);
+      showUpdateToast('Uppdatering hittad â€“ installerar...', 30000);
       newSW.addEventListener('statechange', function() {
         if (this.state === 'installed' && reg.waiting) {
-          // Hamnade i waiting (borde inte hända med skipWaiting i install)
-          showUpdateToast('Uppdatering klar – laddar om...', 1400, true);
+          // Hamnade i waiting (borde inte hÃ¤nda med skipWaiting i install)
+          showUpdateToast('Uppdatering klar â€“ laddar om...', 1400, true);
           activateAndReload(reg.waiting);
         }
-        // Om skipWaiting i install gäller går den direkt installed→activating→activated
+        // Om skipWaiting i install gÃ¤ller gÃ¥r den direkt installedâ†’activatingâ†’activated
         // och controllerchange-lyssnaren hanterar reload
       });
     });
 
     reg.update().then(() => {
-      // reg.update() kan resolva innan installation börjar —
-      // updatefound-lyssnaren ovan fångar det. Om inget hittades:
+      // reg.update() kan resolva innan installation bÃ¶rjar â€”
+      // updatefound-lyssnaren ovan fÃ¥ngar det. Om inget hittades:
       if (!reg.waiting && !reg.installing) {
-        showUpdateToast('Du kör senaste versionen ✅', 2000);
+        showUpdateToast('Du kÃ¶r senaste versionen âœ…', 2000);
       }
     }).catch(() => {
-      showUpdateToast('Kunde inte söka uppdatering (offline?)', 2500);
+      showUpdateToast('Kunde inte sÃ¶ka uppdatering (offline?)', 2500);
     });
   });
 }
 
 function doReload() {
-  // window.location.reload() är opålitligt i iOS PWA standalone-läge
+  // window.location.reload() Ã¤r opÃ¥litligt i iOS PWA standalone-lÃ¤ge
   window.location.href = window.location.href;
 }
 
@@ -694,16 +694,16 @@ function showUpdateToast(msg, duration, willReload) {
   }, duration);
 }
 
-/* Initiera när DOM är redo */
+/* Initiera nÃ¤r DOM Ã¤r redo */
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
-  // Sätt versionsnummer på uppdateringsknappen
+  // SÃ¤tt versionsnummer pÃ¥ uppdateringsknappen
   const updateBtn = document.getElementById('update-btn');
-  if (updateBtn) updateBtn.textContent = `Sök uppdatering (${APP_VERSION})`;
+  if (updateBtn) updateBtn.textContent = `SÃ¶k uppdatering (${APP_VERSION})`;
   // PWA: registrera service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
-    // Ny SW tog över → ladda om sidan direkt
+    // Ny SW tog Ã¶ver â†’ ladda om sidan direkt
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       doReload();
     });

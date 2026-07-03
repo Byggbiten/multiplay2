@@ -548,10 +548,15 @@ const UppstallningGame = (() => {
     const step = demoSteps[demoStep];
     if (!step || step.type === 'done') return;
     lockStep();
+    showStepBubble(); // texten för det steg som NU animeras — text och animation i samma fas
     executeStep(step, () => {
       demoStep++;
       unlockStep();
-      showStepBubble();
+      // "Klart!"-bubblan visas efter sista animationen (med lästid för sista stegtexten)
+      if (demoSteps[demoStep] && demoSteps[demoStep].type === 'done') {
+        const dennaOmgång = demoSteps;
+        setTimeout(() => { if (demoSteps === dennaOmgång) showStepBubble(); }, 1800);
+      }
       refreshNextBtn();
     });
   }
@@ -853,8 +858,13 @@ const UppstallningGame = (() => {
       html = `Kvar blir <strong style="color:${PVC[ck]}">${step.kvar}</strong>. 10:an skickades upp som minnessiffra! ✅`;
     } else if (step.type === 'add_simple') {
       const ck = COL_KEYS[step.col];
-      const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span>` : '';
-      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
+      if (step.a === 0 && step.b === 0 && step.carry_in) {
+        // Kolumn utan siffror — svaret ÄR minnessiffran (t.ex. hundratalet i 50+98)
+        html = `Bara minnessiffran är kvar — <span style="color:#d97706">${step.carry_in}</span>:an flyttas ner! ✅`;
+      } else {
+        const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span>` : '';
+        html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
+      }
     } else if (step.type === 'add_overflow') {
       html = `Minnessiffran <strong style="color:${PVC.hundratal}">${step.digit}</strong> skrivs längst till vänster!`;
 
