@@ -46,12 +46,26 @@ kan vara 1–8, aldrig säg "10:an"):**
 | 3 🌾 | 3-siffrigt × ensiffrigt, minst en minnessiffra, svar ≤ 9999 | 327 × 6 = 1962 |
 | 4 🌳 | 2-siffrigt × 2-siffrigt med delprodukter | 34 × 26 = 884 |
 
-**Nivå 4-pedagogik (delprodukter):** rad 1 = A × entalssiffran (34×6=204),
-rad 2 = A × tiotalssiffran med NOLLA som platshållare ("2:an är tiotal —
-vi räknar 34 × 2 och skriver en nolla först": 680), sist ADDITION av
-delprodukterna (204+680=884) med additionens befintliga pedagogik-språk.
-Demo visar alla tre faserna. Hjälpläge nivå 4: numpad per delproduktsiffra
-+ additionsfasen. Fritt läge: barnet skriver slutsvaret.
+**Nivå 4-pedagogik (delprodukter) — LAYOUT ENLIGT MIRAS MATTEBOK
+(Dennis foto 2026-07-03, exempel 56 · 43 = 2408):**
+```
+      5 6
+    · 4 3
+    ─────
+    1 6 8     ← 56 · 3 (entalsraden)
++ 2 2 4       ← 56 · 4 (tiotalsraden), FÖRSKJUTEN ett steg åt vänster
+  ─────          UTAN platshållar-nolla, med + framför
+  2 4 0 8
+```
+Rad 2 skrivs alltså förskjuten — INTE med nolla. Bubbel-språk: "4:an är
+tiotal — därför börjar vi skriva ett steg åt vänster!". Sist ADDITION av
+delprodukterna med additionens befintliga pedagogik-språk (inkl.
+minnessiffror i additionen). I uppställningen används bokens
+multiplikationstecken **·** (mittpunkt) — i bubbeltexterna får "7 · 6"
+också användas för konsekvens med boken (Gångertabellen-modulen behåller
+sitt ×; multdiv följer åk 4-bokens notation). Demo visar alla tre
+faserna. Hjälpläge nivå 4: numpad per delproduktsiffra + additionsfasen.
+Fritt läge: barnet skriver slutsvaret.
 
 ## Kort division
 
