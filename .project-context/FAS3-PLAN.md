@@ -112,6 +112,19 @@ lär" behålls EXAKT som de är (pedagogiken kräver kolumn-för-kolumn).
 Ersätter v22:s smarta markör I FRIA LÄGET — markör-mönstret lever kvar
 i Platsvärde Dela upp och är fortsatt standard för flerfältsinmatning.
 
+## STATUS v29–v30 (2026-07-03)
+
+- v29 LIVE: Uppställd multiplikation (multdiv.js, Mira åk 4) per
+  MULTDIV-SPEC + bokfotot; kort division = steg B (Kommer snart-kort).
+  Encoding-incident: v28-bumpen mojibakade app.js/sw.js (77 rader) —
+  reparerat + verifierat. LÄRDOM: versionsbump ALDRIG via PowerShell
+  Get-Content/-replace — använd Edit-verktyget.
+- v30 LIVE: Levande minnessiffror (MINNESSIFFER-KONCEPT.md) i addition
+  + multiplikation. Kodgranskad; kvarvarande polish-rest: T3.2 prefixa
+  .mem-*-klasserna per modul (.up-mem-*/.md-mem-*), T3.4 död mdCarries-
+  bokföring i multdiv. Tas i division-steget eller Fas 4-städ.
+- KVAR i multdiv: STEG B — kort division per spec (aktivera hubbkortet).
+
 ## FAS 4 (kvar av renoveringen)
 
 Adaptiv träning (Dagens träning-motorn — hero-slot + gate finns redan),
