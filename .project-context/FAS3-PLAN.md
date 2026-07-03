@@ -123,7 +123,14 @@ i Platsvärde Dela upp och är fortsatt standard för flerfältsinmatning.
   + multiplikation. Kodgranskad; kvarvarande polish-rest: T3.2 prefixa
   .mem-*-klasserna per modul (.up-mem-*/.md-mem-*), T3.4 död mdCarries-
   bokföring i multdiv. Tas i division-steget eller Fas 4-städ.
-- KVAR i multdiv: STEG B — kort division per spec (aktivera hubbkortet).
+- v31 LIVE: tvåstegsfråga + livlinor (2/runda, se-och-skriv-själv) +
+  sista-minnes-undantag (Dennis-beslut).
+- v32 LIVE: KORT DIVISION — multdiv-modulen KOMPLETT. Mellanrest-tänket
+  (barnet placerar resten själv), livlinor delas, glömd-rest-detektor,
+  verifierings-avslut (24·4=96). Tier 3-rest bokförd: nivå 1-division
+  d=4 har bara 4 möjliga tal; glömd-rest-detektorn missar skip-fall;
+  Minnesmästare räknar ej divisionens placeringar (policy-fråga för
+  Dennis); .mem-*-klassprefix (T3.2) kvarstår.
 
 ## FAS 4 (kvar av renoveringen)
 
