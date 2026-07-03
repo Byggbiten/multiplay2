@@ -120,3 +120,15 @@ Konsekvenser:
   portera fundamentet till main-lineagen (efter designlås), Fas 3–5.
   Live-siten bekräftad = main-lineagen (v21→v22); zip:en i publicerat/
   apps/main är 3-spels-omskrivningen, INTE live-versionen.
+- 2026-07-03: v23 LIVE (svårighetsskala 1–4 i Uppställning, ny nivå 3
+  "Över hundra" med colCount-fix). DESIGNEN LÅST av Dennis →
+  DESIGN-LOCK-MULTIPLAY.md (fyller-skärmen, 3 rariteter, Dagens träning
+  ≥2 test). Målbild v2.1 (fyllnad, labAudit 0 overflow + 0 bottengap).
+  FAS PORTERING KLAR: fundamentet porterat till main → v24 LIVE
+  (kodgranskad GODKÄND, 45/45 vitest, live-verifierad mult 92 %/klocka
+  8/10/tiokompisar 9/10, alla 9 per-profil-nycklar rensas vid radering,
+  v23→v24-SW-övergången verifierad självläkande). NÄSTA: Fas 3 —
+  design-implementation över modulerna enligt DESIGN-LOCK, slice för
+  slice med ux-vakt + labAudit-grind. Tier 3-rest från granskning:
+  digital facit-visning i klocktest del 2 visar rå timme (t.ex. 14:45
+  när 02:45 förväntas) — ta i Fas 3-klockslicen.
