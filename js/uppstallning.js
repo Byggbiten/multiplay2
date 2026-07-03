@@ -40,6 +40,13 @@ const UppstallningGame = (() => {
   let exFreeInput        = '';   // svaret som sträng, skrivs vänster→höger
   let exFreeFirstAttempt = true; // poäng endast vid helrätt på första Klar
 
+  /* Levande minnessiffror (v30) — endast ADDITION */
+  let memPhase   = null;  // null | {kind:'place', col, srcCol} | {kind:'strike', col, cont}
+  let memPerfect = true;  // inga fel-tap i hela passet → Minnesmästare ⭐
+  let memMoments = 0;     // antal placera+stryk-moment i passet
+  let freeMemVals = [null, null, null];   // fria lägets frivilliga minnessiffror
+  let freeMemUsed = [false, false, false];
+
   /* Canvas */
   let upCanvas = null, upCtx = null;
   let upDrawing = false, upErasing = false;
@@ -128,9 +135,9 @@ const UppstallningGame = (() => {
     .col-cell.glow-tiotal   { animation:glow-b 1.1s ease-in-out infinite; border-color:#3b82f6; }
     .col-cell.glow-hundratal{ animation:glow-r 1.1s ease-in-out infinite; border-color:#ef4444; }
     .col-cell.problem-cell  { animation:prob-pulse 0.55s ease-in-out infinite; }
-    .carry-cell { width:clamp(46px,8vw,74px); height:clamp(20px,3vw,28px); border-radius:6px; display:flex;
+    .carry-cell { width:clamp(46px,8vw,74px); height:clamp(22px,3.2vw,30px); border-radius:6px; display:flex;
       align-items:center; justify-content:center; font-size:clamp(0.7rem,1.5vw,0.95rem); font-weight:900;
-      color:#d97706; background:rgba(251,191,36,0.13); }
+      color:#dc2626; background:rgba(220,38,38,0.07); overflow:visible; position:relative; }
     .ans-cell { width:clamp(46px,8vw,74px); height:clamp(46px,8vw,74px); border-radius:11px; display:flex;
       align-items:center; justify-content:center; font-size:clamp(1.6rem,4vw,3rem); font-weight:900;
       border:2.5px dashed color-mix(in srgb, var(--accent) 32%, transparent); background:rgba(255,255,255,0.7); }
@@ -158,6 +165,37 @@ const UppstallningGame = (() => {
       border:1.5px solid #ef4444; border-radius:6px; padding:1px clamp(4px,0.8vw,6px);
       pointer-events:none; animation:land-bounce-flex 0.45s ease-out both; white-space:nowrap; }
     .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
+
+    /* Levande minnessiffror (v30) — pennstil: liten, roterad, RÖD.
+       Stryks med penndrag när den är använd — RADERAS ALDRIG under uppgiften. */
+    .mem-digit { position:relative; display:inline-block; line-height:1;
+      transform:rotate(-4deg); color:#dc2626; font-weight:900;
+      font-family:var(--font-head); font-size:clamp(0.95rem,2.2vw,1.5rem);
+      animation:land-bounce-flex 0.45s ease-out both; }
+    .mem-digit.used { opacity:0.5; }
+    .mem-digit .mem-strike { position:absolute; left:-22%; top:-14%; width:144%; height:128%;
+      pointer-events:none; overflow:visible; }
+    .mem-digit .mem-strike path { stroke:#b91c1c; stroke-width:2.6; fill:none;
+      stroke-linecap:round; stroke-dasharray:44; stroke-dashoffset:44;
+      animation:mem-strike-draw 0.25s ease-out forwards; }
+    .mem-digit.pulse { animation:mem-digit-pulse 1.1s ease-in-out infinite; }
+    /* Barnvänlig tap-yta (T2.1): siffran/cellen är liten men träffytan ≥40px */
+    .mem-digit::after { content:''; position:absolute; inset:-14px; }
+    .carry-cell::after { content:''; position:absolute; inset:-10px -4px; }
+    .carry-cell.mem-pulse { animation:mem-cell-pulse 1.1s ease-in-out infinite;
+      border:2px dashed #dc2626; cursor:pointer; }
+    .mem-picker { position:absolute; z-index:30; background:#fff;
+      border:2px solid #dc2626; border-radius:12px; padding:6px;
+      display:grid; grid-template-columns:repeat(3,42px); gap:4px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.2); animation:bubble-in 0.2s var(--spring); }
+    .mem-picker button { width:42px; height:42px; border-radius:8px;
+      border:1.5px solid #fca5a5; background:#fef2f2; color:#dc2626;
+      font-weight:900; font-size:1rem; cursor:pointer; font-family:var(--font-head); }
+    .mem-picker button:active { transform:scale(0.92); }
+    .mem-master { margin-top:8px; display:inline-flex; align-items:center; gap:6px;
+      background:linear-gradient(135deg,#fef9c3,#fde68a); border:2px solid #f59e0b;
+      border-radius:999px; padding:6px 16px; font-weight:900; color:#92400e;
+      animation:land-bounce-flex 0.5s ease-out both; }
 
     /* Tankebubbla */
     .thought-bubble { background:#fff; border-radius:var(--radius-md);
@@ -267,6 +305,15 @@ const UppstallningGame = (() => {
       50%      { transform:translateX(5px); }
       75%      { transform:translateX(-3px); }
     }
+    @keyframes mem-strike-draw { to { stroke-dashoffset:0; } }
+    @keyframes mem-digit-pulse {
+      0%,100% { transform:rotate(-4deg) scale(1); }
+      50%      { transform:rotate(-4deg) scale(1.3); }
+    }
+    @keyframes mem-cell-pulse {
+      0%,100% { box-shadow:0 0 6px rgba(220,38,38,0.35); }
+      50%      { box-shadow:0 0 18px rgba(220,38,38,0.85); }
+    }
   `;
 
   /* ── Init ───────────────────────────────────────────────── */
@@ -279,7 +326,9 @@ const UppstallningGame = (() => {
   /* ══════════════════════════════════════════════════════════
      VÄLJ-SKÄRM
   ══════════════════════════════════════════════════════════ */
+  let upExGen = 0; // session-token: ogiltigförklarar schemalagda uppgiftsbyten vid Avsluta (T3.3)
   function showModeSelect() {
+    upExGen++;
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
 
@@ -450,6 +499,8 @@ const UppstallningGame = (() => {
         } else {
           steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
         }
+        // Minnet i kolumn c är nu ANVÄNT → eget strykningssteg (v30)
+        if (carryVal) steps.push({ type:'add_mem_strike', col:c });
         carryVal = nextCarry;
       }
       if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
@@ -655,6 +706,11 @@ const UppstallningGame = (() => {
         setTimeout(cb, 700);
       }, 300);
 
+    } else if (step.type === 'add_mem_strike') {
+      strikeMemDigit(step.col);
+      App.Sound.play('click');
+      setTimeout(cb, 600);
+
     } else if (step.type === 'add_overflow') {
       App.Sound.play('correct');
       setTimeout(cb, 400);
@@ -852,7 +908,7 @@ const UppstallningGame = (() => {
         html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <strong>${step.behover}</strong> lån = 10) ✏️`;
       }
     } else if (step.type === 'add_carry_fly') {
-      html = `10:an skickas upp som minnessiffra! ⬆️`;
+      html = `1:an skrivs som minnessiffra här 👇`;
     } else if (step.type === 'add_result') {
       const ck = COL_KEYS[step.col];
       html = `Kvar blir <strong style="color:${PVC[ck]}">${step.kvar}</strong>. 10:an skickades upp som minnessiffra! ✅`;
@@ -865,6 +921,8 @@ const UppstallningGame = (() => {
         const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span>` : '';
         html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr} = <strong style="color:${PVC[ck]}">${step.sum}</strong>`;
       }
+    } else if (step.type === 'add_mem_strike') {
+      html = `Nu stryker vi <strong style="color:#dc2626">1</strong>:an — den är använd! Så vet vi att den inte räknas igen. ✏️`;
     } else if (step.type === 'add_overflow') {
       html = `Minnessiffran <strong style="color:${PVC.hundratal}">${step.digit}</strong> skrivs längst till vänster!`;
 
@@ -939,21 +997,37 @@ const UppstallningGame = (() => {
     if (btn) btn.disabled = false;
   }
 
-  /* ── Carry-rad ──────────────────────────────────────────── */
+  /* ── Carry-rad (v30: .mem-digit — raderas ALDRIG under uppgiften) ── */
   function updateCarryRow() {
+    // Skriver ENDAST till: en befintlig minnessiffra rensas eller skrivs
+    // aldrig över — cellen lämnas orörd tills ny uppgift renderar om tabellen.
     for (let c = 0; c < colCount; c++) {
       const el = document.getElementById(`carry-${COL_KEYS[c]}`);
-      if (!el) continue;
-      const val = demoCarries[c];
-      const used = demoCarryUsed[c];
-      if (val) {
-        el.innerHTML = used
-          ? `<span class="dw carry-crossed" style="color:#d97706;opacity:0.4"><span>${val}</span></span>`
-          : `<span style="animation:land-bounce 0.45s ease-out both;display:inline-block">${val}</span>`;
-      } else {
-        el.textContent = '';
+      if (!el || !demoCarries[c]) continue;
+      let d = el.querySelector('.mem-digit');
+      if (!d) {
+        el.innerHTML = `<span class="mem-digit">${demoCarries[c]}</span>`;
+        d = el.querySelector('.mem-digit');
       }
+      if (demoCarryUsed[c]) strikeMemEl(d);
     }
+  }
+
+  /* ── Stryk minnessiffra: animerat snett penndrag (~250 ms) ── */
+  const MEM_STRIKE_SVG = `<svg class="mem-strike" viewBox="0 0 24 24" preserveAspectRatio="none" aria-hidden="true"><path d="M3.2 20.4 C 7.5 16.8 10.4 12.2 14.2 8.6 C 16.8 6.2 19.2 4.4 21 3.2"/></svg>`;
+
+  function strikeMemEl(d) {
+    if (!d || d.classList.contains('used')) return;
+    d.classList.remove('pulse');
+    d.insertAdjacentHTML('beforeend', MEM_STRIKE_SVG);
+    d.classList.add('used');
+  }
+
+  function strikeMemDigit(col) {
+    demoCarryUsed[col] = true;
+    const cell = document.getElementById(`carry-${COL_KEYS[col]}`);
+    if (cell) cell.classList.remove('mem-pulse');
+    strikeMemEl(cell ? cell.querySelector('.mem-digit') : null);
   }
 
   /* ── Borrow-ten hjälpare ────────────────────────────────── */
@@ -1070,7 +1144,7 @@ const UppstallningGame = (() => {
 
     const carryRowHTML = mode === 'addition' ? `
       <tr>
-        <td style="font-size:11px;font-weight:800;color:#d97706;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
+        <td style="font-size:11px;font-weight:800;color:#dc2626;text-align:right;padding-right:6px;white-space:nowrap">minne:</td>
         ${cols.map(c => `<td style="text-align:center">
           <div class="carry-cell" id="carry-${c.key}"></div>
         </td>`).join('')}
@@ -1148,6 +1222,8 @@ const UppstallningGame = (() => {
     App.Sound.play('click');
     exerciseIdx = 0;
     exScore     = 0;
+    memPerfect  = true;
+    memMoments  = 0;
     showHelpSelect();
   }
 
@@ -1198,6 +1274,9 @@ const UppstallningGame = (() => {
     exTenPhase     = [0, 0, 0];
     exFreeInput        = '';
     exFreeFirstAttempt = true;
+    memPhase    = null;
+    freeMemVals = [null, null, null];
+    freeMemUsed = [false, false, false];
     renderExLayout();
   }
 
@@ -1213,7 +1292,7 @@ const UppstallningGame = (() => {
       </div>
       <div id="up-main">
         <div id="up-left">
-          <div id="up-table-wrap">${buildTableHTML()}</div>
+          <div id="up-table-wrap" onclick="UppstallningGame.memTableTap(event)">${buildTableHTML()}</div>
           ${helpMode ? '<div id="ex-bubble"></div>' : ''}
           <div id="ex-col-ui"></div>
           <div id="ex-feedback"></div>
@@ -1408,8 +1487,29 @@ const UppstallningGame = (() => {
         }, 400);
       }
       smallBurst();
-      const next = exCurrentCol + 1;
-      if (next >= colCount) {
+      const col  = exCurrentCol;
+      const next = col + 1;
+      const proceed = () => {
+        if (next >= colCount) exCheckDone();
+        else advanceToColumn(next);
+      };
+      if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]) {
+        // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det
+        memMoments++;
+        setTimeout(() => {
+          memPhase = { kind:'strike', col, cont: proceed };
+          const cell = document.getElementById(`carry-${COL_KEYS[col]}`);
+          if (cell) {
+            cell.classList.add('mem-pulse');
+            const d = cell.querySelector('.mem-digit');
+            if (d) d.classList.add('pulse');
+          }
+          const bubble = document.getElementById('ex-bubble');
+          if (bubble) bubble.innerHTML = `<div class="thought-bubble">Stryk minnessiffran — den är använd! ✏️</div>`;
+          const ui = document.getElementById('ex-col-ui');
+          if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnessiffran för att stryka den!</div>`;
+        }, 700);
+      } else if (next >= colCount) {
         setTimeout(exCheckDone, 900);
       } else {
         setTimeout(() => advanceToColumn(next), 400);
@@ -1503,7 +1603,7 @@ const UppstallningGame = (() => {
   }
 
   function exTenStep3() {
-    // Fas 2 → 3: Kör carry-flyg
+    // Fas 2 → PLACERA (v30): knappen INITIERAR — själva placeringen är barnets tap
     if (exInputLocked) return;
     const c = exCurrentCol;
     const colData = exColData[c];
@@ -1511,12 +1611,149 @@ const UppstallningGame = (() => {
     if (btn) btn.disabled = true;
     exInputLocked = true;
 
-    // Kör add_carry_fly-steget via executeStep
-    executeStep(colData.carryFlyStep, () => {
-      exTenPhase[c] = 3;
-      exInputLocked = false;
-      showExColUI(c);
-    });
+    const fly = colData.carryFlyStep;
+    if (!fly || !fly.nextCarry || c + 1 >= colCount) {
+      // Ingen destination för minnessiffran — bete sig som tidigare (no-op-flyg)
+      executeStep(fly || { type:'add_carry_fly', col:c, nextCarry:0 }, () => {
+        exTenPhase[c] = 3;
+        exInputLocked = false;
+        showExColUI(c);
+      });
+      return;
+    }
+    App.Sound.play('click');
+    memMoments++;
+    memPhase = { kind:'place', col: c + 1, srcCol: c };
+    const cell = document.getElementById(`carry-${COL_KEYS[c + 1]}`);
+    if (cell) cell.classList.add('mem-pulse');
+    const bubble = document.getElementById('ex-bubble');
+    if (bubble) bubble.innerHTML = `<div class="thought-bubble">Var ska minnessiffran? 🤔 Tryck på rätt ruta!</div>`;
+    const ui = document.getElementById('ex-col-ui');
+    if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnesrutan där 1:an ska stå!</div>`;
+  }
+
+  /* ── Levande minnessiffror: tap-hantering (v30, endast addition) ── */
+  function memTableTap(ev) {
+    if (mode !== 'addition') return;
+    if (!helpMode) { freeMemTap(ev); return; }
+    if (!memPhase) return;
+    const cellEl    = ev.target.closest ? ev.target.closest('.carry-cell') : null;
+    const targetKey = COL_KEYS[memPhase.col];
+    const hit       = !!(cellEl && cellEl.id === `carry-${targetKey}`);
+    const fb        = document.getElementById('ex-feedback');
+
+    if (memPhase.kind === 'place') {
+      if (hit) {
+        const dst = memPhase.col, src = memPhase.srcCol;
+        memPhase = null;
+        cellEl.classList.remove('mem-pulse');
+        if (fb) fb.innerHTML = '';
+        playCarrySound();
+        animateCarryToken(src, dst, () => {
+          demoCarries[dst] = 1;
+          updateCarryRow();
+          App.Sound.play('correct');
+          smallBurst();
+          exTenPhase[src] = 3;
+          exInputLocked = false;
+          showExColUI(src);
+        });
+      } else {
+        // Fel tap → mild vägledning, inget poängstraff — tappa igen
+        memPerfect = false;
+        const t = document.getElementById(`carry-${targetKey}`);
+        if (t) t.classList.add('mem-pulse');
+        if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
+          border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
+          color:#92400e;text-align:center">Nästan — den ska stå här 👉</div>`;
+      }
+    } else if (memPhase.kind === 'strike') {
+      if (hit) {
+        const col  = memPhase.col;
+        const cont = memPhase.cont;
+        memPhase = null;
+        if (fb) fb.innerHTML = '';
+        const bubble = document.getElementById('ex-bubble');
+        if (bubble) bubble.innerHTML = `<div class="thought-bubble">Struken! Nu vet vi att den inte räknas igen. ✏️</div>`;
+        strikeMemDigit(col);
+        App.Sound.play('correct');
+        const gen = upExGen;
+        setTimeout(() => { if (gen === upExGen) cont(); }, 500);
+      } else {
+        memPerfect = false;
+        if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
+          border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
+          color:#92400e;text-align:center">Titta — 1:an är inte struken än 👀</div>`;
+      }
+    }
+  }
+
+  /* ── Fria läget: frivilliga minnessiffror (påverkar ALDRIG rättningen) ── */
+  function freeMemTap(ev) {
+    if (ev.target.closest && ev.target.closest('.mem-picker')) return; // väljarens knappar sköter sig själva
+    closeMemPicker();
+    const cellEl = ev.target.closest ? ev.target.closest('.carry-cell') : null;
+    if (!cellEl) return;
+    const col = COL_KEYS.findIndex(k => cellEl.id === `carry-${k}`);
+    if (col < 0) return;
+    if (freeMemVals[col] == null) {
+      openMemPicker(col, cellEl);           // tom → sifferväljare 1–9
+    } else if (!freeMemUsed[col]) {
+      freeMemUsed[col] = true;              // skriven → stryks
+      strikeMemEl(cellEl.querySelector('.mem-digit'));
+      App.Sound.play('click');
+    } else {
+      freeMemVals[col] = null;              // struken → rensas
+      freeMemUsed[col] = false;
+      cellEl.innerHTML = '';
+      App.Sound.play('click');
+    }
+  }
+
+  function openMemPicker(col, cellEl) {
+    const wrap = document.getElementById('up-table-wrap');
+    if (!wrap) return;
+    const p = document.createElement('div');
+    p.className = 'mem-picker';
+    p.id = 'mem-picker';
+    p.innerHTML = [1,2,3,4,5,6,7,8,9].map(n =>
+      `<button onclick="UppstallningGame.memPick(${col},${n})">${n}</button>`).join('');
+    wrap.appendChild(p);
+    // Klampa inom tabellytan — poppisen får aldrig skapa overflow
+    const wR = wrap.getBoundingClientRect();
+    const cR = cellEl.getBoundingClientRect();
+    const left = Math.max(4, Math.min(cR.left - wR.left + cR.width / 2 - p.offsetWidth / 2,
+      wR.width - p.offsetWidth - 4));
+    let top = cR.bottom - wR.top + 6;
+    if (top + p.offsetHeight > wR.height - 4) {
+      top = Math.max(4, cR.top - wR.top - p.offsetHeight - 6);
+    }
+    p.style.left = `${left}px`;
+    p.style.top  = `${top}px`;
+    App.Sound.play('click');
+  }
+
+  function closeMemPicker() {
+    const p = document.getElementById('mem-picker');
+    if (p) p.remove();
+  }
+
+  function memPick(col, n) {
+    closeMemPicker();
+    freeMemVals[col] = n;
+    freeMemUsed[col] = false;
+    const el = document.getElementById(`carry-${COL_KEYS[col]}`);
+    if (el) el.innerHTML = `<span class="mem-digit">${n}</span>`;
+    App.Sound.play('click');
+  }
+
+  /* ── Glömd-minnessiffra-simulering: alla carryIn = 0 ────── */
+  function simulateNoCarrySum() {
+    // Kolumnsumma skrivs mod 10; carry genereras men adderas aldrig
+    const da = digs(numA), db = digs(numB);
+    let out = 0, mul = 1;
+    for (let c = 0; c < colCount; c++) { out += ((da[c] + db[c]) % 10) * mul; mul *= 10; }
+    return out;
   }
 
   /* ── Free mode funktioner (utan hjälp) — miniräknare ───── */
@@ -1629,10 +1866,16 @@ const UppstallningGame = (() => {
       App.Sound.play('wrong');
       if (field) field.classList.add('wrong');
       exFreeShake();
+      // Glömd-minnessiffra-detektion (v30): matchar svaret simuleringen
+      // med alla carryIn=0 → riktad feedback istället för generisk
+      const glomtMinne = mode === 'addition' &&
+        parseInt(exFreeInput, 10) === simulateNoCarrySum();
       const fb = document.getElementById('ex-feedback');
       if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
         border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
-        color:#92400e;text-align:center">Inte riktigt! Ändra med ⌫ och prova igen 💪</div>`;
+        color:#92400e;text-align:center">${glomtMinne
+          ? 'Nästan! Kolla minnessiffrorna — någon vill vara med! 👆'
+          : 'Inte riktigt! Ändra med ⌫ och prova igen 💪'}</div>`;
       exFreeUpdateSubmit(); // siffror finns kvar → Klar förblir aktiv
     }
   }
@@ -1657,7 +1900,8 @@ const UppstallningGame = (() => {
         border-radius:999px;padding:10px 22px;font-weight:800;color:${correct?'#166534':'#92400e'};font-size:1rem">
         ${correct ? '✅ Rätt!' : '💪 Nästa!'} Uppgift ${exerciseIdx}/5</div>`;
       document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); newExProblem(); }, 1100);
+      const gen = upExGen;
+      setTimeout(() => { toast.remove(); if (gen === upExGen) newExProblem(); }, 1100);
     }
   }
 
@@ -1668,6 +1912,9 @@ const UppstallningGame = (() => {
     const root = document.getElementById('uppstallning-root');
     const emoji = exScore === 5 ? '🌟' : exScore >= 4 ? '🥇' : exScore >= 3 ? '🥈' : '💪';
     const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
+    // Minnesmästare ⭐ (v30): alla placera+stryk-moment klarade utan fel-tap.
+    // Aldrig något negativt vid miss — bara utebliven bonus.
+    const memStar = mode === 'addition' && helpMode && memMoments > 0 && memPerfect;
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
       <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
@@ -1682,6 +1929,7 @@ const UppstallningGame = (() => {
           <div class="result-medal">${emoji}</div>
           <div class="result-msg">${msg}</div>
           <div class="result-note num">${exScore} av 5 rätt</div>
+          ${memStar ? '<div class="mem-master">⭐ Minnesmästare!</div>' : ''}
           <div class="result-actions">
             <button class="btn btn-primary btn-lg" onclick="UppstallningGame.startExercise()">
               <svg class="icn"><use href="#i-refresh"/></svg>Spela igen</button>
@@ -1862,6 +2110,7 @@ const UppstallningGame = (() => {
     startExercise, showHelpSelect, setHelpMode,
     exPress, exDoBorrow, exContinueBorrow,
     exTenStep1, exTenStep2, exTenStep3,
+    memTableTap, memPick,
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
