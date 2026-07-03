@@ -42,58 +42,54 @@ const PlatsvardeGame = (() => {
   function showSelect() {
     const root = document.getElementById('addsub-root');
     const cards = [
-      {
-        icon: '🎯', label: 'Platsvärde', desc: 'Ental, tiotal, hundratal 🔢',
-        bg: 'linear-gradient(135deg,#eff6ff,#d1fae5)', border: 'rgba(37,99,235,0.2)',
-        nameColor: 'var(--pv-primary)', iconBg: 'linear-gradient(135deg,#dbeafe,#d1fae5)',
-        onclick: 'PlatsvardeGame.startPlatsvarde()'
-      },
-      {
-        icon: '➕', label: 'Uppställd addition', desc: 'Addition med minnessiffra 🧮',
-        bg: 'linear-gradient(135deg,#fef9c3,#eff6ff)', border: 'rgba(245,158,11,0.2)',
-        nameColor: '#d97706', iconBg: 'linear-gradient(135deg,#fde68a,#dbeafe)',
-        onclick: "PlatsvardeGame.startUppstallning('addition')"
-      },
-      {
-        icon: '➖', label: 'Uppställd subtraktion', desc: 'Subtraktion med lån 🧮',
-        bg: 'linear-gradient(135deg,#fdf4ff,#fef3c7)', border: 'rgba(239,68,68,0.2)',
-        nameColor: '#dc2626', iconBg: 'linear-gradient(135deg,#fecaca,#fde68a)',
-        onclick: "PlatsvardeGame.startUppstallning('subtraction')"
-      },
+      { icon: '🧮', label: 'Platsvärde',            desc: 'Hundratal, tiotal och ental',
+        onclick: 'PlatsvardeGame.startPlatsvarde()' },
+      { icon: '➕', label: 'Uppställd addition',    desc: 'Räkna uppställt med minnessiffra',
+        onclick: "PlatsvardeGame.startUppstallning('addition')" },
+      { icon: '➖', label: 'Uppställd subtraktion', desc: 'Låna från tiotalet',
+        onclick: "PlatsvardeGame.startUppstallning('subtraction')" },
     ];
 
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="App.goBackToGameSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--pv-primary)">➕➖ Addition & Subtraktion</span>
-        <div style="width:80px"></div>
+      <style id="pv-hub-css">
+        .as-hub-grid { display:grid; grid-template-columns:1fr; gap:12px;
+          margin-top:auto; margin-bottom:auto; }
+        .acard { display:flex; align-items:center; gap:16px; text-align:left;
+          padding:14px 20px; width:100%;
+          background:var(--glass); border:1px solid var(--glass-line);
+          border-radius:var(--radius-lg); box-shadow:var(--shadow-panel);
+          cursor:pointer; transition:transform .3s var(--spring), box-shadow .3s; }
+        .acard:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 16px 40px var(--glow); }
+        .acard:active { transform:scale(.98); }
+        .aico { width:58px; height:58px; border-radius:18px; display:grid; place-items:center;
+          font-size:29px; flex-shrink:0;
+          background:linear-gradient(135deg,var(--tint),#fff);
+          border:1px solid var(--glass-line); box-shadow:0 4px 12px var(--glow); }
+        .acard b { font-family:var(--font-head); font-weight:700; font-size:19px;
+          color:var(--deep); display:block; line-height:1.15; }
+        .acard small { color:var(--ink-soft); font-size:13px; font-weight:700; }
+        .acard .chev { color:var(--accent); flex-shrink:0; width:24px; height:24px; margin-left:auto; }
+      </style>
+      <div class="floaties"><span style="top:6%;right:8%">✨</span><span style="bottom:10%;left:5%;animation-delay:2s">🍀</span></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="App.goBackToGameSelect()">Tillbaka</button>
+        <span class="header-title">Addition &amp; Subtraktion</span>
+        <span style="width:52px"></span>
       </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
-        <div class="player-banner">
-          <div class="avatar avatar-lg">${profile.avatar}</div>
-          <div class="player-info">
-            <div class="player-name">${escHtml(profile.name)}</div>
-            <div class="player-tagline">Välj vad du vill träna 🎯</div>
-          </div>
+      <div class="wrap">
+        <div class="me-chip" style="align-self:center">
+          <span class="avatar avatar-sm">${profile.avatar}</span>
+          <b>${escHtml(profile.name)}</b>
         </div>
-        ${cards.map(c => `
-          <div class="card" style="display:flex;align-items:center;gap:var(--space-5);padding:var(--space-5);cursor:pointer;
-            background:${c.bg};border:2px solid ${c.border};
-            transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s"
-            onclick="${c.onclick}"
-            onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-            onmouseleave="this.style.transform='';this.style.boxShadow=''"
-            role="button" tabindex="0">
-            <div style="font-size:2.5rem;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
-              border-radius:var(--radius-lg);background:${c.iconBg}">${c.icon}</div>
-            <div style="flex:1">
-              <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:${c.nameColor}">${c.label}</div>
-              <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">${c.desc}</div>
-            </div>
-            <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
-          </div>
-        `).join('')}
+        <div class="as-hub-grid">
+          ${cards.map(c => `
+            <button class="acard" onclick="${c.onclick}">
+              <span class="aico">${c.icon}</span>
+              <span><b>${c.label}</b><small>${c.desc}</small></span>
+              <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+            </button>
+          `).join('')}
+        </div>
       </div>
     `;
     Router.show('screen-addsub');
@@ -247,57 +243,69 @@ const PlatsvardeGame = (() => {
         #addsub-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
         #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
         #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
-        #pv-scratch { flex:45; background:rgba(255,255,255,0.85); border-radius:var(--radius-lg); padding:8px;
-          border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column; gap:5px; min-height:0; }
+        #pv-scratch { flex:45; background:var(--glass); border-radius:var(--radius-lg); padding:8px;
+          border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
+          display:flex; flex-direction:column; gap:5px; min-height:0; }
         @media (orientation:portrait) {
           #pv-main { flex-direction:column; }
           #pv-left { flex:1; }
           #pv-scratch { flex:0 0 40vh; }
         }
         #pv-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
-          border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25); background:rgba(255,255,255,0.7); }
-        .pv-card { background:rgba(255,255,255,0.9); border-radius:var(--radius-lg); padding:10px;
-          border:1.5px solid rgba(37,99,235,0.12); }
+          border-radius:var(--radius-md); border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
+          background:rgba(255,255,255,0.75); }
+        .pv-card { background:var(--glass-strong); border-radius:var(--radius-lg); padding:10px;
+          border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); }
         .pv-digit-row { display:flex; justify-content:center; gap:10px; margin:8px 0; }
         .pv-digit-box { display:flex; flex-direction:column; align-items:center; gap:4px; width:clamp(52px,10vw,80px);
-          border-radius:var(--radius-lg); padding:10px 0; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s;
+          border-radius:var(--radius-lg); padding:10px 0; cursor:pointer;
+          transition:transform 0.25s var(--spring),box-shadow 0.25s;
           border-width:2.5px; border-style:solid; }
-        .pv-digit-box:hover { transform:scale(1.08); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+        .pv-digit-box:hover { transform:scale(1.08); box-shadow:0 8px 20px var(--glow); }
         .pv-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-        .pv-choice-btn { padding:10px; border-radius:var(--radius-md); background:rgba(255,255,255,0.9);
-          border:2px solid rgba(37,99,235,0.22); color:var(--pv-primary); font-size:var(--text-base);
-          font-weight:800; cursor:pointer; transition:all 0.15s; }
-        .pv-choice-btn:hover { background:rgba(37,99,235,0.1); }
+        .pv-choice-btn { padding:10px; border-radius:var(--radius-md); background:var(--glass-strong);
+          border:2px solid color-mix(in srgb, var(--accent) 22%, transparent); color:var(--deep);
+          font-size:var(--text-base); font-family:var(--font-head);
+          font-weight:800; cursor:pointer; box-shadow:var(--shadow-sm);
+          transition:all 0.25s var(--spring); }
+        .pv-choice-btn:hover { border-color:var(--accent); transform:translateY(-2px) scale(1.02);
+          box-shadow:0 8px 20px var(--glow); }
         .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
+          font-family:var(--font-head); font-variant-numeric:tabular-nums;
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
-          cursor:pointer; transition:all 0.15s; background:rgba(255,255,255,0.9); }
-        .pv-decomp-field.active { outline:3px solid var(--pv-primary); }
+          cursor:pointer; transition:all 0.15s; background:var(--glass-strong); }
+        .pv-decomp-field.active { outline:3px solid var(--accent); }
         .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(40px,8vw,52px)); gap:6px; justify-content:center; margin-top:8px; }
-        .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full); font-size:var(--text-base); font-weight:900;
-          cursor:pointer; background:rgba(255,255,255,0.9); border:1.5px solid rgba(37,99,235,0.3);
-          color:var(--pv-primary); transition:transform 0.1s; }
+        .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full);
+          font-size:var(--text-base); font-family:var(--font-head); font-weight:900;
+          cursor:pointer; background:var(--glass-strong);
+          border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
+          color:var(--deep); transition:transform 0.2s var(--spring); }
         .pv-nk:hover { transform:scale(1.1); }
         .pv-nk-del { background:#fee2e2; border-color:#ef4444; color:#dc2626; }
-        .pv-nk-ok  { background:var(--pv-primary); border-color:var(--pv-primary); color:#fff; }
+        .pv-nk-ok  { background:linear-gradient(135deg,var(--accent),var(--accent-light));
+          border-color:transparent; color:#fff; box-shadow:0 4px 12px var(--glow); }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
         .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
-          cursor:pointer; border:2px solid rgba(37,99,235,0.3); background:rgba(255,255,255,0.9); transition:all 0.15s; }
-        .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md); border:2px dashed rgba(37,99,235,0.3);
+          cursor:pointer; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          background:var(--glass-strong); transition:all 0.25s var(--spring); }
+        .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md);
+          border:2px dashed color-mix(in srgb, var(--accent) 32%, transparent);
           display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-sm);
-          font-weight:800; color:rgba(37,99,235,0.4); }
-        .pv-slot.filled { background:rgba(37,99,235,0.1); border:2px solid var(--pv-primary); color:var(--pv-primary); }
+          font-weight:800; color:color-mix(in srgb, var(--accent) 45%, transparent); }
+        .pv-slot.filled { background:color-mix(in srgb, var(--accent) 10%, transparent);
+          border:2px solid var(--accent); color:var(--accent); }
       </style>
 
       <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:5px 10px;
-        border-bottom:1px solid rgba(37,99,235,0.15);min-height:44px;flex-shrink:0">
-        <button class="btn-back" style="background:var(--pv-light);color:var(--pv-primary);
-          flex-shrink:0;padding:4px 10px;font-size:13px"
+        border-bottom:1px solid color-mix(in srgb, var(--accent) 15%, transparent);min-height:44px;flex-shrink:0">
+        <button class="btn-back" style="flex-shrink:0;min-height:36px;padding:4px 12px 4px 8px;font-size:13px"
           onclick="PlatsvardeGame.confirmAbort()">Avbryt</button>
-        <div style="flex:1;text-align:center;font-weight:800;font-size:13px;color:var(--pv-primary)">
+        <div class="num" style="flex:1;text-align:center;font-family:var(--font-head);font-weight:700;font-size:14px;color:var(--deep)">
           ${getLevelLabel(q)} &middot; ${qIndex + 1}/10
         </div>
-        <div style="width:72px;height:6px;border-radius:3px;background:rgba(37,99,235,0.15);overflow:hidden;flex-shrink:0">
-          <div style="height:100%;width:${qIndex * 10}%;background:linear-gradient(90deg,var(--pv-primary),var(--pv-secondary));transition:width 0.4s"></div>
+        <div class="progress-bar" style="width:72px;flex-shrink:0">
+          <i style="width:${qIndex * 10}%"></i>
         </div>
       </div>
 
@@ -307,19 +315,19 @@ const PlatsvardeGame = (() => {
           <div id="pv-feedback"></div>
         </div>
         <div id="pv-scratch">
-          <div style="font-size:10px;font-weight:800;color:var(--pv-primary);text-transform:uppercase;
+          <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;
             letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
           <canvas id="pv-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
             <button onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
               style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-primary);color:#fff;border:1.5px solid var(--pv-primary)">🖊️ Rita</button>
+              cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
             <button onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
               style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🧹 Sudd</button>
+              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🧹 Sudd</button>
             <button onclick="PlatsvardeGame.pvClearCanvas()"
               style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🗑️ Rensa</button>
+              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🗑️ Rensa</button>
           </div>
         </div>
       </div>
@@ -509,8 +517,8 @@ const PlatsvardeGame = (() => {
   function renderC2(q) {
     return `
       <div class="pv-card">
-        <div style="font-size:var(--text-lg);font-weight:800;color:var(--pv-primary);text-align:center;
-          margin-bottom:10px;padding:10px;background:rgba(37,99,235,0.06);border-radius:var(--radius-md)">
+        <div style="font-size:var(--text-lg);font-weight:800;color:var(--deep);text-align:center;font-family:var(--font-head);
+          margin-bottom:10px;padding:10px;background:color-mix(in srgb, var(--accent) 8%, transparent);border-radius:var(--radius-md)">
           ${escHtml(q.word)}
         </div>
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:10px">
@@ -568,8 +576,9 @@ const PlatsvardeGame = (() => {
           `).join('')}
         </div>
         <button onclick="PlatsvardeGame.submitOrder()"
-          style="width:100%;margin-top:6px;height:40px;border-radius:var(--radius-md);
-          background:var(--pv-primary);color:white;border:none;font-weight:800;cursor:pointer">
+          style="width:100%;margin-top:6px;height:40px;border-radius:var(--radius-full);
+          background:linear-gradient(135deg,var(--accent),var(--accent-light));color:white;border:none;
+          font-weight:800;cursor:pointer;box-shadow:0 4px 12px var(--glow)">
           ✓ Klar
         </button>
       </div>
@@ -737,28 +746,22 @@ const PlatsvardeGame = (() => {
     const emoji = score === 10 ? '🌟' : score >= 8 ? '🥇' : score >= 6 ? '🥈' : '💪';
     const msg   = score === 10 ? 'Perfekt! 🎉' : score >= 8 ? 'Fantastiskt bra!' : score >= 6 ? 'Jättebra!' : 'Fortsätt öva!';
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="PlatsvardeGame.showSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--pv-primary)">🏆 Resultat</span>
-        <div style="width:80px"></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="PlatsvardeGame.showSelect()">Tillbaka</button>
+        <span class="header-title">Resultat</span>
+        <span style="width:52px"></span>
       </div>
-      <div style="padding:var(--space-6);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
-        <div style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));
-          border-radius:var(--radius-xl);padding:var(--space-8) var(--space-6);text-align:center;
-          color:white;width:100%;animation:bounce-in 0.6s var(--ease-bounce)">
-          <div style="font-size:4rem;margin-bottom:var(--space-3)">${emoji}</div>
-          <div style="font-family:var(--font-heading);font-size:var(--text-3xl)">${msg}</div>
-          <div style="font-size:var(--text-5xl);font-weight:900;margin:var(--space-3) 0">
-            ${score} <span style="font-size:var(--text-2xl);opacity:0.8">av 10</span>
+      <div class="wrap">
+        <div class="result-hero">
+          <div class="result-pct num">${pct} %</div>
+          <div class="result-medal">${emoji}</div>
+          <div class="result-msg">${msg}</div>
+          <div class="result-note num">${score} av ${questions.length} rätt</div>
+          <div class="result-actions">
+            <button class="btn btn-primary btn-lg" onclick="PlatsvardeGame.startPlatsvarde()">
+              <svg class="icn"><use href="#i-refresh"/></svg>Spela igen</button>
+            <button class="btn btn-ghost" onclick="PlatsvardeGame.showSelect()">Välj övning</button>
           </div>
-          <div style="font-weight:700">${pct}% rätt</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
-          <button class="btn btn-lg" style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));color:white;border:none"
-            onclick="PlatsvardeGame.startPlatsvarde()">🔄 Spela igen</button>
-          <button class="btn btn-ghost" style="border-color:var(--pv-primary);color:var(--pv-primary)"
-            onclick="PlatsvardeGame.showSelect()">↩ Välj övning</button>
         </div>
       </div>
     `;
@@ -818,8 +821,8 @@ const PlatsvardeGame = (() => {
     pvErasing = on;
     const d = document.getElementById('pv-draw');
     const e = document.getElementById('pv-erase');
-    if (d) { d.style.background = on ? 'var(--pv-light)' : 'var(--pv-primary)'; d.style.color = on ? 'var(--pv-primary)' : '#fff'; }
-    if (e) { e.style.background = on ? 'var(--pv-primary)' : 'var(--pv-light)'; e.style.color = on ? '#fff' : 'var(--pv-primary)'; }
+    if (d) { d.style.background = on ? 'var(--tint)' : 'var(--accent)'; d.style.color = on ? 'var(--deep)' : '#fff'; }
+    if (e) { e.style.background = on ? 'var(--accent)' : 'var(--tint)'; e.style.color = on ? '#fff' : 'var(--deep)'; }
   }
 
   function pvClearCanvas() {

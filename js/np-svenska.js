@@ -29,23 +29,23 @@ const NpSvenska = (() => {
     s.textContent = `
       #screen-np-svenska-prov, #screen-np-svenska-skriva {
         flex-direction:column; height:100vh; overflow:hidden;
-        background:var(--svk-bg,linear-gradient(135deg,#ecfdf5 0%,#eff6ff 50%,#fdf4ff 100%));
       }
       .svk-header {
         display:flex; align-items:center; gap:8px;
         padding:8px 12px; background:rgba(255,255,255,0.92);
-        border-bottom:2px solid rgba(5,150,105,0.2);
+        border-bottom:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
         min-height:44px; flex-shrink:0;
       }
       .svk-btn-back {
-        background:var(--svk-light,#d1fae5); color:var(--svk-primary,#059669);
-        border:none; border-radius:10px; padding:6px 12px;
+        background:var(--glass-strong); color:var(--deep);
+        border:1px solid var(--glass-line); border-radius:var(--radius-full); padding:6px 14px;
         font-weight:800; cursor:pointer; font-size:13px; white-space:nowrap;
+        box-shadow:var(--shadow-sm);
       }
-      .svk-title { font-family:var(--font-heading); color:var(--svk-primary,#059669); font-size:15px; flex:1; text-align:center; }
-      .svk-score { font-weight:800; color:var(--svk-primary,#059669); white-space:nowrap; font-size:13px; }
-      .svk-progress { height:4px; background:rgba(5,150,105,0.15); flex-shrink:0; }
-      .svk-progress-bar { height:100%; background:var(--svk-primary,#059669); transition:width 0.4s; }
+      .svk-title { font-family:var(--font-head); color:var(--deep); font-size:15px; flex:1; text-align:center; }
+      .svk-score { font-weight:800; font-variant-numeric:tabular-nums; color:var(--deep); white-space:nowrap; font-size:13px; }
+      .svk-progress { height:4px; background:color-mix(in srgb, var(--accent) 15%, transparent); flex-shrink:0; }
+      .svk-progress-bar { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-light)); transition:width 0.4s; }
 
       .svk-dashboard {
         flex:1; display:flex; min-height:0;
@@ -59,12 +59,12 @@ const NpSvenska = (() => {
       .svk-text-panel {
         flex:1; overflow-y:auto; padding:12px 14px;
         background:rgba(255,255,255,0.9);
-        border-right:2px solid rgba(5,150,105,0.12);
+        border-right:2px solid color-mix(in srgb, var(--accent) 12%, transparent);
         font-size:var(--text-base,16px); line-height:1.65;
       }
       .svk-text-title {
-        font-family:var(--font-heading); font-size:18px;
-        color:var(--svk-primary,#059669); margin-bottom:10px;
+        font-family:var(--font-head); font-size:18px;
+        color:var(--deep); margin-bottom:10px;
       }
       .svk-qa-panel {
         flex:1; display:flex; flex-direction:column;
@@ -75,21 +75,21 @@ const NpSvenska = (() => {
         display:flex; flex-direction:column; gap:8px;
       }
       .svk-q-label {
-        font-size:12px; font-weight:800; color:var(--svk-secondary,#7c3aed);
+        font-size:12px; font-weight:800; color:var(--accent);
         text-transform:uppercase; letter-spacing:0.04em;
       }
       .svk-q-text {
-        font-family:var(--font-heading); font-size:17px;
-        color:var(--color-text,#1e293b); line-height:1.35;
+        font-family:var(--font-head); font-size:17px;
+        color:var(--ink); line-height:1.35;
       }
       .svk-choices { display:flex; flex-direction:column; gap:6px; }
       .svk-choice {
-        background:rgba(255,255,255,0.9); border:2px solid rgba(5,150,105,0.25);
+        background:var(--glass-strong); border:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
         border-radius:10px; padding:10px 12px; cursor:pointer;
-        font-size:14px; font-weight:700; text-align:left;
+        font-size:14px; font-weight:700; text-align:left; color:var(--ink);
         transition:background 0.15s, border-color 0.15s;
       }
-      .svk-choice:hover { background:var(--svk-light,#d1fae5); border-color:var(--svk-primary,#059669); }
+      .svk-choice:hover { background:var(--tint); border-color:var(--accent); }
       .svk-choice.correct { background:#d1fae5; border-color:#059669; color:#065f46; }
       .svk-choice.wrong   { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
       .svk-choice.disabled { pointer-events:none; opacity:0.6; }
@@ -97,40 +97,40 @@ const NpSvenska = (() => {
       /* Sammanfattningskort */
       .svk-summary-cards { display:flex; flex-direction:column; gap:8px; }
       .svk-summary-card {
-        background:rgba(255,255,255,0.92); border:2px solid rgba(5,150,105,0.2);
+        background:rgba(255,255,255,0.92); border:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
         border-radius:12px; padding:12px; cursor:pointer;
         transition:transform 0.15s, box-shadow 0.15s;
       }
-      .svk-summary-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(5,150,105,0.15); }
+      .svk-summary-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px var(--glow); }
       .svk-summary-card.correct { border-color:#059669; background:#d1fae5; }
       .svk-summary-card.wrong   { border-color:#ef4444; background:#fee2e2; }
       .svk-card-label {
-        font-size:11px; font-weight:900; color:var(--svk-secondary,#7c3aed);
+        font-size:11px; font-weight:900; color:var(--accent);
         letter-spacing:0.08em; margin-bottom:4px;
       }
-      .svk-card-text { font-size:13px; line-height:1.55; color:#1e293b; }
+      .svk-card-text { font-size:13px; line-height:1.55; color:var(--ink); }
 
       /* Ordna-händelser */
       .svk-order-events { display:flex; flex-direction:column; gap:5px; }
       .svk-order-event {
-        background:rgba(255,255,255,0.92); border:2px solid rgba(5,150,105,0.25);
+        background:rgba(255,255,255,0.92); border:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
         border-radius:10px; padding:9px 12px; cursor:pointer;
         font-size:13px; font-weight:700; transition:all 0.15s;
         display:flex; align-items:center; gap:8px;
       }
-      .svk-order-event:hover:not(.placed) { background:var(--svk-light,#d1fae5); }
-      .svk-order-event.placed { background:#e0e7ff; border-color:#6366f1; opacity:0.7; cursor:default; }
+      .svk-order-event:hover:not(.placed) { background:var(--tint); }
+      .svk-order-event.placed { background:var(--tint); border-color:var(--accent-light); opacity:0.7; cursor:default; }
       .svk-order-event.correct { background:#d1fae5; border-color:#059669; }
       .svk-order-event.wrong   { background:#fee2e2; border-color:#ef4444; }
       .svk-order-slot {
-        background:rgba(255,255,255,0.7); border:2px dashed rgba(5,150,105,0.35);
+        background:rgba(255,255,255,0.7); border:2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
         border-radius:10px; padding:9px 12px; min-height:40px;
         font-size:13px; color:#94a3b8; display:flex; align-items:center; gap:8px;
       }
-      .svk-order-slot.filled { border-style:solid; border-color:rgba(5,150,105,0.5); color:#1e293b; background:#f0fdf4; }
+      .svk-order-slot.filled { border-style:solid; border-color:color-mix(in srgb, var(--accent) 50%, transparent); color:var(--ink); background:var(--tint); }
       .svk-order-number {
         width:22px; height:22px; border-radius:50%;
-        background:var(--svk-primary,#059669); color:#fff;
+        background:var(--accent); color:#fff;
         font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center;
         flex-shrink:0;
       }
@@ -138,28 +138,28 @@ const NpSvenska = (() => {
       /* Multi-choice */
       .svk-multi-items { display:flex; flex-wrap:wrap; gap:6px; }
       .svk-multi-item {
-        background:rgba(255,255,255,0.9); border:2px solid rgba(5,150,105,0.25);
+        background:var(--glass-strong); border:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
         border-radius:8px; padding:7px 12px; cursor:pointer;
-        font-size:13px; font-weight:700; transition:all 0.15s;
+        font-size:13px; font-weight:700; color:var(--ink); transition:all 0.15s;
       }
-      .svk-multi-item.selected { background:var(--svk-light,#d1fae5); border-color:var(--svk-primary,#059669); }
+      .svk-multi-item.selected { background:var(--tint); border-color:var(--accent); }
       .svk-multi-item.correct  { background:#d1fae5; border-color:#059669; color:#065f46; }
       .svk-multi-item.wrong    { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
 
       /* Canvas */
       .svk-canvas-strip {
         height:52px; background:rgba(255,255,255,0.85);
-        border-top:1px solid rgba(5,150,105,0.15);
+        border-top:1px solid color-mix(in srgb, var(--accent) 15%, transparent);
         display:flex; align-items:center; gap:6px; padding:0 10px;
         flex-shrink:0;
       }
       .svk-canvas-btn {
-        padding:4px 10px; border-radius:8px; border:2px solid rgba(5,150,105,0.25);
+        padding:4px 10px; border-radius:8px; border:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
         background:rgba(255,255,255,0.8); font-size:12px; font-weight:700;
         cursor:pointer; white-space:nowrap;
       }
-      .svk-canvas-btn.active { background:var(--svk-light,#d1fae5); border-color:var(--svk-primary,#059669); }
-      .svk-canvas-wrap { flex:1; height:36px; border-radius:8px; overflow:hidden; border:1px solid rgba(5,150,105,0.2); }
+      .svk-canvas-btn.active { background:var(--tint); border-color:var(--accent); }
+      .svk-canvas-wrap { flex:1; height:36px; border-radius:8px; overflow:hidden; border:1px solid color-mix(in srgb, var(--accent) 20%, transparent); }
       #svk-canvas { display:block; width:100%; height:100%; touch-action:none; background:rgba(255,255,255,0.5); }
 
       /* Feedback bar */
@@ -182,20 +182,21 @@ const NpSvenska = (() => {
 
       /* Bokvy */
       .svk-book-view {
-        background:#fefce8; border:2px solid rgba(5,150,105,0.2);
+        background:#fefce8; border:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
         border-radius:16px; padding:20px; margin:12px;
         font-size:18px; line-height:1.8; position:relative;
+        box-shadow:var(--shadow-panel);
       }
       .svk-book-title {
-        font-family:var(--font-heading); font-size:24px;
-        color:var(--svk-primary,#059669); margin-bottom:12px; text-align:center;
+        font-family:var(--font-head); font-size:24px;
+        color:var(--deep); margin-bottom:12px; text-align:center;
       }
-      .svk-book-author { font-size:13px; color:#64748b; margin-top:16px; text-align:right; }
+      .svk-book-author { font-size:13px; color:var(--ink-soft); margin-top:16px; text-align:right; }
       .svk-book-wordcount { font-size:11px; color:#94a3b8; text-align:right; }
       .svk-support-words {
-        background:var(--svk-light,#d1fae5); border-radius:10px;
+        background:var(--tint); border-radius:10px;
         padding:10px 14px; margin-top:12px;
-        font-size:13px; color:#065f46;
+        font-size:13px; color:var(--deep);
       }
 
       /* Skrivläge */
@@ -204,41 +205,42 @@ const NpSvenska = (() => {
       .svk-write-left {
         width:200px; flex-shrink:0; overflow-y:auto;
         padding:12px; background:rgba(255,255,255,0.85);
-        border-right:2px solid rgba(5,150,105,0.12);
+        border-right:2px solid color-mix(in srgb, var(--accent) 12%, transparent);
       }
       @media (orientation:portrait) { .svk-write-left { width:auto; max-height:30%; } }
       .svk-write-right { flex:1; display:flex; flex-direction:column; padding:10px; gap:6px; min-width:0; }
       .svk-title-input {
-        border:2px solid rgba(5,150,105,0.3); border-radius:10px;
+        border:2px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:10px;
         padding:8px 12px; font-size:16px; font-weight:700;
-        font-family:var(--font-heading); background:rgba(255,255,255,0.9);
+        font-family:var(--font-head); background:rgba(255,255,255,0.9);
         outline:none; width:100%; box-sizing:border-box;
       }
-      .svk-title-input:focus { border-color:var(--svk-primary,#059669); }
+      .svk-title-input:focus { border-color:var(--accent); }
       .svk-textarea {
-        flex:1; border:2px solid rgba(5,150,105,0.3); border-radius:10px;
+        flex:1; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:10px;
         padding:12px; font-size:18px; line-height:1.65;
         font-family:var(--font-body,sans-serif);
         background:rgba(255,255,255,0.95); resize:none;
         outline:none; min-height:0;
       }
-      .svk-textarea:focus { border-color:var(--svk-primary,#059669); }
-      .svk-wordcount { font-size:12px; color:#64748b; font-weight:700; text-align:right; }
+      .svk-textarea:focus { border-color:var(--accent); }
+      .svk-wordcount { font-size:12px; color:var(--ink-soft); font-weight:700; text-align:right; font-variant-numeric:tabular-nums; }
 
       /* Logg */
       .svk-log-list { display:flex; flex-direction:column; gap:8px; padding:12px; }
       .svk-log-item {
-        background:rgba(255,255,255,0.9); border:2px solid rgba(5,150,105,0.2);
+        background:var(--glass); border:1px solid var(--glass-line);
         border-radius:12px; padding:12px; cursor:pointer;
         display:flex; align-items:center; gap:10px;
+        box-shadow:var(--shadow-sm);
         transition:box-shadow 0.15s;
       }
-      .svk-log-item:hover { box-shadow:0 4px 12px rgba(5,150,105,0.15); }
+      .svk-log-item:hover { box-shadow:0 4px 12px var(--glow); }
       .svk-log-icon { font-size:22px; flex-shrink:0; }
       .svk-log-meta { flex:1; min-width:0; }
-      .svk-log-type { font-size:11px; color:#64748b; font-weight:700; }
-      .svk-log-title { font-size:15px; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      .svk-log-detail { font-size:12px; color:#059669; font-weight:700; }
+      .svk-log-type { font-size:11px; color:var(--ink-soft); font-weight:700; }
+      .svk-log-title { font-size:15px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .svk-log-detail { font-size:12px; color:var(--accent); font-weight:700; }
 
       /* Resultatskärm */
       .svk-result-area { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -250,16 +252,20 @@ const NpSvenska = (() => {
       .svk-result-row.ok  { background:#d1fae5; color:#065f46; }
       .svk-result-row.bad { background:#fee2e2; color:#991b1b; }
 
-      /* Knapp */
+      /* Knapp – följer .btn-familjen visuellt */
       .svk-btn {
-        background:var(--svk-primary,#059669); color:#fff;
-        border:none; border-radius:12px; padding:12px 20px;
+        background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff;
+        border:none; border-radius:var(--radius-full); padding:12px 20px;
         font-size:15px; font-weight:800; cursor:pointer;
-        text-align:center; transition:opacity 0.15s;
+        box-shadow:0 6px 16px var(--glow), inset 0 1px 0 rgba(255,255,255,0.35);
+        text-align:center; transition:transform 0.25s var(--spring), box-shadow 0.25s;
       }
-      .svk-btn:hover { opacity:0.88; }
+      .svk-btn:hover { transform:translateY(-2px); box-shadow:0 10px 24px var(--glow); }
+      .svk-btn:active { transform:scale(0.96); }
       .svk-btn.secondary {
-        background:rgba(5,150,105,0.12); color:var(--svk-primary,#059669);
+        background:var(--glass-strong); color:var(--deep);
+        border:1.5px solid color-mix(in srgb, var(--accent) 28%, transparent);
+        box-shadow:var(--shadow-panel);
       }
     `;
     document.head.appendChild(s);
@@ -315,52 +321,41 @@ const NpSvenska = (() => {
   function showSelectScreen() {
     const root = document.getElementById('np-svenska-select-root');
     root.innerHTML = `
-      <div class="svk-header">
-        <button class="svk-btn-back" onclick="NationellaHub.showSubjectSelect()">Tillbaka</button>
-        <span class="svk-title">📖 Svenska Åk 3</span>
-        <button class="svk-btn-back" onclick="NpSvenska.showLog()" style="white-space:nowrap">📚 Min bok</button>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showSubjectSelect()">Tillbaka</button>
+        <span class="header-title">Svenska Åk 3</span>
+        <button class="btn btn-secondary btn-sm" onclick="NpSvenska.showLog()" style="white-space:nowrap">📚 Min bok</button>
       </div>
-      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto">
+      <div class="wrap vcenter" style="gap:var(--space-4)">
 
-        <div class="card" style="
-          display:flex;align-items:center;gap:16px;padding:18px;cursor:pointer;
-          background:linear-gradient(135deg,#d1fae5 0%,#ede9fe 100%);
-          border:2px solid rgba(5,150,105,0.2);transition:transform 0.2s,box-shadow 0.2s;"
-          onclick="NpSvenska.startProv()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;
-            border-radius:14px;background:linear-gradient(135deg,#d1fae5,#ede9fe)">📝</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:20px;color:var(--svk-primary,#059669)">Läsförståelse &amp; språk</div>
-            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">17 frågor – texter, begrepp och stavning 🔍</div>
-          </div>
-          <div style="font-size:20px;opacity:0.5">›</div>
-        </div>
-
-        <div class="card" style="
-          display:flex;align-items:center;gap:16px;padding:18px;cursor:pointer;
-          background:linear-gradient(135deg,#eff6ff 0%,#fdf4ff 100%);
-          border:2px solid rgba(124,58,237,0.2);transition:transform 0.2s,box-shadow 0.2s;"
-          onclick="NpSvenska.showWriteSelect()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;
-            border-radius:14px;background:linear-gradient(135deg,#eff6ff,#fdf4ff)">✏️</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:20px;color:var(--svk-secondary,#7c3aed)">Skriva</div>
-            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">Berättelse eller faktatext 🖊️</div>
-          </div>
-          <div style="font-size:20px;opacity:0.5">›</div>
-        </div>
-
-        <div class="player-banner" style="margin-top:4px">
+        <div class="player-banner">
           <div class="avatar avatar-lg">${esc(profile.avatar)}</div>
           <div class="player-info">
             <div class="player-name">${esc(profile.name)}</div>
             <div class="player-tagline">Välj vad du vill träna idag 🎯</div>
           </div>
         </div>
+
+        <div class="game-card game-card-wide" style="cursor:pointer"
+          onclick="NpSvenska.startProv()" role="button" tabindex="0">
+          <span class="game-emoji">📝</span>
+          <div style="flex:1;min-width:0">
+            <h3>Läsförståelse &amp; språk</h3>
+            <p>17 frågor – texter, begrepp och stavning 🔍</p>
+          </div>
+          <svg class="icn" style="width:24px;height:24px;color:var(--accent);flex-shrink:0;margin-left:auto"><use href="#i-chevron"/></svg>
+        </div>
+
+        <div class="game-card game-card-wide" style="cursor:pointer"
+          onclick="NpSvenska.showWriteSelect()" role="button" tabindex="0">
+          <span class="game-emoji">✏️</span>
+          <div style="flex:1;min-width:0">
+            <h3>Skriva</h3>
+            <p>Berättelse eller faktatext 🖊️</p>
+          </div>
+          <svg class="icn" style="width:24px;height:24px;color:var(--accent);flex-shrink:0;margin-left:auto"><use href="#i-chevron"/></svg>
+        </div>
+
       </div>
     `;
     Router.show('screen-np-svenska-select');
@@ -606,11 +601,11 @@ const NpSvenska = (() => {
       <div class="svk-q-text">Klicka på händelserna i rätt ordning.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
         <div>
-          <div style="font-size:11px;font-weight:800;color:#64748b;margin-bottom:4px">HÄNDELSER</div>
+          <div style="font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px">HÄNDELSER</div>
           <div class="svk-order-events" id="svk-events"></div>
         </div>
         <div>
-          <div style="font-size:11px;font-weight:800;color:#64748b;margin-bottom:4px">DIN ORDNING</div>
+          <div style="font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px">DIN ORDNING</div>
           <div id="svk-slots"></div>
         </div>
       </div>
@@ -626,7 +621,7 @@ const NpSvenska = (() => {
         const slot = slotsEl.children[i];
         if (i < orderSelected.length) {
           slot.classList.add('filled');
-          slot.innerHTML = `<span style="font-weight:800;color:#059669;font-size:12px">${i+1}.</span> <span>${esc(eventTexts[orderSelected[i]])}</span>`;
+          slot.innerHTML = `<span style="font-weight:800;color:var(--accent);font-size:12px">${i+1}.</span> <span>${esc(eventTexts[orderSelected[i]])}</span>`;
           slot.style.cursor = 'pointer';
           slot.onclick = () => undoFromSlot(i);
         } else {
@@ -708,7 +703,7 @@ const NpSvenska = (() => {
     qa.innerHTML = `
       <div class="svk-q-label">Vem gjorde vad?</div>
       <div class="svk-q-text">${esc(w.q)}</div>
-      <div style="font-size:12px;color:#7c3aed;font-weight:700;margin-top:2px">Välj ${correctCount} namn</div>
+      <div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:2px">Välj ${correctCount} namn</div>
       <div class="svk-multi-items" id="svk-multi"></div>
       <div id="svk-multi-check" style="margin-top:8px"></div>
     `;
@@ -726,7 +721,7 @@ const NpSvenska = (() => {
     qa.innerHTML = `
       <div class="svk-q-label">Vilka saker nämns?</div>
       <div class="svk-q-text">${esc(d.q)}</div>
-      <div style="font-size:12px;color:#7c3aed;font-weight:700;margin-top:2px">Välj ${correctCount} saker</div>
+      <div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:2px">Välj ${correctCount} saker</div>
       <div class="svk-multi-items" id="svk-multi"></div>
       <div id="svk-multi-check" style="margin-top:8px"></div>
     `;
@@ -877,9 +872,9 @@ const NpSvenska = (() => {
       </div>
       <div class="svk-result-area">
         <div style="text-align:center;padding:16px 0">
-          <div style="font-size:3rem">${stars}</div>
-          <div style="font-family:var(--font-heading);font-size:28px;color:var(--svk-primary,#059669)">${score} av 17</div>
-          <div style="font-size:14px;color:#64748b;font-weight:700;margin-top:4px">
+          <div class="result-medal" style="font-size:3rem">${stars}</div>
+          <div class="result-pct num" style="font-size:clamp(40px,8vw,64px)">${score} av 17</div>
+          <div class="result-note">
             ${score === 17 ? 'Perfekt! Du är en stjärna! 🎉' : score >= 13 ? 'Bra jobbat! 💪' : 'Fortsätt öva! 📚'}
           </div>
         </div>
@@ -965,41 +960,31 @@ const NpSvenska = (() => {
     App.Sound.play('click');
     const root = document.getElementById('np-svenska-skriva-root');
     root.innerHTML = `
-      <div class="svk-header">
-        <button class="svk-btn-back" onclick="NpSvenska.showSelectScreen()">Tillbaka</button>
-        <span class="svk-title">✏️ Skriva</span>
-        <button class="svk-btn-back" onclick="NpSvenska.showLog()">📚 Min bok</button>
+      <div class="app-header">
+        <button class="btn-back" onclick="NpSvenska.showSelectScreen()">Tillbaka</button>
+        <span class="header-title">Skriva</span>
+        <button class="btn btn-secondary btn-sm" onclick="NpSvenska.showLog()" style="white-space:nowrap">📚 Min bok</button>
       </div>
-      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto">
+      <div class="wrap vcenter" style="gap:var(--space-4)">
 
-        <div class="card" style="
-          display:flex;align-items:center;gap:16px;padding:18px;cursor:pointer;
-          background:linear-gradient(135deg,#fef9c3 0%,#d1fae5 100%);
-          border:2px solid rgba(5,150,105,0.2);transition:transform 0.2s,box-shadow 0.2s;"
-          onclick="NpSvenska.startWriteStory()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:2.5rem">📖</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:18px;color:#059669">Skriv en berättelse</div>
-            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">Välj ett ämne och skriv fritt</div>
+        <div class="game-card game-card-wide" style="cursor:pointer"
+          onclick="NpSvenska.startWriteStory()" role="button" tabindex="0">
+          <span class="game-emoji">📖</span>
+          <div style="flex:1;min-width:0">
+            <h3>Skriv en berättelse</h3>
+            <p>Välj ett ämne och skriv fritt</p>
           </div>
-          <div style="font-size:20px;opacity:0.5">›</div>
+          <svg class="icn" style="width:24px;height:24px;color:var(--accent);flex-shrink:0;margin-left:auto"><use href="#i-chevron"/></svg>
         </div>
 
-        <div class="card" style="
-          display:flex;align-items:center;gap:16px;padding:18px;cursor:pointer;
-          background:linear-gradient(135deg,#eff6ff 0%,#fdf4ff 100%);
-          border:2px solid rgba(124,58,237,0.2);transition:transform 0.2s,box-shadow 0.2s;"
-          onclick="NpSvenska.startWriteFacts()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:2.5rem">📋</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:18px;color:#7c3aed">Skriv en faktatext</div>
-            <div style="font-size:13px;color:#64748b;font-weight:700;margin-top:4px">Stödord hjälper dig skriva 📝</div>
+        <div class="game-card game-card-wide" style="cursor:pointer"
+          onclick="NpSvenska.startWriteFacts()" role="button" tabindex="0">
+          <span class="game-emoji">📋</span>
+          <div style="flex:1;min-width:0">
+            <h3>Skriv en faktatext</h3>
+            <p>Stödord hjälper dig skriva 📝</p>
           </div>
-          <div style="font-size:20px;opacity:0.5">›</div>
+          <svg class="icn" style="width:24px;height:24px;color:var(--accent);flex-shrink:0;margin-left:auto"><use href="#i-chevron"/></svg>
         </div>
       </div>
     `;
@@ -1022,9 +1007,9 @@ const NpSvenska = (() => {
       </div>
       <div class="svk-write-dashboard" id="svk-write-db">
         <div class="svk-write-left">
-          <div style="font-size:11px;font-weight:900;color:#059669;letter-spacing:0.06em;margin-bottom:6px">UPPGIFT</div>
-          <div style="font-size:14px;font-weight:700;color:#1e293b;line-height:1.5">${esc(currentWritePrompt)}</div>
-          <div style="margin-top:10px;font-size:12px;color:#64748b;line-height:1.5;background:#f0fdf4;border-radius:8px;padding:8px">
+          <div style="font-size:11px;font-weight:900;color:var(--accent);letter-spacing:0.06em;margin-bottom:6px">UPPGIFT</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);line-height:1.5">${esc(currentWritePrompt)}</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--ink-soft);line-height:1.5;background:var(--tint);border-radius:8px;padding:8px">
             💡 Tips: en bra berättelse har en inledning, en handling och en avslutning. Skriv med hela meningar!
           </div>
         </div>
@@ -1082,15 +1067,15 @@ const NpSvenska = (() => {
       </div>
       <div class="svk-write-dashboard" id="svk-write-db">
         <div class="svk-write-left">
-          <div style="font-size:11px;font-weight:900;color:#7c3aed;letter-spacing:0.06em;margin-bottom:6px">UPPGIFT</div>
-          <div style="font-size:14px;font-weight:700;color:#1e293b;line-height:1.5">${esc(currentFactsPrompt.prompt)}</div>
+          <div style="font-size:11px;font-weight:900;color:var(--accent);letter-spacing:0.06em;margin-bottom:6px">UPPGIFT</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);line-height:1.5">${esc(currentFactsPrompt.prompt)}</div>
           <div style="margin-top:10px">
-            <div style="font-size:11px;font-weight:900;color:#059669;letter-spacing:0.06em;margin-bottom:6px">STÖDORD</div>
+            <div style="font-size:11px;font-weight:900;color:var(--accent);letter-spacing:0.06em;margin-bottom:6px">STÖDORD</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px">
-              ${currentFactsPrompt.words.map(w => `<span style="background:#d1fae5;color:#065f46;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${esc(w)}</span>`).join('')}
+              ${currentFactsPrompt.words.map(w => `<span style="background:var(--tint);color:var(--deep);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${esc(w)}</span>`).join('')}
             </div>
           </div>
-          <div style="margin-top:10px;font-size:12px;color:#64748b;background:#f0fdf4;border-radius:8px;padding:8px;line-height:1.5">
+          <div style="margin-top:10px;font-size:12px;color:var(--ink-soft);background:var(--tint);border-radius:8px;padding:8px;line-height:1.5">
             Försök använda stödorden. Skriv med hela meningar.
           </div>
         </div>
@@ -1139,14 +1124,14 @@ const NpSvenska = (() => {
 
     const supportBlock = entry.supportWords ? `
       <div class="svk-support-words">
-        <div style="font-weight:900;font-size:12px;color:#065f46;margin-bottom:5px">STÖDORD</div>
+        <div style="font-weight:900;font-size:12px;color:var(--deep);margin-bottom:5px">STÖDORD</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${entry.supportWords.map(w => `<span style="background:rgba(5,150,105,0.15);border-radius:5px;padding:2px 7px;font-size:12px;font-weight:700">${esc(w)}</span>`).join('')}
+          ${entry.supportWords.map(w => `<span style="background:color-mix(in srgb, var(--accent) 15%, transparent);border-radius:5px;padding:2px 7px;font-size:12px;font-weight:700">${esc(w)}</span>`).join('')}
         </div>
       </div>` : '';
 
     root.innerHTML = `
-      <div style="display:flex;flex-direction:column;height:100%;background:linear-gradient(135deg,#ecfdf5,#eff6ff)">
+      <div style="display:flex;flex-direction:column;height:100%">
         <div class="svk-header">
           <button class="svk-btn-back" id="svk-book-back">Tillbaka</button>
           <span class="svk-title">✨📖✨</span>
@@ -1156,7 +1141,7 @@ const NpSvenska = (() => {
           <div class="svk-book-view">
             <div style="text-align:center;font-size:22px;margin-bottom:6px">✨📖✨</div>
             <div class="svk-book-title">${esc(entry.title)}</div>
-            <div style="font-size:17px;line-height:1.8;color:#1e293b">${esc(entry.text).replace(/\n/g,'<br>')}</div>
+            <div style="font-size:17px;line-height:1.8;color:var(--ink)">${esc(entry.text).replace(/\n/g,'<br>')}</div>
             ${supportBlock}
             <div class="svk-book-author">Skriven av ${esc(entry.authorName)}, ${formatDate(entry.date)}</div>
             <div class="svk-book-wordcount">${entry.wordCount} ord</div>
@@ -1189,8 +1174,8 @@ const NpSvenska = (() => {
         </div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;text-align:center">
           <div style="font-size:3rem">📚</div>
-          <div style="font-family:var(--font-heading);font-size:20px;color:#059669">Din bok är tom än</div>
-          <div style="font-size:14px;color:#64748b">Gör ett prov eller skriv en text för att se dem här!</div>
+          <div style="font-family:var(--font-head);font-size:20px;color:var(--deep)">Din bok är tom än</div>
+          <div style="font-size:14px;color:var(--ink-soft)">Gör ett prov eller skriv en text för att se dem här!</div>
           <button class="svk-btn" onclick="NpSvenska.showSelectScreen()">Börja öva 🚀</button>
         </div>`;
       return;
@@ -1200,7 +1185,7 @@ const NpSvenska = (() => {
       <div class="svk-header">
         <button class="svk-btn-back" onclick="NpSvenska.showSelectScreen()">Tillbaka</button>
         <span class="svk-title">📚 Min svenska-bok</span>
-        <div style="font-size:12px;color:#64748b;font-weight:700">${log.length} poster</div>
+        <div class="num" style="font-size:12px;color:var(--ink-soft);font-weight:700">${log.length} poster</div>
       </div>
       <div class="svk-log-list" style="flex:1;overflow-y:auto">
         ${log.map((entry, i) => renderLogItem(entry, i)).join('')}
@@ -1243,8 +1228,8 @@ const NpSvenska = (() => {
         <div style="flex:1;overflow-y:auto;padding:12px">
           <div style="text-align:center;padding:12px 0">
             <div style="font-size:2rem">📝</div>
-            <div style="font-family:var(--font-heading);font-size:24px;color:#059669">${entry.score} av ${entry.total}</div>
-            <div style="font-size:13px;color:#64748b">${formatDate(entry.date)}</div>
+            <div class="num" style="font-family:var(--font-head);font-size:24px;color:var(--deep)">${entry.score} av ${entry.total}</div>
+            <div style="font-size:13px;color:var(--ink-soft)">${formatDate(entry.date)}</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
             ${(entry.answers || []).map(a => `

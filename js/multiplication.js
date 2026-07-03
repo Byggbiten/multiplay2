@@ -1,7 +1,8 @@
 /* ============================================================
    MULTIPLAY – Gångertabellen
    Modulen renderar sig i #mult-root.
-   Följer DESIGN.md: lila/orange, magisk känsla.
+   Design: nya komponentsystemet (docs/DESIGN-SYSTEM.md).
+   Lila magi-temat sätts automatiskt via #mult-root i app.css.
    ============================================================ */
 'use strict';
 
@@ -14,6 +15,95 @@ const MultGame = (() => {
   let answerMode   = 'choice';   // 'choice' | 'free'
   let timer        = { id: null, seconds: 0, active: false };
   let sessionStart = null;
+
+  /* ── Modulspecifik CSS (uppstallning-mönstret) ─────── */
+  const MULT_CSS = `
+    /* Layout-hjälpare */
+    #mult-root .mult-gap{gap:12px}
+    #mult-root .mult-spacer{width:52px;flex:0 0 auto}
+    #mult-root .mult-hdr-actions{display:flex;gap:8px;flex:0 0 auto}
+    #mult-root .mult-hdr-slot{min-width:52px;display:flex;justify-content:flex-end;flex:0 0 auto}
+    #mult-root .mult-timer-slot{display:flex;justify-content:center;margin-bottom:8px}
+    #mult-root .mult-timer-slot:empty{display:none;margin:0}
+    #mult-root .mult-sub{text-align:center;color:var(--ink-soft);font-weight:700;font-size:14px}
+    #mult-root .mult-stack{display:flex;flex-direction:column;gap:10px}
+
+    /* Hub: tvåkolumn ≥700px (kontroller vänster / tabellrutnät höger) */
+    #mult-root .hub-cols{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+    #mult-root .hub-side{display:flex;flex-direction:column;gap:12px}
+    #mult-root .tables-panel{flex:1;min-height:0;display:flex;flex-direction:column}
+    #mult-root .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;flex:1;align-content:space-evenly}
+    #mult-root .mult-tbar{display:block;height:5px;border-radius:999px;background:rgba(93,63,158,.12);margin-top:7px;overflow:hidden}
+    #mult-root .mult-tbar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+    #mult-root .range-lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+    #mult-root .range-lab b{font-size:15px;color:var(--deep)}
+    #mult-root .range-lab .num{font-family:var(--font-head);font-weight:700;font-size:19px;color:var(--accent)}
+    #mult-root .range-row{display:flex;gap:10px;align-items:center}
+    #mult-root .range-row label{font-size:11px;font-weight:800;color:var(--ink-soft);text-transform:uppercase}
+    #mult-root .timer-row{display:flex;align-items:center;gap:10px;padding:12px 14px}
+    #mult-root .timer-row>b{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--deep)}
+    #mult-root .timer-row>b svg{width:19px;height:19px;color:var(--accent)}
+    #mult-root .timer-row .chips{flex:1;min-width:0;flex-wrap:wrap}
+    #mult-root .timer-row .chip{min-height:38px;padding:7px 12px;font-size:13px;white-space:nowrap}
+    @media (min-width:700px){
+      #mult-root .hub-cols{display:grid;grid-template-columns:minmax(260px,320px) 1fr;align-items:stretch}
+      #mult-root .tgrid .table-card{min-height:118px}
+    }
+    @media (max-width:430px){
+      #mult-root .tgrid{grid-template-columns:repeat(4,1fr);gap:8px}
+      #mult-root .timer-row{padding:10px 12px;gap:8px}
+      #mult-root .timer-row .chip{min-height:34px;padding:6px 9px;font-size:12px}
+    }
+
+    /* Inställningsvy */
+    #mult-root .mult-setup{gap:14px;max-width:520px;margin:0 auto;width:100%}
+
+    /* Lär dig-vy */
+    #mult-root .mult-learn{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex:1;min-height:0;align-content:space-evenly}
+    #mult-root .mult-learn .card{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
+    #mult-root .ml-q{font-size:17px;font-weight:800;color:var(--ink-soft)}
+    #mult-root .ml-a{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--deep)}
+
+    /* Quiz-vyer */
+    #mult-root .mq-plabel{display:flex;justify-content:space-between;font-weight:900;font-size:14px;color:var(--deep);margin-bottom:6px}
+    #mult-root .mq-main{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px;width:100%;max-width:620px;margin:0 auto}
+    #mult-root .mq-qcard{text-align:center;padding:22px 18px}
+    #mult-root .mq-task{font-family:var(--font-head);font-weight:800;font-size:clamp(40px,8vw,68px);line-height:1;color:var(--deep);letter-spacing:2px}
+    #mult-root .mq-x{color:var(--accent-2);margin:0 10px}
+    #mult-root .mq-eq{color:var(--accent);opacity:.85}
+    #mult-root .mq-ans{font-family:var(--font-head);font-weight:800;font-size:clamp(34px,7vw,56px);color:var(--accent);margin-top:8px}
+    #mult-root .mq-hint{color:var(--ink-soft);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+    #mult-root .mq-answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+    #mult-root .mult-free{width:100%;display:flex;flex-direction:column;gap:14px;align-items:center}
+    #mult-root .mult-free .numpad{width:100%;max-width:340px}
+    #mult-root .mult-free-display{width:100%;max-width:340px;height:68px;display:flex;align-items:center;justify-content:center;border-radius:20px;border:3px solid var(--accent-light);background:rgba(255,255,255,.92);font-family:var(--font-head);font-size:2rem;font-weight:800;color:var(--deep);transition:all .15s}
+
+    /* Statistik & logg */
+    #mult-root .mult-stats-cols{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+    #mult-root .mult-stats-side{display:flex;flex-direction:column;gap:10px;min-height:0}
+    @media (min-width:700px){#mult-root .mult-stats-cols{display:grid;grid-template-columns:1fr minmax(280px,340px);align-items:stretch}}
+    #mult-root .mult-scroll{overflow-y:auto;min-height:0}
+    #mult-root .mult-hist-card{flex:1;min-height:0;display:flex;flex-direction:column}
+    #mult-root .mult-good{color:#16a34a}
+    #mult-root .mult-mid{color:#d97706}
+    #mult-root .mult-bad{color:#dc2626}
+    #mult-root .mult-new{display:inline-block;background:var(--accent-2);color:#fff;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800;vertical-align:middle}
+    #mult-root .mult-focus-card{background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-color:#fca5a5}
+    #mult-root .mult-focus-title{color:#be123c}
+    #mult-root .mult-static{cursor:default}
+    #mult-root .mult-left{text-align:left;margin-bottom:10px}
+    #mult-root .mult-empty{align-items:center;gap:14px}
+    #mult-root .mult-empty-emoji{font-size:4rem}
+
+    /* Modal-innehåll (modalen ligger på body – därför oprefixat) */
+    .mult-modal-emoji{font-size:3.2rem;text-align:center;margin-bottom:8px}
+    .mult-modal-txt{color:var(--ink-soft);font-weight:700;text-align:center;margin:6px 0 16px}
+    .mult-modal-stack{display:flex;flex-direction:column;gap:10px}
+    .mult-modal-row{display:flex;gap:10px}
+    .mult-modal-row .btn{flex:1}
+  `;
+
+  const baseStyle = () => `<style id="mult-css">${MULT_CSS}</style>`;
 
   /* ── Statistik-nycklar ─────────────────────────────── */
   const STATS_KEY = id => `mult_stats_${id}`;
@@ -76,78 +166,107 @@ const MultGame = (() => {
     renderMain();
   }
 
+  /* ── Delade markup-snuttar ─────────────────────────── */
+  function modeSegHTML() {
+    return `
+      <div class="segmented">
+        <span class="seg-ind"></span>
+        <button id="mode-choice" class="${answerMode === 'choice' ? 'chip-active' : ''}" onclick="MultGame.setMode('choice')">Flerval</button>
+        <button id="mode-free" class="${answerMode === 'free' ? 'chip-active' : ''}" onclick="MultGame.setMode('free')">Fri inmatning</button>
+      </div>
+    `;
+  }
+
+  function tableCardHTML(t) {
+    const p = getTablePercent(t);
+    const medal = MP.getMedal(p);
+    return `
+      <div class="table-card" onclick="MultGame.selectTable(${t})" tabindex="0" role="button" aria-label="${t}:ans tabell">
+        ${medal ? `<div class="table-medal">${medal}</div>` : ''}
+        <div class="table-number num">${t}:an</div>
+        <div class="table-percent num">${p !== null ? p + '%' : 'Ej tränad'}</div>
+        <span class="mult-tbar"><i style="width:${p ?? 0}%"></i></span>
+      </div>
+    `;
+  }
+
   /* ══════════════════════════════════════════════════════
-     HUVUD-VY
+     HUVUD-VY (hub)
   ══════════════════════════════════════════════════════ */
   function renderMain() {
     const root = document.getElementById('mult-root');
-    const pct  = getTablePercent;
 
     root.innerHTML = `
+      ${baseStyle()}
+      <div class="floaties"><span style="top:5%;right:8%">✨</span><span style="bottom:10%;left:4%;animation-delay:2s">🔮</span></div>
       <div class="app-header">
         <button class="btn-back" onclick="App.goBackToGameSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">✖️ Gångertabellen</span>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost btn-sm" onclick="MultGame.showStats()">📊</button>
-          <button class="btn btn-ghost btn-sm" onclick="MultGame.showLog()">📝</button>
+        <span class="header-title">Gångertabellen</span>
+        <div class="mult-hdr-actions">
+          <button class="icon-btn" aria-label="Statistik" onclick="MultGame.showStats()">
+            <svg class="icn"><use href="#i-stats"/></svg>
+          </button>
+          <button class="icon-btn" aria-label="Sessionslogg" onclick="MultGame.showLog()">
+            <svg class="icn"><use href="#i-history"/></svg>
+          </button>
         </div>
       </div>
 
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
-
+      <div class="wrap">
         <!-- TIMER-SEKTION -->
-        <div id="mult-timer-display"></div>
+        <div id="mult-timer-display" class="mult-timer-slot"></div>
 
-        <!-- RANGE SELECTOR -->
-        <div class="card-glass" style="padding:var(--space-4)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
-            <span style="font-weight:800;color:var(--mult-primary)">🎯 Talintervall</span>
-            <span id="range-label" style="font-weight:900;font-size:var(--text-lg);color:var(--mult-primary)">1 – 12</span>
-          </div>
-          <div style="display:flex;gap:var(--space-3);align-items:center">
-            <span style="font-size:var(--text-xs);font-weight:800;color:var(--color-text-muted)">Min</span>
-            <input type="range" class="range-input" id="range-min" min="1" max="12" value="1" oninput="MultGame.updateRange()">
-            <span style="font-size:var(--text-xs);font-weight:800;color:var(--color-text-muted)">Max</span>
-            <input type="range" class="range-input" id="range-max" min="1" max="12" value="12" oninput="MultGame.updateRange()">
-          </div>
-        </div>
+        <div class="hub-cols">
+          <div class="hub-side">
+            <!-- SVARSLÄGE -->
+            ${modeSegHTML()}
 
-        <!-- TIMER-KNAPPAR -->
-        <div class="card-glass" style="padding:var(--space-4)">
-          <div style="font-weight:800;color:var(--mult-primary);margin-bottom:var(--space-3)">⏰ Träna med timer</div>
-          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
-            ${[10,15,20,30].map(m => `
-              <button class="btn btn-ghost btn-sm" onclick="MultGame.startTimer(${m})">${m} min</button>
-            `).join('')}
-            <button class="btn btn-danger btn-sm" id="btn-stop-timer" style="display:none" onclick="MultGame.stopTimer()">⏹ Stoppa</button>
-          </div>
-        </div>
-
-        <!-- EGET MATTEPROV -->
-        <button class="btn btn-accent btn-lg w-full" onclick="MultGame.showCustomTest()">
-          🎲 Gör ett eget Matteprov →
-        </button>
-
-        <!-- TABELL-GRID -->
-        <div class="section-title">Välj en tabell 👇</div>
-        <div class="grid-3" style="gap:var(--space-3)">
-          ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => {
-            const p = pct(t);
-            const medal = MP.getMedal(p);
-            return `
-              <div class="table-card" onclick="MultGame.selectTable(${t})" tabindex="0" role="button" aria-label="${t}:ans tabell">
-                ${medal ? `<div class="table-medal">${medal}</div>` : ''}
-                <div class="table-number">${t}:an</div>
-                ${p !== null ? `<div class="table-percent">${p}%</div>` : '<div class="table-percent">Ej tränad</div>'}
+            <!-- RANGE SELECTOR -->
+            <div class="card">
+              <div class="range-lab"><b>Talintervall</b><span class="num" id="range-label">1 – 12</span></div>
+              <div class="range-row">
+                <label for="range-min">Min</label>
+                <input type="range" class="range-input" id="range-min" min="1" max="12" value="1" oninput="MultGame.updateRange()">
+                <label for="range-max">Max</label>
+                <input type="range" class="range-input" id="range-max" min="1" max="12" value="12" oninput="MultGame.updateRange()">
               </div>
-            `;
-          }).join('')}
-        </div>
+            </div>
 
+            <!-- TIMER-KNAPPAR (EN rad) -->
+            <div class="card timer-row">
+              <b><svg class="icn"><use href="#i-timer"/></svg>Timer</b>
+              <div class="chips">
+                ${[10,15,20,30].map(m => `
+                  <button class="chip" onclick="MultGame.startTimer(${m})">${m} min</button>
+                `).join('')}
+                <button class="chip" id="btn-stop-timer" style="display:none" onclick="MultGame.stopTimer()">Stoppa</button>
+              </div>
+            </div>
+
+            <!-- EGET MATTEPROV -->
+            <button class="btn btn-accent btn-lg btn-block" onclick="MultGame.showCustomTest()">
+              <svg class="icn" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.2" fill="currentColor" stroke="none"/></svg>
+              Gör ett eget Matteprov
+            </button>
+          </div>
+
+          <!-- TABELL-GRID -->
+          <div class="card tables-panel">
+            <div class="panel-title">
+              <svg class="icn" viewBox="0 0 24 24" style="color:var(--accent)"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              Välj en tabell att träna på
+            </div>
+            <div class="tgrid">
+              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => tableCardHTML(t)).join('')}
+            </div>
+          </div>
+        </div>
       </div>
     `;
 
     updateTimerDisplay();
+    updateModeButtons();
+    requestAnimationFrame(updateModeButtons);
   }
 
   /* ── Timer ─────────────────────────────────────────── */
@@ -186,7 +305,7 @@ const MultGame = (() => {
     const s   = timer.seconds % 60;
     const str = `${m}:${String(s).padStart(2,'0')}`;
     const cls = timer.seconds <= 60 ? 'timer-danger' : timer.seconds <= 180 ? 'timer-warning' : '';
-    el.innerHTML = `<div class="timer-bar ${cls}">⏰ ${str}</div>`;
+    el.innerHTML = `<span class="timer-pill timer-bar num ${cls}"><svg class="icn"><use href="#i-timer"/></svg>${str}</span>`;
   }
 
   function showTimerDone(minutes) {
@@ -195,25 +314,19 @@ const MultGame = (() => {
     const elapsed = sessionStart ? Math.round((Date.now() - sessionStart) / 60000) : minutes;
     addSessionLog({ type: 'timer', minutes: elapsed });
     showModal(`
-      <div style="text-align:center">
-        <div style="font-size:4rem;margin-bottom:var(--space-4)">🎉</div>
-        <h3 style="color:var(--mult-primary);font-family:var(--font-heading);font-size:var(--text-2xl);margin-bottom:var(--space-2)">
-          Fantastisk träning!
-        </h3>
-        <p style="color:var(--color-text-muted);margin-bottom:var(--space-6)">
-          Du tränade i ${elapsed} minut${elapsed !== 1 ? 'er' : ''}! ⭐
-        </p>
-        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
-          <button class="btn btn-primary w-full" onclick="MultGame.hideModal();MultGame.startTimer(${minutes})">
-            ⏰ Starta ny timer (${minutes} min)
-          </button>
-          <button class="btn btn-ghost w-full" onclick="MultGame.hideModal();MultGame.showStats()">
-            📊 Se resultat
-          </button>
-          <button class="btn btn-ghost w-full" onclick="MultGame.hideModal()">
-            Fortsätt träna fritt
-          </button>
-        </div>
+      <div class="mult-modal-emoji">🎉</div>
+      <h3 class="modal-title">Fantastisk träning!</h3>
+      <p class="mult-modal-txt">Du tränade i ${elapsed} minut${elapsed !== 1 ? 'er' : ''}! ⭐</p>
+      <div class="mult-modal-stack">
+        <button class="btn btn-primary btn-block" onclick="MultGame.hideModal();MultGame.startTimer(${minutes})">
+          Starta ny timer (${minutes} min)
+        </button>
+        <button class="btn btn-secondary btn-block" onclick="MultGame.hideModal();MultGame.showStats()">
+          Se resultat
+        </button>
+        <button class="btn btn-ghost btn-block" onclick="MultGame.hideModal()">
+          Fortsätt träna fritt
+        </button>
       </div>
     `);
   }
@@ -235,51 +348,40 @@ const MultGame = (() => {
     App.Sound.play('click');
     const root = document.getElementById('mult-root');
     root.innerHTML = `
+      ${baseStyle()}
       <div class="app-header">
         <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">✖️ ${table}:ans tabell</span>
-        <div style="width:64px"></div>
+        <span class="header-title">${table}:ans tabell</span>
+        <span class="mult-spacer"></span>
       </div>
-      <div style="padding:var(--space-6) var(--space-4);display:flex;flex-direction:column;gap:var(--space-5);align-items:center">
-        <div style="font-size:4rem;animation:bounce-in 0.5s var(--ease-bounce)">✖️</div>
-        <h2 style="font-family:var(--font-heading);color:var(--mult-primary);font-size:var(--text-3xl)">
-          ${table}:ans tabell
-        </h2>
-        <p style="color:var(--color-text-muted);text-align:center;font-size:var(--text-sm)">
-          Tränar: ${table} × ${rangeMin}–${rangeMax}
-        </p>
+      <div class="wrap vcenter mult-setup">
+        <p class="mult-sub num">Tränar: ${table} × ${rangeMin}–${rangeMax}</p>
 
         <!-- Svarsläge -->
-        <div class="card-glass w-full" style="padding:var(--space-4)">
-          <div style="font-weight:800;margin-bottom:var(--space-3);color:var(--mult-primary)">Steg 1 – Välj svarsläge</div>
-          <div style="display:flex;gap:var(--space-3)">
-            <button id="mode-choice" class="btn btn-primary w-full" onclick="MultGame.setMode('choice')">
-              📝 Flerval
-            </button>
-            <button id="mode-free" class="btn btn-ghost w-full" onclick="MultGame.setMode('free')">
-              ⌨️ Fri inmatning
-            </button>
-          </div>
+        <div class="card">
+          <div class="card-title">Steg 1 – Välj svarsläge</div>
+          ${modeSegHTML()}
         </div>
 
         <!-- Aktivitet -->
-        <div class="card-glass w-full" style="padding:var(--space-4)">
-          <div style="font-weight:800;margin-bottom:var(--space-3);color:var(--mult-primary)">Steg 2 – Välj aktivitet</div>
-          <div style="display:flex;flex-direction:column;gap:var(--space-3)">
-            <button class="btn btn-ghost w-full" onclick="MultGame.startLearn(${table})">
-              📖 Lär dig först
+        <div class="card">
+          <div class="card-title">Steg 2 – Välj aktivitet</div>
+          <div class="mult-stack">
+            <button class="btn btn-secondary btn-block" onclick="MultGame.startLearn(${table})">
+              Lär dig först
             </button>
-            <button class="btn btn-primary w-full" onclick="MultGame.startInteractive(${table})">
-              🎯 Interaktiv träning
+            <button class="btn btn-primary btn-block" onclick="MultGame.startInteractive(${table})">
+              Interaktiv träning
             </button>
-            <button class="btn btn-accent w-full" onclick="MultGame.startTest(${table})">
-              🚀 Börja testa direkt
+            <button class="btn btn-accent btn-block" onclick="MultGame.startTest(${table})">
+              Börja testa direkt
             </button>
           </div>
         </div>
       </div>
     `;
     updateModeButtons();
+    requestAnimationFrame(updateModeButtons);
   }
 
   function setMode(mode) {
@@ -292,12 +394,14 @@ const MultGame = (() => {
     const ch = document.getElementById('mode-choice');
     const fr = document.getElementById('mode-free');
     if (!ch || !fr) return;
-    if (answerMode === 'choice') {
-      ch.className = 'btn btn-primary w-full';
-      fr.className = 'btn btn-ghost w-full';
-    } else {
-      ch.className = 'btn btn-ghost w-full';
-      fr.className = 'btn btn-primary w-full';
+    const act = answerMode === 'choice' ? ch : fr;
+    ch.classList.toggle('chip-active', act === ch);
+    fr.classList.toggle('chip-active', act === fr);
+    const seg = ch.closest('.segmented');
+    const ind = seg ? seg.querySelector('.seg-ind') : null;
+    if (ind) {
+      ind.style.left  = act.offsetLeft + 'px';
+      ind.style.width = act.offsetWidth + 'px';
     }
   }
 
@@ -310,27 +414,26 @@ const MultGame = (() => {
     const rows = [];
     for (let m = rangeMin; m <= rangeMax; m++) {
       rows.push(`
-        <div class="card animate-pop-in" style="
-          display:flex;justify-content:space-between;align-items:center;
-          padding:var(--space-4);background:rgba(255,255,255,0.9);
-          animation-delay:${(m-rangeMin)*0.06}s
-        ">
-          <span style="font-size:var(--text-xl);font-weight:700;color:var(--color-text-muted)">${table} × ${m}</span>
-          <span style="font-size:var(--text-3xl);font-weight:900;color:var(--mult-primary)">=</span>
-          <span style="font-size:var(--text-3xl);font-weight:900;color:var(--mult-primary)">${table * m}</span>
+        <div class="card animate-pop-in" style="animation-delay:${(m-rangeMin)*0.06}s">
+          <span class="ml-q num">${table} × ${m}</span>
+          <span class="ml-a num">= ${table * m}</span>
         </div>
       `);
     }
     root.innerHTML = `
+      ${baseStyle()}
       <div class="app-header">
         <button class="btn-back" onclick="MultGame.selectTable(${table})">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">📖 ${table}:an – Lär dig</span>
-        <div style="width:64px"></div>
+        <span class="header-title">${table}:an – Lär dig</span>
+        <span class="mult-spacer"></span>
       </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)">
-        ${rows.join('')}
-        <button class="btn btn-primary btn-lg w-full mt-4" onclick="MultGame.startInteractive(${table})">
-          🎯 Träna nu! →
+      <div class="wrap mult-gap">
+        <div class="mult-learn">
+          ${rows.join('')}
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" onclick="MultGame.startInteractive(${table})">
+          Träna nu!
+          <svg class="icn"><use href="#i-play"/></svg>
         </button>
       </div>
     `;
@@ -365,62 +468,65 @@ const MultGame = (() => {
       const prog     = quiz.progress();
       const progress = prog.total > 0 ? Math.min(1, prog.answered / prog.total) : 0;
 
+      const headerHTML = `
+        <div class="app-header">
+          <button class="btn-back" onclick="MultGame.selectTable(${table})">Avbryt</button>
+          <span class="header-title">${table}:ans tabell</span>
+          <span class="mult-hdr-slot" id="mult-timer-display"></span>
+        </div>
+      `;
+      const progressHTML = `
+        <div class="mq-plabel num"><span>Framsteg</span><span>${prog.answered}/${prog.total}</span></div>
+        <div class="progress-bar"><i style="width:${Math.round(progress*100)}%"></i></div>
+      `;
+
       if (phase === 'show') {
         // Visa svaret först
         root.innerHTML = `
-          <div class="app-header">
-            <button class="btn-back" onclick="MultGame.selectTable(${table})">Avbryt</button>
-            <span class="header-title" style="color:var(--mult-primary)">🎯 ${table}:an</span>
-            <div style="width:64px"></div>
-          </div>
-          <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-            <div class="progress-label">
-              <span>Framsteg</span><span>${prog.answered}/${prog.total}</span>
+          ${baseStyle()}
+          ${headerHTML}
+          <div class="wrap">
+            ${progressHTML}
+            <div class="mq-main">
+              <div class="card mq-qcard">
+                <div class="mq-hint">Kom ihåg detta! 📚</div>
+                <div class="mq-task num">${table}<span class="mq-x">×</span>${mult}</div>
+                <div class="mq-ans num">= ${ans}</div>
+              </div>
+              <button class="btn btn-primary btn-lg btn-block" onclick="MultGame._trainingNext()">
+                Jag förstår!
+                <svg class="icn"><use href="#i-play"/></svg>
+              </button>
             </div>
-            <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
-          </div>
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-6) var(--space-4);gap:var(--space-6)">
-            <div style="font-size:var(--text-sm);font-weight:800;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em">Kom ihåg detta! 📚</div>
-            <div style="text-align:center;animation:bounce-in 0.4s var(--ease-bounce)">
-              <div style="font-size:var(--text-5xl);font-weight:900;color:var(--mult-primary)">${table} × ${mult}</div>
-              <div style="font-size:4rem;color:var(--mult-secondary);font-weight:900;margin-top:var(--space-3)">= ${ans}</div>
-            </div>
-            <button class="btn btn-primary btn-lg w-full" onclick="MultGame._trainingNext()">
-              Jag förstår! →
-            </button>
           </div>
         `;
+        updateTimerDisplay();
         MultGame._trainingNext = () => { phase = 'ask'; renderQ(); };
       } else {
         // Fråga
         root.innerHTML = `
-          <div class="app-header">
-            <button class="btn-back" onclick="MultGame.selectTable(${table})">Avbryt</button>
-            <span class="header-title" style="color:var(--mult-primary)">🎯 ${table}:an</span>
-            <div style="width:64px"></div>
-          </div>
-          <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-            <div class="progress-label">
-              <span>Framsteg</span><span>${prog.answered}/${prog.total}</span>
+          ${baseStyle()}
+          ${headerHTML}
+          <div class="wrap">
+            ${progressHTML}
+            <div class="mq-main">
+              <div class="card mq-qcard">
+                <div class="mq-task num">${table}<span class="mq-x">×</span>${mult}<span class="mq-eq">&nbsp;= ?</span></div>
+              </div>
+              ${buildAnswerUI(table, mult, ans, (wasCorrect) => {
+                recordAnswer(table, mult, wasCorrect);
+                quiz.answer(wasCorrect);
+                if (quiz.isDone()) {
+                  showTrainingResult(table, quiz.stats());
+                  return;
+                }
+                if (wasCorrect && showAnswer) { phase = 'show'; }
+                renderQ();
+              })}
             </div>
-            <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
-          </div>
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-4);gap:var(--space-5)">
-            <div style="text-align:center;animation:bounce-in 0.4s var(--ease-bounce)">
-              <div style="font-size:var(--text-4xl);font-weight:900;color:var(--mult-primary)">${table} × ${mult} = ?</div>
-            </div>
-            ${buildAnswerUI(table, mult, ans, (wasCorrect) => {
-              recordAnswer(table, mult, wasCorrect);
-              quiz.answer(wasCorrect);
-              if (quiz.isDone()) {
-                showTrainingResult(table, quiz.stats());
-                return;
-              }
-              if (wasCorrect && showAnswer) { phase = 'show'; }
-              renderQ();
-            })}
           </div>
         `;
+        updateTimerDisplay();
         initFreeInput(ans);
       }
     }
@@ -453,24 +559,26 @@ const MultGame = (() => {
     });
 
     const { emoji, msg } = MP.feedbackMessage(pct);
-    const cls = RESULT_CLS[MP.resultTier(pct)];
+    const cls   = RESULT_CLS[MP.resultTier(pct)];
+    const medal = MP.getMedal(pct);
 
     const root = document.getElementById('mult-root');
     root.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center;padding:var(--space-8) var(--space-4)">
-        <div class="result-display ${cls} w-full">
-          <div style="font-size:4rem;margin-bottom:var(--space-4);animation:sparkle 1.5s infinite">${emoji}</div>
-          <div class="result-score">${pct}%</div>
-          <div class="result-message">${msg}</div>
-          <div class="result-sub">${correct} rätt av ${total}</div>
-          ${MP.getMedal(pct) ? `<div style="font-size:3rem;margin-top:var(--space-4);animation:sparkle 1.5s infinite">${MP.getMedal(pct)}</div>` : ''}
+      ${baseStyle()}
+      <div class="wrap vcenter">
+        <div class="result-hero ${cls}">
+          <div class="result-pct num">${pct}%</div>
+          <div><span class="result-medal">${medal || emoji}</span></div>
+          <p class="result-msg">${msg}</p>
+          <p class="result-note num">${correct} rätt av ${total}</p>
         </div>
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%;margin-top:var(--space-8)">
-          <button class="btn btn-primary btn-lg w-full" onclick="MultGame.startTest(${table})">
-            🔄 Testa igen
+        <div class="result-actions">
+          <button class="btn btn-primary btn-lg" onclick="MultGame.startTest(${table})">
+            <svg class="icn"><use href="#i-refresh"/></svg>
+            Testa igen
           </button>
-          <button class="btn btn-ghost w-full" onclick="MultGame.renderMain()">
-            🏠 Tillbaka till menyn
+          <button class="btn btn-ghost btn-lg" onclick="MultGame.renderMain()">
+            Tillbaka till menyn
           </button>
         </div>
       </div>
@@ -486,39 +594,35 @@ const MultGame = (() => {
 
     const root = document.getElementById('mult-root');
     root.innerHTML = `
+      ${baseStyle()}
       <div class="app-header">
         <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">🎲 Eget Matteprov</span>
-        <div style="width:64px"></div>
+        <span class="header-title">Eget Matteprov</span>
+        <span class="mult-spacer"></span>
       </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-5)">
-        <p style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;text-align:center">
-          Välj 2–3 tabeller att blanda 🎲
-        </p>
-        <div class="grid-3" style="gap:var(--space-2)" id="custom-grid">
+      <div class="wrap mult-gap">
+        <p class="mult-sub">Välj 2–3 tabeller att blanda 🎲</p>
+        <div class="tgrid" id="custom-grid">
           ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => `
             <div class="table-card" id="ct-${t}" onclick="MultGame._toggleCustomTable(${t})" tabindex="0" role="checkbox">
-              <div class="table-number">${t}:an</div>
+              <div class="table-number num">${t}:an</div>
             </div>
           `).join('')}
         </div>
 
         <!-- Range -->
-        <div class="card-glass" style="padding:var(--space-4)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
-            <span style="font-weight:800;color:var(--mult-primary)">Talintervall</span>
-            <span id="custom-range-label" style="font-weight:900;color:var(--mult-primary)">${rangeMin} – ${rangeMax}</span>
-          </div>
-          <div style="display:flex;gap:var(--space-3);align-items:center">
-            <input type="range" class="range-input" id="custom-range-min" min="1" max="12" value="${rangeMin}" oninput="MultGame._updateCustomRange()">
-            <input type="range" class="range-input" id="custom-range-max" min="1" max="12" value="${rangeMax}" oninput="MultGame._updateCustomRange()">
+        <div class="card">
+          <div class="range-lab"><b>Talintervall</b><span class="num" id="custom-range-label">${rangeMin} – ${rangeMax}</span></div>
+          <div class="range-row">
+            <input type="range" class="range-input" id="custom-range-min" min="1" max="12" value="${rangeMin}" oninput="MultGame._updateCustomRange()" aria-label="Från">
+            <input type="range" class="range-input" id="custom-range-max" min="1" max="12" value="${rangeMax}" oninput="MultGame._updateCustomRange()" aria-label="Till">
           </div>
         </div>
 
-        <button class="btn btn-accent btn-lg w-full" id="btn-start-custom" disabled onclick="MultGame._startCustom()">
-          🚀 Starta ditt matteprov!
+        <button class="btn btn-accent btn-lg btn-block" id="btn-start-custom" disabled onclick="MultGame._startCustom()">
+          Starta ditt matteprov!
         </button>
-        <p id="custom-hint" style="text-align:center;font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700">
+        <p class="mult-sub" id="custom-hint">
           Välj minst 2 tabeller
         </p>
       </div>
@@ -576,31 +680,31 @@ const MultGame = (() => {
       const progress = prog.total > 0 ? Math.min(1, prog.answered / prog.total) : 0;
 
       root.innerHTML = `
+        ${baseStyle()}
         <div class="app-header">
           <button class="btn-back" onclick="MultGame.showCustomTest()">Avbryt</button>
-          <span class="header-title" style="color:var(--mult-primary)">🎲 Matteprov</span>
-          <div style="width:64px"></div>
+          <span class="header-title">Matteprov</span>
+          <span class="mult-hdr-slot" id="mult-timer-display"></span>
         </div>
-        <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-          <div class="progress-label">
-            <span>${tables.join(', ')}-tabellerna</span><span>${prog.answered}/${prog.total}</span>
+        <div class="wrap">
+          <div class="mq-plabel num"><span>${tables.join(', ')}-tabellerna</span><span>${prog.answered}/${prog.total}</span></div>
+          <div class="progress-bar"><i style="width:${Math.round(progress*100)}%"></i></div>
+          <div class="mq-main">
+            <div class="card mq-qcard">
+              <div class="mq-task num">${q.table}<span class="mq-x">×</span>${q.mult}<span class="mq-eq">&nbsp;= ?</span></div>
+            </div>
+            ${buildAnswerUI(q.table, q.mult, ans, (wasCorrect) => {
+              recordAnswer(q.table, q.mult, wasCorrect);
+              quiz.answer(wasCorrect);
+              if (quiz.isDone()) {
+                showCustomResult(quiz.stats(), tables); return;
+              }
+              renderQ();
+            })}
           </div>
-          <div class="progress-container"><div class="progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-4);gap:var(--space-5)">
-          <div style="text-align:center;animation:bounce-in 0.4s var(--ease-bounce)">
-            <div style="font-size:var(--text-4xl);font-weight:900;color:var(--mult-primary)">${q.table} × ${q.mult} = ?</div>
-          </div>
-          ${buildAnswerUI(q.table, q.mult, ans, (wasCorrect) => {
-            recordAnswer(q.table, q.mult, wasCorrect);
-            quiz.answer(wasCorrect);
-            if (quiz.isDone()) {
-              showCustomResult(quiz.stats(), tables); return;
-            }
-            renderQ();
-          })}
         </div>
       `;
+      updateTimerDisplay();
       initFreeInput(ans);
     }
 
@@ -618,16 +722,20 @@ const MultGame = (() => {
     const cls = RESULT_CLS[MP.resultTier(pct)];
     const root = document.getElementById('mult-root');
     root.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center;padding:var(--space-8) var(--space-4)">
-        <div class="result-display ${cls} w-full">
-          <div style="font-size:4rem;margin-bottom:var(--space-4)">${emoji}</div>
-          <div class="result-score">${pct}%</div>
-          <div class="result-message">${msg}</div>
-          <div class="result-sub">${correct} rätt av ${total} – ${tables.join(', ')}-tabellerna</div>
+      ${baseStyle()}
+      <div class="wrap vcenter">
+        <div class="result-hero ${cls}">
+          <div class="result-pct num">${pct}%</div>
+          <div><span class="result-medal">${emoji}</span></div>
+          <p class="result-msg">${msg}</p>
+          <p class="result-note num">${correct} rätt av ${total} – ${tables.join(', ')}-tabellerna</p>
         </div>
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%;margin-top:var(--space-8)">
-          <button class="btn btn-accent btn-lg w-full" onclick="MultGame.showCustomTest()">🔄 Nytt matteprov</button>
-          <button class="btn btn-ghost w-full" onclick="MultGame.renderMain()">🏠 Tillbaka</button>
+        <div class="result-actions">
+          <button class="btn btn-accent btn-lg" onclick="MultGame.showCustomTest()">
+            <svg class="icn"><use href="#i-refresh"/></svg>
+            Nytt matteprov
+          </button>
+          <button class="btn btn-ghost btn-lg" onclick="MultGame.renderMain()">Tillbaka</button>
         </div>
       </div>
     `;
@@ -651,73 +759,88 @@ const MultGame = (() => {
 
     const root = document.getElementById('mult-root');
     root.innerHTML = `
+      ${baseStyle()}
       <div class="app-header">
         <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">📊 Statistik</span>
-        <div style="width:64px"></div>
+        <span class="header-title">Statistik</span>
+        <span class="mult-spacer"></span>
       </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
+      <div class="wrap">
+        <div class="mult-stats-cols">
 
-        <!-- Tabellöversikt -->
-        <div class="section-title">Alla tabeller</div>
-        <div class="grid-3" style="gap:var(--space-2)">
-          ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => {
-            const p = getTablePercent(t);
-            const medal = MP.getMedal(p);
-            return `
-              <div class="table-card" style="cursor:default">
-                ${medal ? `<div class="table-medal">${medal}</div>` : ''}
-                <div class="table-number">${t}:an</div>
-                <div class="table-percent">${p !== null ? p+'%' : '—'}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-
-        <!-- Svåraste tal -->
-        ${hardest5.length > 0 ? `
-          <div class="section-title">💪 Träna mer på dessa</div>
-          <div style="display:flex;flex-direction:column;gap:var(--space-2)">
-            ${hardest5.map(x => `
-              <div class="stat-row">
-                <span class="stat-label">${x.key.replace('x', ' × ')}</span>
-                <span class="stat-value" style="color:${x.pct<50?'var(--color-error)':x.pct<75?'var(--color-accent)':'var(--color-success)'}">${x.pct}%</span>
-              </div>
-            `).join('')}
+          <!-- Tabellöversikt -->
+          <div class="card tables-panel">
+            <div class="panel-title">
+              <svg class="icn" style="color:var(--accent)"><use href="#i-stats"/></svg>
+              Alla tabeller
+            </div>
+            <div class="tgrid">
+              ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => {
+                const p = getTablePercent(t);
+                const medal = MP.getMedal(p);
+                return `
+                  <div class="table-card mult-static">
+                    ${medal ? `<div class="table-medal">${medal}</div>` : ''}
+                    <div class="table-number num">${t}:an</div>
+                    <div class="table-percent num">${p !== null ? p+'%' : '—'}</div>
+                    <span class="mult-tbar"><i style="width:${p ?? 0}%"></i></span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
-        ` : ''}
 
-        <!-- Fokuserad träning -->
-        ${problemKeys.length > 0 ? `
-          <div class="card" style="background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-color:#fca5a5">
-            <div style="font-weight:800;color:#be123c;margin-bottom:var(--space-3)">🎯 Fokuserad träning</div>
-            <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-3)">
-              Du har ${problemKeys.length} tal med under 75% – vill du träna på dem?
-            </p>
-            <button class="btn btn-danger w-full" onclick="MultGame.startFocusedTraining()">
-              Träna på problemtalen
+          <div class="mult-stats-side">
+            <!-- Svåraste tal -->
+            ${hardest5.length > 0 ? `
+              <div class="card">
+                <div class="card-title">Träna mer på dessa 💪</div>
+                ${hardest5.map(x => `
+                  <div class="stat-row">
+                    <span class="stat-label num">${x.key.replace('x', ' × ')}</span>
+                    <span class="stat-value num ${x.pct<50?'mult-bad':x.pct<75?'mult-mid':'mult-good'}">${x.pct}%</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <!-- Fokuserad träning -->
+            ${problemKeys.length > 0 ? `
+              <div class="card mult-focus-card">
+                <div class="card-title mult-focus-title">Fokuserad träning</div>
+                <p class="mult-sub mult-left">
+                  Du har ${problemKeys.length} tal med under 75% – vill du träna på dem?
+                </p>
+                <button class="btn btn-danger btn-block" onclick="MultGame.startFocusedTraining()">
+                  Träna på problemtalen
+                </button>
+              </div>
+            ` : ''}
+
+            <!-- Medaljsystem -->
+            <div class="card">
+              <div class="card-title">
+                <svg class="icn" style="color:var(--accent)"><use href="#i-star"/></svg>
+                Medaljsystemet
+              </div>
+              ${[['🥉 Brons','75% rätt'],['🥈 Silver','85% rätt'],['🥇 Guld','95% rätt']].map(([m,r]) => `
+                <div class="stat-row">
+                  <span class="stat-label">${m}</span>
+                  <span class="stat-value num">${r}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Träningshistorik -->
+            ${renderSessionHistory()}
+
+            <!-- Nollställ -->
+            <button class="btn btn-danger btn-sm btn-block" onclick="MultGame.confirmReset()">
+              <svg class="icn"><use href="#i-trash"/></svg>
+              Nollställ all statistik
             </button>
           </div>
-        ` : ''}
-
-        <!-- Medaljsystem -->
-        <div class="section-title">🏆 Medaljsystemet</div>
-        <div class="card">
-          ${[['🥉 Brons','75% rätt'],['🥈 Silver','85% rätt'],['🥇 Guld','95% rätt']].map(([m,r]) => `
-            <div class="stat-row" style="margin-bottom:var(--space-2)">
-              <span style="font-size:var(--text-xl)">${m}</span>
-              <span class="stat-value">${r}</span>
-            </div>
-          `).join('')}
         </div>
-
-        <!-- Träningshistorik -->
-        ${renderSessionHistory()}
-
-        <!-- Nollställ -->
-        <button class="btn btn-danger btn-sm w-full" onclick="MultGame.confirmReset()">
-          ⚙️ Nollställ all statistik
-        </button>
       </div>
     `;
   }
@@ -729,25 +852,32 @@ const MultGame = (() => {
       const d = new Date(e.date);
       const dateStr = d.toLocaleDateString('sv-SE', { day:'numeric', month:'short' });
       const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
+      const icon  = e.type === 'timer' ? '⏰' : e.type === 'custom' ? '🎲' : '✖️';
       const label = e.type === 'timer'
-        ? `⏰ Timerträning`
+        ? 'Timerträning'
         : e.type === 'custom' ? `Eget prov (${e.tables?.join(',')})` : `${e.table}:an`;
       const value = e.type === 'timer'
-        ? `<span class="stat-value" style="color:var(--color-accent)">${e.minutes} min</span>`
-        : `<span class="stat-value" style="color:${e.pct>=80?'var(--color-success)':'var(--color-accent)'}">${e.pct}%</span>`;
+        ? `<span class="history-value num mult-mid">${e.minutes} min</span>`
+        : `<span class="history-value num ${e.pct>=80?'mult-good':'mult-mid'}">${e.pct}%</span>`;
       return `
-        <div class="stat-row">
-          <div>
-            <div style="font-weight:800;font-size:var(--text-sm)">${label} ${i===0?'<span style="color:var(--color-secondary);font-size:var(--text-xs)">NY!</span>':''}</div>
-            <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${dateStr} ${timeStr}</div>
+        <div class="history-item">
+          <span class="history-icon">${icon}</span>
+          <div class="history-main">
+            <div class="history-title">${label} ${i===0?'<span class="mult-new">NY!</span>':''}</div>
+            <div class="history-sub">${dateStr} ${timeStr}</div>
           </div>
           ${value}
         </div>
       `;
     }).join('');
     return `
-      <div class="section-title">📅 Träningshistorik</div>
-      <div style="display:flex;flex-direction:column;gap:var(--space-2)">${entries}</div>
+      <div class="card mult-hist-card">
+        <div class="card-title">
+          <svg class="icn" style="color:var(--accent)"><use href="#i-history"/></svg>
+          Träningshistorik
+        </div>
+        <div class="history-list mult-scroll">${entries}</div>
+      </div>
     `;
   }
 
@@ -769,14 +899,12 @@ const MultGame = (() => {
 
   function confirmReset() {
     showModal(`
-      <div style="text-align:center">
-        <div style="font-size:3rem;margin-bottom:var(--space-4)">⚠️</div>
-        <h3 style="font-family:var(--font-heading);color:var(--color-error-dark);margin-bottom:var(--space-3)">Nollställ statistik?</h3>
-        <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-6)">All träningsdata raderas permanent!</p>
-        <div style="display:flex;gap:var(--space-3)">
-          <button class="btn btn-ghost w-full" onclick="MultGame.hideModal()">Avbryt</button>
-          <button class="btn btn-danger w-full" onclick="MultGame._doReset()">Ja, nollställ</button>
-        </div>
+      <div class="mult-modal-emoji">⚠️</div>
+      <h3 class="modal-title">Nollställ statistik?</h3>
+      <p class="mult-modal-txt">All träningsdata raderas permanent!</p>
+      <div class="mult-modal-row">
+        <button class="btn btn-ghost" onclick="MultGame.hideModal()">Avbryt</button>
+        <button class="btn btn-danger" onclick="MultGame._doReset()">Ja, nollställ</button>
       </div>
     `);
     MultGame._doReset = () => {
@@ -797,14 +925,15 @@ const MultGame = (() => {
 
     if (log.length === 0) {
       root.innerHTML = `
+        ${baseStyle()}
         <div class="app-header">
           <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-          <span class="header-title" style="color:var(--mult-primary)">📝 Sessionslogg</span>
-          <div style="width:64px"></div>
+          <span class="header-title">Sessionslogg</span>
+          <span class="mult-spacer"></span>
         </div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:var(--space-4);padding:var(--space-8)">
-          <div style="font-size:4rem">📭</div>
-          <p style="color:var(--color-text-muted);font-weight:700">Inga sessioner än. Börja träna!</p>
+        <div class="wrap vcenter mult-empty">
+          <div class="mult-empty-emoji">📭</div>
+          <p class="mult-sub">Inga sessioner än. Börja träna!</p>
         </div>
       `;
       return;
@@ -814,39 +943,41 @@ const MultGame = (() => {
       const d = new Date(e.date);
       const dateStr = d.toLocaleDateString('sv-SE', { weekday:'short', day:'numeric', month:'short' });
       const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
+      const icon    = e.type === 'timer' ? '⏰' : e.type === 'custom' ? '🎲' : '✖️';
       const label   = e.type === 'timer'
-        ? `⏰ Timerträning`
+        ? 'Timerträning'
         : e.type === 'custom'
-        ? `🎲 Eget prov (${e.tables?.join(', ')})`
-        : `✖️ ${e.table}:ans tabell`;
+        ? `Eget prov (${e.tables?.join(', ')})`
+        : `${e.table}:ans tabell`;
       const value   = e.type === 'timer'
-        ? `<div style="font-size:var(--text-2xl);font-weight:900;color:var(--color-accent)">${e.minutes} min</div>`
-        : `<div style="font-size:var(--text-2xl);font-weight:900;color:${e.pct>=80?'var(--color-success)':e.pct>=60?'var(--color-accent)':'var(--color-error)'}">${e.pct}%</div>`;
+        ? `<span class="history-value num mult-mid">${e.minutes} min</span>`
+        : `<span class="history-value num ${e.pct>=80?'mult-good':e.pct>=60?'mult-mid':'mult-bad'}">${e.pct}%</span>`;
       const sub     = e.type === 'timer'
         ? `Tidsträning i ${e.minutes} minut${e.minutes !== 1 ? 'er' : ''}`
         : `${e.correct} rätt av ${e.total} | Intervall ${e.rangeMin}–${e.rangeMax}`;
       return `
-        <div class="card" style="padding:var(--space-4)">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
-            <div>
-              <div style="font-weight:800;font-size:var(--text-base)">${label} ${i===0?'<span style="background:var(--color-secondary);color:white;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800">NY!</span>':''}</div>
-              <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${dateStr} kl. ${timeStr}</div>
-            </div>
-            ${value}
+        <div class="history-item">
+          <span class="history-icon">${icon}</span>
+          <div class="history-main">
+            <div class="history-title">${label} ${i===0?'<span class="mult-new">NY!</span>':''}</div>
+            <div class="history-sub">${dateStr} kl. ${timeStr} · ${sub}</div>
           </div>
-          <div style="font-size:var(--text-sm);color:var(--color-text-muted)">${sub}</div>
+          ${value}
         </div>
       `;
     }).join('');
 
     root.innerHTML = `
+      ${baseStyle()}
       <div class="app-header">
         <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-        <span class="header-title" style="color:var(--mult-primary)">📝 Sessionslogg</span>
-        <div style="width:64px"></div>
+        <span class="header-title">Sessionslogg</span>
+        <span class="mult-spacer"></span>
       </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)">
-        ${entries}
+      <div class="wrap">
+        <div class="card mult-hist-card">
+          <div class="history-list mult-scroll">${entries}</div>
+        </div>
       </div>
     `;
   }
@@ -866,9 +997,9 @@ const MultGame = (() => {
     const options = generateOptions(correctAnswer);
     MultGame._choiceCallback = callback;
     return `
-      <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%" id="choice-options">
+      <div class="mq-answers" id="choice-options">
         ${options.map(o => `
-          <button class="answer-option" onclick="MultGame._handleChoice(${o},${correctAnswer})" id="opt-${o}">
+          <button class="answer-option num" onclick="MultGame._handleChoice(${o},${correctAnswer})" id="opt-${o}">
             ${o}
           </button>
         `).join('')}
@@ -898,18 +1029,8 @@ const MultGame = (() => {
     _freeAns = correctAnswer;
     _freeVal = '';
     return `
-      <div style="width:100%;display:flex;flex-direction:column;gap:var(--space-4)">
-        <div id="free-display" style="
-          width:100%;height:72px;
-          display:flex;align-items:center;justify-content:center;
-          border-radius:var(--radius-lg);
-          border:3px solid var(--color-primary-light);
-          background:white;
-          font-size:var(--text-4xl);
-          font-weight:900;
-          color:var(--mult-primary);
-          transition:all 0.15s;
-        ">?</div>
+      <div class="mult-free">
+        <div id="free-display" class="mult-free-display num">?</div>
         <div class="numpad" id="mult-numpad">
           ${[7,8,9,4,5,6,1,2,3].map(n=>`
             <button class="numpad-key" onclick="MultGame._freeInput('${n}')">${n}</button>

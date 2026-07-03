@@ -59,7 +59,7 @@ const NpMatteSkriftlig = (() => {
   ];
   const EMOJI_OBJECTS = ['⚽','🏀','🎾','🏐','🍎','🌟','🐠','🦋','🌸','🎈'];
   const BALL_COLORS   = ['🔵','🔴','🟢','🟡','🟠','🟣'];
-  const STAT_COLORS   = ['#9333ea','#f59e0b','#3b82f6','#f472b6'];
+  const STAT_COLORS   = ['#e85a4f','#f59e0b','#3b82f6','#f472b6'];
 
   const QUESTION_ORDER = [
     'tableChart','pieChart','addText','clock','placeValue',
@@ -85,6 +85,12 @@ const NpMatteSkriftlig = (() => {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const root = () => document.getElementById(ROOT_ID);
 
+  /* Klocklagen: HH:MM färgkodas timme blå / kolon mörk / minut röd */
+  const colorizeClockTimes = str => String(str).replace(/\b(\d{2}):(\d{2})\b/g,
+    '<span class="num" style="color:var(--time-h,#3b82f6);font-weight:900">$1</span>' +
+    '<span style="color:var(--ink)">:</span>' +
+    '<span class="num" style="color:var(--time-m,#ef4444);font-weight:900">$2</span>');
+
   /* ── Init ────────────────────────────────────────────────── */
   function init(p) {
     profile = p;
@@ -94,18 +100,20 @@ const NpMatteSkriftlig = (() => {
   /* ── Start screen ────────────────────────────────────────── */
   function showStartScreen() {
     root().innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back" style="background:#eff6ff;color:#2563eb"
-          onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
-        <span class="header-title" style="color:#2563eb">✏️ Skriftlig del</span>
-        <div style="width:80px"></div>
+      <style id="nps-shell">
+        #np-matte-skriftlig-root { flex:1; display:flex; flex-direction:column; min-height:0; width:100%; }
+      </style>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
+        <span class="header-title">Skriftlig del</span>
+        <span style="width:80px"></span>
       </div>
-      <div style="padding:var(--space-6);display:flex;flex-direction:column;align-items:center;gap:var(--space-5);text-align:center">
-        <div style="font-size:4rem;animation:bounce-in 0.6s var(--ease-bounce)">📝</div>
-        <div style="font-family:var(--font-heading);font-size:var(--text-3xl);color:#2563eb">
+      <div class="wrap vcenter" style="align-items:center;gap:var(--space-5);text-align:center">
+        <div style="font-size:4rem;animation:bounce-in 0.6s var(--spring)">📝</div>
+        <div style="font-family:var(--font-head);font-size:var(--text-3xl);color:var(--deep)">
           Skriftlig del – Åk 3
         </div>
-        <div style="font-size:var(--text-base);color:var(--color-text-muted);font-weight:700;max-width:300px;line-height:1.5">
+        <div style="font-size:var(--text-base);color:var(--ink-soft);font-weight:700;max-width:300px;line-height:1.5">
           20 uppgifter från riktiga nationella prov. Tabeller, diagram, klockan, och mer! 🎯
         </div>
         <div class="player-banner" style="width:100%;max-width:320px">
@@ -115,7 +123,7 @@ const NpMatteSkriftlig = (() => {
             <div class="player-tagline">Redo att visa vad du kan? 💪</div>
           </div>
         </div>
-        <button class="btn btn-primary w-full" style="max-width:320px;background:linear-gradient(135deg,#2563eb,#06b6d4);margin-top:var(--space-2)"
+        <button class="btn btn-primary btn-lg w-full" style="max-width:320px;margin-top:var(--space-2)"
           onclick="NpMatteSkriftlig.startGame()">
           Starta provet! 🚀
         </button>
@@ -164,11 +172,12 @@ const NpMatteSkriftlig = (() => {
         }
         #nps-hdr {
           display:flex; align-items:center; gap:8px; flex-shrink:0;
-          padding:5px 10px; border-bottom:1px solid rgba(37,99,235,0.15); min-height:44px;
+          padding:5px 10px; border-bottom:1px solid color-mix(in srgb, var(--accent) 15%, transparent); min-height:44px;
         }
-        #nps-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:#2563eb; }
-        #nps-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(37,99,235,0.15); overflow:hidden; flex-shrink:0; }
-        #nps-prog-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#2563eb,#06b6d4); transition:width 0.4s; }
+        #nps-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:var(--deep); font-family:var(--font-head); }
+        #nps-prog-wrap { width:72px; height:6px; border:none; box-shadow:none; flex-shrink:0;
+          background:color-mix(in srgb, var(--accent) 15%, transparent); }
+        #nps-prog-fill { transition:width 0.4s; }
         #nps-main {
           flex:1; display:grid; grid-template-columns:55fr 45fr;
           padding:8px; gap:8px; overflow:hidden; min-height:0; height:100%;
@@ -177,58 +186,60 @@ const NpMatteSkriftlig = (() => {
           display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-height:0;
         }
         #nps-visual-panel {
-          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:10px; border:1.5px solid rgba(37,99,235,0.12); flex-shrink:0;
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          padding:10px; border:1.5px solid color-mix(in srgb, var(--accent) 12%, transparent); flex-shrink:0;
         }
         #nps-scratch-panel {
-          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:8px; border:1.5px solid rgba(37,99,235,0.12);
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          padding:8px; border:1.5px solid color-mix(in srgb, var(--accent) 12%, transparent);
           display:flex; flex-direction:column; gap:5px; height:100%; min-height:0;
         }
         #nps-canvas {
           flex:1; width:100%; display:block;
           touch-action:none; cursor:crosshair;
-          border-radius:var(--radius-md); border:1.5px dashed rgba(37,99,235,0.25);
-          background:#f8fbff;
+          border-radius:var(--radius-md); border:1.5px dashed color-mix(in srgb, var(--accent) 25%, transparent);
+          background:rgba(255,255,255,0.7);
         }
         .nps-tool-btn {
           flex:1; height:30px; border-radius:var(--radius-md); font-weight:800;
-          font-size:11px; cursor:pointer; border:1.5px solid rgba(37,99,235,0.3); transition:all 0.15s;
+          font-size:11px; cursor:pointer; border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); transition:all 0.15s;
         }
-        .nps-tool-btn.active       { background:#2563eb; color:#fff; border-color:#2563eb; }
-        .nps-tool-btn:not(.active) { background:#eff6ff; color:#2563eb; }
+        .nps-tool-btn.active       { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .nps-tool-btn:not(.active) { background:var(--tint); color:var(--deep); }
         #nps-bottom { flex-shrink:0; display:flex; flex-direction:column; gap:5px; }
-        .nps-question-text { font-size:var(--text-base); font-weight:800; color:var(--color-text); padding:4px 6px; line-height:1.4; }
+        .nps-question-text { font-size:var(--text-base); font-weight:800; color:var(--ink); padding:4px 6px; line-height:1.4; }
         .nps-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
         .nps-choice-btn {
-          height:46px; border-radius:var(--radius-md); background:rgba(255,255,255,0.9);
-          border:2px solid rgba(37,99,235,0.22); color:#1e3a8a;
-          font-size:var(--text-base); font-weight:800; cursor:pointer;
+          height:46px; border-radius:var(--radius-md); background:var(--glass-strong);
+          border:2px solid color-mix(in srgb, var(--accent) 22%, transparent); color:var(--deep);
+          font-family:var(--font-head); font-size:var(--text-base); font-weight:800; cursor:pointer;
           transition:all 0.15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px;
         }
-        .nps-choice-btn:hover, .nps-choice-btn:active { background:rgba(37,99,235,0.1); }
+        .nps-choice-btn:hover, .nps-choice-btn:active { background:var(--tint); border-color:var(--accent); }
         .nps-numpad-grid { display:grid; grid-template-columns:repeat(3,52px); gap:5px; justify-content:center; }
         .nps-numpad-btn {
           width:52px; height:52px; border-radius:var(--radius-full);
+          font-family:var(--font-head);
           font-size:var(--text-lg); font-weight:900; cursor:pointer;
           box-shadow:var(--shadow-sm); transition:transform 0.1s;
         }
         #nps-npad-display {
-          font-size:var(--text-4xl); font-weight:900; color:#1e3a8a; min-height:52px;
+          font-family:var(--font-head); font-variant-numeric:tabular-nums;
+          font-size:var(--text-4xl); font-weight:900; color:var(--deep); min-height:52px;
           display:flex; align-items:center; justify-content:center;
-          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
-          border:2.5px solid rgba(37,99,235,0.3); width:100%; letter-spacing:0.05em;
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          border:2.5px solid color-mix(in srgb, var(--accent) 30%, transparent); width:100%; letter-spacing:0.05em;
         }
         #nps-feedback { min-height:0; }
       </style>
 
       <!-- Compact header -->
       <div id="nps-hdr">
-        <button class="btn-back" style="background:#eff6ff;color:#2563eb;flex-shrink:0;padding:4px 10px;font-size:13px"
+        <button class="btn-back" style="flex-shrink:0;min-height:36px;padding:4px 12px 4px 8px;font-size:13px"
           onclick="NpMatteSkriftlig.confirmBack()">Avsluta</button>
         <div class="hdr-cat">${getCategoryEmoji(currentQ.cat)} ${getCategoryLabel(currentQ.cat)}</div>
-        <span style="font-size:11px;font-weight:800;color:#2563eb;flex-shrink:0">${qIndex+1}/${questions.length}</span>
-        <div id="nps-prog-wrap"><div id="nps-prog-fill" style="width:${pct}%"></div></div>
+        <span class="num" style="font-size:11px;font-weight:800;color:var(--deep);flex-shrink:0">${qIndex+1}/${questions.length}</span>
+        <div class="progress-bar" id="nps-prog-wrap"><i id="nps-prog-fill" style="width:${pct}%"></i></div>
       </div>
 
       <!-- Main: left col = question+answers, right col = canvas -->
@@ -237,15 +248,15 @@ const NpMatteSkriftlig = (() => {
         <!-- Left column: question, visual, answer area, feedback -->
         <div id="nps-left-col">
           <div id="nps-visual-panel">
-            <div style="font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;opacity:0.7">
+            <div style="font-size:11px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;opacity:0.7">
               ${getCategoryLabel(currentQ.cat)}
             </div>
-            <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);line-height:1.4;margin-bottom:8px">
-              ${currentQ.question}
+            <div style="font-size:var(--text-base);font-weight:800;color:var(--ink);line-height:1.4;margin-bottom:8px">
+              ${colorizeClockTimes(currentQ.question)}
             </div>
             <div id="nps-visual"></div>
-            <div id="nps-hint" style="display:none;margin-top:6px;padding:8px 10px;background:#eff6ff;border-radius:var(--radius-md);border:1.5px solid rgba(37,99,235,0.2);font-size:var(--text-sm);font-weight:700;color:#1d4ed8">
-              💡 ${esc(currentQ.hint || '')}
+            <div id="nps-hint" style="display:none;margin-top:6px;padding:8px 10px;background:rgba(251,191,36,0.12);border-radius:var(--radius-md);border:1.5px solid rgba(251,191,36,0.35);font-size:var(--text-sm);font-weight:700;color:var(--choco)">
+              💡 ${colorizeClockTimes(esc(currentQ.hint || ''))}
             </div>
           </div>
           <div id="nps-bottom">
@@ -256,7 +267,7 @@ const NpMatteSkriftlig = (() => {
 
         <!-- Right column: canvas full height -->
         <div id="nps-scratch-panel">
-          <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
           <canvas id="nps-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
             <button id="nps-tool-draw" class="nps-tool-btn active" onclick="NpMatteSkriftlig.toggleEraser(false)">🖊️ Rita</button>
@@ -313,7 +324,7 @@ const NpMatteSkriftlig = (() => {
     } else {
       ctx.globalCompositeOperation = 'source-over';
       ctx.lineWidth = Math.max(1.5, (e.pressure || 0.5) * 3);
-      ctx.strokeStyle = '#1e3a8a';
+      ctx.strokeStyle = '#8f2b1e'; /* var(--np-deep) – canvas kräver literal */
     }
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -397,8 +408,8 @@ const NpMatteSkriftlig = (() => {
     return `
       <div style="display:flex;gap:var(--space-4);align-items:flex-start;flex-wrap:wrap">
         <table style="border-collapse:collapse;font-size:var(--text-sm);background:rgba(255,255,255,0.8);
-          border-radius:var(--radius-md);overflow:hidden;border:1px solid rgba(37,99,235,0.15)">
-          <thead><tr style="background:rgba(37,99,235,0.1)">
+          border-radius:var(--radius-md);overflow:hidden;border:1px solid color-mix(in srgb, var(--accent) 15%, transparent)">
+          <thead><tr style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
             <th style="padding:4px 8px;text-align:left;font-size:var(--text-xs)">Namn</th>
             <th style="padding:4px 8px;text-align:right;font-size:var(--text-xs)">${esc(unit||'antal')}</th>
           </tr></thead>
@@ -441,8 +452,8 @@ const NpMatteSkriftlig = (() => {
           ${slices}
         </svg>
         <table style="border-collapse:collapse;font-size:var(--text-sm);background:rgba(255,255,255,0.8);
-          border-radius:var(--radius-md);overflow:hidden;border:1px solid rgba(37,99,235,0.15)">
-          <thead><tr style="background:rgba(37,99,235,0.1)">
+          border-radius:var(--radius-md);overflow:hidden;border:1px solid color-mix(in srgb, var(--accent) 15%, transparent)">
+          <thead><tr style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
             <th style="padding:4px 8px;text-align:left;font-size:var(--text-xs)">Aktivitet</th>
             <th style="padding:4px 8px;text-align:right;font-size:var(--text-xs)">Elever</th>
           </tr></thead>
@@ -468,7 +479,7 @@ const NpMatteSkriftlig = (() => {
       const nx = cx + 58 * Math.cos(toRad(a));
       const ny = cy + 58 * Math.sin(toRad(a));
       nums += `<text x="${nx.toFixed(1)}" y="${ny.toFixed(1)}" text-anchor="middle"
-        dominant-baseline="middle" font-size="11" font-weight="800" fill="#1e3a8a">${n}</text>`;
+        dominant-baseline="middle" font-size="11" font-weight="800" fill="#1e3a5f">${n}</text>`;
     }
     let ticks = '';
     for (let t = 0; t < 60; t++) {
@@ -487,10 +498,10 @@ const NpMatteSkriftlig = (() => {
         <circle cx="${cx}" cy="${cy}" r="${r}" fill="#f0f9ff" stroke="#3b82f6" stroke-width="3"/>
         ${ticks}${nums}
         <line x1="${cx}" y1="${cy}" x2="${hourX.toFixed(1)}" y2="${hourY.toFixed(1)}"
-          stroke="#1e3a8a" stroke-width="5" stroke-linecap="round"/>
+          stroke="var(--time-h, #3b82f6)" stroke-width="6" stroke-linecap="round"/>
         <line x1="${cx}" y1="${cy}" x2="${minX.toFixed(1)}" y2="${minY.toFixed(1)}"
-          stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="${cx}" cy="${cy}" r="5" fill="#1e3a8a"/>
+          stroke="var(--time-m, #ef4444)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="5" fill="#1e3a5f"/>
       </svg>`;
   }
 
@@ -515,7 +526,7 @@ const NpMatteSkriftlig = (() => {
     const { groups, perGroup, emoji } = data;
     let html = '<div style="display:flex;gap:var(--space-3);flex-wrap:wrap">';
     for (let g = 0; g < groups; g++) {
-      html += `<div style="border:2px solid rgba(37,99,235,0.3);border-radius:var(--radius-md);
+      html += `<div style="border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:var(--radius-md);
         padding:var(--space-2);display:flex;flex-wrap:wrap;gap:2px;max-width:${perGroup*28+12}px">`;
       for (let i = 0; i < perGroup; i++) {
         html += `<span style="font-size:1.4rem">${emoji}</span>`;
@@ -531,7 +542,7 @@ const NpMatteSkriftlig = (() => {
     let html = '<div style="display:flex;gap:var(--space-4);flex-wrap:wrap">';
     bags.forEach(bag => {
       html += `<div style="text-align:center">
-        <div style="border:2px solid rgba(37,99,235,0.3);border-radius:var(--radius-xl);
+        <div style="border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:var(--radius-xl);
           padding:var(--space-3);background:rgba(255,255,255,0.8);min-width:70px;
           display:flex;flex-wrap:wrap;gap:2px;justify-content:center;max-width:90px">`;
       bag.contents.forEach(({color, count}) => {
@@ -540,7 +551,7 @@ const NpMatteSkriftlig = (() => {
         }
       });
       html += `</div>
-        <div style="font-weight:800;font-size:var(--text-sm);color:#2563eb;margin-top:4px">${esc(bag.label)}</div>
+        <div style="font-weight:800;font-size:var(--text-sm);color:var(--deep);margin-top:4px">${esc(bag.label)}</div>
       </div>`;
     });
     html += '</div>';
@@ -574,9 +585,9 @@ const NpMatteSkriftlig = (() => {
         <div class="nps-numpad-grid" id="${id}">
           ${keys.map(k => `
             <button class="nps-numpad-btn" style="
-              background:${k==='✓'?'linear-gradient(135deg,#2563eb,#06b6d4)':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'rgba(255,255,255,0.9)'};
-              color:${k==='✓'||k==='⌫'?'white':'#1e3a8a'};
-              border:2px solid ${k==='✓'?'#2563eb':k==='⌫'?'#ef4444':'rgba(37,99,235,0.2)'};
+              background:${k==='✓'?'linear-gradient(135deg,var(--accent),var(--accent-light))':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'var(--glass-strong)'};
+              color:${k==='✓'||k==='⌫'?'white':'var(--deep)'};
+              border:2px solid ${k==='✓'?'var(--accent)':k==='⌫'?'#ef4444':'color-mix(in srgb, var(--accent) 20%, transparent)'};
             "
               onpointerdown="this.style.transform='scale(0.91)'"
               onpointerup="this.style.transform=''"
@@ -600,7 +611,7 @@ const NpMatteSkriftlig = (() => {
     return `<div class="nps-choice-grid">` +
       q.choices.map((c, i) =>
         `<button class="nps-choice-btn" id="nps-choice-${i}"
-          onclick="NpMatteSkriftlig.submitChoice(${i})">${esc(String(c))}</button>`
+          onclick="NpMatteSkriftlig.submitChoice(${i})">${colorizeClockTimes(esc(String(c)))}</button>`
       ).join('') + '</div>';
   }
 
@@ -615,8 +626,8 @@ const NpMatteSkriftlig = (() => {
     let html = '<div style="display:flex;flex-direction:column;gap:var(--space-3)">';
     q.statements.forEach((s, i) => {
       html += `
-        <div style="background:rgba(255,255,255,0.85);border-radius:var(--radius-md);
-          padding:var(--space-3);border:1.5px solid rgba(37,99,235,0.15)">
+        <div style="background:var(--glass-strong);border-radius:var(--radius-md);
+          padding:var(--space-3);border:1.5px solid color-mix(in srgb, var(--accent) 15%, transparent)">
           <div style="font-weight:700;font-size:var(--text-sm);margin-bottom:var(--space-2)">${esc(s)}</div>
           <div style="display:flex;gap:var(--space-2)">
             <button onclick="NpMatteSkriftlig.tfPick(${i},'sant')" id="nps-tf-${i}-sant"
@@ -631,8 +642,8 @@ const NpMatteSkriftlig = (() => {
     html += `</div>
       <button onclick="NpMatteSkriftlig.submitTrueFalse()" id="nps-tf-confirm"
         style="margin-top:var(--space-3);width:100%;padding:var(--space-3);
-        border-radius:var(--radius-md);border:none;background:rgba(37,99,235,0.15);
-        color:#1e3a8a;font-weight:800;font-size:var(--text-base);cursor:pointer;
+        border-radius:var(--radius-full);border:none;background:color-mix(in srgb, var(--accent) 15%, transparent);
+        color:var(--deep);font-weight:800;font-size:var(--text-base);cursor:pointer;
         opacity:0.5" disabled>Bekräfta svar</button>`;
     return html;
   }
@@ -650,7 +661,7 @@ const NpMatteSkriftlig = (() => {
     if (confirm && Object.keys(tfAnswers).length === currentQ.statements.length) {
       confirm.style.opacity = '1';
       confirm.removeAttribute('disabled');
-      confirm.style.background = 'linear-gradient(135deg,#2563eb,#06b6d4)';
+      confirm.style.background = 'linear-gradient(135deg,var(--accent),var(--accent-light))';
       confirm.style.color = '#fff';
     }
   }
@@ -664,20 +675,20 @@ const NpMatteSkriftlig = (() => {
   /* ── Multi-choice ────────────────────────────────────────── */
   function buildMultiChoice(q) {
     const needed = q.correctCount || 3;
-    let html = `<div style="font-size:var(--text-sm);font-weight:800;color:#2563eb;margin-bottom:var(--space-2)">
+    let html = `<div style="font-size:var(--text-sm);font-weight:800;color:var(--deep);margin-bottom:var(--space-2)">
       Välj ${needed} alternativ:</div>
       <div style="display:flex;flex-direction:column;gap:var(--space-2)">`;
     q.choices.forEach((c, i) => {
       html += `<button onclick="NpMatteSkriftlig.mcToggle(${i},${needed})" id="nps-mc-${i}"
-        style="padding:var(--space-3);border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.25);
-        background:rgba(255,255,255,0.85);font-size:var(--text-base);font-weight:800;
-        color:#1e3a8a;cursor:pointer;text-align:left">${esc(String(c))}</button>`;
+        style="padding:var(--space-3);border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+        background:var(--glass-strong);font-size:var(--text-base);font-weight:800;
+        color:var(--deep);cursor:pointer;text-align:left">${esc(String(c))}</button>`;
     });
     html += `</div>
       <button onclick="NpMatteSkriftlig.submitMultiChoice()" id="nps-mc-confirm"
         style="margin-top:var(--space-3);width:100%;padding:var(--space-3);
-        border-radius:var(--radius-md);border:none;background:rgba(37,99,235,0.15);
-        color:#1e3a8a;font-weight:800;font-size:var(--text-base);cursor:pointer;
+        border-radius:var(--radius-full);border:none;background:color-mix(in srgb, var(--accent) 15%, transparent);
+        color:var(--deep);font-weight:800;font-size:var(--text-base);cursor:pointer;
         opacity:0.5" disabled>Bekräfta svar</button>`;
     return html;
   }
@@ -687,22 +698,22 @@ const NpMatteSkriftlig = (() => {
     if (!btn) return;
     if (mcSelected.has(i)) {
       mcSelected.delete(i);
-      btn.style.background = 'rgba(255,255,255,0.85)';
-      btn.style.borderColor = 'rgba(37,99,235,0.25)';
-      btn.style.color = '#1e3a8a';
+      btn.style.background = 'var(--glass-strong)';
+      btn.style.borderColor = 'color-mix(in srgb, var(--accent) 25%, transparent)';
+      btn.style.color = 'var(--deep)';
     } else {
       if (mcSelected.size >= needed) return;
       mcSelected.add(i);
-      btn.style.background = '#2563eb';
-      btn.style.borderColor = '#2563eb';
+      btn.style.background = 'var(--accent)';
+      btn.style.borderColor = 'var(--accent)';
       btn.style.color = '#fff';
     }
     const confirm = document.getElementById('nps-mc-confirm');
     if (confirm) {
       const ready = mcSelected.size === needed;
       confirm.style.opacity = ready ? '1' : '0.5';
-      if (ready) { confirm.removeAttribute('disabled'); confirm.style.background='linear-gradient(135deg,#2563eb,#06b6d4)'; confirm.style.color='#fff'; }
-      else { confirm.setAttribute('disabled',''); confirm.style.background='rgba(37,99,235,0.15)'; confirm.style.color='#1e3a8a'; }
+      if (ready) { confirm.removeAttribute('disabled'); confirm.style.background='linear-gradient(135deg,var(--accent),var(--accent-light))'; confirm.style.color='#fff'; }
+      else { confirm.setAttribute('disabled',''); confirm.style.background='color-mix(in srgb, var(--accent) 15%, transparent)'; confirm.style.color='var(--deep)'; }
     }
   }
 
@@ -717,16 +728,16 @@ const NpMatteSkriftlig = (() => {
     mfValues = new Array(q.fields.length).fill('');
     mfActiveIdx = 0;
     let tableHtml = `<table style="border-collapse:collapse;margin-bottom:var(--space-3);width:100%;
-      background:rgba(255,255,255,0.85);border-radius:var(--radius-md);overflow:hidden;
-      border:1.5px solid rgba(37,99,235,0.15)"><thead><tr>`;
-    q.fields.forEach(f => { tableHtml += `<th style="padding:6px 12px;font-size:var(--text-sm);background:rgba(37,99,235,0.08)">${esc(f.label)}</th>`; });
+      background:var(--glass-strong);border-radius:var(--radius-md);overflow:hidden;
+      border:1.5px solid color-mix(in srgb, var(--accent) 15%, transparent)"><thead><tr>`;
+    q.fields.forEach(f => { tableHtml += `<th style="padding:6px 12px;font-size:var(--text-sm);background:color-mix(in srgb, var(--accent) 8%, transparent)">${esc(f.label)}</th>`; });
     tableHtml += '</tr></thead><tbody><tr>';
     q.fields.forEach((f, i) => {
       tableHtml += `<td style="padding:8px;text-align:center">
-        <div id="nps-mf-cell-${i}" onclick="NpMatteSkriftlig.mfFocus(${i})"
-          style="min-width:60px;height:44px;border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.3);
-          background:${i===0?'rgba(37,99,235,0.08)':'#fff'};display:flex;align-items:center;
-          justify-content:center;font-size:var(--text-xl);font-weight:900;color:#1e3a8a;cursor:pointer">
+        <div id="nps-mf-cell-${i}" class="num" onclick="NpMatteSkriftlig.mfFocus(${i})"
+          style="min-width:60px;height:44px;border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          background:${i===0?'color-mix(in srgb, var(--accent) 8%, transparent)':'#fff'};display:flex;align-items:center;
+          justify-content:center;font-size:var(--text-xl);font-weight:900;color:var(--deep);cursor:pointer">
           ${f.prefilled !== undefined ? f.prefilled : '...'}
         </div></td>`;
     });
@@ -740,9 +751,8 @@ const NpMatteSkriftlig = (() => {
     if (mfActiveIdx < 0) mfActiveIdx = 0;
 
     return tableHtml + buildNumpad('nps-mf-numpad') +
-      `<button onclick="NpMatteSkriftlig.submitMultiFree()"
-        style="margin-top:var(--space-3);width:100%;padding:var(--space-3);border-radius:var(--radius-md);
-        border:none;background:linear-gradient(135deg,#2563eb,#06b6d4);color:#fff;font-weight:800;cursor:pointer">
+      `<button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)"
+        onclick="NpMatteSkriftlig.submitMultiFree()">
         Bekräfta svar ✓</button>`;
   }
 
@@ -752,7 +762,7 @@ const NpMatteSkriftlig = (() => {
     currentQ.fields.forEach((f, j) => {
       const cell = document.getElementById(`nps-mf-cell-${j}`);
       if (cell && f.prefilled === undefined) {
-        cell.style.background = j === i ? 'rgba(37,99,235,0.08)' : '#fff';
+        cell.style.background = j === i ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : '#fff';
       }
     });
     const disp = document.getElementById('nps-npad-display');
@@ -813,34 +823,32 @@ const NpMatteSkriftlig = (() => {
     let pool = '<div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-3)">';
     q.numbers.forEach((n, i) => {
       const placed = orderPlaced.includes(n) && orderPlaced.filter(x=>x===n).length >= orderPool.filter(x=>x===n).length;
-      pool += `<button onclick="NpMatteSkriftlig.orderPick(${n})" id="nps-ord-pool-${i}"
+      pool += `<button onclick="NpMatteSkriftlig.orderPick(${n})" id="nps-ord-pool-${i}" class="num"
         style="padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);
-        border:2px solid ${placed?'rgba(37,99,235,0.1)':'rgba(37,99,235,0.3)'};
-        background:${placed?'rgba(200,200,200,0.2)':'rgba(255,255,255,0.85)'};
-        font-size:var(--text-xl);font-weight:900;color:${placed?'#aaa':'#1e3a8a'};cursor:pointer">
+        border:2px solid ${placed?'color-mix(in srgb, var(--accent) 10%, transparent)':'color-mix(in srgb, var(--accent) 30%, transparent)'};
+        background:${placed?'rgba(200,200,200,0.2)':'var(--glass-strong)'};
+        font-family:var(--font-head);font-size:var(--text-xl);font-weight:900;color:${placed?'#aaa':'var(--deep)'};cursor:pointer">
         ${n}</button>`;
     });
     pool += '</div>';
 
     let placed = '<div style="display:flex;gap:var(--space-2);align-items:center;margin-bottom:var(--space-3)">';
-    placed += '<span style="font-size:var(--text-xs);font-weight:800;color:#555;white-space:nowrap">Minst →</span>';
+    placed += '<span style="font-size:var(--text-xs);font-weight:800;color:var(--ink-soft);white-space:nowrap">Minst →</span>';
     for (let i = 0; i < slots; i++) {
-      placed += `<div id="nps-ord-slot-${i}" style="width:52px;height:52px;border-radius:var(--radius-md);
-        border:2px dashed rgba(37,99,235,0.3);background:rgba(37,99,235,0.04);
-        display:flex;align-items:center;justify-content:center;font-size:var(--text-lg);font-weight:900;color:#1e3a8a">
+      placed += `<div id="nps-ord-slot-${i}" class="num" style="width:52px;height:52px;border-radius:var(--radius-md);
+        border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);background:color-mix(in srgb, var(--accent) 4%, transparent);
+        display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:var(--text-lg);font-weight:900;color:var(--deep)">
         ${orderPlaced[i] !== undefined ? orderPlaced[i] : ''}</div>`;
     }
-    placed += '<span style="font-size:var(--text-xs);font-weight:800;color:#555;white-space:nowrap">→ Störst</span>';
+    placed += '<span style="font-size:var(--text-xs);font-weight:800;color:var(--ink-soft);white-space:nowrap">→ Störst</span>';
     placed += '</div>';
 
     return pool + placed +
       `<div style="display:flex;gap:var(--space-3)">
-        <button onclick="NpMatteSkriftlig.orderUndo()"
-          style="flex:1;padding:var(--space-2);border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.2);
-          background:transparent;color:#2563eb;font-weight:800;cursor:pointer">↩ Ångra</button>
-        <button onclick="NpMatteSkriftlig.submitOrder()" id="nps-ord-confirm"
-          style="flex:2;padding:var(--space-2);border-radius:var(--radius-md);border:none;
-          background:linear-gradient(135deg,#2563eb,#06b6d4);color:#fff;font-weight:800;cursor:pointer">
+        <button class="btn btn-ghost btn-sm" style="flex:1"
+          onclick="NpMatteSkriftlig.orderUndo()">↩ Ångra</button>
+        <button class="btn btn-primary btn-sm" style="flex:2" id="nps-ord-confirm"
+          onclick="NpMatteSkriftlig.submitOrder()">
           Bekräfta ✓</button>
       </div>`;
   }
@@ -878,13 +886,13 @@ const NpMatteSkriftlig = (() => {
     let html = '<div style="display:flex;flex-direction:column;gap:var(--space-4)">';
     q.subQuestions.forEach((sq, i) => {
       html += `
-        <div style="background:rgba(255,255,255,0.85);border-radius:var(--radius-md);
-          padding:var(--space-3);border:1.5px solid rgba(37,99,235,0.15)">
-          <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-2xl);font-weight:900;color:#1e3a8a;margin-bottom:var(--space-2)">
+        <div style="background:var(--glass-strong);border-radius:var(--radius-md);
+          padding:var(--space-3);border:1.5px solid color-mix(in srgb, var(--accent) 15%, transparent)">
+          <div class="num" style="display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-head);font-size:var(--text-2xl);font-weight:900;color:var(--deep);margin-bottom:var(--space-2)">
             <span>${sq.a}</span>
             <div id="nps-fs-${i}-0" onclick="NpMatteSkriftlig.fsSelect(${i},0)"
-              style="width:40px;height:40px;border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.4);
-              background:rgba(37,99,235,0.05);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--text-xl)">
+              style="width:40px;height:40px;border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+              background:color-mix(in srgb, var(--accent) 5%, transparent);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--text-xl)">
               ?</div>
             <span>${sq.b}</span>
             <span>=</span>
@@ -893,17 +901,16 @@ const NpMatteSkriftlig = (() => {
           <div style="display:flex;gap:var(--space-2)">
             ${['+','−','·','÷'].map(sign =>
               `<button onclick="NpMatteSkriftlig.fsSign(${i},'${sign}')"
-                style="flex:1;height:40px;border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.2);
-                background:rgba(255,255,255,0.9);font-size:var(--text-lg);font-weight:800;color:#1e3a8a;cursor:pointer">
+                style="flex:1;height:40px;border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+                background:var(--glass-strong);font-size:var(--text-lg);font-weight:800;color:var(--deep);cursor:pointer">
                 ${sign}</button>`
             ).join('')}
           </div>
         </div>`;
     });
     html += '</div>';
-    html += `<button onclick="NpMatteSkriftlig.submitFillSign()"
-      style="margin-top:var(--space-3);width:100%;padding:var(--space-3);border-radius:var(--radius-md);
-      border:none;background:linear-gradient(135deg,#2563eb,#06b6d4);color:#fff;font-weight:800;cursor:pointer">
+    html += `<button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)"
+      onclick="NpMatteSkriftlig.submitFillSign()">
       Bekräfta svar ✓</button>`;
     return html;
   }
@@ -913,7 +920,7 @@ const NpMatteSkriftlig = (() => {
   function fsSign(qi, sign) {
     fillAnswers[qi].op1 = sign;
     const el = document.getElementById(`nps-fs-${qi}-0`);
-    if (el) { el.textContent = sign; el.style.background = 'rgba(37,99,235,0.15)'; el.style.color='#2563eb'; }
+    if (el) { el.textContent = sign; el.style.background = 'color-mix(in srgb, var(--accent) 15%, transparent)'; el.style.color='var(--accent)'; }
   }
 
   function submitFillSign() {
@@ -926,26 +933,25 @@ const NpMatteSkriftlig = (() => {
   function buildMatch(q) {
     matchPairs  = {};
     matchLeft   = null;
-    const COLORS = ['#9333ea','#f59e0b','#3b82f6','#f472b6'];
+    const COLORS = ['#e85a4f','#f59e0b','#3b82f6','#f472b6'];
     let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
-      <div style="font-size:var(--text-xs);font-weight:800;color:#555;text-align:center;padding-bottom:4px">Räknehändelse</div>
-      <div style="font-size:var(--text-xs);font-weight:800;color:#555;text-align:center;padding-bottom:4px">Uttryck</div>`;
+      <div style="font-size:var(--text-xs);font-weight:800;color:var(--ink-soft);text-align:center;padding-bottom:4px">Räknehändelse</div>
+      <div style="font-size:var(--text-xs);font-weight:800;color:var(--ink-soft);text-align:center;padding-bottom:4px">Uttryck</div>`;
     q.events.forEach((ev, i) => {
       html += `<button onclick="NpMatteSkriftlig.matchPickLeft(${i})" id="nps-ml-${i}"
-        style="padding:var(--space-2);border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.2);
-        background:rgba(255,255,255,0.85);font-size:var(--text-sm);font-weight:700;color:#1e3a8a;cursor:pointer;text-align:left">
+        style="padding:var(--space-2);border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+        background:var(--glass-strong);font-size:var(--text-sm);font-weight:700;color:var(--deep);cursor:pointer;text-align:left">
         ${esc(ev)}</button>`;
     });
     q.expressions.forEach((ex, i) => {
-      html += `<button onclick="NpMatteSkriftlig.matchPickRight(${i})" id="nps-mr-${i}"
-        style="padding:var(--space-2);border-radius:var(--radius-md);border:2px solid rgba(37,99,235,0.2);
-        background:rgba(255,255,255,0.85);font-size:var(--text-lg);font-weight:900;color:#1e3a8a;cursor:pointer;text-align:center">
+      html += `<button onclick="NpMatteSkriftlig.matchPickRight(${i})" id="nps-mr-${i}" class="num"
+        style="padding:var(--space-2);border-radius:var(--radius-md);border:2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+        background:var(--glass-strong);font-family:var(--font-head);font-size:var(--text-lg);font-weight:900;color:var(--deep);cursor:pointer;text-align:center">
         ${esc(ex)}</button>`;
     });
     html += `</div>
-      <button onclick="NpMatteSkriftlig.submitMatch()" id="nps-match-confirm"
-        style="margin-top:var(--space-3);width:100%;padding:var(--space-3);border-radius:var(--radius-md);
-        border:none;background:linear-gradient(135deg,#2563eb,#06b6d4);color:#fff;font-weight:800;cursor:pointer">
+      <button class="btn btn-primary btn-block btn-sm" style="margin-top:var(--space-3)" id="nps-match-confirm"
+        onclick="NpMatteSkriftlig.submitMatch()">
         Bekräfta ✓</button>`;
     return html;
   }
@@ -954,7 +960,7 @@ const NpMatteSkriftlig = (() => {
     matchLeft = i;
     currentQ.events.forEach((_, j) => {
       const b = document.getElementById(`nps-ml-${j}`);
-      if (b) b.style.outline = j===i ? '3px solid #2563eb' : 'none';
+      if (b) b.style.outline = j===i ? '3px solid var(--accent)' : 'none';
     });
   }
 
@@ -964,7 +970,7 @@ const NpMatteSkriftlig = (() => {
     matchPairs[matchLeft] = i;
     matchLeft = null;
     // Re-color all
-    const COLORS = ['#9333ea','#f59e0b','#3b82f6','#f472b6'];
+    const COLORS = ['#e85a4f','#f59e0b','#3b82f6','#f472b6'];
     Object.entries(matchPairs).forEach(([li, ri]) => {
       const lBtn = document.getElementById(`nps-ml-${li}`);
       const rBtn = document.getElementById(`nps-mr-${ri}`);
@@ -1036,7 +1042,7 @@ const NpMatteSkriftlig = (() => {
     if (!el) return;
     if (correct) {
       App.Sound.play('correct');
-      el.innerHTML = `<div style="text-align:center;font-size:var(--text-xl);font-weight:900;color:#16a34a;animation:bounce-in 0.4s var(--ease-bounce)">
+      el.innerHTML = `<div style="text-align:center;font-size:var(--text-xl);font-weight:900;color:#16a34a;animation:bounce-in 0.4s var(--spring)">
         ✅ Rätt! ${pick(['Bra jobbat! 🌟','Fantastiskt! 🎉','Supersnyggt! 💫','Du är grym! 🦁'])}
       </div>`;
     } else if (reveal) {
@@ -1096,29 +1102,28 @@ const NpMatteSkriftlig = (() => {
                   score >= questions.length * 0.5 ? 'Bra kämpat!' : 'Fortsätt öva!';
 
     root().innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back" style="background:#eff6ff;color:#2563eb"
-          onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
-        <span class="header-title" style="color:#2563eb">Resultat</span>
-        <div style="width:80px"></div>
+      <style id="nps-shell">
+        #np-matte-skriftlig-root { flex:1; display:flex; flex-direction:column; min-height:0; width:100%; }
+      </style>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
+        <span class="header-title">Resultat</span>
+        <span style="width:80px"></span>
       </div>
-      <div style="padding:var(--space-6);display:flex;flex-direction:column;align-items:center;gap:var(--space-5);text-align:center">
-        <div style="font-size:5rem;animation:bounce-in 0.6s var(--ease-bounce)">${medal}</div>
-        <div style="font-family:var(--font-heading);font-size:var(--text-3xl);color:#2563eb">${msg}</div>
-        <div style="font-size:var(--text-5xl);font-weight:900;color:#1e3a8a">
-          ${score}<span style="font-size:var(--text-2xl);opacity:0.6">/${questions.length}</span>
-        </div>
-        <div style="width:100%;max-width:320px">
-          <div style="height:16px;border-radius:var(--radius-full);background:rgba(37,99,235,0.1);overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#2563eb,#06b6d4);
-              border-radius:var(--radius-full);transition:width 1s ease"></div>
+      <div class="wrap vcenter" style="gap:var(--space-4)">
+        <div class="result-hero" style="flex:0 0 auto">
+          <span class="result-medal">${medal}</span>
+          <div class="result-msg">${msg}</div>
+          <div class="result-pct num">${score}<span style="font-size:0.4em">/${questions.length}</span></div>
+          <div style="width:100%;max-width:320px;margin:var(--space-3) auto 0">
+            <div class="progress-bar" style="height:16px"><i style="width:${pct}%"></i></div>
+            <div class="result-note num" style="margin-top:4px">${pct}%</div>
           </div>
-          <div style="margin-top:4px;font-size:var(--text-sm);font-weight:800;color:#2563eb">${pct}%</div>
+          <div class="result-actions">
+            <button class="btn btn-primary btn-lg" onclick="NpMatteSkriftlig.startGame()">Spela igen 🔄</button>
+            <button class="btn btn-ghost" onclick="NationellaHub.showMatteSelect()">Byt modul</button>
+          </div>
         </div>
-        <button class="btn btn-primary w-full" style="max-width:320px;background:linear-gradient(135deg,#2563eb,#06b6d4)"
-          onclick="NpMatteSkriftlig.startGame()">Spela igen 🔄</button>
-        <button class="btn btn-ghost w-full" style="max-width:320px"
-          onclick="NationellaHub.showMatteSelect()">Byt modul</button>
       </div>`;
   }
 

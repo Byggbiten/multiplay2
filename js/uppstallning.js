@@ -63,6 +63,7 @@ const UppstallningGame = (() => {
     #screen-addsub .app-header, #screen-uppstallning .app-header { max-width:100% !important; }
 
     #uppstallning-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+    #uppstallning-root .app-header { padding:4px 12px 0; margin-bottom:0; flex-shrink:0; }
     #up-main { flex:1; display:flex; overflow:hidden; min-height:0; }
     #up-left { flex:1; display:flex; flex-direction:column; gap:8px;
                overflow-y:auto; padding:clamp(6px,1.5vw,12px); min-height:0; padding-bottom:12px; }
@@ -73,28 +74,45 @@ const UppstallningGame = (() => {
       #up-left { flex:1; }
       #up-right { flex:0 0 35vh; min-height:120px; }
     }
-    .up-btn { cursor:pointer; border:none; border-radius:12px; font-weight:800;
-      transition:transform 0.15s,box-shadow 0.15s; }
-    .up-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+    .up-btn { cursor:pointer; border:none; border-radius:var(--radius-md); font-weight:800;
+      font-family:var(--font-body);
+      transition:transform 0.25s var(--spring),box-shadow 0.25s; }
+    .up-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 20px var(--glow); }
     .up-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
-    .up-card { background:rgba(255,255,255,0.92); border-radius:16px; padding:20px;
-      border:2px solid rgba(37,99,235,0.15); cursor:pointer;
-      transition:transform 0.2s,box-shadow 0.2s; }
-    .up-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.12); }
+    /* Val-kort (acard-mönstret från målbilden) */
+    .up-card { display:flex; align-items:center; gap:16px; text-align:left;
+      padding:14px 20px; width:100%;
+      background:var(--glass); border:1px solid var(--glass-line);
+      border-radius:var(--radius-lg); box-shadow:var(--shadow-panel); cursor:pointer;
+      transition:transform .3s var(--spring),box-shadow .3s; }
+    .up-card:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 16px 40px var(--glow); }
+    .up-card:active { transform:scale(.98); }
+    .up-aico { width:58px; height:58px; border-radius:18px; display:grid; place-items:center;
+      font-size:29px; flex-shrink:0; background:linear-gradient(135deg,var(--tint),#fff);
+      border:1px solid var(--glass-line); box-shadow:0 4px 12px var(--glow); }
+    .up-card b { font-family:var(--font-head); font-weight:700; font-size:19px;
+      color:var(--deep); display:block; line-height:1.15; }
+    .up-card small { color:var(--ink-soft); font-size:13px; font-weight:700; }
+    .up-card .chev { color:var(--accent); flex-shrink:0; width:24px; height:24px; margin-left:auto; }
+    /* Svårighetsgrad 1–4: målbildens kompakta tvåraders-chips */
     .diff-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
     @media (max-width:480px) { .diff-row { grid-template-columns:repeat(2,1fr); } }
-    .diff-btn { padding:8px 6px; border-radius:14px; font-weight:800; font-size:13px;
-      cursor:pointer; border:2px solid rgba(37,99,235,0.3);
-      background:var(--pv-light); color:var(--pv-primary); transition:all 0.15s;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:2px; line-height:1.15; }
-    .diff-btn .diff-num  { font-size:1.05rem; font-weight:900; }
-    .diff-btn .diff-desc { font-size:10.5px; font-weight:800; opacity:0.85; }
-    .diff-btn.active { background:var(--pv-primary); color:#fff; border-color:var(--pv-primary); }
+    .diff-btn { display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:1px; min-height:50px; padding:7px 5px; border-radius:var(--radius-lg);
+      cursor:pointer; line-height:1.1;
+      background:var(--glass-strong);
+      border:1.5px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      color:var(--deep); transition:all 0.25s var(--spring); }
+    .diff-btn:hover { transform:translateY(-2px); border-color:var(--accent); }
+    .diff-btn .diff-num  { font-family:var(--font-head); font-weight:700; font-size:16px; line-height:1.1; }
+    .diff-btn .diff-desc { font-size:11px; font-weight:800; opacity:0.9; line-height:1.1; white-space:nowrap; }
+    .diff-btn.active { background:linear-gradient(135deg,var(--accent),var(--accent-light));
+      color:#fff; border-color:transparent; box-shadow:0 6px 16px var(--glow); }
 
     /* Uppställningstabell */
-    #up-table-wrap { position:relative; background:rgba(255,255,255,0.93);
-      border-radius:16px; padding:clamp(8px,1.5vw,16px); border:2px solid rgba(37,99,235,0.12); width:100%; }
+    #up-table-wrap { position:relative; background:var(--glass-strong);
+      border-radius:var(--radius-lg); padding:clamp(8px,1.5vw,16px);
+      border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); width:100%; }
     .up-table { border-collapse:separate; border-spacing:clamp(4px,1vw,8px); margin:0 auto; }
     .col-cell { width:clamp(46px,8vw,74px); height:clamp(46px,8vw,74px); border-radius:11px; position:relative;
       display:flex; align-items:center; justify-content:center;
@@ -111,9 +129,9 @@ const UppstallningGame = (() => {
       color:#d97706; background:rgba(251,191,36,0.13); }
     .ans-cell { width:clamp(46px,8vw,74px); height:clamp(46px,8vw,74px); border-radius:11px; display:flex;
       align-items:center; justify-content:center; font-size:clamp(1.6rem,4vw,3rem); font-weight:900;
-      border:2.5px dashed rgba(37,99,235,0.28); background:rgba(255,255,255,0.7); }
-    .ans-cell.active-col { border-style:solid; border-color:var(--pv-primary);
-      background:rgba(37,99,235,0.07); }
+      border:2.5px dashed color-mix(in srgb, var(--accent) 32%, transparent); background:rgba(255,255,255,0.7); }
+    .ans-cell.active-col { border-style:solid; border-color:var(--accent);
+      background:color-mix(in srgb, var(--accent) 8%, transparent); }
     .ans-cell.filled { border-style:solid; }
     .ans-cell.wrong { border:2.5px solid #ef4444 !important; background:rgba(239,68,68,0.1) !important; }
     .ans-cell.clickable { cursor:pointer; }
@@ -141,19 +159,21 @@ const UppstallningGame = (() => {
     .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
 
     /* Tankebubbla */
-    .thought-bubble { background:#fff; border-radius:16px;
+    .thought-bubble { background:#fff; border-radius:var(--radius-md);
       padding:clamp(8px,1.5vw,14px) clamp(10px,2vw,18px);
-      box-shadow:0 2px 12px rgba(0,0,0,0.10); font-weight:800;
+      box-shadow:var(--shadow-panel); font-weight:800; color:var(--ink);
       font-size:clamp(0.92rem,2vw,1.15rem);
-      border:2px solid rgba(37,99,235,0.16); animation:bubble-in 0.3s ease-out; line-height:1.5; }
+      border:2px solid color-mix(in srgb, var(--accent) 18%, transparent);
+      animation:bubble-in 0.3s var(--spring); line-height:1.5; }
 
     /* Numpad i övningsläge */
     .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(40px,7vw,60px)); gap:5px; justify-content:center; }
     .ex-nk { width:clamp(40px,7vw,60px); height:clamp(40px,7vw,60px); border-radius:50%;
-      font-size:clamp(0.95rem,2vw,1.1rem); font-weight:900;
-      cursor:pointer; background:rgba(255,255,255,0.92); border:1.5px solid rgba(37,99,235,0.3);
-      color:var(--pv-primary); transition:transform 0.1s; }
-    .ex-nk:hover { transform:scale(1.12); }
+      font-size:clamp(0.95rem,2vw,1.1rem); font-family:var(--font-head); font-weight:900;
+      cursor:pointer; background:var(--glass-strong);
+      border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
+      color:var(--deep); transition:transform 0.2s var(--spring); }
+    .ex-nk:hover { transform:scale(1.12); border-color:var(--accent); }
 
     /* Fria läget: markör, pil och låsta rutor */
     .ans-cell.free-cursor { position:relative; animation:free-glow 1.2s ease-in-out infinite; }
@@ -164,11 +184,13 @@ const UppstallningGame = (() => {
       background:rgba(148,163,184,0.08); cursor:default; }
 
     /* Canvas */
-    .up-scratch { background:rgba(255,255,255,0.85); border-radius:14px;
-      border:1.5px solid rgba(37,99,235,0.15); display:flex; flex-direction:column;
+    .up-scratch { background:var(--glass); border-radius:var(--radius-md);
+      border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
+      display:flex; flex-direction:column;
       gap:5px; flex:1; min-height:0; padding:8px; }
     .up-canvas { flex:1; min-height:120px; width:100%; display:block; touch-action:none;
-      cursor:crosshair; border-radius:10px; border:2px dashed rgba(37,99,235,0.25);
+      cursor:crosshair; border-radius:10px;
+      border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
       background:rgba(255,255,255,0.8); }
 
     /* Keyframes */
@@ -224,8 +246,8 @@ const UppstallningGame = (() => {
       50%      { box-shadow: 0 6px 28px rgba(245,158,11,0.95); }
     }
     @keyframes free-glow {
-      0%,100% { box-shadow:0 0 6px rgba(37,99,235,0.30); }
-      50%      { box-shadow:0 0 20px rgba(37,99,235,0.75); }
+      0%,100% { box-shadow:0 0 6px rgba(14,159,110,0.30); }
+      50%      { box-shadow:0 0 20px rgba(14,159,110,0.75); }
     }
     @keyframes arrow-bounce {
       0%,100% { transform:translateX(-50%) translateY(0); }
@@ -246,10 +268,6 @@ const UppstallningGame = (() => {
   function showModeSelect() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-    const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
-    const modeBg    = mode === 'addition'
-      ? 'linear-gradient(135deg,#fef9c3,#eff6ff)'
-      : 'linear-gradient(135deg,#fdf4ff,#fef3c7)';
 
     const levels = [
       { n: 1, emoji: '🌱', desc: 'Tal 0–20' },
@@ -266,42 +284,34 @@ const UppstallningGame = (() => {
 
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="UppstallningGame.goBack()">Tillbaka</button>
-        <span class="header-title" style="color:${modeColor}">${modeLabel}</span>
-        <div style="width:80px"></div>
+      <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="UppstallningGame.goBack()">Tillbaka</button>
+        <span class="header-title">${modeLabel}</span>
+        <span style="width:52px"></span>
       </div>
-      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
-        <div class="player-banner">
-          <div class="avatar avatar-lg">${profile.avatar}</div>
-          <div class="player-info">
-            <div class="player-name">${escHtml(profile.name)}</div>
-            <div class="player-tagline">Välj läge och svårighetsgrad 🎯</div>
+      <div class="wrap" style="padding:0 12px 12px;overflow-y:auto">
+        <div class="me-chip" style="align-self:center;margin-top:auto">
+          <span class="avatar avatar-sm">${profile.avatar}</span>
+          <b>${escHtml(profile.name)}</b>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin:14px 0 auto">
+          <div class="up-card" onclick="UppstallningGame.startDemo()">
+            <span class="up-aico">👀</span>
+            <span><b>Titta och lär</b><small>Se varje steg animerat – tryck "Nästa steg"</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>
-        </div>
-        <div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:14px;border:2px solid rgba(37,99,235,0.1)">
-          <div style="font-weight:800;font-size:12px;color:var(--pv-primary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Svårighetsgrad</div>
-          <div class="diff-row">${diffBtnsHTML}</div>
-        </div>
-        <div class="up-card" style="background:${modeBg}" onclick="UppstallningGame.startDemo()">
-          <div style="display:flex;align-items:center;gap:16px">
-            <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(255,255,255,0.7)">👀</div>
-            <div style="flex:1">
-              <div style="font-family:var(--font-heading);font-size:1.3rem;color:${modeColor}">Titta och lär</div>
-              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Se varje steg animerat – tryck "Nästa steg"</div>
-            </div>
-            <div style="font-size:1.5rem;opacity:0.4">›</div>
+          <div class="up-card" onclick="UppstallningGame.startExercise()">
+            <span class="up-aico">✏️</span>
+            <span><b>Räkna själv</b><small>Fyll i svar kolumn för kolumn</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>
-        </div>
-        <div class="up-card" onclick="UppstallningGame.startExercise()">
-          <div style="display:flex;align-items:center;gap:16px">
-            <div style="font-size:2.5rem;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(255,255,255,0.7)">✏️</div>
-            <div style="flex:1">
-              <div style="font-family:var(--font-heading);font-size:1.3rem;color:var(--pv-primary)">Räkna själv</div>
-              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Fyll i svar kolumn för kolumn</div>
+          <div class="card" style="padding:14px">
+            <div class="panel-title" style="margin-bottom:10px">
+              <svg class="icn" style="color:var(--accent)" viewBox="0 0 24 24"><path d="M6 16l4-8 3 6 2-3 3 5"/></svg>
+              Svårighetsgrad
             </div>
-            <div style="font-size:1.5rem;opacity:0.4">›</div>
+            <div class="diff-row">${diffBtnsHTML}</div>
           </div>
         </div>
       </div>`;
@@ -495,15 +505,13 @@ const UppstallningGame = (() => {
   function renderDemoView() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-    const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
 
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="UppstallningGame.goBack()">Avsluta</button>
-        <span class="header-title" style="color:${modeColor}">${modeLabel} – Demo</span>
-        <div style="width:80px"></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="UppstallningGame.goBack()">Avsluta</button>
+        <span class="header-title">${modeLabel} – Demo</span>
+        <span style="width:52px"></span>
       </div>
       <div id="up-main">
         <div id="up-left">
@@ -885,15 +893,14 @@ const UppstallningGame = (() => {
     if (!step) return '';
     if (step.type === 'done') {
       return `<div style="display:flex;gap:8px">
-        <button class="up-btn" style="flex:1;height:50px;background:var(--pv-primary);color:#fff;font-size:1rem"
-          onclick="UppstallningGame.startDemo()">🔄 Ny uppgift</button>
-        <button class="up-btn" style="flex:1;height:50px;background:var(--pv-light);color:var(--pv-primary);border:2px solid rgba(37,99,235,0.3);font-size:1rem"
-          onclick="UppstallningGame.goBack()">↩ Tillbaka</button>
+        <button class="btn btn-primary" style="flex:1"
+          onclick="UppstallningGame.startDemo()"><svg class="icn"><use href="#i-refresh"/></svg>Ny uppgift</button>
+        <button class="btn btn-secondary" style="flex:1"
+          onclick="UppstallningGame.goBack()">Tillbaka</button>
       </div>`;
     }
-    return `<button id="up-next-btn" class="up-btn" onclick="UppstallningGame.demoNextStep()"
-      style="width:100%;height:54px;background:var(--pv-primary);color:#fff;font-size:1.1rem;border-radius:14px"
-      ${stepLocked ? 'disabled' : ''}>Nästa steg ▶️</button>`;
+    return `<button id="up-next-btn" class="btn btn-primary btn-block" onclick="UppstallningGame.demoNextStep()"
+      ${stepLocked ? 'disabled' : ''}>Nästa steg <svg class="icn"><use href="#i-play"/></svg></button>`;
   }
 
   function lockStep() {
@@ -1123,36 +1130,25 @@ const UppstallningGame = (() => {
   function showHelpSelect() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-    const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="UppstallningGame.goBack()">Tillbaka</button>
-        <span class="header-title" style="color:${modeColor}">${modeLabel} – Övning</span>
-        <div style="width:80px"></div>
+      <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="UppstallningGame.goBack()">Tillbaka</button>
+        <span class="header-title">${modeLabel} – Övning</span>
+        <span style="width:52px"></span>
       </div>
-      <div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px">
-        <div style="font-family:var(--font-heading);font-size:1.4rem;color:var(--pv-primary);text-align:center">Hur vill du räkna?</div>
-        <div class="up-card" style="width:100%;background:linear-gradient(135deg,#eff6ff,#dbeafe)"
-          onclick="UppstallningGame.setHelpMode(true)">
-          <div style="display:flex;align-items:center;gap:16px">
-            <div style="font-size:2.5rem">🤝</div>
-            <div>
-              <div style="font-family:var(--font-heading);font-size:1.2rem;color:var(--pv-primary)">Med hjälp</div>
-              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Ledtrådar, låna-knapp och kompletteringsmetoden</div>
-            </div>
-          </div>
+      <div class="wrap vcenter" style="padding:0 12px 12px;gap:14px">
+        <div class="section-title" style="text-align:center">Hur vill du räkna?</div>
+        <div class="up-card" onclick="UppstallningGame.setHelpMode(true)">
+          <span class="up-aico">🤝</span>
+          <span><b>Med hjälp</b><small>Ledtrådar, låna-knapp och kompletteringsmetoden</small></span>
+          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
         </div>
-        <div class="up-card" style="width:100%;background:linear-gradient(135deg,#f0fdf4,#dcfce7)"
-          onclick="UppstallningGame.setHelpMode(false)">
-          <div style="display:flex;align-items:center;gap:16px">
-            <div style="font-size:2.5rem">💪</div>
-            <div>
-              <div style="font-family:var(--font-heading);font-size:1.2rem;color:#166534">Utan hjälp</div>
-              <div style="font-size:0.85rem;color:var(--color-text-muted);font-weight:700;margin-top:4px">Räkna på egen hand – ingen ledtråd</div>
-            </div>
-          </div>
+        <div class="up-card" onclick="UppstallningGame.setHelpMode(false)">
+          <span class="up-aico">💪</span>
+          <span><b>Utan hjälp</b><small>Räkna på egen hand – ingen ledtråd</small></span>
+          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
         </div>
       </div>`;
   }
@@ -1188,14 +1184,12 @@ const UppstallningGame = (() => {
   function renderExLayout() {
     const root = document.getElementById('uppstallning-root');
     const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-    const modeColor = mode === 'addition' ? '#d97706' : '#dc2626';
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="UppstallningGame.goBack()">Avsluta</button>
-        <span class="header-title" style="color:${modeColor}">${modeLabel} – Övning</span>
-        <div style="font-size:12px;font-weight:800;color:var(--color-text-muted)">${exerciseIdx+1}/5</div>
+      <div class="app-header">
+        <button class="btn-back" onclick="UppstallningGame.goBack()">Avsluta</button>
+        <span class="header-title">${modeLabel} – Övning</span>
+        <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx+1}/5</span>
       </div>
       <div id="up-main">
         <div id="up-left">
@@ -1234,7 +1228,7 @@ const UppstallningGame = (() => {
 
     /* ── Free mode (utan hjälp) — renderas EN gång per uppgift ── */
     if (!helpMode) {
-      ui.innerHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+      ui.innerHTML = `<div style="background:var(--glass-strong);border-radius:var(--radius-md);padding:12px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
         <div id="ex-free-label" style="font-size:11px;font-weight:800;text-align:center;margin-bottom:8px;text-transform:uppercase"></div>
         <div class="ex-numpad">
           ${[1,2,3,4,5,6,7,8,9,0].map(k =>
@@ -1243,9 +1237,9 @@ const UppstallningGame = (() => {
         </div>
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="up-btn" id="ex-free-erase" onclick="UppstallningGame.exFreeErase()"
-            style="width:64px;height:48px;background:var(--pv-light);color:var(--pv-primary);border:2px solid rgba(37,99,235,0.3);font-size:1.2rem;border-radius:14px">⌫</button>
+            style="width:64px;height:48px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
           <button class="up-btn" id="ex-free-submit" onclick="UppstallningGame.exFreeSubmit()" disabled
-            style="flex:1;height:48px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:1rem;border-radius:14px">
+            style="flex:1;height:48px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:1rem;border-radius:var(--radius-full)">
             Fyll i alla rutor…</button>
         </div>
       </div>`;
@@ -1268,30 +1262,28 @@ const UppstallningGame = (() => {
     if (needsBorrow) {
       // Subtraktion-lån (oförändrad)
       ui.innerHTML = `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
-        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
+        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:var(--radius-full);animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
         👆 Tryck här för att låna!</button>`;
 
     } else if (isTenFriend && tenPhase === 0) {
       // Fas 0: "mer än 9" — visa knapp för att gå till förklaring
       ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exTenStep1()"
-        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:14px;animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
+        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:var(--radius-full);animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
         👆 Tryck här för att se hur! 🔢</button>`;
 
     } else if (isTenFriend && tenPhase === 1) {
       // Fas 1: förklaring visas i bubblan — knapp för att köra animationen
-      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exTenStep2()"
-        style="width:100%;height:58px;background:var(--pv-primary);color:#fff;border:none;font-size:1rem;border-radius:14px">
-        Se animation ▶️</button>`;
+      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStep2()">
+        Se animation <svg class="icn"><use href="#i-play"/></svg></button>`;
 
     } else if (isTenFriend && tenPhase === 2) {
       // Fas 2: streck-animation körd, väntar på carry-flyg
-      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exTenStep3()"
-        style="width:100%;height:58px;background:var(--pv-primary);color:#fff;border:none;font-size:1rem;border-radius:14px">
-        Skicka 10:an! ⬆️</button>`;
+      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStep3()">
+        Skicka 10:an! <svg class="icn" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>`;
 
     } else {
       // Fas 3+ eller ingen 10-kompis: visa numpad
-      ui.innerHTML = `<div style="background:rgba(255,255,255,0.9);border-radius:14px;padding:12px;border:2px solid rgba(37,99,235,0.1)">
+      ui.innerHTML = `<div style="background:var(--glass-strong);border-radius:var(--radius-md);padding:12px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
         <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
           Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
         </div>
@@ -1435,9 +1427,8 @@ const UppstallningGame = (() => {
     // Visa "Fortsätt"-knapp istället för tidsbaserad paus
     const ui = document.getElementById('ex-col-ui');
     if (ui) {
-      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exContinueBorrow()"
-        style="width:100%;height:54px;background:var(--pv-primary);color:#fff;font-size:1rem;border-radius:14px">
-        Fortsätt ▶️</button>`;
+      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exContinueBorrow()">
+        Fortsätt <svg class="icn"><use href="#i-play"/></svg></button>`;
     }
   }
 
@@ -1601,7 +1592,7 @@ const UppstallningGame = (() => {
     const ready = exFreeAllFilled();
     btn.disabled = !ready;
     btn.style.background = ready
-      ? 'linear-gradient(135deg,#22c55e,#16a34a)'
+      ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
       : 'linear-gradient(135deg,#cbd5e1,#94a3b8)';
     btn.textContent = ready ? 'Klar ✓' : 'Fyll i alla rutor…';
   }
@@ -1754,26 +1745,23 @@ const UppstallningGame = (() => {
     const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
-      <div class="app-header" style="border-bottom-color:rgba(37,99,235,0.2)">
-        <button class="btn-back up-btn" style="background:var(--pv-light);color:var(--pv-primary)"
-          onclick="UppstallningGame.goBack()">Tillbaka</button>
-        <span class="header-title" style="color:var(--pv-primary)">🏆 Resultat</span>
-        <div style="width:80px"></div>
+      <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
+      <div class="app-header">
+        <button class="btn-back" onclick="UppstallningGame.goBack()">Tillbaka</button>
+        <span class="header-title">Resultat</span>
+        <span style="width:52px"></span>
       </div>
-      <div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px">
-        <div style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));
-          border-radius:20px;padding:32px 24px;text-align:center;color:white;width:100%;animation:bounce-in 0.6s var(--ease-bounce)">
-          <div style="font-size:4rem;margin-bottom:12px">${emoji}</div>
-          <div style="font-family:var(--font-heading);font-size:1.6rem">${msg}</div>
-          <div style="font-size:3rem;font-weight:900;margin:12px 0">
-            ${exScore} <span style="font-size:1.5rem;opacity:0.8">av 5</span>
+      <div class="wrap" style="padding:0 12px 12px">
+        <div class="result-hero">
+          <div class="result-pct num">${Math.round((exScore / 5) * 100)} %</div>
+          <div class="result-medal">${emoji}</div>
+          <div class="result-msg">${msg}</div>
+          <div class="result-note num">${exScore} av 5 rätt</div>
+          <div class="result-actions">
+            <button class="btn btn-primary btn-lg" onclick="UppstallningGame.startExercise()">
+              <svg class="icn"><use href="#i-refresh"/></svg>Spela igen</button>
+            <button class="btn btn-ghost" onclick="UppstallningGame.goBack()">Välj läge</button>
           </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;width:100%">
-          <button class="btn btn-lg up-btn" style="background:linear-gradient(135deg,var(--pv-primary),var(--pv-secondary));color:white;border:none"
-            onclick="UppstallningGame.startExercise()">🔄 Spela igen</button>
-          <button class="btn btn-ghost up-btn" style="border-color:var(--pv-primary);color:var(--pv-primary)"
-            onclick="UppstallningGame.goBack()">↩ Välj läge</button>
         </div>
       </div>`;
   }
@@ -1781,18 +1769,18 @@ const UppstallningGame = (() => {
   /* ── Scratch HTML ───────────────────────────────────────── */
   function scratchHTML() {
     return `<div class="up-scratch">
-      <div style="font-size:10px;font-weight:800;color:var(--pv-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+      <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
       <canvas id="up-canvas" class="up-canvas"></canvas>
       <div style="display:flex;gap:5px;flex-shrink:0">
         <button onclick="UppstallningGame.upToggleEraser(false)" id="up-draw"
           style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
-          cursor:pointer;background:var(--pv-primary);color:#fff;border:1.5px solid var(--pv-primary)">🖊️ Rita</button>
+          cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
         <button onclick="UppstallningGame.upToggleEraser(true)" id="up-erase"
           style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
-          cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🧹 Sudd</button>
+          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🧹 Sudd</button>
         <button onclick="UppstallningGame.upClearCanvas()"
           style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
-          cursor:pointer;background:var(--pv-light);color:var(--pv-primary);border:1.5px solid rgba(37,99,235,0.3)">🗑️ Rensa</button>
+          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🗑️ Rensa</button>
       </div>
     </div>`;
   }
@@ -1871,8 +1859,8 @@ const UppstallningGame = (() => {
     upErasing = on;
     const d = document.getElementById('up-draw');
     const e = document.getElementById('up-erase');
-    if (d) { d.style.background = on ? 'var(--pv-light)' : 'var(--pv-primary)'; d.style.color = on ? 'var(--pv-primary)' : '#fff'; }
-    if (e) { e.style.background = on ? 'var(--pv-primary)' : 'var(--pv-light)'; e.style.color = on ? '#fff' : 'var(--pv-primary)'; }
+    if (d) { d.style.background = on ? 'var(--tint)' : 'var(--accent)'; d.style.color = on ? 'var(--deep)' : '#fff'; }
+    if (e) { e.style.background = on ? 'var(--accent)' : 'var(--tint)'; e.style.color = on ? '#fff' : 'var(--deep)'; }
   }
 
   function upClearCanvas() {

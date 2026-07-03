@@ -11,211 +11,35 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
-  <!-- Styles -->
+  <!-- Typografi: Baloo 2 (rubriker/siffror) + Nunito (brödtext) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Designsystem (se docs/DESIGN-SYSTEM.md) -->
   <link rel="stylesheet" href="styles/app.css" />
-
-  <style>
-    /* ── Startskärm ─────────────────────────────── */
-    #screen-home {
-      background: var(--bg-app);
-      align-items: center;
-      padding: var(--space-8) var(--space-4);
-      gap: var(--space-6);
-    }
-
-    .home-logo {
-      text-align: center;
-      animation: bounce-in 0.7s var(--ease-bounce);
-    }
-    .home-logo .logo-text { font-size: 3rem; }
-    .home-logo .logo-sub {
-      font-size: var(--text-base);
-      color: var(--color-text-muted);
-      font-weight: 700;
-      margin-top: var(--space-1);
-    }
-    .home-stars {
-      font-size: 2.5rem;
-      letter-spacing: 0.3em;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .profiles-section { width: 100%; }
-    .profiles-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-      margin-bottom: var(--space-4);
-    }
-
-    .profile-card .profile-actions {
-      margin-left: auto;
-      display: flex;
-      gap: var(--space-2);
-    }
-
-    .btn-delete-profile {
-      width: 36px; height: 36px;
-      border-radius: var(--radius-full);
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: var(--text-lg);
-      display: flex; align-items: center; justify-content: center;
-      transition: all var(--duration-fast) var(--ease-smooth);
-      opacity: 0;
-    }
-    .profile-card:hover .btn-delete-profile { opacity: 1; }
-    .btn-delete-profile:hover {
-      background: #fee2e2;
-      transform: scale(1.2);
-    }
-
-    .home-actions {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-
-    /* ── Skapa profil-skärm ──────────────────────── */
-    #screen-create-profile {
-      background: var(--bg-app);
-      align-items: center;
-      padding: var(--space-6) var(--space-4);
-      gap: var(--space-5);
-    }
-    #screen-create-profile .create-header {
-      text-align: center;
-      animation: slide-up 0.4s var(--ease-smooth);
-    }
-    .create-form { width: 100%; display: flex; flex-direction: column; gap: var(--space-5); }
-    .form-label {
-      font-weight: 800;
-      font-size: var(--text-base);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-2);
-      display: block;
-    }
-    .avatar-picker { justify-content: center; }
-
-    /* ── Spelväljare ─────────────────────────────── */
-    #screen-game-select {
-      background: var(--bg-app);
-      padding: var(--space-4);
-      gap: var(--space-4);
-    }
-    .player-banner {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-4) var(--space-5);
-      background: rgba(255,255,255,0.8);
-      border-radius: var(--radius-xl);
-      border: 2px solid rgba(192,132,252,0.2);
-      box-shadow: var(--shadow-sm);
-      animation: slide-up 0.4s var(--ease-smooth);
-    }
-    .player-banner .player-info .player-name {
-      font-family: var(--font-heading);
-      font-size: var(--text-2xl);
-      color: var(--color-primary-dark);
-    }
-    .player-banner .player-info .player-tagline {
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-      font-weight: 700;
-    }
-
-    .game-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(clamp(140px,30vw,280px), 1fr));
-      gap: clamp(8px,2vw,16px);
-      padding: clamp(8px,2vw,16px);
-      width: 100%;
-    }
-
-    .card-game {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-2);
-      min-height: clamp(100px,15vh,180px);
-      text-align: center;
-    }
-    .game-icon {
-      font-size: clamp(2rem,5vw,3.5rem);
-      display: flex; align-items: center; justify-content: center;
-      border-radius: var(--radius-lg);
-      transition: transform var(--duration-normal) var(--ease-bounce);
-      width: auto; height: auto; padding: var(--space-2);
-    }
-    .card-game:hover .game-icon { transform: scale(1.15) rotate(8deg); }
-
-    .game-info { flex: unset; }
-    .game-name {
-      font-family: var(--font-heading);
-      font-size: clamp(1rem,2.5vw,1.5rem);
-      line-height: 1.2;
-    }
-    .game-desc {
-      font-size: clamp(0.75rem,1.5vw,0.95rem);
-      color: var(--color-text-muted);
-      font-weight: 700;
-      margin-top: var(--space-1);
-    }
-    .game-arrow { display: none; }
-
-    /* Spelkort-färger */
-    .game-mult  { background: linear-gradient(135deg, #fdf4ff 0%, #ede9fe 100%); }
-    .game-clock { background: linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%); }
-    .game-friends { background: linear-gradient(135deg, #fdf4ff 0%, #fef9c3 100%); }
-    .game-np { background: linear-gradient(135deg, #fef9c3 0%, #fce7f3 100%); }
-
-    .game-mult  .game-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
-    .game-clock .game-icon { background: linear-gradient(135deg, #dbeafe, #fef3c7); }
-    .game-friends .game-icon { background: linear-gradient(135deg, #ede9fe, #fef9c3); }
-    .game-np .game-icon { background: linear-gradient(135deg, #fef9c3, #fce7f3); }
-
-    .game-mult  .game-name { color: var(--mult-primary); }
-    .game-clock .game-name { color: var(--clock-primary); }
-    .game-friends .game-name { color: var(--friends-primary); }
-    .game-np .game-name { color: var(--np-primary); }
-    .game-pv { background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%); }
-    .game-pv .game-icon { background: linear-gradient(135deg, #fde68a, #bfdbfe); }
-    .game-pv .game-name { color: var(--pv-primary); }
-
-    /* Stäng-knapp i delete-modal */
-    .profile-delete-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-      max-height: 300px;
-      overflow-y: auto;
-      margin: var(--space-4) 0;
-    }
-    .delete-profile-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      background: #fff5f5;
-      border-radius: var(--radius-md);
-      border: 1.5px solid #fecaca;
-    }
-    .delete-profile-row .delete-name {
-      flex: 1;
-      font-weight: 800;
-      font-size: var(--text-base);
-    }
-  </style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════
-     DEKORATIVA BAKGRUNDSSTJÄRNOR
+     IKONBIBLIOTEK (inline-SVG, UI-ikoner – aldrig emoji)
+     Användning: <svg class="icn"><use href="#i-back"/></svg>
 ═══════════════════════════════════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-stats" viewBox="0 0 24 24"><path d="M5 19v-6M12 19V5.5M19 19v-9"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-switch" viewBox="0 0 24 24"><path d="M7 8h10M14 5l3 3-3 3M17 16H7M10 13l-3 3 3 3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3M4.5 17.5V12H10"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2 4.6 5 .5-3.8 3.4 1.1 4.9L12 14.3 7.7 16.9l1.1-4.9L5 8.6l5-.5z"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.5M9.5 3.5h5"/></symbol>
+</svg>
+
+<!-- Dekorativa bakgrundsstjärnor (innehålls-emoji, pausbara) -->
 <div id="bg-stars" aria-hidden="true"></div>
 
 <div class="app-wrapper">
@@ -224,156 +48,156 @@
        SKÄRM 1: STARTSKÄRM / PROFILER
   ══════════════════════════════════════ -->
   <section id="screen-home" class="screen active" role="main">
-
-    <div class="home-logo">
-      <div class="home-stars">✨ 🌟 ✨</div>
-      <div class="logo-text">MULTIPLAY</div>
-      <div class="logo-sub">Magisk mattestund 🎀</div>
+    <div class="floaties" aria-hidden="true">
+      <span style="top:8%;left:8%">✨</span>
+      <span style="top:14%;right:10%;animation-delay:1.5s">🌟</span>
+      <span style="bottom:12%;right:7%;animation-delay:2s">✨</span>
     </div>
+    <div class="wrap vcenter">
+      <div class="logo">MULTIPLAY</div>
+      <p class="tagline">Vem ska spela idag?</p>
 
-    <div class="profiles-section w-full">
-      <div class="section-title">Vem är du? 👋</div>
-      <div class="profiles-list" id="profiles-list">
-        <!-- Profiler renderas hit av JS -->
+      <div class="profiles" id="profiles-list">
+        <!-- Profilkort renderas hit av App.renderProfiles() -->
       </div>
-      <div id="no-profiles-msg" class="hidden" style="text-align:center;color:var(--color-text-muted);padding:var(--space-6);font-weight:700;">
+      <div id="no-profiles-msg" class="empty-note hidden">
         Inga profiler ännu – skapa en! 🌟
       </div>
-    </div>
 
-    <div class="home-actions">
-      <button class="btn btn-primary btn-lg w-full" onclick="App.showCreateProfile()">
-        ✨ Skapa ny profil
+      <div class="home-actions">
+        <button class="btn btn-primary btn-lg btn-block" onclick="App.showCreateProfile()">
+          <svg class="icn"><use href="#i-plus"/></svg>
+          Skapa ny profil
+        </button>
+        <button class="btn btn-ghost btn-sm btn-block" onclick="App.showDeleteProfiles()" id="btn-show-delete">
+          <svg class="icn"><use href="#i-trash"/></svg>
+          Ta bort profiler
+        </button>
+      </div>
+
+      <button id="update-btn" class="update-link" onclick="checkForUpdate()">
+        Sök uppdatering
       </button>
-      <button class="btn btn-ghost btn-sm w-full" onclick="App.showDeleteProfiles()" id="btn-show-delete">
-        🗑️ Ta bort profiler
-      </button>
     </div>
-
-    <button id="update-btn" onclick="checkForUpdate()" style="
-      background:none; border:none; color:var(--color-text-muted);
-      font-size:12px; font-weight:700; cursor:pointer; padding:6px 12px;
-      border-radius:var(--radius-full); opacity:0.6;
-      transition:opacity 0.2s;"
-      onmouseenter="this.style.opacity='1'"
-      onmouseleave="this.style.opacity='0.6'">
-      🔄 Sök uppdatering
-    </button>
-
   </section>
 
   <!-- ══════════════════════════════════════
        SKÄRM 2: SKAPA PROFIL
   ══════════════════════════════════════ -->
   <section id="screen-create-profile" class="screen" role="main">
-
-    <div class="app-header">
-      <button class="btn-back" onclick="App.showHome()">Tillbaka</button>
-      <span class="header-title">Ny profil 🌟</span>
-      <div style="width:80px"></div>
+    <div class="floaties" aria-hidden="true">
+      <span style="top:6%;right:8%">✨</span>
+      <span style="bottom:10%;left:6%;animation-delay:2s">🌟</span>
     </div>
-
-    <div class="create-header">
-      <h2>Vad heter du? 😊</h2>
-      <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-2);">Skapa din magiska profil!</p>
-    </div>
-
-    <div class="create-form container">
-      <div>
-        <label class="form-label" for="profile-name-input">Ditt namn ✏️</label>
-        <input
-          class="input"
-          id="profile-name-input"
-          type="text"
-          placeholder="Skriv ditt namn här..."
-          maxlength="20"
-          autocomplete="off"
-          spellcheck="false"
-        />
+    <div class="wrap">
+      <div class="app-header">
+        <button class="btn-back" onclick="App.showHome()">Tillbaka</button>
+        <span class="header-title">Ny profil</span>
+        <span style="width:52px" aria-hidden="true"></span>
       </div>
 
-      <div>
-        <label class="form-label">Välj din avatar 🎭</label>
-        <div class="avatar-picker" id="avatar-picker">
-          <!-- Renderas av JS -->
+      <div class="wrap vcenter">
+        <div class="card create-form">
+          <div class="text-center">
+            <h2>Vad heter du? 😊</h2>
+            <p class="text-muted text-sm mt-2">Skapa din magiska profil!</p>
+          </div>
+
+          <div>
+            <label class="form-label" for="profile-name-input">Ditt namn ✏️</label>
+            <input
+              class="input"
+              id="profile-name-input"
+              type="text"
+              placeholder="Skriv ditt namn här..."
+              maxlength="20"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div>
+            <label class="form-label">Välj din avatar 🎭</label>
+            <div class="avatar-picker" id="avatar-picker">
+              <!-- Renderas av JS -->
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-block" onclick="App.createProfile()" id="btn-create">
+            Skapa!
+            <svg class="icn"><use href="#i-play"/></svg>
+          </button>
         </div>
       </div>
-
-      <button class="btn btn-primary btn-lg w-full" onclick="App.createProfile()" id="btn-create">
-        🚀 Skapa!
-      </button>
     </div>
-
   </section>
 
   <!-- ══════════════════════════════════════
        SKÄRM 3: SPELVÄLJARE
   ══════════════════════════════════════ -->
   <section id="screen-game-select" class="screen" role="main">
-
-    <div class="app-header">
-      <button class="btn-back" onclick="App.showHome()">Byt profil</button>
-      <span class="header-title">Välj spel 🎮</span>
-      <div style="width:80px"></div>
+    <div class="floaties" aria-hidden="true">
+      <span style="top:6%;right:6%">✨</span>
+      <span style="bottom:8%;left:4%;animation-delay:2s">🌟</span>
     </div>
+    <div class="wrap">
+      <div class="me-row">
+        <div class="me-chip" id="player-banner">
+          <span class="avatar avatar-sm" id="banner-avatar"></span>
+          <b id="banner-name"></b>
+          <button class="btn-switch" onclick="App.showHome()">
+            <svg class="icn"><use href="#i-switch"/></svg>Byt
+          </button>
+        </div>
+      </div>
 
-    <div class="player-banner" id="player-banner">
-      <div class="avatar avatar-lg" id="banner-avatar"></div>
-      <div class="player-info">
-        <div class="player-name" id="banner-name"></div>
-        <div class="player-tagline">Redo att lära sig? 🎯</div>
+      <h2 class="hello">Hej <em id="hello-name"></em>! Vad vill du träna på? 🌈</h2>
+
+      <!-- Hero-slot: "kom igång" nu · Dagens träning byggs i Fas 4.
+           Innehållet renderas av App.renderHero(). -->
+      <div class="hero" id="daily-hero"></div>
+
+      <div class="grid-cards">
+
+        <button class="game-card theme-mult" onclick="App.startGame('multiplication')">
+          <span class="game-emoji">✖️</span>
+          <h3>Gångertabellen</h3>
+          <p>Träna 1–12:ans tabeller i din egen takt</p>
+          <span class="game-meta" data-game-status="multiplication">Ny! ✨</span>
+        </button>
+
+        <button class="game-card theme-clock" onclick="App.startGame('clock')">
+          <span class="game-emoji">🕐</span>
+          <h3>Klockan</h3>
+          <p>Analog, digital och svensk tid</p>
+          <span class="game-meta" data-game-status="clock">Ny! ✨</span>
+        </button>
+
+        <button class="game-card theme-friends" onclick="App.startGame('friends')">
+          <span class="game-emoji">🤝</span>
+          <h3>10-Kompisar</h3>
+          <p>Talpar som tillsammans blir 10</p>
+          <span class="game-meta" data-game-status="friends">Ny! ✨</span>
+        </button>
+
+        <button class="game-card theme-np" onclick="App.startGame('nationella')">
+          <span class="game-emoji">📝</span>
+          <h3>Nationella Prov</h3>
+          <p>Träna inför nationella proven i åk 3</p>
+          <span class="game-meta" data-game-status="nationella">Ny! ✨</span>
+        </button>
+
+        <button class="game-card game-card-wide theme-plus" onclick="App.startGame('addsub')">
+          <span class="game-emoji">➕➖</span>
+          <span>
+            <h3>Addition &amp; Subtraktion</h3>
+            <p>Platsvärde, uppställning &amp; minnessiffra</p>
+          </span>
+          <span class="game-meta" data-game-status="addsub">Ny! ✨</span>
+        </button>
+
       </div>
     </div>
-
-    <div class="game-cards">
-
-      <div class="card-game game-mult" onclick="App.startGame('multiplication')" role="button" tabindex="0">
-        <div class="game-icon">✖️</div>
-        <div class="game-info">
-          <div class="game-name">Gångertabellen</div>
-          <div class="game-desc">Träna 1–12:ans tabell 🔢</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
-
-      <div class="card-game game-clock" onclick="App.startGame('clock')" role="button" tabindex="0">
-        <div class="game-icon">🕐</div>
-        <div class="game-info">
-          <div class="game-name">Klockan</div>
-          <div class="game-desc">Lär dig läsa och ställa klockan ⏰</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
-
-      <div class="card-game game-friends" onclick="App.startGame('friends')" role="button" tabindex="0">
-        <div class="game-icon">🤝</div>
-        <div class="game-info">
-          <div class="game-name">10-Kompisar</div>
-          <div class="game-desc">Talpar som blir 10 tillsammans 💛</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
-
-      <div class="card-game game-np" onclick="App.startGame('nationella')" role="button" tabindex="0">
-        <div class="game-icon">📝</div>
-        <div class="game-info">
-          <div class="game-name">Nationella Prov</div>
-          <div class="game-desc">Träna inför nationella proven i åk 3 🎯</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
-
-      <div class="card-game game-pv" onclick="App.startGame('addsub')" role="button" tabindex="0">
-        <div class="game-icon">➕➖</div>
-        <div class="game-info">
-          <div class="game-name">Addition & Subtraktion</div>
-          <div class="game-desc">Platsvärde, uppställning & minnessiffra 📐</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
-
-    </div>
-
   </section>
 
   <!-- ══════════════════════════════════════
@@ -467,12 +291,12 @@
 ══════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="modal-delete-profiles">
   <div class="modal">
-    <div class="modal-title">🗑️ Ta bort profil</div>
-    <p style="text-align:center;font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-2);">
+    <div class="modal-title">Ta bort profil</div>
+    <p class="text-center text-sm text-muted" style="margin-bottom:var(--space-2);">
       All statistik raderas permanent!
     </p>
     <div class="profile-delete-list" id="delete-profiles-list"></div>
-    <button class="btn btn-ghost w-full" onclick="App.hideDeleteProfiles()">Stäng</button>
+    <button class="btn btn-ghost btn-block" onclick="App.hideDeleteProfiles()">Stäng</button>
   </div>
 </div>
 
@@ -482,7 +306,7 @@
 <div class="modal-overlay hidden" id="modal-confirm-delete">
   <div class="modal">
     <div class="modal-title">⚠️ Är du säker?</div>
-    <p style="text-align:center;color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-6);" id="confirm-delete-msg"></p>
+    <p class="text-center text-sm text-muted" style="margin-bottom:var(--space-6);" id="confirm-delete-msg"></p>
     <div style="display:flex;gap:var(--space-3);">
       <button class="btn btn-ghost w-full" onclick="App.hideConfirmDelete()">Avbryt</button>
       <button class="btn btn-danger w-full" id="btn-confirm-delete-yes">Ta bort</button>
@@ -496,7 +320,7 @@
 <div class="confetti-container" id="confetti-container" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════════════
-     SCRIPTS
+     SCRIPTS (shared.js FÖRST, ordningen är kontrakt)
 ══════════════════════════════════════ -->
 <script src="js/shared.js"></script>
 <script src="js/app.js"></script>

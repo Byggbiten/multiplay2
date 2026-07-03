@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v24';
+const APP_VERSION = 'v25';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -241,6 +241,106 @@ const App = (() => {
     Sound.play('click');
   }
 
+  /* ── Loggläsning (statuschips + Dagens träning-villkor) ── */
+  /* Loggnycklar per modul – samma nycklar som Store.deleteProfile rensar */
+  const GAME_LOG_KEYS = {
+    multiplication: id => [`mult_log_${id}`],
+    clock:          id => [`clock_log_${id}`],
+    friends:        id => [`friends_log_${id}`],
+    nationella:     id => [`np_svenska_log_${id}`],
+    addsub:         id => [`uppstallning_log_${id}`, `platsvarde_log_${id}`],
+  };
+
+  function readLog(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; }
+    catch (_) { return []; }
+  }
+
+  function allLogs(profileId) {
+    return Object.values(GAME_LOG_KEYS)
+      .flatMap(fn => fn(profileId))
+      .map(readLog);
+  }
+
+  function countTotalTests(profileId) {
+    return allLogs(profileId).reduce((sum, log) => sum + log.length, 0);
+  }
+
+  /* Dagens träning visas först när profilen har ≥2 spelade test totalt.
+     (Själva innehållet i Dagens träning byggs i Fas 4.) */
+  function shouldShowDailyTraining(profile) {
+    const p = profile || currentProfile;
+    if (!p) return false;
+    return countTotalTests(p.id) >= 2;
+  }
+
+  /* Procent ur en loggpost oavsett modulens fältnamn */
+  function entryPct(e) {
+    if (!e) return null;
+    if (typeof e.pct === 'number') return e.pct;
+    const correct = (typeof e.score === 'number') ? e.score
+                  : (typeof e.totalCorrect === 'number') ? e.totalCorrect
+                  : (typeof e.correct === 'number') ? e.correct : null;
+    if (correct !== null && typeof e.total === 'number' && e.total > 0) {
+      return Math.round((correct / e.total) * 100);
+    }
+    return null;
+  }
+
+  /* Statuschip-text för ett spelkort: senaste resultat eller "Ny! ✨".
+     Loggarna är nyast-först (unshift), så [0] är senaste posten. */
+  function gameStatusChip(game, profile) {
+    const p = profile || currentProfile;
+    const keyFn = GAME_LOG_KEYS[game];
+    if (!p || !keyFn) return 'Ny! ✨';
+
+    const logs = keyFn(p.id).map(readLog).filter(l => l.length > 0);
+    if (logs.length === 0) return 'Ny! ✨';
+
+    // Vid flera loggar (addsub): ta den färskaste av loggarnas senaste poster
+    const latest = logs
+      .map(l => l[0])
+      .sort((a, b) => new Date(b && b.date || 0) - new Date(a && a.date || 0))[0];
+
+    const pct = entryPct(latest);
+    if (pct === null) {
+      const count = logs.reduce((sum, l) => sum + l.length, 0);
+      return `🎯 ${count} spelade`;
+    }
+    const medal = MP.getMedal(pct);
+    return `${medal || '⭐'} Senast ${pct} %`;
+  }
+
+  /* "Spelade idag/igår/i förrgår/3 jun" */
+  function lastPlayedText(profileId) {
+    const dates = allLogs(profileId)
+      .flatMap(log => log.map(e => e && e.date).filter(Boolean))
+      .map(d => new Date(d))
+      .filter(d => !isNaN(d));
+    if (dates.length === 0) return null;
+    const last = new Date(Math.max(...dates));
+    const days = Math.floor((new Date().setHours(0,0,0,0) - new Date(last).setHours(0,0,0,0)) / 86400000);
+    if (days <= 0) return 'Spelade idag';
+    if (days === 1) return 'Spelade igår';
+    if (days === 2) return 'Spelade i förrgår';
+    return 'Spelade ' + last.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+  }
+
+  /* Medaljräkning över alla loggar (🥉 vid ≥75 %) */
+  function countMedals(profileId) {
+    return allLogs(profileId)
+      .flatMap(log => log)
+      .filter(e => { const pct = entryPct(e); return pct !== null && pct >= 75; })
+      .length;
+  }
+
+  function profileMetaText(p) {
+    const medals = countMedals(p.id);
+    const played = lastPlayedText(p.id);
+    if (!played) return 'Ny spelare ✨';
+    return `🥇 ${medals} medalj${medals === 1 ? '' : 'er'} · ${played}`;
+  }
+
   /* ── Profilrendering ──────────────────────────────── */
   function renderProfiles() {
     const list = document.getElementById('profiles-list');
@@ -260,13 +360,16 @@ const App = (() => {
     list.innerHTML = profiles.map(p => `
       <div class="profile-card animate-pop-in" onclick="App.selectProfile('${p.id}')">
         <div class="avatar avatar-md">${p.avatar}</div>
-        <div style="flex:1">
+        <div style="flex:1;min-width:0">
           <div class="profile-name">${escapeHtml(p.name)}</div>
-          <div class="profile-meta">Skapad ${formatDate(p.created)}</div>
+          <div class="profile-meta">${escapeHtml(profileMetaText(p))}</div>
         </div>
         <div class="profile-actions" onclick="event.stopPropagation()">
-          <button class="btn-delete-profile" onclick="App.confirmDeleteProfile('${p.id}')" title="Ta bort profil" aria-label="Ta bort ${escapeHtml(p.name)}">🗑️</button>
+          <button class="btn-delete-profile" onclick="App.confirmDeleteProfile('${p.id}')" title="Ta bort profil" aria-label="Ta bort ${escapeHtml(p.name)}">
+            <svg class="icn"><use href="#i-trash"/></svg>
+          </button>
         </div>
+        <svg class="icn chev" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
       </div>
     `).join('');
   }
@@ -316,7 +419,52 @@ const App = (() => {
 
     document.getElementById('banner-avatar').textContent = currentProfile.avatar;
     document.getElementById('banner-name').textContent   = currentProfile.name;
+    const helloName = document.getElementById('hello-name');
+    if (helloName) helloName.textContent = currentProfile.name;
+
+    renderHero();
+    renderGameStatus();
     Router.show('screen-game-select');
+  }
+
+  /* Hero-slot i spelväljaren.
+     Villkor <2 test  → "kom igång"-kort som pekar mot spelen.
+     Villkor ≥2 test  → Dagens träning-slot; innehållet (adaptiv motor)
+     är Fas 4, så TILLS VIDARE visas kom igång-kortet med anpassad text. */
+  function renderHero() {
+    const hero = document.getElementById('daily-hero');
+    if (!hero || !currentProfile) return;
+
+    if (shouldShowDailyTraining(currentProfile)) {
+      hero.innerHTML = `
+        <div class="hero-inner">
+          <span class="hero-emoji">🎯</span>
+          <div>
+            <span class="hero-badge">✨ Smart träning</span>
+            <h2>Dagens träning</h2>
+            <p>Byggs just nu – snart tränar du på precis det du behöver! 🛠️</p>
+            <small>Fortsätt spela så länge – varje test gör din träning smartare 💜</small>
+          </div>
+        </div>`;
+    } else {
+      hero.innerHTML = `
+        <div class="hero-inner">
+          <span class="hero-emoji">🚀</span>
+          <div>
+            <span class="hero-badge">✨ Kom igång</span>
+            <h2>Kom igång!</h2>
+            <p>Välj ett spel här nedanför och kör dina två första test 🌟</p>
+            <small>Sen låser du upp Dagens träning – smart träning på just dina tal</small>
+          </div>
+        </div>`;
+    }
+  }
+
+  /* Fyll spelkortens statuschips (senaste resultat eller "Ny! ✨") */
+  function renderGameStatus() {
+    document.querySelectorAll('[data-game-status]').forEach(el => {
+      el.textContent = gameStatusChip(el.dataset.gameStatus, currentProfile);
+    });
   }
 
   function startGame(game) {
@@ -367,7 +515,7 @@ const App = (() => {
         <div class="avatar avatar-sm">${p.avatar}</div>
         <div class="delete-name">${escapeHtml(p.name)}</div>
         <button class="btn btn-danger btn-sm" onclick="App.confirmDeleteProfile('${p.id}')">
-          🗑️ Ta bort
+          <svg class="icn"><use href="#i-trash"/></svg> Ta bort
         </button>
       </div>
     `).join('');
@@ -449,6 +597,8 @@ const App = (() => {
     confirmDeleteProfile,
     hideConfirmDelete,
     getCurrentProfile,
+    shouldShowDailyTraining,
+    gameStatusChip,
     // Hjälpfunktioner tillgängliga för moduler
     Sound,
     Confetti,
@@ -549,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
   App.init();
   // Sätt versionsnummer på uppdateringsknappen
   const updateBtn = document.getElementById('update-btn');
-  if (updateBtn) updateBtn.textContent = `🔄 Sök uppdatering (${APP_VERSION})`;
+  if (updateBtn) updateBtn.textContent = `Sök uppdatering (${APP_VERSION})`;
   // PWA: registrera service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});

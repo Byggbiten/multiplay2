@@ -13,91 +13,67 @@ const NationellaHub = (() => {
     showSubjectSelect();
   }
 
+  /* ── Modulspecifik CSS (rot-fyllnad, tokens) ─────────── */
+  const HUB_CSS = `
+    #nationella-root, #np-matte-select-root {
+      flex:1; display:flex; flex-direction:column; min-height:0; width:100%;
+    }
+    .nphub-list { flex:1; display:flex; flex-direction:column;
+      justify-content:center; gap:var(--space-4); min-height:0; }
+    .nphub-chev { width:24px; height:24px; color:var(--accent); flex-shrink:0; margin-left:auto; }
+  `;
+
   /* ── Ämnesval: Matematik / Svenska ───────────────────── */
   function showSubjectSelect() {
     const root = document.getElementById('nationella-root');
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
-        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary)"
-          onclick="App.goBackToGameSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--np-primary)">📝 Nationella Prov Åk 3</span>
-        <div style="width:80px"></div>
+      <style id="nphub-rs">${HUB_CSS}</style>
+      <div class="app-header">
+        <button class="btn-back" onclick="App.goBackToGameSelect()">Tillbaka</button>
+        <span class="header-title">Nationella Prov Åk 3</span>
+        <span style="width:80px"></span>
       </div>
 
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
+      <div class="wrap">
+        <div class="nphub-list">
 
-        <!-- Spelarbanner -->
-        <div class="player-banner">
-          <div class="avatar avatar-lg">${profile.avatar}</div>
-          <div class="player-info">
-            <div class="player-name">${escHtml(profile.name)}</div>
-            <div class="player-tagline">Välj ett ämne att träna 🎯</div>
-          </div>
-        </div>
-
-        <!-- Ämnesval -->
-        <div style="font-weight:800;font-size:var(--text-lg);color:var(--np-primary);margin-top:var(--space-2)">
-          Välj ämne
-        </div>
-
-        <!-- Matematik (aktiv) -->
-        <div class="card" style="
-          display:flex;align-items:center;gap:var(--space-5);
-          padding:var(--space-5);cursor:pointer;
-          background:linear-gradient(135deg,#fef9c3 0%,#fce7f3 100%);
-          border:2px solid rgba(124,58,237,0.2);
-          transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s;
-        "
-          onclick="NationellaHub.showMatteSelect()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''"
-          role="button" tabindex="0">
-          <div style="
-            font-size:2.5rem;width:64px;height:64px;
-            display:flex;align-items:center;justify-content:center;
-            border-radius:var(--radius-lg);
-            background:linear-gradient(135deg,#fef9c3,#fce7f3);
-          ">🔢</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:var(--np-primary)">
-              Matematik Åk 3
-            </div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">
-              Tabeller, diagram, chans och mer 📊
+          <!-- Spelarbanner -->
+          <div class="player-banner">
+            <div class="avatar avatar-lg">${profile.avatar}</div>
+            <div class="player-info">
+              <div class="player-name">${escHtml(profile.name)}</div>
+              <div class="player-tagline">Välj ett ämne att träna 🎯</div>
             </div>
           </div>
-          <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
-        </div>
 
-        <!-- Svenska (aktiv) -->
-        <div class="card" style="
-          display:flex;align-items:center;gap:var(--space-5);
-          padding:var(--space-5);cursor:pointer;
-          background:linear-gradient(135deg,#d1fae5 0%,#ede9fe 100%);
-          border:2px solid rgba(5,150,105,0.2);
-          transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s;
-        "
-          onclick="NationellaHub.startSvenska()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''"
-          role="button" tabindex="0">
-          <div style="
-            font-size:2.5rem;width:64px;height:64px;
-            display:flex;align-items:center;justify-content:center;
-            border-radius:var(--radius-lg);
-            background:linear-gradient(135deg,#d1fae5,#ede9fe);
-          ">📖</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:#059669">
-              Svenska Åk 3
+          <!-- Ämnesval -->
+          <div class="section-title">Välj ämne</div>
+
+          <!-- Matematik (aktiv) -->
+          <div class="game-card game-card-wide" style="cursor:pointer"
+            onclick="NationellaHub.showMatteSelect()"
+            role="button" tabindex="0">
+            <span class="game-emoji">🔢</span>
+            <div style="flex:1;min-width:0">
+              <h3>Matematik Åk 3</h3>
+              <p>Tabeller, diagram, chans och mer 📊</p>
             </div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">
-              Läsförståelse, begrepp och skriva ✏️
-            </div>
+            <svg class="icn nphub-chev"><use href="#i-chevron"/></svg>
           </div>
-          <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
-        </div>
 
+          <!-- Svenska (aktiv) -->
+          <div class="game-card game-card-wide" style="cursor:pointer"
+            onclick="NationellaHub.startSvenska()"
+            role="button" tabindex="0">
+            <span class="game-emoji">📖</span>
+            <div style="flex:1;min-width:0">
+              <h3>Svenska Åk 3</h3>
+              <p>Läsförståelse, begrepp och skriva ✏️</p>
+            </div>
+            <svg class="icn nphub-chev"><use href="#i-chevron"/></svg>
+          </div>
+
+        </div>
       </div>
     `;
     Router.show('screen-nationella-select');
@@ -108,82 +84,50 @@ const NationellaHub = (() => {
     App.Sound.play('click');
     const root = document.getElementById('np-matte-select-root');
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
-        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary)"
-          onclick="NationellaHub.showSubjectSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--np-primary)">🔢 Matematik Åk 3</span>
-        <div style="width:80px"></div>
+      <style id="nphub-rs2">${HUB_CSS}</style>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showSubjectSelect()">Tillbaka</button>
+        <span class="header-title">Matematik Åk 3</span>
+        <span style="width:80px"></span>
       </div>
 
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
+      <div class="wrap">
+        <div class="nphub-list">
 
-        <!-- Spelarbanner -->
-        <div class="player-banner">
-          <div class="avatar avatar-lg">${profile.avatar}</div>
-          <div class="player-info">
-            <div class="player-name">${escHtml(profile.name)}</div>
-            <div class="player-tagline">Välj delmodul att träna 📚</div>
-          </div>
-        </div>
-
-        <!-- Delmodul: Muntlig del (aktiv) -->
-        <div class="card" style="
-          display:flex;align-items:center;gap:var(--space-5);
-          padding:var(--space-5);cursor:pointer;
-          background:linear-gradient(135deg,#ede9fe 0%,#fce7f3 100%);
-          border:2px solid rgba(124,58,237,0.2);
-          transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s;
-        "
-          onclick="NationellaHub.startMatteMuntligt()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''"
-          role="button" tabindex="0">
-          <div style="
-            font-size:2.5rem;width:64px;height:64px;
-            display:flex;align-items:center;justify-content:center;
-            border-radius:var(--radius-lg);
-            background:linear-gradient(135deg,#ede9fe,#fce7f3);
-          ">🗣️</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:var(--np-primary)">
-              Muntlig del Åk 3
-            </div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">
-              10 uppgifter – tabeller, diagram och chans 🎲
+          <!-- Spelarbanner -->
+          <div class="player-banner">
+            <div class="avatar avatar-lg">${profile.avatar}</div>
+            <div class="player-info">
+              <div class="player-name">${escHtml(profile.name)}</div>
+              <div class="player-tagline">Välj delmodul att träna 📚</div>
             </div>
           </div>
-          <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
-        </div>
 
-        <!-- Skriftlig del (aktiv) -->
-        <div class="card" style="
-          display:flex;align-items:center;gap:var(--space-5);
-          padding:var(--space-5);cursor:pointer;
-          background:linear-gradient(135deg,#eff6ff 0%,#ecfeff 100%);
-          border:2px solid rgba(37,99,235,0.2);
-          transition:transform 0.2s var(--ease-bounce),box-shadow 0.2s;
-        "
-          onclick="NationellaHub.startMatteSkriftlig()"
-          onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-          onmouseleave="this.style.transform='';this.style.boxShadow=''"
-          role="button" tabindex="0">
-          <div style="
-            font-size:2.5rem;width:64px;height:64px;
-            display:flex;align-items:center;justify-content:center;
-            border-radius:var(--radius-lg);
-            background:linear-gradient(135deg,#eff6ff,#ecfeff);
-          ">✏️</div>
-          <div style="flex:1">
-            <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:#2563eb">
-              Skriftlig del Åk 3
+          <!-- Delmodul: Muntlig del (aktiv) -->
+          <div class="game-card game-card-wide" style="cursor:pointer"
+            onclick="NationellaHub.startMatteMuntligt()"
+            role="button" tabindex="0">
+            <span class="game-emoji">🗣️</span>
+            <div style="flex:1;min-width:0">
+              <h3>Muntlig del Åk 3</h3>
+              <p>10 uppgifter – tabeller, diagram och chans 🎲</p>
             </div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700;margin-top:4px">
-              20 uppgifter – tabeller, diagram och mer 📝
-            </div>
+            <svg class="icn nphub-chev"><use href="#i-chevron"/></svg>
           </div>
-          <div style="font-size:var(--text-2xl);opacity:0.5">›</div>
-        </div>
 
+          <!-- Skriftlig del (aktiv) -->
+          <div class="game-card game-card-wide" style="cursor:pointer"
+            onclick="NationellaHub.startMatteSkriftlig()"
+            role="button" tabindex="0">
+            <span class="game-emoji">✏️</span>
+            <div style="flex:1;min-width:0">
+              <h3>Skriftlig del Åk 3</h3>
+              <p>20 uppgifter – tabeller, diagram och mer 📝</p>
+            </div>
+            <svg class="icn nphub-chev"><use href="#i-chevron"/></svg>
+          </div>
+
+        </div>
       </div>
     `;
     Router.show('screen-np-matte-select');

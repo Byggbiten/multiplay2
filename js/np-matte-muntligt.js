@@ -44,7 +44,7 @@ const NpMatteMuntligt = (() => {
 
   const CONTEXTS = ['kulor','klossar','äpplen','stjärnor','godisbitar','kort'];
   const EVEN_NUMS = [6,8,10,12,14,16,18,20,24,30,40,50,60,80,100,150,200,300];
-  const BAR_COLORS = ['#7c3aed','#f472b6','#fbbf24','#4ade80','#60a5fa','#fb923c'];
+  const BAR_COLORS = ['#e85a4f','#f472b6','#fbbf24','#4ade80','#60a5fa','#fb923c'];
 
   /* ── Fråge-ordning ──────────────────────────────────── */
   const QUESTION_ORDER = [
@@ -79,45 +79,36 @@ const NpMatteMuntligt = (() => {
   function showStartScreen() {
     const root = document.getElementById('np-matte-muntligt-root');
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
-        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary)"
-          onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--np-primary)">🗣️ Matte Muntligt</span>
-        <div style="width:80px"></div>
+      <style id="np-shell">
+        #np-matte-muntligt-root { flex:1; display:flex; flex-direction:column; min-height:0; width:100%; }
+      </style>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
+        <span class="header-title">Matte Muntligt</span>
+        <span style="width:80px"></span>
       </div>
 
-      <div style="
-        flex:1;display:flex;flex-direction:column;align-items:center;
-        justify-content:center;padding:var(--space-8) var(--space-4);
-        gap:var(--space-6);text-align:center;
-        background:var(--np-bg);
-      ">
-        <div style="animation:bounce-in 0.6s var(--ease-bounce)">
-          <div style="font-size:5rem;margin-bottom:var(--space-3)">🗣️✨</div>
+      <div class="wrap vcenter" style="align-items:center;gap:var(--space-5);text-align:center">
+        <div style="animation:bounce-in 0.6s var(--spring)">
+          <div style="font-size:4.5rem;margin-bottom:var(--space-3)">🗣️✨</div>
           <h1 style="
-            font-family:var(--font-heading);
+            font-family:var(--font-head);
             font-size:var(--text-4xl);
-            color:var(--np-primary);
+            color:var(--deep);
             margin:0 0 var(--space-3);
           ">Matteprat!</h1>
-          <div class="card" style="text-align:left;padding:var(--space-5);max-width:400px">
-            <p style="font-weight:700;color:var(--color-text);font-size:var(--text-base);margin:0 0 var(--space-3)">
+          <div class="card" style="text-align:left;max-width:420px">
+            <p style="font-weight:700;color:var(--ink);font-size:var(--text-base);margin:0 0 var(--space-3)">
               Du kommer få <strong>10 uppgifter</strong>. Titta på tabeller och diagram, räkna, och berätta hur du tänker!
             </p>
-            <p style="font-weight:700;color:var(--np-secondary);font-size:var(--text-sm);margin:0">
+            <p style="font-weight:800;color:var(--deep);font-size:var(--text-sm);margin:0">
               👨‍👩‍👧 En vuxen sitter bredvid dig.
             </p>
           </div>
         </div>
 
-        <button class="btn btn-lg" style="
-          background:linear-gradient(135deg,var(--np-primary),var(--np-secondary));
-          color:white;
-          box-shadow:0 6px 24px var(--np-glow);
-          width:100%;max-width:400px;
-          font-size:var(--text-xl);
-          animation:pulse-glow 2s infinite;
-        " onclick="NpMatteMuntligt.startGame()">
+        <button class="btn btn-primary btn-lg" style="width:100%;max-width:400px"
+          onclick="NpMatteMuntligt.startGame()">
           Starta muntlig matte ▶️
         </button>
       </div>
@@ -159,11 +150,12 @@ const NpMatteMuntligt = (() => {
         /* ── Compact header ── */
         #np-hdr {
           display:flex; align-items:center; gap:8px; flex-shrink:0;
-          padding:5px 10px; border-bottom:1px solid rgba(124,58,237,0.15); min-height:44px;
+          padding:5px 10px; border-bottom:1px solid color-mix(in srgb, var(--accent) 15%, transparent); min-height:44px;
         }
-        #np-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:var(--np-primary); }
-        #np-prog-wrap { width:72px; height:6px; border-radius:3px; background:rgba(124,58,237,0.15); overflow:hidden; flex-shrink:0; }
-        #np-prog-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--np-primary),var(--np-secondary)); transition:width 0.4s; }
+        #np-hdr .hdr-cat { flex:1; text-align:center; font-weight:800; font-size:13px; color:var(--deep); font-family:var(--font-head); }
+        #np-prog-wrap { width:72px; height:6px; border:none; box-shadow:none; flex-shrink:0;
+          background:color-mix(in srgb, var(--accent) 15%, transparent); }
+        #np-prog-fill  { transition:width 0.4s; }
         /* ── Main: two-column grid, left=content, right=canvas ── */
         #np-main {
           flex:1; display:grid;
@@ -180,54 +172,56 @@ const NpMatteMuntligt = (() => {
           overflow-y:auto; min-height:0;
         }
         #np-visual-panel {
-          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:10px; border:1.5px solid rgba(124,58,237,0.12);
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          padding:10px; border:1.5px solid color-mix(in srgb, var(--accent) 12%, transparent);
           flex-shrink:0;
         }
         /* RIGHT column: canvas fills full height */
         #np-scratch-panel {
-          background:rgba(255,255,255,0.85); border-radius:var(--radius-lg);
-          padding:8px; border:1.5px solid rgba(124,58,237,0.12);
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          padding:8px; border:1.5px solid color-mix(in srgb, var(--accent) 12%, transparent);
           display:flex; flex-direction:column; gap:5px;
           height:100%; min-height:0;
         }
         #np-canvas {
           flex:1; width:100%; display:block;
           touch-action:none; cursor:crosshair;
-          border-radius:var(--radius-md); border:1.5px dashed rgba(124,58,237,0.25);
+          border-radius:var(--radius-md); border:1.5px dashed color-mix(in srgb, var(--accent) 25%, transparent);
           background:rgba(255,255,255,0.7);
         }
         .np-canvas-tools { display:flex; gap:5px; flex-shrink:0; }
         .np-tool-btn {
           flex:1; height:30px; border-radius:var(--radius-md); font-weight:800;
-          font-size:11px; cursor:pointer; border:1.5px solid rgba(124,58,237,0.3); transition:all 0.15s;
+          font-size:11px; cursor:pointer; border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); transition:all 0.15s;
         }
-        .np-tool-btn.active       { background:var(--np-primary); color:#fff; border-color:var(--np-primary); }
-        .np-tool-btn:not(.active) { background:var(--np-light);   color:var(--np-primary); }
+        .np-tool-btn.active       { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .np-tool-btn:not(.active) { background:var(--tint);   color:var(--deep); }
         /* question + answers + hints */
-        .np-question-text { font-size:var(--text-base); font-weight:800; color:var(--color-text); padding:4px 6px; line-height:1.4; }
+        .np-question-text { font-size:var(--text-base); font-weight:800; color:var(--ink); padding:4px 6px; line-height:1.4; }
         /* choice: 2×2 grid */
         .np-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
         .np-choice-btn {
-          height:46px; border-radius:var(--radius-md); background:rgba(255,255,255,0.9);
-          border:2px solid rgba(124,58,237,0.22); color:var(--np-primary);
-          font-size:var(--text-base); font-weight:800; cursor:pointer;
-          transition:all 0.15s var(--ease-smooth); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px;
+          height:46px; border-radius:var(--radius-md); background:var(--glass-strong);
+          border:2px solid color-mix(in srgb, var(--accent) 22%, transparent); color:var(--deep);
+          font-family:var(--font-head); font-size:var(--text-base); font-weight:800; cursor:pointer;
+          transition:all 0.15s var(--smooth); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px;
         }
-        .np-choice-btn:hover, .np-choice-btn:active { background:rgba(124,58,237,0.1); }
+        .np-choice-btn:hover, .np-choice-btn:active { background:var(--tint); border-color:var(--accent); }
         /* numpad: compact 52px */
         .np-numpad-grid { display:grid; grid-template-columns:repeat(3,52px); gap:5px; justify-content:center; }
         .np-numpad-btn {
           width:52px; height:52px; border-radius:var(--radius-full);
+          font-family:var(--font-head);
           font-size:var(--text-lg); font-weight:900; cursor:pointer;
           box-shadow:var(--shadow-sm); transition:transform 0.1s;
         }
         /* free display */
         #np-free-display {
-          font-size:var(--text-4xl); font-weight:900; color:var(--np-primary); min-height:52px;
+          font-family:var(--font-head); font-variant-numeric:tabular-nums;
+          font-size:var(--text-4xl); font-weight:900; color:var(--deep); min-height:52px;
           display:flex; align-items:center; justify-content:center;
-          background:rgba(255,255,255,0.9); border-radius:var(--radius-lg);
-          border:2.5px solid rgba(124,58,237,0.3); width:100%; letter-spacing:0.05em;
+          background:var(--glass-strong); border-radius:var(--radius-lg);
+          border:2.5px solid color-mix(in srgb, var(--accent) 30%, transparent); width:100%; letter-spacing:0.05em;
         }
         /* hint bar */
         .np-hint-bar { display:flex; gap:5px; }
@@ -240,11 +234,11 @@ const NpMatteMuntligt = (() => {
 
       <!-- Compact header -->
       <div id="np-hdr">
-        <button class="btn-back" style="background:var(--np-light);color:var(--np-primary);flex-shrink:0;padding:4px 10px;font-size:13px"
+        <button class="btn-back" style="flex-shrink:0;min-height:36px;padding:4px 12px 4px 8px;font-size:13px"
           onclick="NpMatteMuntligt.confirmAbort()">Avbryt</button>
         <div class="hdr-cat">${q.emoji} ${q.category}</div>
-        <span style="font-size:11px;font-weight:800;color:var(--np-primary);flex-shrink:0">${currentIdx+1}/10</span>
-        <div id="np-prog-wrap"><div id="np-prog-fill" style="width:${pct}%"></div></div>
+        <span class="num" style="font-size:11px;font-weight:800;color:var(--deep);flex-shrink:0">${currentIdx+1}/10</span>
+        <div class="progress-bar" id="np-prog-wrap"><i id="np-prog-fill" style="width:${pct}%"></i></div>
       </div>
 
       <!-- Main area: two-column grid -->
@@ -253,7 +247,7 @@ const NpMatteMuntligt = (() => {
         <!-- LEFT column: visual + question + answers + hints -->
         <div id="np-left-col">
           <div id="np-visual-panel">
-            ${q.visual ? renderVisual(q.visual) : `<div style="color:#c084fc;font-size:2rem;text-align:center;padding-top:8px">${q.emoji}</div>`}
+            ${q.visual ? renderVisual(q.visual) : `<div style="color:var(--accent-light);font-size:2rem;text-align:center;padding-top:8px">${q.emoji}</div>`}
           </div>
           <div class="np-question-text">${q.question}</div>
           <div id="np-answer-area">${renderAnswerArea(q)}</div>
@@ -270,7 +264,7 @@ const NpMatteMuntligt = (() => {
 
         <!-- RIGHT column: canvas full height -->
         <div id="np-scratch-panel">
-          <div style="font-size:10px;font-weight:800;color:var(--np-primary);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
           <canvas id="np-canvas"></canvas>
           <div class="np-canvas-tools">
             <button id="np-tool-draw" class="np-tool-btn active" onclick="NpMatteMuntligt.toggleEraser(false)">🖊️ Rita</button>
@@ -311,25 +305,20 @@ const NpMatteMuntligt = (() => {
 
     if (q.answerType === 'oral') {
       return `
-        <div style="
-          background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(244,114,182,0.08));
-          border-radius:var(--radius-lg);
+        <div class="card" style="
           padding:var(--space-6);
           text-align:center;
-          border:2px solid rgba(124,58,237,0.15);
+          border:2px solid color-mix(in srgb, var(--accent) 15%, transparent);
         ">
           <div style="font-size:3rem;margin-bottom:var(--space-3)">🗣️</div>
-          <p style="font-weight:800;color:var(--np-primary);font-size:var(--text-lg);margin:0 0 var(--space-2)">
+          <p style="font-weight:800;color:var(--deep);font-size:var(--text-lg);margin:0 0 var(--space-2)">
             Berätta för den vuxna!
           </p>
-          <p style="font-weight:700;color:var(--color-text-muted);font-size:var(--text-sm);margin:0 0 var(--space-6)">
+          <p style="font-weight:700;color:var(--ink-soft);font-size:var(--text-sm);margin:0 0 var(--space-6)">
             Ta din tid. Den vuxna trycker på knappen när ni är klara.
           </p>
-          <button class="btn btn-lg" style="
-            background:linear-gradient(135deg,var(--np-primary),var(--np-secondary));
-            color:white;width:100%;
-            box-shadow:0 4px 16px var(--np-glow);
-          " onclick="NpMatteMuntligt.handleOral()">
+          <button class="btn btn-primary btn-lg" style="width:100%"
+            onclick="NpMatteMuntligt.handleOral()">
             Vi har pratat klart ✅
           </button>
         </div>
@@ -348,9 +337,9 @@ const NpMatteMuntligt = (() => {
       <div class="np-numpad-grid">
         ${keys.map(k => `
           <button class="np-numpad-btn" style="
-            background:${k==='OK'?'linear-gradient(135deg,var(--np-primary),var(--np-secondary))':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'rgba(255,255,255,0.9)'};
-            color:${k==='OK'||k==='⌫'?'white':'var(--np-primary)'};
-            border:2px solid ${k==='OK'?'var(--np-primary)':k==='⌫'?'#ef4444':'rgba(124,58,237,0.2)'};
+            background:${k==='OK'?'linear-gradient(135deg,var(--accent),var(--accent-light))':k==='⌫'?'linear-gradient(135deg,#fca5a5,#f87171)':'var(--glass-strong)'};
+            color:${k==='OK'||k==='⌫'?'white':'var(--deep)'};
+            border:2px solid ${k==='OK'?'var(--accent)':k==='⌫'?'#ef4444':'color-mix(in srgb, var(--accent) 20%, transparent)'};
           "
             onpointerdown="this.style.transform='scale(0.91)'"
             onpointerup="this.style.transform=''"
@@ -430,7 +419,7 @@ const NpMatteMuntligt = (() => {
     } else {
       canvasCtx.globalCompositeOperation = 'source-over';
       canvasCtx.lineWidth   = 2 + pressure * 4;
-      canvasCtx.strokeStyle = '#7c3aed';
+      canvasCtx.strokeStyle = '#e85a4f'; /* var(--np-acc) – canvas kräver literal */
     }
     canvasCtx.lineCap   = 'round';
     canvasCtx.lineJoin  = 'round';
@@ -548,7 +537,7 @@ const NpMatteMuntligt = (() => {
           font-weight:900;
           color:#166534;
           font-size:var(--text-xl);
-          animation:bounce-in 0.4s var(--ease-bounce);
+          animation:bounce-in 0.4s var(--spring);
         ">✅ ${msgs[Math.floor(Math.random()*msgs.length)]}</div>
       `;
     }
@@ -563,11 +552,11 @@ const NpMatteMuntligt = (() => {
       if (btn) {
         btn.style.background = 'linear-gradient(135deg,#fee2e2,#fecaca)';
         btn.style.borderColor = '#ef4444';
-        btn.style.animation = 'wiggle 0.4s var(--ease-smooth)';
+        btn.style.animation = 'wiggle 0.4s var(--smooth)';
         setTimeout(() => {
           if (btn) {
-            btn.style.background = 'rgba(255,255,255,0.9)';
-            btn.style.borderColor = 'rgba(124,58,237,0.25)';
+            btn.style.background = 'var(--glass-strong)';
+            btn.style.borderColor = 'color-mix(in srgb, var(--accent) 25%, transparent)';
             btn.style.animation = '';
             btn.disabled = true;
           }
@@ -615,18 +604,18 @@ const NpMatteMuntligt = (() => {
       fb.innerHTML = `
         <div style="
           background:rgba(255,255,255,0.95);
-          border:2px solid rgba(124,58,237,0.3);
+          border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
           border-radius:var(--radius-lg);
           padding:var(--space-4);
           text-align:center;
         ">
-          <div style="font-weight:700;color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-2)">
+          <div style="font-weight:700;color:var(--ink-soft);font-size:var(--text-sm);margin-bottom:var(--space-2)">
             Rätt svar var:
           </div>
-          <div style="font-weight:900;font-size:var(--text-3xl);color:var(--np-primary)">
+          <div class="num" style="font-family:var(--font-head);font-weight:900;font-size:var(--text-3xl);color:var(--deep)">
             ${escHtml(correct)}
           </div>
-          <div style="font-weight:700;color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-2)">
+          <div style="font-weight:700;color:var(--ink-soft);font-size:var(--text-sm);margin-top:var(--space-2)">
             Fortsätt – du lär dig! 💪
           </div>
         </div>
@@ -707,74 +696,47 @@ const NpMatteMuntligt = (() => {
     }));
 
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(124,58,237,0.2)">
-        <div style="width:80px"></div>
-        <span class="header-title" style="color:var(--np-primary)">🏆 Resultat</span>
-        <div style="width:80px"></div>
+      <style id="np-shell">
+        #np-matte-muntligt-root { flex:1; display:flex; flex-direction:column; min-height:0; width:100%; }
+      </style>
+      <div class="app-header">
+        <button class="btn-back" onclick="NationellaHub.showMatteSelect()">Tillbaka</button>
+        <span class="header-title">Resultat</span>
+        <span style="width:80px"></span>
       </div>
 
-      <div style="flex:1;overflow-y:auto;padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)">
+      <div class="wrap vcenter" style="gap:var(--space-4)">
 
         <!-- Huvudresultat -->
-        <div style="
-          background:linear-gradient(135deg,var(--np-primary),var(--np-secondary));
-          border-radius:var(--radius-xl);
-          padding:var(--space-8) var(--space-5);
-          text-align:center;
-          color:white;
-          animation:bounce-in 0.6s var(--ease-bounce);
-        ">
-          <div style="font-size:4rem;margin-bottom:var(--space-3);animation:sparkle 1.5s infinite">🌟</div>
-          <div style="font-family:var(--font-heading);font-size:var(--text-4xl);margin-bottom:var(--space-2)">
-            Fantastiskt jobbat!
-          </div>
-          <div style="font-size:var(--text-6xl);font-weight:900;margin:var(--space-3) 0">
-            ${score} <span style="font-size:var(--text-2xl);opacity:0.8">av 10</span>
-          </div>
-          <div style="opacity:0.9;font-weight:700;font-size:var(--text-lg)">
-            Du klarade ${score} frågor! 🎊
-          </div>
+        <div class="result-hero" style="flex:0 0 auto">
+          <span class="result-medal">🌟</span>
+          <div class="result-msg">Fantastiskt jobbat!</div>
+          <div class="result-pct num">${score}<span style="font-size:0.32em"> av 10</span></div>
+          <div class="result-note">Du klarade ${score} frågor! 🎊</div>
         </div>
 
         <!-- Tränade områden -->
-        <div class="card" style="padding:var(--space-4)">
-          <div style="font-weight:800;color:var(--np-primary);margin-bottom:var(--space-3);font-size:var(--text-base)">
+        <div class="card" style="flex-shrink:1;min-height:0;overflow-y:auto">
+          <div class="card-title">
+            <svg class="icn" style="color:var(--accent)"><use href="#i-stats"/></svg>
             Du tränade på:
           </div>
-          <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-2)">
             ${categories.map(c => `
-              <div style="
-                display:flex;align-items:center;gap:var(--space-3);
-                padding:var(--space-2) var(--space-3);
-                border-radius:var(--radius-md);
-                background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(244,114,182,0.06));
-              ">
-                <span style="font-size:1.2rem">${c.emoji}</span>
-                <span style="font-weight:700;color:var(--color-text);flex:1">${c.label}</span>
-                <span style="color:var(--np-primary)">✅</span>
-              </div>
+              <span class="chip" style="cursor:default">${c.emoji} ${c.label} ✅</span>
             `).join('')}
           </div>
         </div>
 
         <!-- Knappar -->
-        <div style="display:flex;flex-direction:column;gap:var(--space-3)">
-          <button class="btn btn-lg" style="
-            background:linear-gradient(135deg,var(--np-primary),var(--np-secondary));
-            color:white;
-            box-shadow:0 4px 20px var(--np-glow);
-          " onclick="NpMatteMuntligt.startGame()">
+        <div class="result-actions">
+          <button class="btn btn-primary btn-lg" onclick="NpMatteMuntligt.startGame()">
             Spela igen 🔄
           </button>
-          <button class="btn btn-ghost" style="
-            border-color:var(--np-primary);
-            color:var(--np-primary);
-          " onclick="NationellaHub.showMatteSelect()">
+          <button class="btn btn-ghost" onclick="NationellaHub.showMatteSelect()">
             Tillbaka 🏠
           </button>
         </div>
-
-        <div style="height:var(--space-8)"></div>
       </div>
     `;
   }
@@ -850,16 +812,16 @@ const NpMatteMuntligt = (() => {
         font-size:var(--text-base);font-weight:700;
       ">
         <thead>
-          <tr style="background:linear-gradient(135deg,var(--np-primary),var(--np-secondary))">
+          <tr style="background:linear-gradient(135deg,var(--accent),var(--accent-light))">
             <th style="padding:12px 16px;text-align:left;color:white;font-weight:800">${escHtml(data.col1)}</th>
             <th style="padding:12px 16px;text-align:right;color:white;font-weight:800">${escHtml(data.col2)}</th>
           </tr>
         </thead>
         <tbody>
           ${data.rows.map((r, i) => `
-            <tr style="background:${i%2===0?'rgba(255,255,255,0.9)':'rgba(124,58,237,0.05)'}">
-              <td style="padding:12px 16px;color:var(--color-text);border-bottom:1px solid rgba(124,58,237,0.1)">${escHtml(r.label)}</td>
-              <td style="padding:12px 16px;text-align:right;font-weight:900;color:var(--np-primary);border-bottom:1px solid rgba(124,58,237,0.1)">${r.value}</td>
+            <tr style="background:${i%2===0?'rgba(255,255,255,0.9)':'color-mix(in srgb, var(--accent) 5%, transparent)'}">
+              <td style="padding:12px 16px;color:var(--ink);border-bottom:1px solid color-mix(in srgb, var(--accent) 10%, transparent)">${escHtml(r.label)}</td>
+              <td class="num" style="padding:12px 16px;text-align:right;font-weight:900;color:var(--deep);border-bottom:1px solid color-mix(in srgb, var(--accent) 10%, transparent)">${r.value}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -905,7 +867,7 @@ const NpMatteMuntligt = (() => {
     });
 
     return `
-      <div style="font-weight:800;color:var(--np-primary);margin-bottom:var(--space-2);font-size:var(--text-sm)">
+      <div style="font-weight:800;color:var(--deep);margin-bottom:var(--space-2);font-size:var(--text-sm)">
         ${escHtml(data.title)} ${data.emoji}
       </div>
       <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:400px;display:block;margin:0 auto">
@@ -940,7 +902,7 @@ const NpMatteMuntligt = (() => {
 
           return `
             <div style="text-align:center">
-              <div style="font-weight:800;color:var(--np-primary);font-size:var(--text-sm);margin-bottom:6px">
+              <div style="font-weight:800;color:var(--deep);font-size:var(--text-sm);margin-bottom:6px">
                 ${bagLabels[bi]}
               </div>
               <svg width="110" height="${Math.max(60, svgH + 20)}"
@@ -949,7 +911,7 @@ const NpMatteMuntligt = (() => {
                   rx="12" fill="${bagColors[bi]}22" stroke="${bagColors[bi]}" stroke-width="2"/>
                 <g transform="translate(5,10)">${circles}</g>
               </svg>
-              <div style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:700;margin-top:4px">
+              <div style="font-size:var(--text-xs);color:var(--ink-soft);font-weight:700;margin-top:4px">
                 ${bag.balls.map(b => `${b.count} ${b.colorName}`).join(', ')}
               </div>
             </div>
@@ -997,7 +959,7 @@ const NpMatteMuntligt = (() => {
 
     return `
       <div style="text-align:center">
-        <div style="font-weight:800;color:var(--np-primary);margin-bottom:var(--space-2);font-size:var(--text-sm)">Snurra</div>
+        <div style="font-weight:800;color:var(--deep);margin-bottom:var(--space-2);font-size:var(--text-sm)">Snurra</div>
         <svg width="220" height="220" style="display:block;margin:0 auto">
           ${paths.join('')}
           ${labels.join('')}

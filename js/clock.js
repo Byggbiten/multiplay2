@@ -1,7 +1,10 @@
 /* ============================================================
    MULTIPLAY – Klockan
    Övning + Test (analog & digital). Renderar i #clock-root.
-   DESIGN.md: himmelsblå/solguld, drömhimmel-känsla.
+   Design: designsystem v25 (docs/DESIGN-SYSTEM.md) – drömhimmel
+   via .theme-clock-tokens (#clock-root sätter accentgruppen).
+   KLOCKLAGEN (designlag 3): timvisare BLÅ --time-h, minutvisare
+   RÖD --time-m, digital tid blå/mörk/röd, tidstext färgkodad.
    ============================================================ */
 'use strict';
 
@@ -24,13 +27,206 @@ const ClockGame = (() => {
 
   function addLog(entry) { sessionLog().add(entry); }
 
-  // Resultatnivå → befintlig CSS-klass
-  const RESULT_CLS = {
-    excellent: 'result-excellent',
-    good:      'result-good',
-    ok:        'result-ok',
-    practice:  'result-tryagain',
-  };
+  const p2 = n => String(n).padStart(2, '0');
+
+  /* ══════════════════════════════════════════════════════
+     MODULSPECIFIK CSS — EN injektion (id="clock-css")
+  ══════════════════════════════════════════════════════ */
+  const CLOCK_CSS = `
+    #clock-root .wrap{gap:12px}
+    .hdr-spacer{width:52px;flex-shrink:0;display:inline-block}
+
+    /* Tidsfärger (KLOCKLAGEN – designlag 3) */
+    .t-h{color:var(--time-h);font-weight:900}
+    .t-m{color:var(--time-m);font-weight:900}
+    .t-k{color:var(--time-k);font-weight:800}
+
+    /* Urtavlans SVG-delar */
+    .ck-tick{stroke:var(--deep)}
+    .ck-num{fill:var(--deep);font-family:var(--font-head);font-weight:700;font-size:15px;text-anchor:middle}
+    .ck-hand-h{stroke:var(--time-h)}
+    .ck-hand-m{stroke:var(--time-m)}
+    .ck-cap{fill:var(--accent-2);stroke:#fff;stroke-width:2.5}
+
+    /* Övningsvyn – tvåkolumn ≥900px */
+    .ck-cols{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+    .ck-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px 16px;flex:1;min-height:0}
+    .ck-right{display:flex;flex-direction:column;gap:12px;min-height:0}
+    #clock-root .ck-svg{width:min(272px,100%);height:auto;filter:drop-shadow(0 12px 30px rgba(47,111,228,.26))}
+    .ck-periods{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+    .ck-periods .chip{min-height:38px;font-size:13px;padding:7px 13px;cursor:default}
+    .ck-timepanel{text-align:center;padding:14px 18px}
+    .ck-digi{font-family:var(--font-head);font-weight:800;font-size:44px;line-height:1.05;letter-spacing:2px}
+    .ck-svline{font-family:var(--font-head);font-weight:700;font-size:21px;color:var(--time-k);line-height:1.25;margin-top:6px}
+    .ck-legend{display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:12px;font-weight:800;color:var(--ink-soft)}
+    .ck-legend span{display:inline-flex;align-items:center;gap:6px}
+    .ck-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .ck-legend .dot-h{background:var(--time-h)}
+    .ck-legend .dot-m{background:var(--time-m)}
+    .ck-spins{padding:8px 18px}
+    .ck-spinrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 0}
+    .ck-spinrow+.ck-spinrow{border-top:1px solid rgba(109,90,150,.14)}
+    .ck-spinrow b{font-size:16px;display:block}
+    .ck-spinrow b.lab-h{color:var(--time-h)}
+    .ck-spinrow b.lab-m{color:var(--time-m)}
+    .ck-spinrow small{display:block;font-size:12px;font-weight:700;color:var(--ink-soft)}
+    .ck-ctrls{display:flex;align-items:center;gap:10px}
+    .ck-ctrls .icon-btn{width:46px;height:46px;min-height:46px}
+    .ck-val{font-family:var(--font-head);font-weight:800;font-size:24px;min-width:46px;text-align:center}
+    .ck-actions{display:flex;gap:10px;align-items:stretch}
+    .ck-actions .icon-btn{width:52px;height:52px;flex-shrink:0}
+    .ck-actions .btn{flex:1;min-height:52px}
+
+    /* Testval */
+    .ck-choice-wrap{align-items:center;gap:18px}
+    .ck-hero{font-size:60px;text-align:center;animation:bounce-in .5s var(--spring)}
+    .ck-choice-title{font-family:var(--font-head);color:var(--deep);font-size:24px;text-align:center}
+    .ck-choice{display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px}
+    .ck-chev{width:24px;height:24px;margin-left:auto;color:var(--ink-soft);flex-shrink:0}
+
+    /* Testflöde (Del 1 & 2) */
+    .ck-prog{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .ck-prog-label{font-weight:800;font-size:13px;color:var(--deep);white-space:nowrap}
+    .ck-prog .progress-bar{flex:1}
+    .ck-quiz{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px}
+    .ck-qpanel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+    .ck-qlabel{font-family:var(--font-head);font-weight:700;font-size:20px;color:var(--deep);text-align:center}
+    .ck-qsvg{width:min(46vw,232px);height:auto;filter:drop-shadow(0 10px 24px rgba(47,111,228,.22))}
+    .ck-digibox{font-family:var(--font-head);font-weight:800;font-size:clamp(36px,7vw,54px);letter-spacing:2px;line-height:1.05;padding:12px 28px;background:rgba(255,255,255,.92);border:2px solid rgba(47,111,228,.18);border-radius:22px;box-shadow:var(--shadow-md)}
+    .ck-target{font-size:clamp(20px,3.4vw,30px);letter-spacing:0;padding:10px 22px}
+    .ck-opts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:460px;margin:0 auto}
+    .ck-setctrl{display:flex;flex-direction:column;justify-content:center;gap:12px;width:100%;max-width:460px;margin:0 auto}
+    .ck-facit{font-weight:800;font-size:14px;color:#16a34a;text-align:center;margin-bottom:6px}
+
+    /* Resultat */
+    .ck-result{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+    .ck-detail{flex:1;min-height:0;overflow-y:auto}
+    .ck-detail .stat-row{padding:8px 12px;margin-bottom:6px}
+    .ck-sec{font-size:12px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin:8px 0 6px}
+    .c-ok{color:#16a34a}.c-mid{color:#d97706}.c-err{color:#dc2626}
+
+    /* Historik */
+    .ck-history{flex:1;min-height:0}
+    .ck-history .history-list{flex:1}
+    .ck-history .history-value.c-ok{color:#16a34a}
+    .ck-history .history-value.c-mid{color:#d97706}
+    .ck-history .history-value.c-err{color:#dc2626}
+    .ck-new{background:var(--accent);color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+    .ck-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+    .ck-empty-emoji{font-size:56px}
+    .ck-empty p{color:var(--ink-soft);font-weight:700}
+
+    /* Mobil ≤430 */
+    @media (max-width:430px){
+      .ck-left{padding:13px 10px;gap:9px}
+      #clock-root .ck-svg{width:min(250px,64vw)}
+      .ck-periods .chip{min-height:33px;font-size:11.5px;padding:6px 10px}
+      .ck-timepanel{padding:11px 13px}
+      .ck-digi{font-size:35px}
+      .ck-svline{font-size:16.5px;margin-top:4px}
+      .ck-legend{margin-top:6px;font-size:10.5px;gap:12px}
+      .ck-spins{padding:5px 13px}
+      .ck-spinrow{padding:6px 0}
+      .ck-spinrow b{font-size:14.5px}
+      .ck-spinrow small{display:none}
+      .ck-ctrls .icon-btn{width:40px;height:40px;min-height:40px}
+      .ck-val{font-size:20px;min-width:38px}
+      .ck-actions .icon-btn{width:46px;height:46px}
+      .ck-actions .btn{min-height:46px;font-size:14.5px}
+      .ck-qsvg{width:min(52vw,190px)}
+      .ck-qlabel{font-size:16px}
+      .ck-digibox{font-size:34px;padding:9px 20px}
+      .ck-target{font-size:18px}
+      .ck-hero{font-size:48px}
+      .ck-choice-title{font-size:20px}
+    }
+
+    /* iPad porträtt 700–899: skala upp (designlag 2 – fyll skärmen) */
+    @media (min-width:700px) and (max-width:899px){
+      #clock-root .ck-svg{width:min(340px,100%)}
+      .ck-periods .chip{min-height:44px;font-size:14px;padding:9px 16px}
+      .ck-timepanel{padding:20px 18px}
+      .ck-digi{font-size:56px}
+      .ck-svline{font-size:25px;margin-top:8px}
+      .ck-legend{font-size:13px;margin-top:10px}
+      .ck-spins{padding:12px 22px}
+      .ck-spinrow{padding:10px 0}
+      .ck-ctrls .icon-btn{width:52px;height:52px;min-height:52px}
+      .ck-val{font-size:28px;min-width:52px}
+      .ck-actions .icon-btn{width:58px;height:58px}
+      .ck-actions .btn{min-height:58px;font-size:17px}
+      .ck-qsvg{width:min(300px,44vw)}
+      .ck-qlabel{font-size:23px}
+    }
+
+    /* iPad landskap / desktop ≥900: tvåkolumn */
+    @media (min-width:900px){
+      .ck-cols{display:grid;grid-template-columns:1.02fr 1fr;align-items:stretch}
+      .ck-right .ck-timepanel,.ck-right .ck-spins{flex:1;display:flex;flex-direction:column;justify-content:center}
+      #clock-root .ck-svg{width:min(400px,100%);height:auto}
+      .ck-quiz{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:22px}
+      .ck-opts,.ck-setctrl{margin:0}
+      .ck-qsvg{width:min(36vh,300px)}
+      .ck-result{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px}
+    }
+  `;
+
+  function styleTag() {
+    return `<style id="clock-css">${CLOCK_CSS}</style>`;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MARKUP-HJÄLPARE
+  ══════════════════════════════════════════════════════ */
+  const ICON_MINUS   = `<svg class="icn" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>`;
+  const ICON_PLUS    = `<svg class="icn" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
+  const ICON_DICE    = `<svg class="icn" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg>`;
+  const ICON_CHECK   = `<svg class="icn" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>`;
+
+  function headerHtml(title, backAction, opts = {}) {
+    const right = opts.history
+      ? `<button class="icon-btn" aria-label="Historik" onclick="ClockGame.showHistory()"><svg class="icn"><use href="#i-history"/></svg></button>`
+      : `<span class="hdr-spacer"></span>`;
+    return `
+      <div class="app-header">
+        <button class="btn-back" onclick="${backAction}">${opts.backLabel || 'Tillbaka'}</button>
+        <span class="header-title">${title}</span>
+        ${right}
+      </div>`;
+  }
+
+  function progressHtml(label, pct) {
+    return `
+      <div class="ck-prog">
+        <span class="ck-prog-label num">${label}</span>
+        <div class="progress-bar"><i style="width:${pct}%"></i></div>
+      </div>`;
+  }
+
+  /* Spinners: Timmar (blå etikett) + Minuter (röd etikett) */
+  function spinnersHtml(fn, withVals) {
+    const btn = (label, onclick, icon) =>
+      `<button class="icon-btn" aria-label="${label}" onclick="${onclick}">${icon}</button>`;
+    return `
+      <div class="card ck-spins">
+        <div class="ck-spinrow">
+          <span><b class="lab-h">Timmar</b><small>+1 / −1 timme</small></span>
+          <span class="ck-ctrls">
+            ${btn('Minska timme', `${fn}('h',-1)`, ICON_MINUS)}
+            ${withVals ? `<span class="ck-val num" id="ctrl-h">12</span>` : ''}
+            ${btn('Öka timme', `${fn}('h',1)`, ICON_PLUS)}
+          </span>
+        </div>
+        <div class="ck-spinrow">
+          <span><b class="lab-m">Minuter</b><small>+5 / −5 minuter</small></span>
+          <span class="ck-ctrls">
+            ${btn('Minska minuter', `${fn}('m',-5)`, ICON_MINUS)}
+            ${withVals ? `<span class="ck-val num" id="ctrl-m">00</span>` : ''}
+            ${btn('Öka minuter', `${fn}('m',5)`, ICON_PLUS)}
+          </span>
+        </div>
+      </div>`;
+  }
 
   /* ══════════════════════════════════════════════════════
      INIT
@@ -43,106 +239,60 @@ const ClockGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════
-     ÖVNINGSLÄGE
+     ÖVNINGSLÄGE — målbildens klockvy (scr-clock)
   ══════════════════════════════════════════════════════ */
   function renderPractice() {
     const root = document.getElementById('clock-root');
     root.innerHTML = `
-      <div class="app-header" style="border-bottom-color:rgba(59,130,246,0.2)">
-        <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="App.goBackToGameSelect()">Tillbaka</button>
-        <span class="header-title" style="color:var(--clock-primary)">🕐 Klockan</span>
-        <button class="btn btn-ghost btn-sm" style="border-color:var(--clock-primary);color:var(--clock-primary)" onclick="ClockGame.showHistory()">🕐 Historik</button>
-      </div>
+      ${styleTag()}
+      <div class="floaties"><span style="top:5%;left:5%">☁️</span><span style="top:9%;right:7%;animation-delay:2s">🌤️</span></div>
+      ${headerHtml('Klockan', 'App.goBackToGameSelect()', { history: true })}
+      <div class="wrap">
+        <div class="ck-cols">
 
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-5);align-items:center">
-
-        <!-- Tidsperiod-indikator -->
-        <div id="time-period" style="
-          width:100%;padding:var(--space-3) var(--space-5);
-          border-radius:var(--radius-full);
-          font-size:var(--text-lg);font-weight:800;
-          text-align:center;
-          transition:all 0.5s var(--ease-smooth);
-        "></div>
-
-        <!-- Analog klocka -->
-        <div style="position:relative;width:clamp(200px,40vw,400px);height:clamp(200px,40vw,400px);margin:0 auto">
-          <svg id="clock-svg" width="100%" height="100%" viewBox="0 0 220 220" style="filter:drop-shadow(0 8px 24px rgba(59,130,246,0.3))">
-            <!-- Urtavla -->
-            <circle cx="110" cy="110" r="105" fill="white" stroke="var(--clock-primary)" stroke-width="6"/>
-            <circle cx="110" cy="110" r="100" fill="white" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>
-            <!-- Timmarssiffror -->
-            ${[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i) => {
-              const angle = (i * 30 - 90) * Math.PI / 180;
-              const x = 110 + 82 * Math.cos(angle);
-              const y = 110 + 82 * Math.sin(angle);
-              return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
-                font-family="Nunito,sans-serif" font-size="14" font-weight="900" fill="var(--clock-primary)">${n}</text>`;
-            }).join('')}
-            <!-- Minutmarkeringar -->
-            ${Array.from({length:60},(_,i) => {
-              const angle = (i * 6 - 90) * Math.PI / 180;
-              const r1 = i%5===0 ? 90 : 95;
-              const r2 = 100;
-              return `<line x1="${(110+r1*Math.cos(angle)).toFixed(1)}" y1="${(110+r1*Math.sin(angle)).toFixed(1)}"
-                x2="${(110+r2*Math.cos(angle)).toFixed(1)}" y2="${(110+r2*Math.sin(angle)).toFixed(1)}"
-                stroke="${i%5===0?'var(--clock-primary)':'rgba(59,130,246,0.3)'}" stroke-width="${i%5===0?2.5:1}" stroke-linecap="round"/>`;
-            }).join('')}
-            <!-- Timvisare -->
-            <line id="hand-hour" x1="110" y1="110" x2="110" y2="60"
-              stroke="var(--clock-primary)" stroke-width="7" stroke-linecap="round"
-              transform-origin="110 110"/>
-            <!-- Minutvisare -->
-            <line id="hand-minute" x1="110" y1="110" x2="110" y2="40"
-              stroke="#ef4444" stroke-width="4" stroke-linecap="round"
-              transform-origin="110 110"/>
-            <!-- Mittpunkt -->
-            <circle cx="110" cy="110" r="7" fill="var(--clock-primary)"/>
-            <circle cx="110" cy="110" r="3" fill="white"/>
-          </svg>
-        </div>
-
-        <!-- Digital klocka & text -->
-        <div style="text-align:center">
-          <div id="digital-display" style="
-            font-family:var(--font-heading);font-size:var(--text-5xl);
-            color:var(--clock-primary);letter-spacing:0.05em;
-          ">12:00</div>
-          <div id="text-display" style="
-            font-size:var(--text-xl);font-weight:800;
-            color:var(--clock-secondary);margin-top:var(--space-2);
-          ">tolv</div>
-        </div>
-
-        <!-- Kontroller -->
-        <div class="card-glass w-full" style="padding:var(--space-4);max-width:360px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
-            <!-- Timmar -->
-            <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-              <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-primary);text-transform:uppercase">Timmar</span>
-              <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);min-height:48px;width:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame.adjustTime('h',1)">▲</button>
-              <div id="ctrl-h" style="font-size:var(--text-3xl);font-weight:900;color:var(--clock-primary)">12</div>
-              <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);min-height:48px;width:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame.adjustTime('h',-1)">▼</button>
-            </div>
-            <!-- Minuter -->
-            <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-              <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-secondary);text-transform:uppercase">Minuter</span>
-              <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);min-height:48px;width:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame.adjustTime('m',5)">▲</button>
-              <div id="ctrl-m" style="font-size:var(--text-3xl);font-weight:900;color:var(--clock-secondary)">00</div>
-              <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);min-height:48px;width:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame.adjustTime('m',-5)">▼</button>
+          <!-- Vänster: stor analog klocka + dygnsperiod-chips -->
+          <div class="card ck-left">
+            <svg id="clock-svg" class="ck-svg" viewBox="0 0 200 200" role="img"
+              aria-label="Analog klocka – blå timvisare, röd minutvisare">
+              ${faceDefs()}${faceBody()}
+              <line id="hand-hour" class="ck-hand-h" x1="100" y1="100" x2="100" y2="57"
+                stroke-width="8" stroke-linecap="round"/>
+              <line id="hand-minute" class="ck-hand-m" x1="100" y1="100" x2="100" y2="37"
+                stroke-width="4.5" stroke-linecap="round"/>
+              <circle class="ck-cap" cx="100" cy="100" r="6.5"/>
+            </svg>
+            <div class="ck-periods" id="time-period">
+              <span class="chip" data-p="natt">🌙 Natt</span>
+              <span class="chip" data-p="morgon">🌅 Morgon</span>
+              <span class="chip chip-gold" data-p="dag">☀️ Dag</span>
+              <span class="chip" data-p="kvall">🌆 Kväll</span>
             </div>
           </div>
-          <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4)">
-            <button class="btn btn-ghost btn-sm w-full" style="border-color:var(--clock-primary);color:var(--clock-primary)" onclick="ClockGame.resetTime()">↺ Återställ</button>
-            <button class="btn btn-sm w-full" style="background:var(--clock-light);color:var(--clock-primary);border:none" onclick="ClockGame.randomTime()">🎲 Slumpa</button>
+
+          <!-- Höger: digital + tidstext + legend, spinners, actions -->
+          <div class="ck-right">
+            <div class="card ck-timepanel">
+              <div id="digital-display" class="ck-digi num">12:00</div>
+              <p id="text-display" class="ck-svline"></p>
+              <div class="ck-legend">
+                <span><i class="dot-h"></i>Timmar</span>
+                <span><i class="dot-m"></i>Minuter</span>
+              </div>
+            </div>
+
+            ${spinnersHtml('ClockGame.adjustTime', true)}
+
+            <div class="ck-actions">
+              <button class="icon-btn" aria-label="Slumpa tid" title="Slumpa tid" onclick="ClockGame.randomTime()">${ICON_DICE}</button>
+              <button class="icon-btn" aria-label="Återställ" title="Återställ" onclick="ClockGame.resetTime()"><svg class="icn"><use href="#i-refresh"/></svg></button>
+              <button class="btn btn-primary" onclick="ClockGame.showTestSetup()">
+                Starta klocktest
+                <svg class="icn"><use href="#i-play"/></svg>
+              </button>
+            </div>
           </div>
+
         </div>
-
-        <!-- Starta test -->
-        <button class="btn btn-lg w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white;box-shadow:0 4px 15px var(--clock-glow);max-width:360px" onclick="ClockGame.showTestSetup()">
-          🎯 Starta test →
-        </button>
-
       </div>
     `;
 
@@ -154,7 +304,7 @@ const ClockGame = (() => {
     const h = practiceH;
     const m = practiceM;
 
-    // Visare-vinklar
+    // Visare-vinklar (urtavla: centrum 100,100 · timvisare 43 · minutvisare 63)
     const hourAngle   = (h % 12) * 30 + m * 0.5 - 90;
     const minuteAngle = m * 6 - 90;
 
@@ -165,47 +315,38 @@ const ClockGame = (() => {
     const handM = document.getElementById('hand-minute');
 
     if (handH) {
-      const hx = 110 + 55 * Math.cos(hRad);
-      const hy = 110 + 55 * Math.sin(hRad);
-      handH.setAttribute('x2', hx.toFixed(1));
-      handH.setAttribute('y2', hy.toFixed(1));
+      handH.setAttribute('x2', (100 + 43 * Math.cos(hRad)).toFixed(1));
+      handH.setAttribute('y2', (100 + 43 * Math.sin(hRad)).toFixed(1));
     }
     if (handM) {
-      const mx = 110 + 75 * Math.cos(mRad);
-      const my = 110 + 75 * Math.sin(mRad);
-      handM.setAttribute('x2', mx.toFixed(1));
-      handM.setAttribute('y2', my.toFixed(1));
+      handM.setAttribute('x2', (100 + 63 * Math.cos(mRad)).toFixed(1));
+      handM.setAttribute('y2', (100 + 63 * Math.sin(mRad)).toFixed(1));
     }
 
-    // Digital
+    // Digital: timmar blå · kolon mörk · minuter röda
     const digitalEl = document.getElementById('digital-display');
-    if (digitalEl) digitalEl.innerHTML = colorizeTimeText(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    if (digitalEl) digitalEl.innerHTML = colorizeTimeText(`${p2(h)}:${p2(m)}`);
 
-    // Text
+    // Svensk tidstext: timord blå · minutord röda · bindeord mörka
     const textEl = document.getElementById('text-display');
-    if (textEl) textEl.innerHTML = colorizeTimeText(MP.timeToSwedish(h, m));
+    if (textEl) textEl.innerHTML = `<span class="t-k">Klockan är</span> ${colorizeTimeText(MP.timeToSwedish(h, m))}`;
 
-    // Kontroller
+    // Spinner-värden
     const ch = document.getElementById('ctrl-h');
     const cm = document.getElementById('ctrl-m');
-    if (ch) ch.textContent = String(h).padStart(2,'0');
-    if (cm) cm.textContent = String(m).padStart(2,'0');
+    if (ch) ch.textContent = p2(h);
+    if (cm) cm.textContent = p2(m);
 
-    // Tidsperiod
+    // Dygnsperiod
     updateTimePeriod(h);
   }
 
   function updateTimePeriod(h) {
     const el = document.getElementById('time-period');
     if (!el) return;
-    let emoji, label, bg, color;
-    if (h >= 0 && h < 6)       { emoji='🌙'; label='Natt';       bg='linear-gradient(135deg,#1e1b4b,#312e81)'; color='#c7d2fe'; }
-    else if (h < 12)            { emoji='🌅'; label='Förmiddag';  bg='linear-gradient(135deg,#fef3c7,#fde68a)'; color='#92400e'; }
-    else if (h < 18)            { emoji='☀️'; label='Eftermiddag'; bg='linear-gradient(135deg,#dbeafe,#bfdbfe)'; color='#1e3a8a'; }
-    else                        { emoji='🌆'; label='Kväll';      bg='linear-gradient(135deg,#fce7f3,#f3e8ff)'; color='#7e22ce'; }
-    el.style.background = bg;
-    el.style.color = color;
-    el.textContent = `${emoji} ${label}`;
+    const p = h < 6 ? 'natt' : h < 12 ? 'morgon' : h < 18 ? 'dag' : 'kvall';
+    el.querySelectorAll('.chip').forEach(c =>
+      c.classList.toggle('chip-active', c.dataset.p === p));
   }
 
   function adjustTime(part, delta) {
@@ -238,30 +379,27 @@ const ClockGame = (() => {
     const root = document.getElementById('clock-root');
     App.Sound.play('click');
     root.innerHTML = `
-      <div class="app-header">
-        <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.renderPractice()">Tillbaka</button>
-        <span class="header-title" style="color:var(--clock-primary)">🎯 Välj klocktyp</span>
-        <div style="width:64px"></div>
-      </div>
-      <div style="padding:var(--space-8) var(--space-4);display:flex;flex-direction:column;gap:var(--space-5);align-items:center">
-        <div style="font-size:4rem;animation:bounce-in 0.5s var(--ease-bounce)">⏰</div>
-        <h2 style="font-family:var(--font-heading);color:var(--clock-primary);text-align:center">Vilket test vill du göra?</h2>
-        <div style="display:flex;flex-direction:column;gap:var(--space-4);width:100%">
-          <button class="card-game" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)" onclick="ClockGame.startTestWithType('analog')">
-            <div style="font-size:3rem;background:#dbeafe;border-radius:var(--radius-lg);width:64px;height:64px;display:flex;align-items:center;justify-content:center">🕐</div>
+      ${styleTag()}
+      ${headerHtml('Välj klocktest', 'ClockGame.renderPractice()')}
+      <div class="wrap vcenter ck-choice-wrap">
+        <div class="ck-hero">⏰</div>
+        <h2 class="ck-choice-title">Vilket test vill du göra?</h2>
+        <div class="ck-choice">
+          <button class="game-card game-card-wide" onclick="ClockGame.startTestWithType('analog')">
+            <span class="game-emoji">🕐</span>
             <div>
-              <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:var(--clock-primary)">Analog klocka</div>
-              <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700">Urtavla med visare</div>
+              <h3>Analog klocka</h3>
+              <p>Urtavla med visare</p>
             </div>
-            <div style="font-size:var(--text-2xl);opacity:0.4">›</div>
+            <svg class="icn ck-chev"><use href="#i-chevron"/></svg>
           </button>
-          <button class="card-game" style="background:linear-gradient(135deg,#fef3c7,#fde68a)" onclick="ClockGame.startTestWithType('digital')">
-            <div style="font-size:3rem;background:#fde68a;border-radius:var(--radius-lg);width:64px;height:64px;display:flex;align-items:center;justify-content:center">⏰</div>
+          <button class="game-card game-card-wide" onclick="ClockGame.startTestWithType('digital')">
+            <span class="game-emoji">⏰</span>
             <div>
-              <div style="font-family:var(--font-heading);font-size:var(--text-2xl);color:var(--clock-secondary)">Digital klocka</div>
-              <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:700">24-timmars format</div>
+              <h3>Digital klocka</h3>
+              <p>24-timmars format</p>
             </div>
-            <div style="font-size:var(--text-2xl);opacity:0.4">›</div>
+            <svg class="icn ck-chev"><use href="#i-chevron"/></svg>
           </button>
         </div>
       </div>
@@ -311,38 +449,25 @@ const ClockGame = (() => {
       const progress = prog.answered / TOTAL;
 
       root.innerHTML = `
-        <div class="app-header">
-          <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.showTestSetup()">Avbryt</button>
-          <span class="header-title" style="color:var(--clock-primary)">Del 1 – Läsa klockan</span>
-          <div style="width:64px"></div>
-        </div>
-        <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-          <div class="progress-label" style="color:var(--clock-primary)">
-            <span>Fråga ${Math.min(prog.answered+1,TOTAL)} av ${TOTAL}</span>
-          </div>
-          <div class="progress-container" style="background:var(--clock-light)">
-            <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--clock-primary),var(--clock-accent))"></div>
-          </div>
-        </div>
-        <div style="padding:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
-          <p style="font-weight:800;color:var(--clock-primary);font-size:var(--text-lg)">Vad visar klockan?</p>
-
-          ${type === 'analog'
-            ? drawAnalogClock(q.h, q.m, 180)
-            : `<div style="font-family:var(--font-heading);font-size:var(--text-6xl);color:var(--clock-primary);letter-spacing:0.08em;padding:var(--space-6) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">${String(q.h).padStart(2,'0')}:${String(q.m).padStart(2,'0')}</div>`
-          }
-
-          <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
-            ${options.map((opt, i) => {
-              const colors = ['#eff6ff','#fef3c7','#f0fdf4','#fdf4ff'];
-              return `
-                <button class="answer-option" id="opt-${i}"
-                  style="border-color:rgba(59,130,246,0.3);background:${colors[i]}"
-                  onclick="ClockGame._handleReadChoice(${i})">
+        ${styleTag()}
+        ${headerHtml('Del 1 · Läsa klockan', 'ClockGame.showTestSetup()', { backLabel: 'Avbryt' })}
+        <div class="wrap">
+          ${progressHtml(`Fråga ${Math.min(prog.answered+1,TOTAL)} av ${TOTAL}`, Math.round(progress*100))}
+          <div class="ck-quiz">
+            <div class="ck-qpanel">
+              <p class="ck-qlabel">Vad visar klockan?</p>
+              ${type === 'analog'
+                ? drawAnalogClock(q.h, q.m)
+                : `<div class="ck-digibox num">${colorizeTimeText(`${p2(q.h)}:${p2(q.m)}`)}</div>`
+              }
+            </div>
+            <div class="ck-opts">
+              ${options.map((opt, i) => `
+                <button class="answer-option" id="opt-${i}" onclick="ClockGame._handleReadChoice(${i})">
                   ${colorizeTimeText(opt)}
                 </button>
-              `;
-            }).join('')}
+              `).join('')}
+            </div>
           </div>
         </div>
       `;
@@ -396,61 +521,27 @@ const ClockGame = (() => {
       const progress = (5 + prog.answered) / 10;
 
       root.innerHTML = `
-        <div class="app-header">
-          <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.showTestSetup()">Avbryt</button>
-          <span class="header-title" style="color:var(--clock-primary)">Del 2 – Ställ klockan</span>
-          <div style="width:64px"></div>
-        </div>
-        <div style="padding:var(--space-4) var(--space-4) var(--space-2)">
-          <div class="progress-label" style="color:var(--clock-primary)">
-            <span>Fråga ${Math.min(prog.answered+1,TOTAL)+5} av 10</span>
+        ${styleTag()}
+        ${headerHtml('Del 2 · Ställ klockan', 'ClockGame.showTestSetup()', { backLabel: 'Avbryt' })}
+        <div class="wrap">
+          ${progressHtml(`Fråga ${Math.min(prog.answered+1,TOTAL)+5} av 10`, Math.round(progress*100))}
+          <div class="ck-quiz">
+            <div class="ck-qpanel">
+              <p class="ck-qlabel">Ställ klockan till:</p>
+              <div class="ck-digibox ck-target">${colorizeTimeText(text)}</div>
+              ${type === 'analog'
+                ? `<div id="setting-clock-wrap">${drawSettingClock(settingH, settingM)}</div>`
+                : `<div id="digital-setting-wrap">${drawDigitalSetting(settingH, settingM)}</div>`
+              }
+            </div>
+            <div class="ck-setctrl">
+              ${spinnersHtml('ClockGame._adjustSetting', false)}
+              <button class="btn btn-primary btn-lg" onclick="ClockGame._lockSetting()">
+                Lås svar
+                ${ICON_CHECK}
+              </button>
+            </div>
           </div>
-          <div class="progress-container" style="background:var(--clock-light)">
-            <div class="progress-fill" style="width:${Math.round(progress*100)}%;background:linear-gradient(90deg,var(--clock-primary),var(--clock-accent))"></div>
-          </div>
-        </div>
-        <div style="padding:var(--space-4);display:flex;flex-direction:column;align-items:center;gap:var(--space-5)">
-          <p style="font-weight:800;color:var(--clock-primary);font-size:var(--text-lg);text-align:center">Ställ klockan till:</p>
-          <div style="font-family:var(--font-heading);font-size:var(--text-4xl);padding:var(--space-4) var(--space-8);background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)">
-            ${colorizeTimeText(text)}
-          </div>
-
-          ${type === 'analog'
-            ? `<div id="setting-clock-wrap">${drawSettingClock(settingH, settingM)}</div>`
-            : `<div id="digital-setting-wrap">${drawDigitalSetting(settingH, settingM)}</div>`
-          }
-
-          <!-- Kontroller -->
-          ${type === 'analog'
-            ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);width:100%">
-                <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-                  <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-primary)">Timmar</span>
-                  <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame._adjustSetting('h',1)">▲</button>
-                  <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame._adjustSetting('h',-1)">▼</button>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-                  <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-secondary)">Minuter</span>
-                  <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame._adjustSetting('m',5)">▲</button>
-                  <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full);font-size:var(--text-xl)" onclick="ClockGame._adjustSetting('m',-5)">▼</button>
-                </div>
-              </div>`
-            : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);width:100%">
-                <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-                  <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-primary)">Timmar</span>
-                  <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full)" onclick="ClockGame._adjustSetting('h',1)">▲</button>
-                  <button class="btn" style="background:var(--clock-light);color:var(--clock-primary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full)" onclick="ClockGame._adjustSetting('h',-1)">▼</button>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
-                  <span style="font-size:var(--text-xs);font-weight:800;color:var(--clock-secondary)">Minuter</span>
-                  <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full)" onclick="ClockGame._adjustSetting('m',5)">▲</button>
-                  <button class="btn" style="background:#fef3c7;color:var(--clock-secondary);width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--radius-full)" onclick="ClockGame._adjustSetting('m',-5)">▼</button>
-                </div>
-              </div>`
-          }
-
-          <button class="btn btn-lg w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white" onclick="ClockGame._lockSetting()">
-            ✅ OK – Lås svar
-          </button>
         </div>
       `;
 
@@ -485,11 +576,18 @@ const ClockGame = (() => {
         quiz.answer(wasCorrect);
 
         if (!wasCorrect) {
-          // Visa korrekt svar kort, ställ sedan om SAMMA fråga
+          // Visa facit kort, ställ sedan om SAMMA fråga.
+          // Visarna behåller KLOCKLAGENS färger (blå tim / röd minut).
           if (type === 'analog') {
-            document.getElementById('setting-clock-wrap').innerHTML = drawSettingClock(q.h, q.m, '#ef4444', '#22c55e');
+            document.getElementById('setting-clock-wrap').innerHTML =
+              `<p class="ck-facit">Rätt svar:</p>` + drawSettingClock(q.h, q.m);
           } else {
-            document.getElementById('digital-setting-wrap').innerHTML = drawDigitalSetting(q.h, q.m);
+            // Tidstexten är fm/em-ambivalent (jämförelsen är mod 12): visa
+            // facit-timmen konsekvent med det barnet kunde veta — behåll
+            // barnets timme om den var mod-12-rätt, annars frågans timme.
+            const facitH = (settingH % 12) === (q.h % 12) ? settingH : q.h;
+            document.getElementById('digital-setting-wrap').innerHTML =
+              `<p class="ck-facit">Rätt svar:</p>` + drawDigitalSetting(facitH, q.m);
           }
           setTimeout(render, 1500);
         } else {
@@ -514,50 +612,52 @@ const ClockGame = (() => {
 
     addLog({ type: clockType, totalCorrect, total, pct, part1, part2 });
 
-    const cls = RESULT_CLS[MP.resultTier(pct)];
     const { emoji, msg } = MP.feedbackMessage(pct);
 
     const root = document.getElementById('clock-root');
     root.innerHTML = `
-      <div class="app-header">
-        <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.renderPractice()">Tillbaka</button>
-        <span class="header-title" style="color:var(--clock-primary)">🏆 Resultat</span>
-        <div style="width:64px"></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;padding:var(--space-8) var(--space-4);gap:var(--space-6)">
-        <div class="result-display ${cls} w-full">
-          <div style="font-size:4rem;margin-bottom:var(--space-3)">${emoji}</div>
-          <div class="result-score">${totalCorrect} / ${total}</div>
-          <div class="result-message">${msg}</div>
-          <div class="result-sub">${pct}% rätt</div>
-        </div>
+      ${styleTag()}
+      ${headerHtml('Resultat', 'ClockGame.renderPractice()')}
+      <div class="wrap">
+        <div class="ck-result">
 
-        <!-- Detaljvy -->
-        <div class="card w-full" style="padding:var(--space-4)">
-          <div style="font-weight:800;color:var(--clock-primary);margin-bottom:var(--space-3)">Detaljresultat</div>
-          <div style="margin-bottom:var(--space-2);font-size:var(--text-sm);font-weight:800;color:var(--color-text-muted)">Del 1 – Läsa klockan</div>
-          ${part1.slice(0,5).map(r => `
-            <div class="stat-row">
-              <span>${String(r.h).padStart(2,'0')}:${String(r.m).padStart(2,'0')}</span>
-              <span style="color:${r.correct?'var(--color-success)':'var(--color-error)'}">${r.correct?'✓':'✗'} ${MP.timeToSwedish(r.h,r.m)}</span>
+          <div class="result-hero">
+            <div class="result-pct num">${pct}%</div>
+            <div class="result-medal">${emoji}</div>
+            <div class="result-msg">${msg}</div>
+            <div class="result-note">${totalCorrect} av ${total} rätt · ${type==='analog'?'Analog':'Digital'} klocka</div>
+            <div class="result-actions">
+              <button class="btn btn-primary" onclick="ClockGame.startTestWithType('${type}')">
+                Spela igen
+                <svg class="icn"><use href="#i-refresh"/></svg>
+              </button>
+              <button class="btn btn-ghost" onclick="ClockGame.renderPractice()">Till övningen</button>
             </div>
-          `).join('')}
-          <div style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-size:var(--text-sm);font-weight:800;color:var(--color-text-muted)">Del 2 – Ställa klockan</div>
-          ${part2.slice(0,5).map(r => `
-            <div class="stat-row">
-              <span>${MP.timeToSwedish(r.h,r.m)}</span>
-              <span style="color:${r.correct?'var(--color-success)':'var(--color-error)'}">${r.correct?'✓ Rätt':'✗ '+String(r.setH).padStart(2,'0')+':'+String(r.setM).padStart(2,'0')}</span>
-            </div>
-          `).join('')}
-        </div>
+          </div>
 
-        <div style="display:flex;flex-direction:column;gap:var(--space-3);width:100%">
-          <button class="btn btn-lg w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white" onclick="ClockGame.startTestWithType('${type}')">
-            🔄 Spela igen
-          </button>
-          <button class="btn btn-ghost w-full" style="border-color:var(--clock-primary);color:var(--clock-primary)" onclick="ClockGame.renderPractice()">
-            ↩ Tillbaka till övning
-          </button>
+          <div class="card ck-detail">
+            <div class="card-title">
+              <svg class="icn" style="color:var(--accent)"><use href="#i-stats"/></svg>
+              Detaljresultat
+            </div>
+            <div class="ck-sec">Del 1 · Läsa klockan</div>
+            ${part1.slice(0,5).map(r => `
+              <div class="stat-row">
+                <span class="num">${colorizeTimeText(`${p2(r.h)}:${p2(r.m)}`)}</span>
+                <span class="${r.correct?'c-ok':'c-err'}">${r.correct?'✓':'✗'} ${colorizeTimeText(MP.timeToSwedish(r.h,r.m))}</span>
+              </div>
+            `).join('')}
+            <div class="ck-sec">Del 2 · Ställa klockan</div>
+            ${part2.slice(0,5).map(r => `
+              <div class="stat-row">
+                <span>${colorizeTimeText(MP.timeToSwedish(r.h,r.m))}</span>
+                <span class="${r.correct?'c-ok':'c-err'}">${r.correct
+                  ? '✓ Rätt'
+                  : `✗ ${colorizeTimeText(`${p2(r.setH)}:${p2(r.setM)}`)}`}</span>
+              </div>
+            `).join('')}
+          </div>
+
         </div>
       </div>
     `;
@@ -573,121 +673,112 @@ const ClockGame = (() => {
 
     if (log.length === 0) {
       root.innerHTML = `
-        <div class="app-header">
-          <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.renderPractice()">Tillbaka</button>
-          <span class="header-title" style="color:var(--clock-primary)">📜 Historik</span>
-          <div style="width:64px"></div>
-        </div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:var(--space-4);padding:var(--space-8)">
-          <div style="font-size:4rem">📭</div>
-          <p style="color:var(--color-text-muted);font-weight:700">Inga test gjorda ännu!</p>
-          <button class="btn w-full" style="background:linear-gradient(135deg,var(--clock-primary),var(--clock-accent));color:white" onclick="ClockGame.showTestSetup()">Gör ett test nu!</button>
+        ${styleTag()}
+        ${headerHtml('Historik', 'ClockGame.renderPractice()')}
+        <div class="wrap">
+          <div class="ck-empty">
+            <div class="ck-empty-emoji">📭</div>
+            <p>Inga test gjorda ännu!</p>
+            <button class="btn btn-primary" onclick="ClockGame.showTestSetup()">
+              Gör ett test nu!
+              <svg class="icn"><use href="#i-play"/></svg>
+            </button>
+          </div>
         </div>
       `;
       return;
     }
 
     root.innerHTML = `
-      <div class="app-header">
-        <button class="btn-back" style="background:var(--clock-light);color:var(--clock-primary)" onclick="ClockGame.renderPractice()">Tillbaka</button>
-        <span class="header-title" style="color:var(--clock-primary)">📜 Historik</span>
-        <div style="width:64px"></div>
-      </div>
-      <div style="padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)">
-        ${log.map((e, i) => {
-          const d = new Date(e.date);
-          const dateStr = d.toLocaleDateString('sv-SE', { weekday:'short', day:'numeric', month:'short' });
-          const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
-          return `
-            <div class="card" style="padding:var(--space-4)">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                  <div style="font-weight:800">${e.type==='analog'?'🕐 Analog':'⏰ Digital'} ${i===0?'<span style="background:var(--clock-primary);color:white;font-size:10px;padding:2px 8px;border-radius:999px">NY!</span>':''}</div>
-                  <div style="font-size:var(--text-xs);color:var(--color-text-muted)">${dateStr} kl. ${timeStr}</div>
+      ${styleTag()}
+      ${headerHtml('Historik', 'ClockGame.renderPractice()')}
+      <div class="wrap ck-history">
+        <div class="history-list">
+          ${log.map((e, i) => {
+            const d = new Date(e.date);
+            const dateStr = d.toLocaleDateString('sv-SE', { weekday:'short', day:'numeric', month:'short' });
+            const timeStr = d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' });
+            const vCls = e.pct >= 80 ? 'c-ok' : e.pct >= 60 ? 'c-mid' : 'c-err';
+            return `
+              <div class="history-item">
+                <span class="history-icon">${e.type==='analog'?'🕐':'⏰'}</span>
+                <div class="history-main">
+                  <div class="history-title">${e.type==='analog'?'Analog':'Digital'} klocktest${i===0?'<span class="ck-new">Ny!</span>':''}</div>
+                  <div class="history-sub">${dateStr} kl. ${timeStr}</div>
                 </div>
-                <div style="font-size:var(--text-2xl);font-weight:900;color:${e.pct>=80?'var(--color-success)':e.pct>=60?'var(--color-accent)':'var(--color-error)'}">${e.totalCorrect}/10</div>
+                <span class="history-value num ${vCls}">${e.totalCorrect}/10</span>
               </div>
-            </div>
-          `;
-        }).join('')}
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
   }
 
   /* ══════════════════════════════════════════════════════
-     SVG-HJÄLPARE
+     SVG-HJÄLPARE — drömhimmels-urtavlan (målbildens face)
+     viewBox 0 0 200 200 · centrum (100,100) · rim r95 · face r87
   ══════════════════════════════════════════════════════ */
-  function drawAnalogClock(h, m, size = 180) {
-    const hourAngle   = (h % 12) * 30 + m * 0.5 - 90;
-    const minuteAngle = m * 6 - 90;
-    const hr = hourAngle   * Math.PI / 180;
-    const mr = minuteAngle * Math.PI / 180;
-    const cx = size / 2, cy = size / 2, r = size / 2 - 5;
-    const hx = cx + (r*0.5) * Math.cos(hr), hy = cy + (r*0.5) * Math.sin(hr);
-    const mx = cx + (r*0.7) * Math.cos(mr), my = cy + (r*0.7) * Math.sin(mr);
+  function faceDefs() {
+    return `
+      <defs>
+        <radialGradient id="ck-face" cx="38%" cy="32%" r="80%">
+          <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e3efff"/>
+        </radialGradient>
+        <linearGradient id="ck-rim" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7db2f7"/><stop offset="100%" stop-color="#2f6fe4"/>
+        </linearGradient>
+      </defs>`;
+  }
+
+  function faceBody() {
+    let ticks = '';
+    for (let i = 0; i < 60; i++) {
+      const a = i * 6 * Math.PI / 180, major = i % 5 === 0;
+      const r1 = major ? 73 : 79, r2 = 82;
+      ticks += `<line class="ck-tick" x1="${(100+r1*Math.sin(a)).toFixed(1)}" y1="${(100-r1*Math.cos(a)).toFixed(1)}"
+        x2="${(100+r2*Math.sin(a)).toFixed(1)}" y2="${(100-r2*Math.cos(a)).toFixed(1)}"
+        stroke-width="${major?3:1.4}" stroke-linecap="round" opacity="${major?0.9:0.3}"/>`;
+    }
+    let nums = '';
+    for (let h = 1; h <= 12; h++) {
+      const a = h * 30 * Math.PI / 180;
+      nums += `<text class="ck-num" x="${(100+61*Math.sin(a)).toFixed(1)}" y="${(100-61*Math.cos(a)+5.2).toFixed(1)}">${h}</text>`;
+    }
+    return `
+      <circle cx="100" cy="100" r="95" fill="url(#ck-rim)"/>
+      <circle cx="100" cy="100" r="87" fill="url(#ck-face)"/>
+      ${ticks}${nums}`;
+  }
+
+  /* Statisk klocka (fråge- och inställningsvyer).
+     KLOCKLAGEN: timvisare blå (tjock/kort), minutvisare röd (tunn/lång). */
+  function drawAnalogClock(h, m) {
+    const hourAngle   = ((h % 12) * 30 + m * 0.5 - 90) * Math.PI / 180;
+    const minuteAngle = (m * 6 - 90) * Math.PI / 180;
+    const hx = 100 + 43 * Math.cos(hourAngle),   hy = 100 + 43 * Math.sin(hourAngle);
+    const mx = 100 + 63 * Math.cos(minuteAngle), my = 100 + 63 * Math.sin(minuteAngle);
 
     return `
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"
-        style="filter:drop-shadow(0 6px 20px rgba(59,130,246,0.3));display:block;margin:0 auto">
-        <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="var(--clock-primary)" stroke-width="5"/>
-        ${[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i) => {
-          const a = (i*30-90)*Math.PI/180;
-          const tx = cx + (r-16)*Math.cos(a), ty = cy + (r-16)*Math.sin(a);
-          return `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
-            font-family="Nunito,sans-serif" font-size="11" font-weight="900" fill="var(--clock-primary)">${n}</text>`;
-        }).join('')}
-        <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}"
-          stroke="var(--clock-primary)" stroke-width="5" stroke-linecap="round"/>
-        <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
-          stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="${cx}" cy="${cy}" r="5" fill="var(--clock-primary)"/>
-        <circle cx="${cx}" cy="${cy}" r="2" fill="white"/>
+      <svg class="ck-qsvg" viewBox="0 0 200 200" role="img"
+        aria-label="Analog klocka – blå timvisare, röd minutvisare">
+        ${faceDefs()}${faceBody()}
+        <line class="ck-hand-h" x1="100" y1="100" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}"
+          stroke-width="8" stroke-linecap="round"/>
+        <line class="ck-hand-m" x1="100" y1="100" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
+          stroke-width="4.5" stroke-linecap="round"/>
+        <circle class="ck-cap" cx="100" cy="100" r="6.5"/>
       </svg>
     `;
   }
 
-  function drawSettingClock(h, m, hColor = '#3b82f6', mColor = '#ef4444') {
-    return drawAnalogClockColored(h, m, 180, hColor, mColor);
-  }
-
-  function drawAnalogClockColored(h, m, size, hColor, mColor) {
-    const hourAngle   = (h % 12) * 30 + m * 0.5 - 90;
-    const minuteAngle = m * 6 - 90;
-    const hr = hourAngle   * Math.PI / 180;
-    const mr = minuteAngle * Math.PI / 180;
-    const cx = size/2, cy = size/2, r = size/2 - 5;
-    const hx = cx + (r*0.5)*Math.cos(hr), hy = cy + (r*0.5)*Math.sin(hr);
-    const mx = cx + (r*0.7)*Math.cos(mr), my = cy + (r*0.7)*Math.sin(mr);
-
-    return `
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"
-        style="display:block;margin:0 auto;filter:drop-shadow(0 4px 12px rgba(59,130,246,0.25))">
-        <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="var(--clock-primary)" stroke-width="4"/>
-        ${[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i)=>{
-          const a=(i*30-90)*Math.PI/180;
-          const tx=cx+(r-15)*Math.cos(a), ty=cy+(r-15)*Math.sin(a);
-          return `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
-            font-family="Nunito,sans-serif" font-size="10" font-weight="900" fill="var(--clock-primary)">${n}</text>`;
-        }).join('')}
-        <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}"
-          stroke="${hColor}" stroke-width="5" stroke-linecap="round"/>
-        <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}"
-          stroke="${mColor}" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="${cx}" cy="${cy}" r="5" fill="var(--clock-primary)"/>
-      </svg>
-    `;
+  function drawSettingClock(h, m) {
+    return drawAnalogClock(h, m);
   }
 
   function drawDigitalSetting(h, m) {
     return `
-      <div id="digital-setting-display" style="
-        font-family:var(--font-heading);font-size:var(--text-5xl);
-        color:var(--clock-primary);letter-spacing:0.08em;
-        padding:var(--space-5) var(--space-8);
-        background:white;border-radius:var(--radius-xl);
-        box-shadow:var(--shadow-md);
-        border:3px solid var(--clock-light);
-      ">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>
+      <div id="digital-setting-display" class="ck-digibox num">${colorizeTimeText(`${p2(h)}:${p2(m)}`)}</div>
     `;
   }
 
@@ -706,13 +797,15 @@ const ClockGame = (() => {
     return opts.sort(() => Math.random() - 0.5);
   }
 
-  /* ── Färgkoda tidstext pedagogiskt ─────────────────── */
+  /* ── Färgkoda tidstext pedagogiskt (KLOCKLAGEN) ─────
+     Timord blå (.t-h) · minutord röda (.t-m, inkl "halv") ·
+     bindeord/kolon mörka (.t-k). Klasserna i clock-css. */
   function colorizeTimeText(text) {
-    const b = s => `<span style="color:#3b82f6;font-weight:900">${s}</span>`;
-    const r = s => `<span style="color:#ef4444;font-weight:900">${s}</span>`;
-    const k = s => `<span style="color:#1e293b;font-weight:800">${s}</span>`;
+    const b = s => `<span class="t-h">${s}</span>`;
+    const r = s => `<span class="t-m">${s}</span>`;
+    const k = s => `<span class="t-k">${s}</span>`;
 
-    // Digital: "23:45" → timme blå, kolon svart, minut röd
+    // Digital: "23:45" → timme blå, kolon mörk, minut röd
     if (/^\d{2}:\d{2}$/.test(text)) {
       const [hh, mm] = text.split(':');
       return b(hh) + k(':') + r(mm);
@@ -721,11 +814,11 @@ const ClockGame = (() => {
     let match = text.match(/^halv (.+)$/);
     if (match) return r('halv ') + b(match[1]);
 
-    // "X över halv Y" → minut röd, "över" svart, "halv" röd, timme blå
+    // "X över halv Y" → minut röd, "över" mörk, "halv" röd, timme blå
     match = text.match(/^(.+?) över halv (.+)$/);
     if (match) return r(match[1]) + k(' över ') + r('halv ') + b(match[2]);
 
-    // "X i halv Y" → minut röd, "i" svart, "halv" röd, timme blå
+    // "X i halv Y" → minut röd, "i" mörk, "halv" röd, timme blå
     match = text.match(/^(.+?) i halv (.+)$/);
     if (match) return r(match[1]) + k(' i ') + r('halv ') + b(match[2]);
 
