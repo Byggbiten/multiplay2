@@ -1,5 +1,11 @@
 # FAS4-SPEC — Dagens träning + Capybara-samlingen
 
+**STATUS 2026-07-05: FAS 4 KOMPLETT.** v33 (Dagens träning) LIVE,
+v34 (Capybara-samlingen, 24 kort) LIVE, v35 (bakåtknappen) pushad.
+Bokförd rest: NP-modulerna + Platsvärde saknar capy-hooks (medvetet
+scope steg 2 — läggs till vid behov); Minnesmästare-policyn för
+division väntar på Dennis-beslut; nivå 1-division d=4 har få tal.
+
 Beslutad av Dennis 2026-07-03 ("kör enligt rekommendationen").
 Ordning: 1) Dagens träning (v33) → 2) Belöningssystem/samlarkort (v34)
 → 3) Android-bakåtknapp (v35). Barnens direktiv: korten är KAWAII
