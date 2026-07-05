@@ -86,10 +86,25 @@ Ingen poängpåverkan. Räknaren nollställs per runda.
 
 ## Kort division
 
-Layout: divisorn till vänster, lodrätt avskiljare, täljaren till höger.
-KVOTEN skrivs ovanför täljaren, siffra för siffra. Mellanrest skrivs som
-LITEN siffra uppe till vänster om nästa täljarsiffra (9 rest 1 före 6 →
-"¹6" läses sexton).
+**LAYOUT KORRIGERAD (Dennis bokfoto #2, 2026-07-05 — ersätter
+lodstrecks-varianten):** BRÅKSTRECKS-NOTATION som Miras bok:
+```
+   8̶ ²5̶ ¹2̶
+  ───────── = 1 4 2
+      6
+```
+Täljaren överst (med plats för små röda rest-prefix före varje siffra),
+horisontellt bråkstreck under, DIVISORN centrerad under strecket,
+KVOTEN skrivs efter likhetstecknet till höger, siffra för siffra
+vänster→höger. Mellanrest = liten röd pennstils-siffra (mem-digit) uppe
+till VÄNSTER om nästa täljarsiffra (²5 läses tjugofem).
+**Strykregel (Dennis 2026-07-05): varje täljarsiffra STRYKS (penndrag)
+när dess delningssteg är klart** — 8̶ när ²:an flyttats, 5̶ när steget
+klart osv. Samma ätstryk-vana som minnessiffrorna. I hjälpläget stryker
+BARNET (tap, egen fas som minnessiffrorna); sista siffrans strykning
+undantas från KRAVET per sista-minnes-principen (demo visar den dock).
+Divisionens stryk-moment räknas i Minnesmästare (samma vana — flaggat
+för Dennis-veto). Rest-prefixen stryks aldrig.
 
 **Beräkningsgång, siffra för siffra vänster→höger:**
 "Hur många HELA 4:or ryms i 9?" → 2 (för 2×4=8) → skriv 2 i kvoten
