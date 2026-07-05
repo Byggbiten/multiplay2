@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v32';
+const APP_VERSION = 'v33';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -159,6 +159,8 @@ const Store = {
       `np_svenska_log_${id}`,           // np-svenska.js
       `np_matte_muntligt_stats_${id}`,  // np-matte-muntligt.js
       `np_matte_skriftlig_stats_${id}`, // np-matte-skriftlig.js
+      `daily_log_${id}`,                // daily.js (Dagens träning-logg)
+      `daily_state_${id}`,              // daily.js (dagens frysta urval)
     ].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) { /* ignorera */ }
     });
@@ -204,9 +206,9 @@ const Router = (() => {
   return { show, getCurrent };
 })();
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════
    HUVUD-APP-OBJEKT
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+══════════════════════════════════════════════════════ */
 const App = (() => {
   let currentProfile = null;
   let selectedAvatar = AVATARS[0];
@@ -269,7 +271,7 @@ const App = (() => {
   }
 
   /* Dagens träning visas först när profilen har ≥2 spelade test totalt.
-     (Själva innehållet i Dagens träning byggs i Fas 4.) */
+     Innehållet byggs av DailyTraining (js/daily.js). */
   function shouldShowDailyTraining(profile) {
     const p = profile || currentProfile;
     if (!p) return false;
@@ -431,22 +433,63 @@ const App = (() => {
 
   /* Hero-slot i spelväljaren.
      Villkor <2 test  → "kom igång"-kort som pekar mot spelen.
-     Villkor ≥2 test  → Dagens träning-slot; innehållet (adaptiv motor)
-     är Fas 4, så TILLS VIDARE visas kom igång-kortet med anpassad text. */
+     Villkor ≥2 test  → Dagens träning (DailyTraining.heroContent):
+       träna    → dagens 3 tal + Starta-knapp
+       klart    → "Klart för idag!" + diskret Kör igen
+       fallback → föreslå svagaste modulen (ingen mult-data än)
+       null     → kom igång-kortet (bör inte hända bakom gaten) */
   function renderHero() {
     const hero = document.getElementById('daily-hero');
     if (!hero || !currentProfile) return;
 
-    if (shouldShowDailyTraining(currentProfile)) {
+    const daily = (shouldShowDailyTraining(currentProfile) && typeof DailyTraining !== 'undefined')
+      ? DailyTraining.heroContent(currentProfile)
+      : null;
+
+    if (daily && daily.läge === 'träna') {
       hero.innerHTML = `
         <div class="hero-inner">
           <span class="hero-emoji">🎯</span>
           <div>
             <span class="hero-badge">✨ Smart träning</span>
             <h2>Dagens träning</h2>
-            <p>Byggs just nu – snart tränar du på precis det du behöver! 🛠️</p>
-            <small>Fortsätt spela så länge – varje test gör din träning smartare 💜</small>
+            <p>3 tal väntar på dig! ✨ <span class="num">${escapeHtml(daily.text)}</span></p>
+            <small>Precis de du övar på 💜</small>
           </div>
+          <button class="btn btn-primary" onclick="App.startDailyTraining()">
+            Starta
+            <svg class="icn"><use href="#i-play"/></svg>
+          </button>
+        </div>`;
+    } else if (daily && daily.läge === 'klart') {
+      const streakTxt = daily.streak >= 2
+        ? `🔥 ${daily.streak} dagar i rad – wow!`
+        : 'Ett extra pass gör dig ännu vassare 💪';
+      hero.innerHTML = `
+        <div class="hero-inner">
+          <span class="hero-emoji">🌟</span>
+          <div>
+            <span class="hero-badge">✨ Smart träning</span>
+            <h2>Klart för idag! 🌟</h2>
+            <p>Kom tillbaka i morgon – då väntar nya tal</p>
+            <small>${escapeHtml(streakTxt)}</small>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="App.startDailyTraining()">Kör igen</button>
+        </div>`;
+    } else if (daily && daily.läge === 'fallback') {
+      hero.innerHTML = `
+        <div class="hero-inner">
+          <span class="hero-emoji">🎯</span>
+          <div>
+            <span class="hero-badge">✨ Smart träning</span>
+            <h2>Dagens träning</h2>
+            <p>Dags att träna ${escapeHtml(daily.namn)}?${daily.senast ? ` <span class="num">Senast ${escapeHtml(daily.senast)}</span>` : ''}</p>
+            <small>Spela Gångertabellen så lär jag mig dina tal 💜</small>
+          </div>
+          <button class="btn btn-primary" onclick="App.startGame('${daily.modul}')">
+            Kör!
+            <svg class="icn"><use href="#i-play"/></svg>
+          </button>
         </div>`;
     } else {
       hero.innerHTML = `
@@ -460,6 +503,17 @@ const App = (() => {
           </div>
         </div>`;
     }
+  }
+
+  /* Starta Dagens träning-passet (körs i Gångertabellens skärm,
+     quiz-maskineriet återanvänds via DailyTraining → MultGame). */
+  function startDailyTraining() {
+    if (!currentProfile) { showHome(); return; }
+    if (typeof DailyTraining === 'undefined' || typeof MultGame === 'undefined') return;
+    Sound.play('click');
+    if (MultGame.stopTimer) MultGame.stopTimer();
+    Router.show('screen-multiplication');
+    DailyTraining.startPass(currentProfile);
   }
 
   /* Fyll spelkortens statuschips (senaste resultat eller "Ny! ✨") */
@@ -596,6 +650,7 @@ const App = (() => {
     selectAvatar,
     showGameSelect,
     startGame,
+    startDailyTraining,
     goBackToGameSelect,
     showDeleteProfiles,
     hideDeleteProfiles,

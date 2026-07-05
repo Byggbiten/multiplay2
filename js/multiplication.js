@@ -705,12 +705,28 @@ const MultGame = (() => {
     };
   }
 
-  function runCustomSession(questions, tables) {
+  /* Kör en blandad session med given frågelista.
+     opts (alla valfria – utelämnade = exakt gamla Matteprov-beteendet):
+       headerTitle  – rubrik i headern
+       hint         – text ovanför frågan ('' döljer raden)
+       onCancel     – Avbryt-knappens handling (default: showCustomTest)
+       onDone(stats)– egen resultathantering (default: showCustomResult)
+     Återanvänds av Dagens träning (js/daily.js) via runFocusedSession. */
+  function runCustomSession(questions, tables, opts) {
+    opts = opts || {};
     const quiz = MP.createRetryQuiz(questions);
+    const headerTitle = opts.headerTitle || 'Matteprov';
+    const hint = (opts.hint !== undefined) ? opts.hint : `${tables.join(', ')}-tabellerna`;
+    MultGame._sessionCancel = opts.onCancel || showCustomTest;
+
+    function finish() {
+      if (opts.onDone) { opts.onDone(quiz.stats()); return; }
+      showCustomResult(quiz.stats(), tables);
+    }
 
     function renderQ() {
       const q = quiz.current();
-      if (q === null) { showCustomResult(quiz.stats(), tables); return; }
+      if (q === null) { finish(); return; }
       const ans = q.table * q.mult;
       const root = document.getElementById('mult-root');
       const prog     = quiz.progress();
@@ -719,8 +735,8 @@ const MultGame = (() => {
       root.innerHTML = `
         ${baseStyle()}
         <div class="app-header">
-          <button class="btn-back" onclick="MultGame.showCustomTest()">Avbryt</button>
-          <span class="header-title">Matteprov</span>
+          <button class="btn-back" onclick="MultGame._sessionCancel()">Avbryt</button>
+          <span class="header-title">${headerTitle}</span>
           <div class="mult-hdr-actions">
             <span class="mult-timer-hdr" id="mult-timer-display"></span>
             <span class="header-progress num" role="progressbar" aria-valuenow="${prog.answered}" aria-valuemin="0" aria-valuemax="${prog.total}" aria-label="Framsteg">
@@ -732,14 +748,14 @@ const MultGame = (() => {
         <div class="wrap">
           <div class="mq-main">
             <div class="card mq-qcard q-hero">
-              <div class="mq-hint num">${tables.join(', ')}-tabellerna</div>
+              ${hint ? `<div class="mq-hint num">${hint}</div>` : ''}
               <div class="mq-task num">${q.table}<span class="mq-x">×</span>${q.mult}<span class="mq-eq">&nbsp;= ?</span></div>
             </div>
             ${buildAnswerUI(q.table, q.mult, ans, (wasCorrect) => {
               recordAnswer(q.table, q.mult, wasCorrect);
               quiz.answer(wasCorrect);
               if (quiz.isDone()) {
-                showCustomResult(quiz.stats(), tables); return;
+                finish(); return;
               }
               renderQ();
             })}
@@ -939,6 +955,27 @@ const MultGame = (() => {
     runCustomSession(problems, tables);
   }
 
+  /* Parametriserad fokuserad träning för externa moduler
+     (Dagens träning, js/daily.js): exakt frågelista in
+     [{table, mult}, ...], callbacks ut. Sätter profil och kan
+     tillfälligt tvinga svarsläge ('choice') – användarens val
+     återställs när passet avslutas eller avbryts. */
+  function runFocusedSession(p, pairs, opts) {
+    opts = opts || {};
+    profile = p;
+    stopTimer();
+    const prevMode = answerMode;
+    if (opts.answerMode) answerMode = opts.answerMode;
+    const restore = () => { answerMode = prevMode; };
+    const tables = [...new Set(pairs.map(q => q.table))];
+    runCustomSession(pairs.slice(), tables, {
+      headerTitle: opts.headerTitle,
+      hint:        opts.hint,
+      onCancel:    opts.onCancel && (() => { restore(); opts.onCancel(); }),
+      onDone:      opts.onDone && ((stats) => { restore(); opts.onDone(stats); }),
+    });
+  }
+
   function confirmReset() {
     showModal(`
       <div class="mult-modal-emoji">⚠️</div>
@@ -1129,6 +1166,7 @@ const MultGame = (() => {
     showStats,
     showLog,
     startFocusedTraining,
+    runFocusedSession,
     confirmReset,
     updateRange,
     startTimer,
@@ -1138,6 +1176,7 @@ const MultGame = (() => {
 
     // Händelsehanterare (sätts dynamiskt av renderfunktioner)
     _trainingNext: null,
+    _sessionCancel: null,
     _toggleCustomTable: null,
     _updateCustomRange: null,
     _startCustom: null,
