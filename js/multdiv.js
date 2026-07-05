@@ -1,5 +1,5 @@
 /* ============================================================
-   MULTIPLAY – Multiplikation & Division med uppställning (v32)
+   MULTIPLAY – Multiplikation & Division med uppställning (v36)
    Steg A: hubb + UPPSTÄLLD MULTIPLIKATION nivå 1–4 (alla lägen).
    Steg B (v32): KORT DIVISION nivå 1–4 (alla lägen) — hubbkortet
    är aktiverat.
@@ -20,9 +20,8 @@
    nivå 4:s additionsfas). LIVLINOR — 2 st per övningsrunda i hjälp-
    läget: knappen visar svaret i bubblan men barnet MÅSTE skriva in
    det själv (ingen auto-fyllning, ingen poängpåverkan).
-   v32: KORT DIVISION — divisorn till vänster, lodrät avskiljare,
-   täljaren till höger; kvoten skrivs siffra för siffra OVANFÖR
-   täljaren. Mellanrest = liten röd .mem-digit-siffra uppe till
+   v32: KORT DIVISION — (lodstrecks-layouten ERSATT av bråkstreck i
+   v36, se nedan). Mellanrest = liten röd .mem-digit-siffra uppe till
    vänster om NÄSTA täljarsiffra ("¹6" läses sexton). Rester stryks
    ALDRIG (de uppgår i nästa tal — pappers-korrekt). Generatorn
    konstruerar BAKLÄNGES (kvot·divisor = täljare ⇒ jämn delning) och
@@ -32,6 +31,19 @@
    med multiplikationen (2/runda). Fritt läge: kvoten i miniräknar-
    fältet + glömd-rest-detektor (kvotsiffra = floor(siffra/divisor)
    utan rest-medföljning). Multiplikationens kedjor är ORÖRDA.
+   v36: DIVISIONENS LAYOUT = BRÅKSTRECKS-NOTATION per Miras mattebok
+   (Dennis bokfoto #2, 2026-07-05 — ersätter lodstrecks-varianten):
+   täljaren överst (rest-prefix + strykbar), horisontellt bråkstreck,
+   divisorn centrerad UNDER strecket, kvoten efter "=" till HÖGER
+   (flex-wrap ⇒ "= kvoten" radbryter under bråket på smala skärmar).
+   NYTT strykmoment: varje täljarsiffra STRYKS (penndrag, mem-digit-
+   vanan — siffran står kvar) när dess delningssteg är klart. Demo:
+   eget steg med bubbla. Hjälp: egen STRYK-fas där barnet TAPPAR
+   siffran (fel-tap → mild vägledning + memMistakes). SISTA siffrans
+   strykning krävs inte (sista-minnes-principen) men demon visar den.
+   Stryk-momenten räknas i Minnesmästare (memMoments/memMistakes).
+   Rest-prefixen stryks ALDRIG. Beräkningsgång, generatorer, facit,
+   frågekedja och poäng är HELT ORÖRDA — endast layout + strykmoment.
    ============================================================ */
 'use strict';
 
@@ -61,6 +73,10 @@ const MultDivGame = (() => {
   /* Divisionens PLACERA-fas (v32): { g, val, next } — barnet tappar
      platsen framför nästa täljarsiffra där mellanresten ska stå. */
   let divAwait = null;
+
+  /* Divisionens STRYK-fas (v36): { g, digit } — barnet tappar täljar-
+     siffran som ska strykas när dess delningssteg är klart. */
+  let divStrikeAwait = null;
 
   /* Övning */
   let exerciseIdx = 0, exScore = 0, helpMode = true;
@@ -195,11 +211,34 @@ const MultDivGame = (() => {
     .md-l4 .mem-digit, .md-l4 .mem-slot { font-size:clamp(0.72rem,1.8vw,1.2rem); }
     @media (max-width:420px) { .md-memcol { width:clamp(36px,10vw,48px); gap:1px 4px; } }
 
-    /* Kort division (v32): divisor | lodrät avskiljare | täljare.
-       Mellanresten (.md-divrem) = liten röd pennstils-siffra (.mem-digit)
-       uppe till vänster om NÄSTA täljarsiffra — stryks ALDRIG. */
-    .md-divbar { width:4px; height:clamp(38px,7vw,64px); border-radius:2px;
-      background:linear-gradient(180deg,transparent,#374151 12%,#374151 88%,transparent); }
+    /* Kort division (v36): BRÅKSTRECKS-NOTATION per Miras mattebok —
+       täljaren överst, horisontellt bråkstreck, divisorn centrerad
+       UNDER strecket, kvoten efter "=" till HÖGER. flex-wrap ⇒
+       "= kvoten" radbryter UNDER bråket på smala skärmar (390 px)
+       i stället för overflow. Mellanresten (.md-divrem) = liten röd
+       pennstils-siffra (.mem-digit) uppe till vänster om NÄSTA
+       täljarsiffra — stryks ALDRIG. */
+    .md-divwrap { display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+      gap:8px clamp(8px,2vw,18px); padding:2px 0; }
+    .md-frac { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .md-fracrow { display:flex; gap:clamp(3px,0.9vw,7px); }
+    .md-fraccol { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .md-flbl { font-size:clamp(0.8rem,1.6vw,1.15rem); font-weight:900; line-height:1.1; }
+    .md-fracbar { align-self:stretch; height:4px; border-radius:2px;
+      background:linear-gradient(90deg,transparent,#374151 6%,#374151 94%,transparent); }
+    .md-diveq { display:flex; align-items:center; gap:clamp(3px,0.9vw,7px); }
+    .md-eqsign { font-family:var(--font-head); font-weight:900; color:#475569;
+      font-size:clamp(1.3rem,3vw,2.1rem); padding:0 2px; }
+    .md-diveq-free { flex:1 1 220px; max-width:340px; }
+    .md-diveq-free .md-field { flex:1; width:auto; }
+    /* Struken täljarsiffra (v36): penndraget ritas — siffran STÅR KVAR
+       (samma ätstryk-vana som minnessiffrorna). Rest-prefixen (.md-divrem)
+       och placera-slotten undantas — de stryks/dimmas ALDRIG. */
+    .md-cell.struck > span:not(.md-divrem):not(.md-divslot) { opacity:0.55; }
+    .md-cell.md-ntap { cursor:pointer; }
+    .md-cell .nstrike { position:absolute; left:7%; top:7%; width:86%; height:86%;
+      overflow:visible; pointer-events:none; z-index:2; }
+    .md-cell .nstrike path { stroke-width:1.8; }
     .md-cell .md-divrem { position:absolute; top:-9px; left:-10px; z-index:3; display:none; }
     .md-cell .md-divrem.on { display:inline-flex; }
     .md-cell .md-divslot { position:absolute; top:-13px; left:-13px; z-index:4;
@@ -267,7 +306,10 @@ const MultDivGame = (() => {
       .md-l4 .md-cell, .md-l4 .md-ansc { width:27px; height:27px; font-size:0.95rem; border-radius:8px; }
       .mem-digit, .mem-slot, .md-l4 .mem-digit, .md-l4 .mem-slot { font-size:0.72rem; }
       .md-memcol { width:34px; gap:1px 3px; }
-      .md-divbar { height:clamp(32px,6vw,44px); }
+      .md-fracbar { height:3px; }
+      .md-eqsign { font-size:1.15rem; }
+      .md-flbl { font-size:0.72rem; }
+      .md-divwrap { gap:6px 8px; }
       .md-cell .md-divrem { top:-7px; left:-7px; }
       .md-cell .md-divslot { top:-10px; left:-10px; }
       .md-table { border-spacing:2px; }
@@ -600,9 +642,13 @@ const MultDivGame = (() => {
      ("Hur många hela 4:or ryms i 9?") → skriv kvotsiffran → ev. rest-
      steg (mellanresten ritas som mem-digit framför nästa siffra).
      Jämn fortsättning (remIn>0, rem=0) får spec-bubblan "precis jämnt!"
-     som ETT steg. Leading-specialfallet: informationssteg utan skrivning. */
+     som ETT steg. Leading-specialfallet: informationssteg utan skrivning.
+     v36: STRYKMOMENTET som eget steg — när delningssteget är klart
+     (kvotsiffra skriven + ev. rest flyttad) stryks täljarsiffran med
+     penndraget. fromSkip-steget stryker BÅDA siffrorna (33 lästes ihop).
+     Demon visar även SISTA siffrans strykning (hjälpläget kräver den ej). */
   function buildDivDemoSteps() {
-    const steps = [];
+    const steps = [], nd = digitsOf(numA);
     for (const s of plan.pass.steps) {
       steps.push({ t: 'dhl', ...s });
       if (s.skip) { steps.push({ t: 'dskip', ...s }); continue; }
@@ -613,6 +659,8 @@ const MultDivGame = (() => {
         steps.push({ t: 'dwrite', ...s });          // "2 stycken! För 2 · 4 = 8"
       }
       if (s.rem > 0 && !s.last) steps.push({ t: 'drem', ...s });
+      const gsDone = s.fromSkip ? [s.g + 1, s.g] : [s.g];
+      steps.push({ t: 'dstrike', gs: gsDone, digits: gsDone.map(g => nd[g]), last: s.last });
     }
     steps.push({ t: 'done' });
     return steps;
@@ -694,6 +742,10 @@ const MultDivGame = (() => {
         if (step.remIn > 0 && step.rem === 0)
           return `<strong>${step.cur} ÷ ${numB} = ${step.q}</strong>, precis jämnt! ✅`;
         return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'}! För ${step.q} · ${numB} = ${step.q * numB}`;
+      case 'dstrike':
+        return step.digits.length === 2
+          ? `<strong>${step.digits[0]}</strong>:an och <strong>${step.digits[1]}</strong>:an är klara — vi stryker dem! ✏️`
+          : `<strong>${step.digits[0]}</strong>:an är klar — vi stryker den! ✏️`;
       case 'drem':
         return step.q > 0
           ? `${step.cur} − ${step.q * numB} = <strong style="color:#dc2626">${step.rem}</strong> blir över — ${step.rem}:an ställer sig framför ${step.next}:an: nu har vi <strong>${step.rem * 10 + step.next}</strong>!`
@@ -717,6 +769,7 @@ const MultDivGame = (() => {
     demoStep = 0; stepLocked = false;
     mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
     mdMemList = []; memAwait = null; memPickerOpen = false; memColMode = 'demo';
+    divAwait = null; divStrikeAwait = null;
     demoSteps = buildDemoSteps();
     renderDemoView();
   }
@@ -891,6 +944,12 @@ const MultDivGame = (() => {
       playCarrySound();
       setTimeout(cb, 900);
 
+    } else if (step.t === 'dstrike') {
+      // v36: penndraget ritas över täljarsiffran — den STÅR KVAR struken
+      step.gs.forEach(g => divStrikeDigit(g, true));
+      App.Sound.play('click');
+      setTimeout(cb, 900);
+
     } else {
       cb();
     }
@@ -988,6 +1047,19 @@ const MultDivGame = (() => {
     sp.classList.add('on', 'landing');
   }
 
+  /* Täljarsiffran stryks (v36) med penndraget — siffran STÅR KVAR,
+     bara nedtonad (samma ätstryk-vana som .mem-digit.used). Rest-
+     prefixen (.md-divrem) ligger ovanpå (z-index 3) och berörs ej. */
+  function divStrikeDigit(g, animate) {
+    const cell = document.getElementById(`md-n-${g}`);
+    if (!cell || cell.querySelector('.nstrike')) return;
+    cell.classList.add('struck');
+    cell.insertAdjacentHTML('beforeend',
+      `<svg class="mem-strike nstrike${animate ? ' draw' : ''}" viewBox="0 0 20 20"
+         preserveAspectRatio="none" aria-hidden="true">
+         <path pathLength="30" d="M2.5 17.5 C 6 13.5, 7.5 12, 10 9 S 15.5 4.5, 17.5 2.5"/></svg>`);
+  }
+
   function writeDigit(rowKey, g, d) {
     const cell = document.getElementById(`md-${rowKey}-${g}`);
     if (!cell) return;
@@ -1074,41 +1146,49 @@ const MultDivGame = (() => {
      Nivå 4: p1-rad + p2-rad (förskjuten, + framför, position 0 TOM)
      + slutstreck + svarsrad. Fritt läge: inga delrader.
   ══════════════════════════════════════════════════════════ */
-  /* Kort division (v32): divisor | lodrät avskiljare | täljarsiffror.
-     KVOTEN skrivs siffra för siffra OVANFÖR täljaren (md-q-cellerna,
-     ghost över leading-skip-positionen). Fritt läge: kvotraden ersätts
-     av miniräknar-fältet. g = platsvärde från höger (färg/id som mult). */
+  /* Kort division (v36): BRÅKSTRECKS-NOTATION per Miras mattebok —
+     täljarsiffrorna i rad överst (platsvärdes-etikett ovanför, plats
+     för rest-prefix + penndrags-strykning), horisontellt bråkstreck,
+     divisorn centrerad UNDER strecket, " = " + kvotens rutor till
+     HÖGER (fylls vänster→höger; ghost-ruta vid leading-skip som förr).
+     flex-wrap ⇒ "= kvoten" radbryter under bråket på smala skärmar.
+     Fritt läge: kvotrutorna ersätts av miniräknar-fältet efter "=".
+     g = platsvärde från höger (färg/id oförändrade: md-n-g, md-d-0,
+     md-q-g — hela steg/frågekedjan träffar samma id:n som förut). */
   function buildDivTableHTML(freeMode) {
     const nd = digitsOf(numA).reverse(); // vänster→höger
     const L = nd.length;
     const gs = []; for (let i = 0; i < L; i++) gs.push(L - 1 - i);
     const skipG = plan.pass.steps.length && plan.pass.steps[0].skip ? plan.pass.steps[0].g : null;
 
-    const labelRow = `<tr><td></td><td></td>${gs.map(g =>
-      `<th style="text-align:center;font-size:clamp(0.8rem,1.6vw,1.15rem);font-weight:900;color:${cv(g)};padding-bottom:2px">${LBL[g]}</th>`).join('')}</tr>`;
+    // Hjälpläget: siffrorna är tappbara (STRYK-fasen v36). Demo/fritt: ej.
+    // memColMode sätts FÖRE rendering ('demo' i startDemo, 'help'/'free' i newExProblem).
+    const tap = !freeMode && memColMode === 'help'
+      ? g => ` onclick="event.stopPropagation();MultDivGame.divDigitTap(${g})"` : () => '';
 
-    const qRow = freeMode
-      ? `<tr><td colspan="${L + 2}">
-           <div class="md-field num" id="md-free-field"><span class="md-caret"></span></div></td></tr>`
-      : `<tr><td></td><td></td>${gs.map(g =>
-          `<td><div class="md-ansc${g === skipG ? ' md-ghost' : ''}" id="md-q-${g}"></div></td>`).join('')}</tr>`;
+    const numCols = gs.map((g, i) => `
+      <div class="md-fraccol">
+        <span class="md-flbl" style="color:${cv(g)}">${LBL[g]}</span>
+        <div class="md-cell${tap(g) ? ' md-ntap' : ''}" id="md-n-${g}" style="border-color:${cv(g)}"${tap(g)}>
+          <span style="color:${cv(g)}">${nd[i]}</span></div>
+      </div>`).join('');
 
-    const nRow = `<tr>
-      <td><div class="md-cell" id="md-d-0" style="border-color:#64748b">
-        <span style="color:#475569">${numB}</span></div></td>
-      <td style="padding:0 2px"><div class="md-divbar"></div></td>
-      ${gs.map((g, i) =>
-        `<td><div class="md-cell" id="md-n-${g}" style="border-color:${cv(g)}">
-           <span style="color:${cv(g)}">${nd[i]}</span></div></td>`).join('')}</tr>`;
+    const eqPart = freeMode
+      ? `<div class="md-diveq md-diveq-free"><span class="md-eqsign num">=</span>
+           <div class="md-field num" id="md-free-field"><span class="md-caret"></span></div></div>`
+      : `<div class="md-diveq"><span class="md-eqsign num">=</span>
+           ${gs.map(g => `<div class="md-ansc${g === skipG ? ' md-ghost' : ''}" id="md-q-${g}"></div>`).join('')}</div>`;
 
     return `
-      <table class="md-table">
-        <tbody>
-          ${labelRow}
-          ${qRow}
-          ${nRow}
-        </tbody>
-      </table>`;
+      <div class="md-divwrap">
+        <div class="md-frac">
+          <div class="md-fracrow">${numCols}</div>
+          <div class="md-fracbar"></div>
+          <div class="md-cell" id="md-d-0" style="border-color:#64748b">
+            <span style="color:#475569">${numB}</span></div>
+        </div>
+        ${eqPart}
+      </div>`;
   }
 
   function buildTableHTML(freeMode) {
@@ -1217,7 +1297,7 @@ const MultDivGame = (() => {
           </div>
           <div class="md-card" onclick="MultDivGame.chooseDiv()">
             <span class="md-aico">➗</span>
-            <span><b>Kort division</b><small>Divisorn till vänster – kvoten skrivs ovanpå</small></span>
+            <span><b>Kort division</b><small>Bråkstreck som i matteboken – kvoten efter =</small></span>
             <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>
           <div class="card" style="padding:14px">
@@ -1326,7 +1406,7 @@ const MultDivGame = (() => {
     exInputLocked = false;
     mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
     mdMemList = []; memAwait = null; memPickerOpen = false; // nytt papper
-    divAwait = null;
+    divAwait = null; divStrikeAwait = null;
     memColMode = helpMode ? 'help' : 'free';
     helpQueue = helpMode ? buildHelpQueue() : [];
     helpIdx = 0; helpSub = 0; helpInput = '';
@@ -1371,16 +1451,26 @@ const MultDivGame = (() => {
      (b) 'divrem' — OM rest: "Blir något över? 9 − 8 = ?" (skippas när
          kvotsiffran är 0 — hela talet blir över, ingen subtraktion);
      (c) 'divplace' — PLACERA-fasen: barnet tappar platsen framför
-         nästa täljarsiffra → ¹ skrivs (mem-digit-mönstret, INGEN strykfas).
+         nästa täljarsiffra → ¹ skrivs (mem-digit-mönstret; resten
+         stryks ALDRIG);
+     (d) 'divstrike' (v36) — STRYK-fasen: när delningssteget är klart
+         TAPPAR barnet täljarsiffran → penndraget ritas (mem-tap-
+         mönstret, räknas i Minnesmästare). fromSkip-steget ger TVÅ
+         strykfaser (båda ihoplästa siffrorna). SISTA siffrans
+         strykning krävs INTE (sista-minnes-principen — demon visar den).
      Leading-specialfallet: informationssteg med framåtblickande knapp. */
   function buildDivHelpQueue() {
-    const q = [];
+    const q = [], nd = digitsOf(numA);
     for (const s of plan.pass.steps) {
       if (s.skip) { q.push({ kind: 'dskip', rowKey: 'q', ...s }); continue; }
       q.push({ kind: 'divq', rowKey: 'q', ...s });
       if (s.rem > 0 && !s.last) {
         if (s.q > 0) q.push({ kind: 'divrem', rowKey: 'q', ...s });
         q.push({ kind: 'divplace', rowKey: 'q', ...s });
+      }
+      if (!s.last) {
+        if (s.fromSkip) q.push({ kind: 'divstrike', strikeG: s.g + 1, digit: nd[s.g + 1] });
+        q.push({ kind: 'divstrike', strikeG: s.g, digit: nd[s.g] });
       }
     }
     return q;
@@ -1452,13 +1542,17 @@ const MultDivGame = (() => {
     exInputLocked = false;
     memAwait = null;
     divAwait = null;
+    divStrikeAwait = null;
     document.querySelectorAll('.md-divslot').forEach(el => el.remove());
+    // v36: städa ev. kvarhängande stryk-puls (md-prob används transient i demo)
+    document.querySelectorAll('#md-table-wrap .md-prob').forEach(el => el.classList.remove('md-prob'));
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = '';
     const item = helpItem();
     if (!item) { helpTaskDone(); return; }
     if (item.kind === 'memplace' || item.kind === 'memstrike') { showMemPhase(item); return; }
     if (item.kind === 'divplace') { showDivPlace(item); return; }
+    if (item.kind === 'divstrike') { showDivStrike(item); return; }
     if (item.kind === 'mult') doHighlight({ phase: 'mult', aCol: item.col, mCol: item.mCol, g: item.g });
     else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ phase: 'add', g: item.g });
     else if (item.kind === 'divq' || item.kind === 'divrem' || item.kind === 'dskip') divHighlight(item);
@@ -1545,14 +1639,60 @@ const MultDivGame = (() => {
     setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
   }
 
-  function divWrapTap(ev) {
-    if (!divAwait || exInputLocked) return;
-    if (ev.target && ev.target.closest && ev.target.closest('.md-divslot')) return;
-    // Fel tap → mild vägledning, aldrig poängstraff (barn-UX-lagen)
+  /* Mild vägledningsruta (barn-UX-lagen: aldrig poängstraff) */
+  function divGuideFb(msg) {
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
       border:2px solid #f59e0b;border-radius:12px;padding:5px 10px;font-weight:800;
-      font-size:0.92rem;color:#92400e;text-align:center">Nästan — resten ska stå här 👉</div>`;
+      font-size:0.92rem;color:#92400e;text-align:center">${msg}</div>`;
+  }
+
+  function divWrapTap(ev) {
+    if (exInputLocked) return;
+    if (divAwait) {
+      if (ev.target && ev.target.closest && ev.target.closest('.md-divslot')) return;
+      // Fel tap → mild vägledning, aldrig poängstraff (barn-UX-lagen)
+      divGuideFb('Nästan — resten ska stå här 👉');
+    } else if (divStrikeAwait) {
+      // v36: fel-tap i STRYK-fasen räknas som mem-miss (mem-tap-mönstret)
+      memMistakes++;
+      divGuideFb(`Titta — ${divStrikeAwait.digit}:an är inte struken än 👀`);
+    }
+  }
+
+  /* ── Divisionens STRYK-fas (v36): barnet tappar täljarsiffran ──
+     Mem-tap-mönstret: rätt siffra → penndrag + vidare; fel siffra/
+     fel yta → mild vägledning + memMistakes. Räknas i Minnesmästare. */
+  function showDivStrike(item) {
+    memMoments++; // v36: divisionens äkta Minnesmästare-moment
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';
+    divStrikeAwait = { g: item.strikeG, digit: item.digit };
+    const cell = document.getElementById(`md-n-${item.strikeG}`);
+    if (cell) cell.classList.add('md-prob'); // pulserar tills barnet stryker
+    helpBubble(`<strong style="color:${cv(item.strikeG)}">${item.digit}</strong>:an är klar — stryk den! ✏️`);
+  }
+
+  function divDigitTap(g) {
+    if (exInputLocked) return;
+    if (divAwait) { divGuideFb('Nästan — resten ska stå här 👉'); return; }
+    if (!divStrikeAwait) return;
+    if (g === divStrikeAwait.g) {
+      exInputLocked = true;
+      const digit = divStrikeAwait.digit;
+      divStrikeAwait = null;
+      const cell = document.getElementById(`md-n-${g}`);
+      if (cell) cell.classList.remove('md-prob');
+      divStrikeDigit(g, true); // animerat penndrag — siffran står kvar
+      App.Sound.play('correct');
+      helpBubble(`Struken! ✏️ Nu ser vi att ${digit}:an är klar.`);
+      const gen = exGen;
+      setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
+    } else {
+      memMistakes++;
+      divGuideFb(`Titta — ${divStrikeAwait.digit}:an är inte struken än 👀`);
+    }
   }
 
   function memTapSlot() {
@@ -1833,7 +1973,7 @@ const MultDivGame = (() => {
       App.Sound.play('correct');
       const gen = exGen;
       if (item.kind === 'divq') {
-        // Kvotsiffran skrivs OVANFÖR täljaren — sedan ev. rest-frågan
+        // Kvotsiffran skrivs i kvoten efter "=" (v36) — sedan ev. rest-frågan
         writeDigit('q', item.g, item.q);
         const txt = item.q === 0
           ? `Rätt! Ingen hel ${numB}:a ryms i ${item.cur} — <strong style="color:${cv(item.g)}">0</strong> i kvoten! ⭕`
@@ -2254,6 +2394,7 @@ const MultDivGame = (() => {
     useLifeline,                           // livlinor (v31)
     memTap, memTapSlot, memPick,           // minnesspalten (v30)
     divTapSlot,                            // divisionens PLACERA-fas (v32)
+    divDigitTap,                           // divisionens STRYK-fas (v36)
     exFreePress, exFreeErase, exFreeSubmit,
     mdToggleEraser, mdClearCanvas,
     exitToApp,
