@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v34';
+const APP_VERSION = 'v35';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -185,6 +185,8 @@ const Store = {
 /* ── Routing / Screen-hantering ───────────────────────── */
 const Router = (() => {
   let current = 'screen-home';
+  let historyReady = false;   // first show() -> replaceState
+  let suppressPush = false;   // popstate-driven nav -> no push
 
   function show(screenId) {
     // Göm alla skärmar
@@ -198,6 +200,18 @@ const Router = (() => {
     target.classList.add('active');
     current = screenId;
 
+    // History-post per skärm (Android-bakåtknappen)
+    if (!suppressPush) {
+      try {
+        if (!historyReady) {
+          history.replaceState({ screen: screenId }, '', '');
+          historyReady = true;
+        } else if (!history.state || history.state.screen !== screenId) {
+          history.pushState({ screen: screenId }, '', '');
+        }
+      } catch (_) { /* history-API saknas (gammal WebView) */ }
+    }
+
     // Scrolla till toppen
     target.scrollTop = 0;
     window.scrollTo(0, 0);
@@ -205,7 +219,13 @@ const Router = (() => {
 
   function getCurrent() { return current; }
 
-  return { show, getCurrent };
+  // Kör fn utan att pusha history (popstate-driven navigering)
+  function silent(fn) {
+    suppressPush = true;
+    try { fn(); } finally { suppressPush = false; }
+  }
+
+  return { show, getCurrent, silent };
 })();
 
 /* ══════════════════════════════════════════════════════
@@ -222,6 +242,32 @@ const App = (() => {
     renderProfiles();
     setupKeyboardNav();
     showHome();
+    setupHistoryNav();
+  }
+
+  /* ── Android-bakåtknapp (popstate → logisk bakåtnav) ── */
+  function setupHistoryNav() {
+    try {
+      window.addEventListener('popstate', () => {
+        // Gå BAKÅT logiskt utifrån synlig skärm (ej event.state),
+        // så snabba back-tryck aldrig hamnar fel i hierarkin.
+        const cur = Router.getCurrent();
+        if (cur === 'screen-home') return; // hem: låt back lämna appen
+
+        Router.silent(() => {
+          if (cur === 'screen-game-select' || cur === 'screen-create-profile') {
+            showHome();
+          } else if (cur === 'screen-np-matte-select' || cur === 'screen-np-svenska-select') {
+            // NP-undervy -> NP-hubben (App:s väg dit)
+            startGame('nationella');
+          } else {
+            // Spel-skärmar, Samlingen, djupa NP-vyer m.fl.
+            // -> game-select (stoppar timer, som Avsluta)
+            goBackToGameSelect();
+          }
+        });
+      });
+    } catch (_) { /* history-API saknas (gammal WebView) */ }
   }
 
   /* ── Avatarväljare ────────────────────────────────── */
