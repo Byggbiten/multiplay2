@@ -87,7 +87,10 @@ Ingen poängpåverkan. Räknaren nollställs per runda.
 ## Kort division
 
 **LAYOUT KORRIGERAD (Dennis bokfoto #2, 2026-07-05 — ersätter
-lodstrecks-varianten):** BRÅKSTRECKS-NOTATION som Miras bok:
+lodstrecks-varianten):** BRÅKSTRECKS-NOTATION som Miras bok.
+Extern källa (Dennis): Skolbanken-planering "Kort division — dividera
+med uppställning" (skolbanken.unikum.net/plans/plan/11982730933) —
+"det vanligaste sättet idag när man vill dividera tal med uppställning".
 ```
    8̶ ²5̶ ¹2̶
   ───────── = 1 4 2
