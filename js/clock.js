@@ -683,6 +683,8 @@ const ClockGame = (() => {
         </div>
       </div>
     `;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'clock', pct } }); } catch (_) {}
   }
 
   /* ══════════════════════════════════════════════════════

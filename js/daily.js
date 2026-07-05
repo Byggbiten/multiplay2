@@ -285,6 +285,8 @@ const DailyTraining = (() => {
       onCancel:    () => App.goBackToGameSelect(),
       onDone:      (stats) => {
         markDone(profile, stats, tal);
+        // Capybara-samlingen (v34): ren sidoeffekt EFTER logg – får aldrig kasta
+        try { if (window.Capy) Capy.award(profile, { type: 'daily', data: { pct: stats.pct, streak: streak(profile) } }); } catch (_) {}
         showResult(stats);
       },
     });

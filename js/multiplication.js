@@ -620,6 +620,8 @@ const MultGame = (() => {
         </div>
       </div>
     `;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'mult', pct } }); } catch (_) {}
   }
 
   /* ══════════════════════════════════════════════════════
@@ -797,6 +799,8 @@ const MultGame = (() => {
         </div>
       </div>
     `;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'mult', pct } }); } catch (_) {}
   }
 
   /* ══════════════════════════════════════════════════════

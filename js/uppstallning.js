@@ -1940,6 +1940,8 @@ const UppstallningGame = (() => {
           </div>
         </div>
       </div>`;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'uppstallning', pct: Math.round((exScore / 5) * 100), memStar } }); } catch (_) {}
   }
 
   /* ── Scratch HTML ───────────────────────────────────────── */

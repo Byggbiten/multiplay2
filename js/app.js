@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v33';
+const APP_VERSION = 'v34';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -161,6 +161,8 @@ const Store = {
       `np_matte_skriftlig_stats_${id}`, // np-matte-skriftlig.js
       `daily_log_${id}`,                // daily.js (Dagens träning-logg)
       `daily_state_${id}`,              // daily.js (dagens frysta urval)
+      `capy_cards_${id}`,               // capy.js (kortinnehav)
+      `capy_state_${id}`,               // capy.js (milstolpe-räknare)
     ].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) { /* ignorera */ }
     });
@@ -342,7 +344,11 @@ const App = (() => {
     const medals = countMedals(p.id);
     const played = lastPlayedText(p.id);
     if (!played) return 'Ny spelare ✨';
-    return `🥇 ${medals} medalj${medals === 1 ? '' : 'er'} · ${played}`;
+    // Capybara-kort (capy.js) – metadatan läses billigt ur localStorage
+    let kort = 0;
+    try { if (typeof Capy !== 'undefined') kort = Capy.cardCount(p.id); } catch (_) { /* aldrig blockera hem-vyn */ }
+    const kortTxt = kort > 0 ? ` · 🃏 ${kort} kort` : '';
+    return `🥇 ${medals} medalj${medals === 1 ? '' : 'er'}${kortTxt} · ${played}`;
   }
 
   /* ── Profilrendering ──────────────────────────────── */

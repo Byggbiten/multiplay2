@@ -501,6 +501,8 @@ const FriendsGame = (() => {
         </div>
       </div>
     `;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'friends', pct } }); } catch (_) {}
   }
 
   /* ══════════════════════════════════════════════════════

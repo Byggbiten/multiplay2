@@ -2112,6 +2112,8 @@ const MultDivGame = (() => {
           </div>
         </div>
       </div>`;
+    // Capybara-samlingen (v34): ren sidoeffekt EFTER resultat/logg – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type: 'test', data: { module: 'multdiv', pct: Math.round((exScore / 5) * 100), memStar } }); } catch (_) {}
   }
 
   /* ── Kladd (Fas 3.2: fyller ledig yta + bitmapp-synk) ───── */

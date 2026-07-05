@@ -149,6 +149,9 @@
             <svg class="icn"><use href="#i-switch"/></svg>Byt
           </button>
         </div>
+        <button class="icon-btn" aria-label="Samlingen – dina capybara-kort" title="Samlingen" onclick="typeof Capy !== 'undefined' && Capy.showCollection()">
+          <svg class="icn"><use href="#i-star"/></svg>
+        </button>
       </div>
 
       <h2 class="hello">Hej <em id="hello-name"></em>! Vad vill du träna på? 🌈</h2>
@@ -304,6 +307,13 @@
     <div id="multdiv-root"></div>
   </section>
 
+  <!-- ══════════════════════════════════════
+       SKÄRM 17: CAPYBARA-SAMLINGEN (js/capy.js)
+  ══════════════════════════════════════ -->
+  <section id="screen-collection" class="screen" role="main">
+    <div id="capy-root"></div>
+  </section>
+
 </div><!-- /app-wrapper -->
 
 <!-- ══════════════════════════════════════
@@ -345,6 +355,7 @@
 <script src="js/shared.js"></script>
 <script src="js/app.js"></script>
 <script src="js/daily.js"></script>
+<script src="js/capy.js"></script>
 <script src="js/multiplication.js"></script>
 <script src="js/clock.js"></script>
 <script src="js/tenfriends.js"></script>
