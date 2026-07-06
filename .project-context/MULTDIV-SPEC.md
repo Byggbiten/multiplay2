@@ -139,6 +139,17 @@ den framräknade stegsekvensen, annars slumpa om.
 - klart: "Klart! 🎉 96 ÷ 4 = 24 — kolla: 24 × 4 = 96!" (verifiering med
   multiplikation — knyter ihop räknesätten)
 
+## NAVIGERINGSKONSOLIDERING (Dennis 2026-07-05, v37)
+
+Gäller BÅDE multdiv och uppställningen (A&S):
+- **Vy 1 (hubben):** ENDAST räknesättsval (Multiplikation/Division resp.
+  Platsvärde/Add/Sub). Inga nivåchips här längre.
+- **Vy 2 (lägesvyn per räknesätt):** TRE likvärdiga val — 👀 Titta och
+  lär · 🤝 Räkna med hjälp · 💪 Räkna själv — med SVÅRIGHETSVÄLJAREN
+  (1–4-chipsen) i BOTTEN av samma vy. Klick på ett läge startar direkt
+  med vald nivå. Det separata "Med hjälp / Utan hjälp"-steget utgår.
+- Tillbaka/Avsluta-vägar pekar på lägesvyn som tidigare.
+
 ## Lägen (samma kontrakt som uppstallning.js)
 
 - **Titta och lär:** "Nästa steg"-knapp, bubbla FÖRE animation (v28-
