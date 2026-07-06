@@ -119,6 +119,15 @@ const UppstallningGame = (() => {
     .diff-btn .diff-desc { font-size:11px; font-weight:800; opacity:0.9; line-height:1.1; white-space:nowrap; }
     .diff-btn.active { background:linear-gradient(135deg,var(--accent),var(--accent-light));
       color:#fff; border-color:transparent; box-shadow:0 6px 16px var(--glow); }
+    /* v37: lägesvyn på korta skärmar (390×664) — kompakta lägeskort
+       så tre kort + chipsraden ryms utan scroll */
+    @media (max-height:700px) {
+      .up-card { padding:9px 14px; gap:12px; }
+      .up-aico { width:44px; height:44px; font-size:22px; border-radius:14px; }
+      .up-card b { font-size:16px; }
+      .up-card small { font-size:12px; }
+      .diff-btn { min-height:44px; padding:5px 4px; }
+    }
 
     /* Uppställningstabell */
     #up-table-wrap { position:relative; background:var(--glass-strong);
@@ -324,7 +333,12 @@ const UppstallningGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════
-     VÄLJ-SKÄRM
+     VÄLJ-SKÄRM — v37: konsoliderad LÄGESVY med tre likvärdiga
+     lägeskort (Titta och lär / Räkna med hjälp / Räkna själv) +
+     svårighetschipsen i botten. Hjälpvals-steget är borttaget —
+     startExercise(withHelp) startar rundan direkt. Avsluta/Tillbaka
+     från demo/övning/resultat pekar HIT; vyens egen Tillbaka
+     (goBack) går till A&S-hubben som tidigare.
   ══════════════════════════════════════════════════════════ */
   let upExGen = 0; // session-token: ogiltigförklarar schemalagda uppgiftsbyten vid Avsluta (T3.3)
   function showModeSelect() {
@@ -364,9 +378,14 @@ const UppstallningGame = (() => {
             <span><b>Titta och lär</b><small>Se varje steg animerat – tryck "Nästa steg"</small></span>
             <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>
-          <div class="up-card" onclick="UppstallningGame.startExercise()">
-            <span class="up-aico">✏️</span>
-            <span><b>Räkna själv</b><small>Fyll i svar kolumn för kolumn</small></span>
+          <div class="up-card" onclick="UppstallningGame.startExercise(true)">
+            <span class="up-aico">🤝</span>
+            <span><b>Räkna med hjälp</b><small>Ledtrådar och låna-knapp kolumn för kolumn</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </div>
+          <div class="up-card" onclick="UppstallningGame.startExercise(false)">
+            <span class="up-aico">💪</span>
+            <span><b>Räkna själv</b><small>På egen hand – ingen ledtråd</small></span>
             <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>
           <div class="card" style="padding:14px">
@@ -575,7 +594,7 @@ const UppstallningGame = (() => {
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
       <div class="app-header">
-        <button class="btn-back" onclick="UppstallningGame.goBack()">Avsluta</button>
+        <button class="btn-back" onclick="UppstallningGame.showModeSelect()">Avsluta</button>
         <span class="header-title">${modeLabel} – Demo</span>
         <span style="width:52px"></span>
       </div>
@@ -979,7 +998,7 @@ const UppstallningGame = (() => {
         <button class="btn btn-primary" style="flex:1"
           onclick="UppstallningGame.startDemo()"><svg class="icn"><use href="#i-refresh"/></svg>Ny uppgift</button>
         <button class="btn btn-secondary" style="flex:1"
-          onclick="UppstallningGame.goBack()">Tillbaka</button>
+          onclick="UppstallningGame.showModeSelect()">Tillbaka</button>
       </div>`;
     }
     return `<button id="up-next-btn" class="btn btn-primary btn-block" onclick="UppstallningGame.demoNextStep()"
@@ -1219,43 +1238,18 @@ const UppstallningGame = (() => {
   /* ══════════════════════════════════════════════════════════
      ÖVNINGSLÄGE
   ══════════════════════════════════════════════════════════ */
-  function startExercise() {
+  /* v37: startar övningsrundan DIREKT från lägesvyn (hjälpvals-steget
+     är borttaget). withHelp sätter helpMode (true = Räkna med hjälp,
+     false = Räkna själv); utelämnad (resultatvyens "Spela igen")
+     behålls senaste läget. Nollställningarna som tidigare låg i
+     startExercise/setHelpMode är samlade här. */
+  function startExercise(withHelp) {
+    if (withHelp !== undefined) helpMode = withHelp;
     App.Sound.play('click');
     exerciseIdx = 0;
     exScore     = 0;
     memPerfect  = true;
     memMoments  = 0;
-    showHelpSelect();
-  }
-
-  function showHelpSelect() {
-    const root = document.getElementById('uppstallning-root');
-    const modeLabel = mode === 'addition' ? 'Addition ➕' : 'Subtraktion ➖';
-    root.innerHTML = `
-      <style id="up-base">${BASE_CSS}</style>
-      <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
-      <div class="app-header">
-        <button class="btn-back" onclick="UppstallningGame.goBack()">Tillbaka</button>
-        <span class="header-title">${modeLabel} – Övning</span>
-        <span style="width:52px"></span>
-      </div>
-      <div class="wrap vcenter" style="padding:0 12px 12px;gap:14px">
-        <div class="section-title" style="text-align:center">Hur vill du räkna?</div>
-        <div class="up-card" onclick="UppstallningGame.setHelpMode(true)">
-          <span class="up-aico">🤝</span>
-          <span><b>Med hjälp</b><small>Ledtrådar, låna-knapp och kompletteringsmetoden</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-        </div>
-        <div class="up-card" onclick="UppstallningGame.setHelpMode(false)">
-          <span class="up-aico">💪</span>
-          <span><b>Utan hjälp</b><small>Räkna på egen hand – ingen ledtråd</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-        </div>
-      </div>`;
-  }
-
-  function setHelpMode(on) {
-    helpMode = on;
     newExProblem();
   }
 
@@ -1287,7 +1281,7 @@ const UppstallningGame = (() => {
     root.innerHTML = `
       <style id="up-base">${BASE_CSS}</style>
       <div class="app-header">
-        <button class="btn-back" onclick="UppstallningGame.goBack()">Avsluta</button>
+        <button class="btn-back" onclick="UppstallningGame.showModeSelect()">Avsluta</button>
         <span class="header-title">${modeLabel} – Övning</span>
         <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx+1}/5</span>
       </div>
@@ -1922,7 +1916,7 @@ const UppstallningGame = (() => {
       <style id="up-base">${BASE_CSS}</style>
       <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🍀</span></div>
       <div class="app-header">
-        <button class="btn-back" onclick="UppstallningGame.goBack()">Tillbaka</button>
+        <button class="btn-back" onclick="UppstallningGame.showModeSelect()">Tillbaka</button>
         <span class="header-title">Resultat</span>
         <span style="width:52px"></span>
       </div>
@@ -1936,7 +1930,7 @@ const UppstallningGame = (() => {
           <div class="result-actions">
             <button class="btn btn-primary btn-lg" onclick="UppstallningGame.startExercise()">
               <svg class="icn"><use href="#i-refresh"/></svg>Spela igen</button>
-            <button class="btn btn-ghost" onclick="UppstallningGame.goBack()">Välj läge</button>
+            <button class="btn btn-ghost" onclick="UppstallningGame.showModeSelect()">Välj läge</button>
           </div>
         </div>
       </div>`;
@@ -2112,7 +2106,7 @@ const UppstallningGame = (() => {
   return {
     init, showModeSelect, setDifficulty,
     startDemo, demoNextStep,
-    startExercise, showHelpSelect, setHelpMode,
+    startExercise,
     exPress, exDoBorrow, exContinueBorrow,
     exTenStep1, exTenStep2, exTenStep3,
     memTableTap, memPick,

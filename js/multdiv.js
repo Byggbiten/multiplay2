@@ -1,5 +1,5 @@
 /* ============================================================
-   MULTIPLAY – Multiplikation & Division med uppställning (v36)
+   MULTIPLAY – Multiplikation & Division med uppställning (v37)
    Steg A: hubb + UPPSTÄLLD MULTIPLIKATION nivå 1–4 (alla lägen).
    Steg B (v32): KORT DIVISION nivå 1–4 (alla lägen) — hubbkortet
    är aktiverat.
@@ -44,6 +44,11 @@
    Stryk-momenten räknas i Minnesmästare (memMoments/memMistakes).
    Rest-prefixen stryks ALDRIG. Beräkningsgång, generatorer, facit,
    frågekedja och poäng är HELT ORÖRDA — endast layout + strykmoment.
+   v37: NAVIGERINGSKONSOLIDERING — hubben visar ENDAST räknesättsvalet;
+   lägesvyn (showModeSelect) har tre likvärdiga lägeskort (Titta och
+   lär / Räkna med hjälp / Räkna själv) + svårighetschipsen i botten.
+   Hjälpvals-steget (showHelpSelect/setHelpMode) är BORTTAGET —
+   startExercise(withHelp) startar rundan direkt. Spel-/poänglogik orörd.
    ============================================================ */
 'use strict';
 
@@ -298,6 +303,16 @@ const MultDivGame = (() => {
       .md-nk { width:clamp(36px,5vw,46px); height:clamp(36px,5vw,46px); }
       .md-numpad { grid-template-columns:repeat(5,clamp(36px,5vw,46px)); }
       .md-field-sm { min-height:clamp(32px,5vw,42px); font-size:clamp(1.05rem,2.2vw,1.5rem); }
+    }
+
+    /* v37: val-vyerna på korta skärmar (390×664) — kompakta lägeskort
+       så tre kort + chipsraden ryms utan scroll */
+    @media (max-height:700px) {
+      .md-card { padding:9px 14px; gap:12px; }
+      .md-aico { width:44px; height:44px; font-size:22px; border-radius:14px; }
+      .md-card b { font-size:16px; }
+      .md-card small { font-size:12px; }
+      .md-diff-btn { min-height:44px; padding:5px 4px; }
     }
 
     /* Stress-höjden 390×664 (porträtt, kort skärm): krymp tabell + numpad + kladd-minimum */
@@ -1261,21 +1276,8 @@ const MultDivGame = (() => {
 
   function showHub() {
     const root = document.getElementById('multdiv-root');
-    /* v32: chipsen gäller BÅDA spelen (väljs innan kortet) — beskriv-
-       ningarna täcker mult (minne) och division (rest) per spec-tabellen. */
-    const levels = [
-      { n: 1, emoji: '🌱', desc: 'Utan minne · utan rest' },
-      { n: 2, emoji: '🌿', desc: 'Med minne · med rest' },
-      { n: 3, emoji: '🌾', desc: 'Tresiffrigt tal' },
-      { n: 4, emoji: '🌳', desc: 'Klurigaste nivån' },
-    ];
-    const diffBtnsHTML = levels.map(l => `
-      <button class="md-diff-btn ${difficulty === l.n ? 'active' : ''}"
-        onclick="MultDivGame.setDifficulty(${l.n},this)">
-        <span class="diff-num">${l.n} ${l.emoji}</span>
-        <span class="diff-desc">${l.desc}</span>
-      </button>`).join('');
-
+    /* v37: hubben visar ENDAST räknesättsvalet — nivåchipsen bor nu
+       i lägesvyn (showModeSelect) tillsammans med de tre lägeskorten. */
     root.innerHTML = `
       <style id="md-base">${BASE_CSS}</style>
       <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🐬</span></div>
@@ -1299,13 +1301,6 @@ const MultDivGame = (() => {
             <span class="md-aico">➗</span>
             <span><b>Kort division</b><small>Bråkstreck som i matteboken – kvoten efter =</small></span>
             <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-          </div>
-          <div class="card" style="padding:14px">
-            <div class="panel-title" style="margin-bottom:10px">
-              <svg class="icn" style="color:var(--accent)" viewBox="0 0 24 24"><path d="M6 16l4-8 3 6 2-3 3 5"/></svg>
-              Svårighetsgrad
-            </div>
-            <div class="md-diff-row">${diffBtnsHTML}</div>
           </div>
         </div>
       </div>`;
@@ -1331,70 +1326,77 @@ const MultDivGame = (() => {
     showModeSelect();
   }
 
+  /* v37: KONSOLIDERAD LÄGESVY — tre likvärdiga lägeskort (Titta och
+     lär / Räkna med hjälp / Räkna själv) + svårighetsväljaren i botten
+     av SAMMA vy. Klick på ett läge startar direkt med vald nivå; det
+     gamla hjälpvals-steget ("Med hjälp / Utan hjälp") är borttaget. */
   function showModeSelect() {
     exGen++; // avbryter ev. schemalagd nästa-uppgift (Avsluta-racet)
     const root = document.getElementById('multdiv-root');
+    const div = gameKind === 'div';
+    // Mode-medvetna nivåbeskrivningar (mult = minne, div = rest)
+    const levels = [
+      { n: 1, emoji: '🌱', desc: div ? 'Utan mellanrest'  : 'Utan minnessiffra' },
+      { n: 2, emoji: '🌿', desc: div ? 'Med mellanrest'   : 'Med minnessiffra' },
+      { n: 3, emoji: '🌾', desc: 'Tresiffrigt tal' },
+      { n: 4, emoji: '🌳', desc: div ? 'Klurigaste nivån' : 'Två tvåsiffriga' },
+    ];
+    const diffBtnsHTML = levels.map(l => `
+      <button class="md-diff-btn ${difficulty === l.n ? 'active' : ''}"
+        onclick="MultDivGame.setDifficulty(${l.n},this)">
+        <span class="diff-num">${l.n} ${l.emoji}</span>
+        <span class="diff-desc">${l.desc}</span>
+      </button>`).join('');
+
     root.innerHTML = `
       <style id="md-base">${BASE_CSS}</style>
       <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🐬</span></div>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.showHub()">Tillbaka</button>
-        <span class="header-title">${gameKind === 'div' ? 'Kort division ➗' : 'Multiplikation ✖️'}</span>
+        <span class="header-title">${div ? 'Kort division ➗' : 'Multiplikation ✖️'}</span>
         <span style="width:52px"></span>
       </div>
-      <div class="wrap vcenter" style="padding:0 12px 12px;gap:14px">
-        <div class="section-title" style="text-align:center">Hur vill du träna?</div>
-        <div class="md-card" onclick="MultDivGame.startDemo()">
-          <span class="md-aico">👀</span>
-          <span><b>Titta och lär</b><small>Se varje steg animerat – tryck "Nästa steg"</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-        </div>
-        <div class="md-card" onclick="MultDivGame.startExercise()">
-          <span class="md-aico">✏️</span>
-          <span><b>Räkna själv</b><small>Räkna uppgifterna steg för steg</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+      <div class="wrap" style="padding:0 12px 12px;overflow-y:auto">
+        <div style="display:flex;flex-direction:column;gap:12px;margin:auto 0">
+          <div class="section-title" style="text-align:center">Hur vill du träna?</div>
+          <div class="md-card" onclick="MultDivGame.startDemo()">
+            <span class="md-aico">👀</span>
+            <span><b>Titta och lär</b><small>Se varje steg animerat – tryck "Nästa steg"</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </div>
+          <div class="md-card" onclick="MultDivGame.startExercise(true)">
+            <span class="md-aico">🤝</span>
+            <span><b>Räkna med hjälp</b><small>Guidefrågor kolumn för kolumn</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </div>
+          <div class="md-card" onclick="MultDivGame.startExercise(false)">
+            <span class="md-aico">💪</span>
+            <span><b>Räkna själv</b><small>På egen hand – skriv hela svaret</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </div>
+          <div class="card" style="padding:14px">
+            <div class="panel-title" style="margin-bottom:10px">
+              <svg class="icn" style="color:var(--accent)" viewBox="0 0 24 24"><path d="M6 16l4-8 3 6 2-3 3 5"/></svg>
+              Svårighetsgrad
+            </div>
+            <div class="md-diff-row">${diffBtnsHTML}</div>
+          </div>
         </div>
       </div>`;
     Router.show('screen-multdiv');
   }
 
-  function startExercise() {
+  /* v37: startar övningsrundan DIREKT från lägesvyn. withHelp sätter
+     helpMode (true = Räkna med hjälp, false = Räkna själv); utelämnad
+     (resultatvyens "Spela igen") behålls senaste läget. Nollställning-
+     arna som tidigare låg i startExercise/setHelpMode är samlade här. */
+  function startExercise(withHelp) {
+    if (withHelp !== undefined) helpMode = withHelp;
     App.Sound.play('click');
     exerciseIdx = 0;
     exScore = 0;
     memMoments = 0; memMistakes = 0; // Minnesmästare ⭐ räknas per pass
     lifelines = 2; // v31: livlinorna nollställs per övningsrunda (5 uppgifter)
-    showHelpSelect();
-  }
-
-  function showHelpSelect() {
-    const root = document.getElementById('multdiv-root');
-    root.innerHTML = `
-      <style id="md-base">${BASE_CSS}</style>
-      <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🐬</span></div>
-      <div class="app-header">
-        <button class="btn-back" onclick="MultDivGame.showModeSelect()">Tillbaka</button>
-        <span class="header-title">${modeTitle()} – Övning</span>
-        <span style="width:52px"></span>
-      </div>
-      <div class="wrap vcenter" style="padding:0 12px 12px;gap:14px">
-        <div class="section-title" style="text-align:center">Hur vill du räkna?</div>
-        <div class="md-card" onclick="MultDivGame.setHelpMode(true)">
-          <span class="md-aico">🤝</span>
-          <span><b>Med hjälp</b><small>Guidefrågor kolumn för kolumn</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-        </div>
-        <div class="md-card" onclick="MultDivGame.setHelpMode(false)">
-          <span class="md-aico">💪</span>
-          <span><b>Utan hjälp</b><small>Räkna på egen hand – skriv hela svaret</small></span>
-          <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
-        </div>
-      </div>`;
-  }
-
-  function setHelpMode(on) {
-    helpMode = on;
-    App.Sound.play('click');
     newExProblem();
   }
 
@@ -2389,7 +2391,7 @@ const MultDivGame = (() => {
   const api = {
     init, showHub, setDifficulty, chooseMult, chooseDiv,
     showModeSelect, startDemo, demoNextStep,
-    startExercise, showHelpSelect, setHelpMode,
+    startExercise,
     helpKey, helpErase, helpSubmit, helpAction,
     useLifeline,                           // livlinor (v31)
     memTap, memTapSlot, memPick,           // minnesspalten (v30)
