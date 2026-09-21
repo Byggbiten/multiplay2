@@ -596,6 +596,38 @@ describe('lanekedjan i planSubtractionColumns', () => {
     expect(fel).toEqual([]);
   });
 
+  /* Punkt 9: ovningslaget spelar demons ko. Kon ar allt fore svaret —
+     sub_ten_minus ar aldrig med, det ar barnets siffra som utloser den. */
+  it('ovningens vagval: kon ar demons steg fram till svaret', () => {
+    const { exColumnPlan } = require('../js/uppstallning.js').__test;
+    const p0 = exColumnPlan(planSubtractionColumns(405, 187, 3), 0);
+    expect(p0.kind).toBe('borrow');
+    expect(p0.queue.map(s => s.type)).toEqual(['sub_cant', 'sub_lend', 'sub_land', 'sub_lend', 'sub_flip']);
+    const p1 = exColumnPlan(planSubtractionColumns(405, 187, 3), 1);
+    expect(p1.kind).toBe('simple');
+    expect(p1.queue).toEqual([]);
+    const z = exColumnPlan(planSubtractionColumns(30, 29, 2), 1);
+    expect(z.kind).toBe('zeroLead');
+    expect(z.queue.map(s => s.type)).toEqual(['sub_zero_lead']);
+    const t = exColumnPlan(planSubtractionColumns(40, 18, 2), 0);
+    expect(t.queue.map(s => s.type)).toEqual(['sub_cant', 'sub_lend', 'sub_take']);
+  });
+
+  it('kon innehaller aldrig sub_ten_minus eller sub_highlight — alla nivaer', () => {
+    const { exColumnPlan } = require('../js/uppstallning.js').__test;
+    const fel = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      const steps = planSubtractionColumns(a, b, cc);
+      for (let c = 0; c < cc; c++) {
+        const q = exColumnPlan(steps, c).queue;
+        if (q.some(s => s.type === 'sub_ten_minus' || s.type === 'sub_highlight')) fel.push(`niva ${niva}: ${a}-${b} kol ${c}`);
+        const harLan = steps.some(s => s.type === 'sub_lend' && s.col === c);
+        if (harLan && exColumnPlan(steps, c).kind !== 'borrow') fel.push(`niva ${niva}: ${a}-${b} kol ${c} utan borrow`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
   it('varje lanekolumn foljer exakt kedjan cant → lan(en) → flip|take → ten_minus', () => {
     const fel = [];
     for (const [niva, a, b, cc] of subPar()) {

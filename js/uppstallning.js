@@ -2622,7 +2622,13 @@ const UppstallningGame = (() => {
          formuleringar i övningsläget (spec §8). */
       msg = bubbleHTML(queue[phase]);
 
-    } else if (queue.length && mode !== 'addition') {
+    } else if (queue.length && exColData[col]?.noAnswer) {
+      /* A4: ledande nolla — inget att fråga efter. Stegets ord står kvar
+         tills nästa kolumn tar över; annars faller kolumnen ner i låne-
+         frågan och säger "Vad är 10 minus 0?" (fynd i hjälplägesrundan). */
+      msg = bubbleHTML(queue[queue.length - 1]);
+
+    } else if (queue.length && exColData[col]?.kind === 'borrow') {
       /* Lånekedjan är genomgången: "10 − 5" står i marginalen och det barnet
          ska göra är att säga vad tian har kvar. Samma ord som demons
          sub_ten_minus, som fråga. */
