@@ -317,7 +317,10 @@ const PlatsvardeGame = (() => {
       <style id="pv-rs">
         #screen-addsub { max-width:100% !important; width:100% !important; padding:0 !important; }
         #screen-addsub .app-header { max-width:100% !important; }
-        #addsub-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+        /* Ingen height:100vh här (granskning C6): .screen är redan height:100 %
+           och #addsub-root flex:1 — 100vh är högre än synlig vy i iOS Safari
+           och tryckte Kladd-knapparna under verktygsfältet. */
+        #addsub-root { display:flex; flex-direction:column; overflow:hidden; }
         #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
         #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
         #pv-scratch { flex:45; background:var(--glass); border-radius:var(--radius-lg); padding:8px;
@@ -384,16 +387,9 @@ const PlatsvardeGame = (() => {
           cursor:pointer; transition:all 0.15s; background:var(--glass-strong); position:relative; }
         .pv-decomp-field.active { outline:3px solid var(--accent);
           animation:pv-free-glow 1.2s ease-in-out infinite; }
-        .pv-free-arrow { position:absolute; bottom:calc(100% + 2px); left:50%;
-          transform:translateX(-50%); font-size:clamp(1rem,2.2vw,1.3rem);
-          pointer-events:none; z-index:6; animation:pv-arrow-bounce 0.9s ease-in-out infinite; }
         @keyframes pv-free-glow {
           0%,100% { box-shadow:0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
           50%      { box-shadow:0 0 20px color-mix(in srgb, var(--accent) 75%, transparent); }
-        }
-        @keyframes pv-arrow-bounce {
-          0%,100% { transform:translateX(-50%) translateY(0); }
-          50%      { transform:translateX(-50%) translateY(-7px); }
         }
         /* B2 kompakt (granskning C2): fälten till vänster, knappsatsen till
            höger — kortet blir ~260 px och ryms vid 390×664 utan scroll.
@@ -461,8 +457,8 @@ const PlatsvardeGame = (() => {
           <div id="pv-feedback"></div>
         </div>
         <div id="pv-scratch">
-          <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;
-            letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <div style="font-size:14px;font-weight:800;color:var(--deep);text-transform:uppercase;
+            letter-spacing:0.06em;flex-shrink:0">Kladd</div>
           <canvas id="pv-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
             <button onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
@@ -844,17 +840,9 @@ const PlatsvardeGame = (() => {
     [0, 1, 2].forEach(i => {
       const el = document.getElementById(`pv-dc-${i}`);
       if (!el) return;
-      const active = i === idx;
-      el.classList.toggle('active', active);
-      let arrow = el.querySelector('.pv-free-arrow');
-      if (active && !arrow) {
-        arrow = document.createElement('span');
-        arrow.className = 'pv-free-arrow';
-        arrow.textContent = '👇';
-        el.appendChild(arrow);
-      } else if (!active && arrow) {
-        arrow.remove();
-      }
+      /* Bara glow-ramen visar aktivt fält — pilen täckte rubriken
+         (granskning C4) och var en emoji-ikon (D1). */
+      el.classList.toggle('active', i === idx);
     });
   }
 
