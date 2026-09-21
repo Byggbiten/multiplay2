@@ -42,6 +42,20 @@ globalThis.requestAnimationFrame = fn => fn();
 const PV = require('../js/platsvarde.js');
 const { generateQuestions, setStateForTest, getState } = PV.__test;
 
+describe('B1 — fyra unika alternativ (granskning B1)', () => {
+  it('10 000 slumpade pass: aldrig dubbletter, rätt svar exakt en gång', () => {
+    let dubbletter = 0;
+    for (let i = 0; i < 10000; i++) {
+      const q = generateQuestions().find(x => x.type === 'B1');
+      expect(q.options.length).toBe(4);
+      if (new Set(q.options).size !== 4) dubbletter++;
+      expect(q.options.filter(o => o === q.correct).length).toBe(1);
+      q.options.forEach(o => expect(o).toBeGreaterThanOrEqual(100));
+    }
+    expect(dubbletter).toBe(0);
+  });
+});
+
 describe('A1 — fel första tryck låser inte frågan (granskning A1)', () => {
   beforeEach(() => {
     vi.useFakeTimers();

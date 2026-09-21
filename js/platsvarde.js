@@ -226,7 +226,17 @@ const PlatsvardeGame = (() => {
     const bT = 1 + Math.floor(Math.random() * 9);
     const bE = 1 + Math.floor(Math.random() * 9);
     const b1Cor  = bH * 100 + bT * 10 + bE;
-    const b1Opts = shuffle([b1Cor, bH * 100 + bE * 10 + bT, bE * 100 + bT * 10 + bH, bT * 100 + bH * 10 + bE]);
+    /* Distraktorer = samma siffror på fel platser. När två siffror är lika
+       kollapsar permutationerna (t.ex. 553/535 vid t === e), så listan
+       dedupliceras och fylls på med tal där EN siffra bytts (granskning B1). */
+    const b1Perms = [bH * 100 + bE * 10 + bT, bE * 100 + bT * 10 + bH, bT * 100 + bH * 10 + bE,
+                     bT * 100 + bE * 10 + bH, bE * 100 + bH * 10 + bT];
+    const b1Opts = shuffle(fillUnique([b1Cor, ...b1Perms], 4, () => {
+      const d = [bH, bT, bE], i = Math.floor(Math.random() * 3);
+      let nd; do { nd = 1 + Math.floor(Math.random() * 9); } while (nd === d[i]);
+      d[i] = nd;
+      return d[0] * 100 + d[1] * 10 + d[2];
+    }));
     qs.push({ level: 'B', type: 'B1', h: bH, t: bT, e: bE, correct: b1Cor, options: b1Opts });
 
     // B2: Dela upp tal
@@ -1015,6 +1025,17 @@ const PlatsvardeGame = (() => {
   function getLevelLabel(q) {
     const map = { A: 'Nivå A – Platsvärde', B: 'Nivå B – Bygga tal', C: 'Nivå C – Talord', D: 'Nivå D – Jämföra' };
     return map[q.level] || 'Platsvärde';
+  }
+
+  /* Unika alternativ: tar seed i ordning (rätt svar först), hoppar över
+     dubbletter och sådant ok() avvisar, fyller sedan på med gen() tills n. */
+  function fillUnique(seed, n, gen, ok) {
+    const out = [];
+    const tryAdd = v => { if (!out.includes(v) && (!ok || ok(v, out))) out.push(v); };
+    seed.forEach(v => { if (out.length < n) tryAdd(v); });
+    let guard = 0;
+    while (out.length < n && guard++ < 1000) tryAdd(gen());
+    return out;
   }
 
   function shuffle(arr) {
