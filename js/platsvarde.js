@@ -459,13 +459,6 @@ const PlatsvardeGame = (() => {
   }
 
   /* ── Render-hjälpare ────────────────────────────────────── */
-  function renderMonoColor(n, color, size) {
-    size = size || '1.25rem';
-    return String(n).split('').map(d =>
-      `<span style="color:${color};font-weight:900;font-size:${size}">${d}</span>`
-    ).join('');
-  }
-
   function coloredDigit(d, pos) {
     return `<span style="color:${PV_COLORS[pos]};font-weight:900">${d}</span>`;
   }
@@ -515,7 +508,7 @@ const PlatsvardeGame = (() => {
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
             <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
-              ${renderMonoColor(opt, PV_COLORS[q.target], '1.25rem')}
+              ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
         </div>
@@ -646,11 +639,12 @@ const PlatsvardeGame = (() => {
 
   /* D1: Störst/minst */
   function renderD1(q) {
-    const col = q.askMax ? PV_COLORS.hundratal : PV_COLORS.ental;
+    /* Störst/minst i modulens accentfärg — platsvärdesfärgerna betyder
+       BARA platsvärde (granskning B5). */
     return `
       <div class="pv-card">
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:10px">
-          Vilket tal är <span style="color:${col};font-weight:900">${q.askMax ? 'störst' : 'minst'}</span>?
+          Vilket tal är <span style="color:var(--deep);font-weight:900">${q.askMax ? 'störst' : 'minst'}</span>?
         </div>
         <div class="pv-choice-grid">
           ${q.nums.map(n => `
@@ -670,8 +664,8 @@ const PlatsvardeGame = (() => {
       <div class="pv-card">
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Ordna från
-          <span style="color:${PV_COLORS.ental};font-weight:900">minst</span> →
-          <span style="color:${PV_COLORS.hundratal};font-weight:900">störst</span>:
+          <span style="color:var(--deep);font-weight:900">minst</span> →
+          <span style="color:var(--deep);font-weight:900">störst</span>:
         </div>
         <div style="display:flex;gap:4px;justify-content:center;margin-bottom:8px" id="pv-order-slots">
           ${[0,1,2,3].map(i => `<div class="pv-slot" id="pv-slot-${i}">?</div>`).join('')}
