@@ -686,7 +686,6 @@ const UppstallningGame = (() => {
 
     } else if (step.type === 'add_carry_fly') {
       if (step.nextCarry && step.col + 1 < colCount) {
-        playCarrySound();
         animateCarryToken(step.col, step.col + 1, () => {
           demoCarries[step.col + 1] = 1;
           updateCarryRow();
@@ -1473,7 +1472,6 @@ const UppstallningGame = (() => {
       }
       if (demoBorrowTens[exCurrentCol]) useBorrowTen(exCurrentCol);
       if (mode === 'addition' && exColData[exCurrentCol].nextCarry && !exColData[exCurrentCol].needsTenFriend && exCurrentCol + 1 < colCount) {
-        playCarrySound();
         setTimeout(() => {
           animateCarryToken(exCurrentCol, exCurrentCol + 1, () => {
             demoCarries[exCurrentCol + 1] = 1;
@@ -1645,7 +1643,6 @@ const UppstallningGame = (() => {
         memPhase = null;
         cellEl.classList.remove('mem-pulse');
         if (fb) fb.innerHTML = '';
-        playCarrySound();
         animateCarryToken(src, dst, () => {
           demoCarries[dst] = 1;
           updateCarryRow();
