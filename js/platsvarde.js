@@ -323,10 +323,14 @@ const PlatsvardeGame = (() => {
         #pv-scratch { flex:45; background:var(--glass); border-radius:var(--radius-lg); padding:8px;
           border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
           display:flex; flex-direction:column; gap:5px; min-height:0; }
+        /* Porträtt (granskning C2/C3): frågekortet tar sin naturliga höjd,
+           kladden tar ALLT som blir över — samma grepp som additionens
+           sömlösa kladd. Golvet 238 px = etikett + 150 px canvas + 44 px
+           knappar + mellanrum; under det får #pv-left rulla i stället. */
         @media (orientation:portrait) {
           #pv-main { flex-direction:column; }
-          #pv-left { flex:1; }
-          #pv-scratch { flex:0 0 40vh; }
+          #pv-left { flex:0 1 auto; }
+          #pv-scratch { flex:1 1 0; min-height:238px; }
         }
         #pv-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
@@ -391,6 +395,13 @@ const PlatsvardeGame = (() => {
           0%,100% { transform:translateX(-50%) translateY(0); }
           50%      { transform:translateX(-50%) translateY(-7px); }
         }
+        /* B2 kompakt (granskning C2): fälten till vänster, knappsatsen till
+           höger — kortet blir ~260 px och ryms vid 390×664 utan scroll.
+           Etiketten står i --deep; fältet bär positionsfärgen (C5). */
+        .pv-b2 { display:flex; gap:14px; align-items:center; justify-content:center; }
+        .pv-b2-fields { display:flex; flex-direction:column; gap:8px; }
+        .pv-b2-row { display:flex; align-items:center; gap:8px; }
+        .pv-b2-lbl { font-size:16px; font-weight:800; color:var(--deep); }
         .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(48px,12vw,56px)); gap:6px; justify-content:center; }
         .pv-nk { width:clamp(48px,12vw,56px); height:clamp(48px,12vw,56px); border-radius:var(--radius-full);
           font-size:var(--text-lg); font-family:var(--font-head); font-weight:900;
@@ -597,24 +608,26 @@ const PlatsvardeGame = (() => {
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Dela upp: ${renderColoredNumber(q.num, '1.5rem')}
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
-          ${fields.map(f => `
-            <div style="display:flex;align-items:center;gap:8px">
-              <div id="pv-dc-${f.idx}" class="pv-decomp-field"
-                style="border-color:${PV_COLORS[f.pos]};color:${PV_COLORS[f.pos]}"
-                onclick="PlatsvardeGame.setDecompActive(${f.idx})">
-                <span id="pv-dc-val-${f.idx}">?</span>
+        <div class="pv-b2">
+          <div class="pv-b2-fields">
+            ${fields.map(f => `
+              <div class="pv-b2-row">
+                <div id="pv-dc-${f.idx}" class="pv-decomp-field"
+                  style="border-color:${PV_COLORS[f.pos]};color:${PV_COLORS[f.pos]}"
+                  onclick="PlatsvardeGame.setDecompActive(${f.idx})">
+                  <span id="pv-dc-val-${f.idx}">?</span>
+                </div>
+                <span class="pv-b2-lbl">${f.label}</span>
               </div>
-              <span style="color:${PV_COLORS[f.pos]};font-weight:800;font-size:var(--text-base)">${f.label}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div class="pv-numpad">
-          ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
-            <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
-              ${k==='✓' ? 'id="pv-dc-ok" disabled' : ''}
-              onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
-          `).join('')}
+            `).join('')}
+          </div>
+          <div class="pv-numpad">
+            ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
+              <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
+                ${k==='✓' ? 'id="pv-dc-ok" disabled' : ''}
+                onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
