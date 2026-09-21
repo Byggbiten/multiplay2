@@ -481,32 +481,10 @@ function subPar() {
 
 const { planSubtractionColumns } = require('../js/uppstallning.js').__test;
 
-/* Referens: dagens buildDemoSteps-gren for subtraktion, verbatim, fore
-   utbrytningen (js/uppstallning.js:853–890 pa dev). */
-function referensSub(numA, numB, colCount) {
-  const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
-  const da = digs(numA), db = digs(numB), steps = [];
-  const effA = [...da];
-  for (let c = 0; c < colCount; c++) {
-    steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
-    if (effA[c] < db[c]) {
-      const diff = db[c] - effA[c];
-      const isDouble = c + 1 < colCount && effA[c+1] === 0 && c + 2 < colCount;
-      steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant', col:c, a:effA[c], b:db[c] });
-      if (isDouble) {
-        steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1, srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
-        effA[c+2]--; effA[c+1] += 10;
-      }
-      steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff, srcCol:c+1, srcNew:effA[c+1]-1 });
-      effA[c+1]--;
-      steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
-    } else {
-      steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
-    }
-  }
-  steps.push({ type:'done' });
-  return steps;
-}
+/* Karakteriseringstestet mot den gamla kedjan (sub_flip_borrow/sub_borrow)
+   levde i commit b72e52f–ed17965 som nat under utbrytningen. Kedjan byttes
+   avsiktligt (A1, A3, B2 i granskningen 21/9); laset ar nu 'lanekedjan'
+   nedan plus A4:s uttommande svarstest. */
 
 /* Svaret som steglistan skriver: en siffra per kolumn ur sub_ten_minus.ans
    eller sub_calc.diff, last fran hogsta kolumnen med svar ned till entalen.
@@ -521,25 +499,6 @@ function subSvar(steps) {
   for (let c = siffror.length - 1; c >= 0; c--) str += (siffror[c] ?? '·');
   return str;
 }
-
-describe('planSubtractionColumns — karakterisering av dagens beteende', () => {
-  /* A4 (granskning 21/9) andrade regeln for ledande nollor. Referensen
-     galler darfor bara for par dar svaret fyller alla kolumner — dar ska
-     ingenting ha andrats. */
-  it('ger identisk steglista som referensen nar ingen ledande nolla uppstar', () => {
-    const avvikelser = [];
-    /* bEmpty ar ett avsiktligt nytt falt (A4): bubblan ska inte saga "3 − 0"
-       nar undre cellen ar tom. Sjalva stegen och deras ordning ar oforandrade. */
-    const utanBEmpty = steps => steps.map(({ bEmpty, ...s }) => s);
-    for (const [niva, a, b, cc] of subPar()) {
-      if (String(a - b).length !== cc) continue;
-      if (JSON.stringify(utanBEmpty(planSubtractionColumns(a, b, cc))) !== JSON.stringify(referensSub(a, b, cc))) {
-        avvikelser.push(`niva ${niva}: ${a}-${b}`);
-      }
-    }
-    expect(avvikelser).toEqual([]);
-  });
-});
 
 /* ── A4: ledande nolla ────────────────────────────────────────────────────
    100 − 55 skrevs "0 4 5", 8 − 3 skrevs "0 5". Kolumner utan siffror ska
@@ -580,5 +539,77 @@ describe('A4: ledande nolla', () => {
 
   it('entalen far alltid ett svar, aven nar a === b', () => {
     expect(subSvar(planSubtractionColumns(7, 7, 2))).toBe('0');
+  });
+});
+
+/* ── Lanekedjan: en ide per steg (A1, A3, B2) ─────────────────────────────
+   sub_flip_borrow sa tre saker och avslojade svaret ett steg for tidigt.
+   Nu: sub_cant (gar inte) → sub_lend (en tia lanas, kallan stryks) →
+   sub_flip (vand om: fran a till b ar det diff) → sub_ten_minus (10 minus
+   diff — svaret skrivs SIST). Dubbellan: sub_lend (H) → sub_land (T blir 10)
+   → sub_lend (T) — ett lan per steg. a = 0: ingen vand-om, sub_take.       */
+describe('lanekedjan i planSubtractionColumns', () => {
+  const typer = (a, b, cc, c) => planSubtractionColumns(a, b, cc).filter(s => s.col === c).map(s => s.type);
+
+  it('52 − 17 entalen: cant → lend → flip → ten_minus', () => {
+    expect(typer(52, 17, 2, 0)).toEqual(['sub_highlight', 'sub_cant', 'sub_lend', 'sub_flip', 'sub_ten_minus']);
+    const lend = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_lend');
+    expect(lend).toMatchObject({ col: 0, srcCol: 1, dstCol: 0, srcOld: 5, srcNew: 4, toPaper: false });
+    const flip = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_flip');
+    expect(flip).toMatchObject({ col: 0, a: 2, b: 7, diff: 5 });
+    const ten = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_ten_minus');
+    expect(ten).toMatchObject({ col: 0, diff: 5, ans: 5 });
+  });
+
+  it('405 − 187 entalen: dubbellan ar tva lan i var sitt steg, med landning emellan', () => {
+    expect(typer(405, 187, 3, 0)).toEqual([
+      'sub_highlight', 'sub_cant', 'sub_lend', 'sub_land', 'sub_lend', 'sub_flip', 'sub_ten_minus',
+    ]);
+    const steps = planSubtractionColumns(405, 187, 3);
+    const lends = steps.filter(s => s.type === 'sub_lend');
+    expect(lends[0]).toMatchObject({ col: 0, srcCol: 2, dstCol: 1, srcOld: 4, srcNew: 3, toPaper: true });
+    expect(steps.find(s => s.type === 'sub_land')).toMatchObject({ col: 0, srcCol: 2, dstCol: 1, dstOld: 0, dstNew: 10 });
+    expect(lends[1]).toMatchObject({ col: 0, srcCol: 1, dstCol: 0, srcOld: 10, srcNew: 9, toPaper: false });
+    expect(steps.find(s => s.type === 'sub_cant')).toMatchObject({ col: 0, a: 5, b: 7, double: true, srcCol: 2 });
+    /* Tiotalen raknar sedan med 9:an som star skriven pa pappret. */
+    expect(steps.find(s => s.type === 'sub_calc' && s.col === 1)).toMatchObject({ a: 9, b: 8, diff: 1 });
+  });
+
+  it('40 − 18 entalen: a = 0 ger ingen vand-om — sub_take i stallet', () => {
+    expect(typer(40, 18, 2, 0)).toEqual(['sub_highlight', 'sub_cant', 'sub_lend', 'sub_take', 'sub_ten_minus']);
+    expect(planSubtractionColumns(40, 18, 2).find(s => s.type === 'sub_take')).toMatchObject({ col: 0, b: 8, diff: 8 });
+  });
+
+  it('sub_flip finns aldrig med a = 0, och de gamla stegtyperna ar borta — alla nivaer', () => {
+    const fel = [];
+    const borta = new Set(['sub_flip_borrow', 'sub_borrow', 'sub_cant_double']);
+    for (const [niva, a, b, cc] of subPar()) {
+      for (const s of planSubtractionColumns(a, b, cc)) {
+        if (borta.has(s.type)) fel.push(`niva ${niva}: ${a}-${b} ${s.type}`);
+        if (s.type === 'sub_flip' && s.a === 0) fel.push(`niva ${niva}: ${a}-${b} flip med a=0`);
+        if (s.type === 'sub_flip' && s.diff !== s.b - s.a) fel.push(`niva ${niva}: ${a}-${b} flip diff`);
+        if (s.type === 'sub_lend' && (s.srcNew !== s.srcOld - 1 || s.srcOld < 1)) fel.push(`niva ${niva}: ${a}-${b} lend ${s.srcOld}`);
+        if (s.type === 'sub_ten_minus' && s.ans !== 10 - s.diff) fel.push(`niva ${niva}: ${a}-${b} ten_minus`);
+        if (s.type !== 'done' && s.col === undefined) fel.push(`niva ${niva}: ${a}-${b} ${s.type} utan col`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('varje lanekolumn foljer exakt kedjan cant → lan(en) → flip|take → ten_minus', () => {
+    const fel = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      const steps = planSubtractionColumns(a, b, cc);
+      for (let c = 0; c < cc; c++) {
+        const t = steps.filter(s => s.col === c).map(s => s.type);
+        if (!t.includes('sub_cant')) continue;
+        const ok = t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_flip,sub_ten_minus'
+                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_take,sub_ten_minus'
+                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_flip,sub_ten_minus'
+                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_take,sub_ten_minus';
+        if (!ok) fel.push(`niva ${niva}: ${a}-${b} kol ${c}: ${t.join(',')}`);
+      }
+    }
+    expect(fel).toEqual([]);
   });
 });
