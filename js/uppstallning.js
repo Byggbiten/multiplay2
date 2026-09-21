@@ -61,6 +61,19 @@ const UppstallningGame = (() => {
   /* Additionens pedagogiska vägval. Ändras i uppgift 2. */
   const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
+  /* TANKERUTANS TRÖSKEL — Dennis 2026-09-21.
+     Ett lån på 1 är inget att lyfta ur kolumnen för på de svåra nivåerna:
+     där kan hon metoden, och utlyftet blir en ceremoni kring ingenting.
+     På nivå 1–2 öppnas rutan ALLTID, även vid små lån, så att metoden
+     känns likadan varje gång medan hon lär sig den.
+     Tröskeln är satt av Dennis och får höjas — `<= 2` är nästa steg, och
+     tar då med lån på 2 i den korta vägen. Mätt på nuvarande regelverk är
+     behover === 1 39,4 % av komplementkolumnerna på nivå 3 och 42,5 % på
+     nivå 4 (3 000 000 dragningar per nivå). En höjning till `<= 2` skulle
+     ta 70,0 % resp. 73,4 % av dem — alltså nästan hela klassen. */
+  const SKIP_BOX_MAX_BORROW = 1;
+  const SKIP_BOX_MIN_LEVEL  = 3;
+
   /* Tiokompis-villkoret (spec §3b = mockup:301). Båda termerna måste vara
      minst 1 — annars är det ingen tiokompis, utan en tia som redan står där. */
   function isExactTen(growVal, giveVal) {
@@ -382,6 +395,68 @@ const UppstallningGame = (() => {
     .carry-cell .mem-digit.tk-blink{animation:tk-blink .4s ease-in-out both;}
     @keyframes tk-blink{0%,100%{transform:rotate(-4deg) scale(1);}
       50%{transform:rotate(-4deg) scale(1.45);}}
+
+    /* Spökkonturen — platsen lånet ska fylla (mockup:613–626) */
+    .nf-ghost{position:absolute;z-index:7;pointer-events:none;display:grid;place-items:center;
+      border-radius:12px;border:2.5px dashed currentColor;background:rgba(255,255,255,0.55);
+      font-family:var(--font-head);font-weight:800;font-size:1.45rem;line-height:1;opacity:.40;
+      animation:nf-ghost-in .38s var(--spring) both;}
+    @keyframes nf-ghost-in{0%{transform:scale(.6);opacity:0;}
+      65%{transform:scale(1.12);opacity:.48;}100%{transform:scale(1);opacity:.40;}}
+    .nf-ghost.filled{opacity:1;background:rgba(255,255,255,0.96);border-style:solid;
+      box-shadow:0 5px 16px rgba(0,0,0,.14);}
+    .nf-ghost.pop{animation:tk-pop .3s var(--spring) both;}
+    .nf-ghost.inline{position:static;width:36px;height:36px;font-size:1.35rem;
+      margin-left:-3px;flex:0 0 auto;align-self:center;}
+    .nf-ghost.fading{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
+      opacity:0;transform:scale(.68);}
+
+    /* Siffror mitt i en förändring (mockup:630–633).
+       Spec §5.2 lät bli .dw.nf-owing eftersom läget "i kolumnen" var
+       förkastat. Dennis korta väg (SKIP_BOX_MAX_BORROW) räknar just i
+       kolumnen, så regeln behövs: siffran som lånat ut är blek tills den
+       skrivits om, annars står "10 + 5" en stund och ljuger. */
+    .dw.nf-owing > span{opacity:.34;transition:opacity .25s var(--smooth);}
+    .col-cell.nf-vacated{border-style:dashed;}
+    .dw.nf-vacated > span{opacity:.18;transition:opacity .3s var(--smooth);}
+
+    /* Tankerutan (mockup:637–640, 649–682) */
+    #up-think{max-height:0;opacity:0;overflow:hidden;flex-shrink:0;
+      transition:max-height .42s var(--spring),opacity .28s var(--smooth);}
+    #up-think.open{max-height:210px;opacity:1;}
+    #up-think.off{display:none;}
+    .nf-think{background:linear-gradient(140deg,#f7f2ff,#eef6ff);border:2.5px dashed #c4b5fd;
+      border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:7px 10px 9px;position:relative;}
+    .nf-think-title{font-family:var(--font-head);font-weight:700;font-size:12.5px;
+      color:var(--friends-deep);text-align:center;margin-bottom:3px;}
+    .nf-think-row{display:flex;align-items:center;justify-content:center;gap:9px;min-height:54px;
+      position:relative;}
+    .nf-chip{min-width:50px;height:50px;padding:0 9px;border-radius:14px;background:#fff;
+      border:2.5px solid currentColor;display:grid;place-items:center;
+      font-family:var(--font-head);font-weight:800;font-size:1.95rem;line-height:1;
+      box-shadow:0 4px 14px rgba(93,63,158,.13);opacity:0;
+      transition:opacity .22s var(--smooth);}
+    .nf-chip.in{opacity:1;}
+    .nf-chip.owing{opacity:.38;border-style:dashed;}
+    .nf-chip.pop{animation:tk-pop .32s var(--spring) both;}
+    .nf-chip.nf-mem{min-width:38px;height:42px;font-size:1.5rem;border-width:2px;border-style:dashed;}
+    .nf-dot{font-family:var(--font-head);font-weight:800;font-size:1.5rem;color:#94a3b8;
+      margin:0 -3px;opacity:0;transition:opacity .22s var(--smooth);}
+    .nf-dot.in{opacity:1;}
+    .nf-chip.isten{border:none;padding:0 12px;color:#fff;gap:1px;display:flex;align-items:center;
+      background:linear-gradient(135deg,#7c3aed,#a78bfa);
+      box-shadow:0 7px 20px rgba(124,58,237,.42), inset 0 1px 0 rgba(255,255,255,.35);}
+    .nf-chip.isten.badge-blue{background:linear-gradient(135deg,#3b82f6,#93c5fd);
+      box-shadow:0 7px 20px rgba(59,130,246,.42), inset 0 1px 0 rgba(255,255,255,.35);}
+    .nf-chip.isten.badge-green{background:linear-gradient(135deg,#22c55e,#86efac);
+      box-shadow:0 7px 20px rgba(34,197,94,.42), inset 0 1px 0 rgba(255,255,255,.35);}
+    .nf-chip.isten.badge-red{background:linear-gradient(135deg,#ef4444,#fca5a5);
+      box-shadow:0 7px 20px rgba(239,68,68,.42), inset 0 1px 0 rgba(255,255,255,.35);}
+    .nf-op{font-family:var(--font-head);font-weight:800;font-size:1.5rem;color:#64748b;
+      opacity:0;transition:opacity .22s var(--smooth);}
+    .nf-op.in{opacity:1;}
+    .nf-think.leaving{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
+      opacity:.25;transform:scale(.97);}
   `;
 
   /* ── Init ───────────────────────────────────────────────── */
@@ -553,7 +628,10 @@ const UppstallningGame = (() => {
 
   /* Ren, testbar stegbyggare för addition. Läser inget modultillstånd. */
   function planAdditionColumns(numA, numB, colCount, opts) {
-    const o = Object.assign({ compTo: 'oversta', memTo: 'oversta' }, opts || {});
+    /* difficulty kommer in via opts — funktionen är ren och får inte läsa
+       modultillståndet. Förvalet 1 är den LÅNGA vägen: tankerutan öppnas
+       alltid, vilket är rätt för den som inte har sagt något annat. */
+    const o = Object.assign({ compTo: 'oversta', memTo: 'oversta', difficulty: 1 }, opts || {});
     /* Gamla vägen (båda 'oversta') ska ge EXAKT dagens steglista — samma fält,
        samma ordning. Därför bär bara den nya vägen §2.3:s extrafält. */
     const legacy = (o.compTo === 'oversta' && o.memTo === 'oversta');
@@ -587,12 +665,14 @@ const UppstallningGame = (() => {
         const base = { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar,
                        ans, nextCarry, sum, growRow, giveRow, growVal, giveVal,
                        valA, valB, memRow, memDigit, memNew };
-        const P = legacy
-          ? { over9:  { col:c, a, b, carry_in:carryVal, sum, effectiveA },
-              full:   { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry },
-              result: { col:c, a, b, kvar, ans, nextCarry } }
-          : { over9: base, full: base, result: base };
-        if (!legacy && isExactTen(growVal, giveVal)) {
+        if (legacy) {
+          /* Gamla vägen, orörd: karakteriseringstestet jämför hela objekt. */
+          steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
+          steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
+          steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
+          steps.push({ type:'add_carry_fly', col:c, nextCarry });
+          steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
+        } else if (isExactTen(growVal, giveVal)) {
           /* Tiokompis-genvägen (spec §3b): ingen tankeruta, ingen strykning.
              Att ceremonin uteblir ÄR beskedet "den här såg du direkt". */
           /* HÅL B (spec §7.2): är siffran minnet läggs på en 0:a skulle
@@ -605,7 +685,7 @@ const UppstallningGame = (() => {
           steps.push({ type:'tf_pair', ...base, ...(memZero ? { memSaid:true } : {}) });
           steps.push({ type:'add_carry_fly', ...base, tf:true, chip:true });
           steps.push({ type:'add_result', ...base, tf:true, chip:true });
-        } else if (!legacy && behover === 0) {
+        } else if (behover === 0) {
           /* HÅL A (spec §7.1): termen ÄR redan 10 när minnet lagts på. Det
              finns ingenting att låna — kolumnen är 10 + resten. Komplement-
              stegen hoppas över helt: ingen "behöver", ingen "lånar", ingen
@@ -617,11 +697,40 @@ const UppstallningGame = (() => {
           steps.push({ type:'add_carry_fly', ...base, nf:true, chip:true });
           steps.push({ type:'add_result', ...base, nf:true, chip:true });
         } else {
-          steps.push({ type:'add_over9', ...P.over9 });
-          steps.push({ type:'add_explain', ...P.full });
-          steps.push({ type:'add_cross', ...P.full });
-          steps.push({ type:'add_carry_fly', col:c, nextCarry });
-          steps.push({ type:'add_result', ...P.result });
+          /* DET VANLIGA FALLET (spec §3c/§3d): behover >= 1 och kvar >= 1.
+             Att det alltid gäller här följer av att sum > 9 med growVal som
+             det större talet: giveVal >= behover, och likhet betyder att
+             kolumnen är exakt-10 (ovan) eller hål A (ovan).
+             En idé per steg — paret lyfts ur kolumnen, räknas i rutan, och
+             skrivs tillbaka på pappret INNAN summan läses ur det. */
+          const box = !(behover <= SKIP_BOX_MAX_BORROW && o.difficulty >= SKIP_BOX_MIN_LEVEL);
+          if (box) {
+            /* Utlyftet bär orsaken: paret hoppar ut UR motiveringen, så
+               add_over9 behövs inte som eget steg (mockup:774–775). */
+            steps.push({ type:'add_lift', ...base, box:true, merged:true });
+            /* Minnet får ett eget andetag först när brickorna ligger nere —
+               det är brickan som blir en 7:a, inte siffran på pappret. */
+            if (carryVal) steps.push({ type:'add_memjoin', ...base, box:true });
+          } else if (carryVal) {
+            /* Korta vägen: ingen ruta, men minnet måste ändå nämnas. */
+            steps.push({ type:'add_memjoin', ...base, box:false });
+          }
+          steps.push({ type:'add_need', ...base, box });
+          steps.push({ type:'add_lend', ...base, box, split:false });
+          if (box) {
+            steps.push({ type:'add_ten_named', ...base, box:true });
+            /* "Ur pappret": skriv först, läs av sedan — då kan summan inte
+               försvinna, för den har inte fötts än (spec §3c steg 6–7). */
+            steps.push({ type:'add_return', ...base, box:true, way:'ur' });
+            steps.push({ type:'add_sum', ...base, box:true, way:'ur' });
+          } else {
+            /* Korta vägen skriver om direkt i kolumnen — samma papper,
+               samma slut, bara utan utflykten till rutan. */
+            steps.push({ type:'add_ten', ...base, box:false });
+            steps.push({ type:'add_sum', ...base, box:false, way:'ur' });
+          }
+          steps.push({ type:'add_carry_fly', ...base, nf:true, chip:true });
+          steps.push({ type:'add_result', ...base, nf:true, chip:true });
         }
       } else {
         steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
@@ -637,7 +746,9 @@ const UppstallningGame = (() => {
   }
 
   function buildDemoSteps() {
-    if (mode === 'addition') return planAdditionColumns(numA, numB, colCount, ADD_OPTS);
+    if (mode === 'addition') {
+      return planAdditionColumns(numA, numB, colCount, { ...ADD_OPTS, difficulty });
+    }
 
     const steps = [];
     const da = [...digs(numA)], db = digs(numB);
@@ -720,6 +831,7 @@ const UppstallningGame = (() => {
       <div id="up-main">
         <div id="up-left">
           <div id="up-table-wrap">${buildTableHTML()}</div>
+          <div id="up-think" class="off"></div>
           <div id="up-bubble"></div>
           <div id="up-next-area">${nextBtnHTML()}</div>
         </div>
@@ -752,8 +864,16 @@ const UppstallningGame = (() => {
   }
 
   function executeStep(step, cb) {
+    /* Övningsläget slår upp steg per typ och kan få null sedan additionens
+       stegtyper bytts (t.ex. crossStep). De grenarna är oåtkomliga i dag
+       — needsTenFriend är false utan add_over9 — och byggs om i uppgift 7.
+       Tills dess ska ett saknat steg inte kunna krascha en körning. */
+    if (!step) { cb && cb(); return; }
     if (step.type === 'add_highlight') {
       highlightCol(step.col);
+      /* Lämna inget kvar från förra kolumnen som kan läsas som aktuellt. */
+      const gStale = ghostEl(); if (gStale) gStale.remove();
+      closeThink();
       setTimeout(cb, 50);
 
     /* ── Tiokompis-steget (spec §4.2) ──────────────────────────
@@ -789,6 +909,30 @@ const UppstallningGame = (() => {
     } else if (step.type === 'add_memjoin') {
       highlightCol(step.col);
       const row  = step.memRow || 'a';
+      if (step.box) {
+        /* I rutan glider minnesbrickan in i sin term, som SYNLIGT blir en
+           7:a. Brickan förbrukas — den skrivna 1:an i minnesraden står kvar
+           tills den stryks i sitt eget steg (spec §4.4). */
+        const mem = chipEl('m'), dot = document.querySelector('.nf-dot');
+        const tgt = chipEl(row);
+        if (!mem || !tgt) { after(300, cb); return; }
+        const tR = tgt.getBoundingClientRect(), mR = mem.getBoundingClientRect();
+        mem.style.transition = `transform ${Ts(520)} cubic-bezier(0.34,1.06,0.5,1),` +
+                               `opacity ${Ts(260)} var(--smooth) ${Ts(300)}`;
+        if (dot) { dot.style.transition = `opacity ${Ts(240)} var(--smooth)`; dot.style.opacity = '0'; }
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          mem.style.transform = `translateX(${Math.round(tR.left - mR.left)}px) scale(.7)`;
+          mem.style.opacity = '0';
+        }));
+        after(560, () => {
+          mem.remove();
+          if (dot) dot.remove();
+          tgt.textContent = step.memNew;
+          pop(tgt, 340, 'pop');
+        });
+        after(980, cb);
+        return;
+      }
       const cell = upCarry(step.col);
       const md   = cell && cell.querySelector('.mem-digit');
       if (md) { md.style.animationDuration = Ts(250); md.classList.add('tk-blink'); }
@@ -798,6 +942,147 @@ const UppstallningGame = (() => {
           fontSize: '1.2rem', color: '#d97706', endColor: '#d97706', fade: true
         }, () => { pop(upDw(row, step.col), 300); after(320, cb); });
       });
+
+    /* ── UTLYFTET (spec §4.3) ───────────────────────────────────
+       Paret pulsar först — meningen pekar på DEM, sedan hoppar de ner i
+       rutan. Det som dras ner är det som FAKTISKT står skrivet: minnes-
+       ettan, a och b. Siffrorna på pappret blir spöken, inte borta: de
+       är kvar, de räknas bara någon annanstans just nu. */
+    } else if (step.type === 'add_lift') {
+      highlightCol(step.col);
+      if (step.merged) ['a', 'b'].forEach(r => pop(upDw(r, step.col), 300));
+      openThink(step);
+      after(180, () => {
+        const ca = chipEl('a'), cbp = chipEl('b'), op = document.querySelector('.nf-op');
+        const colr = PVC[COL_KEYS[step.col]];
+        /* fixed: resan går från kortet ner till rutan — i vy-koordinater,
+           annars räknas hela sträckan in i #up-lefts scrollHeight. */
+        flyCopy(upDw('a', step.col), ca, String(step.a), {
+          dur: 600, easing: 'cubic-bezier(0.34,1.3,0.4,1)', fixed: true,
+          fontSize: '1.95rem', color: colr
+        }, () => { if (ca) { ca.classList.add('in'); pop(ca, 300, 'pop'); } if (op) op.classList.add('in'); });
+        flyCopy(upDw('b', step.col), cbp, String(step.b), {
+          dur: 600, easing: 'cubic-bezier(0.34,1.3,0.4,1)', fixed: true,
+          fontSize: '1.95rem', color: colr
+        }, () => { if (cbp) { cbp.classList.add('in'); pop(cbp, 300, 'pop'); } });
+        if (step.carry_in) {
+          const cm = chipEl('m'), dot = document.querySelector('.nf-dot');
+          const cell = upCarry(step.col);
+          const md = cell && cell.querySelector('.mem-digit');
+          if (md) { md.style.animationDuration = Ts(300); md.classList.add('tk-blink'); }
+          if (cm) flyCopy(md || cell, cm, String(step.carry_in), {
+            dur: 600, easing: 'cubic-bezier(0.34,1.3,0.4,1)', fixed: true,
+            fontSize: '1.7rem', color: '#dc2626'
+          }, () => { cm.classList.add('in'); pop(cm, 300, 'pop'); if (dot) dot.classList.add('in'); });
+        }
+      });
+      after(600, () => {
+        ['a', 'b'].forEach(r => {
+          const cell = upCell(r, step.col), dw = upDw(r, step.col);
+          if (cell) cell.classList.add('nf-vacated');
+          if (dw)   dw.classList.add('nf-vacated');
+        });
+      });
+      after(960, cb);
+
+    /* ── BEHOVET (spec §4.5) — platsen tänds innan något fyller den. */
+    } else if (step.type === 'add_need') {
+      highlightCol(step.col);
+      const host = step.box ? thinkCard() : null;
+      const gr = step.growRow || 'a';
+      pop(step.box ? chipEl(gr) : upDw(gr, step.col), 300, step.box ? 'pop' : 'tk-pop');
+      after(180, () => drawGhost(step.col, step.behover, host, gr));
+      after(560, cb);
+
+    /* ── LÅNET (spec §4.6) — 3:an lämnar 5:an på riktigt, så "5:an har 2
+       kvar" räcker som mening. Givaren är blek tills den skrivits om:
+       annars står "10 + 5" en stund och ljuger. */
+    } else if (step.type === 'add_lend') {
+      highlightCol(step.col);
+      const ghost = ghostEl();
+      const gr = step.growRow || 'a', gv = step.giveRow || 'b';
+      const src = step.box ? chipEl(gv) : upDw(gv, step.col);
+      const dst = ghost || (step.box ? chipEl(gr) : upCell(gr, step.col));
+      const host = step.box ? thinkCard() : upWrap();
+      flyCopyIn(host, src, dst, String(step.behover), {
+        dur: 620, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+        fontSize: '1.5rem', color: PVC[COL_KEYS[step.col]], sound: true
+      }, () => {
+        if (ghost) { ghost.classList.add('filled'); pop(ghost, 300, 'pop'); }
+        const owe = step.box ? chipEl(gv) : upDw(gv, step.col);
+        if (owe) owe.classList.add(step.box ? 'owing' : 'nf-owing');
+        after(280, () => {
+          if (step.box) {
+            const chip = chipEl(gv);
+            if (chip) { chip.classList.remove('owing'); chip.textContent = step.kvar; pop(chip, 300, 'pop'); }
+          } else {
+            const dw = upDw(gv, step.col);
+            if (dw) dw.classList.remove('nf-owing');
+            crossRow(gv, step.col, step.kvar);
+          }
+          after(420, () => {
+            /* Samma textfunktion, ny mening: "5:an har 2 kvar." */
+            showStepBubble({ ...step, type: 'add_left' });
+            after(step.box ? 240 : 120, cb);
+          });
+        });
+      });
+
+    /* ── TIAN FÅR SIN EGEN MENING (spec §4.7) — lånet sugs in i 7:an och
+       FÖRST därefter framträder 10-brickan. Slutsatsen sist. */
+    } else if (step.type === 'add_ten_named') {
+      highlightCol(step.col);
+      const g = ghostEl();
+      if (g) pop(g, 300, 'pop');
+      after(120, absorbGhost);
+      after(400, () => chipToTen(step));
+      after(760, cb);
+
+    /* ── TIAN I KOLUMNEN (korta vägen utan tankeruta) ────────────
+       Samma mening, samma slutsats — men den skrivs direkt på pappret,
+       för paret har aldrig lämnat kolumnen. */
+    } else if (step.type === 'add_ten') {
+      highlightCol(step.col);
+      crossRow(step.growRow || 'a', step.col, '10');
+      const g = ghostEl();
+      after(560, () => { if (g) { g.classList.add('fading'); after(320, () => g.remove()); } });
+      after(900, cb);
+
+    /* ── ÅTERVÄNDANDET (spec §4.8) ──────────────────────────────
+       Tankerutan ERSÄTTER inte pappret. Här landar allt i kolumnen: 10
+       under den term som fylldes, resten under den som lånade ut. Först
+       när det står skrivet får summan läsas — därför kommer add_sum
+       efter, inte före. */
+    } else if (step.type === 'add_return') {
+      highlightCol(step.col);
+      ['a', 'b'].forEach(r => {
+        const cell = upCell(r, step.col), dw = upDw(r, step.col);
+        if (cell) cell.classList.remove('nf-vacated');
+        if (dw)   dw.classList.remove('nf-vacated');
+      });
+      const colr = PVC[COL_KEYS[step.col]];
+      const gr = step.growRow || 'a', gv = step.giveRow || 'b';
+      const srcA = chipEl(gr), srcB = chipEl(gv);
+      flyCopy(srcB || upWrap(), upDw(gv, step.col), String(step.kvar), {
+        dur: 500, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fixed: true,
+        fontSize: '1.5rem', color: colr, endColor: '#d97706'
+      }, () => crossRow(gv, step.col, step.kvar));
+      if (srcB) after(40, () => { srcB.style.visibility = 'hidden'; });
+      after(260, () => {
+        flyCopy(srcA || upWrap(), upDw(gr, step.col), '10', {
+          dur: 500, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fixed: true,
+          fontSize: '1.5rem', color: colr, endColor: '#d97706'
+        }, () => crossRow(gr, step.col, '10'));
+        if (srcA) after(40, () => { srcA.style.visibility = 'hidden'; });
+        const r = document.querySelector('.nf-think-row');
+        if (r) { r.style.transition = `opacity ${Ts(420)} var(--smooth)`; r.style.opacity = '0'; }
+      });
+      after(900, () => {
+        const tc = thinkCard();
+        if (tc) tc.classList.add('leaving');
+        closeThink();
+      });
+      after(1420, cb);
 
     /* ── Summan stiger ur pappret (spec §4.9) ──────────────────
        I 10 + resten-fallet är pappret tre källor: båda siffrorna OCH
@@ -821,37 +1106,12 @@ const UppstallningGame = (() => {
         cb();
       }, 1200);
 
-    } else if (step.type === 'add_explain') {
-      // Bara en förklaringsbubbla, ingen animation. Bubblan uppdateras av showStepBubble().
-      highlightCol(step.col);
-      setTimeout(cb, 50);
-
-    } else if (step.type === 'add_cross') {
-      highlightCol(step.col);
-      const colKey = COL_KEYS[step.col];
-      // t=0: Stryk undre siffran, visa "kvar" som liten siffra
-      const dwB = document.getElementById(`dw-b-${colKey}`);
-      if (dwB) {
-        dwB.classList.add('crossed');
-        const sp = document.createElement('span');
-        sp.className = 'small-new-digit';
-        sp.style.color = '#d97706';
-        sp.textContent = step.kvar;
-        dwB.appendChild(sp);
-      }
-      // t=400ms: Stryk övre siffran, visa "10" som liten siffra
-      setTimeout(() => {
-        const dwA = document.getElementById(`dw-a-${colKey}`);
-        if (dwA) {
-          dwA.classList.add('crossed');
-          const sp = document.createElement('span');
-          sp.className = 'small-new-digit';
-          sp.style.color = '#d97706';
-          sp.textContent = '10';
-          dwA.appendChild(sp);
-        }
-        setTimeout(cb, 500);
-      }, 400);
+    /* add_explain och add_cross är BORTA ur additionen (plan uppgift 6,
+       steg 7). De var radfasta: texten sa "Vi tar 1 från 9" när lånet i
+       själva verket togs från 2:an, och skrev 10 under fel rad. Spec §3c:s
+       kedja innehåller dem inte, och stegen produceras bara av legacy-
+       vägen i planAdditionColumns, som ingen körning i appen når.
+       Subtraktionen har egna stegtyper och rörs inte. */
 
     } else if (step.type === 'add_carry_fly') {
       if (step.nextCarry && step.col + 1 < colCount) {
@@ -1093,10 +1353,13 @@ const UppstallningGame = (() => {
   }
 
   /* ── Tankebubbla ────────────────────────────────────────── */
-  function showStepBubble() {
+  /* stepOverride: bubbeltexten kan bytas MITT i ett steg — lånet byter till
+     "5:an har 2 kvar" när siffran skrivits om (spec §3c steg 4b). Samma
+     textfunktion, ingen dubblerad sträng. */
+  function showStepBubble(stepOverride) {
     const area = document.getElementById('up-bubble');
     if (!area) return;
-    const step = demoSteps[demoStep];
+    const step = stepOverride || demoSteps[demoStep];
     if (!step) { area.innerHTML = ''; return; }
 
     let html = '';
@@ -1106,25 +1369,28 @@ const UppstallningGame = (() => {
       const ck = COL_KEYS[step.col];
       const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span> (minne)` : '';
       html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr}... Hmm, det blir mer än 9! 🤔`;
-    } else if (step.type === 'add_explain') {
+    /* ── Komplementvägen, en kort mening per steg (spec §3c/§3d) ──
+       Ingen aritmetik i texten som barnet måste räkna ut: 3:an lämnar
+       5:an på riktigt, så "5:an har 2 kvar" räcker som mening. */
+    } else if (step.type === 'add_lift') {
       const ck = COL_KEYS[step.col];
-      if (step.carry_in) {
-        html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:#d97706">${step.carry_in}</span> = <strong>${step.effectiveA}</strong> (<span style="color:#d97706">${step.carry_in}</span>:an är minnessiffran).<br>
-          <span style="color:${PVC[ck]}">${step.effectiveA}</span>:ans 10-kompis är <strong>${step.behover}</strong>.<br>
-          Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${step.b}</span>:an blir <strong>${step.kvar}</strong>).<br>
-          Så <span style="color:${PVC[ck]}">${step.b}</span> blir <strong>${step.kvar}</strong> och <span style="color:${PVC[ck]}">${step.a}</span>:an blir <strong>10</strong>! 💡`;
-      } else {
-        html = `<span style="color:${PVC[ck]}">${step.effectiveA}</span>:ans 10-kompis är <strong>${step.behover}</strong>.<br>
-          Vi tar <strong>${step.behover}</strong> från <span style="color:${PVC[ck]}">${step.b}</span>: ${step.b} − ${step.behover} = <strong>${step.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${step.b}</span>:an blir <strong>${step.kvar}</strong>).<br>
-          Så <span style="color:${PVC[ck]}">${step.b}</span> blir <strong>${step.kvar}</strong> och <span style="color:${PVC[ck]}">${step.effectiveA}</span> blir <strong>10</strong>! 💡`;
-      }
-    } else if (step.type === 'add_cross') {
+      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>` +
+             `${step.carry_in ? ' + minnet' : ''} blir mer än 9 — vi tittar på dem en stund. 🤔`;
+    } else if (step.type === 'add_need') {
       const ck = COL_KEYS[step.col];
-      if (step.carry_in) {
-        html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:#d97706">${step.carry_in}</span> minne + <strong>${step.behover}</strong> lån = 10) ✏️`;
-      } else {
-        html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <strong>${step.behover}</strong> lån = 10) ✏️`;
-      }
+      html = `<strong style="color:${PVC[ck]}">${step.growVal}</strong> behöver <strong style="color:${PVC[ck]}">${step.behover}</strong> för att bli <strong>10</strong>.`;
+    } else if (step.type === 'add_lend') {
+      const ck = COL_KEYS[step.col];
+      html = `Vi lånar <strong style="color:${PVC[ck]}">${step.behover}</strong>:an från <strong style="color:${PVC[ck]}">${step.giveVal}</strong>:an.`;
+    } else if (step.type === 'add_left') {
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.giveVal}</strong>:an har <strong style="color:#d97706">${step.kvar}</strong> kvar.`;
+    } else if (step.type === 'add_ten_named' || step.type === 'add_ten') {
+      /* ORDAGRANT samma mening i tankerutan som i kolumnen. */
+      const ck = COL_KEYS[step.col];
+      html = `Nu är <strong style="color:${PVC[ck]}">${step.growVal}</strong>:an en hel tia.`;
+    } else if (step.type === 'add_return') {
+      html = `Nu skriver vi om det i uppställningen.`;
     } else if (step.type === 'tf_pair') {
       /* Spec §3b, verbatim ur mockup:1898–1906. */
       const ck = COL_KEYS[step.col];
@@ -1388,6 +1654,13 @@ const UppstallningGame = (() => {
      Appen har inget fartreglage, så after()/Ts() är setTimeout och
      sekunder rakt av. De gör tiderna läsbara på ett ställe.
   ══════════════════════════════════════════════════════════ */
+  /* REDUCERAD RÖRELSE ÄR MEDVETET BORTVALD HÄR — Dennis 2026-09-21.
+     styles/app.css:2286–2293 nollar redan alla animationer och övergångar
+     med !important när prefers-reduced-motion: reduce är på. Den regeln
+     träffar brickflykterna nedan automatiskt: siffran hamnar direkt på sin
+     plats, medan stegen, bubblorna och ordningen finns kvar. Degraderingen
+     är alltså redan hygglig, och en egen hantering här skulle bara kunna
+     göra den sämre. Det är inte en glömska. */
   const Ts    = ms => (ms / 1000).toFixed(3) + 's';
   const after = (ms, fn) => setTimeout(fn, ms);
 
@@ -1419,6 +1692,129 @@ const UppstallningGame = (() => {
     el.classList.add('filled');
     el.style.borderColor = PVC[key];
     demoAns[col] = value;
+  }
+
+  /* ── TANKERUTAN (spec §3c, §5.2–5.3; mockup:1413–1443) ──────────────
+     Paret lyfts ut och räknas för sig. Fällan är att pappersvanan tappas
+     om ALLT sker här — därför skriver add_return tillbaka strykningen och
+     siffrorna i kolumnen innan summan läses av. */
+  const upThink   = () => document.getElementById('up-think');
+  const thinkCard = () => document.querySelector('.nf-think');
+  const chipEl    = slot => document.querySelector(`.nf-chip[data-slot="${slot}"]`);
+  const ghostEl   = () => document.querySelector('.nf-ghost');
+
+  function thinkHTML(step) {
+    const c = PVC[COL_KEYS[step.col]];
+    /* Vid minne in dras TRE brickor ner — minnesettan står något avskild
+       med en punkt, så att den läses som minnet och inte som en term. */
+    const mem = step.carry_in
+      ? `<span class="nf-chip nf-mem" data-slot="m" style="color:#dc2626">${step.carry_in}</span>` +
+        `<span class="nf-dot">·</span>`
+      : '';
+    return `<div class="nf-think">
+      <div class="nf-think-title">Vi räknar så här</div>
+      <div class="nf-think-row">${mem}` +
+      `<span class="nf-chip" data-slot="a" style="color:${c}">${step.a}</span>` +
+      `<span class="nf-op">+</span>` +
+      `<span class="nf-chip" data-slot="b" style="color:${c}">${step.b}</span>` +
+      `</div></div>`;
+  }
+
+  function openThink(step) {
+    const t = upThink();
+    if (!t) return null;
+    t.innerHTML = thinkHTML(step);
+    t.classList.remove('off');
+    void t.offsetWidth;          /* annars hoppar max-height-övergången över */
+    t.classList.add('open');
+    return t;
+  }
+
+  /* Rutan hör till kolumnen som räknades. Fäll ihop den när vi går vidare,
+     annars står ett gammalt "7 + 5" kvar och ljuger om nuet. */
+  function closeThink() {
+    const t = upThink();
+    if (!t) return;
+    t.classList.remove('open');
+    after(420, () => {
+      if (!t.classList.contains('open')) { t.innerHTML = ''; t.classList.add('off'); }
+    });
+  }
+
+  function absorbGhost() {
+    const g = ghostEl();
+    if (!g) return;
+    g.classList.add('fading');
+    after(320, () => g.remove());
+  }
+
+  /* Platsen som lånet ska fylla. I rutan står den INLINE direkt efter
+     grow-brickan ("7 ⟨3⟩ + 5"); i kolumnen läggs den vid sidan av cellen. */
+  function drawGhost(col, value, hostEl, row) {
+    const old = ghostEl(); if (old) old.remove();
+    const g = document.createElement('div');
+    g.className = 'nf-ghost';
+    g.textContent = value;
+    g.style.color = PVC[COL_KEYS[col]];
+    g.style.animationDuration = Ts(380);
+    if (hostEl) {
+      const chip = hostEl.querySelector(`.nf-chip[data-slot="${row || 'a'}"]`);
+      if (!chip) return null;
+      g.classList.add('inline');
+      chip.insertAdjacentElement('afterend', g);
+      return g;
+    }
+    const wrap = upWrap(), anchor = upCell(row || 'a', col);
+    if (!wrap || !anchor) return null;
+    const wR = wrap.getBoundingClientRect(), aR = anchor.getBoundingClientRect();
+    const size = Math.round(aR.height * 0.66);
+    g.style.width  = size + 'px';
+    g.style.height = size + 'px';
+    g.style.fontSize = Math.round(size * 0.62) + 'px';
+    g.style.top  = (aR.top - wR.top + aR.height / 2 - size / 2) + 'px';
+    /* Kolumn 0 ligger ytterst till höger i tabellen och har plats där.
+       Övriga har grannar åt höger — då går brickan ut i vänstermarginalen,
+       utanför hela tabellen, så den aldrig täcker en annan kolumn. */
+    g.style.left = (col === 0 ? (aR.right - wR.left + 8) : leftMarginSpot(size)) + 'px';
+    wrap.appendChild(g);
+    return g;
+  }
+
+  function leftMarginSpot(width) {
+    const wrap = upWrap(), table = document.querySelector('.up-table');
+    if (!wrap || !table) return 2;
+    return Math.max(2, (table.getBoundingClientRect().left -
+                        wrap.getBoundingClientRect().left) - width - 8);
+  }
+
+  /* Grow-brickan blir en hel tia inne i rutan (mockup:1541–1548). */
+  function chipToTen(step) {
+    const chip = chipEl(step.growRow || 'a');
+    if (!chip) return;
+    chip.innerHTML = `<span class="tk-d">1</span><span class="tk-d">0</span>`;
+    chip.classList.add('isten', badgeColorClass(step.col));
+    pop(chip, 320, 'pop');
+  }
+
+  /* Strykning + omskrivning på PAPPRET — samma gest som appen alltid haft:
+     siffran stryks och den nya skrivs liten i amber bredvid (mockup:1237–1249). */
+  function crossRow(row, col, text) {
+    const dw = upDw(row, col);
+    if (!dw || dw.classList.contains('crossed')) return;
+    dw.classList.remove('nf-vacated');
+    dw.classList.add('crossed');
+    const sp = document.createElement('span');
+    sp.className = 'small-new-digit';
+    sp.style.color = '#d97706';
+    sp.textContent = text;
+    sp.style.animation = `land-bounce-flex ${Ts(400)} ease-out both`;
+    sp.style.animationDelay = Ts(240);
+    dw.appendChild(sp);
+  }
+
+  /* Flykt i uppställningens egna koordinater (mockup:1186–1188). */
+  function flyCopy(fromEl, toEl, text, opts, cb) {
+    flyCopyIn(upWrap(), fromEl, toEl, text, opts, cb);
   }
 
   /* Kapseln runt paret (mockup:1313–1329). */
@@ -2446,9 +2842,20 @@ const UppstallningGame = (() => {
   }
 
   /* ── Ljud ───────────────────────────────────────────────── */
+  /* Spec §4.14: EN AudioContext, och den skapas först efter en användargest.
+     Annars varnar webbläsaren i konsolen — och konsolen ska vara tom. Efter
+     lånet ringer det två gånger per komplementkolumn i stället för en. */
+  let upAudioCtx = null, upGestured = false;
+  /* Modulen laddas också av vitest, där det inte finns något document. */
+  if (typeof document !== 'undefined') {
+    document.addEventListener('pointerdown', () => { upGestured = true; }, { passive: true });
+  }
+
   function playCarrySound() {
+    if (!upGestured) return;
     try {
-      const ac = new (window.AudioContext || window['webkitAudioContext'])();
+      upAudioCtx = upAudioCtx || new (window.AudioContext || window['webkitAudioContext'])();
+      const ac = upAudioCtx;
       const o = ac.createOscillator(), g = ac.createGain();
       o.connect(g); g.connect(ac.destination);
       o.frequency.setValueAtTime(400, ac.currentTime);

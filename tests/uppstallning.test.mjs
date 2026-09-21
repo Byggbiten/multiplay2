@@ -71,20 +71,22 @@ describe('planAdditionColumns — karakterisering av dagens beteende', () => {
 describe('storsta-talet-regeln', () => {
   const OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
+  /* Uppgift 6: komplementvagens barare ar add_need (spec kap 3c), inte det
+     borttagna add_explain. Samma falt, samma aritmetik — annan stegtyp. */
   it('32+29: 9:an fylls till 10, inte 2:an', () => {
     const steps = planAdditionColumns(32, 29, 2, OPTS);
-    const explain = steps.find(s => s.type === 'add_explain' && s.col === 0);
-    expect(explain.growVal).toBe(9);
-    expect(explain.behover).toBe(1);
-    expect(explain.kvar).toBe(1);
+    const behov = steps.find(s => s.type === 'add_need' && s.col === 0);
+    expect(behov.growVal).toBe(9);
+    expect(behov.behover).toBe(1);
+    expect(behov.kvar).toBe(1);
   });
 
   it('47+35: oforandrat mot forr eftersom 7 redan ar storst', () => {
     const steps = planAdditionColumns(47, 35, 2, OPTS);
-    const explain = steps.find(s => s.type === 'add_explain' && s.col === 0);
-    expect(explain.growVal).toBe(7);
-    expect(explain.behover).toBe(3);
-    expect(explain.kvar).toBe(2);
+    const behov = steps.find(s => s.type === 'add_need' && s.col === 0);
+    expect(behov.growVal).toBe(7);
+    expect(behov.behover).toBe(3);
+    expect(behov.kvar).toBe(2);
   });
 
   /* Undantaget: en exakt-10-kolumn (growVal + giveVal === 10, bada >= 1) lanar
@@ -99,7 +101,7 @@ describe('storsta-talet-regeln', () => {
     for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
       const cc = (a + b >= 100) ? 3 : 2;
       for (const s of planAdditionColumns(a, b, cc, OPTS)) {
-        if (s.type === 'add_explain' && s.behover >= 1 && s.kvar < 1 && !arExaktTio(s)) {
+        if (s.type === 'add_need' && s.behover >= 1 && s.kvar < 1 && !arExaktTio(s)) {
           fel.push(`${a}+${b} kol ${s.col}`);
         }
       }
@@ -112,7 +114,7 @@ describe('storsta-talet-regeln', () => {
     for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
       const cc = (a + b >= 100) ? 3 : 2;
       for (const s of planAdditionColumns(a, b, cc, OPTS)) {
-        if (s.type === 'add_explain' && arExaktTio(s) && s.kvar !== 0) {
+        if (s.type === 'add_need' && arExaktTio(s) && s.kvar !== 0) {
           fel.push(`${a}+${b} kol ${s.col}: exakt-10 men kvar ${s.kvar}`);
         }
       }
@@ -142,8 +144,8 @@ describe('exakt-10-genvagen', () => {
   it('41+39: entalen far tf_pair, inga komplementsteg', () => {
     const typer = planAdditionColumns(41, 39, 2, OPTS).filter(s => s.col === 0).map(s => s.type);
     expect(typer).toContain('tf_pair');
-    expect(typer).not.toContain('add_explain');
-    expect(typer).not.toContain('add_cross');
+    expect(typer).not.toContain('add_need');
+    expect(typer).not.toContain('add_lend');
   });
 
   it('41+39 ger 80', () => {
@@ -160,7 +162,7 @@ describe('exakt-10-genvagen', () => {
       const cc = (a + b >= 100) ? 3 : 2;
       const steps = planAdditionColumns(a, b, cc, OPTS);
       for (const s of steps) {
-        if (s.type === 'add_explain' && s.valA >= 1 && s.valB >= 1 && s.valA + s.valB === 10) {
+        if (s.type === 'add_need' && s.valA >= 1 && s.valB >= 1 && s.valA + s.valB === 10) {
           fel.push(`${a}+${b} kol ${s.col}`);
         }
       }
@@ -174,8 +176,9 @@ describe('hal A: termen ar redan 10 efter minnet', () => {
 
   it('95+47 tiotalen: inga komplementsteg, ingen strykning', () => {
     const kol1 = planAdditionColumns(95, 47, 3, OPTS).filter(s => s.col === 1).map(s => s.type);
-    expect(kol1).not.toContain('add_explain');
-    expect(kol1).not.toContain('add_cross');
+    expect(kol1).not.toContain('add_need');
+    expect(kol1).not.toContain('add_lend');
+    expect(kol1).not.toContain('add_lift');
     expect(kol1).toContain('add_memjoin');
     expect(kol1).toContain('add_sum');
   });
@@ -192,7 +195,7 @@ describe('hal A: termen ar redan 10 efter minnet', () => {
     for (let a = 40; a <= 99; a++) for (let b = 40; b <= 99; b++) {
       if (a + b < 100) continue;
       for (const s of planAdditionColumns(a, b, 3, OPTS)) {
-        if (s.type === 'add_explain' && s.behover === 0) fel.push(`${a}+${b} kol ${s.col}`);
+        if (s.type === 'add_need' && s.behover === 0) fel.push(`${a}+${b} kol ${s.col}`);
       }
     }
     expect(fel).toEqual([]);
@@ -250,5 +253,103 @@ describe('hal B: siffran minnet laggs pa ar 0', () => {
       }
     }
     expect(traffar).toEqual([]);
+  });
+});
+
+/* ── Uppgift 6: stegordningen i komplementkolumner ───────────────────────
+   Planens forvantade lista satte add_sum FORE add_return. Spec kap 3c har
+   motsatt ordning (6 add_return, 7 add_sum) och mockupen bygger sa
+   (sumWay 'ur', mockup:806-808): pappret skrivs forst, och summan stiger
+   ur det som DA star skrivet. Specen galler — testet foljer specen.       */
+describe('stegordningen i komplementkolumner', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+
+  it('47+35 entalen foljer spec kap 3c', () => {
+    const typer = planAdditionColumns(47, 35, 2, OPTS).filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toEqual([
+      'add_highlight', 'add_lift', 'add_need', 'add_lend',
+      'add_ten_named', 'add_return', 'add_sum', 'add_carry_fly', 'add_result',
+    ]);
+  });
+
+  it('68+57 tiotalen foljer spec kap 3d — add_memjoin direkt efter add_lift', () => {
+    const typer = planAdditionColumns(68, 57, 3, OPTS).filter(s => s.col === 1).map(s => s.type);
+    expect(typer).toEqual([
+      'add_highlight', 'add_lift', 'add_memjoin', 'add_need', 'add_lend',
+      'add_ten_named', 'add_return', 'add_sum', 'add_carry_fly', 'add_result',
+      'add_mem_strike',
+    ]);
+  });
+
+  it('summan skapas fore att den anvands', () => {
+    const typer = planAdditionColumns(47, 35, 2, OPTS).map(s => s.type);
+    expect(typer.indexOf('add_sum')).toBeLessThan(typer.indexOf('add_carry_fly'));
+  });
+
+  it('add_explain och add_cross ar borta ur additionsvagen', () => {
+    const traffar = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      for (const d of [1, 2, 3, 4]) {
+        for (const s of planAdditionColumns(a, b, cc, { ...OPTS, difficulty: d })) {
+          if (s.type === 'add_explain' || s.type === 'add_cross' || s.type === 'add_over9') {
+            traffar.push(`${a}+${b} niva ${d}: ${s.type}`);
+          }
+        }
+      }
+    }
+    expect(traffar).toEqual([]);
+  });
+});
+
+/* ── Uppgift 6, Dennis beslut: tankerutan hoppas over vid sma lan ────────
+   behover <= SKIP_BOX_MAX_BORROW OCH niva >= 3 ⇒ kort vag utan utlyft.
+   Pa niva 1-2 oppnas rutan alltid, sa att metoden kanns likadan varje
+   gang medan hon lar sig den.                                             */
+describe('tankerutan hoppas over vid sma lan pa svara nivaer', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+
+  it('32+29 pa niva 4: inget utlyft, men samma slut', () => {
+    const typer = planAdditionColumns(32, 29, 2, { ...OPTS, difficulty: 4 })
+      .filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toEqual([
+      'add_highlight', 'add_need', 'add_lend', 'add_ten',
+      'add_sum', 'add_carry_fly', 'add_result',
+    ]);
+  });
+
+  it('32+29 pa niva 2: rutan oppnas anda', () => {
+    const typer = planAdditionColumns(32, 29, 2, { ...OPTS, difficulty: 2 })
+      .filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toContain('add_lift');
+    expect(typer).toContain('add_return');
+  });
+
+  it('47+35 pa niva 4: lanet ar 3, sa rutan oppnas', () => {
+    const typer = planAdditionColumns(47, 35, 2, { ...OPTS, difficulty: 4 })
+      .filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toContain('add_lift');
+  });
+
+  it('utan difficulty i opts oppnas rutan — forvalet ar den langa vagen', () => {
+    const typer = planAdditionColumns(32, 29, 2, OPTS).filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toContain('add_lift');
+  });
+
+  it('korta vagen slutar likadant som den langa', () => {
+    const fel = [];
+    for (let a = 40; a <= 99; a++) for (let b = 40; b <= 99; b++) {
+      if (a + b < 100) continue;
+      const steps = planAdditionColumns(a, b, 3, { ...OPTS, difficulty: 3 });
+      for (let c = 0; c < 3; c++) {
+        const t = steps.filter(s => s.col === c).map(s => s.type);
+        if (!t.includes('add_need')) continue;
+        const svans = t.slice(t.indexOf('add_sum'));
+        if (svans.join(',').indexOf('add_sum,add_carry_fly,add_result') !== 0) {
+          fel.push(`${a}+${b} kol ${c}: ${t.join(',')}`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
   });
 });
