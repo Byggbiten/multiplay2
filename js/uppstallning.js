@@ -1650,14 +1650,21 @@ const UppstallningGame = (() => {
     } else if (step.type === 'sub_landed') {
       html = `Nu står det <strong style="color:#dc2626">${step.dstNew}</strong> i tiotalet.`;
     } else if (step.type === 'sub_flip') {
+      /* Dennis 21/9: "från 2 till 9 är det 7" förklarade aldrig VARFÖR vi
+         vänder, och sjuan dök upp ur ingenstans. Skillnaden skrivs som det
+         lilla tal den är — 9 − 2 = 7 — inte som ett avstånd i ord. Det är
+         notationen hon lär sig skriva, och den läses snabbare än en
+         jämförelsemening. */
       const ck = COL_KEYS[step.col];
-      html = `Vi vänder om: från <strong style="color:${PVC[ck]}">${step.a}</strong> till <strong style="color:${PVC[ck]}">${step.b}</strong> är det <strong style="color:${PVC[ck]}">${step.diff}</strong>.`;
+      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>.`;
     } else if (step.type === 'sub_take') {
       const ck = COL_KEYS[step.col];
       html = `Vi tar <strong style="color:${PVC[ck]}">${step.b}</strong>:an från tian.`;
     } else if (step.type === 'sub_ten_minus') {
+      /* Dennis 21/9: namnge tian som DEN LÅNADE — det knyter ihop steget
+         med brickan i marginalen och med lånet några steg tidigare. */
       const ck = COL_KEYS[step.col];
-      html = `<strong style="color:${PVC[ck]}">10</strong> minus <strong style="color:${PVC[ck]}">${step.diff}</strong> är <strong style="color:${PVC[ck]}">${step.ans}</strong>.`;
+      html = `Och nu använder vi lånetian! <strong style="color:${PVC[ck]}">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong>`;
     } else if (step.type === 'sub_calc') {
       const ck = COL_KEYS[step.col];
       html = step.bEmpty
