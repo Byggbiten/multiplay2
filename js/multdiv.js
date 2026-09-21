@@ -662,9 +662,9 @@ const MultDivGame = (() => {
      (kvotsiffra skriven + ev. rest flyttad) stryks täljarsiffran med
      penndraget. fromSkip-steget stryker BÅDA siffrorna (33 lästes ihop).
      Demon visar även SISTA siffrans strykning (hjälpläget kräver den ej). */
-  function buildDivDemoSteps() {
-    const steps = [], nd = digitsOf(numA);
-    for (const s of plan.pass.steps) {
+  function planDivSteps(pl) {
+    const steps = [], nd = digitsOf(pl.a);
+    for (const s of pl.pass.steps) {
       steps.push({ t: 'dhl', ...s });
       if (s.skip) { steps.push({ t: 'dskip', ...s }); continue; }
       if (s.remIn > 0 && s.rem === 0) {
@@ -681,22 +681,27 @@ const MultDivGame = (() => {
     return steps;
   }
 
-  function buildDemoSteps() {
-    if (plan.kind === 'division') return buildDivDemoSteps();
+  /* Ren stegbyggare (multiplikation): läser BARA planen, aldrig modul-
+     tillståndet — vitest kör den över hela generatorrymden. */
+  function planMultSteps(pl) {
     const steps = [];
-    if (plan.kind === 'simple') {
-      passStepsInto(steps, plan.pass, 'ans', 0, true);
+    if (pl.kind === 'simple') {
+      passStepsInto(steps, pl.pass, 'ans', 0, true);
     } else {
       // v31: delprodukternas minnen är ALDRIG uppgiftens sista (p2 + addition följer)
       steps.push({ t: 'phase', which: 1 });
-      passStepsInto(steps, plan.p1, 'p1', 0, false);
+      passStepsInto(steps, pl.p1, 'p1', 0, false);
       steps.push({ t: 'phase', which: 2 });
-      passStepsInto(steps, plan.p2, 'p2', 1, false);
+      passStepsInto(steps, pl.p2, 'p2', 1, false);
       steps.push({ t: 'phase', which: 3 });
-      addStepsInto(steps, plan.add);
+      addStepsInto(steps, pl.add);
     }
     steps.push({ t: 'done' });
     return steps;
+  }
+
+  function buildDemoSteps() {
+    return plan.kind === 'division' ? planDivSteps(plan) : planMultSteps(plan);
   }
 
   /* ── Bubbeltexter (spec-språket, · per boken) ───────────── */
@@ -1461,9 +1466,9 @@ const MultDivGame = (() => {
          strykfaser (båda ihoplästa siffrorna). SISTA siffrans
          strykning krävs INTE (sista-minnes-principen — demon visar den).
      Leading-specialfallet: informationssteg med framåtblickande knapp. */
-  function buildDivHelpQueue() {
-    const q = [], nd = digitsOf(numA);
-    for (const s of plan.pass.steps) {
+  function planDivHelpQueue(pl) {
+    const q = [], nd = digitsOf(pl.a);
+    for (const s of pl.pass.steps) {
       if (s.skip) { q.push({ kind: 'dskip', rowKey: 'q', ...s }); continue; }
       q.push({ kind: 'divq', rowKey: 'q', ...s });
       if (s.rem > 0 && !s.last) {
@@ -1478,8 +1483,7 @@ const MultDivGame = (() => {
     return q;
   }
 
-  function buildHelpQueue() {
-    if (plan.kind === 'division') return buildDivHelpQueue();
+  function planMultHelpQueue(pl) {
     const q = [];
     /* v30: efter varje kolumn skjuts minnets livscykel in som egna
        faser — STRYK det använda minnet, PLACERA det nya.
@@ -1505,16 +1509,16 @@ const MultDivGame = (() => {
         memQ(c, g, finalPass);
       }
     };
-    if (plan.kind === 'simple') {
-      passQ(plan.pass, 'ans', 0, true);
+    if (pl.kind === 'simple') {
+      passQ(pl.pass, 'ans', 0, true);
     } else {
       // v31: delprodukternas minnen är ALDRIG uppgiftens sista (p2 + addition följer)
       q.push({ kind: 'phase', which: 1 });
-      passQ(plan.p1, 'p1', 0, false);
+      passQ(pl.p1, 'p1', 0, false);
       q.push({ kind: 'phase', which: 2 });
-      passQ(plan.p2, 'p2', 1, false);
+      passQ(pl.p2, 'p2', 1, false);
       q.push({ kind: 'phase', which: 3 });
-      for (const c of plan.add.cols) {
+      for (const c of pl.add.cols) {
         const single = (c.x === null || c.y === null) && c.carryIn === 0;
         const bothNull = c.x === null && c.y === null;
         if (single) {
@@ -1533,6 +1537,10 @@ const MultDivGame = (() => {
       }
     }
     return q;
+  }
+
+  function buildHelpQueue() {
+    return plan.kind === 'division' ? planDivHelpQueue(plan) : planMultHelpQueue(plan);
   }
 
   function helpItem() { return helpQueue[helpIdx] || null; }
@@ -2403,6 +2411,8 @@ const MultDivGame = (() => {
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
+    /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
+    __test: { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue },
   };
   return api;
 })();
