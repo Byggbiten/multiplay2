@@ -825,18 +825,22 @@ Ett brett fält inbjuder till att räkna hela summan i huvudet och skriva in den
 
 Cellerna finns alltså redan i `buildTableHTML`. Minnesrutorna och tapp-maskineriet finns också, byggt för hjälpläget (`memTableTap`, `memPick`). Uppgiften är till stor del en **borttagning**: sluta ersätta raden, återanvänd det som finns.
 
-**Designen (Dennis: "tänk på vad som blir mest logiskt och intuitivt för ett barn på iPhone eller iPad").**
+**BESLUT 21/9, efter tre layoutmockups (design-lab/inmatning-barnvy.html):** Dennis ratade alla tre layoutalternativen (knappsats som glider upp, bred 5×2, kladd i helskärm) och landade i: *"i så fall är det bättre som det är idag, förutom att cellinmatning passar bättre för att man skall börja räkna ut entalen."*
 
-Båda arbetssätten han beskriver — den som räknar medan hon skriver, och den som skrivit klart svaret på kladden — går höger till vänster. Det blir grunden:
+Alltså: **layouten rörs inte.** Uppställningskortet, knappsatskortet (5×2, samma plats) och kladdytan står kvar exakt som i dag. Det enda som byggs om är **svarsraden**.
 
-1. **Fokus börjar i entalsrutan** och flyttar ett steg vänsterut när en siffra skrivits.
-2. **Vilken cell som helst går att trycka på** och skriva om. En ny siffra ersätter den gamla; ingen radering först.
-3. **Suddknappen tömmer aktuell cell och flyttar fokus åt höger** — tillbaka samma väg.
-4. **Ingen bedömning förrän "Klar ✓"**: inga bockar, ingen skakning, ingen antydan medan hon skriver. Knappen aktiveras när minst en siffra finns. Lägg INGEN spärr av typen "du har missat en ruta" — det vore en ledtråd.
-5. **Minnesrutorna fungerar likadant**: tryck, knappa in siffran, ändra fritt. Appen placerar ingenting åt henne.
-6. **Fokusflytten ska synas** — kort animation. Ett barn som inte ser markören hoppa tappar bort sig.
-7. **Bara svaret bedöms, inte minnessiffrorna.** Minnesraden är hennes kladd. Blir minnet fel blir svaret fel ändå, och då kan återkopplingen peka på kolumnen.
-8. **Kladdytan är kvar** — Dennis nämner uttryckligen att en del räknar färdigt där först.
+**Designen:**
+
+1. **Svaret skrivs i cellerna** — de per-kolumn-rutor som `buildTableHTML` redan skapar och som `exFreeInit()` i dag river ut. Sluta riva ut dem.
+2. **Fokus börjar i entalsrutan** och flyttar ett steg vänsterut när en siffra skrivits. Flytten ska synas (kort animation, inte ett tyst skutt).
+3. **Vilken cell som helst går att trycka på** för att välja den. En ny siffra ersätter den gamla; ingen radering först.
+4. **⌫ beter sig som en vanlig backsteg:** har aktuell cell en siffra töms den och fokus stannar; är cellen tom flyttar fokus ett steg åt höger och tömmer den cellen. Så blir "ångra sista siffran" ett tryck även direkt efter att fokus glidit vänsterut.
+5. **Ingen bedömning förrän "Klar ✓"** — inga bockar, ingen skakning, ingen färg medan hon skriver. Knappen och dess etikett fungerar som i dag (`Skriv svaret…` → `Klar ✓` när minst en siffra finns). Ingen spärr av typen "du har missat en ruta".
+6. **Minnesrutorna är tappbara**: tryck öppnar samma väljare som hjälpläget redan har (`openMemPicker`/`memPick`), siffran skrivs som röd `.mem-digit`, går att ändra fritt. Appen placerar ingenting åt henne.
+7. **Bara svaret bedöms, inte minnessiffrorna.** Minnesraden är hennes kladd.
+8. **Tomma ledande rutor är tillåtna** (på papper lämnas de blanka) och räknas som "ingen siffra" vid bedömning — inte som fel förrän Klar.
+9. **Knappsatsens knappar höjs från 40 till 44 pt** (`.ex-nk` och `.ex-numpad`, `clamp(44px, …)`), utan att layouten ändras — 5 × 44 + 4 × 5 = 240 px ryms i kortet med marginal. Det är Apples golv, och 40 klarade det inte på någon iPhone.
+10. **`free-field`/`exFreeInput`-koden (miniräknar-modellen) tas bort** när den blivit död. Grepa hela filen.
 
 **Krav:**
 - Träffytor minst 44 pt. `.ans-cell` är redan `clamp(46px,8vw,74px)`.
