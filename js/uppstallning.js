@@ -63,23 +63,12 @@ const UppstallningGame = (() => {
   const COL_LABELS = ['E','T','H'];
   const LOG_KEY    = id => `uppstallning_log_${id}`;
 
-  /* Additionens pedagogiska vägval — Dennis 2026-09-20.
+  /* Additionens pedagogiska vägval — Dennis 2026-09-20, utan förbehåll 21/9.
      'storsta' betyder att BÅDE komplementet och minnessiffran utgår från
      den största siffran i kolumnen: en 9:a tar 1 av en 2:a, aldrig tvärtom.
-
-     VARFÖR DEN GAMLA VÄGEN FINNS KVAR: 'oversta' (= det översta talet, appens
-     regel före 20/9) lever kvar i planAdditionColumns som `legacy`-grenen, och
-     karakteriseringstestet i tests/uppstallning.test.mjs håller den vid liv.
-     Skälet är att största-talet-regeln ÄNNU INTE är verifierad mot Miras
-     mattebok (Mitt i Prick 4A). Visar boken att klassrummet alltid fyller det
-     översta talet till 10, vänds hela regeln tillbaka genom att ändra raden
-     nedan till { compTo:'oversta', memTo:'oversta' } — en rad, ingen omskrivning.
-
-     VAD SOM FÅR STRYKA DEN: att boken kontrollerats och bekräftar största-
-     talet-regeln (eller att Dennis säger att frågan är stängd). Då tas
-     `legacy`-grenen i planAdditionColumns bort tillsammans med
-     karakteriseringstestet, i samma commit — den pinnar annars fast ett
-     beteende vi medvetet övergett. */
+     'oversta' finns kvar som värde (hål B-testet kör memTo:'oversta'), men den
+     gamla stegkedjan (add_over9/add_explain/add_cross) är borttagen — Dennis
+     släppte frågan om att verifiera regeln mot matteboken. */
   const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
   /* TANKERUTANS TRÖSKEL — Dennis 2026-09-21.
@@ -741,9 +730,6 @@ const UppstallningGame = (() => {
        modultillståndet. Förvalet 1 är den LÅNGA vägen: tankerutan öppnas
        alltid, vilket är rätt för den som inte har sagt något annat. */
     const o = Object.assign({ compTo: 'oversta', memTo: 'oversta', difficulty: 1 }, opts || {});
-    /* Gamla vägen (båda 'oversta') ska ge EXAKT dagens steglista — samma fält,
-       samma ordning. Därför bär bara den nya vägen §2.3:s extrafält. */
-    const legacy = (o.compTo === 'oversta' && o.memTo === 'oversta');
     /* Samma siffersplit som modulens digs(): [ental, tiotal, hundratal] */
     const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
     const da = digs(numA), db = digs(numB);
@@ -774,14 +760,7 @@ const UppstallningGame = (() => {
         const base = { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar,
                        ans, nextCarry, sum, growRow, giveRow, growVal, giveVal,
                        valA, valB, memRow, memDigit, memNew };
-        if (legacy) {
-          /* Gamla vägen, orörd: karakteriseringstestet jämför hela objekt. */
-          steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
-          steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_carry_fly', col:c, nextCarry });
-          steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
-        } else if (isExactTen(growVal, giveVal)) {
+        if (isExactTen(growVal, giveVal)) {
           /* Tiokompis-genvägen (spec §3b): ingen tankeruta, ingen strykning.
              Att ceremonin uteblir ÄR beskedet "den här såg du direkt". */
           /* HÅL B (spec §7.2): är siffran minnet läggs på en 0:a skulle
@@ -1324,20 +1303,6 @@ const UppstallningGame = (() => {
       clearWork(true);
       riseSumChip(step.col, step.sum, paperSources(step.col, !!step.nostrike), cb);
 
-    } else if (step.type === 'add_over9') {
-      highlightCol(step.col);
-      const colKey = COL_KEYS[step.col];
-      ['row-a','row-b'].forEach(row => {
-        const el = document.getElementById(`cell-${row}-${colKey}`);
-        if (el) el.classList.add('problem-cell');
-      });
-      setTimeout(() => {
-        ['row-a','row-b'].forEach(row => {
-          const el = document.getElementById(`cell-${row}-${colKey}`);
-          if (el) el.classList.remove('problem-cell');
-        });
-        cb();
-      }, 1200);
 
     /* add_explain och add_cross är BORTA ur additionen (plan uppgift 6,
        steg 7). De var radfasta: texten sa "Vi tar 1 från 9" när lånet i
@@ -1577,10 +1542,6 @@ const UppstallningGame = (() => {
     let html = '';
     if (step.type === 'add_highlight') {
       html = '';
-    } else if (step.type === 'add_over9') {
-      const ck = COL_KEYS[step.col];
-      const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span> (minne)` : '';
-      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr}... Hmm, det blir mer än 9! 🤔`;
     /* ── Komplementvägen, en kort mening per steg (spec §3c/§3d) ──
        Ingen aritmetik i texten som barnet måste räkna ut: 3:an lämnar
        5:an på riktigt, så "5:an har 2 kvar" räcker som mening. */
