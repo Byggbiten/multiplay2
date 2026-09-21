@@ -439,7 +439,7 @@ const PlatsvardeGame = (() => {
         .pv-fb-wrong { display:flex; align-items:center; gap:8px;
           background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
           border-radius:var(--radius-md); padding:6px 6px 6px 12px;
-          font-size:var(--text-base); font-weight:700; color:#92400e; }
+          font-size:14px; font-weight:700; color:#92400e; }
         .pv-fb-wrong > span { flex:1; text-align:center; }
         .pv-next { flex:0 0 auto; min-height:44px; padding:0 14px 0 18px; border:none; cursor:pointer;
           border-radius:var(--radius-full); display:inline-flex; align-items:center; gap:4px;
@@ -640,17 +640,19 @@ const PlatsvardeGame = (() => {
 
   /* C1: Tal → ord */
   function renderC1(q) {
+    /* Talet 2,5 rem och 8 px marginaler: kortet 260 px så facitraden (60 px)
+       ryms i #pv-left:s 333 px vid 390×664 utan att kladden går under 150. */
     return `
       <div class="pv-card">
-        <div style="text-align:center;margin-bottom:10px;letter-spacing:2px">
-          ${renderColoredNumber(q.num, '3rem')}
+        <div style="text-align:center;margin-bottom:8px;letter-spacing:2px">
+          ${renderColoredNumber(q.num, '2.5rem')}
         </div>
-        <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:10px">
+        <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Hur skrivs talet med bokstäver?
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" data-val="${escHtml(opt)}" style="text-align:left;padding:10px 12px"
+            <button class="pv-choice-btn" data-val="${escHtml(opt)}" style="text-align:left;padding:8px 12px;min-height:44px"
               onclick="PlatsvardeGame.handleChoice('${escApos(opt)}','${escApos(q.correct)}')">
               ${escHtml(opt)}
             </button>
