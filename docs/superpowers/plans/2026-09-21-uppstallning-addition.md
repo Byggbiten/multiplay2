@@ -605,7 +605,25 @@ Mät också:
 - konsolen tom (`read_console_messages`)
 - inget brickelement skapas och tas bort i samma steg
 
-- [ ] **Steg 7: Commit**
+- [ ] **Steg 7: Ta bort `add_explain` och `add_cross` ur additionsvägen**
+
+Efter uppgift 2 är aritmetiken radmedveten (`growRow`/`giveRow`) men
+`showStepBubble` och `add_cross` läser fortfarande `step.a`/`step.b`. För
+`32 + 29` gav det rätt siffror men fel formulering: bubblan sa *"Vi tar 1 från
+9"* i stället för från 2:an, och `10` skrevs under 2:an i stället för under
+9:an. Det är ett medvetet mellanläge mellan uppgift 2 och den här uppgiften.
+
+Spec §3c:s kedja innehåller varken `add_explain` eller `add_cross`. När den är
+på plats är båda **döda för addition** (subtraktionen har egna stegtyper). Ta
+bort dem ur additionsgrenen i `planAdditionColumns`, och ta bort deras grenar i
+`executeStep` och `showStepBubble` om ingen annan stegtyp använder dem — grepa
+hela filen först. Lämnas de kvar blir de en fälla: radfast kod som ser levande
+ut.
+
+Kontrollera med `grep -n "add_explain\|add_cross" js/uppstallning.js` att de
+bara förekommer i legacy-vägen (om den behålls) och ingenstans i den nya.
+
+- [ ] **Steg 8: Commit**
 
 ```bash
 git add js/uppstallning.js
@@ -689,7 +707,29 @@ Förväntat: PASS, alla filer.
 
 Skriv ett engångsskript i scratchpad-katalogen (inte i repot) som kör `planAdditionColumns` över samtliga par i alla fyra svårighetsnivåernas intervall (`js/uppstallning.js:418`, `:421`, `:424`, `:427`) och kontrollerar att den summa steglistan bygger stämmer med `a + b`. Förväntat: noll fel.
 
-- [ ] **Steg 3: Höj cache-versionen**
+- [ ] **Steg 3: Avgör legacy-vägens öde**
+
+Uppgift 2 införde en `legacy`-flagga i `planAdditionColumns`
+(`js/uppstallning.js:503`): med `{compTo:'oversta', memTo:'oversta'}` pushas
+dagens exakta stegobjekt, annars de nya fälten ur spec §2.3. Det gjordes för
+att karakteriseringstestet jämför hela stegobjekt med `JSON.stringify` och
+hade fällts av ovillkorliga extrafält.
+
+Den vägen har gjort sitt jobb som skyddsnät genom hela bygget. Nu är frågan om
+den ska stanna. **Ta inte bort den utan att fråga Dennis** — argumenten åt båda
+håll:
+
+- *Behåll:* `ADD_OPTS` är en rad, så hela största-talet-regeln kan vändas
+  tillbaka om Mitt i Prick 4A visar sig lära ut det översta talet. Regeln är
+  inte verifierad mot boken.
+- *Ta bort:* två aritmetikvägar i samma funktion är skuld, och
+  karakteriseringstestet pinnar då fast ett beteende vi medvetet övergett.
+
+Om den behålls: dokumentera i en kommentar vid `ADD_OPTS` varför, och behåll
+karakteriseringstestet. Om den tas bort: ta bort testet i samma commit och
+säg det i meddelandet.
+
+- [ ] **Steg 4: Höj cache-versionen**
 
 I `sw.js`, höj `CACHE_VERSION` från `'v37'` till `'v38'`.
 
