@@ -58,6 +58,9 @@ const UppstallningGame = (() => {
   const COL_LABELS = ['E','T','H'];
   const LOG_KEY    = id => `uppstallning_log_${id}`;
 
+  /* Additionens pedagogiska vägval. Ändras i uppgift 2. */
+  const ADD_OPTS = { compTo: 'oversta', memTo: 'oversta' };
+
   /* ── CSS (injected once per view) ──────────────────────── */
   const BASE_CSS = `
     /* Helskärmslayout – överskriver app.css max-width */
@@ -491,40 +494,54 @@ const UppstallningGame = (() => {
   }
 
   /* ── Steg-byggare ───────────────────────────────────────── */
+
+  /* Ren, testbar stegbyggare för addition. Läser inget modultillstånd. */
+  function planAdditionColumns(numA, numB, colCount, opts) {
+    const o = Object.assign({ compTo: 'oversta', memTo: 'oversta' }, opts || {});
+    void o; // vägvalen används från uppgift 2
+    /* Samma siffersplit som modulens digs(): [ental, tiotal, hundratal] */
+    const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
+    const da = digs(numA), db = digs(numB);
+    const steps = [];
+    let carryVal = 0;
+    for (let c = 0; c < colCount; c++) {
+      const a = da[c], b = db[c];
+      const effectiveA = a + carryVal;
+      const sum = effectiveA + b;
+      const ans = sum % 10;
+      const nextCarry = sum > 9 ? 1 : 0;
+      steps.push({ type:'add_highlight', col:c });
+      if (sum > 9) {
+        const behover = 10 - effectiveA;
+        const kvar = b - behover;
+        steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
+        steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal,
+                     effectiveA, behover, kvar, ans, nextCarry });
+        steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal,
+                     effectiveA, behover, kvar, ans, nextCarry });
+        steps.push({ type:'add_carry_fly', col:c, nextCarry });
+        steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
+      } else {
+        steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
+      }
+      // Minnet i kolumn c är nu ANVÄNT → eget strykningssteg (v30).
+      // SISTA kolumnens minne stryks inte (Dennis: inget kommande att förväxla med)
+      if (carryVal && c < colCount - 1) steps.push({ type:'add_mem_strike', col:c });
+      carryVal = nextCarry;
+    }
+    if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
+    steps.push({ type:'done' });
+    return steps;
+  }
+
   function buildDemoSteps() {
+    if (mode === 'addition') return planAdditionColumns(numA, numB, colCount, ADD_OPTS);
+
     const steps = [];
     const da = [...digs(numA)], db = digs(numB);
     const maxC = colCount;
 
-    if (mode === 'addition') {
-      let carryVal = 0;
-      for (let c = 0; c < maxC; c++) {
-        const a = da[c], b = db[c];
-        const effectiveA = a + carryVal;
-        const sum = effectiveA + b;
-        const ans = sum % 10;
-        const nextCarry = sum > 9 ? 1 : 0;
-        steps.push({ type:'add_highlight', col:c });
-        if (sum > 9) {
-          const behover = 10 - effectiveA;
-          const kvar = b - behover;
-          steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
-          steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal,
-                       effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal,
-                       effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_carry_fly', col:c, nextCarry });
-          steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
-        } else {
-          steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
-        }
-        // Minnet i kolumn c är nu ANVÄNT → eget strykningssteg (v30).
-        // SISTA kolumnens minne stryks inte (Dennis: inget kommande att förväxla med)
-        if (carryVal && c < colCount - 1) steps.push({ type:'add_mem_strike', col:c });
-        carryVal = nextCarry;
-      }
-      if (carryVal) steps.push({ type:'add_overflow', digit:carryVal });
-    } else {
+    {
       // Kompletteringsmetoden
       const effA = [...da];
       for (let c = 0; c < maxC; c++) {
@@ -2110,5 +2127,8 @@ const UppstallningGame = (() => {
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
+    __test: { planAdditionColumns },
   };
 })();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = UppstallningGame;
