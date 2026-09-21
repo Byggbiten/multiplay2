@@ -372,7 +372,9 @@ const PlatsvardeGame = (() => {
           60%  { transform:scale(0.96); }
           100% { transform:scale(1); }
         }
-        .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
+        /* Träffytor (granskning C1): 12vw är 46,8 px vid 390 — golvet 46/48
+           gäller alltid; clamp-maxen nås först på surfplatta. */
+        .pv-decomp-field { width:clamp(46px,12vw,60px); height:clamp(46px,12vw,60px); border-radius:var(--radius-md); font-size:1.6rem;
           font-family:var(--font-head); font-variant-numeric:tabular-nums;
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
           cursor:pointer; transition:all 0.15s; background:var(--glass-strong); position:relative; }
@@ -389,9 +391,10 @@ const PlatsvardeGame = (() => {
           0%,100% { transform:translateX(-50%) translateY(0); }
           50%      { transform:translateX(-50%) translateY(-7px); }
         }
-        .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(40px,8vw,52px)); gap:6px; justify-content:center; margin-top:8px; }
-        .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full);
-          font-size:var(--text-base); font-family:var(--font-head); font-weight:900;
+        .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(48px,12vw,56px)); gap:6px; justify-content:center; }
+        .pv-nk { width:clamp(48px,12vw,56px); height:clamp(48px,12vw,56px); border-radius:var(--radius-full);
+          font-size:var(--text-lg); font-family:var(--font-head); font-weight:900;
+          display:inline-flex; align-items:center; justify-content:center; padding:0;
           cursor:pointer; background:var(--glass-strong);
           border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
           color:var(--deep); transition:transform 0.2s var(--spring); }
@@ -402,15 +405,15 @@ const PlatsvardeGame = (() => {
         .pv-nk:disabled { opacity:0.5; cursor:default; box-shadow:none; }
         .pv-nk:disabled:hover { transform:none; }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
-        .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
+        .pv-order-btn { min-height:44px; padding:4px 10px; border-radius:var(--radius-md); font-weight:800;
           cursor:pointer; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
           background:var(--glass-strong); transition:all 0.25s var(--spring); }
         .pv-order-btn.placed { opacity:0.45; border-style:dashed; border-color:var(--accent);
           outline:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
           background:color-mix(in srgb, var(--accent) 8%, transparent); }
-        .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md);
+        .pv-slot { width:clamp(64px,16vw,84px); height:46px; border-radius:var(--radius-md);
           border:2px dashed color-mix(in srgb, var(--accent) 32%, transparent);
-          display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-sm);
+          display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-lg);
           font-weight:800; color:color-mix(in srgb, var(--accent) 45%, transparent); }
         .pv-slot.filled { background:color-mix(in srgb, var(--accent) 10%, transparent);
           border:2px solid var(--accent); color:var(--accent); cursor:pointer; }
@@ -429,9 +432,9 @@ const PlatsvardeGame = (() => {
           stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
       </style>
 
-      <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:5px 10px;
+      <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:4px 10px;
         border-bottom:1px solid color-mix(in srgb, var(--accent) 15%, transparent);min-height:44px;flex-shrink:0">
-        <button class="btn-back" style="flex-shrink:0;min-height:36px;padding:4px 12px 4px 8px;font-size:13px"
+        <button class="btn-back" style="flex-shrink:0;min-height:44px;padding:4px 12px 4px 8px;font-size:14px"
           onclick="PlatsvardeGame.confirmAbort()">Avbryt</button>
         <div class="num" style="flex:1;text-align:center;font-family:var(--font-head);font-weight:700;font-size:14px;color:var(--deep)">
           ${getLevelLabel(q)} &middot; ${qIndex + 1}/10
@@ -452,13 +455,13 @@ const PlatsvardeGame = (() => {
           <canvas id="pv-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
             <button onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
+              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
               cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
             <button onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
+              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
               cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🧹 Sudd</button>
             <button onclick="PlatsvardeGame.pvClearCanvas()"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
+              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
               cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🗑️ Rensa</button>
           </div>
         </div>
@@ -698,20 +701,20 @@ const PlatsvardeGame = (() => {
           ${q.nums.map(n => `
             <button class="pv-order-btn" id="pv-ob-${n}"
               onclick="PlatsvardeGame.handleOrderClick(${n})">
-              ${renderColoredNumber(n, '0.9rem')}
+              ${renderColoredNumber(n, '1.5rem')}
             </button>
           `).join('')}
         </div>
         <div style="display:flex;gap:8px;margin-top:6px">
           <button onclick="PlatsvardeGame.orderUndo()"
-            style="flex:1;height:40px;border-radius:var(--radius-full);
+            style="flex:1;height:48px;border-radius:var(--radius-full);
             background:var(--tint);color:var(--deep);
             border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
             font-weight:800;cursor:pointer">
             ↩ Ångra
           </button>
           <button id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
-            style="flex:2;height:40px;border-radius:var(--radius-full);
+            style="flex:2;height:48px;border-radius:var(--radius-full);
             background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--deep);border:none;
             font-weight:800;cursor:pointer;opacity:0.5">
             ✓ Klar
@@ -905,7 +908,7 @@ const PlatsvardeGame = (() => {
       if (orderPlaced[i] !== undefined) {
         const num = orderPlaced[i];
         slot.className = 'pv-slot filled';
-        slot.innerHTML = renderColoredNumber(num, '0.9rem');
+        slot.innerHTML = renderColoredNumber(num, '1.5rem');
         slot.onclick = () => handleOrderClick(num); // klick på fylld slot tar bort talet
       } else {
         slot.className = 'pv-slot';
