@@ -733,11 +733,11 @@ säg det i meddelandet.
 
 I `sw.js`, höj `CACHE_VERSION` från `'v37'` till `'v38'`.
 
-- [ ] **Steg 4: Live-verifiering i iPhone-simulatorn**
+- [ ] **Steg 5: Live-verifiering i iPhone-simulatorn**
 
 Kör appen som PWA i iPhone 17 e och gå igenom demon och övningsläget för minst `47+35`, `68+57`, `41+39` och `95+47`. Kontrollera att inget scrollar och att kladdytan finns kvar.
 
-- [ ] **Steg 5: Commit och push till dev**
+- [ ] **Steg 6: Commit och push till dev**
 
 ```bash
 git add sw.js
