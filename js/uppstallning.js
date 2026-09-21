@@ -58,7 +58,23 @@ const UppstallningGame = (() => {
   const COL_LABELS = ['E','T','H'];
   const LOG_KEY    = id => `uppstallning_log_${id}`;
 
-  /* Additionens pedagogiska vägval. Ändras i uppgift 2. */
+  /* Additionens pedagogiska vägval — Dennis 2026-09-20.
+     'storsta' betyder att BÅDE komplementet och minnessiffran utgår från
+     den största siffran i kolumnen: en 9:a tar 1 av en 2:a, aldrig tvärtom.
+
+     VARFÖR DEN GAMLA VÄGEN FINNS KVAR: 'oversta' (= det översta talet, appens
+     regel före 20/9) lever kvar i planAdditionColumns som `legacy`-grenen, och
+     karakteriseringstestet i tests/uppstallning.test.mjs håller den vid liv.
+     Skälet är att största-talet-regeln ÄNNU INTE är verifierad mot Miras
+     mattebok (Mitt i Prick 4A). Visar boken att klassrummet alltid fyller det
+     översta talet till 10, vänds hela regeln tillbaka genom att ändra raden
+     nedan till { compTo:'oversta', memTo:'oversta' } — en rad, ingen omskrivning.
+
+     VAD SOM FÅR STRYKA DEN: att boken kontrollerats och bekräftar största-
+     talet-regeln (eller att Dennis säger att frågan är stängd). Då tas
+     `legacy`-grenen i planAdditionColumns bort tillsammans med
+     karakteriseringstestet, i samma commit — den pinnar annars fast ett
+     beteende vi medvetet övergett. */
   const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
   /* TANKERUTANS TRÖSKEL — Dennis 2026-09-21.
