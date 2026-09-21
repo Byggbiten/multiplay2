@@ -110,7 +110,7 @@ const MultDivGame = (() => {
     #multdiv-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
     #multdiv-root .app-header { padding:4px 12px 0; margin-bottom:0; flex-shrink:0; }
     #md-main { flex:1; display:flex; overflow:hidden; min-height:0; }
-    #md-left { display:flex; flex-direction:column; gap:8px;
+    #md-left { display:flex; flex-direction:column; gap:6px;
                overflow-y:auto; padding:clamp(6px,1.5vw,12px); min-height:0; padding-bottom:12px; }
     #md-right { display:flex; flex-direction:column; padding:clamp(6px,1.5vw,12px); gap:5px; min-height:0; }
     /* Kladd-lagen (Fas 3.2): kladden fyller ALL ledig yta i sin riktning. */
@@ -208,9 +208,12 @@ const MultDivGame = (() => {
     .mem-slot { width:1.05em; height:1.3em; border:2px dashed rgba(220,38,38,0.55);
       border-radius:6px; display:inline-flex; font-size:clamp(0.85rem,2.1vw,1.45rem); }
     #md-memcol .mem-digit, #md-memcol .mem-slot { cursor:pointer; }
-    /* Barnvänlig tap-yta (T2.1): siffran är liten men träffytan ≥40px */
+    /* Barnvänlig tap-yta (C2, 2026-09-21): siffran är 9–16 px men träff-
+       ytan är minst 44×44, centrerad på siffran (inset:-14px gav 37×42
+       på nivå 4). */
     #md-memcol .mem-digit::after, #md-memcol .mem-slot::after {
-      content:''; position:absolute; inset:-14px; }
+      content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:max(44px,140%); height:max(44px,140%); }
     .mem-slot { position:relative; }
     .mem-pulse { animation:md-mem-pulse 1.1s ease-in-out infinite; }
     .md-l4 .mem-digit, .md-l4 .mem-slot { font-size:clamp(0.72rem,1.8vw,1.2rem); }
@@ -297,6 +300,11 @@ const MultDivGame = (() => {
       background:rgba(255,255,255,0.92); cursor:pointer; }
     .md-cell .md-divslot::after { content:''; position:absolute; inset:-12px; }
 
+    /* Tankebubbla. #md-bubble håller fast höjd (C4): i demon två rader
+       (64 px vid 390) så "Nästa steg" står still under fingret; i övningen
+       en rad så knappsatsen inte hoppar när bubblan byter text. */
+    #md-bubble { min-height:42px; display:flex; flex-direction:column; justify-content:center; }
+    #md-bubble.md-bub-demo { min-height:64px; }
     /* Tankebubbla */
     .md-thought { background:#fff; border-radius:var(--radius-md);
       padding:clamp(8px,1.5vw,14px) clamp(10px,2vw,18px);
@@ -306,11 +314,14 @@ const MultDivGame = (() => {
       animation:md-bubble-in 0.3s var(--spring); line-height:1.5; }
 
     /* Numpad + inmatningsfält */
-    .md-panel { background:var(--glass-strong); border-radius:var(--radius-md); padding:12px;
+    .md-panel { background:var(--glass-strong); border-radius:var(--radius-md); padding:8px 10px;
       border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); }
-    .md-numpad { display:grid; grid-template-columns:repeat(5,clamp(38px,6.6vw,58px)); gap:5px; justify-content:center; }
-    .md-nk { width:clamp(38px,6.6vw,58px); height:clamp(38px,6.6vw,58px); border-radius:50%;
-      font-size:clamp(0.95rem,2vw,1.1rem); font-family:var(--font-head); font-weight:900;
+    /* Knappsatsen (C1, 2026-09-21): clamp(38px,6.6vw,58px) gav 38 px på en
+       390 pt-telefon — under Apples 44-golv. Samma clamp som additionen:
+       5×48 + 4×5 = 260 av ~362 ryms med marginal. */
+    .md-numpad { display:grid; grid-template-columns:repeat(5,clamp(48px,12vw,64px)); gap:4px; justify-content:center; }
+    .md-nk { width:clamp(48px,12vw,64px); height:clamp(48px,12vw,64px); border-radius:50%;
+      font-size:clamp(1.05rem,2.4vw,1.25rem); font-family:var(--font-head); font-weight:900;
       cursor:pointer; background:var(--glass-strong);
       border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
       color:var(--deep); transition:transform 0.2s var(--spring); }
@@ -327,7 +338,7 @@ const MultDivGame = (() => {
     .md-field.wrong { border:2.5px solid #ef4444; background:rgba(239,68,68,0.1); color:#dc2626; }
     .md-field.correct { border:2.5px solid #22c55e; background:rgba(34,197,94,0.12); color:#16a34a; }
     .md-field.shake { animation:md-shake 0.3s ease; }
-    .md-field-sm { min-height:clamp(34px,6vw,50px); font-size:clamp(1.1rem,2.6vw,1.7rem); margin-bottom:8px; }
+    .md-field-sm { min-height:clamp(44px,6vw,50px); font-size:clamp(1.1rem,2.6vw,1.7rem); margin-bottom:4px; }
     .md-caret { display:inline-block; width:3px; height:1.05em; border-radius:2px;
       background:var(--accent); animation:md-caret 1s steps(1) infinite; }
     .md-field.wrong .md-caret { background:#dc2626; }
@@ -347,9 +358,9 @@ const MultDivGame = (() => {
       .md-l4 .md-cell, .md-l4 .md-ansc { width:clamp(33px,5vw,44px); height:clamp(33px,5vw,44px);
         font-size:clamp(1.15rem,2.6vw,1.7rem); }
       .md-l4 .mem-digit, .md-l4 .mem-slot { font-size:clamp(0.72rem,1.5vw,1rem); }
-      .md-nk { width:clamp(36px,5vw,46px); height:clamp(36px,5vw,46px); }
-      .md-numpad { grid-template-columns:repeat(5,clamp(36px,5vw,46px)); }
-      .md-field-sm { min-height:clamp(32px,5vw,42px); font-size:clamp(1.05rem,2.2vw,1.5rem); }
+      .md-nk { width:clamp(44px,5vw,48px); height:clamp(44px,5vw,48px); }
+      .md-numpad { grid-template-columns:repeat(5,clamp(44px,5vw,48px)); }
+      .md-field-sm { min-height:44px; font-size:clamp(1.05rem,2.2vw,1.5rem); }
     }
 
     /* v37: val-vyerna på korta skärmar (390×664) — kompakta lägeskort
@@ -376,12 +387,12 @@ const MultDivGame = (() => {
       .md-cell .md-divslot { top:-10px; left:-10px; }
       .md-table { border-spacing:2px; }
       #md-table-wrap { padding:5px; }
-      .md-nk { width:34px; height:34px; font-size:0.82rem; }
-      .md-numpad { grid-template-columns:repeat(5,34px); }
+      .md-nk { width:44px; height:44px; font-size:0.95rem; }
+      .md-numpad { grid-template-columns:repeat(5,44px); gap:4px; }
       .md-panel { padding:6px; }
       .md-thought { font-size:0.85rem; padding:6px 10px; line-height:1.4; }
       .md-field { min-height:36px; font-size:1.2rem; }
-      .md-field-sm { min-height:30px; font-size:1rem; margin-bottom:5px; }
+      .md-field-sm { min-height:44px; font-size:1rem; margin-bottom:4px; }
       #md-right { min-height:96px; }
       #md-left { gap:6px; }
     }
@@ -857,13 +868,13 @@ const MultDivGame = (() => {
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.showModeSelect()">Avsluta</button>
-        <span class="header-title">${modeTitle()} – Demo</span>
+        <span class="header-title">${modeTitle()}</span>
         <span style="width:52px"></span>
       </div>
       <div id="md-main">
         <div id="md-left">
           <div id="md-table-wrap" class="${plan.kind === 'twostep' ? 'md-l4' : ''}">${buildTableHTML(false)}</div>
-          <div id="md-bubble"></div>
+          <div id="md-bubble" class="md-bub-demo"></div>
           <div id="md-next-area">${nextBtnHTML()}</div>
         </div>
         <div id="md-right">${scratchHTML()}</div>
@@ -1658,7 +1669,7 @@ const MultDivGame = (() => {
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.showModeSelect()">Avsluta</button>
-        <span class="header-title">${modeTitle()} – Övning</span>
+        <span class="header-title">${modeTitle()}</span>
         <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
       </div>
       <div id="md-main">
@@ -2169,7 +2180,7 @@ const MultDivGame = (() => {
         ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.helpKey('${k}')">${k}</button>`).join('')}
       </div>
-      <div style="display:flex;gap:6px;margin-top:8px">
+      <div style="display:flex;gap:6px;margin-top:6px">
         <button class="md-btn" onclick="MultDivGame.helpErase()"
           style="width:52px;flex-shrink:0;height:44px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
         ${lifelineBtnHTML()}
