@@ -850,43 +850,44 @@ const UppstallningGame = (() => {
     return steps;
   }
 
-  function buildDemoSteps() {
-    if (mode === 'addition') {
-      return planAdditionColumns(numA, numB, colCount, { ...ADD_OPTS, difficulty });
-    }
-
+  /* Ren, testbar stegbyggare för subtraktion ("vänd om"-metoden). Läser
+     inget modultillstånd — samma kontrakt som planAdditionColumns. */
+  function planSubtractionColumns(numA, numB, colCount) {
+    const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
+    const da = digs(numA), db = digs(numB);
     const steps = [];
-    const da = [...digs(numA)], db = digs(numB);
-    const maxC = colCount;
-
-    {
-      // Kompletteringsmetoden
-      const effA = [...da];
-      for (let c = 0; c < maxC; c++) {
-        steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
-        if (effA[c] < db[c]) {
-          const diff = db[c] - effA[c];
-          const isDouble = c + 1 < maxC && effA[c+1] === 0 && c + 2 < maxC;
-          steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant',
-            col:c, a:effA[c], b:db[c] });
-          if (isDouble) {
-            // Mellanlån H → T (separat steg, T visar nytt värde)
-            steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1,
-              srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
-            effA[c+2]--; effA[c+1] += 10;
-          }
-          // sub_flip + T→E lån i ETT steg
-          steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff,
-            srcCol:c+1, srcNew:effA[c+1]-1 });
-          effA[c+1]--;
-          steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
-        } else {
-          steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
+    const effA = [...da];
+    for (let c = 0; c < colCount; c++) {
+      steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
+      if (effA[c] < db[c]) {
+        const diff = db[c] - effA[c];
+        const isDouble = c + 1 < colCount && effA[c+1] === 0 && c + 2 < colCount;
+        steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant',
+          col:c, a:effA[c], b:db[c] });
+        if (isDouble) {
+          // Mellanlån H → T (separat steg, T visar nytt värde)
+          steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1,
+            srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
+          effA[c+2]--; effA[c+1] += 10;
         }
+        // sub_flip + T→E lån i ETT steg
+        steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff,
+          srcCol:c+1, srcNew:effA[c+1]-1 });
+        effA[c+1]--;
+        steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
+      } else {
+        steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
       }
     }
     steps.push({ type:'done' });
     return steps;
+  }
+
+  function buildDemoSteps() {
+    if (mode === 'addition') {
+      return planAdditionColumns(numA, numB, colCount, { ...ADD_OPTS, difficulty });
+    }
+    return planSubtractionColumns(numA, numB, colCount);
   }
 
   /* ── Övningslägets vägval (spec §8) ─────────────────────────────────
@@ -3310,7 +3311,7 @@ const UppstallningGame = (() => {
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
-    __test: { planAdditionColumns, exColumnPlan },
+    __test: { planAdditionColumns, planSubtractionColumns, exColumnPlan },
   };
 })();
 

@@ -451,3 +451,71 @@ describe('vagvalet per kolumn', () => {
     expect(fel).toEqual([]);
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SUBTRAKTION — planSubtractionColumns
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Alla giltiga par per niva, uttommande, exakt som generatePair() drar dem
+   (js/uppstallning.js, subtraktionsgrenen i generatePair). Niva 4:s forsta
+   gren: hA 3–9, eA 1–4, a = hA·100 + eA; hB 1..hA−1, tB 1–5, eB = min(eA+3+r, 9)
+   med r 0–4. Andra grenen: a 300–899, b 150–449, a > b och minst ett lan.
+   colCount ar 3 nar numA >= 100, annars 2 (generatePair, sista raden). */
+function subPar() {
+  const par = [];
+  const cc = a => a >= 100 ? 3 : 2;
+  const hasBorrow = (a, b) => (a % 10) < (b % 10) || (Math.floor(a/10) % 10) < (Math.floor(b/10) % 10);
+  for (let a = 5; a <= 20; a++) for (let b = 1; b <= a - 1; b++) par.push([1, a, b, cc(a)]);
+  for (let a = 30; a <= 99; a++) for (let b = 10; b <= 29; b++) if (a > b) par.push([2, a, b, cc(a)]);
+  for (let a = 100; a <= 198; a++) for (let b = 10; b <= 99; b++) if (a - b >= 1 && a - b <= 99) par.push([3, a, b, 3]);
+  for (let hA = 3; hA <= 9; hA++) for (let eA = 1; eA <= 4; eA++) {
+    const a = hA * 100 + eA;
+    for (let hB = 1; hB <= hA - 1; hB++) for (let tB = 1; tB <= 5; tB++) for (let r = 0; r <= 4; r++) {
+      const b = hB * 100 + tB * 10 + Math.min(eA + 3 + r, 9);
+      if (a > b) par.push([4, a, b, 3]);
+    }
+  }
+  for (let a = 300; a <= 899; a++) for (let b = 150; b <= 449; b++) if (a > b && hasBorrow(a, b)) par.push([4, a, b, 3]);
+  return par;
+}
+
+const { planSubtractionColumns } = require('../js/uppstallning.js').__test;
+
+/* Referens: dagens buildDemoSteps-gren for subtraktion, verbatim, fore
+   utbrytningen (js/uppstallning.js:853–890 pa dev). */
+function referensSub(numA, numB, colCount) {
+  const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
+  const da = digs(numA), db = digs(numB), steps = [];
+  const effA = [...da];
+  for (let c = 0; c < colCount; c++) {
+    steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
+    if (effA[c] < db[c]) {
+      const diff = db[c] - effA[c];
+      const isDouble = c + 1 < colCount && effA[c+1] === 0 && c + 2 < colCount;
+      steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant', col:c, a:effA[c], b:db[c] });
+      if (isDouble) {
+        steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1, srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
+        effA[c+2]--; effA[c+1] += 10;
+      }
+      steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff, srcCol:c+1, srcNew:effA[c+1]-1 });
+      effA[c+1]--;
+      steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
+    } else {
+      steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
+    }
+  }
+  steps.push({ type:'done' });
+  return steps;
+}
+
+describe('planSubtractionColumns — karakterisering av dagens beteende', () => {
+  it('ger identisk steglista som referensen for alla giltiga par i alla fyra nivaerna', () => {
+    const avvikelser = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      if (JSON.stringify(planSubtractionColumns(a, b, cc)) !== JSON.stringify(referensSub(a, b, cc))) {
+        avvikelser.push(`niva ${niva}: ${a}-${b}`);
+      }
+    }
+    expect(avvikelser).toEqual([]);
+  });
+});
