@@ -857,8 +857,23 @@ const UppstallningGame = (() => {
     const da = digs(numA), db = digs(numB);
     const steps = [];
     const effA = [...da];
+    /* A4 (granskning 21/9): ingen skriver 045 på papper. En kolumn där både
+       talen är tomma får inget steg alls, och när resten av svaret är 0 skrivs
+       ingen siffra — har kolumnen ändå siffror (30 − 29: 2 − 2) får den ett
+       eget steg som SÄGER att det inte blir någon siffra, så att barnet inte
+       lär sig hoppa över kolumner som har något i sig. Entalen skrivs alltid. */
+    const lenA = String(numA).length, lenB = String(numB).length;
+    const rest = c => Math.floor((numA - numB) / Math.pow(10, c));
     for (let c = 0; c < colCount; c++) {
-      steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
+      if (c >= lenA && c >= lenB) break;
+      const bEmpty = c >= lenB;
+      if (c > 0 && rest(c) === 0) {
+        if (bEmpty) break;
+        steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
+        steps.push({ type:'sub_zero_lead', col:c, a:effA[c], b:db[c] });
+        continue;
+      }
+      steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c], ...(bEmpty ? { bEmpty:true } : {}) });
       if (effA[c] < db[c]) {
         const diff = db[c] - effA[c];
         const isDouble = c + 1 < colCount && effA[c+1] === 0 && c + 2 < colCount;
@@ -876,7 +891,7 @@ const UppstallningGame = (() => {
         effA[c+1]--;
         steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
       } else {
-        steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
+        steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c], ...(bEmpty ? { bEmpty:true } : {}) });
       }
     }
     steps.push({ type:'done' });
@@ -904,6 +919,8 @@ const UppstallningGame = (() => {
     'add_lift', 'add_memjoin', 'add_need', 'add_lend',
     'add_ten', 'add_ten_named', 'add_return', 'add_sum',
     'tf_pair', 'add_carry_fly',
+    /* A4: ledande nolla i subtraktion — visas, inget svar krävs. */
+    'sub_zero_lead',
   ]);
 
   /* Ren klassning av EN kolumn: vilket av de fyra fallen den är, och vilka
@@ -942,9 +959,27 @@ const UppstallningGame = (() => {
         kind,                      /* 'simple' | 'exact10' | 'complement' | 'tenPlusRest' */
         queue,                     /* demo-stegen, i ordning; exTenPhase[c] är index i den */
         resultStep:      resultStep  || null,
+        /* A4: en kolumn utan steg finns inte på pappret (8 − 3: tiotalet) och
+           en ledande nolla (30 − 29: tiotalet) får inget svar — övningen får
+           aldrig fråga efter en 0:a där. */
+        skip:            !steps.some(s => s.col === c),
+        noAnswer:        steps.some(s => s.type === 'sub_zero_lead' && s.col === c),
       };
     }
     return result;
+  }
+
+  /* Nästa kolumn som övningen ska stanna i, eller -1 när uppgiften är klar.
+     Kolumner som inte finns på pappret hoppas över utan att nämnas. */
+  function exNextCol(from) {
+    for (let c = from + 1; c < colCount; c++) if (!exColData[c]?.skip) return c;
+    return -1;
+  }
+
+  function exProceedFrom(col) {
+    const next = exNextCol(col);
+    if (next < 0) exCheckDone();
+    else advanceToColumn(next);
   }
 
   /* ── Render demo-vy ─────────────────────────────────────── */
@@ -1516,6 +1551,13 @@ const UppstallningGame = (() => {
         setTimeout(cb, 700);
       }, 300);
 
+    /* A4: kolumnen har siffror men svaret är en ledande nolla (30 − 29).
+       Ingen siffra skrivs — steget finns för att SÄGA det. */
+    } else if (step.type === 'sub_zero_lead') {
+      highlightCol(step.col);
+      ['a', 'b'].forEach(r => pop(upDw(r, step.col), 300));
+      setTimeout(cb, 900);
+
     } else {
       cb();
     }
@@ -1641,7 +1683,10 @@ const UppstallningGame = (() => {
     } else if (step.type === 'sub_highlight') {
       const ck = COL_KEYS[step.col];
       const colName = step.col === 0 ? 'E (ental)' : step.col === 1 ? 'T (tiotal)' : 'H (hundratal)';
-      if (step.a >= step.b) {
+      if (step.bEmpty) {
+        /* A4: undre cellen är tom — då finns inget "− 0" att läsa upp. */
+        html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong>:an står ensam — inget att ta bort.`;
+      } else if (step.a >= step.b) {
         html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — det går! ✅`;
       } else {
         html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — hmm...`;
@@ -1669,7 +1714,12 @@ const UppstallningGame = (() => {
       html = `<strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong> ✅`;
     } else if (step.type === 'sub_calc') {
       const ck = COL_KEYS[step.col];
-      html = `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+      html = step.bEmpty
+        ? `<strong style="color:${PVC[ck]}">${step.a}</strong>:an skrivs ner som den är.`
+        : `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+    } else if (step.type === 'sub_zero_lead') {
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> är 0 — här blir det ingen siffra.`;
     } else if (step.type === 'done') {
       html = `Klart! 🎉 ${numA} ${mode==='addition'?'+':'−'} ${numB} = <strong>${mode==='addition'?numA+numB:numA-numB}</strong>`;
     }
@@ -2503,6 +2553,15 @@ const UppstallningGame = (() => {
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStepNext()">
         Nästa steg <svg class="icn"><use href="#i-play"/></svg></button>`;
 
+    } else if (exColData[col]?.noAnswer) {
+      /* A4: ledande nolla — steget är visat, ingen siffra ska skrivas.
+         Vidare av sig själv; låset hindrar dubbla timers om vyn ritas om. */
+      ui.innerHTML = '';
+      if (!exInputLocked) {
+        exInputLocked = true;
+        setTimeout(() => { exInputLocked = false; exProceedFrom(col); }, 700);
+      }
+
     } else {
       // Metoden är genomgången (eller kolumnen gick direkt): visa numpad
       ui.innerHTML = `<div style="background:var(--glass-strong);border-radius:var(--radius-md);padding:12px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
@@ -2583,7 +2642,7 @@ const UppstallningGame = (() => {
       /* Kolumnindexet MÅSTE fångas här: allt nedan kan köra efter att
          advanceToColumn() flyttat exCurrentCol. */
       const col     = exCurrentCol;
-      const next    = col + 1;
+      const next    = exNextCol(col);
       const ansCell = document.getElementById(`ans-${colKey}`);
 
       const finish = () => {
@@ -2606,10 +2665,7 @@ const UppstallningGame = (() => {
           }, 400);
         }
         smallBurst();
-        const proceed = () => {
-          if (next >= colCount) exCheckDone();
-          else advanceToColumn(next);
-        };
+        const proceed = () => exProceedFrom(col);
         if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]
             && col < colCount - 1) {
           // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det.
@@ -2628,7 +2684,7 @@ const UppstallningGame = (() => {
             const ui = document.getElementById('ex-col-ui');
             if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnessiffran för att stryka den!</div>`;
           }, 700);
-        } else if (next >= colCount) {
+        } else if (next < 0) {
           setTimeout(exCheckDone, 900);
         } else {
           setTimeout(() => advanceToColumn(next), 400);
@@ -3066,7 +3122,9 @@ const UppstallningGame = (() => {
     const dr = digs(mode === 'addition' ? numA + numB : numA - numB);
     let correct = true;
     for (let c = 0; c < colCount; c++) {
-      if (exAnswers[c] !== dr[c]) { correct = false; break; }
+      /* A4: en kolumn utan svar (tom på pappret, eller en ledande nolla)
+         står som null — det ÄR rätt när siffran där är 0. */
+      if ((exAnswers[c] ?? 0) !== dr[c]) { correct = false; break; }
     }
     if (correct) { if (!skipScore) exScore++; App.Sound.play('correct'); smallBurst(); }
     else App.Sound.play('wrong');

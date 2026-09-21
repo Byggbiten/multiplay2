@@ -508,14 +508,77 @@ function referensSub(numA, numB, colCount) {
   return steps;
 }
 
+/* Svaret som steglistan skriver: en siffra per kolumn ur sub_ten_minus.ans
+   eller sub_calc.diff, last fran hogsta kolumnen med svar ned till entalen.
+   Strangen (inte talet) jamfors — "045" ar inte "45" pa papper. */
+function subSvar(steps) {
+  const siffror = [];
+  for (const s of steps) {
+    if (s.type === 'sub_ten_minus') siffror[s.col] = s.ans;
+    if (s.type === 'sub_calc')      siffror[s.col] = s.diff;
+  }
+  let str = '';
+  for (let c = siffror.length - 1; c >= 0; c--) str += (siffror[c] ?? '·');
+  return str;
+}
+
 describe('planSubtractionColumns — karakterisering av dagens beteende', () => {
-  it('ger identisk steglista som referensen for alla giltiga par i alla fyra nivaerna', () => {
+  /* A4 (granskning 21/9) andrade regeln for ledande nollor. Referensen
+     galler darfor bara for par dar svaret fyller alla kolumner — dar ska
+     ingenting ha andrats. */
+  it('ger identisk steglista som referensen nar ingen ledande nolla uppstar', () => {
     const avvikelser = [];
+    /* bEmpty ar ett avsiktligt nytt falt (A4): bubblan ska inte saga "3 − 0"
+       nar undre cellen ar tom. Sjalva stegen och deras ordning ar oforandrade. */
+    const utanBEmpty = steps => steps.map(({ bEmpty, ...s }) => s);
     for (const [niva, a, b, cc] of subPar()) {
-      if (JSON.stringify(planSubtractionColumns(a, b, cc)) !== JSON.stringify(referensSub(a, b, cc))) {
+      if (String(a - b).length !== cc) continue;
+      if (JSON.stringify(utanBEmpty(planSubtractionColumns(a, b, cc))) !== JSON.stringify(referensSub(a, b, cc))) {
         avvikelser.push(`niva ${niva}: ${a}-${b}`);
       }
     }
     expect(avvikelser).toEqual([]);
+  });
+});
+
+/* ── A4: ledande nolla ────────────────────────────────────────────────────
+   100 − 55 skrevs "0 4 5", 8 − 3 skrevs "0 5". Kolumner utan siffror ska
+   inte fa ett svar, och svaret ur steglistan ska vara a − b utan ledande
+   nollor — for ALLA giltiga par i alla fyra nivaerna.                     */
+describe('A4: ledande nolla', () => {
+  it('svaret ur steglistan ar a − b utan ledande nollor, alla nivaer', () => {
+    const fel = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      const fick = subSvar(planSubtractionColumns(a, b, cc));
+      if (fick !== String(a - b)) fel.push(`niva ${niva}: ${a}-${b} gav ${fick}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('ingen kolumn utan siffror far nagot steg alls', () => {
+    const fel = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      const lenA = String(a).length;
+      for (const s of planSubtractionColumns(a, b, cc)) {
+        if (s.col !== undefined && s.col >= lenA) fel.push(`niva ${niva}: ${a}-${b} kol ${s.col} ${s.type}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('100 − 55: hundratalet far inget svar; 8 − 3: tiotalet far inget steg', () => {
+    const h = planSubtractionColumns(100, 55, 3).filter(s => s.col === 2).map(s => s.type);
+    expect(h).toEqual([]);
+    const t = planSubtractionColumns(8, 3, 2).filter(s => s.col === 1).map(s => s.type);
+    expect(t).toEqual([]);
+  });
+
+  it('30 − 29: tiotalet har siffror men blir en ledande nolla — eget steg utan svar', () => {
+    const t = planSubtractionColumns(30, 29, 2).filter(s => s.col === 1).map(s => s.type);
+    expect(t).toEqual(['sub_highlight', 'sub_zero_lead']);
+  });
+
+  it('entalen far alltid ett svar, aven nar a === b', () => {
+    expect(subSvar(planSubtractionColumns(7, 7, 2))).toBe('0');
   });
 });
