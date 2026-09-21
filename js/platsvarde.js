@@ -334,11 +334,23 @@ const PlatsvardeGame = (() => {
         .pv-card { background:var(--glass-strong); border-radius:var(--radius-lg); padding:10px;
           border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); }
         .pv-digit-row { display:flex; justify-content:center; gap:10px; margin:8px 0; }
+        /* A1-rutorna är NEUTRALA tills svaret är givet: ingen etikett, ingen
+           positionsfärg — annars blir uppgiften ordmatchning (granskning B4).
+           .revealed slår på färg + etikett; etiketten står i --deep på en
+           tonad yta, 14 px, så färgen bär ramen och inte brödtexten (C5). */
         .pv-digit-box { display:flex; flex-direction:column; align-items:center; gap:4px; width:clamp(52px,10vw,80px);
           border-radius:var(--radius-lg); padding:10px 0; cursor:pointer;
-          transition:transform 0.25s var(--spring),box-shadow 0.25s;
-          border-width:2.5px; border-style:solid; }
+          transition:transform 0.25s var(--spring),box-shadow 0.25s,border-color 0.3s;
+          border:2.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          background:var(--glass-strong); }
         .pv-digit-box:hover { transform:scale(1.08); box-shadow:0 8px 20px var(--glow); }
+        .pv-digit-box .pv-dg { font-size:2.5rem; font-weight:900; line-height:1; color:var(--deep);
+          transition:color 0.3s; }
+        .pv-digit-box .pv-dl { font-size:14px; font-weight:800; color:var(--deep); line-height:1.3;
+          padding:1px 8px; border-radius:var(--radius-full); opacity:0; transition:opacity 0.3s; }
+        .pv-digit-box.revealed { border-color:var(--pvc); }
+        .pv-digit-box.revealed .pv-dg { color:var(--pvc); }
+        .pv-digit-box.revealed .pv-dl { opacity:1; background:color-mix(in srgb, var(--pvc) 18%, #fff); }
         .pv-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
         .pv-choice-btn { padding:10px; border-radius:var(--radius-md); background:var(--glass-strong);
           border:2px solid color-mix(in srgb, var(--accent) 22%, transparent); color:var(--deep);
@@ -483,11 +495,10 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-digit-row">
           ${['hundratal','tiotal','ental'].map((pos, i) => `
-            <button class="pv-digit-box" id="pv-digit-${pos}"
-              style="background:rgba(0,0,0,0.03);border-color:${PV_COLORS[pos]}"
+            <button class="pv-digit-box" id="pv-digit-${pos}" style="--pvc:${PV_COLORS[pos]}"
               onclick="PlatsvardeGame.handleDigitClick('${pos}')">
-              <span style="font-size:2.5rem;font-weight:900;color:${PV_COLORS[pos]};line-height:1">${s[i]}</span>
-              <span style="font-size:10px;font-weight:800;color:${PV_COLORS[pos]}">${POS_LABELS[pos]}</span>
+              <span class="pv-dg">${s[i]}</span>
+              <span class="pv-dl">${POS_LABELS[pos]}</span>
             </button>
           `).join('')}
         </div>
@@ -713,6 +724,7 @@ const PlatsvardeGame = (() => {
     const btn = document.getElementById(`pv-digit-${pos}`);
     if (isCorrect) {
       lockDigitBoxes();
+      revealDigitPositions();
       if (btn) btn.style.background = 'rgba(34,197,94,0.25)';
     } else if (btn) {
       /* Fel: BARA den tryckta rutan dämpas och låses — de andra förblir
@@ -731,12 +743,21 @@ const PlatsvardeGame = (() => {
     });
   }
 
+  /* Först när svaret är givet får rutorna sin positionsfärg och etikett. */
+  function revealDigitPositions() {
+    ['hundratal', 'tiotal', 'ental'].forEach(p => {
+      const b = document.getElementById(`pv-digit-${p}`);
+      if (b) b.classList.add('revealed');
+    });
+  }
+
   /* Facit efter två fel: svaret landar i frågans egna rutor och står kvar
      tills barnet trycker Nästa (granskning B6). */
   function revealAnswer() {
     const q = currentQ;
     if (q.type === 'A1') {
       lockDigitBoxes();
+      revealDigitPositions();
       const t = document.getElementById(`pv-digit-${q.target}`);
       if (t) { t.style.background = 'rgba(34,197,94,0.25)'; t.style.opacity = '1'; }
     }
