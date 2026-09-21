@@ -67,3 +67,71 @@ describe('planAdditionColumns — karakterisering av dagens beteende', () => {
     expect(fel).toEqual([]);
   });
 });
+
+describe('storsta-talet-regeln', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+
+  it('32+29: 9:an fylls till 10, inte 2:an', () => {
+    const steps = planAdditionColumns(32, 29, 2, OPTS);
+    const explain = steps.find(s => s.type === 'add_explain' && s.col === 0);
+    expect(explain.growVal).toBe(9);
+    expect(explain.behover).toBe(1);
+    expect(explain.kvar).toBe(1);
+  });
+
+  it('47+35: oforandrat mot forr eftersom 7 redan ar storst', () => {
+    const steps = planAdditionColumns(47, 35, 2, OPTS);
+    const explain = steps.find(s => s.type === 'add_explain' && s.col === 0);
+    expect(explain.growVal).toBe(7);
+    expect(explain.behover).toBe(3);
+    expect(explain.kvar).toBe(2);
+  });
+
+  /* Undantaget: en exakt-10-kolumn (growVal + giveVal === 10, bada >= 1) lanar
+     ut HELA det mindre talet, sa kvar blir 0. Den kolumnen tar tiokompis-
+     genvagen och kor aldrig komplementvagen (spec kap 3b) — den byggs i
+     uppgift 3. Testet mater darfor invarianten utanfor den klassen, och
+     kontrollerar samtidigt att undantaget inte ar nagot annat. */
+  const arExaktTio = s => s.growVal >= 1 && s.giveVal >= 1 && s.growVal + s.giveVal === 10;
+
+  it('kvar blir alltid minst 1 nar behover ar minst 1 (utanfor exakt-10)', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      for (const s of planAdditionColumns(a, b, cc, OPTS)) {
+        if (s.type === 'add_explain' && s.behover >= 1 && s.kvar < 1 && !arExaktTio(s)) {
+          fel.push(`${a}+${b} kol ${s.col}`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('undantaget ar exakt-10-klassen och inget annat', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      for (const s of planAdditionColumns(a, b, cc, OPTS)) {
+        if (s.type === 'add_explain' && arExaktTio(s) && s.kvar !== 0) {
+          fel.push(`${a}+${b} kol ${s.col}: exakt-10 men kvar ${s.kvar}`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('summan ar fortfarande korrekt for alla par', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      const siffror = [];
+      for (const s of planAdditionColumns(a, b, cc, OPTS)) {
+        if (s.type === 'add_result' || s.type === 'add_simple') siffror[s.col] = s.ans;
+        if (s.type === 'add_overflow') siffror[cc] = s.digit;
+      }
+      const summa = Number(siffror.map(d => d ?? 0).reverse().join(''));
+      if (summa !== a + b) fel.push(`${a}+${b} gav ${summa}`);
+    }
+    expect(fel).toEqual([]);
+  });
+});

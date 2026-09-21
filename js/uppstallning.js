@@ -59,7 +59,7 @@ const UppstallningGame = (() => {
   const LOG_KEY    = id => `uppstallning_log_${id}`;
 
   /* Additionens pedagogiska vägval. Ändras i uppgift 2. */
-  const ADD_OPTS = { compTo: 'oversta', memTo: 'oversta' };
+  const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
   /* ── CSS (injected once per view) ──────────────────────── */
   const BASE_CSS = `
@@ -498,7 +498,9 @@ const UppstallningGame = (() => {
   /* Ren, testbar stegbyggare för addition. Läser inget modultillstånd. */
   function planAdditionColumns(numA, numB, colCount, opts) {
     const o = Object.assign({ compTo: 'oversta', memTo: 'oversta' }, opts || {});
-    void o; // vägvalen används från uppgift 2
+    /* Gamla vägen (båda 'oversta') ska ge EXAKT dagens steglista — samma fält,
+       samma ordning. Därför bär bara den nya vägen §2.3:s extrafält. */
+    const legacy = (o.compTo === 'oversta' && o.memTo === 'oversta');
     /* Samma siffersplit som modulens digs(): [ental, tiotal, hundratal] */
     const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
     const da = digs(numA), db = digs(numB);
@@ -506,21 +508,39 @@ const UppstallningGame = (() => {
     let carryVal = 0;
     for (let c = 0; c < colCount; c++) {
       const a = da[c], b = db[c];
-      const effectiveA = a + carryVal;
-      const sum = effectiveA + b;
+      /* 1. MINNET går till en av termerna (spec §2.1). */
+      const memRow   = (carryVal && o.memTo === 'storsta' && b > a) ? 'b' : 'a';
+      const memDigit = (memRow === 'a') ? a : b;
+      const memNew   = memDigit + carryVal;
+      const valA = a + (memRow === 'a' ? carryVal : 0);
+      const valB = b + (memRow === 'b' ? carryVal : 0);
+      /* 2. KOMPLEMENTET fyller ett av talen till 10 (spec §2.1). */
+      const growRow = (o.compTo === 'storsta' && valB > valA) ? 'b' : 'a';
+      const giveRow = (growRow === 'a') ? 'b' : 'a';
+      const growVal = (growRow === 'a') ? valA : valB;
+      const giveVal = (growRow === 'a') ? valB : valA;
+      const effectiveA = growVal;
+      const sum = valA + valB;
       const ans = sum % 10;
       const nextCarry = sum > 9 ? 1 : 0;
       steps.push({ type:'add_highlight', col:c });
       if (sum > 9) {
         const behover = 10 - effectiveA;
-        const kvar = b - behover;
-        steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
-        steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal,
-                     effectiveA, behover, kvar, ans, nextCarry });
-        steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal,
-                     effectiveA, behover, kvar, ans, nextCarry });
+        const kvar = giveVal - behover;
+        /* §2.3: de nya stegen bär hela base-objektet. */
+        const base = { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar,
+                       ans, nextCarry, sum, growRow, giveRow, growVal, giveVal,
+                       valA, valB, memRow, memDigit, memNew };
+        const P = legacy
+          ? { over9:  { col:c, a, b, carry_in:carryVal, sum, effectiveA },
+              full:   { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry },
+              result: { col:c, a, b, kvar, ans, nextCarry } }
+          : { over9: base, full: base, result: base };
+        steps.push({ type:'add_over9', ...P.over9 });
+        steps.push({ type:'add_explain', ...P.full });
+        steps.push({ type:'add_cross', ...P.full });
         steps.push({ type:'add_carry_fly', col:c, nextCarry });
-        steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
+        steps.push({ type:'add_result', ...P.result });
       } else {
         steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
       }
