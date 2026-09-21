@@ -61,6 +61,12 @@ const UppstallningGame = (() => {
   /* Additionens pedagogiska vägval. Ändras i uppgift 2. */
   const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
+  /* Tiokompis-villkoret (spec §3b = mockup:301). Båda termerna måste vara
+     minst 1 — annars är det ingen tiokompis, utan en tia som redan står där. */
+  function isExactTen(growVal, giveVal) {
+    return growVal + giveVal === 10 && growVal >= 1 && giveVal >= 1;
+  }
+
   /* ── CSS (injected once per view) ──────────────────────── */
   const BASE_CSS = `
     /* Helskärmslayout – överskriver app.css max-width */
@@ -326,6 +332,56 @@ const UppstallningGame = (() => {
       0%,100% { box-shadow:0 0 6px rgba(220,38,38,0.35); }
       50%      { box-shadow:0 0 18px rgba(220,38,38,0.85); }
     }
+
+    /* ══ Tiokompis-genvägen — spec §5.2, verbatim ur mockupen ══ */
+
+    /* Kapseln kring paret (mockup:544–551) */
+    .tk-capsule{position:absolute;z-index:6;pointer-events:none;
+      border-radius:22px;border:3px solid #7c3aed;
+      background:rgba(255,255,255,0.42);
+      box-shadow:0 6px 20px rgba(124,58,237,0.26), inset 0 0 0 6px rgba(250,204,21,0.9);
+      animation:tk-cap-in .38s var(--spring) both;}
+    @keyframes tk-cap-in{0%{transform:scale(.82);opacity:0;}65%{transform:scale(1.04);opacity:1;}
+      100%{transform:scale(1);opacity:1;}}
+    .tk-capsule.fading{transition:opacity .35s var(--smooth);opacity:0;}
+
+    /* Summebrickan (mockup:554–563, 570–579, 588) */
+    .tk-badge{position:absolute;z-index:8;pointer-events:none;display:flex;align-items:center;
+      gap:1px;padding:4px 12px;border-radius:var(--radius-full);
+      background:linear-gradient(135deg,#7c3aed,#a78bfa);
+      box-shadow:0 7px 20px rgba(124,58,237,.45), inset 0 1px 0 rgba(255,255,255,.35);
+      font-family:var(--font-head);font-weight:800;font-size:1.5rem;color:#fff;line-height:1;
+      animation:tk-badge-in .35s var(--spring) both;}
+    @keyframes tk-badge-in{0%{transform:scale(.4);opacity:0;}65%{transform:scale(1.16);opacity:1;}
+      100%{transform:scale(1);opacity:1;}}
+    .tk-badge .tk-d{display:inline-block;transition:opacity .18s var(--smooth);}
+    .tk-badge .tk-d.gone{opacity:0;width:0;overflow:hidden;}
+    .tk-badge.badge-blue{background:linear-gradient(135deg,#3b82f6,#93c5fd);
+      box-shadow:0 7px 20px rgba(59,130,246,.45), inset 0 1px 0 rgba(255,255,255,.35);}
+    .tk-badge.badge-green{background:linear-gradient(135deg,#22c55e,#86efac);
+      box-shadow:0 7px 20px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.35);}
+    .tk-badge.badge-red{background:linear-gradient(135deg,#ef4444,#fca5a5);
+      box-shadow:0 7px 20px rgba(239,68,68,.45), inset 0 1px 0 rgba(255,255,255,.35);}
+    .tk-badge.fading{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
+      opacity:0;transform:scale(.7);}
+    .tk-badge.tk-sum{min-width:62px;justify-content:center;}
+
+    /* Flygande siffror (mockup:581–585) */
+    .tk-fly{position:absolute;z-index:22;pointer-events:none;display:grid;place-items:center;
+      font-family:var(--font-head);font-weight:800;line-height:1;}
+    .tk-fly.fly-fixed{position:fixed;z-index:40;}
+    .tk-badge.fly-fixed{position:fixed;z-index:40;}
+
+    /* Avläsningspulsen och pulsarna (mockup:592–605) */
+    @keyframes nf-read-glow{
+      0%,100%{ text-shadow:none; }
+      45%{ text-shadow:0 0 9px currentColor, 0 0 3px currentColor; }
+    }
+    .dw.tk-pop{animation:tk-pop .3s var(--spring) both;}
+    @keyframes tk-pop{0%{transform:scale(1);}45%{transform:scale(1.34);}100%{transform:scale(1);}}
+    .carry-cell .mem-digit.tk-blink{animation:tk-blink .4s ease-in-out both;}
+    @keyframes tk-blink{0%,100%{transform:rotate(-4deg) scale(1);}
+      50%{transform:rotate(-4deg) scale(1.45);}}
   `;
 
   /* ── Init ───────────────────────────────────────────────── */
@@ -536,11 +592,19 @@ const UppstallningGame = (() => {
               full:   { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry },
               result: { col:c, a, b, kvar, ans, nextCarry } }
           : { over9: base, full: base, result: base };
-        steps.push({ type:'add_over9', ...P.over9 });
-        steps.push({ type:'add_explain', ...P.full });
-        steps.push({ type:'add_cross', ...P.full });
-        steps.push({ type:'add_carry_fly', col:c, nextCarry });
-        steps.push({ type:'add_result', ...P.result });
+        if (!legacy && isExactTen(growVal, giveVal)) {
+          /* Tiokompis-genvägen (spec §3b): ingen tankeruta, ingen strykning.
+             Att ceremonin uteblir ÄR beskedet "den här såg du direkt". */
+          steps.push({ type:'tf_pair', ...base });
+          steps.push({ type:'add_carry_fly', ...base, tf:true, chip:true });
+          steps.push({ type:'add_result', ...base, tf:true, chip:true });
+        } else {
+          steps.push({ type:'add_over9', ...P.over9 });
+          steps.push({ type:'add_explain', ...P.full });
+          steps.push({ type:'add_cross', ...P.full });
+          steps.push({ type:'add_carry_fly', col:c, nextCarry });
+          steps.push({ type:'add_result', ...P.result });
+        }
       } else {
         steps.push({ type:'add_simple', col:c, a, b, carry_in:carryVal, sum, ans });
       }
@@ -674,6 +738,32 @@ const UppstallningGame = (() => {
       highlightCol(step.col);
       setTimeout(cb, 50);
 
+    /* ── Tiokompis-steget (spec §4.2) ──────────────────────────
+       Ordningen är hela poängen:
+       (1) minnet blinkar där siffran kom ifrån (bara om carry_in)
+       (2) BÅDA siffrorna pulsar samtidigt + kapseln ritas
+       (3) 10-brickan framträder SIST — slutsatsen, inte premissen  */
+    } else if (step.type === 'tf_pair') {
+      highlightCol(step.col);
+      let t0 = 0;
+      if (step.carry_in) {
+        const cell = upCarry(step.col);
+        const md = cell && cell.querySelector('.mem-digit');
+        if (md) { md.style.animationDuration = Ts(400); md.classList.add('tk-blink'); }
+        t0 = 400;
+      }
+      after(t0, () => {
+        ['a', 'b'].forEach(r => {
+          const dw = upDw(r, step.col);
+          if (dw) { dw.style.animationDuration = Ts(300); dw.classList.add('tk-pop'); }
+        });
+        drawCapsule(step.col);
+      });
+      /* Även här stiger summan ur det som står skrivet — siffrorna är
+         ostrukna, men de ÄR pappret, och 10 är vad de säger ihop. */
+      after(t0 + 400, () => riseSumChip(step.col, step.sum, paperSources(step.col), null));
+      after(t0 + 1560, cb);
+
     } else if (step.type === 'add_over9') {
       highlightCol(step.col);
       const colKey = COL_KEYS[step.col];
@@ -723,17 +813,47 @@ const UppstallningGame = (() => {
 
     } else if (step.type === 'add_carry_fly') {
       if (step.nextCarry && step.col + 1 < colCount) {
-        animateCarryToken(step.col, step.col + 1, () => {
-          demoCarries[step.col + 1] = 1;
-          updateCarryRow();
-          setTimeout(cb, 300);
-        });
+        if (step.chip) {
+          /* Summans 1:a hör hemma i nästa kolumn — den lämnar brickan och
+             åker dit. Ingen förvandling behövs: den ÄR redan en 1:a.
+             Pappret under rörs inte (spec §4.11). */
+          const sc = upSumChip();
+          const d1 = sc && sc.querySelector('.sum-tens');
+          flyBadgeDigit(d1, upCarry(step.col + 1), {
+            dur: 700, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+            fontSize: '1.5rem', color: '#ffffff', endColor: '#dc2626',
+            endTransform: 'rotate(-4deg) scale(0.86)', sound: true
+          }, () => {
+            demoCarries[step.col + 1] = 1;
+            updateCarryRow();
+            after(450, cb);
+          });
+        } else {
+          animateCarryToken(step.col, step.col + 1, () => {
+            demoCarries[step.col + 1] = 1;
+            updateCarryRow();
+            setTimeout(cb, 300);
+          });
+        }
       } else {
         setTimeout(cb, 100);
       }
 
     } else if (step.type === 'add_result') {
       highlightCol(step.col);
+      if (step.chip) {
+        /* Den högra siffran åker ner i svaret och BLIR svarssiffran (spec §4.12). */
+        if (step.tf) {
+          /* Exakt-10-fallets kapsel har gjort sitt när paret lämnat. */
+          after(150, () => {
+            const cap = upCaps();
+            if (cap) cap.classList.add('fading');
+            after(350, () => { if (cap) cap.remove(); });
+          });
+        }
+        flyChipToAnswer(upSumChip(), step.col, step.ans, cb);
+        return;
+      }
       const colKey = COL_KEYS[step.col];
       setTimeout(() => {
         const ansCell = document.getElementById(`ans-${colKey}`);
@@ -963,11 +1083,31 @@ const UppstallningGame = (() => {
       } else {
         html = `Vi stryker och skriver om: <span style="color:${PVC[ck]}">${step.b}</span> → <strong>${step.kvar}</strong>, <span style="color:${PVC[ck]}">${step.a}</span> → <strong>10</strong> (<span style="color:${PVC[ck]}">${step.a}</span> + <strong>${step.behover}</strong> lån = 10) ✏️`;
       }
+    } else if (step.type === 'tf_pair') {
+      /* Spec §3b, verbatim ur mockup:1898–1906. */
+      const ck = COL_KEYS[step.col];
+      if (step.carry_in) {
+        html = `<span style="color:${PVC[ck]}">${step.memDigit}</span> plus minnet <span style="color:#d97706">${step.carry_in}</span> är <strong>${step.memNew}</strong>. Och <strong style="color:${PVC[ck]}">${step.valA}</strong> och <strong style="color:${PVC[ck]}">${step.valB}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
+      } else {
+        html = `<strong style="color:${PVC[ck]}">${step.a}</strong> och <strong style="color:${PVC[ck]}">${step.b}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
+      }
     } else if (step.type === 'add_carry_fly') {
-      html = `1:an skrivs som minnessiffra här 👇`;
+      /* Summans vänstra siffra ÄR redan en 1:a — inget att förklara. */
+      if (step.chip) {
+        html = (step.nextCarry && step.col + 1 < colCount)
+          ? `<strong style="color:#d97706">1</strong>:an åker upp som minne. 👆`
+          : `<strong style="color:#d97706">1</strong>:an skrivs längst till vänster. 👆`;
+      } else {
+        html = `1:an skrivs som minnessiffra här 👇`;
+      }
     } else if (step.type === 'add_result') {
       const ck = COL_KEYS[step.col];
-      html = `Kvar blir <strong style="color:${PVC[ck]}">${step.kvar}</strong>. 10:an skickades upp som minnessiffra! ✅`;
+      if (step.chip) {
+        /* Summans högra siffra hör hemma i kolumnen — den åker dit. */
+        html = `<strong style="color:${PVC[ck]}">${step.ans}</strong>:an åker ner i svaret. ✅`;
+      } else {
+        html = `Kvar blir <strong style="color:${PVC[ck]}">${step.kvar}</strong>. 10:an skickades upp som minnessiffra! ✅`;
+      }
     } else if (step.type === 'add_simple') {
       const ck = COL_KEYS[step.col];
       if (step.a === 0 && step.b === 0 && step.carry_in) {
@@ -1185,6 +1325,242 @@ const UppstallningGame = (() => {
       token.style.transition += ',opacity 0.3s';
       setTimeout(() => { token.remove(); cb(); }, 350);
     }, 800);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TIOKOMPIS-GENVÄGEN — hjälpare (spec §4, mockupen är facit)
+     Appen har inget fartreglage, så after()/Ts() är setTimeout och
+     sekunder rakt av. De gör tiderna läsbara på ett ställe.
+  ══════════════════════════════════════════════════════════ */
+  const Ts    = ms => (ms / 1000).toFixed(3) + 's';
+  const after = (ms, fn) => setTimeout(fn, ms);
+
+  /* Uppslag mot appens id-schema (spec §5.3: id-schemat behålls). */
+  const upWrap    = () => document.getElementById('up-table-wrap');
+  const upCell    = (row, c) => document.getElementById(`cell-row-${row}-${COL_KEYS[c]}`);
+  const upDw      = (row, c) => document.getElementById(`dw-${row}-${COL_KEYS[c]}`);
+  const upAns     = c => document.getElementById(`ans-${COL_KEYS[c]}`);
+  const upCarry   = c => document.getElementById(`carry-${COL_KEYS[c]}`);
+  const upCaps    = () => document.querySelector('.tk-capsule');
+  const upSumChip = () => document.querySelector('.tk-badge[data-role="sum"]');
+
+  /* Retriggbar puls — klassen kan redan sitta kvar från ett tidigare steg. */
+  function pop(el, ms, cls) {
+    if (!el) return;
+    const k = cls || 'tk-pop';
+    el.classList.remove(k);
+    void el.offsetWidth;
+    el.style.animationDuration = Ts(ms || 300);
+    el.classList.add(k);
+  }
+
+  /* Svarssiffran skrivs — samma markup som de befintliga grenarna. */
+  function fillAnsCell(col, value, anim) {
+    const el = upAns(col);
+    if (!el) return;
+    const key = COL_KEYS[col];
+    el.innerHTML = `<span style="color:${PVC[key]};animation:${anim || 'drop-down 0.55s ease-out both'};display:inline-block">${value}</span>`;
+    el.classList.add('filled');
+    el.style.borderColor = PVC[key];
+    demoAns[col] = value;
+  }
+
+  /* Kapseln runt paret (mockup:1313–1329). */
+  function drawCapsule(col) {
+    const wrap = upWrap(), ca = upCell('a', col), cbEl = upCell('b', col);
+    if (!wrap || !ca || !cbEl) return null;
+    const wR = wrap.getBoundingClientRect();
+    const aR = ca.getBoundingClientRect(), bR = cbEl.getBoundingClientRect();
+    const pad = 7;
+    const cap = document.createElement('div');
+    cap.className = 'tk-capsule';
+    cap.style.left   = (aR.left - wR.left - pad) + 'px';
+    cap.style.top    = (aR.top  - wR.top  - pad) + 'px';
+    cap.style.width  = (aR.width + pad * 2) + 'px';
+    cap.style.height = ((bR.bottom - aR.top) + pad * 2) + 'px';
+    cap.style.animationDuration = Ts(380);
+    wrap.appendChild(cap);
+    return cap;
+  }
+
+  /* 10-brickans färg: låst till kolumnens platsvärdesfärg (mockup:1343–1348). */
+  function badgeColorClass(col) {
+    const key = COL_KEYS[col];
+    if (key === 'ental')     return 'badge-green';
+    if (key === 'hundratal') return 'badge-red';
+    return 'badge-blue';
+  }
+
+  /* PARKERINGSPLATSEN: fri marginal till höger om HELA tabellen — samma x
+     hela uppgiften igenom, så barnet slipper leta efter brickan. */
+  function rightMarginSpot(width) {
+    const wrap = upWrap();
+    const table = document.querySelector('.up-table');
+    if (!wrap || !table) return 2;
+    const wR = wrap.getBoundingClientRect(), tR = table.getBoundingClientRect();
+    const x = (tR.right - wR.left) + 8;
+    return Math.max(2, Math.min(x, wR.width - width - 4));
+  }
+
+  /* Summebrickan skapas parkerad i marginalen (mockup:1350–1372). */
+  function drawSumChip(col, sum) {
+    const wrap = upWrap(), ca = upCell('a', col), cbEl = upCell('b', col);
+    if (!wrap || !ca || !cbEl) return null;
+    document.querySelectorAll('.tk-badge[data-role="sum"]').forEach(e => e.remove());
+    const e = document.createElement('div');
+    e.className = 'tk-badge tk-sum ' + badgeColorClass(col);
+    e.dataset.role = 'sum';
+    e.dataset.col  = col;
+    e.innerHTML = `<span class="tk-d sum-tens">${Math.floor(sum / 10)}</span>` +
+                  `<span class="tk-d sum-ones">${sum % 10}</span>`;
+    e.style.animationDuration = Ts(350);
+    wrap.appendChild(e);
+    const wR = wrap.getBoundingClientRect();
+    const aR = ca.getBoundingClientRect(), bR = cbEl.getBoundingClientRect();
+    const bb = e.getBoundingClientRect();
+    e.style.left = rightMarginSpot(bb.width) + 'px';
+    e.style.top  = ((aR.top - wR.top) + ((bR.bottom - aR.top) / 2) - bb.height / 2) + 'px';
+    return e;
+  }
+
+  /* VAD SOM STÅR SKRIVET i kolumnen just nu, att läsa av. Efter en strykning
+     är det de små amber-siffrorna som gäller; i exakt-10-fallet står inget
+     struket, och då ÄR de två termerna pappret (mockup:1506–1512). */
+  function paperSources(col) {
+    return ['a', 'b'].map(r => {
+      const dw = upDw(r, col);
+      if (!dw) return null;
+      return dw.querySelector('.small-new-digit') || dw;
+    });
+  }
+
+  /* En KOPIA flyger, originalet står kvar (mockup:1191–1224).
+     opts.fixed: flyg i VYNS koordinater — absolutpositionerade barn i
+     #up-table-wrap räknas annars in i #up-lefts scrollHeight. */
+  function flyCopyIn(host, fromEl, toEl, text, opts, cb) {
+    const fixed = !!(opts && opts.fixed);
+    const wrap = fixed ? document.body : host;
+    if (!wrap || !fromEl || !toEl) { after(250, () => cb && cb()); return; }
+    const wR = fixed ? { left: 0, top: 0 } : host.getBoundingClientRect();
+    const sR = fromEl.getBoundingClientRect();
+    const dR = toEl.getBoundingClientRect();
+    const size = Math.max(28, Math.round(sR.height * 0.8));
+    const f = document.createElement('div');
+    f.className = 'tk-fly' + (fixed ? ' fly-fixed' : '');
+    f.textContent = text;
+    f.style.cssText = `left:${sR.left - wR.left + sR.width / 2 - size / 2}px;` +
+      `top:${sR.top - wR.top + sR.height / 2 - size / 2}px;` +
+      `width:${size}px;height:${size}px;` +
+      `font-size:${opts.fontSize};color:${opts.color};` +
+      `transition:left ${Ts(opts.dur)} ${opts.easing},` +
+      `top ${Ts(opts.dur)} ${opts.easing},` +
+      `opacity ${Ts(opts.dur)} linear,` +
+      `color ${Ts(opts.dur)} linear;`;
+    wrap.appendChild(f);
+    if (opts.sound) playCarrySound();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      f.style.left = `${dR.left - wR.left + dR.width / 2 - size / 2}px`;
+      f.style.top  = `${dR.top  - wR.top  + dR.height / 2 - size / 2}px`;
+      if (opts.endColor) f.style.color = opts.endColor;
+      if (opts.fade)     f.style.opacity = '0';
+    }));
+    after(opts.dur + 20, () => { f.remove(); cb && cb(); });
+  }
+
+  /* UR PAPPRET — summan läses av det som står skrivet. De skrivna siffrorna
+     pulsar, en avläsning färdas ut i marginalen, och DÄR formas brickan.
+     Siffrorna på pappret rörs aldrig: det är en avläsning, inte en flytt. */
+  function riseSumChip(col, sum, srcEls, cb) {
+    const chip = drawSumChip(col, sum);
+    if (!chip) { after(250, () => cb && cb()); return null; }
+    chip.style.animation = 'none';
+    chip.style.opacity = '0';
+    const src = srcEls.filter(Boolean);
+    src.forEach(el => { el.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`; });
+    after(200, () => {
+      src.forEach(el => {
+        flyCopyIn(document.body, el, chip, el.textContent.trim(), {
+          dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.2rem', color: '#d97706', endColor: PVC[COL_KEYS[col]], fade: true
+        }, null);
+      });
+    });
+    after(760, () => {
+      chip.style.opacity = '';
+      chip.style.animation = `tk-badge-in ${Ts(380)} cubic-bezier(0.34,1.3,0.4,1) both`;
+    });
+    after(1160, () => cb && cb());
+    return chip;
+  }
+
+  /* Summans vänstra siffra lämnar brickan och åker upp som minnessiffra
+     (mockup:1153–1183). Pappret under rörs inte. */
+  function flyBadgeDigit(digitEl, toEl, opts, cb) {
+    const wrap = upWrap();
+    if (!wrap || !digitEl || !toEl) { after(250, () => cb && cb()); return; }
+    const wR = wrap.getBoundingClientRect();
+    const sR = digitEl.getBoundingClientRect();
+    const dR = toEl.getBoundingClientRect();
+    const size = Math.max(26, sR.width + 12);
+    const f = document.createElement('div');
+    f.className = 'tk-fly';
+    f.textContent = digitEl.textContent;
+    f.style.cssText = `left:${sR.left - wR.left + sR.width / 2 - size / 2}px;` +
+      `top:${sR.top - wR.top + sR.height / 2 - size / 2}px;` +
+      `width:${size}px;height:${size}px;` +
+      `font-size:${opts.fontSize};color:${opts.color};` +
+      `transition:left ${Ts(opts.dur)} ${opts.easing},` +
+      `top ${Ts(opts.dur)} ${opts.easing},` +
+      `transform ${Ts(opts.dur)} ${opts.easing},` +
+      `color ${Ts(opts.dur)} linear;`;
+    wrap.appendChild(f);
+    digitEl.classList.add('gone');
+    if (opts.sound) playCarrySound();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      f.style.left = `${dR.left - wR.left + dR.width / 2 - size / 2}px`;
+      f.style.top  = `${dR.top  - wR.top  + dR.height / 2 - size / 2}px`;
+      if (opts.endColor) f.style.color = opts.endColor;
+      if (opts.endTransform) f.style.transform = opts.endTransform;
+    }));
+    after(opts.dur + 20, () => { f.remove(); cb && cb(); });
+  }
+
+  /* DEN HÖGRA SIFFRAN ÅKER NER I SVARET. Brickan KLONAS inte — samma element
+     flyttas, morfar till svarssiffrans utseende och förbrukas först när
+     siffran står i cellen (mockup:1374–1415). */
+  function flyChipToAnswer(chip, col, value, cb) {
+    const dst = upAns(col);
+    if (!chip || !dst) { after(250, () => cb && cb()); return; }
+    const sR = chip.getBoundingClientRect(), dR = dst.getBoundingClientRect();
+    const dur = 560;
+    chip.style.animation = 'none';
+    chip.classList.add('fly-fixed');
+    chip.style.left = sR.left + 'px';
+    chip.style.top  = sR.top  + 'px';
+    void chip.offsetWidth;
+    chip.style.transition = `left ${Ts(dur)} cubic-bezier(0.34,1.12,0.5,1),` +
+      `top ${Ts(dur)} cubic-bezier(0.34,1.12,0.5,1),` +
+      `background ${Ts(280)} var(--smooth),box-shadow ${Ts(280)} var(--smooth),` +
+      `color ${Ts(280)} var(--smooth),font-size ${Ts(280)} var(--smooth),` +
+      `min-width ${Ts(280)} var(--smooth),padding ${Ts(280)} var(--smooth)`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      chip.style.left = `${dR.left + dR.width / 2 - chip.offsetWidth / 2}px`;
+      chip.style.top  = `${dR.top  + dR.height / 2 - chip.offsetHeight / 2}px`;
+    }));
+    after(Math.round(dur * 0.55), () => {
+      chip.style.background = 'transparent';
+      chip.style.boxShadow  = 'none';
+      chip.style.color      = PVC[COL_KEYS[col]];
+      chip.style.padding    = '0';
+      chip.style.minWidth   = '0';
+      chip.style.fontSize   = '2.2rem';
+    });
+    after(dur + 40, () => {
+      fillAnsCell(col, value, `land-bounce-flex ${Ts(360)} ease-out both`);
+      chip.remove();                  /* förbrukad — siffran står i cellen */
+      App.Sound.play('correct');
+      after(420, () => cb && cb());
+    });
   }
 
   /* ── Tabell HTML ────────────────────────────────────────── */
@@ -1508,11 +1884,21 @@ const UppstallningGame = (() => {
         ansCell.classList.remove('active-col');
       }
       if (demoBorrowTens[exCurrentCol]) useBorrowTen(exCurrentCol);
-      if (mode === 'addition' && exColData[exCurrentCol].nextCarry && !exColData[exCurrentCol].needsTenFriend && exCurrentCol + 1 < colCount) {
+      /* Minnet från en kolumn som gick direkt. Kolumnindexet MÅSTE fångas här:
+         advanceToColumn() flyttar exCurrentCol redan efter 400 ms, medan
+         flygets callback kommer ~1,5 s senare — läste den exCurrentCol lade
+         den minnet i en kolumn som inte finns, och minnessiffran försvann.
+         Grenen var oåtkomlig före tiokompis-genvägen (varje kolumn med
+         summa > 9 hade needsTenFriend), så felet syntes aldrig förrän nu. */
+      const carryCol = exCurrentCol;
+      if (mode === 'addition' && exColData[carryCol].nextCarry && !exColData[carryCol].needsTenFriend && carryCol + 1 < colCount) {
         setTimeout(() => {
-          animateCarryToken(exCurrentCol, exCurrentCol + 1, () => {
-            demoCarries[exCurrentCol + 1] = 1;
+          animateCarryToken(carryCol, carryCol + 1, () => {
+            demoCarries[carryCol + 1] = 1;
             updateCarryRow();
+            /* Nästa kolumns fråga skrevs innan minnet landade — skriv om den,
+               annars står det "Vad är 4 + 3?" när svaret ska bli 8. */
+            if (exCurrentCol === carryCol + 1 && !exInputLocked) showExColUI(exCurrentCol);
           });
         }, 400);
       }

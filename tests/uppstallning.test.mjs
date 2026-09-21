@@ -135,3 +135,36 @@ describe('storsta-talet-regeln', () => {
     expect(fel).toEqual([]);
   });
 });
+
+describe('exakt-10-genvagen', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+
+  it('41+39: entalen far tf_pair, inga komplementsteg', () => {
+    const typer = planAdditionColumns(41, 39, 2, OPTS).filter(s => s.col === 0).map(s => s.type);
+    expect(typer).toContain('tf_pair');
+    expect(typer).not.toContain('add_explain');
+    expect(typer).not.toContain('add_cross');
+  });
+
+  it('41+39 ger 80', () => {
+    const siffror = [];
+    for (const s of planAdditionColumns(41, 39, 2, OPTS)) {
+      if (s.type === 'add_result' || s.type === 'add_simple') siffror[s.col] = s.ans;
+    }
+    expect(Number(siffror.reverse().join(''))).toBe(80);
+  });
+
+  it('ingen kolumn med bada termerna minst 1 och summa 10 kor komplementvagen', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      const steps = planAdditionColumns(a, b, cc, OPTS);
+      for (const s of steps) {
+        if (s.type === 'add_explain' && s.valA >= 1 && s.valB >= 1 && s.valA + s.valB === 10) {
+          fel.push(`${a}+${b} kol ${s.col}`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+});
