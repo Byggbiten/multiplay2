@@ -369,6 +369,19 @@ const PlatsvardeGame = (() => {
           font-weight:800; color:color-mix(in srgb, var(--accent) 45%, transparent); }
         .pv-slot.filled { background:color-mix(in srgb, var(--accent) 10%, transparent);
           border:2px solid var(--accent); color:var(--accent); cursor:pointer; }
+        /* Fel-/facitrutan: text + Nästa på samma rad, Nästa minst 44 pt hög. */
+        .pv-fb-wrong { display:flex; align-items:center; gap:8px;
+          background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
+          border-radius:var(--radius-md); padding:6px 6px 6px 12px;
+          font-size:var(--text-base); font-weight:700; color:#92400e; }
+        .pv-fb-wrong > span { flex:1; text-align:center; }
+        .pv-next { flex:0 0 auto; min-height:44px; padding:0 14px 0 18px; border:none; cursor:pointer;
+          border-radius:var(--radius-full); display:inline-flex; align-items:center; gap:4px;
+          font-family:var(--font-head); font-weight:800; font-size:var(--text-base); color:#fff;
+          background:linear-gradient(135deg,var(--accent),var(--accent-light));
+          box-shadow:0 4px 12px var(--glow); }
+        .pv-next svg { width:20px; height:20px; fill:none; stroke:currentColor;
+          stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
       </style>
 
       <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:5px 10px;
@@ -683,14 +696,36 @@ const PlatsvardeGame = (() => {
     if (inputLocked) return;
     inputLocked = true;
     const isCorrect = pos === currentQ.target;
-    ['hundratal', 'tiotal', 'ental'].forEach(p => {
-      const btn = document.getElementById(`pv-digit-${p}`);
-      if (!btn) return;
+    const btn = document.getElementById(`pv-digit-${pos}`);
+    if (isCorrect) {
+      lockDigitBoxes();
+      if (btn) btn.style.background = 'rgba(34,197,94,0.25)';
+    } else if (btn) {
+      /* Fel: BARA den tryckta rutan dämpas och låses — de andra förblir
+         tryckbara och rätt svar ges inte bort (granskning A1). */
+      btn.style.background = 'rgba(239,68,68,0.2)';
+      btn.style.opacity    = '0.45';
       btn.style.pointerEvents = 'none';
-      if (p === currentQ.target) btn.style.background = 'rgba(34,197,94,0.25)';
-      if (p === pos && !isCorrect) btn.style.background = 'rgba(239,68,68,0.2)';
-    });
+    }
     processAnswer(isCorrect, POS_LABELS[currentQ.target]);
+  }
+
+  function lockDigitBoxes() {
+    ['hundratal', 'tiotal', 'ental'].forEach(p => {
+      const b = document.getElementById(`pv-digit-${p}`);
+      if (b) b.style.pointerEvents = 'none';
+    });
+  }
+
+  /* Facit efter två fel: svaret landar i frågans egna rutor och står kvar
+     tills barnet trycker Nästa (granskning B6). */
+  function revealAnswer() {
+    const q = currentQ;
+    if (q.type === 'A1') {
+      lockDigitBoxes();
+      const t = document.getElementById(`pv-digit-${q.target}`);
+      if (t) { t.style.background = 'rgba(34,197,94,0.25)'; t.style.opacity = '1'; }
+    }
   }
 
   function setDecompActive(idx) {
@@ -821,8 +856,10 @@ const PlatsvardeGame = (() => {
       setTimeout(nextQuestion, 1400);
     } else if (attempts >= 2) {
       App.Sound.play('wrong');
-      showFeedback(false, `Rätt svar: <strong>${correctDisplay}</strong>`);
-      setTimeout(nextQuestion, 2200);
+      /* Facit är något som ska läras: det står kvar tills barnet trycker
+         Nästa — ingen timer (granskning B6). */
+      revealAnswer();
+      showFeedback(false, `Rätt svar: <strong>${correctDisplay}</strong>`, true);
     } else {
       inputLocked = false;
       App.Sound.play('wrong');
@@ -830,17 +867,20 @@ const PlatsvardeGame = (() => {
     }
   }
 
-  function showFeedback(correct, msg) {
+  function showFeedback(correct, msg, withNext) {
     const fb = document.getElementById('pv-feedback');
     if (!fb) return;
+    const nextBtn = withNext
+      ? `<button class="pv-next" onclick="PlatsvardeGame.nextQuestion()">Nästa
+           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`
+      : '';
     fb.innerHTML = correct
       ? `<div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #22c55e;
           border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-base);
           font-weight:800;color:#166534;text-align:center;animation:bounce-in 0.3s var(--ease-bounce)">
-          ✅ Rätt! 🌟</div>`
-      : `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #f59e0b;
-          border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-sm);
-          font-weight:700;color:#92400e;text-align:center">❌ ${msg}</div>`;
+          Rätt! 🌟</div>`
+      : `<div class="pv-fb-wrong">
+          <span>${msg}</span>${nextBtn}</div>`;
   }
 
   function celebrationBurst() {
@@ -1018,6 +1058,21 @@ const PlatsvardeGame = (() => {
     setDecompActive, decompPress, submitDecomp,
     handleOrderClick, orderUndo, submitOrder,
     pvToggleEraser, pvClearCanvas,
-    confirmAbort,
+    confirmAbort, nextQuestion,
+    /* Testkrokar (vitest) — samma mönster som uppstallning.js. */
+    __test: {
+      generateQuestions,
+      setStateForTest(s) {
+        if ('questions'   in s) questions   = s.questions;
+        if ('qIndex'      in s) qIndex      = s.qIndex;
+        if ('currentQ'    in s) currentQ    = s.currentQ;
+        if ('attempts'    in s) attempts    = s.attempts;
+        if ('inputLocked' in s) inputLocked = s.inputLocked;
+        if ('score'       in s) score       = s.score;
+      },
+      getState() { return { qIndex, attempts, inputLocked, score }; },
+    },
   };
 })();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = PlatsvardeGame;
