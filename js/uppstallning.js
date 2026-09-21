@@ -34,7 +34,7 @@ const UppstallningGame = (() => {
   let exInput       = '';
   let exColData     = []; // preprocessad per-kolumn data från buildDemoSteps
   let helpMode      = true; // true = med hjälp, false = utan hjälp
-  let exTenPhase = [];  // 0=visa "Tryck för att se", 1=visa förklaring, 2=animation körd, 3=carry körd
+  let exTenPhase = [];  // index i kolumnens metodkö (exColData[c].queue), 0…queue.length
 
   /* Free mode (utan hjälp) — miniräknar-modell: ETT svarsfält */
   let exFreeInput        = '';   // svaret som sträng, skrivs vänster→höger
@@ -784,6 +784,36 @@ const UppstallningGame = (() => {
     return steps;
   }
 
+  /* ── Övningslägets vägval (spec §8) ─────────────────────────────────
+     De steg demon spelar upp INNAN svarssiffran skrivs. add_result är
+     aldrig med — den siffran är barnets jobb. add_mem_strike är inte
+     heller med: strykningen är barnets tap efter svaret (exSubmitCol).
+
+     add_ten står i listan trots att spec §8 inte nämner den. Specen skrevs
+     före den korta vägen (uppgift 6: `behover === 1` på nivå 3–4 hoppar över
+     tankerutan och skriver om tian direkt i kolumnen). Utan add_ten i kön
+     skrivs aldrig 10:an på pappret, och add_sum läser då ostruket papper och
+     bildar summan ur fel siffror. */
+  const EX_QUEUE_TYPES = new Set([
+    'add_lift', 'add_memjoin', 'add_need', 'add_lend',
+    'add_ten', 'add_ten_named', 'add_return', 'add_sum',
+    'tf_pair', 'add_carry_fly',
+  ]);
+
+  /* Ren klassning av EN kolumn: vilket av de fyra fallen den är, och vilka
+     steg som ska spelas upp. Ersätter `needsTenFriend: !!overStep`, som blev
+     false för varje kolumn så snart add_over9 slutade byggas — och då slutade
+     övningsläget tyst undervisa metoden. */
+  function exColumnPlan(steps, col) {
+    const queue = steps.filter(s => s.col === col && EX_QUEUE_TYPES.has(s.type));
+    const har   = t => queue.some(s => s.type === t);
+    const kind  = har('tf_pair')  ? 'exact10'      /* tiokompis-genvägen */
+                : har('add_need') ? 'complement'   /* lån ur det andra talet */
+                : har('add_sum')  ? 'tenPlusRest'  /* hål A: termen är redan 10 */
+                :                   'simple';      /* går direkt, summa ≤ 9 */
+    return { kind, queue };
+  }
+
   /* ── Preprocessa steg → per-kolumn övningsdata ──────────── */
   function preprocessExSteps(steps) {
     const result = [];
@@ -793,23 +823,18 @@ const UppstallningGame = (() => {
       const tenStep     = steps.find(s => s.type === 'sub_ten_minus'   && s.col === c);
       const calcStep    = steps.find(s => s.type === 'sub_calc'        && s.col === c);
       const interStep   = steps.find(s => s.type === 'sub_borrow'      && s.mainCol === c);
-      const overStep     = steps.find(s => s.type === 'add_over9'       && s.col === c);
-      const explainStep  = steps.find(s => s.type === 'add_explain'    && s.col === c);
-      const crossStep    = steps.find(s => s.type === 'add_cross'      && s.col === c);
-      const carryFlyStep = steps.find(s => s.type === 'add_carry_fly'  && s.col === c);
       const resultStep   = steps.find(s => (s.type === 'add_result' || s.type === 'add_simple') && s.col === c);
+      const { kind, queue } = exColumnPlan(steps, c);
       result[c] = {
         correctAnswer:   tenStep?.ans ?? calcStep?.diff ?? resultStep?.ans ?? 0,
         nextCarry:       resultStep?.nextCarry ?? 0,
+        sum:             resultStep?.sum ?? null,
         needsBorrow:     !!cantStep,
         isDouble:        cantStep?.type === 'sub_cant_double',
         flipStep:        flipStep    || null,
         interStep:       interStep   || null,
-        needsTenFriend:  !!overStep,
-        overStep:        overStep    || null,
-        explainStep:     explainStep || null,
-        crossStep:       crossStep   || null,
-        carryFlyStep:    carryFlyStep|| null,
+        kind,                      /* 'simple' | 'exact10' | 'complement' | 'tenPlusRest' */
+        queue,                     /* demo-stegen, i ordning; exTenPhase[c] är index i den */
         resultStep:      resultStep  || null,
       };
     }
@@ -864,10 +889,9 @@ const UppstallningGame = (() => {
   }
 
   function executeStep(step, cb) {
-    /* Övningsläget slår upp steg per typ och kan få null sedan additionens
-       stegtyper bytts (t.ex. crossStep). De grenarna är oåtkomliga i dag
-       — needsTenFriend är false utan add_over9 — och byggs om i uppgift 7.
-       Tills dess ska ett saknat steg inte kunna krascha en körning. */
+    /* Övningsläget spelar upp steg ur kolumnens kö och subtraktionens
+       flipStep/interStep kan vara null. Ett saknat steg ska aldrig kunna
+       krascha en körning — det hoppas över. */
     if (!step) { cb && cb(); return; }
     if (step.type === 'add_highlight') {
       highlightCol(step.col);
@@ -1357,11 +1381,21 @@ const UppstallningGame = (() => {
      "5:an har 2 kvar" när siffran skrivits om (spec §3c steg 4b). Samma
      textfunktion, ingen dubblerad sträng. */
   function showStepBubble(stepOverride) {
-    const area = document.getElementById('up-bubble');
+    /* Demon skriver i #up-bubble, övningsläget i #ex-bubble. Samma steg ska
+       ge samma ord i båda — annars tappar övningen meningarna som executeStep
+       skjuter in mitt i en animation (t.ex. "5:an har 2 kvar"). */
+    const area = document.getElementById('up-bubble') || document.getElementById('ex-bubble');
     if (!area) return;
     const step = stepOverride || demoSteps[demoStep];
     if (!step) { area.innerHTML = ''; return; }
+    const html = bubbleHTML(step);
+    area.innerHTML = html ? `<div class="thought-bubble">${html}</div>` : '';
+  }
 
+  /* Ren textfunktion: ETT steg in, färdig HTML ut, inga sidoeffekter.
+     Demon och övningsläget delar den, så metoden sägs med samma ord. */
+  function bubbleHTML(step) {
+    if (!step) return '';
     let html = '';
     if (step.type === 'add_highlight') {
       html = '';
@@ -1479,8 +1513,7 @@ const UppstallningGame = (() => {
     } else if (step.type === 'done') {
       html = `Klart! 🎉 ${numA} ${mode==='addition'?'+':'−'} ${numB} = <strong>${mode==='addition'?numA+numB:numA-numB}</strong>`;
     }
-
-    area.innerHTML = html ? `<div class="thought-bubble">${html}</div>` : '';
+    return html;
   }
 
   function refreshNextBtn() {
@@ -2160,6 +2193,7 @@ const UppstallningGame = (() => {
       <div id="up-main">
         <div id="up-left">
           <div id="up-table-wrap" onclick="UppstallningGame.memTableTap(event)">${buildTableHTML()}</div>
+          ${helpMode ? '<div id="up-think" class="off"></div>' : ''}
           ${helpMode ? '<div id="ex-bubble"></div>' : ''}
           <div id="ex-col-ui"></div>
           <div id="ex-feedback"></div>
@@ -2216,12 +2250,14 @@ const UppstallningGame = (() => {
     /* ── Help mode (med hjälp) — oförändrad ───────────── */
     const colKey      = COL_KEYS[col];
     const needsBorrow = !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
-    const isTenFriend = !!(exColData[col]?.needsTenFriend);
-    const tenPhase    = exTenPhase[col] || 0;
+    /* Vägvalet, inte längre needsTenFriend: kön är kolumnens metod och
+       exTenPhase[col] är hur långt barnet har tagit sig i den. */
+    const queue       = exColData[col]?.queue || [];
+    const phase       = exTenPhase[col] || 0;
 
     const bubble = document.getElementById('ex-bubble');
     if (bubble) {
-      const msg = exBubbleMsg(col, needsBorrow, isTenFriend, tenPhase);
+      const msg = exBubbleMsg(col, needsBorrow);
       bubble.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
     }
 
@@ -2231,24 +2267,19 @@ const UppstallningGame = (() => {
         style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:var(--radius-full);animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
         👆 Tryck här för att låna!</button>`;
 
-    } else if (isTenFriend && tenPhase === 0) {
-      // Fas 0: "mer än 9" — visa knapp för att gå till förklaring
-      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exTenStep1()"
+    } else if (queue.length && phase === 0) {
+      // Metoden är inte visad än — lockknappen öppnar den första gesten
+      ui.innerHTML = `<button class="up-btn" id="ex-continue-btn" onclick="UppstallningGame.exTenStepNext()"
         style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:var(--radius-full);animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
         👆 Tryck här för att se hur! 🔢</button>`;
 
-    } else if (isTenFriend && tenPhase === 1) {
-      // Fas 1: förklaring visas i bubblan — knapp för att köra animationen
-      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStep2()">
-        Se animation <svg class="icn"><use href="#i-play"/></svg></button>`;
-
-    } else if (isTenFriend && tenPhase === 2) {
-      // Fas 2: streck-animation körd, väntar på carry-flyg
-      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStep3()">
-        Skicka 10:an! <svg class="icn" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>`;
+    } else if (phase < queue.length) {
+      // Mitt i metoden — ett steg per tryck, samma kedja som demon
+      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStepNext()">
+        Nästa steg <svg class="icn"><use href="#i-play"/></svg></button>`;
 
     } else {
-      // Fas 3+ eller ingen 10-kompis: visa numpad
+      // Metoden är genomgången (eller kolumnen gick direkt): visa numpad
       ui.innerHTML = `<div style="background:var(--glass-strong);border-radius:var(--radius-md);padding:12px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
         <div style="font-size:11px;font-weight:800;color:${PVC[colKey]};text-align:center;margin-bottom:8px;text-transform:uppercase">
           Fyll i ${colKey === 'ental' ? 'entalet' : colKey === 'tiotal' ? 'tiotalet' : 'hundratalet'}
@@ -2262,11 +2293,13 @@ const UppstallningGame = (() => {
     }
   }
 
-  function exBubbleMsg(col, needsBorrow, isTenFriend, tenPhase) {
+  function exBubbleMsg(col, needsBorrow) {
     if (!helpMode) return '';
     const ck   = COL_KEYS[col];
     const aVal = demoEffA[col];
     const bVal = digs(numB)[col];
+    const queue = exColData[col]?.queue || [];
+    const phase = exTenPhase[col] || 0;
     let msg = '';
 
     if (needsBorrow) {
@@ -2274,30 +2307,17 @@ const UppstallningGame = (() => {
         ? `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
         : `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Du behöver låna.</span>`;
 
-    } else if (isTenFriend && tenPhase === 0) {
-      const over = exColData[col].overStep;
-      const ciStr = over.carry_in ? ` + <span style="color:#d97706">${over.carry_in}</span>` : '';
-      msg = `<span style="color:${PVC[ck]}">${over.a}</span> + <span style="color:${PVC[ck]}">${over.b}</span>${ciStr}... Det blir mer än 9! 🤔 Se hur vi gör!`;
+    } else if (phase < queue.length) {
+      /* ORDAGRANT demons text för samma steg — en idé per steg, inga egna
+         formuleringar i övningsläget (spec §8). */
+      msg = bubbleHTML(queue[phase]);
 
-    } else if (isTenFriend && tenPhase === 1) {
-      const exp = exColData[col].explainStep;
-      if (exp.carry_in) {
-        msg = `<span style="color:${PVC[ck]}">${exp.a}</span> + <span style="color:#d97706">${exp.carry_in}</span> = <strong>${exp.effectiveA}</strong> (<span style="color:#d97706">${exp.carry_in}</span>:an är minnessiffran).<br>
-          <span style="color:${PVC[ck]}">${exp.effectiveA}</span>:ans 10-kompis är <strong>${exp.behover}</strong>.<br>
-          Vi tar <strong>${exp.behover}</strong> från <span style="color:${PVC[ck]}">${exp.b}</span>: ${exp.b} − ${exp.behover} = <strong>${exp.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${exp.b}</span>:an blir <strong>${exp.kvar}</strong>).<br>
-          Så <span style="color:${PVC[ck]}">${exp.b}</span> blir <strong>${exp.kvar}</strong> och <span style="color:${PVC[ck]}">${exp.a}</span>:an blir <strong>10</strong>! 💡`;
-      } else {
-        msg = `<span style="color:${PVC[ck]}">${exp.effectiveA}</span>:ans 10-kompis är <strong>${exp.behover}</strong>.<br>
-          Vi tar <strong>${exp.behover}</strong> från <span style="color:${PVC[ck]}">${exp.b}</span>: ${exp.b} − ${exp.behover} = <strong>${exp.kvar}</strong> (kvar från <span style="color:${PVC[ck]}">${exp.b}</span>:an blir <strong>${exp.kvar}</strong>).<br>
-          Så <span style="color:${PVC[ck]}">${exp.b}</span> blir <strong>${exp.kvar}</strong> och <span style="color:${PVC[ck]}">${exp.effectiveA}</span> blir <strong>10</strong>! 💡`;
-      }
-
-    } else if (isTenFriend && tenPhase === 2) {
-      msg = `Bra! Nu skickar vi 10:an som minnessiffra! ⬆️`;
-
-    } else if (isTenFriend && tenPhase >= 3) {
-      const exp = exColData[col].explainStep;
-      msg = `Kvar: <strong style="color:${PVC[ck]}">${exp.b}</strong> − <strong>${exp.behover}</strong> = ? Fyll i!`;
+    } else if (queue.length) {
+      /* Metoden är genomgången: summan står i marginalen, och det barnet ska
+         göra är att placera dess sista siffra. Den gamla frågan "Kvar: 5 − 3
+         = ?" hörde till en metod som inte lärs ut längre. */
+      const sum = exColData[col]?.sum ?? queue[queue.length - 1]?.sum;
+      msg = `Vad är sista siffran i <strong style="color:${PVC[ck]}">${sum}</strong>?`;
 
     } else if (demoBorrowTens[col]) {
       const diff = exColData[col]?.flipStep?.diff ?? (bVal - aVal + 10);
@@ -2335,62 +2355,88 @@ const UppstallningGame = (() => {
     if (parseInt(exInput) === correctDigit) {
       exAnswers[exCurrentCol] = correctDigit;
       exInput = '';
-      App.Sound.play('correct');
+      /* Kolumnindexet MÅSTE fångas här: allt nedan kan köra efter att
+         advanceToColumn() flyttat exCurrentCol. */
+      const col     = exCurrentCol;
+      const next    = col + 1;
       const ansCell = document.getElementById(`ans-${colKey}`);
-      if (ansCell) {
-        ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${correctDigit}</span>`;
-        ansCell.classList.add('filled');
-        ansCell.style.borderColor = PVC[colKey];
-        ansCell.classList.remove('active-col');
-      }
-      if (demoBorrowTens[exCurrentCol]) useBorrowTen(exCurrentCol);
-      /* Minnet från en kolumn som gick direkt. Kolumnindexet MÅSTE fångas här:
-         advanceToColumn() flyttar exCurrentCol redan efter 400 ms, medan
-         flygets callback kommer ~1,5 s senare — läste den exCurrentCol lade
-         den minnet i en kolumn som inte finns, och minnessiffran försvann.
-         Grenen var oåtkomlig före tiokompis-genvägen (varje kolumn med
-         summa > 9 hade needsTenFriend), så felet syntes aldrig förrän nu. */
-      const carryCol = exCurrentCol;
-      if (mode === 'addition' && exColData[carryCol].nextCarry && !exColData[carryCol].needsTenFriend && carryCol + 1 < colCount) {
-        setTimeout(() => {
-          animateCarryToken(carryCol, carryCol + 1, () => {
-            demoCarries[carryCol + 1] = 1;
-            updateCarryRow();
-            /* Nästa kolumns fråga skrevs innan minnet landade — skriv om den,
-               annars står det "Vad är 4 + 3?" när svaret ska bli 8. */
-            if (exCurrentCol === carryCol + 1 && !exInputLocked) showExColUI(exCurrentCol);
-          });
-        }, 400);
-      }
-      smallBurst();
-      const col  = exCurrentCol;
-      const next = col + 1;
-      const proceed = () => {
-        if (next >= colCount) exCheckDone();
-        else advanceToColumn(next);
+
+      const finish = () => {
+        if (demoBorrowTens[col]) useBorrowTen(col);
+        /* Minnet från en kolumn som gick direkt. I alla andra kolumner har
+           barnet redan placerat minnet i kön (add_carry_fly) — flög det en
+           gång till här blev det två minnessiffror av en. Kolumner med
+           kind 'simple' har summa ≤ 9 och därmed aldrig något minne ut, så
+           grenen är i praktiken en spärr: den får inte tas som en väg. */
+        if (mode === 'addition' && exColData[col].nextCarry
+            && exColData[col].kind === 'simple' && col + 1 < colCount) {
+          setTimeout(() => {
+            animateCarryToken(col, col + 1, () => {
+              demoCarries[col + 1] = 1;
+              updateCarryRow();
+              /* Nästa kolumns fråga skrevs innan minnet landade — skriv om den,
+                 annars står det "Vad är 4 + 3?" när svaret ska bli 8. */
+              if (exCurrentCol === col + 1 && !exInputLocked) showExColUI(exCurrentCol);
+            });
+          }, 400);
+        }
+        smallBurst();
+        const proceed = () => {
+          if (next >= colCount) exCheckDone();
+          else advanceToColumn(next);
+        };
+        if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]
+            && col < colCount - 1) {
+          // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det.
+          // Sista kolumnens minne undantas (Dennis: inget kommande att förväxla med)
+          memMoments++;
+          setTimeout(() => {
+            memPhase = { kind:'strike', col, cont: proceed };
+            const cell = document.getElementById(`carry-${COL_KEYS[col]}`);
+            if (cell) {
+              cell.classList.add('mem-pulse');
+              const d = cell.querySelector('.mem-digit');
+              if (d) d.classList.add('pulse');
+            }
+            const bubble = document.getElementById('ex-bubble');
+            if (bubble) bubble.innerHTML = `<div class="thought-bubble">Stryk minnessiffran — den är använd! ✏️</div>`;
+            const ui = document.getElementById('ex-col-ui');
+            if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnessiffran för att stryka den!</div>`;
+          }, 700);
+        } else if (next >= colCount) {
+          setTimeout(exCheckDone, 900);
+        } else {
+          setTimeout(() => advanceToColumn(next), 400);
+        }
       };
-      if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]
-          && col < colCount - 1) {
-        // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det.
-        // Sista kolumnens minne undantas (Dennis: inget kommande att förväxla med)
-        memMoments++;
-        setTimeout(() => {
-          memPhase = { kind:'strike', col, cont: proceed };
-          const cell = document.getElementById(`carry-${COL_KEYS[col]}`);
-          if (cell) {
-            cell.classList.add('mem-pulse');
-            const d = cell.querySelector('.mem-digit');
-            if (d) d.classList.add('pulse');
-          }
-          const bubble = document.getElementById('ex-bubble');
-          if (bubble) bubble.innerHTML = `<div class="thought-bubble">Stryk minnessiffran — den är använd! ✏️</div>`;
-          const ui = document.getElementById('ex-col-ui');
-          if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnessiffran för att stryka den!</div>`;
-        }, 700);
-      } else if (next >= colCount) {
-        setTimeout(exCheckDone, 900);
+
+      /* SUMMEBRICKAN ÄR SVARET (spec §8, §4.12). Ligger den kvar i marginalen
+         ska den landa i cellen — annars står brickan kvar och ljuger, och
+         svarssiffran föds ur intet bredvid den. Den skrivna gissningen tas
+         bort först: det är brickan som blir siffran. */
+      const chip = upSumChip();
+      if (chip) {
+        if (ansCell) { ansCell.innerHTML = ''; ansCell.classList.remove('active-col'); }
+        /* Exakt-10-fallets kapsel har gjort sitt när paret lämnat — samma
+           avslut som demons add_result (spec §4.12). I övningsläget kommer
+           add_result aldrig, så den städningen måste ske här. */
+        if (exColData[col].kind === 'exact10') {
+          after(150, () => {
+            const cap = upCaps();
+            if (cap) cap.classList.add('fading');
+            after(350, () => { if (cap) cap.remove(); });
+          });
+        }
+        flyChipToAnswer(chip, col, correctDigit, finish);
       } else {
-        setTimeout(() => advanceToColumn(next), 400);
+        App.Sound.play('correct');
+        if (ansCell) {
+          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${correctDigit}</span>`;
+          ansCell.classList.add('filled');
+          ansCell.style.borderColor = PVC[colKey];
+          ansCell.classList.remove('active-col');
+        }
+        finish();
       }
     } else {
       App.Sound.play('wrong');
@@ -2454,60 +2500,46 @@ const UppstallningGame = (() => {
     }
   }
 
-  function exTenStep1() {
-    // Fas 0 → 1: Visa förklaring i bubblan
+  /* ── ETT steg i taget ur kolumnens kö (spec §8) ─────────────────────
+     Ersätter exTenStep1/2/3, som var bundna till den gamla treställiga
+     fasmodellen. exTenPhase[c] är nu index i kön: knappen spelar upp
+     queue[phase] och räknar upp. Samma steg, samma animation och samma
+     ord som demon — metoden lärs ut likadant i båda lägena. */
+  function exTenStepNext() {
     if (exInputLocked) return;
-    App.Sound.play('click');
-    const c = exCurrentCol;
-    exTenPhase[c] = 1;
-    showExColUI(c);
-  }
-
-  function exTenStep2() {
-    // Fas 1 → 2: Kör streck-animationen
-    if (exInputLocked) return;
-    const c = exCurrentCol;
+    /* Kolumnen fångas HÄR, synkront: callbacken nedan kommer efter att
+       advanceToColumn() kan ha flyttat exCurrentCol. */
+    const c       = exCurrentCol;
     const colData = exColData[c];
+    const queue   = colData?.queue || [];
+    const step    = queue[exTenPhase[c] || 0];
+    if (!step) { showExColUI(c); return; }
+
     const btn = document.getElementById('ex-continue-btn');
     if (btn) btn.disabled = true;
     exInputLocked = true;
 
-    // Kör add_cross-steget via executeStep
-    executeStep(colData.crossStep, () => {
-      exTenPhase[c] = 2;
+    /* LEVANDE MINNESSIFFROR (v30): minnets flygning initieras inte av
+       knappen utan av barnets tap på rätt ruta. Knappen lämnar bara över. */
+    if (step.type === 'add_carry_fly' && step.nextCarry && c + 1 < colCount) {
+      App.Sound.play('click');
+      memMoments++;
+      memPhase = { kind:'place', col: c + 1, srcCol: c };
+      const cell = document.getElementById(`carry-${COL_KEYS[c + 1]}`);
+      if (cell) cell.classList.add('mem-pulse');
+      const bubble = document.getElementById('ex-bubble');
+      if (bubble) bubble.innerHTML = `<div class="thought-bubble">Var ska minnessiffran? 🤔 Tryck på rätt ruta!</div>`;
+      const ui = document.getElementById('ex-col-ui');
+      if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnesrutan där 1:an ska stå!</div>`;
+      return;
+    }
+
+    App.Sound.play('click');
+    executeStep(step, () => {
+      exTenPhase[c] = (exTenPhase[c] || 0) + 1;
       exInputLocked = false;
       showExColUI(c);
     });
-  }
-
-  function exTenStep3() {
-    // Fas 2 → PLACERA (v30): knappen INITIERAR — själva placeringen är barnets tap
-    if (exInputLocked) return;
-    const c = exCurrentCol;
-    const colData = exColData[c];
-    const btn = document.getElementById('ex-continue-btn');
-    if (btn) btn.disabled = true;
-    exInputLocked = true;
-
-    const fly = colData.carryFlyStep;
-    if (!fly || !fly.nextCarry || c + 1 >= colCount) {
-      // Ingen destination för minnessiffran — bete sig som tidigare (no-op-flyg)
-      executeStep(fly || { type:'add_carry_fly', col:c, nextCarry:0 }, () => {
-        exTenPhase[c] = 3;
-        exInputLocked = false;
-        showExColUI(c);
-      });
-      return;
-    }
-    App.Sound.play('click');
-    memMoments++;
-    memPhase = { kind:'place', col: c + 1, srcCol: c };
-    const cell = document.getElementById(`carry-${COL_KEYS[c + 1]}`);
-    if (cell) cell.classList.add('mem-pulse');
-    const bubble = document.getElementById('ex-bubble');
-    if (bubble) bubble.innerHTML = `<div class="thought-bubble">Var ska minnessiffran? 🤔 Tryck på rätt ruta!</div>`;
-    const ui = document.getElementById('ex-col-ui');
-    if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnesrutan där 1:an ska stå!</div>`;
   }
 
   /* ── Levande minnessiffror: tap-hantering (v30, endast addition) ── */
@@ -2526,15 +2558,31 @@ const UppstallningGame = (() => {
         memPhase = null;
         cellEl.classList.remove('mem-pulse');
         if (fb) fb.innerHTML = '';
-        animateCarryToken(src, dst, () => {
+        const landed = () => {
           demoCarries[dst] = 1;
           updateCarryRow();
           App.Sound.play('correct');
           smallBurst();
-          exTenPhase[src] = 3;
+          exTenPhase[src] = (exTenPhase[src] || 0) + 1;
           exInputLocked = false;
           showExColUI(src);
-        });
+        };
+        /* Minnet kommer UR summebrickan, precis som i demon (spec §4.11):
+           brickans vänstra siffra lämnar den och blir minnessiffran. Flög en
+           gul token i stället stod brickan kvar med sin 1:a och pappret ljög
+           om vad som hänt. animateCarryToken är kvar som reserv för kolumner
+           utan bricka. */
+        const sc = upSumChip();
+        const d1 = sc && sc.querySelector('.sum-tens');
+        if (d1) {
+          flyBadgeDigit(d1, upCarry(dst), {
+            dur: 700, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+            fontSize: '1.5rem', color: '#ffffff', endColor: '#dc2626',
+            endTransform: 'rotate(-4deg) scale(0.86)', sound: true
+          }, landed);
+        } else {
+          animateCarryToken(src, dst, landed);
+        }
       } else {
         // Fel tap → mild vägledning, inget poängstraff — tappa igen
         memPerfect = false;
@@ -2999,12 +3047,12 @@ const UppstallningGame = (() => {
     startDemo, demoNextStep,
     startExercise,
     exPress, exDoBorrow, exContinueBorrow,
-    exTenStep1, exTenStep2, exTenStep3,
+    exTenStepNext,
     memTableTap, memPick,
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
-    __test: { planAdditionColumns },
+    __test: { planAdditionColumns, exColumnPlan },
   };
 })();
 

@@ -353,3 +353,101 @@ describe('tankerutan hoppas over vid sma lan pa svara nivaer', () => {
     expect(fel).toEqual([]);
   });
 });
+
+/* ── Uppgift 7: ovningslagets per-kolumndata ─────────────────────────────
+   needsTenFriend ar borta. Varje kolumn maste ha ETT vagval, annars faller
+   ovningslaget tyst ner i numpaden och slutar undervisa metoden.          */
+describe('ovningslagets per-kolumndata', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+  it('varje kolumn far ett vagval som inte ar odefinierat', () => {
+    const fel = [];
+    for (const [a, b] of [[47,35],[68,57],[41,39],[95,47],[295,208],[32,29]]) {
+      const cc = (a >= 100 || b >= 100 || a + b >= 100) ? 3 : 2;
+      const steps = planAdditionColumns(a, b, cc, OPTS);
+      for (let c = 0; c < cc; c++) {
+        const iKol = steps.filter(s => s.col === c).map(s => s.type);
+        const harVag = iKol.includes('tf_pair') || iKol.includes('add_lend')
+                    || iKol.includes('add_sum') || iKol.includes('add_simple');
+        if (!harVag) fel.push(`${a}+${b} kol ${c}: ${iKol.join(',')}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+});
+
+/* ── Uppgift 7: vagvalet som ersatter needsTenFriend ─────────────────────
+   exColumnPlan() ar den rena delen av preprocessExSteps(): den klassar
+   kolumnen och plockar ut de demo-steg ovningslaget ska spela upp innan
+   barnet far skriva svarssiffran. add_result ar ALDRIG med — den siffran
+   ar barnets jobb.                                                        */
+describe('vagvalet per kolumn', () => {
+  const { exColumnPlan } = require('../js/uppstallning.js').__test;
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+  const plan = (a, b, cc, c, extra) =>
+    exColumnPlan(planAdditionColumns(a, b, cc, { ...OPTS, ...extra }), c);
+
+  it('47+35 entalen ar en komplementkolumn', () => {
+    expect(plan(47, 35, 2, 0).kind).toBe('complement');
+  });
+
+  it('41+39 entalen ar en tiokompiskolumn', () => {
+    expect(plan(41, 39, 2, 0).kind).toBe('exact10');
+  });
+
+  it('95+47 tiotalen ar 10 + resten', () => {
+    expect(plan(95, 47, 3, 1).kind).toBe('tenPlusRest');
+  });
+
+  it('47+35 tiotalen gar direkt', () => {
+    const p = plan(47, 35, 2, 1);
+    expect(p.kind).toBe('simple');
+    expect(p.queue).toEqual([]);
+  });
+
+  it('korta vagen behaller tian i kon — annars laser summan ostruket papper', () => {
+    const typer = plan(32, 29, 2, 0, { difficulty: 4 }).queue.map(s => s.type);
+    expect(typer).toEqual(['add_need', 'add_lend', 'add_ten', 'add_sum', 'add_carry_fly']);
+  });
+
+  it('kon innehaller aldrig add_result — svarssiffran ar barnets jobb', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      const steps = planAdditionColumns(a, b, cc, OPTS);
+      for (let c = 0; c < cc; c++) {
+        if (exColumnPlan(steps, c).queue.some(s => s.type === 'add_result')) fel.push(`${a}+${b} kol ${c}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('varje kolumn med summa over 9 far en icke-tom ko och ett vagval', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      for (const d of [1, 2, 3, 4]) {
+        const steps = planAdditionColumns(a, b, cc, { ...OPTS, difficulty: d });
+        for (let c = 0; c < cc; c++) {
+          const p = exColumnPlan(steps, c);
+          const direkt = steps.some(s => s.type === 'add_simple' && s.col === c);
+          if (direkt && p.kind !== 'simple') fel.push(`${a}+${b} niva ${d} kol ${c}: ${p.kind}`);
+          if (!direkt && (p.kind === 'simple' || !p.queue.length)) fel.push(`${a}+${b} niva ${d} kol ${c}: tomt vagval`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('varje ko slutar med add_carry_fly — minnet placeras fore svaret', () => {
+    const fel = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      const steps = planAdditionColumns(a, b, cc, OPTS);
+      for (let c = 0; c < cc; c++) {
+        const q = exColumnPlan(steps, c).queue;
+        if (q.length && q[q.length - 1].type !== 'add_carry_fly') fel.push(`${a}+${b} kol ${c}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+});
