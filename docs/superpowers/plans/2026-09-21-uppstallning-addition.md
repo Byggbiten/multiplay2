@@ -806,3 +806,43 @@ Det är vad den långa vägen gör i tankerutan, utan låda.
   minnesrad.
 
 **Verifiera i iOS-simulatorn som PWA** (iPhone 17e) på `59 + 87`, nivå 3.
+
+---
+
+### Uppgift 9: "Räkna själv" ska skriva svaret i cellerna, inte i ett fält
+
+Dennis 21/9, efter PWA-test: *"så kanske vi skall göra så att svaret skall skrivas in i celler i summan. Så att de kan svara på en siffra i taget och jobba sig från höger till vänster i summan. dvs, från ental till hundratal. samt att de skall kunna lägga till minnessiffror genom att markera minnesrutan och ange hur många minnessiffror de vill lägga till."*
+
+**Varför.** Koden dömer sig själv, `js/uppstallning.js:39–41`:
+```js
+/* Free mode (utan hjälp) — miniräknar-modell: ETT svarsfält */
+let exFreeInput = '';   // svaret som sträng, skrivs vänster→höger
+```
+Ett brett fält inbjuder till att räkna hela summan i huvudet och skriva in den, vänster till höger — motsatsen till pappret, och precis den vana appen finns till för att bryta. "Räkna själv" är i dag en **annan uppgift** än de andra två lägena, inte samma uppgift utan hjälp.
+
+**Ingreppet är mindre än det ser ut.** `exFreeInit()` (≈rad 2831) *river ut* svarsradens per-kolumn-rutor och ersätter dem med ett fält:
+> *"Ersätt svarsradens per-kolumn-rutor med ETT brett svarsfält."*
+
+Cellerna finns alltså redan i `buildTableHTML`. Minnesrutorna och tapp-maskineriet finns också, byggt för hjälpläget (`memTableTap`, `memPick`). Uppgiften är till stor del en **borttagning**: sluta ersätta raden, återanvänd det som finns.
+
+**Designen (Dennis: "tänk på vad som blir mest logiskt och intuitivt för ett barn på iPhone eller iPad").**
+
+Båda arbetssätten han beskriver — den som räknar medan hon skriver, och den som skrivit klart svaret på kladden — går höger till vänster. Det blir grunden:
+
+1. **Fokus börjar i entalsrutan** och flyttar ett steg vänsterut när en siffra skrivits.
+2. **Vilken cell som helst går att trycka på** och skriva om. En ny siffra ersätter den gamla; ingen radering först.
+3. **Suddknappen tömmer aktuell cell och flyttar fokus åt höger** — tillbaka samma väg.
+4. **Ingen bedömning förrän "Klar ✓"**: inga bockar, ingen skakning, ingen antydan medan hon skriver. Knappen aktiveras när minst en siffra finns. Lägg INGEN spärr av typen "du har missat en ruta" — det vore en ledtråd.
+5. **Minnesrutorna fungerar likadant**: tryck, knappa in siffran, ändra fritt. Appen placerar ingenting åt henne.
+6. **Fokusflytten ska synas** — kort animation. Ett barn som inte ser markören hoppa tappar bort sig.
+7. **Bara svaret bedöms, inte minnessiffrorna.** Minnesraden är hennes kladd. Blir minnet fel blir svaret fel ändå, och då kan återkopplingen peka på kolumnen.
+8. **Kladdytan är kvar** — Dennis nämner uttryckligen att en del räknar färdigt där först.
+
+**Krav:**
+- Träffytor minst 44 pt. `.ans-cell` är redan `clamp(46px,8vw,74px)`.
+- Tomma ledande rutor är tillåtna (på papper lämnas de blanka) och får inte tolkas som fel förrän vid bedömning.
+- Poängmodellen (`exFreeFirstAttempt`) behålls: poäng bara vid helrätt på första "Klar".
+- Hjälpläget och demon rörs inte.
+- Alla 80 tester gröna.
+
+**Verifiera i iOS-simulatorn som PWA**, både iPhone 17e och en iPad-storlek om möjligt: fyll i höger till vänster, gå tillbaka och ändra en cell, skriv en minnessiffra, sudda, och kontrollera att ingenting bedöms förrän "Klar ✓".
