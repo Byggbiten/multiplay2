@@ -168,3 +168,48 @@ describe('exakt-10-genvagen', () => {
     expect(fel).toEqual([]);
   });
 });
+
+describe('hal A: termen ar redan 10 efter minnet', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'storsta' };
+
+  it('95+47 tiotalen: inga komplementsteg, ingen strykning', () => {
+    const kol1 = planAdditionColumns(95, 47, 3, OPTS).filter(s => s.col === 1).map(s => s.type);
+    expect(kol1).not.toContain('add_explain');
+    expect(kol1).not.toContain('add_cross');
+    expect(kol1).toContain('add_memjoin');
+    expect(kol1).toContain('add_sum');
+  });
+
+  it('295+208 tiotalen: resten ar 0', () => {
+    const steg = planAdditionColumns(295, 208, 3, OPTS).find(s => s.type === 'add_sum' && s.col === 1);
+    expect(steg.sum).toBe(10);
+    expect(steg.ans).toBe(0);
+    expect(steg.kvar).toBe(0);
+  });
+
+  it('ingen kolumn kor komplementvagen med behover 0', () => {
+    const fel = [];
+    for (let a = 40; a <= 99; a++) for (let b = 40; b <= 99; b++) {
+      if (a + b < 100) continue;
+      for (const s of planAdditionColumns(a, b, 3, OPTS)) {
+        if (s.type === 'add_explain' && s.behover === 0) fel.push(`${a}+${b} kol ${s.col}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('summan ar korrekt for hela niva 3 uttommande', () => {
+    const fel = [];
+    for (let a = 40; a <= 99; a++) for (let b = 40; b <= 99; b++) {
+      if (a + b < 100) continue;
+      const siffror = [];
+      for (const s of planAdditionColumns(a, b, 3, OPTS)) {
+        if (s.type === 'add_result' || s.type === 'add_simple') siffror[s.col] = s.ans;
+        if (s.type === 'add_overflow') siffror[3] = s.digit;
+      }
+      const summa = Number(siffror.map(d => d ?? 0).reverse().join(''));
+      if (summa !== a + b) fel.push(`${a}+${b} gav ${summa}`);
+    }
+    expect(fel).toEqual([]);
+  });
+});

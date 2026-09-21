@@ -598,6 +598,17 @@ const UppstallningGame = (() => {
           steps.push({ type:'tf_pair', ...base });
           steps.push({ type:'add_carry_fly', ...base, tf:true, chip:true });
           steps.push({ type:'add_result', ...base, tf:true, chip:true });
+        } else if (!legacy && behover === 0) {
+          /* HÅL A (spec §7.1): termen ÄR redan 10 när minnet lagts på. Det
+             finns ingenting att låna — kolumnen är 10 + resten. Komplement-
+             stegen hoppas över helt: ingen "behöver", ingen "lånar", ingen
+             strykning. På pappret skriver barnet inget överkryssat här.
+             Minnet MÅSTE nämnas först, annars får hon en bricka som säger
+             14 utan att ettan någonsin kommit på tal. */
+          steps.push({ type:'add_memjoin', ...base, box:false });
+          steps.push({ type:'add_sum', ...base, box:false, way:'ur', nostrike:true });
+          steps.push({ type:'add_carry_fly', ...base, nf:true, chip:true });
+          steps.push({ type:'add_result', ...base, nf:true, chip:true });
         } else {
           steps.push({ type:'add_over9', ...P.over9 });
           steps.push({ type:'add_explain', ...P.full });
@@ -763,6 +774,30 @@ const UppstallningGame = (() => {
          ostrukna, men de ÄR pappret, och 10 är vad de säger ihop. */
       after(t0 + 400, () => riseSumChip(step.col, step.sum, paperSources(step.col), null));
       after(t0 + 1560, cb);
+
+    /* ── Minnet slås ihop med sin term (spec §4.4, box:false-grenen) ──
+       En KOPIA av minnessiffran glider ner i cellen och tonar ut. Den
+       skrivna röda 1:an i minnesraden rörs inte — den stryks i sitt eget
+       steg, aldrig här. */
+    } else if (step.type === 'add_memjoin') {
+      highlightCol(step.col);
+      const row  = step.memRow || 'a';
+      const cell = upCarry(step.col);
+      const md   = cell && cell.querySelector('.mem-digit');
+      if (md) { md.style.animationDuration = Ts(250); md.classList.add('tk-blink'); }
+      after(250, () => {
+        flyCopyIn(document.body, md || cell, upCell(row, step.col), String(step.carry_in), {
+          dur: 550, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fixed: true,
+          fontSize: '1.2rem', color: '#d97706', endColor: '#d97706', fade: true
+        }, () => { pop(upDw(row, step.col), 300); after(320, cb); });
+      });
+
+    /* ── Summan stiger ur pappret (spec §4.9) ──────────────────
+       I 10 + resten-fallet är pappret tre källor: båda siffrorna OCH
+       minnessiffran. Ingenting är struket — det finns inget att stryka. */
+    } else if (step.type === 'add_sum') {
+      highlightCol(step.col);
+      riseSumChip(step.col, step.sum, paperSources(step.col, !!step.nostrike), cb);
 
     } else if (step.type === 'add_over9') {
       highlightCol(step.col);
@@ -1091,6 +1126,16 @@ const UppstallningGame = (() => {
       } else {
         html = `<strong style="color:${PVC[ck]}">${step.a}</strong> och <strong style="color:${PVC[ck]}">${step.b}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
       }
+    } else if (step.type === 'add_memjoin') {
+      /* Spec §7.1 krav 1: minnet nämns FÖRE summan. */
+      const ck = COL_KEYS[step.col];
+      html = `Minnet gör <strong style="color:${PVC[ck]}">${step.memDigit}</strong>:an till <strong style="color:${PVC[ck]}">${step.memNew}</strong>.`;
+    } else if (step.type === 'add_sum') {
+      /* Spec §7.1 krav 4a: med nostrike är ingenting omskrivet, så resten
+         bär kolumnens platsvärdesfärg — amber vore en lögn om lagret. */
+      const ck = COL_KEYS[step.col];
+      const kvarColor = step.nostrike ? PVC[ck] : '#d97706';
+      html = `<strong>10</strong> och <strong style="color:${kvarColor}">${step.kvar}</strong> är <strong style="color:${PVC[ck]}">${step.sum}</strong>.`;
     } else if (step.type === 'add_carry_fly') {
       /* Summans vänstra siffra ÄR redan en 1:a — inget att förklara. */
       if (step.chip) {
@@ -1426,12 +1471,20 @@ const UppstallningGame = (() => {
   /* VAD SOM STÅR SKRIVET i kolumnen just nu, att läsa av. Efter en strykning
      är det de små amber-siffrorna som gäller; i exakt-10-fallet står inget
      struket, och då ÄR de två termerna pappret (mockup:1506–1512). */
-  function paperSources(col) {
-    return ['a', 'b'].map(r => {
+  function paperSources(col, withMem) {
+    const src = ['a', 'b'].map(r => {
       const dw = upDw(r, col);
       if (!dw) return null;
       return dw.querySelector('.small-new-digit') || dw;
     });
+    /* 10 + resten (spec §7.1.4b): minnessiffran ÄR en av källorna. Utan den
+       läser avläsningen 9 och 4 och bildar 14 ur intet. */
+    if (withMem) {
+      const cell = upCarry(col);
+      const md = cell && cell.querySelector('.mem-digit');
+      if (md) src.push(md);
+    }
+    return src;
   }
 
   /* En KOPIA flyger, originalet står kvar (mockup:1191–1224).
@@ -1479,9 +1532,13 @@ const UppstallningGame = (() => {
     src.forEach(el => { el.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`; });
     after(200, () => {
       src.forEach(el => {
+        /* Minnessiffrans kopia behåller sin röda identitet på vägen ut
+           (spec §7.1.4b); de skrivna siffrorna reser i amber. */
+        const isMem = el.classList && el.classList.contains('mem-digit');
         flyCopyIn(document.body, el, chip, el.textContent.trim(), {
           dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
-          fontSize: '1.2rem', color: '#d97706', endColor: PVC[COL_KEYS[col]], fade: true
+          fontSize: '1.2rem', color: isMem ? '#dc2626' : '#d97706',
+          endColor: PVC[COL_KEYS[col]], fade: true
         }, null);
       });
     });
