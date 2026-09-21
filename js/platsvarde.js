@@ -19,6 +19,7 @@ const PlatsvardeGame = (() => {
   let pvCanvas = null, pvCtx = null;
   let pvDrawing = false, pvErasing = false;
   let pvLastX = 0, pvLastY = 0;
+  let pvResizeObs = null, pvPen = '#5b21b6';
 
   /* Answer state */
   let decompAnswers = ['', '', ''];
@@ -29,6 +30,14 @@ const PlatsvardeGame = (() => {
   const PV_COLORS = { ental: '#22c55e', tiotal: '#3b82f6', hundratal: '#ef4444' };
   const POS_LABELS = { hundratal: 'Hundratal', tiotal: 'Tiotal', ental: 'Ental' };
   const LOG_KEY = id => `platsvarde_log_${id}`;
+  /* SVG som UI-ikoner, aldrig emoji (DESIGN-SYSTEM rad 9; granskning D1).
+     Sudd/bock är samma paths som i uppstallning.js. */
+  const ICON_ERASE  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6H9.6a2 2 0 0 0-1.5.7L3.4 12l4.7 5.3a2 2 0 0 0 1.5.7H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"/><path d="M17 10l-4 4M13 10l4 4"/></svg>';
+  const ICON_CHECK  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg>';
+  const ICON_UNDO   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>';
+  const ICON_PEN    = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4Z"/><path d="M13 7l3 3"/></svg>';
+  const ICON_ERASER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 20 3.5 15.5a2 2 0 0 1 0-2.8l8.2-8.2a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8L13 19"/><path d="M6.5 12.5l6 6M8 20h12"/></svg>';
+  const ICON_TRASH  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
   /* ── Init ───────────────────────────────────────────────── */
   function init(p) {
@@ -223,12 +232,10 @@ const PlatsvardeGame = (() => {
     const a3Num  = genNum3();
     const a3Pos  = positions[Math.floor(Math.random() * 3)];
     const a3Dig  = getDigitAt(a3Num, a3Pos);
-    const a3Pool = [a3Dig];
-    for (let d = 1; d <= 9 && a3Pool.length < 4; d++) {
-      const v = (a3Dig + d) % 10;
-      if (!a3Pool.includes(v)) a3Pool.push(v);
-    }
-    qs.push({ level: 'A', type: 'A3', num: a3Num, target: a3Pos, correct: a3Dig, options: shuffle(a3Pool.slice(0, 4)) });
+    /* Talen saknar nollor, så 0 vore gratis uteslutning (granskning D7):
+       distraktorer 1–9, aldrig 0, slumpade i stället för a3Dig+1, +2, +3. */
+    const a3Pool = fillUnique([a3Dig], 4, () => 1 + Math.floor(Math.random() * 9));
+    qs.push({ level: 'A', type: 'A3', num: a3Num, target: a3Pos, correct: a3Dig, options: shuffle(a3Pool) });
 
     /* ── Nivå B: 2 frågor ── */
     // B1: Sätt ihop tal
@@ -274,13 +281,10 @@ const PlatsvardeGame = (() => {
     }
     qs.push({ level: 'C', type: 'C2', num: c2Num, word: numberToSwedish(c2Num), correct: c2Num, options: shuffle(c2Opts) });
 
-    // C3: Tal → ord (till)
+    // C3: Ord → tal (till) — var en kopia av C1; nu två av varje riktning (granskning D6)
     const c3Num  = genNum3();
-    const c3Word = numberToSwedish(c3Num);
-    let c3W1, c3W2;
-    do { c3W1 = numberToSwedish(genNum3()); } while (c3W1 === c3Word);
-    do { c3W2 = numberToSwedish(genNum3()); } while (c3W2 === c3Word || c3W2 === c3W1);
-    qs.push({ level: 'C', type: 'C1', num: c3Num, correct: c3Word, options: shuffle([c3Word, c3W1, c3W2]) });
+    const c3Opts = fillUnique([c3Num], 4, genNum3);
+    qs.push({ level: 'C', type: 'C2', num: c3Num, word: numberToSwedish(c3Num), correct: c3Num, options: shuffle(c3Opts) });
 
     /* ── Nivå D: 2 frågor ── */
     // D1: Störst/minst
@@ -411,6 +415,13 @@ const PlatsvardeGame = (() => {
           border-color:transparent; color:#fff; box-shadow:0 4px 12px var(--glow); }
         .pv-nk:disabled { opacity:0.5; cursor:default; box-shadow:none; }
         .pv-nk:disabled:hover { transform:none; }
+        .pv-nk svg, .pv-kb svg, .pv-ob-act svg { width:22px; height:22px; fill:none; stroke:currentColor;
+          stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+        .pv-kb { flex:1; height:44px; border-radius:var(--radius-md); font-weight:800; font-size:14px;
+          cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;
+          border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+        .pv-kb svg { width:18px; height:18px; }
+        .pv-ob-act { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
         .pv-order-btn { min-height:44px; padding:4px 10px; border-radius:var(--radius-md); font-weight:800;
           cursor:pointer; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
@@ -461,15 +472,12 @@ const PlatsvardeGame = (() => {
             letter-spacing:0.06em;flex-shrink:0">Kladd</div>
           <canvas id="pv-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
-            <button onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
-              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
-              cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
-            <button onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
-              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
-              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🧹 Sudd</button>
-            <button onclick="PlatsvardeGame.pvClearCanvas()"
-              style="flex:1;height:44px;border-radius:var(--radius-md);font-weight:800;font-size:14px;
-              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🗑️ Rensa</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
+              style="background:var(--accent);color:#fff;border-color:var(--accent)">${ICON_PEN} Rita</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
+              style="background:var(--tint);color:var(--deep)">${ICON_ERASER} Sudd</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvClearCanvas()"
+              style="background:var(--tint);color:var(--deep)">${ICON_TRASH} Rensa</button>
           </div>
         </div>
       </div>
@@ -620,8 +628,8 @@ const PlatsvardeGame = (() => {
           <div class="pv-numpad">
             ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
               <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
-                ${k==='✓' ? 'id="pv-dc-ok" disabled' : ''}
-                onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
+                ${k==='✓' ? 'id="pv-dc-ok" disabled aria-label="Klar"' : k==='⌫' ? 'aria-label="Sudda"' : ''}
+                onclick="PlatsvardeGame.decompPress('${k}')">${k==='⌫' ? ICON_ERASE : k==='✓' ? ICON_CHECK : k}</button>
             `).join('')}
           </div>
         </div>
@@ -715,18 +723,18 @@ const PlatsvardeGame = (() => {
           `).join('')}
         </div>
         <div style="display:flex;gap:8px;margin-top:6px">
-          <button onclick="PlatsvardeGame.orderUndo()"
+          <button class="pv-ob-act" onclick="PlatsvardeGame.orderUndo()"
             style="flex:1;height:48px;border-radius:var(--radius-full);
             background:var(--tint);color:var(--deep);
             border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
             font-weight:800;cursor:pointer">
-            ↩ Ångra
+            ${ICON_UNDO} Ångra
           </button>
-          <button id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
+          <button class="pv-ob-act" id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
             style="flex:2;height:48px;border-radius:var(--radius-full);
             background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--deep);border:none;
             font-weight:800;cursor:pointer;opacity:0.5">
-            ✓ Klar
+            ${ICON_CHECK} Klar
           </button>
         </div>
       </div>
@@ -991,12 +999,14 @@ const PlatsvardeGame = (() => {
       const el = document.createElement('span');
       el.className = 'confetti-piece';
       el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+      /* Konfettin ska vara borta när nästa fråga kommer efter 1,4 s
+         (granskning D3): 0,9–1,2 s fall, städas vid 1,3 s. */
       el.style.cssText = `left:${Math.random()*100}%;font-size:${14+Math.random()*18}px;
         color:#${Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')};
-        animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.3}s`;
+        animation-duration:${0.9+Math.random()*0.3}s;animation-delay:${Math.random()*0.1}s`;
       container.appendChild(el);
     }
-    setTimeout(() => { container.innerHTML = ''; }, 3000);
+    setTimeout(() => { container.innerHTML = ''; }, 1300);
   }
 
   /* ── Navigation ─────────────────────────────────────────── */
@@ -1042,16 +1052,38 @@ const PlatsvardeGame = (() => {
     pvCanvas = document.getElementById('pv-canvas');
     if (!pvCanvas) return;
     pvErasing = false;
+    if (pvResizeObs) { pvResizeObs.disconnect(); pvResizeObs = null; }
     requestAnimationFrame(() => {
       const r = pvCanvas.getBoundingClientRect();
       pvCanvas.width  = r.width  || 300;
       pvCanvas.height = r.height || 160;
       pvCtx = pvCanvas.getContext('2d');
+      /* Pennan i modulens djupa färg — blått är tiotalsfärgen (granskning D5). */
+      pvPen = (getComputedStyle(pvCanvas).getPropertyValue('--deep') || '').trim() || '#5b21b6';
       pvCanvas.addEventListener('pointerdown',  pvPD);
       pvCanvas.addEventListener('pointermove',  pvPM);
       pvCanvas.addEventListener('pointerup',    pvPU);
       pvCanvas.addEventListener('pointercancel', pvPU);
+      /* Rotation/omfördelning: rita om ritningen i nya måttet i stället
+         för att låta den sträckas (granskning D5). */
+      if (typeof ResizeObserver !== 'undefined') {
+        pvResizeObs = new ResizeObserver(pvResize);
+        pvResizeObs.observe(pvCanvas);
+      }
     });
+  }
+
+  function pvResize() {
+    if (!pvCanvas || !pvCtx) return;
+    const r = pvCanvas.getBoundingClientRect();
+    const w = Math.round(r.width), h = Math.round(r.height);
+    if (!w || !h || (w === pvCanvas.width && h === pvCanvas.height)) return;
+    const copy = document.createElement('canvas');
+    copy.width = pvCanvas.width; copy.height = pvCanvas.height;
+    copy.getContext('2d').drawImage(pvCanvas, 0, 0);
+    pvCanvas.width = w; pvCanvas.height = h;
+    pvCtx = pvCanvas.getContext('2d');
+    pvCtx.drawImage(copy, 0, 0); // 1:1 — strecken behåller sin storlek, sträcks inte
   }
 
   function pvPD(e) {
@@ -1075,7 +1107,7 @@ const PlatsvardeGame = (() => {
     } else {
       pvCtx.globalCompositeOperation = 'source-over';
       pvCtx.lineWidth = 2 + (e.pressure || 0.5) * 3;
-      pvCtx.strokeStyle = '#3b82f6';
+      pvCtx.strokeStyle = pvPen;
     }
     pvCtx.lineCap = 'round'; pvCtx.lineJoin = 'round';
     pvCtx.beginPath(); pvCtx.moveTo(pvLastX, pvLastY);

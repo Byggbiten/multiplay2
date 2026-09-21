@@ -74,6 +74,24 @@ describe('A2 — distraktorer är platsvärdesförväxlingar (granskning B2)', (
   });
 });
 
+describe('D6/D7 — frågeföljd och A3-pool', () => {
+  it('passet har två C1 och två C2 (D6), A3-poolen är 4 unika siffror 1–9 (D7)', () => {
+    for (let i = 0; i < 2000; i++) {
+      const qs = generateQuestions();
+      expect(qs.map(q => q.type)).toEqual(['A1','A2','A3','B1','B2','C1','C2','C2','D1','D2']);
+      const a3 = qs[2];
+      expect(a3.options.length).toBe(4);
+      expect(new Set(a3.options).size).toBe(4);
+      expect(a3.options).toContain(a3.correct);
+      a3.options.forEach(o => { expect(o).toBeGreaterThanOrEqual(1); expect(o).toBeLessThanOrEqual(9); });
+      const c3 = qs[7];
+      expect(c3.options.length).toBe(4);
+      expect(new Set(c3.options).size).toBe(4);
+      expect(c3.options).toContain(c3.correct);
+    }
+  });
+});
+
 describe('B6 — facit landar i frågans egna rutor och väntar på Nästa', () => {
   beforeEach(() => {
     vi.useFakeTimers();
