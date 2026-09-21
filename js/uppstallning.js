@@ -1772,19 +1772,15 @@ const UppstallningGame = (() => {
     g.style.height = size + 'px';
     g.style.fontSize = Math.round(size * 0.62) + 'px';
     g.style.top  = (aR.top - wR.top + aR.height / 2 - size / 2) + 'px';
-    /* Kolumn 0 ligger ytterst till höger i tabellen och har plats där.
-       Övriga har grannar åt höger — då går brickan ut i vänstermarginalen,
-       utanför hela tabellen, så den aldrig täcker en annan kolumn. */
-    g.style.left = (col === 0 ? (aR.right - wR.left + 8) : leftMarginSpot(size)) + 'px';
+    /* ALLT lösräknande ligger på talets HÖGERSIDA, samma x hela uppgiften
+       igenom — samma parkeringsplats som summebrickan. Dennis 21/9: barnen
+       ska lära sig att hålla uträkningarna om talets högersida, så handen vet
+       var kladden hör hemma. Tidigare gick spöket ut i vänstermarginalen för
+       alla kolumner utom entalen; då låg lösa siffror på ena sidan och summan
+       på den andra, och barnet fick leta på två håll. */
+    g.style.left = rightMarginSpot(size) + 'px';
     wrap.appendChild(g);
     return g;
-  }
-
-  function leftMarginSpot(width) {
-    const wrap = upWrap(), table = document.querySelector('.up-table');
-    if (!wrap || !table) return 2;
-    return Math.max(2, (table.getBoundingClientRect().left -
-                        wrap.getBoundingClientRect().left) - width - 8);
   }
 
   /* Grow-brickan blir en hel tia inne i rutan (mockup:1541–1548). */
