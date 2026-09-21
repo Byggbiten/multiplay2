@@ -90,7 +90,10 @@ const MultDivGame = (() => {
   let helpQueue = [], helpIdx = 0, helpSub = 0; // helpSub: alltid 0 sedan v30 (carry-knappen ersattes av PLACERA-fasen)
   let helpInput = '', exInputLocked = false;
 
-  /* Fritt läge (utan hjälp) — miniräknar-modell: ETT svarsfält */
+  /* Fritt läge (utan hjälp): svaret skrivs i svarsradens celler, höger→
+     vänster från entalet (C3). exFreeInput lever kvar för divisionens
+     miniräknar-fält tills dess skiva byggs. */
+  let exFreeCells = [], exFreeCur = 0;   // svarsrutan med fokus (0 = entalet)
   let exFreeInput = '', exFreeFirstAttempt = true;
 
   /* Kladd-canvas */
@@ -263,6 +266,65 @@ const MultDivGame = (() => {
       border-color:rgba(220,38,38,0.45); }
     .md-nk.md-pk-x { color:var(--ink-soft); border-color:var(--glass-line); }
     .md-thought .md-mempick { background:none; border:none; box-shadow:none; padding:0; }
+
+    /* FRIA LÄGET (C3/C4, facit uppstallning.js .free-keys/.btn-klar/.ans-focus):
+       svarsrutorna är pappret, fokusringen glider mellan dem, knappsatsen
+       är ett 3×4-grid med Klar som hög Enter-knapp. ⌫ nere till vänster,
+       längst från Klar. */
+    .md-ansc.md-tap { cursor:pointer; }
+    .md-ans-focus { position:absolute; pointer-events:none; z-index:6; border-radius:15px;
+      border:3px solid var(--accent);
+      box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent), 0 6px 16px var(--glow);
+      transition:left 0.26s var(--spring), top 0.26s var(--spring),
+                 width 0.26s var(--spring), height 0.26s var(--spring); }
+    .md-ans-focus.instant { transition:none; }
+    .md-ansc.hop { animation:md-cell-hop 0.34s var(--spring) both; }
+    .md-ansc .md-ans-caret { display:inline-block; width:4px; height:0.62em; border-radius:2px;
+      background:var(--accent); animation:md-caret 1s steps(1) infinite; }
+    /* Bedömningen syns FÖRST efter Klar — aldrig medan hon skriver. */
+    .md-ansc.judged-ok { border-color:#22c55e !important; border-style:solid;
+      background:rgba(34,197,94,0.14); animation:md-land 0.45s ease-out both; }
+    #md-table-wrap.shake { animation:md-shake 0.3s ease; }
+    .md-free-card { padding:6px; }
+    .md-free-pad { display:flex; gap:clamp(5px,1.4vw,9px); align-items:stretch; }
+    .md-free-keys { flex:1 1 auto; display:grid; grid-template-columns:repeat(3,1fr);
+      grid-auto-rows:clamp(46px,min(12vw,9vh),60px); gap:clamp(5px,1.4vw,9px); }
+    .md-free-keys .md-nk { width:100%; height:100%; border-radius:16px;
+      font-size:clamp(1.25rem,3.4vw,1.6rem);
+      background:linear-gradient(180deg,#fff,var(--glass-strong));
+      box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 16%, transparent), 0 4px 10px rgba(13,148,136,0.07); }
+    .md-free-keys .md-nk:hover { transform:none; }
+    .md-free-keys .md-nk:active { transform:scale(0.94); box-shadow:none;
+      background:color-mix(in srgb, var(--accent) 12%, #fff); }
+    .md-free-keys .k-zero { grid-column:2 / span 2; }
+    .md-free-keys .k-erase { color:var(--deep); background:var(--tint); display:grid; place-items:center; }
+    .md-free-keys .k-erase svg { width:26px; height:26px; fill:none; stroke:currentColor;
+      stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+    .md-klar { flex:0 0 clamp(88px,24.5vw,118px); position:relative; overflow:hidden;
+      border:none; border-radius:18px; cursor:pointer;
+      font-family:var(--font-head); font-weight:800; font-size:clamp(1rem,3vw,1.25rem);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+      transition:background 0.25s ease, color 0.2s, box-shadow 0.25s ease; }
+    .md-klar svg { width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:3;
+      stroke-linecap:round; stroke-linejoin:round; }
+    .md-klar[disabled] { cursor:default; color:var(--deep);
+      background:linear-gradient(180deg,#fff,var(--tint));
+      box-shadow:inset 0 0 0 2.5px color-mix(in srgb, var(--accent) 40%, transparent), 0 4px 14px rgba(13,148,136,0.08); }
+    .md-klar[disabled]::after { content:''; position:absolute; inset:0; pointer-events:none;
+      background:linear-gradient(170deg,transparent 38%, color-mix(in srgb, var(--accent) 17%, transparent) 50%, transparent 62%);
+      transform:translateY(-130%); animation:md-klar-sheen 2.6s ease infinite; }
+    .md-klar:not([disabled]) { color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light)); box-shadow:0 8px 22px var(--glow); }
+    .md-klar:not([disabled]):active { transform:scale(0.97); }
+    .md-klar.wake { animation:md-land 0.42s ease-out both; }
+    .md-klar.done[disabled] { color:#fff; background:linear-gradient(135deg,#22c55e,#86efac);
+      box-shadow:0 8px 22px rgba(34,197,94,0.35); }
+    .md-klar.done[disabled]::after { display:none; }
+    .md-free-tip { background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
+      border-radius:12px; padding:6px 10px; font-weight:800; color:#92400e;
+      text-align:center; font-size:0.88rem; line-height:1.25; }
+    @keyframes md-cell-hop { 0% { transform:scale(1); } 45% { transform:scale(1.18); } 100% { transform:scale(1); } }
+    @keyframes md-klar-sheen { 0%,55% { transform:translateY(-130%); } 100% { transform:translateY(130%); } }
     @keyframes md-mem-blink { 0%,100% { transform:rotate(-4deg) scale(1); }
       50% { transform:rotate(-4deg) scale(1.45); } }
 
@@ -304,6 +366,7 @@ const MultDivGame = (() => {
        (64 px vid 390) så "Nästa steg" står still under fingret; i övningen
        en rad så knappsatsen inte hoppar när bubblan byter text. */
     #md-bubble { min-height:42px; display:flex; flex-direction:column; justify-content:center; }
+    #md-bubble:empty { display:none; }
     #md-bubble.md-bub-demo { min-height:64px; }
     /* Tankebubbla */
     .md-thought { background:#fff; border-radius:var(--radius-md);
@@ -1494,9 +1557,11 @@ const MultDivGame = (() => {
         ${lineRow}`;
     }
 
+    /* Fria läget (C3): samma svarsrutor som demo/hjälp, tappbara, med en
+       fokusring som glider höger→vänster (#md-ans-focus, placeras i JS). */
     const ansRow = freeMode
-      ? `<tr><td colspan="${W + 2}">
-           <div class="md-field num" id="md-free-field"><span class="md-caret"></span></div></td></tr>`
+      ? `<tr><td></td>${idx.map(i =>
+          `<td><div class="md-ansc md-tap" id="md-ans-${i}" onclick="MultDivGame.exFreeFocus(${i})"></div></td>`).join('')}<td></td></tr>`
       : `<tr><td></td>${idx.map(i => fillCell('ans', i, true)).join('')}<td></td></tr>`;
 
     return `
@@ -1509,7 +1574,7 @@ const MultDivGame = (() => {
           ${midRows}
           ${ansRow}
         </tbody>
-      </table>`;
+      </table>${freeMode ? '<div id="md-ans-focus" class="md-ans-focus" style="display:none"></div>' : ''}`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2033,10 +2098,15 @@ const MultDivGame = (() => {
   }
 
   function renderMemPicker() {
-    const area = document.getElementById(memColMode === 'help' ? 'md-ui' : 'md-bubble');
+    const area = document.getElementById('md-ui');
     if (!area) return;
-    if (!memPickerOpen) { area.innerHTML = ''; return; }
-    area.innerHTML = memColMode === 'help' ? memPickerHTML(false) : `<div class="md-thought">${memPickerHTML(true)}</div>`;
+    if (memColMode === 'free') {
+      // Fria läget: väljaren lånar knappsatsens yta (kladden krymper inte)
+      if (memPickerOpen) area.innerHTML = memPickerHTML(true);
+      else renderFreePad();
+      return;
+    }
+    area.innerHTML = memPickerOpen ? memPickerHTML(false) : '';
   }
 
   function memPick(d) {
@@ -2389,38 +2459,238 @@ const MultDivGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════
-     UTAN HJÄLP — miniräknar-fältet (v27-mönstret)
+     UTAN HJÄLP — svaret skrivs i svarsradens celler (C3/C4, 2026-09-21;
+     facit uppstallning.js .free-keys/exFreePress/exFreePlaceRing).
+     Fokusringen glider HÖGER→VÄNSTER från entalet, precis som man
+     räknar uppställd multiplikation på papper. Ingen bedömning sker
+     medan barnet skriver — bara vid Klar. Minnesspalten är frivillig
+     (tap på slot → väljare 1–9, ≥48 pt) och RÄKNAS i rättningen: en
+     minnessiffra som inte stämmer med kedjan pekas ut i feedbacken.
+     Divisionen (vänster→höger) byggs om i sin egen skiva och kör tills
+     dess kvar på miniräknar-fältet (grenarna plan.kind === 'division').
   ══════════════════════════════════════════════════════════ */
+  const ICON_ERASE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6H9.6a2 2 0 0 0-1.5.7L3.4 12l4.7 5.3a2 2 0 0 0 1.5.7H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"/><path d="M17 10l-4 4M13 10l4 4"/></svg>';
+  const ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg>';
+  const isDivFree = () => plan.kind === 'division';
+
   function showFreeUI() {
+    if (!isDivFree()) exFreeInit();
+    renderFreePad();
+  }
+
+  /* Knappsatsen ritas om utan att röra svaret (väljaren lånar ytan) */
+  function renderFreePad() {
     const ui = document.getElementById('md-ui');
     if (!ui) return;
-    ui.innerHTML = `<div class="md-panel">
-      <div id="md-free-label" style="font-size:11px;font-weight:800;text-align:center;margin-bottom:8px;text-transform:uppercase"></div>
-      <div class="md-numpad">
-        ${[1,2,3,4,5,6,7,8,9,0].map(k =>
-          `<button class="md-nk" onclick="MultDivGame.exFreePress('${k}')">${k}</button>`).join('')}
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="md-btn" id="md-free-erase" onclick="MultDivGame.exFreeErase()"
-          style="width:64px;height:48px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
-        <button class="md-btn" id="md-free-submit" onclick="MultDivGame.exFreeSubmit()" disabled
-          style="flex:1;height:48px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:1rem;border-radius:var(--radius-full)">Skriv svaret…</button>
+    /* Ingen rubrik över knappsatsen: rutorna, fokusringen och markören
+       säger redan vad som ska göras (Dennis 21/9, additionen). */
+    ui.innerHTML = `<div class="md-panel md-free-card">
+      <div class="md-free-pad">
+        <div class="md-free-keys">
+          ${[1,2,3,4,5,6,7,8,9].map(k =>
+            `<button class="md-nk" onclick="MultDivGame.exFreePress('${k}')">${k}</button>`).join('')}
+          <button class="md-nk k-erase" aria-label="Sudda sista siffran"
+            onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
+          <button class="md-nk k-zero" onclick="MultDivGame.exFreePress('0')">0</button>
+        </div>
+        <button class="md-klar" id="md-free-submit" disabled
+          onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
     </div>`;
     exFreeUpdateSubmit();
   }
 
-  // Maxlängd = svarets sifferantal (aldrig > 4 per nivåvillkoren)
+  /* ── Cellinmatning (multiplikation) ── */
+  function exFreeInit() {
+    exFreeCells = Array(plan.width).fill(null);
+    exFreeCur = 0;
+    exFreePaintCells();
+    requestAnimationFrame(() => exFreePlaceRing(false));
+  }
+
+  /* Svarets värde, eller null om rutorna inte bildar ett tal: ledande
+     tomma rutor hoppas över, en tom ruta MITT i talet kan aldrig bli rätt. */
+  function exFreeValue() {
+    let s = '', started = false;
+    for (let g = plan.width - 1; g >= 0; g--) {
+      const v = exFreeCells[g];
+      if (v === null) { if (started) return null; continue; }
+      started = true; s += v;
+    }
+    return s === '' ? null : parseInt(s, 10);
+  }
+  const exFreeHasDigits = () => exFreeCells.some(v => v !== null);
+
+  function exFreePaintCells(popG) {
+    for (let g = 0; g < plan.width; g++) {
+      const el = document.getElementById(`md-ans-${g}`);
+      if (!el) continue;
+      const v = exFreeCells[g];
+      el.classList.toggle('filled', v !== null);
+      el.classList.toggle('active-col', g === exFreeCur && !exInputLocked);
+      el.style.borderColor = v !== null ? cv(g) : '';
+      el.style.borderStyle = v !== null ? 'solid' : '';
+      el.innerHTML = v !== null
+        ? `<span style="color:${cv(g)}">${v}</span>`
+        : (g === exFreeCur && !exInputLocked ? '<span class="md-ans-caret"></span>' : '');
+      if (popG === g) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+    }
+  }
+
+  /* Fokusringen glider mellan rutorna — flytten ska SYNAS. */
+  function exFreePlaceRing(animate) {
+    const ring = document.getElementById('md-ans-focus'), wrap = mdWrap();
+    if (!ring || !wrap) return;
+    if (exInputLocked) { ring.style.display = 'none'; return; }
+    const cell = document.getElementById(`md-ans-${exFreeCur}`);
+    if (!cell) return;
+    ring.style.display = 'block';
+    ring.classList.toggle('instant', animate === false);
+    const wr = wrap.getBoundingClientRect(), cr = cell.getBoundingClientRect();
+    ring.style.left = `${cr.left - wr.left - 4}px`; ring.style.top = `${cr.top - wr.top - 4}px`;
+    ring.style.width = `${cr.width + 8}px`; ring.style.height = `${cr.height + 8}px`;
+    if (animate === false) requestAnimationFrame(() => ring.classList.remove('instant'));
+  }
+
+  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den gamla. */
+  function exFreeFocus(g) {
+    if (exInputLocked || helpMode || isDivFree()) return;
+    if (g < 0 || g >= plan.width) return;
+    exFreeCur = g;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
+  }
+
+  function exFreeClearWrong() {
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('judged-ok'));
+    const field = document.getElementById('md-free-field');
+    if (field) field.classList.remove('wrong');
+    const fb = document.getElementById('md-feedback');
+    if (fb) fb.innerHTML = '';
+  }
+
+  /* Klar heter Klar hela tiden — ytan bär tillståndet, inte namnet. */
+  function exFreeUpdateSubmit() {
+    const btn = document.getElementById('md-free-submit');
+    if (!btn) return;
+    const ready = (isDivFree() ? exFreeInput.length > 0 : exFreeHasDigits()) && !exInputLocked;
+    const was = !btn.disabled;
+    btn.disabled = !ready;
+    btn.classList.toggle('done', exInputLocked);
+    if (ready && !was) { btn.classList.remove('wake'); void btn.offsetWidth; btn.classList.add('wake'); }
+  }
+
+  function exFreePress(key) {
+    if (exInputLocked) return;
+    exFreeClearWrong();
+    if (isDivFree()) { exFieldPress(key); return; }
+    exFreeCells[exFreeCur] = parseInt(key, 10);
+    const popped = exFreeCur;
+    if (exFreeCur < plan.width - 1) exFreeCur++;   // ett steg vänsterut
+    App.Sound.play('click');
+    exFreePaintCells(popped);
+    exFreePlaceRing(true);
+    exFreeUpdateSubmit();
+  }
+
+  /* ⌫ som på ett tangentbord: har rutan en siffra töms den och fokus står
+     kvar; är rutan tom flyttar fokus ett steg åt HÖGER och tömmer den. */
+  function exFreeErase() {
+    if (exInputLocked) return;
+    exFreeClearWrong();
+    if (isDivFree()) { exFieldErase(); return; }
+    if (exFreeCells[exFreeCur] === null) {
+      if (exFreeCur > 0) { exFreeCur--; exFreeCells[exFreeCur] = null; }
+    } else exFreeCells[exFreeCur] = null;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
+    exFreeUpdateSubmit();
+  }
+
+  /* Minneskedjan enligt planen — de minnen som FAKTISKT uppstår, i den
+     ordning barnet möter dem (p1 → p2 → additionen). */
+  function planCarries(pl) {
+    const of = pass => pass.cols.filter(c => !c.last && c.carryOut > 0).map(c => c.carryOut);
+    if (pl.kind === 'simple') return of(pl.pass);
+    return [...of(pl.p1), ...of(pl.p2), ...of(pl.add)];
+  }
+
+  /* Barnets minnessiffror jämförs med kedjan: första avvikelsen pekas ut.
+     Ren funktion (vitest-bar). null = inget att anmärka på. */
+  function memMismatch(written, carries) {
+    for (let i = 0; i < written.length; i++) {
+      if (i >= carries.length) return { pos: i, wrote: written[i], want: null };
+      if (written[i] !== carries[i]) return { pos: i, wrote: written[i], want: carries[i] };
+    }
+    return null;
+  }
+
+  function freeTip(msg) {
+    const fb = document.getElementById('md-feedback');
+    if (fb) fb.innerHTML = `<div class="md-free-tip">${msg}</div>`;
+  }
+
+  function exFreeSubmit() {
+    if (exInputLocked) return;
+    if (isDivFree()) { exFieldSubmit(); return; }
+    if (!exFreeHasDigits()) return;          // Klar kräver minst en siffra
+    const val = exFreeValue();
+    const mm = memMismatch(mdMemList.map(e => e.val), planCarries(plan));
+    if (val === plan.answer) {
+      exInputLocked = true;
+      if (exFreeFirstAttempt) exScore++;      // +1 endast helrätt på FÖRSTA Klar
+      exFreeClearWrong();
+      exFreePaintCells();
+      exFreePlaceRing(false);                 // låst ruta → ringen släcks
+      document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.add('judged-ok'));
+      exFreeUpdateSubmit();
+      App.Sound.play('correct');
+      smallBurst();
+      // Svaret stämmer — en minnessiffra som inte stämde nämns milt, utan straff
+      if (mm) freeTip(mm.want === null
+        ? `Rätt svar! Minnessiffran <strong>${mm.wrote}</strong> behövdes inte här 👆`
+        : `Rätt svar! Minnessiffran <strong>${mm.wrote}</strong> skulle vara <strong>${mm.want}</strong> 👆`);
+      setTimeout(() => finishTask(true), mm ? 1600 : 900);
+    } else {
+      exFreeFirstAttempt = false;             // fel förbrukar första försöket
+      App.Sound.play('wrong');
+      const wrap = mdWrap();
+      if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+      // Glömd-minnessiffra-detektion (v30): matchar svaret simuleringen där
+      // minnen tappas → riktad feedback. Minnesspalten räknas: en felaktig
+      // minnessiffra pekas ut före den generiska texten.
+      const nc = noCarryAnswer(plan);
+      const memHint = nc !== plan.answer && val === nc;
+      freeTip(mm
+        ? (mm.want === null
+          ? `Kolla minnessiffran <strong>${mm.wrote}</strong> — den behövs inte här 👆`
+          : `Kolla minnessiffran <strong>${mm.wrote}</strong> — den stämmer inte 👆`)
+        : memHint ? 'Nästan! Kolla minnessiffrorna — någon vill vara med! 👆'
+        : 'Inte riktigt! Ändra och prova igen 💪');
+      exFreeUpdateSubmit();
+    }
+  }
+
+  /* Ringen är utmätt i pixlar och måste räknas om när ytan ändrar form. */
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+      if (document.getElementById('md-ans-focus')) exFreePlaceRing(false);
+    });
+  }
+
+  /* ── Miniräknar-fältet: BARA divisionen, tills dess skiva byggs ── */
   function exFreeMaxLen() { return Math.min(plan.width, 4); }
 
-  function exFreeRender() {
+  function exFieldRender() {
     const field = document.getElementById('md-free-field');
     if (!field) return;
     field.classList.toggle('has-digits', exFreeInput.length > 0);
     field.innerHTML = (exFreeInput ? `<span>${exFreeInput}</span>` : '') + '<span class="md-caret"></span>';
   }
 
-  function exFreeShake() {
+  function exFieldShake() {
     const field = document.getElementById('md-free-field');
     if (!field) return;
     field.classList.remove('shake');
@@ -2428,90 +2698,45 @@ const MultDivGame = (() => {
     field.classList.add('shake');
   }
 
-  function exFreeClearWrong() {
-    const field = document.getElementById('md-free-field');
-    if (field) field.classList.remove('wrong');
-    const fb = document.getElementById('md-feedback');
-    if (fb) fb.innerHTML = '';
-  }
-
-  function exFreeUpdateSubmit() {
-    const ready = exFreeInput.length > 0;
-    const btn = document.getElementById('md-free-submit');
-    if (btn) {
-      btn.disabled = !ready;
-      btn.style.background = ready
-        ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
-        : 'linear-gradient(135deg,#cbd5e1,#94a3b8)';
-      btn.textContent = ready ? 'Klar ✓' : 'Skriv svaret…';
-    }
-    const label = document.getElementById('md-free-label');
-    if (label) {
-      const what = gameKind === 'div' ? 'kvoten' : 'svaret';
-      label.textContent = ready ? 'Tryck Klar ✓ när du är säker' : `Skriv ${what} med siffrorna`;
-      label.style.color = ready ? '#16a34a' : 'var(--ink-soft)';
-    }
-  }
-
-  function exFreePress(key) {
-    if (exInputLocked) return;
-    exFreeClearWrong();
-    if (exFreeInput === '0') {
-      exFreeInput = key;             // miniräknar-detalj: ensam nolla ersätts
-    } else if (exFreeInput.length >= exFreeMaxLen()) {
-      exFreeShake();                 // fullt — extra tryck ignoreras mjukt
-      return;
-    } else {
-      exFreeInput += key;            // vänster→höger som man skriver
-    }
+  function exFieldPress(key) {
+    if (exFreeInput === '0') exFreeInput = key;
+    else if (exFreeInput.length >= exFreeMaxLen()) { exFieldShake(); return; }
+    else exFreeInput += key;
     App.Sound.play('click');
-    exFreeRender();
+    exFieldRender();
     exFreeUpdateSubmit();
   }
 
-  function exFreeErase() {
-    if (exInputLocked || !exFreeInput) return;
-    exFreeClearWrong();
-    exFreeInput = exFreeInput.slice(0, -1);   // ⌫ tar bort SISTA siffran
+  function exFieldErase() {
+    if (!exFreeInput) return;
+    exFreeInput = exFreeInput.slice(0, -1);
     App.Sound.play('click');
-    exFreeRender();
+    exFieldRender();
     exFreeUpdateSubmit();
   }
 
-  function exFreeSubmit() {
-    if (exInputLocked || !exFreeInput) return; // gating: Klar kräver ≥1 siffra
+  function exFieldSubmit() {
+    if (!exFreeInput) return;
     const field = document.getElementById('md-free-field');
     if (parseInt(exFreeInput, 10) === plan.answer) {
       exInputLocked = true;
-      if (exFreeFirstAttempt) exScore++;      // +1 endast helrätt på FÖRSTA Klar
+      if (exFreeFirstAttempt) exScore++;
       exFreeClearWrong();
-      if (field) {
-        field.classList.add('correct');
-        field.innerHTML = `<span>${exFreeInput}</span>`;
-      }
+      if (field) { field.classList.remove('shake'); field.classList.add('correct'); field.innerHTML = `<span>${exFreeInput}</span>`; }
+      exFreeUpdateSubmit();
       App.Sound.play('correct');
       smallBurst();
       setTimeout(() => finishTask(true), 900);
     } else {
-      exFreeFirstAttempt = false;             // fel förbrukar första försöket
+      exFreeFirstAttempt = false;
       App.Sound.play('wrong');
-      if (field) field.classList.add('wrong'); // rött + redigerbart
-      exFreeShake();
-      // Glömd-minnessiffra-detektion (v30) / glömd-rest-detektion (v32):
-      // matchar svaret simuleringen där minnen/rester tappas → riktad
-      // feedback i stället för generisk.
+      if (field) field.classList.add('wrong');
+      exFieldShake();
       const guess = parseInt(exFreeInput, 10);
-      const nc = plan.kind === 'division' ? divNoRemAnswer(numA, numB) : noCarryAnswer(plan);
-      const memHint = nc !== plan.answer && guess === nc;
-      const hintText = plan.kind === 'division'
+      const nc = divNoRemAnswer(numA, numB);
+      freeTip(nc !== plan.answer && guess === nc
         ? 'Nästan! Kolla resterna — de följer med till nästa siffra! 👆'
-        : 'Nästan! Kolla minnessiffrorna — någon vill vara med! 👆';
-      const fb = document.getElementById('md-feedback');
-      if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
-        border:2px solid #f59e0b;border-radius:12px;padding:5px 10px;font-weight:800;
-        font-size:0.92rem;color:#92400e;text-align:center">${memHint
-          ? hintText
-          : 'Inte riktigt! Ändra med ⌫ och prova igen 💪'}</div>`;
+        : 'Inte riktigt! Ändra med ⌫ och prova igen 💪');
       exFreeUpdateSubmit();
     }
   }
@@ -2715,14 +2940,14 @@ const MultDivGame = (() => {
     memTap, memTapSlot, memPick,           // minnesspalten (v30)
     divTapSlot,                            // divisionens PLACERA-fas (v32)
     divDigitTap,                           // divisionens STRYK-fas (v36)
-    exFreePress, exFreeErase, exFreeSubmit,
+    exFreePress, exFreeErase, exFreeSubmit, exFreeFocus,
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue },
+    __test: { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planCarries, memMismatch },
   };
   return api;
 })();

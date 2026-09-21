@@ -293,3 +293,20 @@ describe('hjalpkon (GRANSKNING B2/B5/B6/B7)', () => {
     expect(sista[0].single).toBe(true);
   });
 });
+
+describe('fria lagets minnesspalt raknas i rattningen (B5)', () => {
+  const { planCarries, memMismatch } = MD.__test;
+  it('planCarries: minnena i den ordning barnet moter dem', () => {
+    expect(planCarries(buildPlan(28, 8, 2))).toEqual([6]);
+    expect(planCarries(buildPlan(789, 9, 3))).toEqual([8, 8]);
+    expect(planCarries(buildPlan(98, 78, 4))).toEqual([6, 5, 1, 1]);
+    expect(planCarries(buildPlan(32, 3, 1))).toEqual([]);
+  });
+  it('memMismatch: forsta avvikelsen pekas ut, tomt = inget att anmarka pa', () => {
+    expect(memMismatch([], [6])).toBeNull();
+    expect(memMismatch([6], [6])).toBeNull();
+    expect(memMismatch([5], [6])).toEqual({ pos: 0, wrote: 5, want: 6 });
+    expect(memMismatch([6, 5, 2], [6, 5, 1, 1])).toEqual({ pos: 2, wrote: 2, want: 1 });
+    expect(memMismatch([3], [])).toEqual({ pos: 0, wrote: 3, want: null });
+  });
+});
