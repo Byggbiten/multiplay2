@@ -2004,8 +2004,15 @@ const MultDivGame = (() => {
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';
     divAwait = { g: item.g - 1, val: item.rem, next: item.next };
+    // A2: cellen som ska ta emot resten dimmas ALDRIG — slotten är fullt synlig
+    divHighlight(item, [item.g - 1]);
     renderDivSlot();
-    helpBubble(`Var ska resten <strong style="color:#dc2626">${item.rem}</strong> stå? Tryck där! 👉`);
+    const ask = () => helpBubble(`Var ska resten <strong style="color:#dc2626">${item.rem}</strong> stå? Tryck där! 👉`);
+    if (mdChip()) { ask(); return; }
+    // q = 0: ingen rest-fråga ställdes — hela talet blir över, brickan föds här
+    exInputLocked = true;
+    helpBubble(`Hela <strong style="color:#dc2626">${item.rem}</strong>:an blir över.`);
+    chipBorn({ g: item.g }, item.rem, divCurCells(item), () => { exInputLocked = false; ask(); });
   }
 
   function renderDivSlot() {
@@ -2022,14 +2029,16 @@ const MultDivGame = (() => {
   function divTapSlot() {
     if (!divAwait || exInputLocked) return;
     exInputLocked = true;
-    const { g, val, next } = divAwait;
+    const { g, val } = divAwait;
     divAwait = null;
+    const fb = document.getElementById('md-feedback');
+    if (fb) fb.innerHTML = ''; // B7: vägledningen från ett fel-tap står inte kvar bredvid berömmet
     document.querySelectorAll('.md-divslot').forEach(el => el.remove());
-    divWriteRem(g, val);
-    playCarrySound();
-    helpBubble(`Precis där! 🎯 Nu har vi <strong>${val * 10 + next}</strong>!`);
+    helpBubble('Precis där! 🎯');
     const gen = exGen;
-    setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
+    chipToRest(g, val, () => {
+      setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
+    });
   }
 
   /* Mild vägledningsruta (barn-UX-lagen: aldrig poängstraff) */
@@ -2077,6 +2086,8 @@ const MultDivGame = (() => {
       divStrikeAwait = null;
       const cell = document.getElementById(`md-n-${g}`);
       if (cell) cell.classList.remove('md-prob');
+      const fb = document.getElementById('md-feedback');
+      if (fb) fb.innerHTML = '';
       divStrikeDigit(g, true); // animerat penndrag — siffran står kvar
       App.Sound.play('correct');
       helpBubble(`Struken! ✏️ Nu ser vi att ${digit}:an är klar.`);
@@ -2286,9 +2297,9 @@ const MultDivGame = (() => {
 
     /* v32: leading-specialfallet — informationssteg med framåtblickande knapp */
     if (item.kind === 'dskip') {
-      helpBubble(`${numB}:or i ${item.cur}? Det går inte — vi tar med nästa siffra: <strong>${item.cur * 10 + item.next}</strong>!`);
+      helpBubble(`${numB}:or i <strong style="color:${cv(item.g)}">${item.cur}</strong>? Det går inte.`);
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
-        onclick="MultDivGame.helpAction()">Vi tar med nästa siffra! →</button>`;
+        onclick="MultDivGame.helpAction()">Vi tar med ${item.next}:an — nu har vi ${item.cur * 10 + item.next}! →</button>`;
       return;
     }
 
@@ -2409,19 +2420,24 @@ const MultDivGame = (() => {
         // Kvotsiffran skrivs i kvoten efter "=" (v36) — sedan ev. rest-frågan
         writeDigit('q', item.g, item.q);
         const txt = item.q === 0
-          ? `Rätt! Ingen hel ${numB}:a ryms i ${item.cur} — <strong style="color:${cv(item.g)}">0</strong> i kvoten! ⭕`
+          ? `Rätt! Ingen hel ${numB}:a ryms — <strong style="color:${cv(item.g)}">0</strong> i kvoten. ⭕`
           : (item.remIn > 0 && item.rem === 0)
-            ? `Rätt! <strong>${item.cur} ÷ ${numB} = ${item.q}</strong>, precis jämnt! ✅`
-            : `Rätt! <strong style="color:${cv(item.g)}">${item.q}</strong> ${item.q === 1 ? 'styck' : 'stycken'} — för ${item.q} · ${numB} = ${item.q * numB} ✅`;
+            ? `Rätt! <strong style="color:${cv(item.g)}">${item.q}</strong> ${item.q === 1 ? 'styck' : 'stycken'} — precis jämnt! ✅`
+            : `Rätt! <strong style="color:${cv(item.g)}">${item.q}</strong> ${item.q === 1 ? 'styck' : 'stycken'} ✅`;
         helpBubble(txt);
         smallBurst();
         setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 900);
         return;
       }
       if (item.kind === 'divrem') {
+        // Resten föds som BRICKA ur talet och kvotsiffran — den står kvar
+        // i marginalen tills barnet tappat dess plats (A1/A2)
         helpBubble(`Rätt! <strong style="color:#dc2626">${item.rem}</strong> blir över ✅`);
         smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 700);
+        const srcs = [...divCurCells(item), document.getElementById(`md-q-${item.g}`)].filter(Boolean);
+        chipBorn({ g: item.g }, item.rem, srcs, () => {
+          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
+        });
         return;
       }
       if (item.kind === 'memwrite') {
