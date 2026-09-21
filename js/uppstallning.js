@@ -251,9 +251,14 @@ const UppstallningGame = (() => {
       animation:bubble-in 0.3s var(--spring); line-height:1.5; }
 
     /* Numpad i övningsläge */
-    .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(40px,7vw,60px)); gap:5px; justify-content:center; }
-    .ex-nk { width:clamp(40px,7vw,60px); height:clamp(40px,7vw,60px); border-radius:50%;
-      font-size:clamp(0.95rem,2vw,1.1rem); font-family:var(--font-head); font-weight:900;
+    /* Hjälplägets knappsats. Storleken var clamp(40px,7vw,60px) — 7vw är 27 px
+       på en 390 pt-telefon, så den klämde till 40 och passerade Apples golv på
+       44 först vid 629 pt skärmbredd, alltså aldrig på en iPhone i stående.
+       48 pt med 7 px mellanrum ryms med marginal: 5×48 + 4×7 = 268 av ~362.
+       Fria läget överskriver width/height via .free-keys och påverkas inte. */
+    .ex-numpad { display:grid; grid-template-columns:repeat(5,clamp(48px,12vw,64px)); gap:7px; justify-content:center; }
+    .ex-nk { width:clamp(48px,12vw,64px); height:clamp(48px,12vw,64px); border-radius:50%;
+      font-size:clamp(1.05rem,2.4vw,1.25rem); font-family:var(--font-head); font-weight:900;
       cursor:pointer; background:var(--glass-strong);
       border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
       color:var(--deep); transition:transform 0.2s var(--spring); }
