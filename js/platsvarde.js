@@ -359,6 +359,19 @@ const PlatsvardeGame = (() => {
           transition:all 0.25s var(--spring); }
         .pv-choice-btn:hover { border-color:var(--accent); transform:translateY(-2px) scale(1.02);
           box-shadow:0 8px 20px var(--glow); }
+        /* Utfall på plats: rätt lyser, fel dämpas och låses, övriga tonas i facit. */
+        .pv-choice-btn.pv-correct { border-color:#22c55e; background:rgba(34,197,94,0.14);
+          animation:pv-land 0.45s ease-out both; }
+        .pv-choice-btn.pv-wrong { opacity:0.4; pointer-events:none; border-style:dashed; }
+        .pv-choice-btn.pv-dim { opacity:0.55; pointer-events:none; }
+        .pv-choice-btn.pv-correct:hover, .pv-choice-btn.pv-dim:hover { transform:none; box-shadow:none; }
+        /* Facit i fält/slot: siffran landar där barnet hade fel. */
+        .pv-fixed { background:rgba(34,197,94,0.14) !important; animation:pv-land 0.45s ease-out both; }
+        @keyframes pv-land {
+          0%   { transform:scale(1.18); }
+          60%  { transform:scale(0.96); }
+          100% { transform:scale(1); }
+        }
         .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
           font-family:var(--font-head); font-variant-numeric:tabular-nums;
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
@@ -518,7 +531,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
@@ -540,7 +553,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               <span style="font-weight:900;font-size:var(--text-xl)">${opt}</span>
             </button>
           `).join('')}
@@ -560,7 +573,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
@@ -616,7 +629,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" style="text-align:left;padding:10px 12px"
+            <button class="pv-choice-btn" data-val="${escHtml(opt)}" style="text-align:left;padding:10px 12px"
               onclick="PlatsvardeGame.handleChoice('${escApos(opt)}','${escApos(q.correct)}')">
               ${escHtml(opt)}
             </button>
@@ -639,7 +652,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
@@ -659,7 +672,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.nums.map(n => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${n},${q.correct})">
+            <button class="pv-choice-btn" data-val="${n}" onclick="PlatsvardeGame.handleChoice(${n},${q.correct})">
               ${renderColoredNumber(n, '1.5rem')}
             </button>
           `).join('')}
@@ -714,7 +727,18 @@ const PlatsvardeGame = (() => {
   function handleChoice(val, correct) {
     if (inputLocked) return;
     inputLocked = true;
-    processAnswer(String(val) === String(correct), String(correct));
+    const isCorrect = String(val) === String(correct);
+    /* Den tryckta knappen bär utfallet: rätt lyser grönt, fel dämpas och
+       låses så samma knapp inte kan tryckas igen (granskning D4). */
+    const btn = findChoiceBtn(val);
+    if (btn) btn.classList.add(isCorrect ? 'pv-correct' : 'pv-wrong');
+    processAnswer(isCorrect, String(correct));
+  }
+
+  function findChoiceBtn(val) {
+    const all = document.querySelectorAll('.pv-choice-btn');
+    for (const b of all) if (b.dataset && b.dataset.val === String(val)) return b;
+    return null;
   }
 
   function handleDigitClick(pos) {
@@ -755,11 +779,47 @@ const PlatsvardeGame = (() => {
      tills barnet trycker Nästa (granskning B6). */
   function revealAnswer() {
     const q = currentQ;
-    if (q.type === 'A1') {
-      lockDigitBoxes();
-      revealDigitPositions();
-      const t = document.getElementById(`pv-digit-${q.target}`);
-      if (t) { t.style.background = 'rgba(34,197,94,0.25)'; t.style.opacity = '1'; }
+    switch (q.type) {
+      case 'A1': {
+        lockDigitBoxes();
+        revealDigitPositions();
+        const t = document.getElementById(`pv-digit-${q.target}`);
+        if (t) { t.style.background = 'rgba(34,197,94,0.25)'; t.style.opacity = '1'; }
+        break;
+      }
+      case 'A2': case 'A3': case 'B1': case 'C1': case 'C2': case 'D1': {
+        /* Rätt knapp lyser upp på sin plats; de övriga dämpas. */
+        document.querySelectorAll('.pv-choice-btn').forEach(b => {
+          if (b.dataset.val === String(q.correct)) b.classList.add('pv-correct');
+          else if (!b.classList.contains('pv-wrong')) b.classList.add('pv-dim');
+        });
+        break;
+      }
+      case 'B2': {
+        /* Siffrorna landar i sina fält i sin färg; fält som var fel markeras. */
+        setDecompActive(-1);
+        const cor = [q.correct.h, q.correct.t, q.correct.e];
+        cor.forEach((d, i) => {
+          const v = document.getElementById(`pv-dc-val-${i}`);
+          const f = document.getElementById(`pv-dc-${i}`);
+          if (v) v.textContent = String(d);
+          if (f && parseInt(decompAnswers[i]) !== d) f.classList.add('pv-fixed');
+        });
+        document.querySelectorAll('.pv-nk').forEach(b => { b.disabled = true; });
+        break;
+      }
+      case 'D2': {
+        /* Rätt ordning läggs i de fyra platserna. */
+        const wrongIdx = orderPlaced.map((n, i) => n !== q.correct[i] ? i : -1).filter(i => i >= 0);
+        orderPlaced = [...q.correct];
+        updateOrderUI();
+        wrongIdx.forEach(i => {
+          const s = document.getElementById(`pv-slot-${i}`);
+          if (s) s.classList.add('pv-fixed');
+        });
+        [0, 1, 2, 3].forEach(i => { const s = document.getElementById(`pv-slot-${i}`); if (s) s.onclick = null; });
+        break;
+      }
     }
   }
 

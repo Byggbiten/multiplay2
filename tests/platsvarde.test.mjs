@@ -74,6 +74,52 @@ describe('A2 — distraktorer är platsvärdesförväxlingar (granskning B2)', (
   });
 });
 
+describe('B6 — facit landar i frågans egna rutor och väntar på Nästa', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllTimers();
+    globalThis.document = makeDoc();
+  });
+
+  it('B2: efter två fel står rätt siffror i fälten, numpad-tryck ignoreras, ingen timer', () => {
+    const q = { level: 'B', type: 'B2', num: 697, correct: { h: 6, t: 9, e: 7 } };
+    setStateForTest({ questions: [q], qIndex: 0, currentQ: q, attempts: 0, inputLocked: false, score: 0 });
+    const fyll = (a, b, c) => { PV.decompPress(a); PV.decompPress(b); PV.decompPress(c); PV.decompPress('✓'); };
+    fyll('1', '2', '3');            // fel 1 → prova igen, fälten kvar
+    expect(getState().inputLocked).toBe(false);
+    PV.decompPress('⌫'); PV.decompPress('⌫'); PV.decompPress('⌫'); PV.decompPress('⌫');
+    fyll('9', '6', '7');            // fel 2 → facit
+    const st = getState();
+    expect(st.attempts).toBe(2);
+    expect(st.inputLocked).toBe(true);
+    expect(document.getElementById('pv-dc-val-0').textContent).toBe('6');
+    expect(document.getElementById('pv-dc-val-1').textContent).toBe('9');
+    expect(document.getElementById('pv-dc-val-2').textContent).toBe('7');
+    expect(document.getElementById('pv-feedback').innerHTML).toMatch(/pv-next/);
+    vi.advanceTimersByTime(10000);
+    expect(getState().qIndex).toBe(0);
+    PV.decompPress('1');
+    expect(document.getElementById('pv-dc-val-0').textContent).toBe('6');
+  });
+
+  it('D2: efter två fel ligger rätt ordning i de fyra platserna', () => {
+    const q = { level: 'D', type: 'D2', nums: [845, 111, 851, 737], correct: [111, 737, 845, 851] };
+    setStateForTest({ questions: [q], qIndex: 0, currentQ: q, attempts: 0, inputLocked: false, score: 0 });
+    [845, 111, 851, 737].forEach(n => PV.handleOrderClick(n)); PV.submitOrder();
+    expect(getState().inputLocked).toBe(false);
+    PV.orderUndo(); PV.orderUndo(); PV.orderUndo(); PV.orderUndo();
+    [851, 845, 737, 111].forEach(n => PV.handleOrderClick(n)); PV.submitOrder();
+    expect(getState().attempts).toBe(2);
+    [111, 737, 845, 851].forEach((n, i) => {
+      const slot = document.getElementById(`pv-slot-${i}`);
+      expect(slot.className).toMatch(/filled/);
+      expect(slot.innerHTML.replace(/<[^>]+>/g, '')).toBe(String(n));
+    });
+    vi.advanceTimersByTime(10000);
+    expect(getState().qIndex).toBe(0);
+  });
+});
+
 describe('A1 — fel första tryck låser inte frågan (granskning A1)', () => {
   beforeEach(() => {
     vi.useFakeTimers();
