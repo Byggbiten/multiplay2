@@ -36,8 +36,12 @@ const UppstallningGame = (() => {
   let helpMode      = true; // true = med hjälp, false = utan hjälp
   let exTenPhase = [];  // index i kolumnens metodkö (exColData[c].queue), 0…queue.length
 
-  /* Free mode (utan hjälp) — miniräknar-modell: ETT svarsfält */
-  let exFreeInput        = '';   // svaret som sträng, skrivs vänster→höger
+  /* Free mode (utan hjälp) — svaret skrivs i svarsradens EGNA celler,
+     en siffra per kolumn, med start i entalet. Index 0 = ental, 1 = tiotal,
+     2 = hundratal (samma ordning som digs()). null = tom ruta, och en tom
+     LEDANDE ruta är tillåten — på papper lämnas den blank. */
+  let exFreeCells        = [null, null, null];
+  let exFreeCur          = 0;    // svarsrutan med fokus (0 = entalet)
   let exFreeFirstAttempt = true; // poäng endast vid helrätt på första Klar
 
   /* Levande minnessiffror (v30) — endast ADDITION */
@@ -53,6 +57,8 @@ const UppstallningGame = (() => {
   let upLastX = 0, upLastY = 0;
 
   /* ── Konstanter ─────────────────────────────────────────── */
+  const ICON_ERASE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6H9.6a2 2 0 0 0-1.5.7L3.4 12l4.7 5.3a2 2 0 0 0 1.5.7H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"/><path d="M17 10l-4 4M13 10l4 4"/></svg>';
+  const ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg>';
   const PVC = { ental: '#22c55e', tiotal: '#3b82f6', hundratal: '#ef4444' };
   const COL_KEYS   = ['ental','tiotal','hundratal'];
   const COL_LABELS = ['E','T','H'];
@@ -231,14 +237,6 @@ const UppstallningGame = (() => {
     .carry-cell::after { content:''; position:absolute; inset:-10px -4px; }
     .carry-cell.mem-pulse { animation:mem-cell-pulse 1.1s ease-in-out infinite;
       border:2px dashed #dc2626; cursor:pointer; }
-    .mem-picker { position:absolute; z-index:30; background:#fff;
-      border:2px solid #dc2626; border-radius:12px; padding:6px;
-      display:grid; grid-template-columns:repeat(3,42px); gap:4px;
-      box-shadow:0 8px 24px rgba(0,0,0,0.2); animation:bubble-in 0.2s var(--spring); }
-    .mem-picker button { width:42px; height:42px; border-radius:8px;
-      border:1.5px solid #fca5a5; background:#fef2f2; color:#dc2626;
-      font-weight:900; font-size:1rem; cursor:pointer; font-family:var(--font-head); }
-    .mem-picker button:active { transform:scale(0.92); }
     .mem-master { margin-top:8px; display:inline-flex; align-items:center; gap:6px;
       background:linear-gradient(135deg,#fef9c3,#fde68a); border:2px solid #f59e0b;
       border-radius:999px; padding:6px 16px; font-weight:900; color:#92400e;
@@ -261,24 +259,89 @@ const UppstallningGame = (() => {
       color:var(--deep); transition:transform 0.2s var(--spring); }
     .ex-nk:hover { transform:scale(1.12); border-color:var(--accent); }
 
-    /* Fria läget: ETT svarsfält (miniräknar-modell) */
-    .free-field { display:flex; align-items:center; justify-content:flex-end; gap:2px;
-      width:100%; min-height:clamp(40px,8vw,74px); border-radius:11px;
-      padding:0 clamp(10px,2vw,16px);
-      font-family:var(--font-head); font-size:clamp(1.6rem,4vw,3rem); font-weight:900;
-      color:var(--deep); background:rgba(255,255,255,0.7);
-      border:2.5px dashed color-mix(in srgb, var(--accent) 32%, transparent);
-      transition:border-color 0.2s, background 0.2s; }
-    .free-field.has-digits { border-style:solid;
-      border-color:color-mix(in srgb, var(--accent) 55%, transparent); }
-    .free-field.wrong { border:2.5px solid #ef4444; background:rgba(239,68,68,0.1);
-      color:#dc2626; }
-    .free-field.correct { border:2.5px solid #22c55e; background:rgba(34,197,94,0.12);
-      color:#16a34a; }
-    .free-field.shake { animation:free-shake 0.3s ease; }
-    .free-caret { display:inline-block; width:3px; height:1.05em; border-radius:2px;
+    /* Fria läget: svaret skrivs i svarsradens celler (v39).
+       Fokusringen GLIDER mellan rutorna — flytten ska synas, inte ske tyst. */
+    .ans-focus { position:absolute; pointer-events:none; z-index:6; border-radius:15px;
+      border:3px solid var(--accent);
+      box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent),
+                 0 6px 16px var(--glow);
+      transition:left 0.26s var(--spring), top 0.26s var(--spring),
+                 width 0.26s var(--spring), height 0.26s var(--spring); }
+    .ans-focus.instant { transition:none; }
+    .ans-cell.hop { animation:cell-hop 0.34s var(--spring) both; }
+    .ans-cell .ans-caret { display:inline-block; width:4px; height:0.62em; border-radius:2px;
       background:var(--accent); animation:caret-blink 1s steps(1) infinite; }
-    .free-field.wrong .free-caret { background:#dc2626; }
+    /* Bedömningen syns FÖRST efter Klar — aldrig medan hon skriver. */
+    .ans-cell.judged-ok { border-color:#22c55e !important; border-style:solid;
+      background:rgba(34,197,94,0.14); animation:land-bounce-flex 0.45s ease-out both; }
+    #up-table-wrap.shake { animation:free-shake 0.3s ease; }
+
+    /* Fria lägets knappsats: 3×4 siffergrid + Klar som hög Enter-knapp.
+       Siffran trycks tio gånger per uppgift, Klar en — ytan fördelas därefter.
+       ⌫ ligger i nedersta vänstra hörnet, längst från Klar: ångra och
+       lämna-in får aldrig vara grannar. */
+    .free-pad { display:flex; gap:clamp(5px,1.4vw,9px); align-items:stretch; }
+    .free-keys { flex:1 1 auto; display:grid; grid-template-columns:repeat(3,1fr);
+      /* min(12vw,9vh): i liggande är 12vw enormt men höjden knapp —
+         då styr höjden, annars bredden. Golvet 46 px gäller alltid. */
+      grid-auto-rows:clamp(46px,min(12vw,9vh),60px); gap:clamp(5px,1.4vw,9px); }
+    .free-keys .ex-nk { width:100%; height:100%; border-radius:16px;
+      font-size:clamp(1.25rem,3.4vw,1.6rem);
+      background:linear-gradient(180deg,#fff,var(--glass-strong));
+      box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 16%, transparent),
+                 0 4px 10px rgba(93,63,158,0.07); }
+    .free-keys .ex-nk:hover { transform:none; }
+    .free-keys .ex-nk:active { transform:scale(0.94); box-shadow:none;
+      background:color-mix(in srgb, var(--accent) 12%, #fff); }
+    .free-keys .k-zero { grid-column:2 / span 2; }
+    .free-keys .k-erase { color:var(--deep); background:var(--tint);
+      display:grid; place-items:center; }
+    .free-keys .k-erase svg { width:26px; height:26px; fill:none; stroke:currentColor;
+      stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+    /* Klar: samma namn alltid — ytan bär tillståndet, inte etiketten. */
+    .btn-klar { flex:0 0 clamp(88px,24.5vw,118px); position:relative; overflow:hidden;
+      border:none; border-radius:18px; cursor:pointer;
+      font-family:var(--font-head); font-weight:800; font-size:clamp(1rem,3vw,1.25rem);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+      transition:background 0.25s var(--smooth), color 0.2s, box-shadow 0.25s var(--smooth); }
+    .btn-klar svg { width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:3;
+      stroke-linecap:round; stroke-linejoin:round; }
+    .btn-klar[disabled] { cursor:default; color:var(--deep);
+      background:linear-gradient(180deg,#fff,var(--tint));
+      box-shadow:inset 0 0 0 2.5px color-mix(in srgb, var(--accent) 40%, transparent),
+                 0 4px 14px rgba(93,63,158,0.08); }
+    .btn-klar[disabled]::after { content:''; position:absolute; inset:0; pointer-events:none;
+      background:linear-gradient(170deg,transparent 38%,
+        color-mix(in srgb, var(--accent) 17%, transparent) 50%, transparent 62%);
+      transform:translateY(-130%); animation:klar-sheen 2.6s var(--smooth) infinite; }
+    .btn-klar:not([disabled]) { color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light));
+      box-shadow:0 8px 22px var(--glow); }
+    .btn-klar:not([disabled]):active { transform:scale(0.97); }
+    .btn-klar.wake { animation:land-bounce-flex 0.42s ease-out both; }
+    .btn-klar.done[disabled] { color:#fff; background:linear-gradient(135deg,#22c55e,#86efac);
+      box-shadow:0 8px 22px rgba(34,197,94,0.35); }
+    .btn-klar.done[disabled]::after { display:none; }
+
+    /* Fria lägets tips efter ett felaktigt Klar. Egen klass, inte hjälplägets
+       inline-stil: rutan skjuter ner knappsatsen och kladden, så varje pixel
+       den tar är kladdyta. Kompakt nog att kolumnen inte börjar scrolla. */
+    .free-tip { background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
+      border-radius:12px; padding:6px 10px; font-weight:800; color:#92400e;
+      text-align:center; font-size:0.88rem; line-height:1.25; }
+
+    /* Kladden tar vid DIREKT efter knappsatsen i fria läget (porträtt):
+       inget glapp mellan korten, och kortkanterna möts. Ytan som blir över
+       går till ritytan — det är den barnen behöver. */
+    @media (orientation:portrait) {
+      #up-main.free-seam #up-left  { padding-bottom:0; gap:6px; }
+      #up-main.free-seam #up-right { padding-top:0; }
+      #up-main.free-seam #ex-feedback:empty { display:none; }
+      #up-main.free-seam .free-pad-card { border-bottom-left-radius:0;
+        border-bottom-right-radius:0; border-bottom:none; }
+      #up-main.free-seam .up-scratch { border-top-left-radius:0;
+        border-top-right-radius:0; padding-top:6px; }
+    }
 
     /* Canvas */
     .up-scratch { background:var(--glass); border-radius:var(--radius-md);
@@ -352,6 +415,10 @@ const UppstallningGame = (() => {
       50%      { transform:translateX(5px); }
       75%      { transform:translateX(-3px); }
     }
+    @keyframes cell-hop {
+      0% { transform:scale(0.86); } 55% { transform:scale(1.1); } 100% { transform:scale(1); }
+    }
+    @keyframes klar-sheen { 0% { transform:translateY(-130%); } 55%,100% { transform:translateY(130%); } }
     @keyframes mem-strike-draw { to { stroke-dashoffset:0; } }
     @keyframes mem-digit-pulse {
       0%,100% { transform:rotate(-4deg) scale(1); }
@@ -2314,7 +2381,8 @@ const UppstallningGame = (() => {
     demoAns        = [null, null, null, null];
     demoBorrowTens = [false, false, false];
     exTenPhase     = [0, 0, 0];
-    exFreeInput        = '';
+    exFreeCells        = [null, null, null];
+    exFreeCur          = 0;
     exFreeFirstAttempt = true;
     memPhase    = null;
     freeMemVals = [null, null, null];
@@ -2332,16 +2400,19 @@ const UppstallningGame = (() => {
         <span class="header-title">${modeLabel} – Övning</span>
         <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx+1}/5</span>
       </div>
-      <div id="up-main">
+      <div id="up-main"${helpMode ? '' : ' class="free-seam"'}>
         <div id="up-left">
-          <div id="up-table-wrap" onclick="UppstallningGame.memTableTap(event)">${buildTableHTML()}</div>
+          <div id="up-table-wrap" onclick="UppstallningGame.memTableTap(event)">${buildTableHTML()}${
+            helpMode ? '' : '<div class="ans-focus" id="ans-focus" style="display:none"></div>'}</div>
           ${helpMode ? '<div id="up-think" class="off"></div>' : ''}
           ${helpMode ? '<div id="ex-bubble"></div>' : ''}
-          <div id="ex-col-ui"></div>
-          <div id="ex-feedback"></div>
+          ${/* Fria läget: bedömningen hamnar UNDER uppställningen, så att
+                knappsatsen och kladden sitter ihop utan glapp. */ ''}
+          ${helpMode ? '<div id="ex-col-ui"></div><div id="ex-feedback"></div>'
+                     : '<div id="ex-feedback"></div><div id="ex-col-ui"></div>'}
         </div>
         <div id="up-right">
-          ${scratchHTML()}
+          ${scratchHTML(!helpMode)}
         </div>
       </div>`;
     setupCanvas('up-canvas');
@@ -2374,19 +2445,21 @@ const UppstallningGame = (() => {
 
     /* ── Free mode (utan hjälp) — renderas EN gång per uppgift ── */
     if (!helpMode) {
-      ui.innerHTML = `<div style="background:var(--glass-strong);border-radius:var(--radius-md);padding:12px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
-        <div id="ex-free-label" style="font-size:11px;font-weight:800;text-align:center;margin-bottom:8px;text-transform:uppercase"></div>
-        <div class="ex-numpad">
-          ${[1,2,3,4,5,6,7,8,9,0].map(k =>
-            `<button class="ex-nk" onclick="UppstallningGame.exFreePress('${k}')">${k}</button>`
-          ).join('')}
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="up-btn" id="ex-free-erase" onclick="UppstallningGame.exFreeErase()"
-            style="width:64px;height:48px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
-          <button class="up-btn" id="ex-free-submit" onclick="UppstallningGame.exFreeSubmit()" disabled
-            style="flex:1;height:48px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:1rem;border-radius:var(--radius-full)">
-            Skriv svaret…</button>
+      /* Ingen rubrik över knappsatsen: rutorna, fokusringen och den
+         blinkande markören säger redan vad som ska göras, och raden
+         kostade höjd som kladden behöver bättre (Dennis 21/9). */
+      ui.innerHTML = `<div class="free-pad-card" style="background:var(--glass-strong);border-radius:var(--radius-md);padding:6px;border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)">
+        <div class="free-pad">
+          <div class="free-keys">
+            ${[1,2,3,4,5,6,7,8,9].map(k =>
+              `<button class="ex-nk" onclick="UppstallningGame.exFreePress('${k}')">${k}</button>`
+            ).join('')}
+            <button class="ex-nk k-erase" aria-label="Sudda sista siffran"
+              onclick="UppstallningGame.exFreeErase()">${ICON_ERASE}</button>
+            <button class="ex-nk k-zero" onclick="UppstallningGame.exFreePress('0')">0</button>
+          </div>
+          <button class="btn-klar" id="ex-free-submit" disabled
+            onclick="UppstallningGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
         </div>
       </div>`;
       exFreeUpdateSubmit();
@@ -2759,62 +2832,43 @@ const UppstallningGame = (() => {
     }
   }
 
-  /* ── Fria läget: frivilliga minnessiffror (påverkar ALDRIG rättningen) ── */
+  /* ── Fria läget: tap i tabellen (påverkar ALDRIG rättningen) ──
+     Svarsrutan tar fokus. Minnesrutan cyklar i TRE lägen:
+     tom → skriven 1:a → struken 1:a → tom igen.
+
+     Varför ingen sifferväljare: minnessiffran kan aldrig bli något annat än
+     1 i den här appen — kolumnsumman av två siffror plus ett minne är som
+     mest 19, och koden skriver `nextCarry = sum > 9 ? 1 : 0`. En väljare för
+     ett värde med ett enda utfall är bara friktion.
+
+     De två första stegen ÄR minnessiffrans dokumenterade livscykel
+     (.project-context/MINNESSIFFER-KONCEPT.md): skrivs liten → vilar →
+     används → STRYKS, aldrig suddas. Det tredje steget är ångra, och det
+     hör hemma här: i fria läget skriver hon själv och måste kunna rätta en
+     felplacerad etta. Minnesraden är hennes kladd och bedöms aldrig. */
   function freeMemTap(ev) {
-    if (ev.target.closest && ev.target.closest('.mem-picker')) return; // väljarens knappar sköter sig själva
-    closeMemPicker();
+    const ansEl = ev.target.closest ? ev.target.closest('.ans-cell') : null;
+    if (ansEl) {
+      const ac = COL_KEYS.findIndex(k => ansEl.id === `ans-${k}`);
+      if (ac >= 0) exFreeFocusCell(ac);
+      return;
+    }
     const cellEl = ev.target.closest ? ev.target.closest('.carry-cell') : null;
     if (!cellEl) return;
     const col = COL_KEYS.findIndex(k => cellEl.id === `carry-${k}`);
     if (col < 0) return;
     if (freeMemVals[col] == null) {
-      openMemPicker(col, cellEl);           // tom → sifferväljare 1–9
+      freeMemVals[col] = 1;                 // tom → skriven 1:a
+      freeMemUsed[col] = false;
+      cellEl.innerHTML = '<span class="mem-digit">1</span>';
     } else if (!freeMemUsed[col]) {
-      freeMemUsed[col] = true;              // skriven → stryks
+      freeMemUsed[col] = true;              // skriven → struken
       strikeMemEl(cellEl.querySelector('.mem-digit'));
-      App.Sound.play('click');
     } else {
-      freeMemVals[col] = null;              // struken → rensas
+      freeMemVals[col] = null;              // struken → tom igen (ångra)
       freeMemUsed[col] = false;
       cellEl.innerHTML = '';
-      App.Sound.play('click');
     }
-  }
-
-  function openMemPicker(col, cellEl) {
-    const wrap = document.getElementById('up-table-wrap');
-    if (!wrap) return;
-    const p = document.createElement('div');
-    p.className = 'mem-picker';
-    p.id = 'mem-picker';
-    p.innerHTML = [1,2,3,4,5,6,7,8,9].map(n =>
-      `<button onclick="UppstallningGame.memPick(${col},${n})">${n}</button>`).join('');
-    wrap.appendChild(p);
-    // Klampa inom tabellytan — poppisen får aldrig skapa overflow
-    const wR = wrap.getBoundingClientRect();
-    const cR = cellEl.getBoundingClientRect();
-    const left = Math.max(4, Math.min(cR.left - wR.left + cR.width / 2 - p.offsetWidth / 2,
-      wR.width - p.offsetWidth - 4));
-    let top = cR.bottom - wR.top + 6;
-    if (top + p.offsetHeight > wR.height - 4) {
-      top = Math.max(4, cR.top - wR.top - p.offsetHeight - 6);
-    }
-    p.style.left = `${left}px`;
-    p.style.top  = `${top}px`;
-    App.Sound.play('click');
-  }
-
-  function closeMemPicker() {
-    const p = document.getElementById('mem-picker');
-    if (p) p.remove();
-  }
-
-  function memPick(col, n) {
-    closeMemPicker();
-    freeMemVals[col] = n;
-    freeMemUsed[col] = false;
-    const el = document.getElementById(`carry-${COL_KEYS[col]}`);
-    if (el) el.innerHTML = `<span class="mem-digit">${n}</span>`;
     App.Sound.play('click');
   }
 
@@ -2827,128 +2881,178 @@ const UppstallningGame = (() => {
     return out;
   }
 
-  /* ── Free mode funktioner (utan hjälp) — miniräknare ───── */
+  /* ── Free mode (utan hjälp): svaret skrivs i svarsradens celler ──
+     Ingen bedömning sker någonstans i det här blocket utom i exFreeSubmit.
+     Medan hon skriver finns varken bock, skakning eller färg som antyder
+     rätt eller fel — och ingen spärr av typen "du har missat en ruta". */
   function exFreeInit() {
-    // Ersätt svarsradens per-kolumn-rutor med ETT brett svarsfält.
-    // buildTableHTML lämnas orörd (hjälpläget delar den) — fria läget
-    // byter bara ut sin egen svarsrad vid init.
-    const firstAns = document.getElementById(`ans-${COL_KEYS[0]}`);
-    const row = firstAns ? firstAns.closest('tr') : null;
-    if (row) {
-      row.innerHTML = `<td colspan="${colCount + 2}">
-        <div class="free-field num" id="ex-free-field"><span class="free-caret"></span></div>
-      </td>`;
-    }
+    exFreeCells = [null, null, null];
+    exFreeCur   = 0;
+    exFreePaintCells();
     showExColUI(0);
+    /* Ringen mäts mot cellerna och placeras när tabellen fått sina mått. */
+    requestAnimationFrame(() => exFreePlaceRing(false));
   }
 
-  // Maxlängd = antal siffror i största möjliga svar (svar ≥1000 förekommer inte)
-  function exFreeMaxLen() { return colCount; }
-
-  function exFreeRender() {
-    const field = document.getElementById('ex-free-field');
-    if (!field) return;
-    field.classList.toggle('has-digits', exFreeInput.length > 0);
-    field.innerHTML = (exFreeInput ? `<span>${exFreeInput}</span>` : '') +
-      '<span class="free-caret"></span>';
+  /* Svarets värde som tal, eller null om rutorna inte bildar ett tal.
+     Ledande tomma rutor hoppas över — blankt på papper är ingen siffra.
+     En tom ruta MITT i talet är inget tal alls och kan aldrig bli rätt;
+     den får INTE tyst klämmas ihop till ett annat tal. */
+  function exFreeValue() {
+    let s = '', started = false;
+    for (let c = colCount - 1; c >= 0; c--) {
+      const v = exFreeCells[c];
+      if (v === null) { if (started) return null; continue; }
+      started = true; s += v;
+    }
+    return s === '' ? null : parseInt(s, 10);
   }
 
-  function exFreeShake() {
-    const field = document.getElementById('ex-free-field');
-    if (!field) return;
-    field.classList.remove('shake');
-    void field.offsetWidth; // starta om animationen
-    field.classList.add('shake');
+  function exFreeHasDigits() {
+    for (let c = 0; c < colCount; c++) if (exFreeCells[c] !== null) return true;
+    return false;
+  }
+
+  function exFreePaintCells(popCol) {
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+      if (!el) continue;
+      const v = exFreeCells[c];
+      el.classList.toggle('filled', v !== null);
+      el.classList.toggle('active-col', c === exFreeCur && !exInputLocked);
+      el.style.borderColor = v !== null ? PVC[COL_KEYS[c]] : '';
+      el.innerHTML = v !== null
+        ? `<span style="color:${PVC[COL_KEYS[c]]}">${v}</span>`
+        : (c === exFreeCur && !exInputLocked ? '<span class="ans-caret"></span>' : '');
+      if (popCol === c) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+    }
+  }
+
+  /* Fokusringen glider mellan rutorna — flytten ska SYNAS. */
+  function exFreePlaceRing(animate) {
+    const ring = document.getElementById('ans-focus');
+    const wrap = document.getElementById('up-table-wrap');
+    if (!ring || !wrap) return;
+    if (exInputLocked) { ring.style.display = 'none'; return; }
+    const cell = document.getElementById(`ans-${COL_KEYS[exFreeCur]}`);
+    if (!cell) return;
+    ring.style.display = 'block';
+    ring.classList.toggle('instant', animate === false);
+    const wr = wrap.getBoundingClientRect(), cr = cell.getBoundingClientRect();
+    ring.style.left   = `${cr.left - wr.left - 4}px`;
+    ring.style.top    = `${cr.top  - wr.top  - 4}px`;
+    ring.style.width  = `${cr.width + 8}px`;
+    ring.style.height = `${cr.height + 8}px`;
+    if (animate === false) requestAnimationFrame(() => ring.classList.remove('instant'));
+  }
+
+  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den
+     gamla utan att hon först måste sudda. */
+  function exFreeFocusCell(col) {
+    if (exInputLocked || helpMode) return;
+    if (col < 0 || col >= colCount) return;
+    exFreeCur = col;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
   }
 
   function exFreeClearWrong() {
-    const field = document.getElementById('ex-free-field');
-    if (field) field.classList.remove('wrong');
+    for (let c = 0; c < colCount; c++) {
+      const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+      if (el) el.classList.remove('judged-ok');
+    }
     const fb = document.getElementById('ex-feedback');
     if (fb) fb.innerHTML = '';
   }
 
+  /* Klar heter Klar hela tiden och syns även innan den går att trycka på —
+     ytan bär tillståndet, inte namnet. */
   function exFreeUpdateSubmit() {
-    const ready = exFreeInput.length > 0;
     const btn = document.getElementById('ex-free-submit');
-    if (btn) {
-      btn.disabled = !ready;
-      btn.style.background = ready
-        ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
-        : 'linear-gradient(135deg,#cbd5e1,#94a3b8)';
-      btn.textContent = ready ? 'Klar ✓' : 'Skriv svaret…';
-    }
-    const label = document.getElementById('ex-free-label');
-    if (label) {
-      label.textContent = ready ? 'Tryck Klar ✓ när du är säker' : 'Skriv svaret med siffrorna';
-      label.style.color = ready ? '#16a34a' : 'var(--ink-soft)';
-    }
+    if (!btn) return;
+    const ready = exFreeHasDigits() && !exInputLocked;
+    const was   = !btn.disabled;
+    btn.disabled = !ready;
+    btn.classList.toggle('done', exInputLocked);
+    if (ready && !was) { btn.classList.remove('wake'); void btn.offsetWidth; btn.classList.add('wake'); }
   }
 
   function exFreePress(key) {
     if (exInputLocked) return;
     exFreeClearWrong();
-    if (exFreeInput === '0') {
-      exFreeInput = key; // miniräknar-detalj: ensam nolla ersätts
-    } else if (exFreeInput.length >= exFreeMaxLen()) {
-      exFreeShake(); // fullt — extra tryck ignoreras mjukt
-      return;
-    } else {
-      exFreeInput += key; // läggs till i slutet: vänster→höger som man skriver
-    }
+    exFreeCells[exFreeCur] = parseInt(key, 10);
+    const popped = exFreeCur;
+    if (exFreeCur < colCount - 1) exFreeCur++;   // ett steg vänsterut
     App.Sound.play('click');
-    exFreeRender();
+    exFreePaintCells(popped);
+    exFreePlaceRing(true);
     exFreeUpdateSubmit();
   }
 
+  /* ⌫ som på ett tangentbord: har rutan en siffra töms den och fokus står
+     kvar; är rutan tom flyttar fokus ett steg åt HÖGER och tömmer den
+     rutan. Så blir "ångra sista siffran" ETT tryck även direkt efter att
+     fokus glidit vänsterut. */
   function exFreeErase() {
     if (exInputLocked) return;
-    if (!exFreeInput) return; // inget att sudda
     exFreeClearWrong();
-    exFreeInput = exFreeInput.slice(0, -1); // ⌫ tar bort SISTA siffran
+    if (exFreeCells[exFreeCur] === null) {
+      if (exFreeCur > 0) { exFreeCur--; exFreeCells[exFreeCur] = null; }
+    } else {
+      exFreeCells[exFreeCur] = null;
+    }
     App.Sound.play('click');
-    exFreeRender();
+    exFreePaintCells();
+    exFreePlaceRing(true);
     exFreeUpdateSubmit();
   }
 
   function exFreeSubmit() {
     if (exInputLocked) return;
-    if (!exFreeInput) return; // gating: Klar kräver minst 1 siffra
+    if (!exFreeHasDigits()) return;      // Klar kräver minst en siffra
     const facit = mode === 'addition' ? numA + numB : numA - numB;
-    const field = document.getElementById('ex-free-field');
+    const val   = exFreeValue();
 
-    if (parseInt(exFreeInput, 10) === facit) {
+    if (val === facit) {
       // Rätt — poäng endast om helrätt på första Klar-trycket
       exInputLocked = true;
       if (exFreeFirstAttempt) exScore++;
       const dr = digs(facit);
-      for (let c = 0; c < colCount; c++) exAnswers[c] = dr[c];
+      for (let c = 0; c < colCount; c++) { exAnswers[c] = dr[c]; exFreeCells[c] = dr[c]; }
       exFreeClearWrong();
-      if (field) {
-        field.classList.add('correct');
-        field.innerHTML = `<span>${exFreeInput}</span>`; // markören släcks
+      exFreePaintCells();
+      exFreePlaceRing(false);            // låst ruta → ringen släcks
+      for (let c = 0; c < colCount; c++) {
+        const el = document.getElementById(`ans-${COL_KEYS[c]}`);
+        if (el) el.classList.add('judged-ok');
       }
+      exFreeUpdateSubmit();
       App.Sound.play('correct');
       smallBurst();
       setTimeout(() => exCheckDone(true), 900);
     } else {
-      // Fel — förbrukar första försöket; siffrorna står kvar och kan redigeras
+      // Fel — förbrukar första försöket; siffrorna står kvar och kan ändras
       exFreeFirstAttempt = false;
       App.Sound.play('wrong');
-      if (field) field.classList.add('wrong');
-      exFreeShake();
+      const wrap = document.getElementById('up-table-wrap');
+      if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
       // Glömd-minnessiffra-detektion (v30): matchar svaret simuleringen
       // med alla carryIn=0 → riktad feedback istället för generisk
-      const glomtMinne = mode === 'addition' &&
-        parseInt(exFreeInput, 10) === simulateNoCarrySum();
+      const glomtMinne = mode === 'addition' && val !== null && val === simulateNoCarrySum();
       const fb = document.getElementById('ex-feedback');
-      if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
-        border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
-        color:#92400e;text-align:center">${glomtMinne
-          ? 'Nästan! Kolla minnessiffrorna — någon vill vara med! 👆'
-          : 'Inte riktigt! Ändra med ⌫ och prova igen 💪'}</div>`;
+      if (fb) fb.innerHTML = `<div class="free-tip">${glomtMinne
+        ? 'Nästan! Kolla minnessiffrorna — någon vill vara med! 👆'
+        : 'Inte riktigt! Ändra med ⌫ och prova igen 💪'}</div>`;
       exFreeUpdateSubmit(); // siffror finns kvar → Klar förblir aktiv
     }
+  }
+
+  /* Ringen är utmätt i pixlar och måste räknas om när ytan ändrar form. */
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+      if (document.getElementById('ans-focus')) exFreePlaceRing(false);
+    });
   }
 
   function exCheckDone(skipScore) {
@@ -3013,11 +3117,14 @@ const UppstallningGame = (() => {
   }
 
   /* ── Scratch HTML ───────────────────────────────────────── */
-  function scratchHTML() {
+  /* compact=true (fria läget): etikettraden ovanför ritytan utgår och
+     ordet flyttar ner till verktygsraden — raden kostade höjd, ordet inte. */
+  function scratchHTML(compact) {
     return `<div class="up-scratch">
-      <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+      ${compact ? '' : `<div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>`}
       <canvas id="up-canvas" class="up-canvas"></canvas>
-      <div style="display:flex;gap:5px;flex-shrink:0">
+      <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
+        ${compact ? `<span style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</span>` : ''}
         <button onclick="UppstallningGame.upToggleEraser(false)" id="up-draw"
           style="flex:1;height:30px;border-radius:10px;font-weight:800;font-size:11px;
           cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
@@ -3194,7 +3301,7 @@ const UppstallningGame = (() => {
     startExercise,
     exPress, exDoBorrow, exContinueBorrow,
     exTenStepNext,
-    memTableTap, memPick,
+    memTableTap,
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
