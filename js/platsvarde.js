@@ -507,10 +507,11 @@ const PlatsvardeGame = (() => {
   }
 
   function renderColoredNumber(n, size = '2rem') {
+    /* Positionen räknas från höger: index i + (3 − längd) i den fulla
+       ordningen. Den gamla kortade listan för 1–2 siffror gav undefined
+       (mätt: "70" fick 7 grön, 0 ofärgad) när A2 började visa 7/70/700. */
     const s = String(n);
-    const posOrder = s.length >= 3
-      ? ['hundratal', 'tiotal', 'ental']
-      : s.length === 2 ? ['tiotal', 'ental'] : ['ental'];
+    const posOrder = ['hundratal', 'tiotal', 'ental'];
     return s.split('').map((d, i) =>
       `<span style="color:${PV_COLORS[posOrder[i + (3 - s.length)]]};font-weight:900;font-size:${size}">${d}</span>`
     ).join('');
@@ -1207,7 +1208,7 @@ const PlatsvardeGame = (() => {
     confirmAbort, nextQuestion,
     /* Testkrokar (vitest) — samma mönster som uppstallning.js. */
     __test: {
-      generateQuestions,
+      generateQuestions, renderColoredNumber,
       setStateForTest(s) {
         if ('questions'   in s) questions   = s.questions;
         if ('qIndex'      in s) qIndex      = s.qIndex;

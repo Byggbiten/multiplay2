@@ -40,7 +40,17 @@ globalThis.localStorage = { getItem() { return null; }, setItem() {}, removeItem
 globalThis.requestAnimationFrame = fn => fn();
 
 const PV = require('../js/platsvarde.js');
-const { generateQuestions, setStateForTest, getState } = PV.__test;
+const { generateQuestions, setStateForTest, getState, renderColoredNumber } = PV.__test;
+
+describe('renderColoredNumber — positionen räknas från höger även för 1–2 siffror', () => {
+  const colors = html => [...html.matchAll(/color:(#[0-9a-f]{6})/g)].map(m => m[1]);
+  it('700 / 70 / 7 får rött-blått-grönt räknat från entalet', () => {
+    expect(colors(renderColoredNumber(700))).toEqual(['#ef4444', '#3b82f6', '#22c55e']);
+    expect(colors(renderColoredNumber(70))).toEqual(['#3b82f6', '#22c55e']);
+    expect(colors(renderColoredNumber(7))).toEqual(['#22c55e']);
+    expect(renderColoredNumber(70)).not.toMatch(/undefined/);
+  });
+});
 
 describe('B1 — fyra unika alternativ (granskning B1)', () => {
   it('10 000 slumpade pass: aldrig dubbletter, rätt svar exakt en gång', () => {
