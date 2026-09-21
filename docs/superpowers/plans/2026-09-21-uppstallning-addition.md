@@ -642,6 +642,10 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 Spec §8 listar de nio funktioner som måste ändras. **Kritiskt:** `needsTenFriend: !!overStep` (`js/uppstallning.js:578`) blir `false` för varje kolumn så snart `add_over9` slutar produceras — då slutar övningsläget tyst att undervisa metoden. Uppgift 6 får inte commitas utan att denna uppgift följer direkt efter.
 
+**Hålet är redan delvis öppet.** Uppgift 3 tog bort `add_over9` ur exakt-10-kolumner, så de går redan i dag den direkta vägen i övningsläget: frågan blir *"Vad är 1 + 9?"* i stället för att lära ut tiokompis-genvägen. Svaret blir rätt och inget kraschar — men just den kolumn där metoden lönar sig mest undervisar den inte. Det ska den här uppgiften rätta.
+
+Uppgift 3 fixade också ett latent fel som samma ändring väckte: `exSubmitCol` läste `exCurrentCol` inne i flygets callback, som kommer ~1,5 s efter att `advanceToColumn()` flyttat variabeln. Grenen var oåtkomlig så länge varje kolumn med summa > 9 hade `needsTenFriend`. **Leta efter fler sådana:** grepa `exCurrentCol` i hela filen och kontrollera varje förekomst som ligger inuti en `setTimeout` eller en animationscallback.
+
 **Filer:**
 - Ändra: `js/uppstallning.js` — `preprocessExSteps`, `exBubbleMsg`, `showExColUI`, `exTenStep1/2/3`, fasmodellen `exTenPhase`, samt övriga funktioner som spec §8 namnger
 
