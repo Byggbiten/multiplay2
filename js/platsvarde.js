@@ -326,7 +326,7 @@ const PlatsvardeGame = (() => {
            och tryckte Kladd-knapparna under verktygsfältet. */
         #addsub-root { display:flex; flex-direction:column; overflow:hidden; }
         #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
-        #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
+        #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; overflow-x:hidden; min-height:0; padding-bottom:8px; }
         #pv-scratch { flex:45; background:var(--glass); border-radius:var(--radius-lg); padding:8px;
           border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
           display:flex; flex-direction:column; gap:5px; min-height:0; }
@@ -440,7 +440,10 @@ const PlatsvardeGame = (() => {
           background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
           border-radius:var(--radius-md); padding:6px 6px 6px 12px;
           font-size:14px; font-weight:700; color:#92400e; }
-        .pv-fb-wrong > span { flex:1; text-align:center; }
+        /* min-width:0 + overflow-wrap: ett långt talord ("åttahundranittiotre")
+           fick annars raden att bli 395 px bred och #pv-left att visa en
+           vågrät rullist som åt 16 px höjd (mätt vid 390×664). */
+        .pv-fb-wrong > span { flex:1; min-width:0; text-align:center; overflow-wrap:anywhere; }
         .pv-next { flex:0 0 auto; min-height:44px; padding:0 14px 0 18px; border:none; cursor:pointer;
           border-radius:var(--radius-full); display:inline-flex; align-items:center; gap:4px;
           font-family:var(--font-head); font-weight:800; font-size:var(--text-base); color:#fff;
