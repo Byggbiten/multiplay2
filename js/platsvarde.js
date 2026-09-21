@@ -204,10 +204,20 @@ const PlatsvardeGame = (() => {
     const a2Dig  = getDigitAt(a2Num, a2Pos);
     const a2Mul  = a2Pos === 'hundratal' ? 100 : a2Pos === 'tiotal' ? 10 : 1;
     const a2Cor  = a2Dig * a2Mul;
-    const a2Pool = [a2Cor, a2Dig, a2Dig * (a2Mul < 100 ? a2Mul * 10 : 10),
-                    a2Dig * (a2Mul === 1 ? 10 : 1)].filter((v, i, a) => a.indexOf(v) === i);
-    while (a2Pool.length < 4) a2Pool.push(a2Pool[a2Pool.length - 1] + 1);
-    qs.push({ level: 'A', type: 'A2', num: a2Num, target: a2Pos, correct: a2Cor, options: shuffle(a2Pool).slice(0, 4) });
+    /* Distraktorer ska vara platsvärdesförväxlingar, inte grannar
+       (granskning B2): samma siffra på fel plats (×10/÷10), grannsiffrornas
+       värde i sin egen position, och grannsiffrorna på fel plats. Fyll på
+       med k×10^p; inga två alternativ får skilja med exakt 1. */
+    const MULS = { hundratal: 100, tiotal: 10, ental: 1 };
+    const a2Cand = [];
+    [100, 10, 1].filter(m => m !== a2Mul).forEach(m => a2Cand.push(a2Dig * m));
+    positions.filter(p => p !== a2Pos).forEach(p => a2Cand.push(getDigitAt(a2Num, p) * MULS[p]));
+    positions.filter(p => p !== a2Pos).forEach(p =>
+      [100, 10, 1].filter(m => m !== MULS[p]).forEach(m => a2Cand.push(getDigitAt(a2Num, p) * m)));
+    const a2Opts = fillUnique([a2Cor, ...a2Cand], 4,
+      () => (1 + Math.floor(Math.random() * 9)) * [1, 10, 100][Math.floor(Math.random() * 3)],
+      (v, out) => out.every(o => Math.abs(o - v) !== 1));
+    qs.push({ level: 'A', type: 'A2', num: a2Num, target: a2Pos, correct: a2Cor, options: shuffle(a2Opts) });
 
     // A3: Hur många [position]er?
     const a3Num  = genNum3();

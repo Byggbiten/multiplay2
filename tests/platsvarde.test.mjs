@@ -56,6 +56,24 @@ describe('B1 — fyra unika alternativ (granskning B1)', () => {
   });
 });
 
+describe('A2 — distraktorer är platsvärdesförväxlingar (granskning B2)', () => {
+  it('10 000 pass: fyra unika, rätt med, alla k×10^p, inga två skiljer med exakt 1', () => {
+    let grannar = 0, felform = 0;
+    for (let i = 0; i < 10000; i++) {
+      const q = generateQuestions().find(x => x.type === 'A2');
+      expect(q.options.length).toBe(4);
+      expect(new Set(q.options).size).toBe(4);
+      expect(q.options.filter(o => o === q.correct).length).toBe(1);
+      q.options.forEach(o => { if (!/^[1-9]0{0,2}$/.test(String(o))) felform++; });
+      for (let a = 0; a < 4; a++) for (let b = a + 1; b < 4; b++) {
+        if (Math.abs(q.options[a] - q.options[b]) === 1) grannar++;
+      }
+    }
+    expect(felform).toBe(0);
+    expect(grannar).toBe(0);
+  });
+});
+
 describe('A1 — fel första tryck låser inte frågan (granskning A1)', () => {
   beforeEach(() => {
     vi.useFakeTimers();
