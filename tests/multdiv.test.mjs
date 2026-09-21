@@ -82,40 +82,6 @@ function refDivSteps(pl) {
   steps.push({ t: 'done' });
   return steps;
 }
-function refMultHelp(pl) {
-  const q = [];
-  const memQ = (c, g, finalPass) => {
-    if (c.carryIn > 0 && !(finalPass && c.last)) q.push({ kind: 'memstrike', val: c.carryIn });
-    if (!c.last && c.carryOut > 0) q.push({ kind: 'memplace', val: c.carryOut, srcG: g });
-  };
-  const passQ = (pass, rowKey, shift, finalPass) => {
-    for (const c of pass.cols) {
-      const g = c.col + shift;
-      if (c.carryIn > 0) {
-        q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, step: 'table' });
-        q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, step: 'mem' });
-      } else q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift });
-      memQ(c, g, finalPass);
-    }
-  };
-  if (pl.kind === 'simple') passQ(pl.pass, 'ans', 0, true);
-  else {
-    q.push({ kind: 'phase', which: 1 }); passQ(pl.p1, 'p1', 0, false);
-    q.push({ kind: 'phase', which: 2 }); passQ(pl.p2, 'p2', 1, false);
-    q.push({ kind: 'phase', which: 3 });
-    for (const c of pl.add.cols) {
-      const single = (c.x === null || c.y === null) && c.carryIn === 0;
-      const bothNull = c.x === null && c.y === null;
-      if (single) q.push({ kind: 'trivial', ...c, g: c.col, rowKey: 'ans' });
-      else if (c.carryIn > 0 && !bothNull) {
-        if (c.x !== null && c.y !== null) q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans', step: 'table' });
-        q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans', step: 'mem' });
-      } else q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans' });
-      memQ(c, c.col, true);
-    }
-  }
-  return q;
-}
 function refDivHelp(pl) {
   const q = [], nd = digitsOf(pl.a);
   for (const s of pl.pass.steps) {
@@ -133,15 +99,7 @@ function refDivHelp(pl) {
   return q;
 }
 
-describe('karakterisering — hjalpkon och divisionen ar oforandrade', () => {
-  it('planMultHelpQueue == dagens buildHelpQueue over hela generatorrymden', () => {
-    const avv = [];
-    for (const [a, b, lv] of multSpace()) {
-      const pl = buildPlan(a, b, lv);
-      if (JSON.stringify(planMultHelpQueue(pl)) !== JSON.stringify(refMultHelp(pl))) avv.push(`${a}·${b}`);
-    }
-    expect(avv).toEqual([]);
-  });
+describe('karakterisering — divisionen ar oforandrad', () => {
   it('planDivSteps == dagens buildDivDemoSteps over hela generatorrymden', () => {
     const avv = [];
     for (const [n, d, lv] of divSpace()) {
@@ -260,5 +218,78 @@ describe('multiplikationens nya stegkedja (GRANSKNING A1/A2/B1/B3/B6)', () => {
     expect(last).toEqual(['calc', 'write_down']);
     expect(add.find(s => s.g === 3 && s.t === 'calc').memOnly).toBe(true);
     expect(add.find(s => s.g === 3 && s.t === 'calc').base).toBe(1);
+  });
+});
+
+describe('hjalpkon (GRANSKNING B2/B5/B6/B7)', () => {
+  const KINDS = new Set(['phase', 'mult', 'add', 'trivial', 'memstrike', 'memplace', 'memwrite', 'flydown']);
+
+  function kolumnKo(c, finalPass, isAdd) {
+    const out = [];
+    const bothNull = isAdd && c.x === null && c.y === null;
+    const single = isAdd && (c.x === null || c.y === null) && !bothNull;
+    if (single && c.carryIn === 0) return ['trivial'];
+    if (!(single && c.carryIn > 0)) out.push('table');
+    if (c.carryIn > 0 && !bothNull) out.push('mem');
+    if (c.carryIn > 0 && !(finalPass && c.last)) out.push('memstrike');
+    if (!c.last && c.carryOut > 0) out.push('memplace', 'memwrite');
+    else out.push('flydown');
+    return out;
+  }
+  const tagOf = it => it.kind === 'mult' || it.kind === 'add' ? it.step : it.kind;
+
+  it('bara kanda faser, ordningen per kolumn: fraga → minne → stryk → placera/skriv eller flydown', () => {
+    const avv = [];
+    for (const [a, b, lv] of multSpace()) {
+      const pl = buildPlan(a, b, lv);
+      const fick = planMultHelpQueue(pl).map(tagOf);
+      const want = [];
+      if (pl.kind === 'simple') pl.pass.cols.forEach(c => want.push(...kolumnKo(c, true, false)));
+      else {
+        want.push('phase'); pl.p1.cols.forEach(c => want.push(...kolumnKo(c, false, false)));
+        want.push('phase'); pl.p2.cols.forEach(c => want.push(...kolumnKo(c, false, false)));
+        want.push('phase'); pl.add.cols.forEach(c => want.push(...kolumnKo(c, true, true)));
+      }
+      if (JSON.stringify(fick) !== JSON.stringify(want)) avv.push(`${a}·${b}`);
+      for (const it of planMultHelpQueue(pl)) if (!KINDS.has(it.kind)) avv.push(`${a}·${b} ${it.kind}`);
+    }
+    expect(avv).toEqual([]);
+  });
+
+  it('forvantade svar: table = tabellfakta, mem = med minne, memwrite = siffran i rutan, memplace = minnet', () => {
+    const fel = [];
+    for (const [a, b, lv] of multSpace()) {
+      for (const it of planMultHelpQueue(buildPlan(a, b, lv))) {
+        if (it.step === 'table' && it.kind === 'mult' && it.base !== it.aDig * it.m) fel.push(`${a}·${b} table`);
+        if (it.step === 'mem' && it.kind === 'mult' && it.prod !== it.base + it.carryIn) fel.push(`${a}·${b} mem`);
+        if (it.step === 'mem' && it.kind === 'add' && it.sum !== it.base + it.carryIn) fel.push(`${a}·${b} addmem`);
+        if (it.kind === 'memwrite' && it.write !== (it.prod !== undefined ? it.prod : it.sum) % 10) fel.push(`${a}·${b} memwrite`);
+        if (it.kind === 'memplace' && !(it.val >= 1 && it.val <= 8)) fel.push(`${a}·${b} memplace ${it.val}`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('siffrorna barnet skriver (memwrite/flydown/trivial) bildar produkten', () => {
+    const fel = [];
+    const join = ds => ds.reduce((n, d, i) => n + (d || 0) * Math.pow(10, i), 0);
+    for (const [a, b, lv] of multSpace()) {
+      const pl = buildPlan(a, b, lv), rows = { ans: [], p1: [], p2: [] };
+      for (const it of planMultHelpQueue(pl)) {
+        if (it.kind === 'memwrite' || it.kind === 'trivial') rows[it.rowKey][it.g] = it.write;
+        if (it.kind === 'flydown') { rows[it.rowKey][it.g] = it.write; if (it.extra) rows[it.rowKey][it.g + 1] = it.extra; }
+      }
+      if (join(rows.ans) !== a * b) fel.push(`${a}·${b}`);
+      if (pl.kind === 'twostep' && (join(rows.p1) !== pl.p1.value || join(rows.p2) / 10 !== pl.p2.value)) fel.push(`${a}·${b} delprodukt`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('28·8 och 98·78 sista kolumnen (B7): verbatim faser', () => {
+    const t = (a, b, lv) => planMultHelpQueue(buildPlan(a, b, lv)).map(tagOf).join(' ');
+    expect(t(28, 8, 2)).toBe('table memplace memwrite table mem flydown');
+    const sista = planMultHelpQueue(buildPlan(98, 78, 4)).filter(it => it.rowKey === 'ans' && it.g === 3);
+    expect(sista.map(tagOf)).toEqual(['mem', 'flydown']);
+    expect(sista[0].single).toBe(true);
   });
 });

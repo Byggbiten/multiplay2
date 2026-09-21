@@ -250,6 +250,16 @@ const MultDivGame = (() => {
       100% { transform:scale(1); opacity:1; } }
     @keyframes md-chip-pop { 0% { transform:scale(1); } 45% { transform:scale(1.34); } 100% { transform:scale(1); } }
     .mem-digit.tk-blink { animation:md-mem-blink .4s ease-in-out both; }
+    /* Minnesväljaren 1–9 (B5): knappar ≥ 48 pt. Hjälpläget: panel under
+       pappret; fria läget: inuti tankebubblan (frivillig). */
+    .md-mempick { display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+      gap:6px; padding:8px; background:var(--glass-strong); border-radius:var(--radius-md);
+      border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); }
+    .md-mempick-lbl { font-size:0.85rem; font-weight:800; width:100%; text-align:center; color:#dc2626; }
+    .md-nk.md-pk { width:48px; height:48px; font-size:1.1rem; color:#dc2626;
+      border-color:rgba(220,38,38,0.45); }
+    .md-nk.md-pk-x { color:var(--ink-soft); border-color:var(--glass-line); }
+    .md-thought .md-mempick { background:none; border:none; box-shadow:none; padding:0; }
     @keyframes md-mem-blink { 0%,100% { transform:rotate(-4deg) scale(1); }
       50% { transform:rotate(-4deg) scale(1.45); } }
 
@@ -1703,30 +1713,33 @@ const MultDivGame = (() => {
     return q;
   }
 
+  /* ── HJÄLPKÖN (ombyggd 2026-09-21, GRANSKNING B2/B5/B6/B7) ──────
+     Per kolumn: (a) tabellfrågan — rätt svar föder BRICKAN i marginalen
+     och den står kvar; (b) minnesfrågan (step:'mem') — brickan visar det
+     nya värdet; (c) memstrike — barnet stryker det använda minnet DIREKT
+     efter användningen; (d) memplace — barnet tappar platsen i spalten
+     och VÄLJER själv vilken siffra som åker upp (väljare 1–9); (e)
+     memwrite — "Vilken siffra skriver vi i rutan?"; kolumn utan nytt
+     minne avslutas med flydown (brickan åker ner av sig själv).
+     v31: uppgiftens SISTA minne (finalPass + sista kolumnen) har inget
+     strykkrav och räknas inte i Minnesmästare. */
   function planMultHelpQueue(pl) {
     const q = [];
-    /* v30: efter varje kolumn skjuts minnets livscykel in som egna
-       faser — STRYK det använda minnet, PLACERA det nya.
-       v31: uppgiftens SISTA minne (finalPass + sista kolumnen) har inget
-       strykkrav — inget kommande minne att förväxla med. Momentet räknas
-       då inte heller i Minnesmästare (showMemPhase körs aldrig). */
-    const memQ = (c, g, finalPass) => {
+    const tail = (c, g, rowKey, finalPass) => {
       if (c.carryIn > 0 && !(finalPass && c.last)) q.push({ kind: 'memstrike', val: c.carryIn });
-      if (!c.last && c.carryOut > 0) q.push({ kind: 'memplace', val: c.carryOut, srcG: g });
+      if (!c.last && c.carryOut > 0) {
+        q.push({ kind: 'memplace', val: c.carryOut, srcG: g });
+        q.push({ kind: 'memwrite', ...c, g, rowKey });
+      } else {
+        q.push({ kind: 'flydown', ...c, g, rowKey });
+      }
     };
-    /* v31: TVÅSTEGSFRÅGAN — kolumn med minne delas i (a) ren tabell-
-       fråga (step:'table') och (b) minnespåminnelsen som EGEN fråga
-       (step:'mem'). Utan minne: bara en fråga som förut. */
     const passQ = (pass, rowKey, shift, finalPass) => {
       for (const c of pass.cols) {
-        const g = c.col + shift;
-        if (c.carryIn > 0) {
-          q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, step: 'table' });
-          q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, step: 'mem' });
-        } else {
-          q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift });
-        }
-        memQ(c, g, finalPass);
+        const g = c.col + shift, base = c.aDig * c.m;
+        q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, base, step: 'table' });
+        if (c.carryIn > 0) q.push({ kind: 'mult', ...c, g, rowKey, mCol: shift, base, step: 'mem' });
+        tail(c, g, rowKey, finalPass);
       }
     };
     if (pl.kind === 'simple') {
@@ -1739,21 +1752,23 @@ const MultDivGame = (() => {
       passQ(pl.p2, 'p2', 1, false);
       q.push({ kind: 'phase', which: 3 });
       for (const c of pl.add.cols) {
-        const single = (c.x === null || c.y === null) && c.carryIn === 0;
         const bothNull = c.x === null && c.y === null;
-        if (single) {
-          q.push({ kind: 'trivial', ...c, g: c.col, rowKey: 'ans' });
-        } else if (c.carryIn > 0 && !bothNull) {
+        const single = (c.x === null || c.y === null) && !bothNull;
+        const base = bothNull ? c.carryIn : (c.x || 0) + (c.y || 0);
+        const common = { ...c, g: c.col, rowKey: 'ans', base, single, memOnly: bothNull };
+        if (single && c.carryIn === 0) { q.push({ kind: 'trivial', ...common }); continue; }
+        if (bothNull) {
+          q.push({ kind: 'add', ...common, step: 'table' });       // "Bara minnessiffran kvar! Vad är 1?"
+        } else if (c.carryIn > 0) {
           // v31: tabellfrågan bara när det finns TVÅ siffror att addera —
-          // ensam siffra + minne går direkt till minnespåminnelsen
-          if (c.x !== null && c.y !== null)
-            q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans', step: 'table' });
-          q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans', step: 'mem' });
+          // ensam siffra + minne går direkt till minnesfrågan (B7-texten)
+          if (!single) q.push({ kind: 'add', ...common, step: 'table' });
+          q.push({ kind: 'add', ...common, step: 'mem' });
         } else {
-          q.push({ kind: 'add', ...c, g: c.col, rowKey: 'ans' });
+          q.push({ kind: 'add', ...common, step: 'table' });
         }
         // additionsfasen är uppgiftens sista pass ⇒ sista minnet utan strykkrav
-        memQ(c, c.col, true);
+        tail(c, c.col, 'ans', true);
       }
     }
     return q;
@@ -1781,10 +1796,12 @@ const MultDivGame = (() => {
     const item = helpItem();
     if (!item) { helpTaskDone(); return; }
     if (item.kind === 'memplace' || item.kind === 'memstrike') { showMemPhase(item); return; }
+    if (item.kind === 'flydown') { helpFlyDown(item); return; }
     if (item.kind === 'divplace') { showDivPlace(item); return; }
     if (item.kind === 'divstrike') { showDivStrike(item); return; }
     if (item.kind === 'mult') doHighlight({ phase: 'mult', aCol: item.col, mCol: item.mCol, g: item.g });
     else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ phase: 'add', g: item.g });
+    else if (item.kind === 'memwrite') doHighlight(item.rowKey === 'ans' && plan.kind === 'twostep' ? { phase: 'add', g: item.g } : { phase: 'mult', aCol: item.col, mCol: item.g - item.col, g: item.g });
     else if (item.kind === 'divq' || item.kind === 'divrem' || item.kind === 'dskip') divHighlight(item);
     // Markera målcellen
     document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
@@ -1805,13 +1822,33 @@ const MultDivGame = (() => {
     if (item.kind === 'memplace') {
       memAwait = { type: 'place', val: item.val, srcG: item.srcG };
       renderMemCol(); // nästa slot pulserar
-      helpBubble(`Var ska minnessiffran <strong style="color:#dc2626">${item.val}</strong>? Tryck där den ska stå! 👉`);
+      // B5: värdet sägs INTE — barnet väljer själv vilken siffra som åker upp
+      helpBubble(`En siffra åker upp som minne — tryck där den ska stå! 👉`);
     } else {
       const idx = mdMemList.findIndex(e => !e.used);
       if (idx < 0) { advanceHelp(helpIdx + 1); return; } // säkerhetsnät
       memAwait = { type: 'strike', val: item.val, idx };
       renderMemCol(); // siffran pulserar
       helpBubble(`Stryk minnessiffran <strong style="color:#dc2626">${item.val}</strong> — den är använd! ✏️`);
+    }
+  }
+
+  /* Kolumnen är färdigräknad: brickan åker ner i rutan av sig själv
+     (sista kolumnen: hela värdet får plats), sedan nästa fråga. */
+  function helpFlyDown(item) {
+    exInputLocked = true;
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';
+    const gen = exGen;
+    const next = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
+    if (item.last && item.extra !== null && item.extra !== undefined) {
+      helpBubble(`Sista kolumnen — hela <strong style="color:${cv(item.g)}">${item.prod}</strong> får plats! ✅`);
+      chipDigitToCell(item.rowKey, item.g + 1, () => {});
+      setTimeout(() => chipToCell(item.rowKey, item.g, item.write, next), 350);
+    } else {
+      helpBubble(`<strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
+      chipToCell(item.rowKey, item.g, item.write, next);
     }
   }
 
@@ -1928,16 +1965,13 @@ const MultDivGame = (() => {
   function memTapSlot() {
     if (memColMode === 'help') {
       if (!memAwait || memAwait.type !== 'place' || exInputLocked) return;
-      exInputLocked = true;
-      const val = memAwait.val, srcG = memAwait.srcG;
-      memAwait = null;
-      mdMemList.push({ val, used: false });
-      mdCarries[srcG + 1] = val;
-      renderMemCol({ landIdx: mdMemList.length - 1 });
-      playCarrySound();
-      helpBubble('Precis där! 🎯');
-      const gen = exGen;
-      setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 700);
+      // Platsen är vald — nu väljer barnet SIFFRAN (B5): väljaren 1–9 öppnas
+      if (!memPickerOpen) {
+        memPickerOpen = true;
+        renderMemPicker();
+        App.Sound.play('click');
+        helpBubble('Precis där! 🎯 Vilken siffra åker upp som minne? Välj! 👇');
+      }
     } else if (memColMode === 'free') {
       if (exInputLocked) return;
       memPickerOpen = !memPickerOpen;
@@ -1975,20 +2009,50 @@ const MultDivGame = (() => {
     App.Sound.play('click');
   }
 
-  function renderMemPicker() {
-    const area = document.getElementById('md-bubble');
-    if (!area) return;
-    if (!memPickerOpen) { area.innerHTML = ''; return; }
-    area.innerHTML = `<div class="md-thought" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
-      <span style="font-size:0.85rem">Minnessiffra:</span>
-      ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="md-nk" style="width:34px;height:34px;font-size:0.9rem"
-        onclick="MultDivGame.memPick(${d})">${d}</button>`).join('')}
-      <button class="md-nk" style="width:34px;height:34px;font-size:0.9rem"
-        onclick="MultDivGame.memTapSlot()">✕</button>
+  /* Minnesväljaren 1–9 (minnet kan vara 1–8 i multiplikation, 7·8 = 56
+     ⇒ 5 — additionens tryck-cykel duger inte här). Knappar ≥ 48 pt.
+     Hjälpläget: i #md-ui under pappret, efter att platsen tappats.
+     Fria läget: i bubbelytan, som förut (frivillig). */
+  function memPickerHTML(cancel) {
+    return `<div class="md-mempick">
+      <span class="md-mempick-lbl">Minnessiffra:</span>
+      ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="md-nk md-pk" onclick="MultDivGame.memPick(${d})">${d}</button>`).join('')}
+      ${cancel ? `<button class="md-nk md-pk md-pk-x" aria-label="Stäng" onclick="MultDivGame.memTapSlot()">✕</button>` : ''}
     </div>`;
   }
 
+  function renderMemPicker() {
+    const area = document.getElementById(memColMode === 'help' ? 'md-ui' : 'md-bubble');
+    if (!area) return;
+    if (!memPickerOpen) { area.innerHTML = ''; return; }
+    area.innerHTML = memColMode === 'help' ? memPickerHTML(false) : `<div class="md-thought">${memPickerHTML(true)}</div>`;
+  }
+
   function memPick(d) {
+    if (memColMode === 'help') {
+      if (!memAwait || memAwait.type !== 'place' || exInputLocked) return;
+      if (d !== memAwait.val) {
+        // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
+        memMistakes++;
+        App.Sound.play('wrong');
+        divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
+        return;
+      }
+      exInputLocked = true;
+      memPickerOpen = false;
+      renderMemPicker();
+      const fb = document.getElementById('md-feedback');
+      if (fb) fb.innerHTML = '';
+      const srcG = memAwait.srcG;
+      memAwait = null;
+      helpBubble(`<strong style="color:#dc2626">${d}</strong>:an åker upp som minne. ✅`);
+      const gen = exGen;
+      // Samma siffra som lossnar ur brickan landar i spalten (A2)
+      chipDigitToMem({ carryOut: d, g: srcG }, () => {
+        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
+      });
+      return;
+    }
     memPickerOpen = false;
     renderMemPicker();
     mdMemList.push({ val: d, used: false });
@@ -2002,14 +2066,13 @@ const MultDivGame = (() => {
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
-  function helpBase(item) {
-    return item.kind === 'mult' ? item.aDig * item.m : (item.x || 0) + (item.y || 0);
-  }
+  function helpBase(item) { return item.base; }
 
   /* v31: förväntat svar per delfråga — tabellsteget svarar utan minne */
   function helpExpected(item) {
     if (item.kind === 'divq') return item.q;       // kvotsiffran (kan vara 0)
     if (item.kind === 'divrem') return item.rem;   // mellanresten
+    if (item.kind === 'memwrite') return item.write; // siffran i rutan
     if (item.step === 'table') return helpBase(item);
     return item.kind === 'mult' ? item.prod : item.sum;
   }
@@ -2021,8 +2084,9 @@ const MultDivGame = (() => {
       return `<strong style="color:${C}">${item.cur}</strong> ÷ <strong>${numB}</strong>`;
     if (item.kind === 'divrem')
       return `<strong>${item.cur}</strong> − <strong>${item.q * numB}</strong>`;
+    if (item.kind === 'memwrite') return '';
     if (item.step === 'mem')
-      return `<strong>${helpBase(item)}</strong> + <strong style="color:#d97706">${item.carryIn}</strong>`;
+      return `<strong>${helpBase(item)}</strong> + <strong style="color:#dc2626">${item.carryIn}</strong>`;
     if (item.kind === 'mult')
       return `<strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>`;
     if (item.x === null || item.y === null) return ''; // bara-minnet-kolumnen (91·12) — inget uttryck
@@ -2036,10 +2100,18 @@ const MultDivGame = (() => {
       return `Hur många hela <strong>${numB}</strong>:or ryms i <strong style="color:${C}">${item.cur}</strong>? 🤔`;
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
-    /* v31: minnespåminnelsen som EGEN fråga (tvåstegsfrågan) */
+    /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
+    if (item.kind === 'memwrite')
+      return `Vilken siffra skriver vi i rutan? ✏️`;
+    /* v31: minnesfrågan som EGEN fråga (tvåstegsfrågan). B2: kort, utan
+       retorisk fråga — brickan på högersidan bär tabellsvaret. B7: ensam
+       siffra + minne har inget tabellsvar att peka på. */
     if (item.step === 'mem') {
-      return `Har vi någon minnessiffra som ska med? 👀 Just det — <strong style="color:#d97706">${item.carryIn}</strong>:an! `
-           + `Vad blir <strong>${helpBase(item)}</strong> + <strong style="color:#d97706">${item.carryIn}</strong>?`;
+      if (item.single) {
+        const d = item.x === null ? item.y : item.x;
+        return `Här står <strong style="color:${C}">${d}</strong>:an och <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det?`;
+      }
+      return `Nu <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det?`;
     }
     if (item.kind === 'mult') {
       // v31: ren tabellfråga — minnet kommer som egen fråga efteråt
@@ -2124,7 +2196,7 @@ const MultDivGame = (() => {
     if (exInputLocked || lifelines <= 0) return;
     const item = helpItem();
     // v32: samma livline-pool gäller även divisionens frågor
-    if (!item || !['mult', 'add', 'divq', 'divrem'].includes(item.kind)) return;
+    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return;
     lifelines--;
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
@@ -2195,8 +2267,8 @@ const MultDivGame = (() => {
   function helpSubmit() {
     if (exInputLocked || !helpInput) return;
     const item = helpItem();
-    if (!item || !['mult', 'add', 'divq', 'divrem'].includes(item.kind)) return;
-    const expected = helpExpected(item); // v31: per delfråga (tabell/minne)
+    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return;
+    const expected = helpExpected(item); // v31: per delfråga (tabell/minne/ruta)
 
     if (parseInt(helpInput, 10) === expected) {
       exInputLocked = true;
@@ -2221,31 +2293,38 @@ const MultDivGame = (() => {
         setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 700);
         return;
       }
-      if (item.step === 'table') {
-        // v31: tabellsvaret klart — minnespåminnelsen kommer som EGEN fråga.
-        // Inget skrivs i rutan än; consumeCarry sker i minnessteget.
-        helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+      if (item.kind === 'memwrite') {
+        // B5: siffran som skrivs — brickans rest åker ner i rutan
+        helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
         smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
+        chipToCell(item.rowKey, item.g, item.write, () => {
+          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
+        });
         return;
       }
+      if (item.step === 'table') {
+        // Tabellsvaret klart: BRICKAN föds i marginalen och står kvar där
+        // tills kolumnen är färdig (B2). Minnesfrågan kommer som egen fråga.
+        helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+        smallBurst();
+        const step = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, memOnly: !!item.memOnly };
+        chipBorn(step, expected, calcSources(step), () => {
+          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
+        });
+        return;
+      }
+      // step === 'mem': minnet läggs SYNLIGT till brickan (eller föder den
+      // när kolumnen bara hade en siffra + minne, B7)
       consumeCarry(item);
-      if (item.last && item.extra !== null) {
-        writeDigit(item.rowKey, item.g, item.write);
-        setTimeout(() => writeDigit(item.rowKey, item.g + 1, item.extra), 250);
-        helpBubble(`Rätt! Sista kolumnen — hela <strong style="color:${cv(item.g)}">${expected}</strong> får plats! ✅`);
-        smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 1000);
-      } else if (!item.last && item.carryOut > 0) {
-        // v30: skriv siffran — placeringen är barnets egen PLACERA-fas
-        writeDigit(item.rowKey, item.g, item.write);
-        helpBubble(`Rätt! Vi skriver <strong style="color:${cv(item.g)}">${item.write}</strong>:an — <strong style="color:#dc2626">${item.carryOut}</strong>:an blir minnessiffra!`);
-        smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 900);
-      } else {
-        writeDigit(item.rowKey, item.g, item.write);
-        smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 600);
+      helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+      smallBurst();
+      const stepM = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, prod: item.prod, sum: item.sum };
+      const done = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
+      if (mdChip()) chipJoinMem(stepM, done);
+      else {
+        const srcs = calcSources(stepM), md = currentMemNode();
+        if (md) srcs.push(md);
+        chipBorn(stepM, expected, srcs, done);
       }
     } else {
       // Fel → mild "prova igen", inget poängstraff, siffrorna kan redigeras
