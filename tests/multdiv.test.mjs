@@ -133,15 +133,7 @@ function refDivHelp(pl) {
   return q;
 }
 
-describe('karakterisering — utbrytningen andrar ingenting', () => {
-  it('planMultSteps == dagens buildDemoSteps over hela generatorrymden', () => {
-    const avv = [];
-    for (const [a, b, lv] of multSpace()) {
-      const pl = buildPlan(a, b, lv);
-      if (JSON.stringify(planMultSteps(pl)) !== JSON.stringify(refMultSteps(pl))) avv.push(`${a}·${b}`);
-    }
-    expect(avv).toEqual([]);
-  });
+describe('karakterisering — hjalpkon och divisionen ar oforandrade', () => {
   it('planMultHelpQueue == dagens buildHelpQueue over hela generatorrymden', () => {
     const avv = [];
     for (const [a, b, lv] of multSpace()) {
@@ -165,5 +157,108 @@ describe('karakterisering — utbrytningen andrar ingenting', () => {
       if (JSON.stringify(planDivHelpQueue(pl)) !== JSON.stringify(refDivHelp(pl))) avv.push(`${n}÷${d}`);
     }
     expect(avv).toEqual([]);
+  });
+});
+
+describe('multiplikationens nya stegkedja (GRANSKNING A1/A2/B1/B3/B6)', () => {
+  const MULT_TYPES = new Set(['phase', 'calc', 'memjoin', 'mem_strike', 'carry_up', 'write_down', 'move_down', 'write_full', 'done']);
+
+  /* Forvantad kedja per kolumn, harledd ur planen — samma regler som
+     passStepsInto/addStepsInto ska folja. */
+  function kolumnKedja(c, finalPass, isAdd) {
+    const out = [];
+    const bothNull = isAdd && c.x === null && c.y === null;
+    const single = isAdd && (c.x === null || c.y === null) && !bothNull;
+    if (single && c.carryIn === 0) return ['move_down'];
+    out.push('calc');
+    if (c.carryIn > 0 && !bothNull) out.push('memjoin');
+    if (c.carryIn > 0 && !(finalPass && c.last)) out.push('mem_strike');
+    if (c.last) out.push(!isAdd && c.extra !== null ? 'write_full' : 'write_down');
+    else if (c.carryOut > 0) out.push('carry_up', 'write_down');
+    else out.push('write_down');
+    return out;
+  }
+  function forvantad(pl) {
+    const t = [];
+    if (pl.kind === 'simple') pl.pass.cols.forEach(c => t.push(...kolumnKedja(c, true, false)));
+    else {
+      t.push('phase'); pl.p1.cols.forEach(c => t.push(...kolumnKedja(c, false, false)));
+      t.push('phase'); pl.p2.cols.forEach(c => t.push(...kolumnKedja(c, false, false)));
+      t.push('phase'); pl.add.cols.forEach(c => t.push(...kolumnKedja(c, true, true)));
+    }
+    t.push('done');
+    return t;
+  }
+
+  it('bara kanda stegtyper, inga tomma steg (highlight/over9 finns inte)', () => {
+    const fel = new Set();
+    for (const [a, b, lv] of multSpace())
+      for (const s of planMultSteps(buildPlan(a, b, lv))) if (!MULT_TYPES.has(s.t)) fel.add(s.t);
+    expect([...fel]).toEqual([]);
+  });
+
+  it('kedjan per kolumn foljer regeln: calc → memjoin → mem_strike → delning', () => {
+    const avv = [];
+    for (const [a, b, lv] of multSpace()) {
+      const pl = buildPlan(a, b, lv);
+      const fick = planMultSteps(pl).map(s => s.t);
+      if (JSON.stringify(fick) !== JSON.stringify(forvantad(pl))) avv.push(`${a}·${b}`);
+    }
+    expect(avv).toEqual([]);
+  });
+
+  it('siffrorna som skrivs bildar produkten — varje rad, hela rymden', () => {
+    const fel = [];
+    const join = ds => ds.reduce((n, d, i) => n + (d || 0) * Math.pow(10, i), 0);
+    for (const [a, b, lv] of multSpace()) {
+      const pl = buildPlan(a, b, lv);
+      const rows = { ans: [], p1: [], p2: [] };
+      for (const s of planMultSteps(pl)) {
+        if (s.t === 'write_down' || s.t === 'move_down') rows[s.rowKey][s.g] = s.write;
+        if (s.t === 'write_full') { rows[s.rowKey][s.g] = s.write; rows[s.rowKey][s.g + 1] = s.extra; }
+      }
+      if (pl.kind === 'simple') { if (join(rows.ans) !== a * b) fel.push(`${a}·${b}`); }
+      else {
+        if (join(rows.p1) !== pl.p1.value) fel.push(`${a}·${b} p1`);
+        if (join(rows.p2) / 10 !== pl.p2.value) fel.push(`${a}·${b} p2`);
+        if (join(rows.ans) !== a * b) fel.push(`${a}·${b} ans`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('minnet: carry_up bar carryOut, memjoin bar carryIn; strykningen kommer DIREKT efter memjoin', () => {
+    const fel = [];
+    for (const [a, b, lv] of multSpace()) {
+      const st = planMultSteps(buildPlan(a, b, lv));
+      st.forEach((s, i) => {
+        if (s.t === 'carry_up' && !(s.carryOut > 0 && !s.last)) fel.push(`${a}·${b} carry_up`);
+        if (s.t === 'memjoin' && !(s.carryIn > 0)) fel.push(`${a}·${b} memjoin`);
+        if (s.t === 'mem_strike' && st[i - 1].t !== 'memjoin' && !(st[i - 1].t === 'calc' && st[i - 1].memOnly)) fel.push(`${a}·${b} strike-ordning`);
+        if (s.t === 'carry_up' && st[i + 1].t !== 'write_down') fel.push(`${a}·${b} carry_up utan write_down`);
+      });
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('granskningens fyra tal: verbatim kedja', () => {
+    const t = (a, b, lv) => planMultSteps(buildPlan(a, b, lv)).map(s => s.t).join(' ');
+    expect(t(32, 3, 1)).toBe('calc write_down calc write_down done');
+    expect(t(28, 8, 2)).toBe('calc carry_up write_down calc memjoin write_full done');
+    expect(t(789, 9, 3)).toBe('calc carry_up write_down calc memjoin mem_strike carry_up write_down calc memjoin write_full done');
+    expect(t(98, 78, 4)).toBe([
+      'phase', 'calc carry_up write_down', 'calc memjoin mem_strike write_full',
+      'phase', 'calc carry_up write_down', 'calc memjoin mem_strike write_full',
+      'phase', 'move_down', 'calc carry_up write_down', 'calc memjoin mem_strike carry_up write_down', 'calc memjoin write_down',
+      'done'].join(' '));
+  });
+
+  it('91·12: tusentalet ar bara minnet (memOnly) — foods ur minnessiffran, inget strykkrav', () => {
+    const st = planMultSteps(buildPlan(91, 12, 4));
+    const add = st.filter(s => s.phase === 'add');
+    const last = add.filter(s => s.g === 3).map(s => s.t);
+    expect(last).toEqual(['calc', 'write_down']);
+    expect(add.find(s => s.g === 3 && s.t === 'calc').memOnly).toBe(true);
+    expect(add.find(s => s.g === 3 && s.t === 'calc').base).toBe(1);
   });
 });

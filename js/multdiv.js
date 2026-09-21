@@ -216,6 +216,43 @@ const MultDivGame = (() => {
     .md-l4 .mem-digit, .md-l4 .mem-slot { font-size:clamp(0.72rem,1.8vw,1.2rem); }
     @media (max-width:420px) { .md-memcol { width:clamp(36px,10vw,48px); gap:1px 4px; } }
 
+    /* BRICKAN (2026-09-21, facit uppstallning.js .tk-badge/.tk-fly):
+       kvantiteten i högermarginalen — det enda som rör sig. Pappret
+       (cellerna, spalten) står still. Färgen är kolumnens platsvärde. */
+    .md-chip { position:absolute; z-index:8; pointer-events:none; display:flex;
+      align-items:center; justify-content:center; gap:1px; min-width:50px;
+      padding:3px 10px; border-radius:999px; line-height:1;
+      font-family:var(--font-head); font-weight:800; font-size:1.35rem; color:#fff;
+      background:linear-gradient(135deg,#7c3aed,#a78bfa);
+      box-shadow:0 7px 20px rgba(124,58,237,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip .md-cd { display:inline-block; }
+    .md-chip.chip-green  { background:linear-gradient(135deg,#22c55e,#86efac);
+      box-shadow:0 7px 20px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.chip-blue   { background:linear-gradient(135deg,#3b82f6,#93c5fd);
+      box-shadow:0 7px 20px rgba(59,130,246,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.chip-red    { background:linear-gradient(135deg,#ef4444,#fca5a5);
+      box-shadow:0 7px 20px rgba(239,68,68,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.chip-purple { background:linear-gradient(135deg,#a855f7,#d8b4fe);
+      box-shadow:0 7px 20px rgba(168,85,247,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.chip-in  { animation:md-chip-in .38s cubic-bezier(0.34,1.3,0.4,1) both; }
+    .md-chip.chip-pop { animation:md-chip-pop .3s var(--spring) both; }
+    .md-l4 .md-chip { font-size:1.15rem; min-width:44px; padding:2px 8px; }
+    /* Flygaren: SAMMA nod som sedan adopteras av spalten/cellen */
+    .md-fly { position:absolute; z-index:22; pointer-events:none; display:grid;
+      place-items:center; font-family:var(--font-head); font-weight:800; line-height:1; }
+    /* Avläsningspulsen ändrar bara text-shadow — en skriven siffra får
+       aldrig skalas om (P1: pappret står still). */
+    @keyframes md-read-glow {
+      0%,100% { text-shadow:none; }
+      45%     { text-shadow:0 0 9px currentColor, 0 0 3px currentColor; }
+    }
+    @keyframes md-chip-in { 0% { transform:scale(.4); opacity:0; } 65% { transform:scale(1.16); opacity:1; }
+      100% { transform:scale(1); opacity:1; } }
+    @keyframes md-chip-pop { 0% { transform:scale(1); } 45% { transform:scale(1.34); } 100% { transform:scale(1); } }
+    .mem-digit.tk-blink { animation:md-mem-blink .4s ease-in-out both; }
+    @keyframes md-mem-blink { 0%,100% { transform:rotate(-4deg) scale(1); }
+      50% { transform:rotate(-4deg) scale(1.45); } }
+
     /* Kort division (v36): BRÅKSTRECKS-NOTATION per Miras mattebok —
        täljaren överst, horisontellt bråkstreck, divisorn centrerad
        UNDER strecket, kvoten efter "=" till HÖGER. flex-wrap ⇒
@@ -605,51 +642,64 @@ const MultDivGame = (() => {
   /* ══════════════════════════════════════════════════════════
      STEG-BYGGARE (demo) — bubbla FÖRE animation (v28-mönstret)
   ══════════════════════════════════════════════════════════ */
-  /* finalPass (v31): sista minnessiffran i uppgiften — den som används i
-     uppgiftens SISTA beräkningssteg — stryks inte (inget kommande minne
-     att förväxla med). Gäller bara uppgiftens sista pass sista kolumn. */
+  /* ── MULTIPLIKATIONENS STEGKEDJA (ombyggd 2026-09-21, GRANSKNING-
+     MULTIPLIKATION A1/A2/B1/B3/B6) ──────────────────────────────────
+     Additionens grepp: produkten föds som BRICKA i högermarginalen
+     (calc), minnet läggs SYNLIGT till brickan (memjoin), det använda
+     minnet stryks direkt efter användningen (mem_strike — "använd →
+     stryk → räkna vidare"), och sedan DELAR brickan sig: tiotalssiffran
+     åker upp som minnessiffra (carry_up), entalssiffran åker ner i
+     svaret (write_down). Sista kolumnen får plats med hela värdet
+     (write_full). Varje steg bär EN idé och EN rörelse — inga tomma
+     klick (highlight är inbakad i calc).
+     finalPass (v31): uppgiftens SISTA minne — det som används i
+     uppgiftens sista beräkningssteg — stryks inte. */
   function passStepsInto(steps, pass, rowKey, shift, finalPass) {
     for (const c of pass.cols) {
       const g = c.col + shift; // grid-kolumn där siffran SKRIVS
-      steps.push({ t: 'highlight', phase: 'mult', aCol: c.col, mCol: shift, g, rowKey });
-      if (c.last) {
-        if (c.prod > 9) {
-          steps.push({ t: 'calc',       phase: 'mult', ...c, g, rowKey });
-          steps.push({ t: 'write_full', phase: 'mult', ...c, g, rowKey });
-        } else {
-          steps.push({ t: 'write_simple', phase: 'mult', ...c, g, rowKey });
-        }
-      } else if (c.prod > 9) {
-        steps.push({ t: 'calc',        phase: 'mult', ...c, g, rowKey });
-        steps.push({ t: 'over9',       phase: 'mult', ...c, g, rowKey });
-        steps.push({ t: 'write_carry', phase: 'mult', ...c, g, rowKey });
-      } else {
-        steps.push({ t: 'write_simple', phase: 'mult', ...c, g, rowKey });
-      }
-      /* v30: minnets livscykel som EGNA steg — stryk det använda
-         minnet först, placera sedan det nya i spalten.
-         v31: uppgiftens SISTA minne (finalPass + sista kolumnen) stryks ej. */
+      const base = c.aDig * c.m;
+      const common = { phase: 'mult', ...c, g, rowKey, base, aCol: c.col, mCol: shift };
+      steps.push({ t: 'calc', ...common });
+      if (c.carryIn > 0) steps.push({ t: 'memjoin', ...common });
       if (c.carryIn > 0 && !(finalPass && c.last))
         steps.push({ t: 'mem_strike', phase: 'mult', val: c.carryIn, g, rowKey });
-      if (!c.last && c.carryOut > 0) steps.push({ t: 'mem_place', phase: 'mult', carryOut: c.carryOut, g, rowKey });
+      if (c.last) {
+        steps.push({ t: c.extra !== null ? 'write_full' : 'write_down', ...common });
+      } else if (c.carryOut > 0) {
+        steps.push({ t: 'carry_up',   ...common });
+        steps.push({ t: 'write_down', ...common });
+      } else {
+        steps.push({ t: 'write_down', ...common });
+      }
     }
   }
 
+  /* Additionsfasen (nivå 4) kör SAMMA brickkedja som delprodukterna —
+     brickan föds ur de två delproduktsiffrorna, minnet läggs till, och
+     brickan delar sig. Kolumn med bara EN siffra och inget minne flyttas
+     ner i ett steg (move_down). Kolumn med bara minnet (91·12: tusen-
+     talet) föds som bricka ur minnessiffran (memOnly) — den är alltid
+     uppgiftens sista kolumn (allt annat är slut), så inget strykkrav.
+     Valet (B4) är dokumenterat i rapporten: additionens tiokompis-kedja
+     lever i en annan IIFE med egna DOM-id:n och går inte att låna. */
   function addStepsInto(steps, add) {
     for (const c of add.cols) {
-      const single = (c.x === null || c.y === null) && c.carryIn === 0;
-      steps.push({ t: 'highlight', phase: 'add', g: c.col, rowKey: 'ans' });
-      if (!c.last && c.sum > 9) {
-        steps.push({ t: 'calc',        phase: 'add', ...c, g: c.col, rowKey: 'ans' });
-        steps.push({ t: 'over9',       phase: 'add', ...c, g: c.col, rowKey: 'ans' });
-        steps.push({ t: 'write_carry', phase: 'add', ...c, g: c.col, rowKey: 'ans' });
-      } else {
-        steps.push({ t: 'write_simple', phase: 'add', ...c, g: c.col, rowKey: 'ans', single });
-      }
+      const bothNull = c.x === null && c.y === null;
+      const single = (c.x === null || c.y === null) && !bothNull;
+      const base = bothNull ? c.carryIn : (c.x || 0) + (c.y || 0);
+      const common = { phase: 'add', ...c, g: c.col, rowKey: 'ans', base, single, memOnly: bothNull };
+      if (single && c.carryIn === 0) { steps.push({ t: 'move_down', ...common }); continue; }
+      steps.push({ t: 'calc', ...common });
+      if (c.carryIn > 0 && !bothNull) steps.push({ t: 'memjoin', ...common });
       // v31: additionsfasen är uppgiftens sista pass — sista kolumnens minne stryks ej
       if (c.carryIn > 0 && !c.last)
         steps.push({ t: 'mem_strike', phase: 'add', val: c.carryIn, g: c.col, rowKey: 'ans' });
-      if (!c.last && c.carryOut > 0) steps.push({ t: 'mem_place', phase: 'add', carryOut: c.carryOut, g: c.col, rowKey: 'ans' });
+      if (!c.last && c.carryOut > 0) {
+        steps.push({ t: 'carry_up',   ...common });
+        steps.push({ t: 'write_down', ...common });
+      } else {
+        steps.push({ t: 'write_down', ...common });
+      }
     }
   }
 
@@ -705,51 +755,48 @@ const MultDivGame = (() => {
   }
 
   /* ── Bubbeltexter (spec-språket, · per boken) ───────────── */
+  /* Multiplikationens bubblor: en mening, en idé, ingen uträkning att
+     göra i huvudet. Tabellfaktan ("8 · 8 är 64") är premissen — brickan
+     som föds är slutsatsen. Minnet läggs till som ett konstaterande
+     ("gör 64 till 70"), aldrig som en addition barnet ska utföra. */
   function calcText(step) {
     const C = cv(step.g);
     if (step.phase === 'add') {
-      const x = step.x === null ? 0 : step.x, y = step.y === null ? 0 : step.y;
-      const mi = step.carryIn ? `, plus <span style="color:#d97706">${step.carryIn}</span> i minne` : '';
-      if (step.x === null && step.y === null) {
-        // Kolumn utan siffror — bara minnessiffran
-        return `Bara minnessiffran kvar — <span style="color:#d97706">${step.carryIn}</span>:an flyttas ner! ✅`;
+      if (step.memOnly) return `Bara minnessiffran kvar.`;
+      if (step.single) {
+        const d = step.x === null ? step.y : step.x;
+        return `Bara <strong style="color:${C}">${d}</strong>:an här.`;
       }
-      if (step.x === null || step.y === null) {
-        const d = step.x === null ? y : x;
-        return step.carryIn
-          ? `<span style="color:${C}">${d}</span> plus <span style="color:#d97706">${step.carryIn}</span> i minne = <strong>${step.sum}</strong>`
-          : `Bara <span style="color:${C}">${d}</span>:an här — den flyttas ner! ✅`;
-      }
-      return `<span style="color:${C}">${x}</span> + <span style="color:${C}">${y}</span>${mi} = <strong>${step.sum}</strong>`;
+      return `<span style="color:${C}">${step.x}</span> + <span style="color:${C}">${step.y}</span> är <strong style="color:${C}">${step.base}</strong>`;
     }
-    const base = `<span style="color:${C}">${step.aDig}</span> · <span style="color:${C}">${step.m}</span> = <strong>${step.aDig * step.m}</strong>`;
-    return step.carryIn
-      ? `${base}, plus <span style="color:#d97706">${step.carryIn}</span> i minne = <strong>${step.prod}</strong>`
-      : base;
+    return `<span style="color:${C}">${step.aDig}</span> · <span style="color:${C}">${step.m}</span> är <strong style="color:${C}">${step.base}</strong>`;
   }
 
   function stepBubbleHTML(step) {
     if (!step) return '';
     const val = step.phase === 'add' ? step.sum : step.prod;
     switch (step.t) {
-      case 'highlight': return '';
       case 'phase':
         if (step.which === 1)
           return `Först räknar vi <strong>${numA} · ${plan.ones}</strong> — entalssiffran i ${numB}! 👇`;
         if (step.which === 2)
           return `<strong>${plan.tens}</strong>:an är tiotal — därför börjar vi skriva ett steg åt vänster! 👈`;
-        return `Till sist adderar vi delprodukterna — som vanlig uppställd addition! ➕`;
+        return `Nu adderar vi raderna. ➕`;
       case 'calc':  return calcText(step);
-      case 'over9': return `<strong>${val}</strong>... det är mer än 9! 🤔`;
-      case 'write_carry':
-        return `Vi skriver <strong style="color:${cv(step.g)}">${step.write}</strong>:an — <strong style="color:#dc2626">${step.carryOut}</strong>:an blir minnessiffra! ➡️`;
-      case 'write_simple': return calcText(step);
+      case 'memjoin':
+        return `Minnessiffran <strong style="color:#dc2626">${step.carryIn}</strong> gör <strong>${step.base}</strong> till <strong style="color:${cv(step.g)}">${val}</strong>.`;
+      case 'carry_up':
+        return `<strong style="color:#dc2626">${step.carryOut}</strong>:an åker upp som minne. 👉`;
+      case 'write_down':
+        return `<strong style="color:${cv(step.g)}">${step.write}</strong>:an åker ner i svaret. ✅`;
+      case 'move_down': {
+        const d = step.x === null ? step.y : step.x;
+        return `Bara <strong style="color:${cv(step.g)}">${d}</strong>:an här — den åker ner. ✅`;
+      }
       case 'write_full':
-        return `<strong style="color:${cv(step.g)}">${val}</strong> — sista kolumnen, så hela ${val} får plats! ✅`;
-      case 'mem_place':
-        return `<strong style="color:#dc2626">${step.carryOut}</strong>:an skrivs som minnessiffra här 👇`;
+        return `Sista kolumnen — hela <strong style="color:${cv(step.g)}">${val}</strong> får plats! ✅`;
       case 'mem_strike':
-        return `Nu stryker vi <strong style="color:#dc2626">${step.val}</strong>:an — den är använd! Så vet vi att den inte räknas igen. ✏️`;
+        return `Nu stryker vi <strong style="color:#dc2626">${step.val}</strong>:an — den är använd. ✏️`;
       /* Kort division (v32) — spec-språket */
       case 'dhl': return '';
       case 'dask':
@@ -865,60 +912,35 @@ const MultDivGame = (() => {
 
   /* ── Steg-exekvering (animationer) ──────────────────────── */
   function executeStep(step, cb) {
-    if (step.t === 'highlight') {
-      doHighlight(step);
-      setTimeout(cb, 50);
+    if (step.t === 'phase') {
+      if (step.which >= 2) clearCarryRow();
+      if (step.which <= 2) {
+        // Pulsera B-siffran som fasen gäller (ental=grid 0, tiotal=grid 1)
+        const bCell = document.getElementById(`md-b-${step.which - 1}`);
+        if (bCell) {
+          bCell.classList.add('md-prob');
+          setTimeout(() => bCell.classList.remove('md-prob'), 1100);
+        }
+        setTimeout(cb, 1200);
+      } else {
+        // Fas 3: raderna som ska adderas lyser upp — klicket bär en rörelse
+        doHighlight({ phase: 'add', g: -1 });
+        document.querySelectorAll('#md-table-wrap [id^="md-p1-"], #md-table-wrap [id^="md-p2-"]').forEach(el => {
+          if (!el.classList.contains('md-ghost')) { el.classList.remove('dim'); el.classList.add('md-glow'); }
+        });
+        setTimeout(cb, 900);
+      }
 
     } else if (step.t === 'calc') {
-      setTimeout(cb, 50);
+      // Highlight + tabellfakta + brickan föds i marginalen: ETT steg
+      doHighlight(step);
+      const srcs = calcSources(step);
+      chipBorn(step, step.base, srcs, () => setTimeout(cb, 150));
 
-    } else if (step.t === 'phase') {
-      if (step.which >= 2) clearCarryRow();
-      // Pulsera B-siffran som fasen gäller (ental=grid 0, tiotal=grid 1)
-      const bCell = step.which <= 2 ? document.getElementById(`md-b-${step.which - 1}`) : null;
-      if (bCell) {
-        bCell.classList.add('md-prob');
-        setTimeout(() => bCell.classList.remove('md-prob'), 1100);
-      }
-      setTimeout(cb, step.which <= 2 ? 1200 : 600);
-
-    } else if (step.t === 'over9') {
-      probCells(step).forEach(el => el.classList.add('md-prob'));
-      setTimeout(() => {
-        probCells(step).forEach(el => el.classList.remove('md-prob'));
-        cb();
-      }, 1100);
-
-    } else if (step.t === 'write_simple') {
-      consumeCarry(step);
-      setTimeout(() => {
-        writeDigit(step.rowKey, step.g, step.write);
-        App.Sound.play('correct');
-        setTimeout(cb, 700);
-      }, 300);
-
-    } else if (step.t === 'write_carry') {
-      consumeCarry(step);
-      writeDigit(step.rowKey, step.g, step.write);
-      App.Sound.play('correct');
-      setTimeout(cb, 800);
-
-    } else if (step.t === 'mem_place') {
-      // Eget steg (v30): siffran flyger till minnesspalten och landar där
-      mdMemList.push({ val: step.carryOut, used: false });
-      renderMemCol();
-      const col = document.getElementById('md-memcol');
-      const dst = col ? col.querySelectorAll('.mem-digit')[mdMemList.length - 1] : null;
-      const src = document.getElementById(`md-${step.rowKey}-${step.g}`);
-      mdCarries[step.g + 1] = step.carryOut;
-      if (dst && src) {
-        dst.style.opacity = '0';
-        animateTokenTo(src, dst, step.carryOut, () => {
-          dst.style.opacity = '';
-          dst.classList.add('landing');
-          setTimeout(cb, 400);
-        });
-      } else setTimeout(cb, 300);
+    } else if (step.t === 'memjoin') {
+      // Minnet läggs SYNLIGT till brickan: minnessiffran blinkar,
+      // brickan poppar och visar det nya värdet (mockup: add_memjoin)
+      chipJoinMem(step, () => setTimeout(cb, 250));
 
     } else if (step.t === 'mem_strike') {
       // Eget steg (v30): penndraget ritas — minnet står kvar, struket
@@ -927,14 +949,31 @@ const MultDivGame = (() => {
       App.Sound.play('click');
       setTimeout(cb, 900);
 
-    } else if (step.t === 'write_full') {
+    } else if (step.t === 'carry_up') {
+      // Brickan delar sig: tiotalssiffran lossnar och ÄR den som landar
+      // som minnessiffra i spalten (samma element hela vägen — A2)
       consumeCarry(step);
-      writeDigit(step.rowKey, step.g, step.write);
+      chipDigitToMem(step, () => setTimeout(cb, 400));
+
+    } else if (step.t === 'write_down') {
+      consumeCarry(step);
+      chipToCell(step.rowKey, step.g, step.write, () => setTimeout(cb, 420));
+
+    } else if (step.t === 'move_down') {
+      // Ensam siffra i kolumnen: den lyser upp och droppar ner i svaret
+      doHighlight(step);
       setTimeout(() => {
-        if (step.extra !== null) writeDigit(step.rowKey, step.g + 1, step.extra);
+        writeDigit(step.rowKey, step.g, step.write);
         App.Sound.play('correct');
-        setTimeout(cb, 800);
+        setTimeout(cb, 700);
       }, 300);
+
+    } else if (step.t === 'write_full') {
+      // Sista kolumnen: tiotalssiffran åker till rutan längst till
+      // vänster, brickans rest åker ner i sin ruta — hela värdet får plats
+      consumeCarry(step);
+      chipDigitToCell(step.rowKey, step.g + 1, () => {});
+      setTimeout(() => chipToCell(step.rowKey, step.g, step.write, () => setTimeout(cb, 420)), 350);
 
     /* ── Kort division (v32) ── */
     } else if (step.t === 'dhl') {
@@ -973,21 +1012,6 @@ const MultDivGame = (() => {
     } else {
       cb();
     }
-  }
-
-  function probCells(step) {
-    const out = [];
-    if (step.phase === 'mult') {
-      const a = document.getElementById(`md-a-${step.aCol !== undefined ? step.aCol : step.col}`);
-      const b = document.getElementById(`md-b-${step.rowKey === 'p2' ? 1 : 0}`);
-      if (a) out.push(a); if (b) out.push(b);
-    } else {
-      const p1 = document.getElementById(`md-p1-${step.g}`);
-      const p2 = document.getElementById(`md-p2-${step.g}`);
-      if (p1 && !p1.classList.contains('md-ghost')) out.push(p1);
-      if (p2 && !p2.classList.contains('md-ghost')) out.push(p2);
-    }
-    return out;
   }
 
   function doHighlight(opts) {
@@ -1080,10 +1104,10 @@ const MultDivGame = (() => {
          <path pathLength="30" d="M2.5 17.5 C 6 13.5, 7.5 12, 10 9 S 15.5 4.5, 17.5 2.5"/></svg>`);
   }
 
-  function writeDigit(rowKey, g, d) {
+  function writeDigit(rowKey, g, d, anim) {
     const cell = document.getElementById(`md-${rowKey}-${g}`);
     if (!cell) return;
-    cell.innerHTML = `<span style="color:${cv(g)};animation:md-drop 0.55s ease-out both;display:inline-block">${d}</span>`;
+    cell.innerHTML = `<span style="color:${cv(g)};animation:${anim || 'md-drop 0.55s ease-out both'};display:inline-block">${d}</span>`;
     cell.classList.add('filled');
     cell.classList.remove('active-col');
     cell.style.borderColor = cv(g);
@@ -1107,57 +1131,253 @@ const MultDivGame = (() => {
     `<svg class="mem-strike${draw ? ' draw' : ''}" viewBox="0 0 20 20" aria-hidden="true">
        <path pathLength="30" d="M2.5 17.5 C 6 13.5, 7.5 12, 10 9 S 15.5 4.5, 17.5 2.5"/></svg>`;
 
+  /* Spalten AVSTÄMS mot mdMemList i stället för att byggas om (D5):
+     befintliga noder uppdateras, nya appendas. Så kan en siffra som
+     flugit in från brickan (carry_up) VARA noden som sedan lever kvar
+     i spalten — inget skapas och förstörs i samma steg. */
   function renderMemCol(opts = {}) {
     const col = document.getElementById('md-memcol');
     if (!col) return;
     const tap = memColMode !== 'demo';
-    let html = mdMemList.map((e, i) => {
-      let cls = 'mem-digit';
-      if (e.used) cls += ' used';
-      if (memAwait && memAwait.type === 'strike' && memAwait.idx === i) cls += ' mem-pulse';
-      if (opts.landIdx === i) cls += ' landing';
-      const on = tap ? ` onclick="event.stopPropagation();MultDivGame.memTap(${i})"` : '';
-      return `<span class="${cls}"${on}>${e.val}${e.used ? memStrikeSVG(opts.strikeIdx === i) : ''}</span>`;
-    }).join('');
-    if (memColMode === 'help' && memAwait && memAwait.type === 'place')
-      html += `<span class="mem-slot mem-pulse" id="md-memslot"
-        onclick="event.stopPropagation();MultDivGame.memTapSlot()"></span>`;
-    if (memColMode === 'free')
-      html += `<span class="mem-slot" title="Minnessiffra"
-        onclick="event.stopPropagation();MultDivGame.memTapSlot()"></span>`;
-    col.innerHTML = html;
+    const nodes = Array.from(col.children).filter(n => n.classList.contains('mem-digit'));
+    let slot = col.querySelector(':scope > .mem-slot');
+    mdMemList.forEach((e, i) => {
+      let n = nodes[i];
+      if (!n) {
+        n = document.createElement('span');
+        n.className = 'mem-digit';
+        n.textContent = e.val;
+        col.insertBefore(n, slot);
+      }
+      n.classList.toggle('used', !!e.used);
+      n.classList.toggle('mem-pulse', !!(memAwait && memAwait.type === 'strike' && memAwait.idx === i));
+      if (opts.landIdx === i) n.classList.add('landing');
+      n.onclick = tap ? (ev => { ev.stopPropagation(); MultDivGame.memTap(i); }) : null;
+      const hasStrike = !!n.querySelector('.mem-strike');
+      if (e.used && !hasStrike) n.insertAdjacentHTML('beforeend', memStrikeSVG(opts.strikeIdx === i));
+      if (!e.used && hasStrike) n.querySelector('.mem-strike').remove();
+    });
+    nodes.slice(mdMemList.length).forEach(n => n.remove()); // fria lägets "rensa"
+    const wantSlot = (memColMode === 'help' && memAwait && memAwait.type === 'place') || memColMode === 'free';
+    if (wantSlot && !slot) {
+      slot = document.createElement('span');
+      slot.className = 'mem-slot';
+      slot.onclick = ev => { ev.stopPropagation(); MultDivGame.memTapSlot(); };
+      col.appendChild(slot);
+    } else if (!wantSlot && slot) { slot.remove(); slot = null; }
+    if (slot) {
+      slot.id = memColMode === 'help' ? 'md-memslot' : '';
+      slot.title = memColMode === 'free' ? 'Minnessiffra' : '';
+      slot.classList.toggle('mem-pulse', memColMode === 'help');
+    }
   }
 
-  function animateTokenTo(srcCell, dstEl, val, cb) {
-    const wrap = document.getElementById('md-table-wrap');
-    if (!wrap || !srcCell || !dstEl) { setTimeout(cb, 300); return; }
-    const wRect = wrap.getBoundingClientRect();
-    const sRect = srcCell.getBoundingClientRect();
-    const dRect = dstEl.getBoundingClientRect();
-    const token = document.createElement('div');
-    token.textContent = String(val);
-    token.style.cssText = `position:absolute;
-      left:${sRect.left - wRect.left + sRect.width/2 - 14}px;
-      top:${sRect.top - wRect.top + sRect.height/2 - 14}px;
-      width:28px;height:28px;border-radius:50%;
-      background:#fde68a;border:2px solid #d97706;
-      display:flex;align-items:center;justify-content:center;
-      font-size:0.9rem;font-weight:900;color:#d97706;
-      pointer-events:none;z-index:20;
-      transition:left 0.7s cubic-bezier(0.25,0.46,0.45,0.94),
-                 top 0.7s cubic-bezier(0.25,0.46,0.45,0.94);`;
-    wrap.style.position = 'relative';
-    wrap.appendChild(token);
-    playCarrySound();
+  /* ══ BRICKAN I HÖGERMARGINALEN (facit: uppstallning.js riseSumChip/
+     flyBadgeDigit/flyChipToAnswer) ══════════════════════════════════
+     Pappret (cellerna, minnesspalten) står still; brickan är kvantiteten
+     och det enda som rör sig. Brickan föds synligt i marginalen, delar
+     sig, och dess siffror ÄR de element som landar i svaret respektive
+     minnesspalten — inget skapas och förstörs i samma steg. */
+  const mdWrap = () => document.getElementById('md-table-wrap');
+  const mdChip = () => document.querySelector('#md-table-wrap .md-chip');
+  const CHIP_CLS = ['chip-green', 'chip-blue', 'chip-red', 'chip-purple'];
+
+  /* Parkeringsplatsen: fri marginal till HÖGER om tabellen, samma x hela
+     uppgiften igenom (uppstallning.js rightMarginSpot). */
+  function mdRightMarginSpot(width) {
+    const wrap = mdWrap(), table = wrap && wrap.querySelector('.md-table');
+    if (!wrap || !table) return 2;
+    const wR = wrap.getBoundingClientRect(), tR = table.getBoundingClientRect();
+    const x = (tR.right - wR.left) + 6;
+    return Math.max(2, Math.min(x, wR.width - width - 4));
+  }
+
+  /* Vilka celler brickan läses ur (de pulsar med text-shadow, aldrig transform) */
+  function calcSources(step) {
+    const ids = step.phase === 'mult'
+      ? [`md-a-${step.aCol}`, `md-b-${step.mCol}`]
+      : step.memOnly ? [] : [`md-p1-${step.g}`, `md-p2-${step.g}`];
+    const els = ids.map(id => document.getElementById(id)).filter(el => el && !el.classList.contains('md-ghost'));
+    if (step.memOnly) {
+      const md = currentMemNode();
+      if (md) els.push(md);
+    }
+    return els;
+  }
+
+  /* Det ostrukna minnet i spalten = det som ska användas härnäst */
+  function currentMemNode() {
+    const col = document.getElementById('md-memcol');
+    if (!col) return null;
+    const i = mdMemList.findIndex(e => !e.used);
+    if (i < 0) return null;
+    return Array.from(col.children).filter(n => n.classList.contains('mem-digit'))[i] || null;
+  }
+
+  /* Lodrätt mitt för raderna brickan hör till, vågrätt på parkeringsplatsen */
+  function placeChip(chip, step) {
+    const wrap = mdWrap();
+    if (!wrap || !chip) return;
+    const ids = step.phase === 'mult'
+      ? [`md-a-${step.aCol}`, `md-b-${step.mCol}`]
+      : [`md-p1-${step.g}`, `md-p2-${step.g}`];
+    const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+    if (!els.length) return;
+    const wR = wrap.getBoundingClientRect();
+    const top = Math.min(...els.map(e => e.getBoundingClientRect().top));
+    const bottom = Math.max(...els.map(e => e.getBoundingClientRect().bottom));
+    const bb = chip.getBoundingClientRect();
+    chip.style.top  = `${(top - wR.top) + (bottom - top) / 2 - bb.height / 2}px`;
+    chip.style.left = `${mdRightMarginSpot(bb.width)}px`;
+  }
+
+  /* Brickan FÖDS i marginalen: källcellerna pulsar (avläsning), sedan
+     poppar brickan fram med värdet. Ingen kopia flyger — inget skapas
+     och förstörs i samma steg. */
+  function chipBorn(step, value, srcEls, cb) {
+    const wrap = mdWrap();
+    if (!wrap) { setTimeout(cb, 300); return null; }
+    const old = mdChip(); if (old) old.remove(); // säkerhetsnät — normalt förbrukad
+    const chip = document.createElement('div');
+    chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]}`;
+    chip.dataset.g = step.g;
+    chip.innerHTML = String(value).split('').map(d => `<span class="md-cd">${d}</span>`).join('');
+    chip.style.opacity = '0';
+    wrap.appendChild(chip);
+    placeChip(chip, step);
+    srcEls.forEach(el => { el.style.animation = 'md-read-glow 0.52s ease-in-out both'; });
+    setTimeout(() => {
+      srcEls.forEach(el => { el.style.animation = ''; });
+      chip.style.opacity = '';
+      chip.classList.add('chip-in');
+      App.Sound.play('click');
+    }, 300);
+    setTimeout(() => cb && cb(), 700);
+    return chip;
+  }
+
+  /* Minnet läggs till brickan: minnessiffran blinkar, brickan poppar och
+     visar det nya värdet. Brickan står intill spalten, så kopplingen syns. */
+  function chipJoinMem(step, cb) {
+    const chip = mdChip(), md = currentMemNode();
+    const val = step.phase === 'add' ? step.sum : step.prod;
+    if (!chip) { setTimeout(cb, 300); return; }
+    if (md) md.classList.add('tk-blink');
+    setTimeout(() => {
+      chip.innerHTML = String(val).split('').map(d => `<span class="md-cd">${d}</span>`).join('');
+      chip.classList.remove('chip-in'); void chip.offsetWidth; chip.classList.add('chip-pop');
+      placeChip(chip, step);
+      playCarrySound();
+    }, 300);
+    setTimeout(() => { if (md) md.classList.remove('tk-blink'); cb && cb(); }, 700);
+  }
+
+  /* Ett element flyttas som FLYGARE i wrap-koordinater från sin nuvarande
+     ruta till målrutan, och adopteras sedan av `adopt` (samma nod). */
+  function flyNode(node, fromRect, toRect, opts, adopt) {
+    const wrap = mdWrap();
+    const wR = wrap.getBoundingClientRect();
+    const size = Math.max(26, fromRect.width + 12);
+    node.className = 'md-fly';
+    node.style.cssText = `left:${fromRect.left - wR.left + fromRect.width / 2 - size / 2}px;` +
+      `top:${fromRect.top - wR.top + fromRect.height / 2 - size / 2}px;` +
+      `width:${size}px;height:${size}px;font-size:${opts.fontSize};color:${opts.color};` +
+      `transition:left ${opts.dur}ms ${opts.easing},top ${opts.dur}ms ${opts.easing},` +
+      `transform ${opts.dur}ms ${opts.easing},color ${opts.dur}ms linear;`;
+    wrap.appendChild(node);
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      token.style.left = `${dRect.left - wRect.left + dRect.width/2 - 14}px`;
-      token.style.top  = `${dRect.top  - wRect.top  + dRect.height/2 - 14}px`;
+      node.style.left = `${toRect.left - wR.left + toRect.width / 2 - size / 2}px`;
+      node.style.top  = `${toRect.top  - wR.top  + toRect.height / 2 - size / 2}px`;
+      if (opts.endColor) node.style.color = opts.endColor;
+      if (opts.endTransform) node.style.transform = opts.endTransform;
+    }));
+    setTimeout(() => { node.removeAttribute('style'); adopt(node); }, opts.dur + 20);
+  }
+
+  /* Brickans TIOTALSSIFFRA lossnar och åker upp till minnesspalten — det
+     är samma span som blir .mem-digit där. Målrutan mäts genom att noden
+     får stå osynlig på sin slutplats en frame (ingen platshållare skapas). */
+  function chipDigitToMem(step, cb) {
+    const chip = mdChip(), col = document.getElementById('md-memcol');
+    const d = chip && chip.querySelector('.md-cd');
+    if (!chip || !col || !d || chip.querySelectorAll('.md-cd').length < 2) { setTimeout(cb, 300); return; }
+    const fromRect = d.getBoundingClientRect();
+    const slot = col.querySelector(':scope > .mem-slot');
+    d.className = 'mem-digit'; d.style.visibility = 'hidden';
+    col.insertBefore(d, slot);
+    const toRect = d.getBoundingClientRect();
+    d.style.visibility = '';
+    mdMemList.push({ val: step.carryOut, used: false });
+    mdCarries[step.g + 1] = step.carryOut;
+    playCarrySound();
+    flyNode(d, fromRect, toRect, {
+      dur: 700, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fontSize: '1.35rem',
+      color: '#ffffff', endColor: '#dc2626', endTransform: 'rotate(-4deg) scale(0.8)'
+    }, node => {
+      node.className = 'mem-digit landing';
+      col.insertBefore(node, col.querySelector(':scope > .mem-slot'));
+      renderMemCol();
+      cb && cb();
+    });
+  }
+
+  /* Brickans FÖRSTA siffra åker till en svarsruta (sista kolumnens
+     tiotal) och BLIR siffran där — samma span. */
+  function chipDigitToCell(rowKey, g, cb) {
+    const chip = mdChip(), cell = document.getElementById(`md-${rowKey}-${g}`);
+    const d = chip && chip.querySelector('.md-cd');
+    if (!chip || !cell || !d || chip.querySelectorAll('.md-cd').length < 2) { cb && cb(); return; }
+    const fromRect = d.getBoundingClientRect(), toRect = cell.getBoundingClientRect();
+    flyNode(d, fromRect, toRect, {
+      dur: 600, easing: 'cubic-bezier(0.34,1.12,0.5,1)', fontSize: '1.35rem',
+      color: '#ffffff', endColor: cv(g), endTransform: 'scale(1.5)'
+    }, node => {
+      node.className = '';
+      node.style.cssText = `color:${cv(g)};display:inline-block;animation:md-land 0.36s ease-out both`;
+      cell.innerHTML = ''; cell.appendChild(node);
+      cell.classList.add('filled'); cell.classList.remove('active-col');
+      cell.style.borderColor = cv(g); cell.style.borderStyle = 'solid';
+      cb && cb();
+    });
+  }
+
+  /* HELA BRICKAN åker ner i svarsrutan och förbrukas först när siffran
+     står i cellen (facit: flyChipToAnswer). Brickans kvarvarande siffra
+     är den span som blir cellens innehåll. */
+  function chipToCell(rowKey, g, value, cb) {
+    const chip = mdChip(), cell = document.getElementById(`md-${rowKey}-${g}`);
+    if (!chip || !cell) { writeDigit(rowKey, g, value); setTimeout(cb, 300); return; }
+    const wrap = mdWrap(), wR = wrap.getBoundingClientRect();
+    const sR = chip.getBoundingClientRect(), dR = cell.getBoundingClientRect();
+    const dur = 560;
+    chip.classList.remove('chip-in', 'chip-pop');
+    chip.style.animation = 'none';
+    chip.style.left = `${sR.left - wR.left}px`; chip.style.top = `${sR.top - wR.top}px`;
+    void chip.offsetWidth;
+    chip.style.transition = `left ${dur}ms cubic-bezier(0.34,1.12,0.5,1),top ${dur}ms cubic-bezier(0.34,1.12,0.5,1),` +
+      `background 280ms ease,box-shadow 280ms ease,color 280ms ease,font-size 280ms ease,min-width 280ms ease,padding 280ms ease`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      chip.style.left = `${dR.left - wR.left + dR.width / 2 - chip.offsetWidth / 2}px`;
+      chip.style.top  = `${dR.top  - wR.top  + dR.height / 2 - chip.offsetHeight / 2}px`;
     }));
     setTimeout(() => {
-      token.style.opacity = '0';
-      token.style.transition += ',opacity 0.3s';
-      setTimeout(() => { token.remove(); cb(); }, 350);
-    }, 750);
+      chip.style.background = 'transparent'; chip.style.boxShadow = 'none';
+      chip.style.color = cv(g); chip.style.padding = '0'; chip.style.minWidth = '0';
+      chip.style.fontSize = getComputedStyle(cell).fontSize;
+    }, Math.round(dur * 0.55));
+    setTimeout(() => {
+      const d = chip.querySelector('.md-cd');
+      if (d && String(value) === d.textContent) {
+        d.className = '';
+        d.style.cssText = `color:${cv(g)};display:inline-block;animation:md-land 0.36s ease-out both`;
+        cell.innerHTML = ''; cell.appendChild(d);
+        cell.classList.add('filled'); cell.classList.remove('active-col');
+        cell.style.borderColor = cv(g); cell.style.borderStyle = 'solid';
+      } else writeDigit(rowKey, g, value, 'md-land 0.36s ease-out both');
+      chip.remove(); // förbrukad — siffran står i cellen
+      App.Sound.play('correct');
+      cb && cb();
+    }, dur + 40);
   }
 
   /* ══════════════════════════════════════════════════════════
