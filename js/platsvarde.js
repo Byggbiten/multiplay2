@@ -339,7 +339,7 @@ const PlatsvardeGame = (() => {
           #pv-left { flex:0 1 auto; }
           #pv-scratch { flex:1 1 0; min-height:238px; }
         }
-        #pv-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
+        #pv-canvas { flex:1; min-height:0; width:100%; display:block; touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
           background:rgba(255,255,255,0.75); }
         .pv-card { background:var(--glass-strong); border-radius:var(--radius-lg); padding:10px;
@@ -1055,8 +1055,8 @@ const PlatsvardeGame = (() => {
     if (pvResizeObs) { pvResizeObs.disconnect(); pvResizeObs = null; }
     requestAnimationFrame(() => {
       const r = pvCanvas.getBoundingClientRect();
-      pvCanvas.width  = r.width  || 300;
-      pvCanvas.height = r.height || 160;
+      pvCanvas.width  = Math.round(r.width)  || 300;
+      pvCanvas.height = Math.round(r.height) || 160;
       pvCtx = pvCanvas.getContext('2d');
       /* Pennan i modulens djupa färg — blått är tiotalsfärgen (granskning D5). */
       pvPen = (getComputedStyle(pvCanvas).getPropertyValue('--deep') || '').trim() || '#5b21b6';
@@ -1074,16 +1074,20 @@ const PlatsvardeGame = (() => {
   }
 
   function pvResize() {
-    if (!pvCanvas || !pvCtx) return;
-    const r = pvCanvas.getBoundingClientRect();
-    const w = Math.round(r.width), h = Math.round(r.height);
-    if (!w || !h || (w === pvCanvas.width && h === pvCanvas.height)) return;
-    const copy = document.createElement('canvas');
-    copy.width = pvCanvas.width; copy.height = pvCanvas.height;
-    copy.getContext('2d').drawImage(pvCanvas, 0, 0);
-    pvCanvas.width = w; pvCanvas.height = h;
-    pvCtx = pvCanvas.getContext('2d');
-    pvCtx.drawImage(copy, 0, 0); // 1:1 — strecken behåller sin storlek, sträcks inte
+    /* Utanför observer-callbacken (rAF): att sätta canvas.width/height
+       inne i den ger "ResizeObserver loop completed" i konsolen. */
+    requestAnimationFrame(() => {
+      if (!pvCanvas || !pvCtx) return;
+      const r = pvCanvas.getBoundingClientRect();
+      const w = Math.round(r.width), h = Math.round(r.height);
+      if (!w || !h || (w === pvCanvas.width && h === pvCanvas.height)) return;
+      const copy = document.createElement('canvas');
+      copy.width = pvCanvas.width; copy.height = pvCanvas.height;
+      copy.getContext('2d').drawImage(pvCanvas, 0, 0);
+      pvCanvas.width = w; pvCanvas.height = h;
+      pvCtx = pvCanvas.getContext('2d');
+      pvCtx.drawImage(copy, 0, 0); // 1:1 — strecken behåller sin storlek, sträcks inte
+    });
   }
 
   function pvPD(e) {
