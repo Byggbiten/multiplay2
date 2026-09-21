@@ -213,3 +213,42 @@ describe('hal A: termen ar redan 10 efter minnet', () => {
     expect(fel).toEqual([]);
   });
 });
+
+/* ── Uppgift 5: hål B — nollan som blir en etta ───────────────────────────
+   Med memTo:'storsta' kan fallet inte uppstå: minnet gar alltid till den
+   storsta siffran, sa memDigit blir aldrig 0 i en kolumn som gar over 9.
+   Kravet byggs anda, for ADD_OPTS kan vandas tillbaka till 'oversta' om
+   Mitt i Prick 4A visar sig lara ut det oversta talet. Spec kap 7.2.       */
+describe('hal B: siffran minnet laggs pa ar 0', () => {
+  const OPTS = { compTo: 'storsta', memTo: 'oversta' };
+
+  it('205+199 tiotalen: minnet namns fore tiokompis-pastaendet', () => {
+    const kol1 = planAdditionColumns(205, 199, 3, OPTS).filter(s => s.col === 1);
+    const iMemjoin = kol1.findIndex(s => s.type === 'add_memjoin');
+    const iPair    = kol1.findIndex(s => s.type === 'tf_pair');
+    expect(iMemjoin).toBeGreaterThanOrEqual(0);
+    expect(iPair).toBeGreaterThan(iMemjoin);
+    expect(kol1[iPair].memSaid).toBe(true);
+    expect(kol1[iMemjoin].memDigit).toBe(0);
+    expect(kol1[iMemjoin].memNew).toBe(1);
+  });
+
+  it('47+53 tiotalen: minnet landar pa en 4:a, sa inget eget memjoin-steg', () => {
+    const kol1 = planAdditionColumns(47, 53, 3, { compTo: 'storsta', memTo: 'storsta' })
+      .filter(s => s.col === 1);
+    expect(kol1.some(s => s.type === 'add_memjoin')).toBe(false);
+    const pair = kol1.find(s => s.type === 'tf_pair');
+    expect(pair.memSaid).toBeUndefined();
+  });
+
+  it('memDigit 0 intraffar aldrig med storsta-regeln', () => {
+    const traffar = [];
+    for (let a = 10; a <= 99; a++) for (let b = 10; b <= 99; b++) {
+      const cc = (a + b >= 100) ? 3 : 2;
+      for (const s of planAdditionColumns(a, b, cc, { compTo: 'storsta', memTo: 'storsta' })) {
+        if (s.type === 'add_memjoin' && s.memDigit === 0) traffar.push(`${a}+${b} kol ${s.col}`);
+      }
+    }
+    expect(traffar).toEqual([]);
+  });
+});

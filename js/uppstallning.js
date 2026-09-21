@@ -595,7 +595,14 @@ const UppstallningGame = (() => {
         if (!legacy && isExactTen(growVal, giveVal)) {
           /* Tiokompis-genvägen (spec §3b): ingen tankeruta, ingen strykning.
              Att ceremonin uteblir ÄR beskedet "den här såg du direkt". */
-          steps.push({ type:'tf_pair', ...base });
+          /* HÅL B (spec §7.2): är siffran minnet läggs på en 0:a skulle
+             bubblan påstå "1 och 9 är tiokompisar" medan barnet ser en nolla
+             och en nia. Minnet måste tala först, och då får tf_pair inte
+             upprepa det. Inträffar inte med memTo:'storsta' — minnet går
+             alltid till den största siffran — men ADD_OPTS kan vändas. */
+          const memZero = carryVal && memDigit === 0;
+          if (memZero) steps.push({ type:'add_memjoin', ...base, box:false });
+          steps.push({ type:'tf_pair', ...base, ...(memZero ? { memSaid:true } : {}) });
           steps.push({ type:'add_carry_fly', ...base, tf:true, chip:true });
           steps.push({ type:'add_result', ...base, tf:true, chip:true });
         } else if (!legacy && behover === 0) {
@@ -1121,7 +1128,11 @@ const UppstallningGame = (() => {
     } else if (step.type === 'tf_pair') {
       /* Spec §3b, verbatim ur mockup:1898–1906. */
       const ck = COL_KEYS[step.col];
-      if (step.carry_in) {
+      if (step.memSaid) {
+        /* Spec §7.2 krav 2: add_memjoin har redan talat om minnet. Kortformen,
+           annars sägs samma sak två gånger i rad. */
+        html = `<strong style="color:${PVC[ck]}">${step.valA}</strong> och <strong style="color:${PVC[ck]}">${step.valB}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
+      } else if (step.carry_in) {
         html = `<span style="color:${PVC[ck]}">${step.memDigit}</span> plus minnet <span style="color:#d97706">${step.carry_in}</span> är <strong>${step.memNew}</strong>. Och <strong style="color:${PVC[ck]}">${step.valA}</strong> och <strong style="color:${PVC[ck]}">${step.valB}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
       } else {
         html = `<strong style="color:${PVC[ck]}">${step.a}</strong> och <strong style="color:${PVC[ck]}">${step.b}</strong> är tiokompisar — precis <strong>10</strong>! 💛`;
