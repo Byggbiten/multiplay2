@@ -764,3 +764,45 @@ Spec §10 listar sex. Dessa tre kan blockera en uppgift och ska ställas till De
 3. **Reducerad rörelse** (uppgift 6): `prefers-reduced-motion` saknas i mockupens telefon-CSS. Vad som ska hända med brickornas rörelser är obestämt.
 
 Och en fråga till Dennis som inte är teknisk: **stämmer största-talet-regeln med Mitt i Prick 4A?** `MINNESSIFFER-KONCEPT.md` namnger boken som källa men säger inget om vilken term som fylls till 10. Om boken alltid fyller den översta lär appen ut något annat än klassrummet. Regeln går att vända med en rad (`ADD_OPTS`), så det är inte blockerande — men det bör kontrolleras mot boken.
+
+---
+
+### Uppgift 7b: Minnessteget måste SYNAS i den korta vägen
+
+Upptäckt av Dennis 21/9 i PWA-testet, `59 + 87` tiotalskolumnen: minnet gör
+8:an till 9, bubblan säger det, och sedan säger nästa steg *"9 behöver 1"* —
+men i vyn står det **8** hela tiden tills siffran plötsligt blir 10. Hans ord:
+*"det kommer förvirra barnen."*
+
+**Orsaken.** `executeStep`s `add_memjoin`-gren har två vägar. Den med tankeruta
+(`box:true`) sätter `tgt.textContent = step.memNew`, så brickan i rutan blir
+synligt en 9:a. Den utan ruta (`box:false`) låter minnesettan flyga in och
+**poppar bara cellen** — ingenting byter värde. Kedjan är rätt
+(`add_highlight → add_memjoin → add_need → …`); det är bilden som tiger.
+
+Den korta vägen är den `SKIP_BOX_MAX_BORROW`/`SKIP_BOX_MIN_LEVEL` skapar, så
+felet finns bara på nivå 3–4 när `behover === 1`.
+
+**Vald lösning (Dennis: "B").** Skriv INTE om siffran i cellen. Pappret ska
+visa vad Mira faktiskt skriver, och hon skriver aldrig en 9:a där — hon stryker
+8:an och skriver 10. Sätter appen dit en 9:a och stryker sedan den, lär den ut
+ett papper som inte finns.
+
+I stället: **minnesettan lyfter ur minnesraden och landar som en `9`-bricka i
+högermarginalen**, där allt lösräknande redan bor — samma `rightMarginSpot` som
+spök-siffran och summebrickan. Pappret behåller sin 8:a. Därefter pekar
+*"9 behöver 1 för att bli 10."* på något som faktiskt syns.
+
+Det är vad den långa vägen gör i tankerutan, utan låda.
+
+**Krav:**
+- Brickan bär kolumnens platsvärdesfärg, som summebrickan.
+- Spök-siffran i `add_need` ska förhålla sig till 9-brickan, inte till cellen —
+  de får inte hamna ovanpå varandra i marginalen.
+- Den skrivna minnesettan i minnesraden rörs inte; den stryks i sitt eget
+  `add_mem_strike` som i dag.
+- Ingen bricka får skapas och förstöras i samma steg.
+- Mät vid 390×844: brickorna får inte täcka någon cell, svarsrad eller
+  minnesrad.
+
+**Verifiera i iOS-simulatorn som PWA** (iPhone 17e) på `59 + 87`, nivå 3.
