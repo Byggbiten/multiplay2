@@ -796,18 +796,25 @@ const MultDivGame = (() => {
      (kvotsiffra skriven + ev. rest flyttad) stryks täljarsiffran med
      penndraget. fromSkip-steget stryker BÅDA siffrorna (33 lästes ihop).
      Demon visar även SISTA siffrans strykning (hjälpläget kräver den ej). */
+  /* ── KORT DIVISIONENS STEGKEDJA (ombyggd 2026-09-21, GRANSKNING-
+     DIVISION A1/B1/B3/B4/B5/B6) ─────────────────────────────────────
+     Per siffra: dask (ljus + frågan i SAMMA steg — inget tomt klick)
+     → dwrite (kvotsiffran) → om rest: drem_calc (resten föds som BRICKA
+     i marginalen ur talet och kvotsiffran) → drem_place (brickan flyger
+     till platsen framför nästa siffra och ÄR resten som står där) →
+     dstrike (penndraget). Ledande hopp: dskip ("går inte") + dtake
+     ("vi tar med nästa siffra") som två steg. Sista siffran får samma
+     kedja som alla andra (B3) — demon och hjälpet är samma kedja. */
   function planDivSteps(pl) {
     const steps = [], nd = digitsOf(pl.a);
     for (const s of pl.pass.steps) {
-      steps.push({ t: 'dhl', ...s });
-      if (s.skip) { steps.push({ t: 'dskip', ...s }); continue; }
-      if (s.remIn > 0 && s.rem === 0) {
-        steps.push({ t: 'dwrite', ...s });          // "16 ÷ 4 = 4, precis jämnt! ✅"
-      } else {
-        steps.push({ t: 'dask', ...s });            // "Hur många hela 4:or ryms i 9?"
-        steps.push({ t: 'dwrite', ...s });          // "2 stycken! För 2 · 4 = 8"
+      if (s.skip) { steps.push({ t: 'dskip', ...s }); steps.push({ t: 'dtake', ...s }); continue; }
+      steps.push({ t: 'dask', ...s });                // "Hur många hela 4:or ryms i 9?"
+      steps.push({ t: 'dwrite', ...s });              // "2 stycken!"
+      if (s.rem > 0 && !s.last) {
+        steps.push({ t: 'drem_calc', ...s });         // "1 blir över." — brickan föds
+        steps.push({ t: 'drem_place', ...s });        // "1:an ställer sig framför 6:an."
       }
-      if (s.rem > 0 && !s.last) steps.push({ t: 'drem', ...s });
       const gsDone = s.fromSkip ? [s.g + 1, s.g] : [s.g];
       steps.push({ t: 'dstrike', gs: gsDone, digits: gsDone.map(g => nd[g]), last: s.last });
     }
@@ -881,26 +888,29 @@ const MultDivGame = (() => {
         return `Sista kolumnen — hela <strong style="color:${cv(step.g)}">${val}</strong> får plats! ✅`;
       case 'mem_strike':
         return `Nu stryker vi <strong style="color:#dc2626">${step.val}</strong>:an — den är använd. ✏️`;
-      /* Kort division (v32) — spec-språket */
-      case 'dhl': return '';
+      /* Kort division — en idé per steg, ingen subtraktion i texten (B1/B2/B5/B6) */
       case 'dask':
         return `Hur många hela <strong>${numB}</strong>:or ryms i <strong style="color:${cv(step.g)}">${step.cur}</strong>? 🤔`;
       case 'dskip':
-        return `${numB}:or i ${step.cur}? Det går inte — vi tar med nästa siffra: <strong>${step.cur * 10 + step.next}</strong>!`;
+        return `${numB}:or i <strong style="color:${cv(step.g)}">${step.cur}</strong>? Det går inte.`;
+      case 'dtake':
+        return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
       case 'dwrite':
         if (step.q === 0)
-          return `Ingen hel ${numB}:a ryms i ${step.cur} — vi skriver <strong style="color:${cv(step.g)}">0</strong> i kvoten! ⭕`;
+          return `Ingen hel ${numB}:a ryms — vi skriver <strong style="color:${cv(step.g)}">0</strong>. ⭕`;
         if (step.remIn > 0 && step.rem === 0)
-          return `<strong>${step.cur} ÷ ${numB} = ${step.q}</strong>, precis jämnt! ✅`;
-        return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'}! För ${step.q} · ${numB} = ${step.q * numB}`;
+          return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'} — precis jämnt! ✅`;
+        return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'}!`;
+      case 'drem_calc':
+        return step.q > 0
+          ? `<strong style="color:#dc2626">${step.rem}</strong> blir över.`
+          : `Hela <strong style="color:#dc2626">${step.rem}</strong>:an blir över.`;
+      case 'drem_place':
+        return `<strong style="color:#dc2626">${step.rem}</strong>:an ställer sig framför <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an.`;
       case 'dstrike':
         return step.digits.length === 2
           ? `<strong>${step.digits[0]}</strong>:an och <strong>${step.digits[1]}</strong>:an är klara — vi stryker dem! ✏️`
           : `<strong>${step.digits[0]}</strong>:an är klar — vi stryker den! ✏️`;
-      case 'drem':
-        return step.q > 0
-          ? `${step.cur} − ${step.q * numB} = <strong style="color:#dc2626">${step.rem}</strong> blir över — ${step.rem}:an ställer sig framför ${step.next}:an: nu har vi <strong>${step.rem * 10 + step.next}</strong>!`
-          : `Hela <strong style="color:#dc2626">${step.rem}</strong>:an blir över — den ställer sig framför ${step.next}:an: nu har vi <strong>${step.rem * 10 + step.next}</strong>!`;
       case 'done':
         return plan.kind === 'division'
           ? `Klart! 🎉 ${numA} ÷ ${numB} = <strong>${plan.answer}</strong> — kolla: ${plan.answer} · ${numB} = ${numA}!`
@@ -1060,32 +1070,40 @@ const MultDivGame = (() => {
       setTimeout(() => chipToCell(step.rowKey, step.g, step.write, () => setTimeout(cb, 420)), 350);
 
     /* ── Kort division (v32) ── */
-    } else if (step.t === 'dhl') {
-      divHighlight(step);
-      setTimeout(cb, 50);
-
     } else if (step.t === 'dask') {
-      // Pulsera divisorn + aktuell täljarsiffra medan frågan läses
-      const els = [document.getElementById('md-d-0'), document.getElementById(`md-n-${step.g}`)].filter(Boolean);
+      // Ljus + fråga i SAMMA steg (B4): dimma resten, pulsera divisorn och talet
+      divHighlight(step);
+      const els = [document.getElementById('md-d-0'), ...divCurCells(step)];
       els.forEach(el => el.classList.add('md-prob'));
       setTimeout(() => { els.forEach(el => el.classList.remove('md-prob')); cb(); }, 1000);
 
     } else if (step.t === 'dskip') {
-      // "Det går inte — vi tar med nästa siffra": pulsera båda siffrorna
-      const els = [document.getElementById(`md-n-${step.g}`), document.getElementById(`md-n-${step.g - 1}`)].filter(Boolean);
-      els.forEach(el => el.classList.add('md-prob'));
-      setTimeout(() => { els.forEach(el => el.classList.remove('md-prob')); cb(); }, 1200);
+      // "Det går inte": bara den ensamma siffran lyser
+      divHighlight({ g: step.g });
+      const el = document.getElementById(`md-n-${step.g}`);
+      if (el) el.classList.add('md-prob');
+      setTimeout(() => { if (el) el.classList.remove('md-prob'); cb(); }, 900);
+
+    } else if (step.t === 'dtake') {
+      // "Vi tar med nästa siffra": ljuset sprider sig till grannen
+      divHighlight(step);
+      setTimeout(cb, 900);
 
     } else if (step.t === 'dwrite') {
       writeDigit('q', step.g, step.q);
       App.Sound.play('correct');
       setTimeout(cb, 800);
 
-    } else if (step.t === 'drem') {
-      // Mellanresten ritas som liten röd mem-digit framför NÄSTA siffra
-      divWriteRem(step.g - 1, step.rem);
-      playCarrySound();
-      setTimeout(cb, 900);
+    } else if (step.t === 'drem_calc') {
+      // Resten föds som BRICKA i marginalen ur talet och kvotsiffran (A1)
+      const srcs = [...divCurCells(step), document.getElementById(`md-q-${step.g}`)].filter(Boolean);
+      chipBorn(step, step.rem, srcs, () => setTimeout(cb, 150));
+
+    } else if (step.t === 'drem_place') {
+      // Brickan flyger till platsen framför NÄSTA siffra och ÄR resten som
+      // står där; målcellen dimmas aldrig medan den tar emot (A1)
+      divHighlight(step, [step.g - 1]);
+      chipToRest(step.g - 1, step.rem, () => setTimeout(cb, 300));
 
     } else if (step.t === 'dstrike') {
       // v36: penndraget ritas över täljarsiffran — den STÅR KVAR struken
@@ -1141,7 +1159,7 @@ const MultDivGame = (() => {
   /* Divisionens highlight: lys upp siffran/siffrorna som bildar cur.
      fromSkip ⇒ även föregående siffra (33 läses ihop); skip ⇒ även
      nästa ("vi tar med nästa siffra"). Divisorn dimmas aldrig. */
-  function divHighlight(s) {
+  function divHighlight(s, extraHot) {
     document.querySelectorAll('#md-table-wrap .md-cell, #md-table-wrap .md-ansc')
       .forEach(el => { el.classList.remove('md-glow', 'dim'); el.style.removeProperty('--gc'); });
     const glowColor = hex => {
@@ -1152,12 +1170,41 @@ const MultDivGame = (() => {
     const hot = new Set([s.g]);
     if (s.skip) hot.add(s.g - 1);
     if (s.fromSkip) hot.add(s.g + 1);
+    (extraHot || []).forEach(g => hot.add(g));
     for (let g = L - 1; g >= 0; g--) {
       const el = document.getElementById(`md-n-${g}`);
       if (!el) continue;
       if (hot.has(g)) { el.classList.add('md-glow'); el.style.setProperty('--gc', glowColor(cv(s.g))); }
       else el.classList.add('dim');
     }
+  }
+
+  /* Cellerna som bildar talet "cur": siffran (+ grannen vid ihopläsning) */
+  function divCurCells(s) {
+    const gs = s.fromSkip ? [s.g + 1, s.g] : [s.g];
+    return gs.map(g => document.getElementById(`md-n-${g}`)).filter(Boolean);
+  }
+
+  /* Brickan (resten) flyger till platsen uppe till vänster om täljar-
+     siffran i kolumn g och BLIR .md-divrem där — samma nod, ingen kopia.
+     Rest-prefixen stryks aldrig (uppgår i nästa tal). */
+  function chipToRest(g, val, cb) {
+    const chip = mdChip(), cell = document.getElementById(`md-n-${g}`);
+    const d = chip && chip.querySelector('.md-cd');
+    if (!chip || !cell || !d) { divWriteRem(g, val); setTimeout(cb, 400); return; }
+    const old = cell.querySelector('.md-divrem'); if (old) old.remove(); // säkerhetsnät
+    const fromRect = d.getBoundingClientRect(), cR = cell.getBoundingClientRect();
+    const toRect = { left: cR.left - 12, top: cR.top - 10, width: 16, height: 18 };
+    playCarrySound();
+    flyNode(d, fromRect, toRect, {
+      dur: 650, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fontSize: '1.35rem',
+      color: '#ffffff', endColor: '#dc2626', endTransform: 'rotate(-4deg) scale(0.75)'
+    }, node => {
+      node.className = 'mem-digit md-divrem on landing';
+      cell.appendChild(node);
+      chip.remove(); // förbrukad — resten står på pappret
+      cb && cb();
+    });
   }
 
   /* Mellanresten skrivs (pennstil, −4°, röd) uppe till vänster om
@@ -1269,10 +1316,13 @@ const MultDivGame = (() => {
   /* Parkeringsplatsen: fri marginal till HÖGER om tabellen, samma x hela
      uppgiften igenom (uppstallning.js rightMarginSpot). */
   function mdRightMarginSpot(width) {
-    const wrap = mdWrap(), table = wrap && wrap.querySelector('.md-table');
-    if (!wrap || !table) return 2;
-    const wR = wrap.getBoundingClientRect(), tR = table.getBoundingClientRect();
-    const x = (tR.right - wR.left) + 6;
+    const wrap = mdWrap();
+    if (!wrap) return 2;
+    const parts = wrap.querySelectorAll('.md-table, .md-frac, .md-diveq');
+    if (!parts.length) return 2;
+    const wR = wrap.getBoundingClientRect();
+    const right = Math.max(...Array.from(parts).map(el => el.getBoundingClientRect().right));
+    const x = (right - wR.left) + 6;
     return Math.max(2, Math.min(x, wR.width - width - 4));
   }
 
@@ -1302,8 +1352,8 @@ const MultDivGame = (() => {
   function placeChip(chip, step) {
     const wrap = mdWrap();
     if (!wrap || !chip) return;
-    const ids = step.phase === 'mult'
-      ? [`md-a-${step.aCol}`, `md-b-${step.mCol}`]
+    const ids = plan.kind === 'division' ? [`md-n-${step.g}`]
+      : step.phase === 'mult' ? [`md-a-${step.aCol}`, `md-b-${step.mCol}`]
       : [`md-p1-${step.g}`, `md-p2-${step.g}`];
     const els = ids.map(id => document.getElementById(id)).filter(Boolean);
     if (!els.length) return;

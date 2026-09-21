@@ -68,20 +68,6 @@ function refMultSteps(pl) {
   steps.push({ t: 'done' });
   return steps;
 }
-function refDivSteps(pl) {
-  const steps = [], nd = digitsOf(pl.a);
-  for (const s of pl.pass.steps) {
-    steps.push({ t: 'dhl', ...s });
-    if (s.skip) { steps.push({ t: 'dskip', ...s }); continue; }
-    if (s.remIn > 0 && s.rem === 0) steps.push({ t: 'dwrite', ...s });
-    else { steps.push({ t: 'dask', ...s }); steps.push({ t: 'dwrite', ...s }); }
-    if (s.rem > 0 && !s.last) steps.push({ t: 'drem', ...s });
-    const gsDone = s.fromSkip ? [s.g + 1, s.g] : [s.g];
-    steps.push({ t: 'dstrike', gs: gsDone, digits: gsDone.map(g => nd[g]), last: s.last });
-  }
-  steps.push({ t: 'done' });
-  return steps;
-}
 function refDivHelp(pl) {
   const q = [], nd = digitsOf(pl.a);
   for (const s of pl.pass.steps) {
@@ -99,15 +85,7 @@ function refDivHelp(pl) {
   return q;
 }
 
-describe('karakterisering — divisionen ar oforandrad', () => {
-  it('planDivSteps == dagens buildDivDemoSteps over hela generatorrymden', () => {
-    const avv = [];
-    for (const [n, d, lv] of divSpace()) {
-      const pl = buildDivPlan(n, d, lv);
-      if (JSON.stringify(planDivSteps(pl)) !== JSON.stringify(refDivSteps(pl))) avv.push(`${n}÷${d}`);
-    }
-    expect(avv).toEqual([]);
-  });
+describe('karakterisering — divisionens hjalpko ar oforandrad', () => {
   it('planDivHelpQueue == dagens buildDivHelpQueue over hela generatorrymden', () => {
     const avv = [];
     for (const [n, d, lv] of divSpace()) {
@@ -308,5 +286,61 @@ describe('fria lagets minnesspalt raknas i rattningen (B5)', () => {
     expect(memMismatch([5], [6])).toEqual({ pos: 0, wrote: 5, want: 6 });
     expect(memMismatch([6, 5, 2], [6, 5, 1, 1])).toEqual({ pos: 2, wrote: 2, want: 1 });
     expect(memMismatch([3], [])).toEqual({ pos: 0, wrote: 3, want: null });
+  });
+});
+
+describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => {
+  const DIV_TYPES = new Set(['dskip', 'dtake', 'dask', 'dwrite', 'drem_calc', 'drem_place', 'dstrike', 'done']);
+  function forvantad(pl) {
+    const t = [];
+    for (const s of pl.pass.steps) {
+      if (s.skip) { t.push('dskip', 'dtake'); continue; }
+      t.push('dask', 'dwrite');
+      if (s.rem > 0 && !s.last) t.push('drem_calc', 'drem_place');
+      t.push('dstrike');
+    }
+    t.push('done');
+    return t;
+  }
+  it('bara kanda stegtyper, dhl finns inte, sista siffran far dask (B3)', () => {
+    const fel = new Set(), avv = [];
+    for (const [n, d, lv] of divSpace()) {
+      const pl = buildDivPlan(n, d, lv), st = planDivSteps(pl);
+      for (const s of st) if (!DIV_TYPES.has(s.t)) fel.add(s.t);
+      if (JSON.stringify(st.map(s => s.t)) !== JSON.stringify(forvantad(pl))) avv.push(`${n}÷${d}`);
+    }
+    expect([...fel]).toEqual([]);
+    expect(avv).toEqual([]);
+  });
+  it('kvotsiffrorna som skrivs bildar kvoten, resterna stammer med naesta tal', () => {
+    const fel = [];
+    for (const [n, d, lv] of divSpace()) {
+      const pl = buildDivPlan(n, d, lv), qs = [];
+      let q = 0;
+      for (const s of planDivSteps(pl)) {
+        if (s.t === 'dwrite') { qs[s.g] = s.q; q = q * 10 + s.q; }
+        if (s.t === 'drem_place' && s.rem * 10 + s.next !== pl.pass.steps.find(x => x.g === s.g - 1).cur) fel.push(`${n}÷${d} rest`);
+      }
+      if (q !== n / d) fel.push(`${n}÷${d}`);
+    }
+    expect(fel).toEqual([]);
+  });
+  it('granskningens tal: verbatim kedja', () => {
+    const t = (n, d, lv) => planDivSteps(buildDivPlan(n, d, lv)).map(s => s.t).join(' ');
+    expect(t(84, 4, 1)).toBe('dask dwrite dstrike dask dwrite dstrike done');
+    expect(t(96, 4, 2)).toBe('dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    expect(t(738, 3, 3)).toBe('dask dwrite drem_calc drem_place dstrike dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    expect(t(336, 6, 4)).toBe('dskip dtake dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    expect(t(612, 6, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+  });
+  it('hjalpkon och demon ar samma kedja: varje siffra far en fraga i bada', () => {
+    const avv = [];
+    for (const [n, d, lv] of divSpace()) {
+      const pl = buildDivPlan(n, d, lv);
+      const demoAsk = planDivSteps(pl).filter(s => s.t === 'dask').map(s => s.g);
+      const helpAsk = planDivHelpQueue(pl).filter(s => s.kind === 'divq').map(s => s.g);
+      if (JSON.stringify(demoAsk) !== JSON.stringify(helpAsk)) avv.push(`${n}÷${d}`);
+    }
+    expect(avv).toEqual([]);
   });
 });
