@@ -351,14 +351,23 @@ const MultDivGame = (() => {
        och placera-slotten undantas — de stryks/dimmas ALDRIG. */
     .md-cell.struck > span:not(.md-divrem):not(.md-divslot) { opacity:0.55; }
     .md-cell.md-ntap { cursor:pointer; }
+    /* C1: strykbar täljarsiffra — cellen är 38 px vid 390 (34 innanför
+       ramen), träffytan 46×46 */
+    .md-cell.md-ntap::after { content:''; position:absolute; inset:-6px; }
     .md-cell .nstrike { position:absolute; left:7%; top:7%; width:86%; height:86%;
       overflow:visible; pointer-events:none; z-index:2; }
     .md-cell .nstrike path { stroke-width:1.8; }
-    .md-cell .md-divrem { position:absolute; top:-9px; left:-10px; z-index:3; display:none; }
+    /* C2: resten är minst 16 px, på en vit pill så den läses mot grannens
+       ram, och ett steg längre ut från cellen än förr (−12/−11 px). */
+    .md-cell .md-divrem { position:absolute; top:-11px; left:-12px; z-index:3; display:none;
+      font-size:clamp(1rem,2.4vw,1.45rem); padding:0 3px; border-radius:6px;
+      background:rgba(255,255,255,0.92); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
     .md-cell .md-divrem.on { display:inline-flex; }
     .md-cell .md-divslot { position:absolute; top:-13px; left:-13px; z-index:4;
       background:rgba(255,255,255,0.92); cursor:pointer; }
-    .md-cell .md-divslot::after { content:''; position:absolute; inset:-12px; }
+    /* C1: slotten är 16×19 px — träffytan minst 44×44, centrerad */
+    .md-cell .md-divslot::after, .md-cell .md-restslot::after { content:''; position:absolute;
+      left:50%; top:50%; transform:translate(-50%,-50%); width:max(44px,140%); height:max(44px,140%); }
     /* Fria lägets rest-plats (A4): statisk streckad ruta där resten kan
        skrivas; tappbar via cellen (.md-rtap). Döljs när en rest står där. */
     .md-cell.md-rtap { cursor:pointer; }
@@ -449,7 +458,7 @@ const MultDivGame = (() => {
       .md-eqsign { font-size:1.15rem; }
       .md-flbl { font-size:0.72rem; }
       .md-divwrap { gap:6px 8px; }
-      .md-cell .md-divrem { top:-7px; left:-7px; }
+      .md-cell .md-divrem { top:-9px; left:-9px; }
       .md-cell .md-divslot { top:-10px; left:-10px; }
       .md-table { border-spacing:2px; }
       #md-table-wrap { padding:5px; }
