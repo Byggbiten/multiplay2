@@ -411,6 +411,23 @@ const UppstallningGame = (() => {
     .nf-ghost.fading{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
       opacity:0;transform:scale(.68);}
 
+    /* ══ ARBETSYTAN I HÖGERMARGINALEN (uppgift 7b) ══════════════════
+       Korta vägen (SKIP_BOX_MAX_BORROW) har ingen tankeruta, så minnets
+       kvantitet hade ingenstans att synas: bubblan sa "Minnet gör 8:an
+       till 9" medan kolumnen stod kvar på 8 ända tills siffran plötsligt
+       blev 10. Pappret får inte ljuga — Mira skriver aldrig en 9:a där —
+       så 9:an blir en BRICKA i marginalen, där allt lösräknande bor.
+       Ytan håller sina barn INLINE (bricka, sedan spöket), precis som
+       tankerutans rad; annars hamnar två absolutpositionerade element på
+       samma parkeringsplats och lägger sig ovanpå varandra. */
+    .nf-work{position:absolute;z-index:8;pointer-events:none;
+      display:flex;align-items:center;gap:5px;}
+    .nf-work .tk-badge.tk-work{position:static;flex:0 0 auto;
+      font-size:1.35rem;padding:3px 10px;}
+    .tk-badge.tk-pop{animation:tk-pop .3s var(--spring) both;}
+    .nf-work.fading{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
+      opacity:0;transform:scale(.7);}
+
     /* Siffror mitt i en förändring (mockup:630–633).
        Spec §5.2 lät bli .dw.nf-owing eftersom läget "i kolumnen" var
        förkastat. Dennis korta väg (SKIP_BOX_MAX_BORROW) räknar just i
@@ -897,6 +914,7 @@ const UppstallningGame = (() => {
       highlightCol(step.col);
       /* Lämna inget kvar från förra kolumnen som kan läsas som aktuellt. */
       const gStale = ghostEl(); if (gStale) gStale.remove();
+      clearWork(false);
       closeThink();
       setTimeout(cb, 50);
 
@@ -957,15 +975,44 @@ const UppstallningGame = (() => {
         after(980, cb);
         return;
       }
+      /* KORTA VÄGEN (uppgift 7b). Siffran i cellen ändras INTE — den står
+         kvar tills den stryks och skrivs om, precis som på Miras papper.
+         I stället läses 8:an och minnesettan av, och kvantiteten 9 ställer
+         sig som en bricka i marginalen. Då pekar nästa steg ("9 behöver 1")
+         på något som faktiskt syns. */
       const cell = upCarry(step.col);
       const md   = cell && cell.querySelector('.mem-digit');
-      if (md) { md.style.animationDuration = Ts(250); md.classList.add('tk-blink'); }
+      const src  = upDw(row, step.col);
+      const colr = PVC[COL_KEYS[step.col]];
+      const work = ensureWork(step.col, row);
+      if (!work) { after(300, cb); return; }
+      const wchip = document.createElement('div');
+      wchip.className = 'tk-badge tk-work ' + badgeColorClass(step.col);
+      wchip.innerHTML = String(step.memNew).split('')
+        .map(d => `<span class="tk-d">${d}</span>`).join('');
+      wchip.style.opacity = '0';
+      work.appendChild(wchip);
+      placeWork(work, step.col, row);
+      if (src) src.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`;
+      if (md)  { md.style.animationDuration = Ts(250); md.classList.add('tk-blink'); }
       after(250, () => {
-        flyCopyIn(document.body, md || cell, upCell(row, step.col), String(step.carry_in), {
-          dur: 550, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fixed: true,
-          fontSize: '1.2rem', color: '#d97706', endColor: '#d97706', fade: true
-        }, () => { pop(upDw(row, step.col), 300); after(320, cb); });
+        /* Två avläsningar bildar brickan: siffran på pappret och minnet.
+           9:an får inte uppstå ur intet. */
+        if (src) flyCopyIn(document.body, src, wchip, String(step.memDigit), {
+          dur: 550, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.3rem', color: colr, endColor: colr, fade: true
+        }, null);
+        flyCopyIn(document.body, md || cell, wchip, String(step.carry_in), {
+          dur: 550, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.2rem', color: '#dc2626', endColor: colr, fade: true
+        }, null);
       });
+      after(830, () => {
+        wchip.style.opacity = '';
+        wchip.style.animation = `tk-badge-in ${Ts(380)} cubic-bezier(0.34,1.3,0.4,1) both`;
+        placeWork(work, step.col, row);
+      });
+      after(1240, cb);
 
     /* ── UTLYFTET (spec §4.3) ───────────────────────────────────
        Paret pulsar först — meningen pekar på DEM, sedan hoppar de ner i
@@ -1014,7 +1061,11 @@ const UppstallningGame = (() => {
       highlightCol(step.col);
       const host = step.box ? thinkCard() : null;
       const gr = step.growRow || 'a';
-      pop(step.box ? chipEl(gr) : upDw(gr, step.col), 300, step.box ? 'pop' : 'tk-pop');
+      /* Meningen handlar om 9:an — alltså pulsar brickan i marginalen när
+         den finns, inte 8:an på pappret. */
+      const wc = step.box ? null : workChip();
+      pop(step.box ? chipEl(gr) : (wc || upDw(gr, step.col)), 300,
+          step.box ? 'pop' : 'tk-pop');
       after(180, () => drawGhost(step.col, step.behover, host, gr));
       after(560, cb);
 
@@ -1067,6 +1118,22 @@ const UppstallningGame = (() => {
        för paret har aldrig lämnat kolumnen. */
     } else if (step.type === 'add_ten') {
       highlightCol(step.col);
+      const wc = workChip();
+      if (wc) {
+        /* Finns arbetsytan slukar marginalens 9:a lånet och BLIR en tia —
+           samma slutsats som chipToTen gör i rutan. Pappret skrivs om i
+           samma andetag: det är där tian hör hemma. */
+        after(120, absorbGhost);
+        after(460, () => {
+          wc.innerHTML = `<span class="tk-d">1</span><span class="tk-d">0</span>`;
+          pop(wc, 320, 'tk-pop');
+          const w = workEl();
+          if (w) placeWork(w, step.col, w.dataset.row || step.growRow || 'a');
+          crossRow(step.growRow || 'a', step.col, '10');
+        });
+        after(1100, cb);
+        return;
+      }
       crossRow(step.growRow || 'a', step.col, '10');
       const g = ghostEl();
       after(560, () => { if (g) { g.classList.add('fading'); after(320, () => g.remove()); } });
@@ -1113,6 +1180,10 @@ const UppstallningGame = (() => {
        minnessiffran. Ingenting är struket — det finns inget att stryka. */
     } else if (step.type === 'add_sum') {
       highlightCol(step.col);
+      /* Marginalen har EN parkeringsplats. Arbetsytan lämnar den innan
+         summebrickan tar den, annars ligger de ovanpå varandra. Brickan
+         har gjort sitt: kvantiteten står skriven i kolumnen nu. */
+      clearWork(true);
       riseSumChip(step.col, step.sum, paperSources(step.col, !!step.nostrike), cb);
 
     } else if (step.type === 'add_over9') {
@@ -1781,8 +1852,54 @@ const UppstallningGame = (() => {
     after(320, () => g.remove());
   }
 
+  /* ── ARBETSYTAN (uppgift 7b) ───────────────────────────────────────
+     En liten rad i högermarginalen som håller kolumnens lösräknande
+     INLINE: först minnets bricka, sedan spöket. Utan den skulle båda
+     vilja ha rightMarginSpot och lägga sig ovanpå varandra. Ytan flyttas
+     om när bredden ändras, så gruppen hålls kvar i marginalen och aldrig
+     glider in över tabellen. */
+  const workEl   = () => document.querySelector('.nf-work');
+  const workChip = () => document.querySelector('.nf-work .tk-work');
+
+  /* Lodrätt centrerad på den rad minnet gick till; vågrätt på samma
+     parkeringsplats som spöket och summebrickan. */
+  function placeWork(work, col, row) {
+    const wrap = upWrap(), anchor = upCell(row || 'a', col);
+    if (!wrap || !work || !anchor) return;
+    const wR = wrap.getBoundingClientRect(), aR = anchor.getBoundingClientRect();
+    const bb = work.getBoundingClientRect();
+    work.style.top  = (aR.top - wR.top + aR.height / 2 - bb.height / 2) + 'px';
+    work.style.left = rightMarginSpot(bb.width) + 'px';
+  }
+
+  function ensureWork(col, row) {
+    const existing = workEl();
+    if (existing && existing.dataset.col === String(col)) return existing;
+    if (existing) existing.remove();
+    const wrap = upWrap();
+    if (!wrap) return null;
+    const w = document.createElement('div');
+    w.className = 'nf-work';
+    w.dataset.col = String(col);
+    w.dataset.row = row || 'a';
+    wrap.appendChild(w);
+    return w;
+  }
+
+  /* Städas som spöket: tonas bort när kolumnen lämnar marginalen, och
+     sopas bort utan ceremoni när en ny kolumn tar över. */
+  function clearWork(fade) {
+    const w = workEl();
+    if (!w) return;
+    if (!fade) { w.remove(); return; }
+    w.classList.add('fading');
+    after(320, () => w.remove());
+  }
+
   /* Platsen som lånet ska fylla. I rutan står den INLINE direkt efter
-     grow-brickan ("7 ⟨3⟩ + 5"); i kolumnen läggs den vid sidan av cellen. */
+     grow-brickan ("7 ⟨3⟩ + 5"); finns en arbetsyta för kolumnen läggs den
+     inline där i stället, så det läses "9 ⟨1⟩" precis som i rutan; annars
+     läggs den vid sidan av cellen. */
   function drawGhost(col, value, hostEl, row) {
     const old = ghostEl(); if (old) old.remove();
     const g = document.createElement('div');
@@ -1795,6 +1912,15 @@ const UppstallningGame = (() => {
       if (!chip) return null;
       g.classList.add('inline');
       chip.insertAdjacentElement('afterend', g);
+      return g;
+    }
+    /* Korta vägen: har minnet redan lagt en bricka i marginalen ställer
+       sig spöket bredvid den i stället för att ta samma punkt. */
+    const work = workEl();
+    if (work && work.dataset.col === String(col)) {
+      g.classList.add('inline');
+      work.appendChild(g);
+      placeWork(work, col, work.dataset.row);
       return g;
     }
     const wrap = upWrap(), anchor = upCell(row || 'a', col);
@@ -2214,6 +2340,10 @@ const UppstallningGame = (() => {
     exCurrentCol  = col;
     exInputLocked = false;
     exInput       = '';
+    /* Övningsläget spelar samma kö som demon men har inget add_highlight
+       som sopar mellan kolumnerna — inget lösräknande får följa med. */
+    const gStale = ghostEl(); if (gStale) gStale.remove();
+    clearWork(false);
     for (let c = 0; c < colCount; c++) {
       const el = document.getElementById(`ans-${COL_KEYS[c]}`);
       if (el) el.classList.toggle('active-col', c === col);
