@@ -489,7 +489,7 @@ const UppstallningGame = (() => {
        tankerutans rad; annars hamnar två absolutpositionerade element på
        samma parkeringsplats och lägger sig ovanpå varandra. */
     .nf-work{position:absolute;z-index:8;pointer-events:none;
-      display:flex;align-items:center;gap:5px;}
+      display:flex;align-items:center;gap:5px;width:max-content;}
     .nf-work .tk-badge.tk-work{position:static;flex:0 0 auto;
       font-size:1.35rem;padding:3px 10px;}
     .tk-badge.tk-pop{animation:tk-pop .3s var(--spring) both;}
@@ -500,6 +500,44 @@ const UppstallningGame = (() => {
        .tk-badge.fly-fixed på specificitet. */
     .nf-work .nf-op{font-size:1.35rem;}
     .nf-work .tk-badge.tk-work.fly-fixed{position:fixed;}
+
+    /* ══ STRIDSPLATSEN: (10 + 3) − 8 (Dennis 22/9) ══════════════════
+       Parentesgruppen är en pille runt tian och försvararen, så att det
+       SYNS att 10 och 3 hör ihop innan anfallet löser upp dem. När 3:an
+       gått in i 8:an öppnas pillen (.open) och bara tian står kvar —
+       ingenting byts ut, gruppen tonar bara bort runt brickan.
+
+       Övergången ligger på .open, inte på basregeln, och det är avsiktligt:
+       när parentesen SLÅS UPP (klassen tas bort) ska bredden vara färdig
+       med en gång, annars mäter placeWork en yta som fortfarande växer och
+       uttrycket hamnar utanför spalten. När den STÄNGS (klassen läggs på)
+       gäller .open:s egen transition och pillen tonar lugnt bort. */
+    .sub-group{display:flex;align-items:center;gap:4px;padding:3px 8px;
+      border-radius:var(--radius-full);background:rgba(100,116,139,.15);
+      border:2px solid rgba(100,116,139,.34);}
+    .sub-group.open{background:transparent;border-color:transparent;padding:3px 0;gap:0;
+      transition:background .35s var(--smooth),border-color .35s var(--smooth),
+        padding .35s var(--smooth),gap .35s var(--smooth);}
+    .sub-paren{font-family:var(--font-head);font-weight:800;font-size:1.6rem;color:#64748b;
+      line-height:1;transition:opacity .3s var(--smooth);}
+    .sub-term{font-family:var(--font-head);font-weight:800;font-size:1.35rem;line-height:1;
+      display:inline-block;transition:opacity .3s var(--smooth);}
+    .sub-paren.gone,.sub-term.gone,.nf-ghost.gone{opacity:0;}
+
+    /* Den lånade tian skrivs OVANFÖR siffran den tillhör, som på papper.
+       Rubrikraden får därför ett fritt band under sig i subtraktionen —
+       annars hade tian lagt sig över H/T/E-bokstäverna. Måttet bor HÄR och
+       inte i en style-attribut på cellen: en inline-padding vinner över
+       klassregeln, och bandet hade tyst uteblivit. */
+    .up-table thead th{padding-bottom:4px;}
+    .up-table.sub-head thead th{padding-bottom:44px;}
+
+    /* Talet står till VÄNSTER i subtraktionen, inte centrerat. Högerspalten
+       är stridsplatsen och (10 + 3) − 8 är bredare än en centrerad tabell
+       lämnar över: med tabellen mitt i skrevs uttrycket ovanpå kolumnen och
+       barnet såg inte längre pappret. Additionen har inget uttryck att ge
+       plats åt och står kvar centrerad. */
+    .up-table.sub-head{margin-left:4px;}
 
     /* Subtraktionens papper: röd penna i cellhörnet, samma geometri som
        additionens .small-new-digit. En andra omskrivning stryker den
@@ -1430,7 +1468,10 @@ const UppstallningGame = (() => {
       }, 1100);
 
     /* Lånet: grannen pulsar, stryks och skrivs om på pappret; ur den
-       strukna siffran föds tian som bricka och flyger till marginalen.
+       strukna siffran föds tian som bricka och hoppar RAKT till kolumnen
+       till höger, där den lägger sig ovanför siffran. Omvägen ut till
+       marginalen och tillbaka är borta (Dennis 22/9: två rörelser för en
+       händelse) — tian tillhör pappret, inte lösräknandet.
        När den landat byter meningen till vad pappret nu säger. */
     } else if (step.type === 'sub_lend') {
       highlightCol(step.col);
@@ -1439,14 +1480,16 @@ const UppstallningGame = (() => {
         playBorrowSound();
         subRewrite('a', step.srcCol, step.srcNew);
         demoEffA[step.srcCol] = step.srcNew;
-        bornTenChip(step.srcCol, step.dstCol);
+        const chip = bornTenChip(step.srcCol, step.dstCol);
+        const w = chip && workEl();
+        if (w) w.dataset.place = 'above';
       });
-      after(850, () => flyWorkToMargin(step.dstCol, 700));
-      after(1600, () => showStepBubble({ ...step, type: 'sub_left' }));
-      after(1850, cb);
+      after(700, () => flyWorkToSpot(step.dstCol, 600));
+      after(1340, () => showStepBubble({ ...step, type: 'sub_left' }));
+      after(1600, cb);
 
-    /* Dubbellånets landning: tian i marginalen går in i tiotalets cell
-       och BLIR det som står skrivet där — 0:an stryks, "10" skrivs. Brickan
+    /* Dubbellånets landning: tian ovanför tiotalet går in i cellen och
+       BLIR det som står skrivet där — 0:an stryks, "10" skrivs. Brickan
        föddes i förra steget och förbrukas först när siffran står. */
     } else if (step.type === 'sub_land') {
       highlightCol(step.col);
@@ -1462,24 +1505,110 @@ const UppstallningGame = (() => {
       });
       after(1350, cb);
 
-    /* Vänd om (eller ta direkt när a = 0): siffrorna läses av, och i
-       marginalen ställer sig differensen bredvid tian: "10 − 5". */
-    } else if (step.type === 'sub_flip' || step.type === 'sub_take') {
+    /* ── STRIDEN I HÖGERSPALTEN (Dennis 22/9) ──────────────────────────
+       Kolumnen är pappret; högerspalten är stridsplatsen. När lånet är
+       klart hoppar de inblandade talen dit ut och gör upp där, och först
+       svaret återvänder ner i svarscellen.
+
+       sub_expr: tian lämnar pappret och tar plats i högerspalten, och
+       försvararen och anfallaren följer efter som kopior — originalen står
+       kvar i kolumnen, för det som är skrivet ska stå kvar (P5). Kvar står
+       (10 + 3) − 8, med parentesen som en synlig grupp. */
+    } else if (step.type === 'sub_expr') {
       highlightCol(step.col);
-      const rows = step.type === 'sub_flip' ? ['b', 'a'] : ['b'];
+      const work = workEl();
+      if (!work) { after(300, cb); return; }
       const colr = PVC[COL_KEYS[step.col]];
-      rows.forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`; });
-      after(150, () => { subDrawOp(step.col); drawGhost(step.col, step.diff, null, 'a'); });
-      after(300, () => {
-        const g = ghostEl();
-        rows.forEach(r => flyCopyIn(document.body, upDw(r, step.col), g, String(step[r]), {
+      work.dataset.place = '';              /* tian går ut till stridsplatsen */
+      flyWorkToSpot(step.col, 600);
+      after(680, () => { subBuildExpr(work, step.col, step.a, step.b); flyWorkToSpot(step.col, 260, false); });
+      after(880, () => {
+        ['a', 'b'].forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`; });
+        const dst = { a: work.querySelector('.sub-term[data-slot="a"]'), b: ghostEl() };
+        ['a', 'b'].forEach(r => flyCopyIn(document.body, upDw(r, step.col), dst[r], String(step[r]), {
           dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
           fontSize: '1.2rem', color: colr, endColor: colr, fade: true
         }, null));
       });
-      after(700, () => rows.forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = ''; }));
-      after(860, () => { const g = ghostEl(); if (g) { g.classList.add('filled'); pop(g, 300, 'pop'); } });
-      after(1200, cb);
+      after(1300, () => ['a', 'b'].forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = ''; }));
+      after(1420, () => {
+        const ta = work.querySelector('.sub-term[data-slot="a"]');
+        if (ta) { ta.classList.remove('gone'); pop(ta, 320, 'tk-pop'); }
+        const g = ghostEl();
+        if (g) { g.classList.remove('gone'); g.classList.add('filled'); pop(g, 320, 'pop'); }
+      });
+      after(1820, cb);
+
+    /* sub_attack: försvararen lämnar parentesen och går in i anfallaren.
+       3 av 8:an förbrukas och 5:an SYNS uppstå ur samma siffra — den byts
+       mitt i pulsen, det är inte en ny siffra som skrivs dit. Parentesen
+       öppnas i samma rörelse, och kvar står 10 − 5 åt sub_ten_minus. */
+    } else if (step.type === 'sub_attack') {
+      highlightCol(step.col);
+      const work = workEl();
+      if (!work) { after(300, cb); return; }
+      const grp = work.querySelector('.sub-group');
+      const ta  = work.querySelector('.sub-term[data-slot="a"]');
+      const g   = ghostEl();
+      pop(ta, 320, 'tk-pop');
+      after(320, () => {
+        /* Samma nod hela vägen: trean flyttas med transform, den skapas
+           aldrig om på vägen (P5). */
+        if (ta && g) {
+          const tR = ta.getBoundingClientRect(), gR = g.getBoundingClientRect();
+          ta.style.transition = `transform ${Ts(520)} cubic-bezier(0.34,1.06,0.5,1), opacity ${Ts(260)} var(--smooth)`;
+          void ta.offsetWidth;
+          ta.style.transform =
+            `translate(${gR.left + gR.width / 2 - (tR.left + tR.width / 2)}px,` +
+            `${gR.top + gR.height / 2 - (tR.top + tR.height / 2)}px) scale(0.8)`;
+        }
+        if (grp) grp.classList.add('open');
+        work.querySelectorAll('.sub-paren').forEach(e => e.classList.add('gone'));
+        const plus = work.querySelector('.sub-group .nf-op');
+        if (plus) plus.classList.remove('in');
+      });
+      after(870, () => {
+        if (ta) ta.classList.add('gone');
+        playBorrowSound();
+        if (g) { pop(g, 340, 'pop'); after(150, () => { g.textContent = step.diff; }); }
+      });
+      after(1200, () => {
+        if (ta) ta.remove();
+        work.querySelectorAll('.sub-paren').forEach(e => e.remove());
+        const plus = work.querySelector('.sub-group .nf-op');
+        if (plus) plus.remove();
+      });
+      after(1500, cb);
+
+    /* a = 0: det finns ingen försvarare som kan ta något ur anfallaren, och
+       (10 + 0) vore en parentes utan tanke. Tian går ut till stridsplatsen
+       och möter åttan själv: "10 − 8". */
+    } else if (step.type === 'sub_take') {
+      highlightCol(step.col);
+      const work = workEl();
+      const colr = PVC[COL_KEYS[step.col]];
+      if (work) work.dataset.place = '';
+      flyWorkToSpot(step.col, 600);
+      after(680, () => {
+        subDrawOp(step.col);
+        const g = drawGhost(step.col, step.diff, null, 'a');
+        if (g) g.classList.add('gone');
+        flyWorkToSpot(step.col, 260, false);
+      });
+      after(880, () => {
+        const dw = upDw('b', step.col);
+        if (dw) dw.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`;
+        flyCopyIn(document.body, dw, ghostEl(), String(step.b), {
+          dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.2rem', color: colr, endColor: colr, fade: true
+        }, null);
+      });
+      after(1300, () => { const dw = upDw('b', step.col); if (dw) dw.style.animation = ''; });
+      after(1420, () => {
+        const g = ghostEl();
+        if (g) { g.classList.remove('gone'); g.classList.add('filled'); pop(g, 320, 'pop'); }
+      });
+      after(1780, cb);
 
     /* Svaret sist: differensen sugs in i tian, brickan blir svarssiffran
        och åker ner i cellen (samma avslut som additionens add_result). */
@@ -1641,17 +1770,25 @@ const UppstallningGame = (() => {
     /* ── Lånekedjan: en kort mening per steg, ETT namn på lånet (B1):
        det som lånas är "en tia", brickan säger 10, och sedan heter den
        "tian". Ingen uträkning i texten — resultatet sägs, barnet räknar
-       inte (P6). Svaret nämns först i sub_ten_minus, där det skrivs. */
+       inte (P6). Svaret nämns först i sub_ten_minus, där det skrivs.
+
+       BERÄTTELSEN BOR I VERBEN (Dennis 22/9). Övre radens siffror
+       försvarar, undre radens anfaller — därför lånar man: försvararen är
+       för svag och kallar in förstärkning från grannen till vänster.
+       Metaforen bärs av att raderna beter sig olika, inte av att ordet
+       upprepas; varje mening är lika kort som eller kortare än den den
+       ersätter. Och verbet måste ha täckning i bilden: står det "skickar
+       över" ska något flyga, står det "tar av" ska något minska synligt. */
     } else if (step.type === 'sub_cant') {
       const ck = COL_KEYS[step.col];
       html = step.double
-        ? `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte — och tiotalet har inget att låna ut.`
-        : `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte — vi måste låna.`;
+        ? `<strong style="color:${PVC[ck]}">${step.a}</strong>:an klarar inte <strong style="color:${PVC[ck]}">${step.b}</strong>:an — och tiotalet har inget att låna ut.`
+        : `<strong style="color:${PVC[ck]}">${step.a}</strong>:an klarar inte <strong style="color:${PVC[ck]}">${step.b}</strong>:an — vi måste låna.`;
     } else if (step.type === 'sub_lend') {
       const sk = COL_KEYS[step.srcCol];
       html = step.toPaper
-        ? `Tiotalet lånar en tia från <strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an först.`
-        : `Vi lånar en tia från <strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an.`;
+        ? `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an skickar en tia till tiotalet.`
+        : `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an skickar över en tia.`;
     } else if (step.type === 'sub_left') {
       const sk = COL_KEYS[step.srcCol];
       html = `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an har <strong style="color:#dc2626">${step.srcNew}</strong> kvar.`;
@@ -1659,20 +1796,26 @@ const UppstallningGame = (() => {
       html = `Tian landar hos tiotalet.`;
     } else if (step.type === 'sub_landed') {
       html = `Nu står det <strong style="color:#dc2626">${step.dstNew}</strong> i tiotalet.`;
-    } else if (step.type === 'sub_flip') {
-      /* Dennis 21/9: "från 2 till 9 är det 7" förklarade aldrig VARFÖR vi
-         vänder, och sjuan dök upp ur ingenstans. Skillnaden skrivs som det
-         lilla tal den är — 9 − 2 = 7 — inte som ett avstånd i ord. Det är
-         notationen hon lär sig skriva, och den läses snabbare än en
-         jämförelsemening. */
+    } else if (step.type === 'sub_expr') {
+      /* Dennis 22/9, ordagrant. Steget är uppställningen av uttrycket och
+         inget annat — vad det blir sägs i nästa steg, när det syns. */
       const ck = COL_KEYS[step.col];
-      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>.`;
+      html = `Nu har vi (<strong style="color:${PVC[ck]}">10</strong> + <strong style="color:${PVC[ck]}">${step.a}</strong>) − <strong style="color:${PVC[ck]}">${step.b}</strong>.`;
+    } else if (step.type === 'sub_attack') {
+      /* Dennis 21/9: "Vi vänder om: 8 − 3 = 5" förklarade aldrig VARFÖR vi
+         vände, och femman dök upp ur ingenstans. Nu säger meningen vem som
+         gör vad, och båda talen den nämner ändras framför ögonen på barnet:
+         3:an far in i 8:an, och 8:an blir en 5:a. Dennis bild är att de
+         "anfaller" — rörelsen bär den, texten behöver inte ordet. */
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.a}</strong>:an tar <strong style="color:${PVC[ck]}">${step.a}</strong> av <strong style="color:${PVC[ck]}">${step.b}</strong>:an — <strong style="color:${PVC[ck]}">${step.diff}</strong> står kvar.`;
     } else if (step.type === 'sub_take') {
+      /* a = 0: ingen försvarare att skicka in, tian får klara sig själv. */
       const ck = COL_KEYS[step.col];
-      html = `Vi tar <strong style="color:${PVC[ck]}">${step.b}</strong>:an från tian.`;
+      html = `Tian möter <strong style="color:${PVC[ck]}">${step.b}</strong>:an själv.`;
     } else if (step.type === 'sub_ten_minus') {
       /* Dennis 21/9: namnge tian som DEN LÅNADE — det knyter ihop steget
-         med brickan i marginalen och med lånet några steg tidigare. */
+         med brickan i högerspalten och med lånet några steg tidigare. */
       const ck = COL_KEYS[step.col];
       html = `Och nu använder vi lånetian! <strong style="color:${PVC[ck]}">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong>`;
     } else if (step.type === 'sub_calc') {
@@ -1798,7 +1941,7 @@ const UppstallningGame = (() => {
 
   /* animateBorrowToken ("+10"-tokenen som teleporterade, granskning 21/9 A2)
      är borta: tian är nu EN bricka som föds ur den strukna siffran
-     (bornTenChip) och flyger som helhet (flyWorkToMargin/flyWorkTo). */
+     (bornTenChip) och flyger som helhet (flyWorkToSpot/flyWorkTo). */
 
   /* ══════════════════════════════════════════════════════════
      TIOKOMPIS-GENVÄGEN — hjälpare (spec §4, mockupen är facit)
@@ -1908,15 +2051,43 @@ const UppstallningGame = (() => {
   const workEl   = () => document.querySelector('.nf-work');
   const workChip = () => document.querySelector('.nf-work .tk-work');
 
-  /* Lodrätt centrerad på den rad minnet gick till; vågrätt på samma
-     parkeringsplats som spöket och summebrickan. */
+  /* ── TIANS PLATS ÄR PAPPRET, INTE MARGINALEN (Dennis 22/9) ──────────
+     Regeln "allt lösräknande ligger på talets högersida" gäller fullt ut.
+     Den lånade tian är inget undantag från den — den är inte lösräknande.
+     Den är SKRIVEN PÅ PAPPRET, och på papper skrivs den ovanför siffran
+     den tillhör. Därför ligger den över cellen: kolumnen är pappret,
+     högerspalten är stridsplatsen. Först när talen ska göra upp hoppar
+     de ut till högerspalten (sub_expr/sub_take), och där stannar allt
+     räknande tills svaret återvänder ner i svarscellen.
+
+     Ytan bär valet i dataset.place, så att varje befintlig ompositionering
+     (drawGhost, subCollapseTen, flyWorkToSpot) hamnar rätt av sig själv.
+     Additionen sätter aldrig flaggan och rör sig inte ur marginalen. */
   function placeWork(work, col, row) {
+    if (work && work.dataset.place === 'above') return placeWorkAbove(work, col);
     const wrap = upWrap(), anchor = upCell(row || 'a', col);
     if (!wrap || !work || !anchor) return;
     const wR = wrap.getBoundingClientRect(), aR = anchor.getBoundingClientRect();
     const bb = work.getBoundingClientRect();
     work.style.top  = (aR.top - wR.top + aR.height / 2 - bb.height / 2) + 'px';
     work.style.left = rightMarginSpot(bb.width) + 'px';
+  }
+
+  /* Ovanför den mottagande cellen, i det fria bandet under rubrikraden
+     (.up-table.sub-head). Det är BRICKANS mitt som ankras över cellens
+     mitt — inte ytans — så att tian står rakt över sin siffra även när
+     resten av ett uttryck hänger med på ytan. */
+  function placeWorkAbove(work, col) {
+    const wrap = upWrap(), cell = upCell('a', col);
+    if (!wrap || !work || !cell) return;
+    const wR = wrap.getBoundingClientRect(), cR = cell.getBoundingClientRect();
+    const bb = work.getBoundingClientRect();
+    const chip = work.querySelector('.tk-work');
+    const cb = chip ? chip.getBoundingClientRect() : bb;
+    const mitt = (cb.left - bb.left) + cb.width / 2;
+    const left = (cR.left - wR.left) + cR.width / 2 - mitt;
+    work.style.left = Math.max(2, Math.min(left, wR.width - bb.width - 2)) + 'px';
+    work.style.top  = (cR.top - wR.top - bb.height - 4) + 'px';
   }
 
   function ensureWork(col, row) {
@@ -1968,9 +2139,14 @@ const UppstallningGame = (() => {
 
   /* Brickan: tian FÖDS ur den strukna siffran. Arbetsytan (.nf-work, samma
      som additionens korta väg) ställs över källcellen med brickan i sig och
-     flyger sedan som helhet till marginalen — brickan är ett och samma
+     hoppar sedan som helhet till sin plats — brickan är ett och samma
      objekt från födsel till dess den blir svarssiffran. Färgen är
-     MOTTAGARENS platsvärdesfärg: det är tio av hennes enheter. */
+     MOTTAGARENS platsvärdesfärg: det är tio av hennes enheter.
+
+     Brickan föds redan inuti .sub-group, fast öppen (genomskinlig). Utan
+     den skulle sub_expr behöva flytta brickan in i gruppen, och en flyttad
+     nod är en nod som tas bort och skapas igen i samma steg (P5). Nu växer
+     parentesen bara omkring en bricka som står still. */
   function bornTenChip(srcCol, dstCol) {
     const wrap = upWrap(), src = upCell('a', srcCol);
     if (!wrap || !src) return null;
@@ -1978,11 +2154,14 @@ const UppstallningGame = (() => {
     if (!work) return null;
     work.innerHTML = '';
     work.style.transition = 'none';
+    const grp = document.createElement('div');
+    grp.className = 'sub-group open';
     const chip = document.createElement('div');
     chip.className = 'tk-badge tk-work ' + badgeColorClass(dstCol);
     chip.innerHTML = '<span class="tk-d">1</span><span class="tk-d">0</span>';
     chip.style.animationDuration = Ts(380);
-    work.appendChild(chip);
+    grp.appendChild(chip);
+    work.appendChild(grp);
     const wR = wrap.getBoundingClientRect(), sR = src.getBoundingClientRect();
     const bb = work.getBoundingClientRect();
     work.style.left = (sR.left - wR.left + sR.width / 2 - bb.width / 2) + 'px';
@@ -2003,21 +2182,63 @@ const UppstallningGame = (() => {
     after(dur + 40, () => { work.style.transition = ''; });
   }
 
-  function flyWorkToMargin(col, dur) {
+  /* Flytta ytan till sin plats för kolumnen — ovanför cellen eller ute i
+     högerspalten, beroende på dataset.place. Hette flyWorkToMargin när
+     marginalen var enda platsen. */
+  function flyWorkToSpot(col, dur, pulsa) {
     const work = workEl();
     if (!work) return;
     work.style.transition = `left ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1), top ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1)`;
     void work.offsetWidth;
     placeWork(work, col, 'a');
-    after(dur + 40, () => { work.style.transition = ''; pop(workChip(), 300, 'tk-pop'); });
+    after(dur + 40, () => {
+      work.style.transition = '';
+      if (pulsa !== false) pop(workChip(), 300, 'tk-pop');
+    });
+  }
+
+  /* ── UTTRYCKET ( 10 + 3 ) − 8 ───────────────────────────────────────
+     Byggs RUNT tian, som redan står i .sub-group: parentesen och plusset
+     skjuts in före och efter brickan, och gruppen stängs (pillen syns) så
+     att 10 och 3 läses som ett. Slottarna föds tomma — siffrorna kommer
+     flygande från pappret, de uppstår inte i rutan. Platsvärdesfärg på
+     båda, precis som i kolumnen. */
+  function subBuildExpr(work, col, a, b) {
+    const grp  = work && work.querySelector('.sub-group');
+    const chip = grp && grp.querySelector('.tk-work');
+    if (!grp || !chip) return null;
+    const colr = PVC[COL_KEYS[col]];
+    const spann = (cls, txt) => {
+      const e = document.createElement('span');
+      e.className = cls;
+      e.textContent = txt;
+      return e;
+    };
+    grp.insertBefore(spann('sub-paren', '('), chip);
+    const plus = spann('nf-op', '+');
+    grp.appendChild(plus);
+    const ta = spann('sub-term gone', a);
+    ta.dataset.slot = 'a';
+    ta.style.color = colr;
+    grp.appendChild(ta);
+    grp.appendChild(spann('sub-paren', ')'));
+    grp.classList.remove('open');
+    requestAnimationFrame(() => plus.classList.add('in'));
+    /* Anfallaren står utanför parentesen: "… ) − 8". */
+    subDrawOp(col);
+    const g = drawGhost(col, b, null, 'a');
+    if (g) g.classList.add('gone');
+    return g;
   }
 
   /* Minustecknet mellan tian och differensen: "10 − 5" ska läsas som en
-     uträkning, inte som talet 105. */
+     uträkning, inte som talet 105. `:scope >` är inte kosmetik — plusset
+     inne i parentesen är också en .nf-op, och en osållad querySelector
+     hade rivit det uttryck vi just byggt. */
   function subDrawOp(col) {
     const work = workEl();
     if (!work || work.dataset.col !== String(col)) return null;
-    const old = work.querySelector('.nf-op'); if (old) old.remove();
+    const old = work.querySelector(':scope > .nf-op'); if (old) old.remove();
     const op = document.createElement('span');
     op.className = 'nf-op';
     op.textContent = '−';
@@ -2032,7 +2253,7 @@ const UppstallningGame = (() => {
   function subCollapseTen(col, ans, cb) {
     const chip = workChip();
     if (!chip) { fillAnsCell(col, ans); App.Sound.play('correct'); after(700, () => cb && cb()); return; }
-    const g = ghostEl(), op = document.querySelector('.nf-work .nf-op');
+    const g = ghostEl(), op = document.querySelector('.nf-work > .nf-op');
     if (g) pop(g, 300, 'pop');
     after(120, () => {
       absorbGhost();
@@ -2386,11 +2607,11 @@ const UppstallningGame = (() => {
     }).join('');
 
     return `
-      <table class="up-table">
+      <table class="up-table${mode === 'addition' ? '' : ' sub-head'}">
         <thead>
           <tr>
             <td></td>
-            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
+            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]}">${c.label}</th>`).join('')}
             <td></td>
           </tr>
         </thead>
