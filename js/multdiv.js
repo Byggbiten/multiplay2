@@ -1149,7 +1149,7 @@ const MultDivGame = (() => {
     const qf = g === undefined ? 'var(--deep)' : cv(g);
     if (w.kind === 'ingen') {
       return { w, r1: `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>`,
-               r2: '', r2a: '', r2b: '',
+               r2: '', r2a: '', r2b: '', r2q: '',
                r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong style="color:${qf}">0</strong>.</span>` };
     }
     const r1 = `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`;
@@ -1189,14 +1189,27 @@ const MultDivGame = (() => {
        nar ankaret ar valt, r2b svarar den nar krocken skett. Inga
        likheter i texten — brickorna visar dem. r2 star kvar orord for
        livlinan i fria laget, som SAMMANFATTAR i stallet for att stega. */
-    let r2a, r2b;
+    /* r2q — avstandsfragan i hjalplaget (Dennis 23/9, mot bild av 870 ÷ 3):
+       "I detta steg i 'rakna med hjalp' borde man behova svara pa den
+       fragan. hur mycket skiljer det upp till 8? Att det visas en
+       uttrakning som anger: 8-6=? Sa skriver man in 2 for att komma till
+       nasta steg."
+       Uttrycket ar inte en sidoekvation — det AR fragan, och skrivs som
+       notation (dampad, samma anda som minnesfragans "(14 + 6 = ?)").
+       'ner' vander subtraktionen: fragan lyder "hur mycket FOR MYCKET?",
+       sa ankarets produkt star forst. */
+    const gapQ = (a, b) => `<span class="md-walk r2"><span class="md-qexpr">` +
+      `<strong>${a}</strong> − <strong>${b}</strong> = ?</span></span>`;
+    let r2a, r2b, r2q;
     if (w.kind === 'exakt') {
       r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
       r2b = '';                                   // ingen krock att visa
+      r2q = '';                                   // inget avstand att fraga om
     } else if (w.kind === 'ner') {
       r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — hur mycket?</span>`;
       r2b = `<span class="md-walk r2"><strong>${Math.abs(w.mellan)}</strong> för mycket — ` +
             `vi tar bort ${nOr(w.steg, N)}.</span>`;
+      r2q = gapQ(w.bas.prod, cur);
     } else {
       r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. ` +
             `Hur mycket skiljer det upp till <strong>${cur}</strong>?</span>`;
@@ -1205,8 +1218,9 @@ const MultDivGame = (() => {
           `för lite för en till <strong>${N}</strong>:a.</span>`
         : `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
           `då får ${nOr(w.steg, N)} till plats.</span>`;
+      r2q = gapQ(cur, w.bas.prod);
     }
-    return { w, r1, r2, r2a, r2b,
+    return { w, r1, r2, r2a, r2b, r2q,
              r3: slut === 'ingen' ? '' : `<span class="md-walk r3">${svar}.</span>` };
   }
 
@@ -2526,6 +2540,10 @@ const MultDivGame = (() => {
     // Vandringens hjälpbrickor hör till EN fråga och följer aldrig med
     // till nästa (räknebrickan, som saknar .md-aux, rörs inte).
     clearAuxChips();
+    // Ingen halvgången vandring — och därmed ingen kvarhängande
+    // avstandsfraga — far folja med till nasta kopost. showDivQ satter
+    // en ny divWalk strax nedan nar posten ar en divq.
+    divWalk = null;
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = '';
     const item = helpItem();
@@ -2649,10 +2667,13 @@ const MultDivGame = (() => {
       onclick="MultDivGame.divWalkNext()">Nästa steg →</button>`;
   }
 
-  /* Faserna: 0 fragan -> 1 ankarparet fods -> 2 valet + "hur mycket
-     skiljer det?" -> 3 krocken. 'exakt' saknar fas 3 (ankaret AR talet)
-     och gar rakt till knappsatsen efter fas 2 — samma stegning som
-     demon, ett klick per steg. */
+  /* Faserna: 0 fragan -> 1 ankarparet fods -> 2 valet, och dar STANNAR
+     hjalplaget och LATER BARNET SVARA pa hur mycket det skiljer (Dennis
+     23/9) -> 3 krocken. 'exakt' saknar bade avstandsfraga och krock —
+     ankaret AR talet — och gar rakt till huvudfragan efter fas 2.
+
+     Fragan ligger i divWalk:s fasmaskin, INTE i planDivHelpQueue: kon ar
+     byte-identisk mot dev over hela generatorrymden och ska forbli det. */
   function divWalkNext() {
     if (!divWalk) return;
     const { item, rows } = divWalk;
@@ -2660,6 +2681,7 @@ const MultDivGame = (() => {
     const levande = () => gen === exGen && helpItem() === item;
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';          // knappen bort medan brickorna ror sig
+    exInputLocked = true;
     const klart = () => {
       if (!levande()) return;
       divWalk = null;
@@ -2676,13 +2698,33 @@ const MultDivGame = (() => {
       runAnchorPick(item, rows.w, () => {
         if (!levande()) return;
         if (rows.w.kind === 'exakt') { klart(); return; }
-        if (divWalk) divWalkBtn();
+        if (divWalk) showDivGapQ();     // barnet svarar pa avstandet
       });
     } else {
       divWalk.ph = 3;
+      divWalk.gap = null;
       helpBubble(divqHeadHTML(item) + rows.r2b);
       runAnchorGap(item, rows.w, klart);
     }
+  }
+
+  /* Avstandsfragan: samma knappsats som modulens andra delfragor, och
+     uttrycket som egen rad under valet. Ratt svar = |mellan|, alltid
+     positivt — 'ner' vander subtraktionen sa fragan och uttrycket sager
+     samma sak. Ratt svar startar krocken; fel svar beter sig som overallt
+     annars (skakning + "prova igen") och laser inte barnet. */
+  const divGapSvar = w => Math.abs(w.mellan);
+
+  function showDivGapQ() {
+    if (!divWalk) return;
+    const { item, rows } = divWalk;
+    divWalk.gap = divGapSvar(rows.w);
+    helpInput = '';
+    exInputLocked = false;
+    helpBubble(divqHeadHTML(item) + rows.r2a + rows.r2q);
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = helpPadHTML();
+    helpRenderField();
   }
 
   /* ── Divisionens PLACERA-fas (v32): "Var ska resten stå?" ──
@@ -3031,7 +3073,16 @@ const MultDivGame = (() => {
 
     // Fråga + miniräknar-fält (svaret kan vara tvåsiffrigt, t.ex. 42)
     helpBubble(askText(item));
-    ui.innerHTML = `<div class="md-panel">
+    ui.innerHTML = helpPadHTML();
+    helpRenderField();
+  }
+
+  /* Knappsatsen byggs pa ETT stalle. Avstandsfragan i vandringen
+     (divWalk) anvander EXAKT samma panel som modulens ovriga delfragor,
+     sa knappsatsens geometri ar densamma oavsett vilken fraga som star —
+     annars hoppar den nar bubblan byter fraga. */
+  function helpPadHTML() {
+    return `<div class="md-panel">
       <div class="md-field md-field-sm num" id="md-help-field"><span class="md-caret"></span></div>
       <div class="md-numpad">
         ${[1,2,3,4,5,6,7,8,9,0].map(k =>
@@ -3045,7 +3096,6 @@ const MultDivGame = (() => {
           style="flex:1.1;min-width:0;height:44px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:0.95rem;border-radius:var(--radius-full)">Skriv svaret…</button>
       </div>
     </div>`;
-    helpRenderField();
   }
 
   /* ── LIVLINOR (v31) — 2/runda; visar svaret, barnet skriver själv ── */
@@ -3062,6 +3112,19 @@ const MultDivGame = (() => {
 
   function useLifeline() {
     if (exInputLocked || lifelines <= 0) return;
+    /* Vandringens avstandsfraga: livlinan ger AVSTANDET, inte kvotsiffran.
+       Maste ligga fore whitelisten — helpItem() ar annu divq-posten. */
+    if (divWalk && divWalk.gap != null) {
+      lifelines--;
+      App.Sound.play('click');
+      const btn = document.getElementById('md-lifeline');
+      if (btn) btn.outerHTML = lifelineBtnHTML();
+      helpBubble(divqHeadHTML(divWalk.item) + divWalk.rows.r2a +
+        `<span class="md-walk r2"><span class="md-qexpr">Det skiljer </span>` +
+        `<strong>${divWalk.gap}</strong>` +
+        `<span class="md-qexpr"> — skriv in det själv! ✍️</span></span>`);
+      return;
+    }
     const item = helpItem();
     // v32: samma livline-pool gäller även divisionens frågor
     if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return;
@@ -3138,6 +3201,9 @@ const MultDivGame = (() => {
 
   function helpSubmit() {
     if (exInputLocked || !helpInput) return;
+    /* Vandringens avstandsfraga forst: helpIdx pekar annu pa divq-posten,
+       sa utan den har grenen skulle svaret jamforas mot KVOTSIFFRAN. */
+    if (divWalk && divWalk.gap != null) { divGapSubmit(); return; }
     const item = helpItem();
     if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return;
     const expected = helpExpected(item); // v31: per delfråga (tabell/minne/ruta)
@@ -3207,17 +3273,49 @@ const MultDivGame = (() => {
         if (md) srcs.push(md);
         chipBorn(stepM, expected, srcs, done);
       }
-    } else {
-      // Fel → mild "prova igen", inget poängstraff, siffrorna kan redigeras
-      App.Sound.play('wrong');
-      const field = document.getElementById('md-help-field');
-      if (field) field.classList.add('wrong');
-      helpShake();
-      const fb = document.getElementById('md-feedback');
-      if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
-        border:2px solid #f59e0b;border-radius:12px;padding:5px 10px;font-weight:800;
-        font-size:0.92rem;color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
-    }
+    } else helpWrong();
+  }
+
+  /* Fel svar — mild "prova igen", inget poangstraff, siffrorna kan
+     redigeras. Byggs pa ETT stalle sa vandringens avstandsfraga beter
+     sig ordagrant som modulens andra delfragor. */
+  function helpWrong() {
+    App.Sound.play('wrong');
+    const field = document.getElementById('md-help-field');
+    if (field) field.classList.add('wrong');
+    helpShake();
+    const fb = document.getElementById('md-feedback');
+    if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
+      border:2px solid #f59e0b;border-radius:12px;padding:5px 10px;font-weight:800;
+      font-size:0.92rem;color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
+  }
+
+  function divGapSubmit() {
+    const { item, rows } = divWalk;
+    if (parseInt(helpInput, 10) !== divWalk.gap) { helpWrong(); return; }
+    exInputLocked = true;
+    App.Sound.play('correct');
+    helpClearWrong();
+    /* Siffran ar forbrukad. Utan den har raden stod avstandssvaret kvar i
+       faltet nar huvudfragan oppnade, och barnets nasta siffra hamnade
+       EFTER den ("2" + "2" = "22"). Uppmatt: divrem-fragan efterat fick
+       fel svar utan att barnet gjort nagot fel. */
+    helpInput = '';
+    smallBurst();
+    /* Kvittensen ar kort och star bara tills krocken borjar — den nya
+       fragan ror varken poang eller Minnesmastare. */
+    /* Husets kvittensform ("Ratt! …"), inte "precis!" — det ordet ar
+       mattbrickans etikett for noll avstand och ska inte betyda tva saker. */
+    helpBubble(divqHeadHTML(item) + rows.r2a +
+               `<span class="md-walk r2">Rätt! Det skiljer <strong>${divWalk.gap}</strong> ✅</span>`);
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';
+    const gen = exGen;
+    setTimeout(() => {
+      if (gen !== exGen || !divWalk || helpItem() !== item) return;
+      divWalk.ph = 2;            // divWalkNext gar vidare till fas 3 (krocken)
+      divWalkNext();
+    }, 900);
   }
 
   function helpAction() {
