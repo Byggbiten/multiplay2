@@ -1206,9 +1206,21 @@ const MultDivGame = (() => {
       r2b = '';                                   // ingen krock att visa
       r2q = '';                                   // inget avstand att fraga om
     } else if (w.kind === 'ner') {
-      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — hur mycket?</span>`;
-      r2b = `<span class="md-walk r2"><strong>${Math.abs(w.mellan)}</strong> för mycket — ` +
-            `vi tar bort ${nOr(w.steg, N)}.</span>`;
+      /* Dennis 22/9, mot bild (54 ÷ 6): "6 for mycket — vi tar bort en
+         6:a" lade ett ANTAL bredvid ett OBJEKT med samma siffra, och
+         barnet kan inte veta vilket som ar vilket. Det intraffar i 24 av
+         396 vandringar (6 %), alltid nar talet gar jamnt ut.
+         r2b leder darfor med handlingen och slutar i resultatet — inget
+         losryckt tal bredvid ett likadant objekt.
+
+         r2a sager ocksa VARFOR det stora ankaret valdes. Forr stod bara
+         "60 ar for mycket", och barnet sag att 30 fick plats men 60 inte
+         — det sag ut som fel val. "Narmast" betyder narmast i ANTAL STEG,
+         och det maste sagas, annars ser regeln godtycklig ut. */
+      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
+            `men lite för mycket. Hur mycket?</span>`;
+      r2b = `<span class="md-walk r2">Vi tar bort ${nOr(w.steg, N)} — ` +
+            `då blir det <strong>${w.q * N}</strong>.</span>`;
       r2q = gapQ(w.bas.prod, cur);
     } else {
       r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. ` +
