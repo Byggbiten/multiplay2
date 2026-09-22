@@ -86,6 +86,7 @@ const MultDivGame = (() => {
   /* Övning */
   let exerciseIdx = 0, exScore = 0, helpMode = true;
   let lifelines = 2; // v31: 2 livlinor per övningsrunda (hjälpläget) — nollställs i startExercise
+  let divWalk = null; // hjälplägets ankarvandring: {item, rows, ph} — barnet klickar fram den
   let exGen = 0; // session-token: ogiltigförklarar schemalagda uppgiftsbyten vid Avsluta
   let helpQueue = [], helpIdx = 0, helpSub = 0; // helpSub: alltid 0 sedan v30 (carry-knappen ersattes av PLACERA-fasen)
   let helpInput = '', exInputLocked = false;
@@ -2275,6 +2276,7 @@ const MultDivGame = (() => {
      ÖVNINGSLÄGE — gemensam layout
   ══════════════════════════════════════════════════════════ */
   function newExProblem() {
+    divWalk = null;   // ingen halvgangen vandring far folja med till nasta tal
     generateProblem();
     exInputLocked = false;
     mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
@@ -2530,24 +2532,52 @@ const MultDivGame = (() => {
     renderMemCol();
     const rows = anchorWalkRows(item.cur, numB, 'ingen');
     if (rows.w.kind === 'ingen') { showHelpUI(); return; } // q = 0 — ingen vandring
-    const ui = document.getElementById('md-ui');
-    if (ui) ui.innerHTML = '';          // knappsatsen kommer när vägen är gången
+    /* Dennis 22/9, efter prov: "man ska ju klicka for varje steg. inte
+       att den skall spelas som en alldeles for snabb film."
+
+       Vandringen spelades forst upp av sig sjalv och laste knappsatsen
+       i 3,6 s (uppmatt). Det gjorde barnet till askadare i det lage dar
+       det ska gora. Nu driver BARNET vandringen, steg for steg, med
+       samma "Nasta steg" som i demon — och nar vagen ar gangen kommer
+       knappsatsen och fragan ar dess att svara pa. Ingen klocka
+       bestammer takten. */
+    divWalk = { item, rows, ph: 0 };
     exInputLocked = true;
-    const gen = exGen;
     helpBubble(divqHeadHTML(item));
-    setTimeout(() => {
-      if (gen !== exGen || helpItem() !== item) return;
+    divWalkBtn();
+  }
+
+  /* Vandringens egen "Nasta steg" i hjalplaget. Samma knappmonster som
+     dskip/dtake redan anvander, sa barnet moter en knapp det kanner. */
+  function divWalkBtn() {
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
+      onclick="MultDivGame.divWalkNext()">Nästa steg →</button>`;
+  }
+
+  function divWalkNext() {
+    if (!divWalk) return;
+    const { item, rows } = divWalk;
+    const gen = exGen;
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';          // knappen bort medan brickorna ror sig
+    if (divWalk.ph === 0) {
+      divWalk.ph = 1;
       helpBubble(divqHeadHTML(item) + rows.r1);
       anchorChipsBorn(item, rows.w, () => {
-        if (gen !== exGen || helpItem() !== item) return;
-        helpBubble(divqHeadHTML(item) + rows.r2);
-        runAnchorWalkStep(item, rows.w, () => {
-          if (gen !== exGen || helpItem() !== item) return;
-          exInputLocked = false;
-          showHelpUI();               // frågan låses upp — barnet svarar själv
-        });
+        if (gen !== exGen || helpItem() !== item || !divWalk) return;
+        divWalkBtn();
       });
-    }, 1000);
+    } else {
+      divWalk.ph = 2;
+      helpBubble(divqHeadHTML(item) + rows.r2);
+      runAnchorWalkStep(item, rows.w, () => {
+        if (gen !== exGen || helpItem() !== item) return;
+        divWalk = null;
+        exInputLocked = false;
+        showHelpUI();                   // vagen ar gangen — nu svarar barnet
+      });
+    }
   }
 
   /* ── Divisionens PLACERA-fas (v32): "Var ska resten stå?" ──
@@ -3650,6 +3680,7 @@ const MultDivGame = (() => {
     divDigitTap,                           // divisionens STRYK-fas (v36)
     exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeRestTap,
     useFreeLifeline,                       // livlinan i fria laget (22/9)
+    divWalkNext,                           // hjalplagets vandring, ett steg per klick
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     /* Endast för vitest: ren matte-kärna + generator */
