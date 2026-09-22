@@ -1,6 +1,7 @@
 /* tests/multdiv.test.mjs — stegbyggarna i js/multdiv.js (multiplikation + kort division) */
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 const require = createRequire(import.meta.url);
 const MD = require('../js/multdiv.js');
 const { buildPlan, buildDivPlan, digitsOf } = MD._internals;
@@ -647,5 +648,44 @@ describe('textsvepet: ingen mening sager samma tal i tva roller', () => {
     /* Växer den här förbi ~40 har någon lagt till en specialformulering
        som ingen läst igenom. Då ska svepet köras och texterna granskas. */
     expect(former.size).toBeLessThanOrEqual(40);
+  });
+});
+
+/* ── Ovningslagets sanning ────────────────────────────────────────────
+   Mira svarade fel sex ganger och fick "100 % — Perfekt! 🎉 — 5 av 5
+   ratt — ⭐ Minnesmastare". helpTaskDone raknade poang villkorslost.
+   Har pinnas KALLAN i stallet for DOM:en: hjalplaget maste ha samma
+   villkorade rakning som fria laget redan hade.                       */
+describe('ovningslaget raknar bara helratt', () => {
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+
+  it('helpTaskDone raknar inte poang villkorslost', () => {
+    const rad = src.split('\n').find(l => l.includes('if (helpTaskClean) exScore++'));
+    expect(rad, 'helpTaskDone ska vara villkorad av helpTaskClean').toBeTruthy();
+    expect(src).not.toMatch(/function helpTaskDone\(\)\s*\{\s*\n\s*exScore\+\+;/);
+  });
+
+  it('bade fel svar och fel tap gor passet orent', () => {
+    // helpWrong (knappsatsen) och alla fyra memMistakes-stallen
+    expect((src.match(/helpTaskClean = false/g) || []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('Minnesmastaren kraver bade rena tap OCH inga fel svar', () => {
+    expect(src).toMatch(/memStar = helpMode && memMoments > 0 && memMistakes === 0 && exWrongAnswers === 0/);
+  });
+
+  it('tredje felet visar vagen utan att kosta en livlina', () => {
+    expect(src).toMatch(/if \(helpTries >= 3\) visaVagen\(\)/);
+    // livlinan drar polletten FORST efter att vagen faktiskt visats
+    expect(src).toMatch(/if \(!visaVagen\(\)\) return;\s*\n\s*lifelines--/);
+  });
+
+  it('fel svar forbrukas: nasta siffra borjar om', () => {
+    expect(src).toMatch(/helpInputStale = true/);
+    expect(src).toMatch(/if \(helpInputStale\) \{ helpInputStale = false; helpInput = k;/);
+  });
+
+  it('Capy far pct ur exScore — ingen egen sanning', () => {
+    expect(src).toMatch(/Capy\.award\(profile, \{ type: 'test', data: \{ module: 'multdiv', pct: Math\.round\(\(exScore \/ 5\) \* 100\), memStar \} \}\)/);
   });
 });

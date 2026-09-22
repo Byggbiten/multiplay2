@@ -90,6 +90,13 @@ const MultDivGame = (() => {
   let exGen = 0; // session-token: ogiltigförklarar schemalagda uppgiftsbyten vid Avsluta
   let helpQueue = [], helpIdx = 0, helpSub = 0; // helpSub: alltid 0 sedan v30 (carry-knappen ersattes av PLACERA-fasen)
   let helpInput = '', exInputLocked = false;
+  /* Mira svarade fel sex ganger och fick "100 % — Perfekt! 🎉 — 5 av 5
+     ratt". helpTaskDone raknade poang villkorslost. Fria laget gjorde
+     redan ratt (exFreeFirstAttempt); hjalplaget far samma sanning. */
+  let helpTaskClean = true;
+  let helpTries = 0;        // fel pa AKTUELL delfraga — styr riktning + vagen ut
+  let exWrongAnswers = 0;   // fel svar i HELA rundan — Minnesmastaren foljer samma sanning
+  let helpInputStale = false; // fel svar star kvar: nasta siffra borjar om
 
   /* Fritt läge (utan hjälp): svaret skrivs i cellerna — mult höger→
      vänster från entalet, div vänster→höger från högsta positionen (C3). */
@@ -431,8 +438,14 @@ const MultDivGame = (() => {
       font-size:clamp(1rem,2.4vw,1.45rem); padding:0 3px; border-radius:6px;
       background:rgba(255,255,255,0.92); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
     .md-cell .md-divrem.on { display:inline-flex; }
-    .md-cell .md-divslot { position:absolute; top:-13px; left:-10px; z-index:4;
-      background:rgba(255,255,255,0.92); cursor:pointer; }
+    /* Mira: "malet ar ungefar en halv siffra stort". Slotten i hjalplaget
+       ar det barnet ska TRAFFA, sa den ar storre an den fria lagets
+       statiska ruta och har tjockare ram. Traffytan var redan >= 44. */
+    .md-cell .md-divslot { position:absolute; top:-15px; left:-13px; z-index:4;
+      width:1.45em; height:1.6em; border-width:2.5px;
+      border-color:rgba(220,38,38,0.9);
+      background:rgba(255,255,255,0.97); cursor:pointer;
+      box-shadow:0 2px 8px rgba(220,38,38,0.28); }
     /* C1: slotten är 16×19 px — träffytan minst 44×44, centrerad */
     .md-cell .md-divslot::after, .md-cell .md-restslot::after { content:''; position:absolute;
       left:50%; top:50%; transform:translate(-50%,-50%); width:max(44px,140%); height:max(44px,140%); }
@@ -441,6 +454,18 @@ const MultDivGame = (() => {
     .md-cell.md-rtap { cursor:pointer; }
     .md-cell .md-restslot { position:absolute; top:-13px; left:-13px; z-index:4;
       border-color:rgba(220,38,38,0.35); background:rgba(255,255,255,0.92); }
+
+    /* Avsluta-bekraftelsen bor i #md-feedback — samma yta som "prova
+       igen", sa inget annat i vyn flyttar sig. */
+    .md-avslut { background:linear-gradient(135deg,#fff7ed,#fef3c7);
+      border:2px solid #f59e0b; border-radius:12px; padding:8px 10px;
+      font-weight:800; font-size:0.92rem; color:#92400e; text-align:center; }
+    .md-avslut-rad { display:flex; gap:8px; margin-top:8px; }
+    .md-avslut-rad .md-btn { flex:1; min-height:44px; border-radius:var(--radius-full);
+      font-size:0.92rem; background:var(--glass-strong); color:var(--deep);
+      border:2px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+    .md-avslut-rad .md-avslut-ja { background:linear-gradient(135deg,#f59e0b,#fbbf24);
+      color:#fff; border-color:transparent; }
 
     /* Tankebubbla. #md-bubble håller fast höjd (C4): i demon två rader
        (64 px vid 390) så "Nästa steg" står still under fingret; i övningen
@@ -1023,7 +1048,10 @@ const MultDivGame = (() => {
       case 'dskip':
         return skipBubbleHTML(step.cur, step.g);
       case 'dtake':
-        return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
+        /* Mira: "Vi tar med 4:an" i 440 ÷ 5 — det finns tva fyror i talet.
+           Platsvardet skiljer dem at. */
+        return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an i ` +
+               `${pvNamn(step.g - 1)} — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
       /* Ankarvandringen, en rad per steg (Dennis 22/9): brickorna bar
          rorelsen, bubblan bara meningen som hor till just det steget. */
       case 'dwalk_anchors':
@@ -1046,8 +1074,9 @@ const MultDivGame = (() => {
         return `<strong style="color:#dc2626">${step.rem}</strong>:an ställer sig framför <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an.`;
       case 'dstrike':
         return step.digits.length === 2
-          ? `<strong>${step.digits[0]}</strong>:an och <strong>${step.digits[1]}</strong>:an är klara — vi stryker dem! ✏️`
-          : `<strong>${step.digits[0]}</strong>:an är klar — vi stryker den! ✏️`;
+          ? `<strong>${step.digits[0]}</strong>:an i ${pvNamn(step.gs[0])} och ` +
+            `<strong>${step.digits[1]}</strong>:an i ${pvNamn(step.gs[1])} är klara — vi stryker dem! ✏️`
+          : `<strong>${step.digits[0]}</strong>:an i ${pvNamn(step.gs[0])} är klar — vi stryker den! ✏️`;
       case 'done':
         return doneBubbleHTML();
     }
@@ -1129,6 +1158,14 @@ const MultDivGame = (() => {
       mellan: cur - bas * divisor      // avstandet fran ankaret till talet
     };
   }
+
+  /* Mira 23/9: "4:an ar klar — stryk den!" nar TRE fyror syns pa skarmen
+     (den strukna hundratalsfyran, tiotalsfyran och den lilla roda resten
+     4). Hon tryckte fel flera ganger. Ord kan peka entydigt bara med
+     platsvardet, sa varje mening som pekar pa en siffra i talet sager
+     vilken spalt den star i. */
+  const PV_NAMN = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet'];
+  const pvNamn = g => PV_NAMN[g] || `spalt ${g + 1}`;
 
   const TALORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
   /* Divisorn som SAK, inte som antal: "1 femma", "6 femmor". Dennis 22/9
@@ -2414,7 +2451,7 @@ const MultDivGame = (() => {
     App.Sound.play('click');
     exerciseIdx = 0;
     exScore = 0;
-    memMoments = 0; memMistakes = 0; // Minnesmästare ⭐ räknas per pass
+    memMoments = 0; memMistakes = 0; exWrongAnswers = 0; // Minnesmästare ⭐ räknas per pass
     lifelines = 2; // v31: livlinorna nollställs per övningsrunda (5 uppgifter)
     newExProblem();
   }
@@ -2433,6 +2470,7 @@ const MultDivGame = (() => {
     helpQueue = helpMode ? buildHelpQueue() : [];
     helpIdx = 0; helpSub = 0; helpInput = '';
     exFreeFirstAttempt = true;
+    helpTaskClean = true; helpTries = 0; helpInputStale = false;
     renderExLayout();
   }
 
@@ -2442,7 +2480,7 @@ const MultDivGame = (() => {
     root.innerHTML = `
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
-        <button class="btn-back" onclick="MultDivGame.showModeSelect()">Avsluta</button>
+        <button class="btn-back" onclick="MultDivGame.avslutaOvning()">Avsluta</button>
         <span class="header-title">${modeTitle()}</span>
         <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
       </div>
@@ -2569,6 +2607,7 @@ const MultDivGame = (() => {
     helpIdx = idx;
     helpSub = 0;
     helpInput = '';
+    helpTries = 0; helpInputStale = false;   // ny delfråga, rent blad
     exInputLocked = false;
     memAwait = null;
     divAwait = null;
@@ -2647,7 +2686,7 @@ const MultDivGame = (() => {
 
   function memGuide() {
     if (!memAwait) return;
-    memMistakes++;
+    memMistakes++; helpTaskClean = false;
     const fb = document.getElementById('md-feedback');
     const msg = memAwait.type === 'place'
       ? 'Nästan — den ska stå här 👉'
@@ -2779,7 +2818,13 @@ const MultDivGame = (() => {
     // A2: cellen som ska ta emot resten dimmas ALDRIG — slotten är fullt synlig
     divHighlight(item, [item.g - 1]);
     renderDivSlot();
-    const ask = () => helpBubble(`Var ska resten <strong style="color:#dc2626">${item.rem}</strong> stå? Tryck där! 👉`);
+    /* Mira: handen pekade at HOGER, men rutan ligger uppe till VANSTER om
+       nasta siffra. Fel riktning, och malet ar en halv siffra stort. Nu
+       sager orden var rutan ar, och pilen pekar at ratt hall. */
+    const ask = () => helpBubble(
+      `Resten <strong style="color:#dc2626">${item.rem}</strong> ska stå framför ` +
+      `<strong style="color:${cv(item.g - 1)}">${item.next}</strong>:an i ${pvNamn(item.g - 1)}. ` +
+      `Tryck på den lilla rutan uppe till vänster! ↖️`);
     if (mdChip()) { ask(); return; }
     // q = 0: ingen rest-fråga ställdes — hela talet blir över, brickan föds här
     exInputLocked = true;
@@ -2829,8 +2874,9 @@ const MultDivGame = (() => {
       divGuideFb('Nästan — resten ska stå här 👉');
     } else if (divStrikeAwait) {
       // v36: fel-tap i STRYK-fasen räknas som mem-miss (mem-tap-mönstret)
-      memMistakes++;
-      divGuideFb(`Titta — ${divStrikeAwait.digit}:an är inte struken än 👀`);
+      memMistakes++; helpTaskClean = false; helpTaskClean = false;
+      divGuideFb(`Inte den — det är <strong>${divStrikeAwait.digit}</strong>:an i ` +
+                 `${pvNamn(divStrikeAwait.g)} som ska strykas 👀`);
     }
   }
 
@@ -2845,7 +2891,13 @@ const MultDivGame = (() => {
     divStrikeAwait = { g: item.strikeG, digit: item.digit };
     const cell = document.getElementById(`md-n-${item.strikeG}`);
     if (cell) cell.classList.add('md-prob'); // pulserar tills barnet stryker
-    helpBubble(`<strong style="color:${cv(item.strikeG)}">${item.digit}</strong>:an är klar — stryk den! ✏️`);
+    /* Mira satt och vantade: "6:an ar klar — stryk den!" och sedan INGEN
+       knapp alls. I demon star det "vi stryker den" och knappen skoter
+       det; har ska barnet trycka pa siffran sjalv — men det sades aldrig.
+       Ett ord skilde lagena at. Nu star handlingen utskriven: vad som ska
+       tryckas, och var. */
+    helpBubble(`<strong style="color:${cv(item.strikeG)}">${item.digit}</strong>:an i ` +
+               `${pvNamn(item.strikeG)} är klar. Tryck på den i talet för att stryka den! ✏️`);
   }
 
   function divDigitTap(g) {
@@ -2866,8 +2918,9 @@ const MultDivGame = (() => {
       const gen = exGen;
       setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
     } else {
-      memMistakes++;
-      divGuideFb(`Titta — ${divStrikeAwait.digit}:an är inte struken än 👀`);
+      memMistakes++; helpTaskClean = false; helpTaskClean = false;
+      divGuideFb(`Inte den — det är <strong>${divStrikeAwait.digit}</strong>:an i ` +
+                 `${pvNamn(divStrikeAwait.g)} som ska strykas 👀`);
     }
   }
 
@@ -2925,7 +2978,7 @@ const MultDivGame = (() => {
      Fria läget: i bubbelytan, som förut (frivillig). */
   function memPickerHTML(cancel) {
     return `<div class="md-mempick">
-      <span class="md-mempick-lbl">Minnessiffra:</span>
+      <span class="md-mempick-lbl">${plan.kind === 'division' ? 'Resten:' : 'Minnessiffra:'}</span>
       ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="md-nk md-pk" onclick="MultDivGame.memPick(${d})">${d}</button>`).join('')}
       ${cancel ? `<button class="md-nk md-pk md-pk-x" aria-label="${plan.kind === 'division' && exDivRestG !== null && exDivRests[exDivRestG] ? 'Sudda resten' : 'Stäng'}" onclick="MultDivGame.memTapSlot()">${plan.kind === 'division' && exDivRestG !== null && exDivRests[exDivRestG] ? ICON_ERASE : '✕'}</button>` : ''}
     </div>`;
@@ -2948,7 +3001,7 @@ const MultDivGame = (() => {
       if (!memAwait || memAwait.type !== 'place' || exInputLocked) return;
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
-        memMistakes++;
+        memMistakes++; helpTaskClean = false; helpTaskClean = false; helpTaskClean = false;
         App.Sound.play('wrong');
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
@@ -3108,7 +3161,7 @@ const MultDivGame = (() => {
     if (item.kind === 'dskip') {
       helpBubble(skipBubbleHTML(item.cur, item.g));
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
-        onclick="MultDivGame.helpAction()">Vi tar med ${item.next}:an — nu har vi ${item.cur * 10 + item.next}! →</button>`;
+        onclick="MultDivGame.helpAction()">Vi tar med ${item.next}:an i ${pvNamn(item.g - 1)} — nu har vi ${item.cur * 10 + item.next}! →</button>`;
       return;
     }
 
@@ -3151,43 +3204,43 @@ const MultDivGame = (() => {
       background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'}">🛟 Livlina (${lifelines} kvar)</button>`;
   }
 
-  function useLifeline() {
-    if (exInputLocked || lifelines <= 0) return;
-    /* Vandringens avstandsfraga: livlinan ger AVSTANDET, inte kvotsiffran.
-       Maste ligga fore whitelisten — helpItem() ar annu divq-posten. */
+  /* Vagen visas pa ETT stalle. Livlinan kostar en pollett; efter tredje
+     felsvaret pa samma fraga visas samma sak GRATIS.
+
+     Mira, 90 ÷ 5: "Jag hade 0 kvar. Jag svarade fel, tryckte Livlina —
+     ingenting hande. Da finns det ingen vag framat alls. Man maste trycka
+     Avsluta och forlora allt." Ett procedurlage far aldrig sakna utgang. */
+  function visaVagen() {
     if (divWalk && divWalk.gap != null) {
-      lifelines--;
-      App.Sound.play('click');
-      const btn = document.getElementById('md-lifeline');
-      if (btn) btn.outerHTML = lifelineBtnHTML();
       helpBubble(divqHeadHTML(divWalk.item) + divWalk.rows.r2a +
         `<span class="md-walk r2"><span class="md-qexpr">Det skiljer </span>` +
         `<strong>${divWalk.gap}</strong>` +
         `<span class="md-qexpr"> — skriv in det själv! ✍️</span></span>`);
-      return;
+      return true;
     }
     const item = helpItem();
-    // v32: samma livline-pool gäller även divisionens frågor
-    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return;
+    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrem'].includes(item.kind)) return false;
+    /* Svaret VISAS i bubblan — ingen auto-fyllning: knappsatsen är kvar
+       och barnet måste själv skriva rätt svar för att gå vidare. */
+    if (item.kind === 'divq') {
+      /* Vandringen har redan spelats, sa vagen far inte upprepa den — den
+         ger det enda vandringen haller inne med: slutsatsen. */
+      helpBubble(anchorWalkRows(item.cur, numB, 'kvot', item.g).r3 +
+                 `<span class="md-walk r1">Skriv in det själv! ✍️</span>`);
+      return true;
+    }
+    const expr = helpExprHTML(item);
+    helpBubble(`${expr ? `${expr} = ` : 'Svaret är '}<strong>${helpExpected(item)}</strong> — skriv in det själv! ✍️`);
+    return true;
+  }
+
+  function useLifeline() {
+    if (exInputLocked || lifelines <= 0) return;
+    if (!visaVagen()) return;
     lifelines--;
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
     if (btn) btn.outerHTML = lifelineBtnHTML();
-    /* Svaret VISAS i bubblan — ingen auto-fyllning: numpaden är kvar
-       och barnet måste själv skriva rätt svar för att gå vidare.
-       Ingen poängpåverkan, ingen effekt på Minnesmästare. */
-    const expected = helpExpected(item);
-    if (item.kind === 'divq') {
-      /* Vandringen har redan spelats (showDivQ), sa livlinan far inte
-         upprepa den — da vore den ingen hjalp alls. Den ger det enda
-         vandringen haller inne med: slutsatsen. Barnet skriver anda in
-         den sjalv i numpaden. */
-      helpBubble(anchorWalkRows(item.cur, numB, 'kvot', item.g).r3 +
-                 `<span class="md-walk r1">Skriv in det själv! ✍️</span>`);
-      return;
-    }
-    const expr = helpExprHTML(item);
-    helpBubble(`${expr ? `${expr} = ` : 'Svaret är '}<strong>${expected}</strong> — skriv in det själv! ✍️`);
   }
 
   function helpRenderField() {
@@ -3217,6 +3270,9 @@ const MultDivGame = (() => {
   function helpKey(k) {
     if (exInputLocked || helpSub !== 0) return;
     helpClearWrong();
+    /* Mira skrev 5, fick rott, tryckte 3 — och faltet visade 53. Ett
+       underkant svar ar forbrukat: nasta siffra borjar om. */
+    if (helpInputStale) { helpInputStale = false; helpInput = k; App.Sound.play('click'); helpRenderField(); return; }
     if (helpInput === '0') helpInput = k;
     else if (helpInput.length >= 2) { helpShake(); return; }
     else helpInput += k;
@@ -3314,26 +3370,38 @@ const MultDivGame = (() => {
         if (md) srcs.push(md);
         chipBorn(stepM, expected, srcs, done);
       }
-    } else helpWrong();
+    } else helpWrong(expected);
   }
 
   /* Fel svar — mild "prova igen", inget poangstraff, siffrorna kan
      redigeras. Byggs pa ETT stalle sa vandringens avstandsfraga beter
      sig ordagrant som modulens andra delfragor. */
-  function helpWrong() {
+  function helpWrong(expected) {
     App.Sound.play('wrong');
+    helpTaskClean = false;      // uppgiften ar inte langre helratt
+    exWrongAnswers++;
+    helpInputStale = true;      // nasta siffra borjar om
+    helpTries++;
     const field = document.getElementById('md-help-field');
     if (field) field.classList.add('wrong');
     helpShake();
+    /* Mira fick ordagrant samma mening fyra ganger i rad: "Hmm, prova
+       igen!" — den sade aldrig VAD som var fel. Fran andra forsoket ger
+       vi en riktning; fran tredje visas vagen, gratis. */
+    const givet = parseInt(helpInput, 10);
+    let msg = 'Hmm, prova igen! 💪';
+    if (helpTries >= 2 && Number.isFinite(givet) && Number.isFinite(expected))
+      msg = givet > expected ? 'Nästan — men lite för högt. 👇' : 'Nästan — men lite för lågt. 👆';
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
       border:2px solid #f59e0b;border-radius:12px;padding:5px 10px;font-weight:800;
-      font-size:0.92rem;color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
+      font-size:0.92rem;color:#92400e;text-align:center">${msg}</div>`;
+    if (helpTries >= 3) visaVagen();   // alltid en vag framat, utan pollett
   }
 
   function divGapSubmit() {
     const { item, rows } = divWalk;
-    if (parseInt(helpInput, 10) !== divWalk.gap) { helpWrong(); return; }
+    if (parseInt(helpInput, 10) !== divWalk.gap) { helpWrong(divWalk.gap); return; }
     exInputLocked = true;
     App.Sound.play('correct');
     helpClearWrong();
@@ -3385,7 +3453,7 @@ const MultDivGame = (() => {
   }
 
   function helpTaskDone() {
-    exScore++;
+    if (helpTaskClean) exScore++;   // +1 bara utan fel svar — som fria läget
     helpBubble(doneBubbleHTML());
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';
@@ -3422,6 +3490,16 @@ const MultDivGame = (() => {
 
   function showFreeUI() {
     exFreeInit();
+    /* Mira, niva 2, 72 ÷ 3: "ingen text alls. Bara talet och en
+       knappsats." Bubblan stod tom i hela fria laget, och de sma roda
+       rest-rutorna mellan siffrorna sag ut som dekoration. EN rad: vad
+       som ska skrivas, och att rest-rutorna finns om man vill anvanda
+       dem. Inte en forklaring — en startpunkt. */
+    helpBubble(plan.kind === 'division'
+      ? `Skriv kvoten i rutorna efter <strong>=</strong>, en siffra i taget. ` +
+        `<span class="md-qexpr">Rest? Tryck på den lilla rutan framför nästa siffra.</span>`
+      : `Skriv svaret i rutorna, en siffra i taget. ` +
+        `<span class="md-qexpr">Minnessiffra? Tryck i spalten till höger.</span>`);
     renderFreePad();
   }
 
@@ -3757,7 +3835,9 @@ const MultDivGame = (() => {
     const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
     // MINNESMÄSTARE ⭐ (v30): alla placera+stryk-moment utan fel-tap.
     // Aldrig något negativt vid miss — bara utebliven bonus.
-    const memStar = helpMode && memMoments > 0 && memMistakes === 0;
+    /* Samma sanning som poangen: stjarnan ar for den som gick igenom utan
+       att famla — bade i tappen och i svaren. */
+    const memStar = helpMode && memMoments > 0 && memMistakes === 0 && exWrongAnswers === 0;
     root.innerHTML = `
       <style id="md-base">${BASE_CSS}</style>
       <div class="floaties"><span style="top:7%;right:8%">✨</span><span style="bottom:12%;left:6%;animation-delay:2s">🐬</span></div>
@@ -3909,6 +3989,28 @@ const MultDivGame = (() => {
     setTimeout(() => { c.querySelectorAll('.confetti-piece').forEach(p => p.remove()); }, 2500);
   }
 
+  /* Mira: "Uppgift 5 av 5, ett tryck, allt borta." En pabörjad runda ar
+     upp till 20 minuters arbete; den far inte forsvinna pa ett felklick. */
+  function avslutaOvning() {
+    const pabörjad = exerciseIdx > 0 || exScore > 0 || helpIdx > 0 ||
+                     (plan && plan.kind === 'division' && !!document.querySelector('#md-table-wrap .md-cell.struck'));
+    if (!pabörjad) { showModeSelect(); return; }
+    const fb = document.getElementById('md-feedback');
+    if (!fb) { showModeSelect(); return; }
+    App.Sound.play('click');
+    fb.innerHTML = `<div class="md-avslut">
+      <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
+      <div class="md-avslut-rad">
+        <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
+        <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
+      </div></div>`;
+  }
+  function avslutaAngra() {
+    const fb = document.getElementById('md-feedback');
+    if (fb) fb.innerHTML = '';
+    App.Sound.play('click');
+  }
+
   /* ── Navigation ─────────────────────────────────────────── */
   function exitToApp() {
     const root = document.getElementById('multdiv-root');
@@ -3927,6 +4029,7 @@ const MultDivGame = (() => {
     divTapSlot,                            // divisionens PLACERA-fas (v32)
     divDigitTap,                           // divisionens STRYK-fas (v36)
     exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeRestTap,
+    avslutaOvning, avslutaAngra,           // bekraftelse nar en runda ar pabörjad
     useFreeLifeline,                       // livlinan i fria laget (22/9)
     divWalkNext,                           // hjalplagets vandring, ett steg per klick
     mdToggleEraser, mdClearCanvas,
