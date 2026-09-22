@@ -483,55 +483,93 @@ describe('A4: ledande nolla', () => {
   });
 });
 
-/* ── Lanekedjan: en ide per steg (A1, A3, B2) ─────────────────────────────
-   sub_flip_borrow sa tre saker och avslojade svaret ett steg for tidigt.
-   Nu: sub_cant (gar inte) → sub_lend (en tia lanas, kallan stryks) →
-   sub_flip (vand om: fran a till b ar det diff) → sub_ten_minus (10 minus
-   diff — svaret skrivs SIST). Dubbellan: sub_lend (H) → sub_land (T blir 10)
-   → sub_lend (T) — ett lan per steg. a = 0: ingen vand-om, sub_take.       */
+/* ── Lanekedjan: striden i hogerspalten (Dennis 22/9) ─────────────────────
+   Vandningen ("Vi vander om: 8 − 3 = 5") var ett trick utan motivering:
+   femman kom ur ingenstans. Nu vilar kedjan pa (10 + a) − b = 10 − (b − a),
+   och bada leden SYNS: sub_expr staller upp (10 + 3) − 8 i hogerspalten och
+   sub_attack later 3:an ta 3 av 8:an sa att 10 − 5 star kvar. sub_flip ar
+   borta. a = 0 hoppar over bada — det finns ingen 3:a som kan ta nagot, och
+   (10 + 0) vore en parentes utan tanke: sub_take staller 10 − 8 direkt.   */
 describe('lanekedjan i planSubtractionColumns', () => {
   const typer = (a, b, cc, c) => planSubtractionColumns(a, b, cc).filter(s => s.col === c).map(s => s.type);
 
-  it('52 − 17 entalen: cant → lend → flip → ten_minus', () => {
-    expect(typer(52, 17, 2, 0)).toEqual(['sub_highlight', 'sub_cant', 'sub_lend', 'sub_flip', 'sub_ten_minus']);
-    const lend = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_lend');
-    expect(lend).toMatchObject({ col: 0, srcCol: 1, dstCol: 0, srcOld: 5, srcNew: 4, toPaper: false });
-    const flip = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_flip');
-    expect(flip).toMatchObject({ col: 0, a: 2, b: 7, diff: 5 });
-    const ten = planSubtractionColumns(52, 17, 2).find(s => s.type === 'sub_ten_minus');
-    expect(ten).toMatchObject({ col: 0, diff: 5, ans: 5 });
+  it('52 − 17 entalen: cant → lend → expr → attack → ten_minus', () => {
+    expect(typer(52, 17, 2, 0)).toEqual([
+      'sub_highlight', 'sub_cant', 'sub_lend', 'sub_expr', 'sub_attack', 'sub_ten_minus',
+    ]);
+    const steps = planSubtractionColumns(52, 17, 2);
+    expect(steps.find(s => s.type === 'sub_lend')).toMatchObject(
+      { col: 0, srcCol: 1, dstCol: 0, srcOld: 5, srcNew: 4, toPaper: false });
+    /* Uttrycket bar bada talen: tian, forsvararen a och anfallaren b. */
+    expect(steps.find(s => s.type === 'sub_expr')).toMatchObject({ col: 0, a: 2, b: 7, diff: 5 });
+    /* Anfallet: a tas ur b, och diff ar det som star kvar av b. */
+    expect(steps.find(s => s.type === 'sub_attack')).toMatchObject({ col: 0, a: 2, b: 7, diff: 5 });
+    expect(steps.find(s => s.type === 'sub_ten_minus')).toMatchObject({ col: 0, diff: 5, ans: 5 });
   });
 
-  it('405 − 187 entalen: dubbellan ar tva lan i var sitt steg, med landning emellan', () => {
-    expect(typer(405, 187, 3, 0)).toEqual([
-      'sub_highlight', 'sub_cant', 'sub_lend', 'sub_land', 'sub_lend', 'sub_flip', 'sub_ten_minus',
+  it('903 − 158 entalen: dubbellan ar tva hopp i var sitt steg, med landning emellan', () => {
+    expect(typer(903, 158, 3, 0)).toEqual([
+      'sub_highlight', 'sub_cant', 'sub_lend', 'sub_land', 'sub_lend',
+      'sub_expr', 'sub_attack', 'sub_ten_minus',
     ]);
-    const steps = planSubtractionColumns(405, 187, 3);
+    const steps = planSubtractionColumns(903, 158, 3);
     const lends = steps.filter(s => s.type === 'sub_lend');
-    expect(lends[0]).toMatchObject({ col: 0, srcCol: 2, dstCol: 1, srcOld: 4, srcNew: 3, toPaper: true });
+    expect(lends[0]).toMatchObject({ col: 0, srcCol: 2, dstCol: 1, srcOld: 9, srcNew: 8, toPaper: true });
     expect(steps.find(s => s.type === 'sub_land')).toMatchObject({ col: 0, srcCol: 2, dstCol: 1, dstOld: 0, dstNew: 10 });
     expect(lends[1]).toMatchObject({ col: 0, srcCol: 1, dstCol: 0, srcOld: 10, srcNew: 9, toPaper: false });
-    expect(steps.find(s => s.type === 'sub_cant')).toMatchObject({ col: 0, a: 5, b: 7, double: true, srcCol: 2 });
+    expect(steps.find(s => s.type === 'sub_cant')).toMatchObject({ col: 0, a: 3, b: 8, double: true, srcCol: 2 });
+    expect(steps.find(s => s.type === 'sub_expr')).toMatchObject({ col: 0, a: 3, b: 8, diff: 5 });
     /* Tiotalen raknar sedan med 9:an som star skriven pa pappret. */
-    expect(steps.find(s => s.type === 'sub_calc' && s.col === 1)).toMatchObject({ a: 9, b: 8, diff: 1 });
+    expect(steps.find(s => s.type === 'sub_calc' && s.col === 1)).toMatchObject({ a: 9, b: 5, diff: 4 });
   });
 
-  it('40 − 18 entalen: a = 0 ger ingen vand-om — sub_take i stallet', () => {
+  it('405 − 187 entalen: samma dubbellanskedja', () => {
+    expect(typer(405, 187, 3, 0)).toEqual([
+      'sub_highlight', 'sub_cant', 'sub_lend', 'sub_land', 'sub_lend',
+      'sub_expr', 'sub_attack', 'sub_ten_minus',
+    ]);
+  });
+
+  it('40 − 18 entalen: a = 0 hoppar over uttrycket och anfallet — sub_take i stallet', () => {
     expect(typer(40, 18, 2, 0)).toEqual(['sub_highlight', 'sub_cant', 'sub_lend', 'sub_take', 'sub_ten_minus']);
-    expect(planSubtractionColumns(40, 18, 2).find(s => s.type === 'sub_take')).toMatchObject({ col: 0, b: 8, diff: 8 });
+    expect(planSubtractionColumns(40, 18, 2).find(s => s.type === 'sub_take')).toMatchObject({ col: 0, a: 0, b: 8, diff: 8 });
+    const t = typer(40, 18, 2, 0);
+    expect(t).not.toContain('sub_expr');
+    expect(t).not.toContain('sub_attack');
   });
 
-  it('sub_flip finns aldrig med a = 0, och de gamla stegtyperna ar borta — alla nivaer', () => {
+  it('de gamla stegtyperna ar borta och falten haller — alla nivaer', () => {
     const fel = [];
-    const borta = new Set(['sub_flip_borrow', 'sub_borrow', 'sub_cant_double']);
+    const borta = new Set(['sub_flip_borrow', 'sub_borrow', 'sub_cant_double', 'sub_flip']);
     for (const [niva, a, b, cc] of subPar()) {
       for (const s of planSubtractionColumns(a, b, cc)) {
         if (borta.has(s.type)) fel.push(`niva ${niva}: ${a}-${b} ${s.type}`);
-        if (s.type === 'sub_flip' && s.a === 0) fel.push(`niva ${niva}: ${a}-${b} flip med a=0`);
-        if (s.type === 'sub_flip' && s.diff !== s.b - s.a) fel.push(`niva ${niva}: ${a}-${b} flip diff`);
+        if ((s.type === 'sub_expr' || s.type === 'sub_attack')) {
+          if (s.a <= 0) fel.push(`niva ${niva}: ${a}-${b} ${s.type} med a=${s.a}`);
+          if (s.diff !== s.b - s.a) fel.push(`niva ${niva}: ${a}-${b} ${s.type} diff`);
+        }
+        if (s.type === 'sub_take' && s.a !== 0) fel.push(`niva ${niva}: ${a}-${b} take med a=${s.a}`);
         if (s.type === 'sub_lend' && (s.srcNew !== s.srcOld - 1 || s.srcOld < 1)) fel.push(`niva ${niva}: ${a}-${b} lend ${s.srcOld}`);
         if (s.type === 'sub_ten_minus' && s.ans !== 10 - s.diff) fel.push(`niva ${niva}: ${a}-${b} ten_minus`);
         if (s.type !== 'done' && s.col === undefined) fel.push(`niva ${niva}: ${a}-${b} ${s.type} utan col`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  /* sub_expr och sub_attack ar ett par: uttrycket stalls upp och loses upp i
+     samma andetag. Ett uttryck utan anfall lamnar (10 + 3) − 8 obesvarat. */
+  it('sub_expr och sub_attack kommer alltid i par, i den ordningen — alla nivaer', () => {
+    const fel = [];
+    for (const [niva, a, b, cc] of subPar()) {
+      const steps = planSubtractionColumns(a, b, cc);
+      for (let c = 0; c < cc; c++) {
+        const t = steps.filter(s => s.col === c).map(s => s.type);
+        const ie = t.indexOf('sub_expr'), ia = t.indexOf('sub_attack');
+        if ((ie < 0) !== (ia < 0)) fel.push(`niva ${niva}: ${a}-${b} kol ${c}: ${t.join(',')}`);
+        if (ie >= 0 && ia !== ie + 1) fel.push(`niva ${niva}: ${a}-${b} kol ${c} ordning`);
+        if (ie >= 0 && t[ie - 1] !== 'sub_lend') fel.push(`niva ${niva}: ${a}-${b} kol ${c} expr utan lan fore`);
+        if (ia >= 0 && t[ia + 1] !== 'sub_ten_minus') fel.push(`niva ${niva}: ${a}-${b} kol ${c} attack utan ten_minus efter`);
       }
     }
     expect(fel).toEqual([]);
@@ -541,10 +579,11 @@ describe('lanekedjan i planSubtractionColumns', () => {
      sub_ten_minus ar aldrig med, det ar barnets siffra som utloser den. */
   it('ovningens vagval: kon ar demons steg fram till svaret', () => {
     const { exColumnPlan } = require('../js/uppstallning.js').__test;
-    const p0 = exColumnPlan(planSubtractionColumns(405, 187, 3), 0);
+    const p0 = exColumnPlan(planSubtractionColumns(903, 158, 3), 0);
     expect(p0.kind).toBe('borrow');
-    expect(p0.queue.map(s => s.type)).toEqual(['sub_cant', 'sub_lend', 'sub_land', 'sub_lend', 'sub_flip']);
-    const p1 = exColumnPlan(planSubtractionColumns(405, 187, 3), 1);
+    expect(p0.queue.map(s => s.type)).toEqual(
+      ['sub_cant', 'sub_lend', 'sub_land', 'sub_lend', 'sub_expr', 'sub_attack']);
+    const p1 = exColumnPlan(planSubtractionColumns(903, 158, 3), 1);
     expect(p1.kind).toBe('simple');
     expect(p1.queue).toEqual([]);
     const z = exColumnPlan(planSubtractionColumns(30, 29, 2), 1);
@@ -552,6 +591,9 @@ describe('lanekedjan i planSubtractionColumns', () => {
     expect(z.queue.map(s => s.type)).toEqual(['sub_zero_lead']);
     const t = exColumnPlan(planSubtractionColumns(40, 18, 2), 0);
     expect(t.queue.map(s => s.type)).toEqual(['sub_cant', 'sub_lend', 'sub_take']);
+    /* Fragan i slutet ar fortfarande "Vad ar 10 minus 5?" — tenStep bar diff. */
+    expect(exColumnPlan(planSubtractionColumns(52, 17, 2), 0).queue.map(s => s.type))
+      .toEqual(['sub_cant', 'sub_lend', 'sub_expr', 'sub_attack']);
   });
 
   it('kon innehaller aldrig sub_ten_minus eller sub_highlight — alla nivaer', () => {
@@ -564,23 +606,29 @@ describe('lanekedjan i planSubtractionColumns', () => {
         if (q.some(s => s.type === 'sub_ten_minus' || s.type === 'sub_highlight')) fel.push(`niva ${niva}: ${a}-${b} kol ${c}`);
         const harLan = steps.some(s => s.type === 'sub_lend' && s.col === c);
         if (harLan && exColumnPlan(steps, c).kind !== 'borrow') fel.push(`niva ${niva}: ${a}-${b} kol ${c} utan borrow`);
+        /* Ovningen maste lara ut HELA kedjan: bade uttrycket och anfallet. */
+        const harExpr = steps.some(s => s.type === 'sub_expr' && s.col === c);
+        if (harExpr && !(q.some(s => s.type === 'sub_expr') && q.some(s => s.type === 'sub_attack')))
+          fel.push(`niva ${niva}: ${a}-${b} kol ${c} tappade expr/attack ur kon`);
       }
     }
     expect(fel).toEqual([]);
   });
 
-  it('varje lanekolumn foljer exakt kedjan cant → lan(en) → flip|take → ten_minus', () => {
+  it('varje lanekolumn foljer exakt en av de fyra kedjorna', () => {
     const fel = [];
+    const ok = new Set([
+      'sub_highlight,sub_cant,sub_lend,sub_expr,sub_attack,sub_ten_minus',
+      'sub_highlight,sub_cant,sub_lend,sub_take,sub_ten_minus',
+      'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_expr,sub_attack,sub_ten_minus',
+      'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_take,sub_ten_minus',
+    ]);
     for (const [niva, a, b, cc] of subPar()) {
       const steps = planSubtractionColumns(a, b, cc);
       for (let c = 0; c < cc; c++) {
         const t = steps.filter(s => s.col === c).map(s => s.type);
         if (!t.includes('sub_cant')) continue;
-        const ok = t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_flip,sub_ten_minus'
-                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_take,sub_ten_minus'
-                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_flip,sub_ten_minus'
-                || t.join(',') === 'sub_highlight,sub_cant,sub_lend,sub_land,sub_lend,sub_take,sub_ten_minus';
-        if (!ok) fel.push(`niva ${niva}: ${a}-${b} kol ${c}: ${t.join(',')}`);
+        if (!ok.has(t.join(','))) fel.push(`niva ${niva}: ${a}-${b} kol ${c}: ${t.join(',')}`);
       }
     }
     expect(fel).toEqual([]);

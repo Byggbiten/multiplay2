@@ -874,14 +874,24 @@ const UppstallningGame = (() => {
           effA[c+2]--; effA[c+1] = 10;
         }
         /* Grannen lånar ut en tia: grannen stryks och skrivs om på pappret,
-           tian blir en bricka i marginalen — det är lösräknande. */
+           och tian hoppar RAKT till kolumnen och lägger sig ovanför siffran
+           — den är inte lösräknande, den är skriven på pappret. */
         steps.push({ type:'sub_lend', col:c, srcCol:c+1, dstCol:c,
           srcOld:effA[c+1], srcNew:effA[c+1]-1, toPaper:false });
         effA[c+1]--;
-        /* Vänd om: från a upp till b är det diff. Är a = 0 finns inget att
-           vända om (A3: "5 − 0 = 5" var en lögnstrykning) — b tas direkt. */
-        if (a > 0) steps.push({ type:'sub_flip', col:c, a, b, diff });
-        else       steps.push({ type:'sub_take', col:c, a, b, diff });
+        /* STRIDEN I HÖGERSPALTEN (Dennis 22/9). Vändningen ("vi vänder om:
+           8 − 3 = 5") var ett trick utan motivering — femman kom ur
+           ingenstans. Nu visas båda leden i (10 + a) − b = 10 − (b − a):
+           sub_expr ställer upp uttrycket, sub_attack låter a ta a ur b så
+           att 10 − diff står kvar. Är a = 0 hoppas båda över: det finns
+           ingen försvarare som kan ta något, och (10 + 0) vore en parentes
+           utan tanke — tian möter b själv (sub_take). */
+        if (a > 0) {
+          steps.push({ type:'sub_expr',   col:c, a, b, diff });
+          steps.push({ type:'sub_attack', col:c, a, b, diff });
+        } else {
+          steps.push({ type:'sub_take', col:c, a, b, diff });
+        }
         /* Svaret skrivs SIST, i sitt eget steg: 10 minus diff. */
         steps.push({ type:'sub_ten_minus', col:c, a, b, diff, ans:10-diff });
       } else {
@@ -916,7 +926,7 @@ const UppstallningGame = (() => {
     /* Subtraktionens lånekedja: allt fram till svaret, som är barnets jobb.
        sub_ten_minus är aldrig med — brickan blir svaret när hon svarat rätt.
        sub_zero_lead (A4) visas utan att något svar krävs. */
-    'sub_cant', 'sub_lend', 'sub_land', 'sub_flip', 'sub_take',
+    'sub_cant', 'sub_lend', 'sub_land', 'sub_expr', 'sub_attack', 'sub_take',
     'sub_zero_lead',
   ]);
 
