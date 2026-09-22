@@ -455,9 +455,12 @@ const MultDivGame = (() => {
     .md-cell .md-restslot { position:absolute; top:-13px; left:-13px; z-index:4;
       border-color:rgba(220,38,38,0.35); background:rgba(255,255,255,0.92); }
 
-    /* Avsluta-bekraftelsen bor i #md-feedback — samma yta som "prova
-       igen", sa inget annat i vyn flyttar sig. */
-    .md-avslut { background:linear-gradient(135deg,#fff7ed,#fef3c7);
+    /* Avsluta-bekraftelsen ar ett OVERLAGG: i floden tog den 54 px fran
+       kladden (128 px mot golvet 150). Nu ror den ingen layout alls. */
+    .md-avslut-bak { position:fixed; inset:0; z-index:60; display:grid; place-items:center;
+      background:rgba(15,23,42,0.42); animation:md-bubble-in .2s var(--spring); padding:20px; }
+    .md-avslut { max-width:320px; box-shadow:0 18px 50px rgba(15,23,42,0.35);
+      background:linear-gradient(135deg,#fff7ed,#fef3c7);
       border:2px solid #f59e0b; border-radius:12px; padding:8px 10px;
       font-weight:800; font-size:0.92rem; color:#92400e; text-align:center; }
     .md-avslut-rad { display:flex; gap:8px; margin-top:8px; }
@@ -4007,22 +4010,36 @@ const MultDivGame = (() => {
   /* Mira: "Uppgift 5 av 5, ett tryck, allt borta." En pabörjad runda ar
      upp till 20 minuters arbete; den far inte forsvinna pa ett felklick. */
   function avslutaOvning() {
+    /* "Pabörjad" maste betyda ATT BARNET HAR GJORT NAGOT, inte bara att
+       kon gatt framat. Uppmatt: med tre felsvar pa forsta fragan stod
+       exerciseIdx, exScore och helpIdx alla pa 0, och Avsluta gick rakt
+       igenom — mitt i det lage Mira klagade pa. */
     const pabörjad = exerciseIdx > 0 || exScore > 0 || helpIdx > 0 ||
-                     (plan && plan.kind === 'division' && !!document.querySelector('#md-table-wrap .md-cell.struck'));
+                     helpTries > 0 || exWrongAnswers > 0 || !helpTaskClean ||
+                     (!helpMode && exFreeHasDigits()) ||
+                     !!document.querySelector('#md-table-wrap .md-ansc.filled, ' +
+                                              '#md-table-wrap .md-cell.struck, ' +
+                                              '#md-table-wrap .md-divrem.on');
     if (!pabörjad) { showModeSelect(); return; }
-    const fb = document.getElementById('md-feedback');
-    if (!fb) { showModeSelect(); return; }
+    const root = document.getElementById('multdiv-root');
+    if (!root || document.getElementById('md-avslut')) { showModeSelect(); return; }
     App.Sound.play('click');
-    fb.innerHTML = `<div class="md-avslut">
-      <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
-      <div class="md-avslut-rad">
-        <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
-        <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
-      </div></div>`;
+    /* Overlagg, inte en ruta i floden: lagd i #md-feedback tog den 54 px
+       fran kladden (uppmatt 128 px mot golvet 150). Ett overlagg ror
+       ingen layout alls. */
+    root.insertAdjacentHTML('beforeend', `<div id="md-avslut" class="md-avslut-bak"
+      onclick="if(event.target===this)MultDivGame.avslutaAngra()">
+      <div class="md-avslut">
+        <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
+        <div class="md-avslut-rad">
+          <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
+          <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
+        </div>
+      </div></div>`);
   }
   function avslutaAngra() {
-    const fb = document.getElementById('md-feedback');
-    if (fb) fb.innerHTML = '';
+    const o = document.getElementById('md-avslut');
+    if (o) o.remove();
     App.Sound.play('click');
   }
 
