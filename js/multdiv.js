@@ -1843,8 +1843,8 @@ const MultDivGame = (() => {
     setTimeout(() => { srcs.forEach(el => { el.style.animation = ''; }); }, 540);
     chips.forEach((c, i) => setTimeout(() => {
       c.style.opacity = ''; c.classList.add('chip-in'); App.Sound.play('click');
-    }, 320 + i * 260));
-    setTimeout(() => cb && cb(), 320 + chips.length * 260 + 360);
+    }, 320 + i * 220));
+    setTimeout(() => cb && cb(), 320 + chips.length * 220 + 320);
     return chips;
   }
 
@@ -1922,19 +1922,19 @@ const MultDivGame = (() => {
       gapEl.style.opacity = '';
       gapEl.classList.add('gap-in');
       App.Sound.play('click');
-    }, 800);
+    }, 700);
 
     const done = () => setTimeout(() => {
       // Vandringen ar over: ankaret ar inte langre en hjalpbricka utan
       // RAKNEBRICKAN som dwrite skickar ner i kvotrutan.
       win.classList.remove('md-aux');
       cb && cb();
-    }, 380);
+    }, 300);
 
     const tick = k => {
       if (k >= w.steg) { done(); return; }
       playCarrySound();
-      flyPill(dir > 0 ? gapEl : win, dir > 0 ? win : gapEl, String(w.divisor), 540, () => {
+      flyPill(dir > 0 ? gapEl : win, dir > 0 ? win : gapEl, String(w.divisor), 470, () => {
         n += dir;
         setText(win.querySelector('.md-cd'), n);
         setText(win.querySelector('.md-ax'), `·${w.divisor}=${n * w.divisor}`);
@@ -1942,10 +1942,10 @@ const MultDivGame = (() => {
         setGapChip(gapEl, n * w.divisor, w.cur);
         gapEl.classList.remove('gap-in', 'gap-pop'); void gapEl.offsetWidth; gapEl.classList.add('gap-pop');
         stackMarginChips([win, gapEl], step, 6);
-        setTimeout(() => tick(k + 1), 360);
+        setTimeout(() => tick(k + 1), 300);
       });
     };
-    setTimeout(() => (dir === 0 ? done() : tick(0)), 1360);
+    setTimeout(() => (dir === 0 ? done() : tick(0)), 1180);
   }
 
   /* dwrite: notationen slapper taget och ANTALET flyger ner i kvot-
@@ -1974,7 +1974,7 @@ const MultDivGame = (() => {
     setTimeout(() => {
       chip.classList.remove('moving');
       chipToCell('q', step.g, step.q, () => setTimeout(cb, 420));
-    }, 740);
+    }, 560);
   }
 
   /* ══════════════════════════════════════════════════════════
