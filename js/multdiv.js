@@ -919,10 +919,13 @@ const MultDivGame = (() => {
      ("vi tar med nästa siffra") som två steg. Sista siffran får samma
      kedja som alla andra (B3) — demon och hjälpet är samma kedja. */
   /* Ankarvandringen (Dennis 22/9) ligger MELLAN fragan och svaret:
-     dwalk_anchors foder de tva ankarbrickorna i marginalen, dwalk_step
-     valjer ett av dem, matter avstandet till talet och justerar. q = 0
-     har ingen vandring (planAnchorWalk ger kind 'ingen') — da gar dask
-     direkt till dwrite med dagens "Ingen hel 6:a ryms"-text. */
+     dwalk_anchors foder de tva ankarbrickorna i marginalen, dwalk_pick
+     valjer ett av dem, och dwalk_gap matter avstandet och justerar.
+     Valet och krocken ar TVA steg sedan Dennis prov 22/9 ("Har gick det
+     lite for snabbt ... ett mellansteg sa de hinner med att uppfatta").
+     dwalk_gap utgar vid kind 'exakt' — ankaret AR talet, det finns inget
+     avstand att mata. q = 0 har ingen vandring alls (kind 'ingen') — da
+     gar dask direkt till dwrite med "Ingen hel 6:a ryms"-texten. */
   function planDivSteps(pl) {
     const steps = [], nd = digitsOf(pl.a);
     for (const s of pl.pass.steps) {
@@ -1132,10 +1135,12 @@ const MultDivGame = (() => {
                       steg strax efter och ska inte foregripas)
      slut: 'ingen' — ingen slutsats alls (hjalplaget: stegen leder fram,
                       barnet tar sista steget sjalv)                    */
-  /* Raderna var for sig. Animationen (dwalk_anchors / dwalk_step /
-     dwrite) visar EN rad i taget — texten far inte skrivas om pa tva
-     stallen, sa bada vagarna laser ur samma byggare. r1 = ankarparet,
-     r2 = valet och avstandet, r3 = slutsatsen. */
+  /* Raderna var for sig. Animationen (dwalk_anchors / dwalk_pick /
+     dwalk_gap / dwrite) visar EN rad i taget — texten far inte skrivas
+     om pa tva stallen, sa bada vagarna laser ur samma byggare.
+     r1 = ankarparet, r2a = valet, r2b = krocken, r3 = slutsatsen.
+     r2 finns kvar oforandrad for livlinorna, som sammanfattar i stallet
+     for att stega. */
   function anchorWalkRows(cur, divisor, slut, g) {
     const w = planAnchorWalk(cur, divisor);
     const N = divisor;
