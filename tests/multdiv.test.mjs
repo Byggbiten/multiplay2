@@ -689,3 +689,17 @@ describe('ovningslaget raknar bara helratt', () => {
     expect(src).toMatch(/Capy\.award\(profile, \{ type: 'test', data: \{ module: 'multdiv', pct: Math\.round\(\(exScore \/ 5\) \* 100\), memStar \} \}\)/);
   });
 });
+
+/* Tiger vandringen ska den tiga hela vagen — aven i hjalplagets fraga.
+   For 9 ÷ 3 var det just "6 ar narmast" som fick Mira att tro att hon
+   raknat fel, och raden kom fram i fragan aven nar animationen hoppades
+   over.                                                                */
+describe('tyst vandring lacker inte in i fragan', () => {
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+  it('askText returnerar bara fragan nar vandringen ar tyst', () => {
+    expect(src).toMatch(/if \(r\.w\.tyst\) return divqHeadHTML\(item\);/);
+  });
+  it('q = 0 behaller sin ledtrad', () => {
+    expect(src).toMatch(/if \(r\.w\.kind === 'ingen'\) return divqHeadHTML\(item\) \+ r\.r1;/);
+  });
+});

@@ -2655,13 +2655,19 @@ const MultDivGame = (() => {
       memAwait = { type: 'place', val: item.val, srcG: item.srcG };
       renderMemCol(); // nästa slot pulserar
       // B5: värdet sägs INTE — barnet väljer själv vilken siffra som åker upp
-      helpBubble(`En siffra åker upp som minne — tryck där den ska stå! 👉`);
+      /* Samma klass som Miras "stryk den!" utan knapp: handlingen fanns
+         men malet namndes aldrig. Sager nu VAR rutan ar. */
+      helpBubble(`En siffra åker upp som minne — tryck på den streckade rutan ` +
+                 `i minnesspalten till höger! 👉`);
     } else {
       const idx = mdMemList.findIndex(e => !e.used);
       if (idx < 0) { advanceHelp(helpIdx + 1); return; } // säkerhetsnät
       memAwait = { type: 'strike', val: item.val, idx };
       renderMemCol(); // siffran pulserar
-      helpBubble(`Stryk minnessiffran <strong style="color:#dc2626">${item.val}</strong> — den är använd! ✏️`);
+      /* "Stryk minnessiffran 1" sade inte att BARNET ska trycka — exakt
+         det ordvalet fick Mira att sitta och vanta i divisionen. */
+      helpBubble(`Minnessiffran <strong style="color:#dc2626">${item.val}</strong> är använd. ` +
+                 `Tryck på den i spalten till höger för att stryka den! ✏️`);
     }
   }
 
@@ -3085,13 +3091,22 @@ const MultDivGame = (() => {
          sa overlamningen till knappsatsen sker utan att bubblan poppar
          om (helpBubble jamfor och later den sta). */
       const r = anchorWalkRows(item.cur, numB, 'ingen', item.g);
-      return divqHeadHTML(item) + (r.r2b || r.r2a || r.r1);
+      /* Tiger vandringen ska den tiga HELA vagen. Utan den har grenen kom
+         raden fram anda i fragan — och for 9 ÷ 3 var det just "6 ar
+         narmast" som fick Mira att tro att hon raknat fel.
+         q = 0 ar inte tyst utan saknar vandring; dar ar r1 ("Inte ens en
+         6:a far plats i 1") hela ledtraden och ska sta kvar. */
+      if (r.w.tyst) return divqHeadHTML(item);
+      if (r.w.kind === 'ingen') return divqHeadHTML(item) + r.r1;
+      return divqHeadHTML(item) + (r.r2b || r.r2a);
     }
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
     if (item.kind === 'memwrite')
-      return `Vilken siffra skriver vi i rutan? ✏️`;
+      /* Brickan visar t.ex. 64 och minnet tog 6:an — utan att rutan pekas
+         ut kan barnet lika garna svara 64 som 4. */
+      return `Vilken siffra skriver vi i ${pvNamn(item.g)}s ruta? ✏️`;
     /* v31: minnesfrågan som EGEN fråga (tvåstegsfrågan). B2: kort, utan
        retorisk fråga — brickan på högersidan bär tabellsvaret. B7: ensam
        siffra + minne har inget tabellsvar att peka på. */
