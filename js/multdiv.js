@@ -923,7 +923,7 @@ const MultDivGame = (() => {
       case 'dask':
         return `Hur många hela <strong>${numB}</strong>:or ryms i <strong style="color:${cv(step.g)}">${step.cur}</strong>? 🤔`;
       case 'dskip':
-        return `${numB}:or i <strong style="color:${cv(step.g)}">${step.cur}</strong>? Det går inte.`;
+        return skipBubbleHTML(step.cur, step.g);
       case 'dtake':
         return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
       case 'dwrite':
@@ -951,6 +951,20 @@ const MultDivGame = (() => {
   /* Klart-bubblan byggs pa ETT stalle: demon och hjalplaget hade samma
      strang ordagrant pa tva rader, och D3-fixen skulle annars behova
      goras tva ganger. */
+  /* Dennis 22/9: ledande hopp stallde aldrig fragan, det konstaterade bara
+     ("9:or i 4? Det gar inte."). Nu stalls SAMMA fraga som varje annan
+     siffra far — ordagrant samma ordval som dask — och svaret kommer i
+     samma steg. Barnet moter en fraga, inte tva olika satt att prata om
+     samma sak. */
+  function skipBubbleHTML(cur, g) {
+    /* Utan "hela" — dels for att ingen enda ryms har sa ordet inte skiljer
+       nagot fran nagot, dels for att meningen med "hela" gick till tva
+       rader vid 390 i hjalplaget (uppmatt 64 px mot golvet 42) och
+       knappen under hoppade 22 px. */
+    return `Hur många <strong>${numB}</strong>:or ryms i ` +
+           `<strong style="color:${cv(g)}">${cur}</strong>? Hmm… Det går inte.`;
+  }
+
   function doneBubbleHTML() {
     if (plan.kind !== 'division') {
       return `Klart! 🎉 ${numA} · ${numB} = <strong>${plan.answer}</strong>`;
@@ -2357,7 +2371,7 @@ const MultDivGame = (() => {
 
     /* v32: leading-specialfallet — informationssteg med framåtblickande knapp */
     if (item.kind === 'dskip') {
-      helpBubble(`${numB}:or i <strong style="color:${cv(item.g)}">${item.cur}</strong>? Det går inte.`);
+      helpBubble(skipBubbleHTML(item.cur, item.g));
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
         onclick="MultDivGame.helpAction()">Vi tar med ${item.next}:an — nu har vi ${item.cur * 10 + item.next}! →</button>`;
       return;
