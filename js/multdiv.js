@@ -406,6 +406,18 @@ const MultDivGame = (() => {
        siffrorna behåller sina egna färger (brickans tal och det röda
        minnet) — de sätts inline av helpExprHTML och vinner över den här. */
     .md-qexpr { color:#64748b; font-weight:800; white-space:nowrap; }
+    /* ANKARVANDRINGEN: livlinan visar en liten stege i stallet for ett
+       svar. Raderna ar olika tunga med flit — ankarparet ar bakgrund,
+       valet ar sjalva tanken, landningen ar slutsatsen. Bubblan far
+       vaxa har och bara har (.md-bub-walk): alla andra bubblor har fast
+       hojd sa knappsatsen star still, men vandringen ar ett medvetet
+       avbrott barnet sjalv bett om genom att trycka pa livlinan. */
+    #md-bubble.md-bub-walk { min-height:0; }
+    .md-walk { display:block; line-height:1.45; }
+    .md-walk.r1 { font-size:0.86em; color:#64748b; }
+    .md-walk.r2 { margin-top:2px; }
+    .md-walk.r3 { margin-top:4px; padding-top:4px; color:var(--deep);
+      border-top:1.5px dashed color-mix(in srgb, var(--accent) 30%, transparent); }
 
     /* Numpad + inmatningsfält */
     .md-panel { background:var(--glass-strong); border-radius:var(--radius-md); padding:8px 10px;
@@ -956,6 +968,97 @@ const MultDivGame = (() => {
      siffra far — ordagrant samma ordval som dask — och svaret kommer i
      samma steg. Barnet moter en fraga, inte tva olika satt att prata om
      samma sak. */
+  /* ══════════════════════════════════════════════════════════
+     ANKARVANDRINGEN (Dennis 22/9)
+     ─────────────────────────────────────────────────────────
+     "Hur manga 9:or ryms i 45?" har tva svar: det man minns, och
+     det man kan RAKNA UT. Livlinan gav forr det forsta — svaret.
+     Nu ger den det andra: vagen dit.
+
+     Idén ar Dennis egen och har ett namn i litteraturen: ankartal
+     (benchmark numbers) och delkvoter. Barnet behover inte kunna
+     9:ans tabell — det behover tva tal det redan kan och ett
+     avstand att matA. Ankarna ar 1-, 2-, 5- och 10-tabellen.
+
+     Regeln: visa de tva ankare som RAMAR IN svaret, ga fran det
+     narmaste, och stega upp eller ner. Uttommande genomraknat:
+     avstandet ar aldrig mer an tva steg (q=7 ger upp 2, q=8 ger
+     ner 2, allt annat 0 eller 1).
+
+     Ren funktion — inga globaler, inget DOM. Testas i vitest.   */
+  const ANKARE = [1, 2, 5, 10];
+
+  function planAnchorWalk(cur, divisor) {
+    const q = Math.floor(cur / divisor);
+    const rest = cur - q * divisor;
+    if (q === 0) return { kind: 'ingen', cur, divisor, q, rest };
+
+    /* Ankarparet som ramar in svaret: det storsta <= q och det
+       minsta > q. Vid q >= 10 finns inget ovre — kan inte intraffa
+       i kort division (cur < 10*divisor alltid), men funktionen
+       klarar det anda genom att falla tillbaka pa 10. */
+    let lag = ANKARE[0], hog = ANKARE[ANKARE.length - 1];
+    for (const a of ANKARE) if (a <= q) lag = a;
+    const storre = ANKARE.filter(a => a > q);
+    hog = storre.length ? storre[0] : 10;
+    if (lag === hog) lag = ANKARE[Math.max(0, ANKARE.indexOf(hog) - 1)];
+
+    /* Basen ar det ankare som ligger FARRAST STEG bort — inte det
+       vars produkt rakar ligga narmast. Det ar antalet 9:or barnet
+       ska lagga till eller ta bort som ar jobbet, inte differensen. */
+    const bas = Math.abs(q - lag) <= Math.abs(q - hog) ? lag : hog;
+    const steg = q - bas;
+
+    return {
+      kind: steg === 0 ? (rest === 0 ? 'exakt' : 'plan') : (steg > 0 ? 'upp' : 'ner'),
+      cur, divisor, q, rest,
+      ankare: [{ n: lag, prod: lag * divisor }, { n: hog, prod: hog * divisor }],
+      bas: { n: bas, prod: bas * divisor },
+      steg: Math.abs(steg),
+      mellan: cur - bas * divisor      // avstandet fran basen till talet
+    };
+  }
+
+  const TALORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
+  const talord = n => TALORD[n] || String(n);
+  const stor = o => o[0].toUpperCase() + o.slice(1);
+  /* "en 7:a" / "två 7:or" — samma bojning som resten av appen anvander. */
+  const nOr = (k, N) => k === 1 ? `en <strong>${N}</strong>:a` : `${talord(k)} <strong>${N}</strong>:or`;
+  const ankarRad = (a, N) => `${stor(talord(a.n))} ` +
+    `${a.n === 1 ? `<strong>${N}</strong>:a` : `<strong>${N}</strong>:or`} är <strong>${a.prod}</strong>`;
+
+  /* Vandringen i ord. Tre rader: ankarparet, valet, och landningen.
+     Sista raden sager kvotsiffran — livlinan ar till for att barnet ska
+     FORSTA, och svaret skrivs anda in for hand i numpaden. */
+  function anchorWalkHTML(cur, divisor) {
+    const w = planAnchorWalk(cur, divisor);
+    const N = divisor;
+    if (w.kind === 'ingen') {
+      return `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>` +
+             `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>`;
+    }
+    const rader = [
+      `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`
+    ];
+    const svar = `<strong>${stor(talord(w.q))}</strong> ${w.q === 1 ? `${N}:a` : `${N}:or`}` +
+      (w.rest ? `, och <strong>${w.rest}</strong> över` : ' — det går jämnt ut');
+
+    if (w.kind === 'exakt') {
+      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`);
+    } else if (w.kind === 'plan') {
+      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
+                 `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — för lite för en till.</span>`);
+    } else if (w.kind === 'upp') {
+      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
+                 `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — där får ${nOr(w.steg, N)} till plats.</span>`);
+    } else {
+      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
+                 `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`);
+    }
+    rader.push(`<span class="md-walk r3">${svar}.</span>`);
+    return rader.join('');
+  }
+
   function skipBubbleHTML(cur, g) {
     /* Utan "hela" — dels for att ingen enda ryms har sa ordet inte skiljer
        nagot fran nagot, dels for att meningen med "hela" gick till tva
@@ -2263,7 +2366,11 @@ const MultDivGame = (() => {
 
   function helpBubble(html) {
     const area = document.getElementById('md-bubble');
-    if (area) area.innerHTML = html ? `<div class="md-thought">${html}</div>` : '';
+    if (!area) return;
+    /* Vandringens extra hojd galler bara vandringen — nasta bubbla far
+       tillbaka det fasta golvet, annars hoppar knappsatsen efterat. */
+    if (!/md-walk/.test(html || '')) area.classList.remove('md-bub-walk');
+    area.innerHTML = html ? `<div class="md-thought">${html}</div>` : '';
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
@@ -2422,8 +2529,12 @@ const MultDivGame = (() => {
        Ingen poängpåverkan, ingen effekt på Minnesmästare. */
     const expected = helpExpected(item);
     if (item.kind === 'divq') {
-      // Undvik falsk likhet ("9 ÷ 4 = 2" är fel matte) — säg det som det är
-      helpBubble(`Det ryms <strong>${expected}</strong> ${expected === 1 ? `hel ${numB}:a` : `hela ${numB}:or`} i ${item.cur} — skriv in det själv! ✍️`);
+      /* Dennis 22/9: livlinan gav bort svaret. Nu ger den vagen dit —
+         via ett ankare ur 1/2/5/10-tabellen och ett kort avstand. Svaret
+         star sist, for barnet skriver det anda in sjalv i numpaden. */
+      const b = document.getElementById('md-bubble');
+      if (b) b.classList.add('md-bub-walk');
+      helpBubble(anchorWalkHTML(item.cur, numB));
       return;
     }
     const expr = helpExprHTML(item);
@@ -3088,7 +3199,7 @@ const MultDivGame = (() => {
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planCarries, memMismatch, planRests, restMismatch },
+    __test: { planAnchorWalk, planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planCarries, memMismatch, planRests, restMismatch },
   };
   return api;
 })();

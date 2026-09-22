@@ -362,3 +362,77 @@ describe('fria lagets rester raknas i rattningen (division A4)', () => {
     expect(restMismatch({ 1: 2 }, {})).toEqual({ g: 1, wrote: 2, want: null });
   });
 });
+
+/* ── Ankarvandringen (Dennis 22/9) ────────────────────────────────────
+   Livlinan ska ge VÄGEN, inte svaret. Vägen går via ett ankare barnet
+   redan kan (1-, 2-, 5-, 10-tabellen) och ett kort avstånd därifrån.
+   Testerna låser de tre egenskaper som gör vägen gåbar för ett barn:
+   den stämmer, ankarna ramar in svaret, och steget är kort.          */
+describe('ankarvandringen', () => {
+  const { planAnchorWalk } = require('../js/multdiv.js').__test;
+
+  it('45 ÷ 7 ger Dennis egen vandring', () => {
+    const w = planAnchorWalk(45, 7);
+    expect(w.ankare.map(a => a.prod)).toEqual([35, 70]);
+    expect(w.bas.prod).toBe(35);
+    expect(w.kind).toBe('upp');
+    expect(w.steg).toBe(1);
+    expect(w.mellan).toBe(10);
+    expect(w.q).toBe(6);
+    expect(w.rest).toBe(3);
+  });
+
+  it('45 ÷ 9 landar rakt på ankaret', () => {
+    const w = planAnchorWalk(45, 9);
+    expect(w.kind).toBe('exakt');
+    expect(w.bas.prod).toBe(45);
+    expect(w.steg).toBe(0);
+  });
+
+  it('kvotsiffran och resten är alltid rätt', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = 0; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.q * d + w.rest !== c) fel.push(`${c}÷${d}`);
+      if (w.rest < 0 || w.rest >= d) fel.push(`${c}÷${d} rest ${w.rest}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('steget från ankaret är aldrig mer än två', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.steg > 2) fel.push(`${c}÷${d} steg ${w.steg}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('basen plus steget är kvotsiffran, åt rätt håll', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      const nadd = w.kind === 'ner' ? w.bas.n - w.steg : w.bas.n + w.steg;
+      if (nadd !== w.q) fel.push(`${c}÷${d}: ${w.bas.n} ${w.kind} ${w.steg} gav ${nadd}, väntat ${w.q}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('ankarparet ramar in svaret och kommer ur 1/2/5/10-tabellen', () => {
+    const ok = [1, 2, 5, 10], fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      const [lag, hog] = w.ankare;
+      if (!ok.includes(lag.n) || !ok.includes(hog.n)) fel.push(`${c}÷${d} ankare ${lag.n}/${hog.n}`);
+      if (!(lag.n <= w.q && w.q < hog.n)) fel.push(`${c}÷${d}: ${lag.n} <= ${w.q} < ${hog.n} håller inte`);
+      if (![lag.n, hog.n].includes(w.bas.n)) fel.push(`${c}÷${d} bas utanför paret`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('kvotsiffra 0 får ingen vandring', () => {
+    for (let d = 2; d <= 9; d++) for (let c = 0; c < d; c++) {
+      expect(planAnchorWalk(c, d).kind).toBe('ingen');
+    }
+  });
+});
