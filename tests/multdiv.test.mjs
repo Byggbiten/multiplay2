@@ -307,9 +307,10 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
       const w = planAnchorWalk(s.cur, d);
       /* Ingen vandring nar den inte lar ut nagot: q = 0 (inget ryms) eller
          talet AR divisorn (Dennis 22/9, 816 ÷ 8: "lite lojlig"). */
-      if (s.q > 0 && !w.trivial) {
+      if (s.q > 0 && !w.tyst) {
         t.push('dwalk_anchors', 'dwalk_pick');
-        if (w.kind !== 'exakt') t.push('dwalk_gap');
+        // steg 0: ankaret ger redan kvotsiffran — inget att justera
+        if (w.steg !== 0) t.push('dwalk_gap');
       }
       t.push('dwrite');
       if (s.rem > 0 && !s.last) t.push('drem_calc', 'drem_place');
@@ -343,23 +344,27 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
   });
   it('granskningens tal: verbatim kedja', () => {
     const t = (n, d, lv) => planDivSteps(buildDivPlan(n, d, lv)).map(s => s.t).join(' ');
-    const W = 'dwalk_anchors dwalk_pick dwalk_gap ';   // med krock
-    const E = 'dwalk_anchors dwalk_pick ';             // 'exakt' — ingen krock
-    /* 84 ÷ 4: 8÷4 ar 'exakt' (tva 4:or), 4÷4 ar TRIVIAL — talet ar
-       divisorn, sa den siffran far ingen vandring alls. */
-    expect(t(84, 4, 1)).toBe('dask ' + E + 'dwrite dstrike dask dwrite dstrike done');
-    /* 96 ÷ 4: 9÷4 'plan', 16÷4 'ner' — bada har krock */
-    expect(t(96, 4, 2)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
-    /* 738 ÷ 3: plan, ner, upp */
-    expect(t(738, 3, 3)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
-    /* 336 ÷ 6: ledande hopp, sedan plan + upp */
-    expect(t(336, 6, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
-    /* 612 ÷ 6: forsta siffran ar TRIVIAL (6 i 6), mittsiffran ger q = 0 —
-       bada gar rakt fran dask till dwrite. Entalet (12÷6) ar 'exakt'. */
-    expect(t(612, 6, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
-    /* 105 ÷ 3 (Dennis eget): ledande hopp, tiotalet 'upp', entalet 'exakt' */
-    expect(t(105, 3, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
+    const W = 'dwalk_anchors dwalk_pick dwalk_gap ';   // ankare + fråga + krock
+    const P = 'dwalk_anchors dwalk_pick ';             // steg 0 — ingen krock
+    /* 23/9: ETT ankare, och vandringen tiger nar talet gar jamnt upp utan
+       att ankaret traffar. Mycket faller darfor bort. */
+    // 84 ÷ 4: 8÷4 traffar ankaret (steg 0); 4÷4 gar jamnt ut med q=1 -> tyst
+    expect(t(84, 4, 1)).toBe('dask ' + P + 'dwrite dstrike dask dwrite dstrike done');
+    // 96 ÷ 4: 9÷4 steg 0 med rest; 16÷4 jamnt ut men ankaret 5 traffar inte -> tyst
+    expect(t(96, 4, 2)).toBe('dask ' + P + 'dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    // 738 ÷ 3: 7÷3 steg 0; 13÷3 upp; 18÷3 jamnt ut, ankaret 5 traffar inte -> tyst
+    expect(t(738, 3, 3)).toBe('dask ' + P + 'dwrite drem_calc drem_place dstrike dask ' + W +
+                              'dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    // 336 ÷ 6: ledande hopp, 33÷6 steg 0, 36÷6 jamnt ut -> tyst
+    expect(t(336, 6, 4)).toBe('dskip dtake dask ' + P + 'dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    // 612 ÷ 6: 6÷6 tyst (q=1), 1÷6 ingen vandring (q=0), 12÷6 traffar ankaret
+    expect(t(612, 6, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + P + 'dwrite dstrike done');
+    // 105 ÷ 3 (Dennis eget): 10÷3 upp med rest, 15÷3 traffar ankaret 5
+    expect(t(105, 3, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + P + 'dwrite dstrike done');
+    // 816 ÷ 8: hundratalet tyst (talet AR divisorn), 16÷8 traffar ankaret 2
+    expect(t(816, 8, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + P + 'dwrite dstrike done');
   });
+
   it('hjalpkon och demon ar samma kedja: varje siffra far en fraga i bada', () => {
     const avv = [];
     for (const [n, d, lv] of divSpace()) {
@@ -400,7 +405,8 @@ describe('ankarvandringen', () => {
 
   it('45 ÷ 7 ger Dennis egen vandring', () => {
     const w = planAnchorWalk(45, 7);
-    expect(w.ankare.map(a => a.prod)).toEqual([35, 70]);
+    expect(w.ankare.prod).toBe(35);          // 23/9: ETT ankare, inte ett par
+    expect(w.bas).toEqual(w.ankare);         // bas ar alias for ankare
     expect(w.bas.prod).toBe(35);
     expect(w.kind).toBe('upp');
     expect(w.steg).toBe(1);
@@ -445,16 +451,30 @@ describe('ankarvandringen', () => {
     expect(fel).toEqual([]);
   });
 
-  it('ankarparet ramar in svaret och kommer ur 1/2/5/10-tabellen', () => {
-    const ok = [1, 2, 5, 10], fel = [];
+  /* Dennis 23/9, efter Miras prov: ETT ankare ur 2/5/10. Paret visade ett
+     tal som inte fanns i uppgiften ("Tva 3:or ar 6. Fem 3:or ar 15." —
+     "Var kommer 15 ifran?"). Ettan utgar: "en 3:a ar 3" lar inte ut nagot. */
+  it('ett ankare ur 2/5/10, narmast i antal steg, aldrig mer an tva steg', () => {
+    const ok = [2, 5, 10], fel = [];
     for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
       const w = planAnchorWalk(c, d);
-      const [lag, hog] = w.ankare;
-      if (!ok.includes(lag.n) || !ok.includes(hog.n)) fel.push(`${c}÷${d} ankare ${lag.n}/${hog.n}`);
-      if (!(lag.n <= w.q && w.q < hog.n)) fel.push(`${c}÷${d}: ${lag.n} <= ${w.q} < ${hog.n} håller inte`);
-      if (![lag.n, hog.n].includes(w.bas.n)) fel.push(`${c}÷${d} bas utanför paret`);
+      if (Array.isArray(w.ankare)) fel.push(`${c}÷${d}: ankare ar fortfarande ett par`);
+      if (!ok.includes(w.ankare.n)) fel.push(`${c}÷${d} ankare ${w.ankare.n}`);
+      if (w.bas.n !== w.ankare.n) fel.push(`${c}÷${d}: bas och ankare skiljer`);
+      if (w.steg > 2) fel.push(`${c}÷${d}: ${w.steg} steg`);
+      // narmast i antal steg, vid lika det lagre
+      const basta = ok.reduce((b, a) => Math.abs(w.q - a) < Math.abs(w.q - b) ? a : b, ok[0]);
+      if (w.ankare.n !== basta) fel.push(`${c}÷${d}: valde ${w.ankare.n}, narmast ar ${basta}`);
     }
     expect(fel).toEqual([]);
+  });
+
+  it('ankarvalet per kvotsiffra ar Dennis tabell', () => {
+    const facit = { 1: 2, 2: 2, 3: 2, 4: 5, 5: 5, 6: 5, 7: 5, 8: 10, 9: 10 };
+    for (let d = 2; d <= 9; d++) for (let q = 1; q <= 9; q++) {
+      expect(`q=${q} d=${d} -> ${planAnchorWalk(q * d, d).ankare.n}`)
+        .toBe(`q=${q} d=${d} -> ${facit[q]}`);
+    }
   });
 
   it('kvotsiffra 0 får ingen vandring', () => {
@@ -468,19 +488,64 @@ describe('ankarvandringen', () => {
    att 8:an går upp i sig själv en gång. Vandringen finns för att ta sig
    fram till ett svar man inte ser — när man ser det ska den hålla tyst. */
 describe('vandringen tiger nar den inte lar ut nagot', () => {
-  const { planAnchorWalk, planDivSteps } = require('../js/multdiv.js').__test;
+  const { planAnchorWalk, planDivSteps, anchorWalkRows } = require('../js/multdiv.js').__test;
   const { buildDivPlan } = require('../js/multdiv.js')._internals;
 
-  it('talet ar divisorn: trivial', () => {
-    for (let d = 2; d <= 9; d++) expect(planAnchorWalk(d, d).trivial).toBe(true);
+  it('talet ar divisorn: tyst', () => {
+    for (let d = 2; d <= 9; d++) expect(planAnchorWalk(d, d).tyst).toBe(true);
   });
 
-  it('trivial galler exakt nar kvoten ar 1 och inget blir over', () => {
+  /* Dennis 23/9, efter Miras 9 ÷ 3: ankaret sade "6 ar narmast" om ett tal
+     som ar EXAKT tre 3:or, och hon trodde att hon raknat fel. Gar det jamnt
+     upp bar talet sitt svar oppet — da ska vandringen tiga. Det gamla
+     trivial-fallet (q = 1, jamnt ut) ar en delmangd av samma regel. */
+  it('tyst nar det gar jamnt upp och ankaret inte traffar', () => {
     const fel = [];
     for (let d = 2; d <= 9; d++) for (let c = 0; c < 10 * d; c++) {
       const w = planAnchorWalk(c, d);
-      const vantat = (c === d);
-      if (!!w.trivial !== vantat) fel.push(`${c}÷${d}: trivial ${w.trivial}, väntat ${vantat}`);
+      if (w.kind === 'ingen') { if (w.tyst) fel.push(`${c}÷${d}: q=0 ska inte flaggas`); continue; }
+      const vantat = w.rest === 0 && (w.q === 1 || w.steg !== 0);
+      if (!!w.tyst !== vantat) fel.push(`${c}÷${d}: tyst ${w.tyst}, väntat ${vantat}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  /* Varfor nedat-texten alltid behover saga hela-grupper-regeln: overskottet
+     ar hela grupper exakt nar talet gar jamnt upp (bas*N - cur = steg*N
+     <=> cur = q*N <=> rest = 0), och de fallen ar tysta. Faller det har
+     testet har tyst-regeln lossats och r2b behover sin andra gren igen. */
+  it('overskottet ar aldrig hela grupper i en SYNLIG vandring', () => {
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.kind !== 'ner' || w.tyst) continue;
+      expect(w.bas.prod - c).not.toBe(w.steg * d);
+    }
+  });
+
+  it('9 ÷ 3 och 816 ÷ 8 tiger, 47 ÷ 9 och 44 ÷ 6 talar', () => {
+    expect(planAnchorWalk(9, 3).tyst).toBe(true);    // jämnt ut, ankaret 6
+    expect(planAnchorWalk(8, 8).tyst).toBe(true);    // talet är divisorn
+    expect(planAnchorWalk(47, 9).tyst).toBe(false);  // rest kvar
+    expect(planAnchorWalk(44, 6).tyst).toBe(false);  // rest kvar
+  });
+
+  it('gamla trivial-flaggan ar borta', () => {
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      expect(planAnchorWalk(c, d).trivial).toBeUndefined();
+    }
+  });
+
+  /* steg 0: ankaret ger redan kvotsiffran. Forr stalldes "8 − 5 = ?" och
+     sedan "Blir nagot over? 8 − 5 = ?" — ordagrant samma subtraktion tva
+     ganger. Ingen krock, ingen avstandsfraga. */
+  it('steg 0 ger varken krock eller avstandsfraga', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.tyst || w.steg !== 0) continue;
+      const r = anchorWalkRows(c, d, 'kvot', 1);
+      if (r.r2b) fel.push(`${c}÷${d} har r2b`);
+      if (r.r2q) fel.push(`${c}÷${d} har avståndsfråga`);
     }
     expect(fel).toEqual([]);
   });
@@ -518,29 +583,63 @@ describe('textsvepet: ingen mening sager samma tal i tva roller', () => {
   const { planAnchorWalk, anchorWalkRows } = require('../js/multdiv.js').__test;
   const strip = h => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
-  it('r2a och r2b upprepar aldrig ett tal', () => {
+  /* 23/9: svepet raknade FOREKOMSTER, men regeln Dennis satte handlar om
+     ROLLER — "ett ANTAL bredvid ett OBJEKT med samma siffra". Nar han bad
+     om "Vi kan bara ta bort hela 4:or — sa vi tar bort en 4:a" namns
+     divisorn tva ganger med flit, i SAMMA roll, och det ar just det som
+     gor meningen otvetydig. Svepet skiljer darfor pa:
+       objekt = "N:or" / "N:a" (saken man raknar)
+       bart   = varje annat heltal (ett antal, ett tal, ett resultat)
+     Fallt om samma tal star bart tva ganger, eller star bade som objekt
+     och bart. Upprepat objekt ar tillatet. */
+  const roller = txt => {
+    const objekt = [...txt.matchAll(/(\d+):(?:or|a)\b/g)].map(m => m[1]);
+    const bart = [...txt.replace(/(\d+):(?:or|a)\b/g, ' ').matchAll(/\d+/g)].map(m => m[0]);
+    return { objekt, bart };
+  };
+
+  it('samma tal star aldrig i tva roller (antal vs objekt)', () => {
     const fel = [];
     for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
       const w = planAnchorWalk(c, d);
-      if (w.kind === 'ingen' || w.trivial) continue;
+      if (w.kind === 'ingen' || w.tyst) continue;
       const r = anchorWalkRows(c, d, 'kvot', 1);
-      for (const [namn, html] of [['r2a', r.r2a], ['r2b', r.r2b]]) {
+      for (const [namn, html] of [['r1', r.r1], ['r2a', r.r2a], ['r2b', r.r2b], ['r2q', r.r2q]]) {
         if (!html) continue;
-        const txt = strip(html), tal = txt.match(/\d+/g) || [], sedda = {};
-        for (const t of tal) {
+        const txt = strip(html), { objekt, bart } = roller(txt), sedda = {};
+        for (const t of bart) {
           sedda[t] = (sedda[t] || 0) + 1;
-          if (sedda[t] > 1) { fel.push(`${c}÷${d} ${namn}: "${txt}"`); break; }
+          if (sedda[t] > 1) { fel.push(`${c}÷${d} ${namn} (samma tal bart två ggr): "${txt}"`); break; }
         }
+        for (const o of objekt)
+          if (bart.includes(o)) { fel.push(`${c}÷${d} ${namn} (objekt + antal): "${txt}"`); break; }
       }
     }
     expect(fel).toEqual([]);
+  });
+
+  /* Vakten far inte slappa igenom de fall Dennis sjalv hittade. */
+  it('vakten faller fortfarande de gamla krockarna', () => {
+    const krock = t => {
+      const { objekt, bart } = roller(t), sedda = {};
+      for (const x of bart) { sedda[x] = (sedda[x] || 0) + 1; if (sedda[x] > 1) return true; }
+      return objekt.some(o => bart.includes(o));
+    };
+    expect(krock('6 för mycket — vi tar bort en 6:a.')).toBe(true);
+    expect(krock('Det skiljer 2 — då får en 2:a till plats.')).toBe(true);
+    expect(krock('Vi kan bara ta bort hela 9:or — vi tar bort en: 9.')).toBe(true);
+    expect(krock('30 är närmast. Hur långt är det från 30 upp till 44?')).toBe(true);
+    // och slapper igenom det som ar otvetydigt
+    expect(krock('Vi kan bara ta bort hela 4:or — så vi tar bort en 4:a. Då blir det 36.')).toBe(false);
+    expect(krock('Hur långt över 39 är 40?')).toBe(false);
+    expect(krock('Fem 6:or är 30.')).toBe(false);
   });
 
   it('antalet textformer ar litet nog att lasa igenom for hand', () => {
     const former = new Set();
     for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
       const w = planAnchorWalk(c, d);
-      if (w.kind === 'ingen' || w.trivial) continue;
+      if (w.kind === 'ingen' || w.tyst) continue;
       const r = anchorWalkRows(c, d, 'kvot', 1);
       for (const [n, h] of [['r1', r.r1], ['r2a', r.r2a], ['r2b', r.r2b], ['r3', r.r3]])
         if (h) former.add(n + '|' + strip(h).replace(/\d+/g, '#'));

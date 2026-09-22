@@ -932,11 +932,11 @@ const MultDivGame = (() => {
       if (s.skip) { steps.push({ t: 'dskip', ...s }); steps.push({ t: 'dtake', ...s }); continue; }
       steps.push({ t: 'dask', ...s });                // "Hur många hela 4:or ryms i 9?"
       const walk = planAnchorWalk(s.cur, pl.b);
-      if (walk.kind !== 'ingen' && !walk.trivial) {
-        steps.push({ t: 'dwalk_anchors', ...s, walk }); // "Fem 7:or är 35. Tio 7:or är 70."
-        steps.push({ t: 'dwalk_pick',    ...s, walk }); // valet + frågan: hur mycket skiljer det?
-        // 'exakt' har ingen krock att visa — ankaret ÄR talet, ett klick räcker
-        if (walk.kind !== 'exakt')
+      if (walk.kind !== 'ingen' && !walk.tyst) {
+        steps.push({ t: 'dwalk_anchors', ...s, walk }); // "Fem 7:or är 35."
+        steps.push({ t: 'dwalk_pick',    ...s, walk }); // ankaret + frågan: hur mycket skiljer det?
+        // steg 0 har ingen krock att visa — ankaret ger redan kvotsiffran
+        if (walk.steg !== 0)
           steps.push({ t: 'dwalk_gap',   ...s, walk }); // måttet föds, brickan krockar
       }
       steps.push({ t: 'dwrite', ...s });              // "Sex 7:or."
@@ -1080,43 +1080,53 @@ const MultDivGame = (() => {
      ner 2, allt annat 0 eller 1).
 
      Ren funktion — inga globaler, inget DOM. Testas i vitest.   */
-  const ANKARE = [1, 2, 5, 10];
+  /* Dennis 23/9, efter Miras 51 uppgifter: "I dem fallen, valj bara ETT
+     ankare. Antingen x2 x5 eller x10."
+
+     Ankarparet var tanken att RAMA IN svaret, men ramen visade ett tal
+     som inte fanns i uppgiften: "Hur manga hela 3:or ryms i 6?" ->
+     "Tva 3:or ar 6. Fem 3:or ar 15." Mira: "Var kommer 15 ifran? Det
+     finns ingen 15 i uppgiften." Ett ankare racker — det barnet behover
+     ar EN kand punkt att ga fran, inte tva att valja mellan.
+
+     Ettan utgar ur mangden: "en 3:a ar 3" lar inte ut nagot, och 1 som
+     ankare gjorde alltid steget langre an nodvandigt. */
+  const ANKARE = [2, 5, 10];
 
   function planAnchorWalk(cur, divisor) {
     const q = Math.floor(cur / divisor);
     const rest = cur - q * divisor;
     if (q === 0) return { kind: 'ingen', cur, divisor, q, rest };
 
-    /* Ankarparet som ramar in svaret: det storsta <= q och det
-       minsta > q. Vid q >= 10 finns inget ovre — kan inte intraffa
-       i kort division (cur < 10*divisor alltid), men funktionen
-       klarar det anda genom att falla tillbaka pa 10. */
-    let lag = ANKARE[0], hog = ANKARE[ANKARE.length - 1];
-    for (const a of ANKARE) if (a <= q) lag = a;
-    const storre = ANKARE.filter(a => a > q);
-    hog = storre.length ? storre[0] : 10;
-    if (lag === hog) lag = ANKARE[Math.max(0, ANKARE.indexOf(hog) - 1)];
-
-    /* Basen ar det ankare som ligger FARRAST STEG bort — inte det
-       vars produkt rakar ligga narmast. Det ar antalet 9:or barnet
-       ska lagga till eller ta bort som ar jobbet, inte differensen. */
-    const bas = Math.abs(q - lag) <= Math.abs(q - hog) ? lag : hog;
+    /* ETT ankare: det som ligger farrast steg bort, vid lika det lagre.
+       Ger q=1->2, 2->2, 3->2, 4->5, 5->5, 6->5, 7->5, 8->10, 9->10 —
+       aldrig mer an tva steg. */
+    let bas = ANKARE[0];
+    for (const a of ANKARE) if (Math.abs(q - a) < Math.abs(q - bas)) bas = a;
     const steg = q - bas;
+
+    /* Tyst vandring. Tva fall som bada sag ut som app-fel for Mira:
+
+       q = 1 och jamnt ut (816 ÷ 8, hundratalet): "En 8:a ar 8 ... 8 —
+       precis!" for att komma fram till att 8 gar upp i sig sjalv en gang.
+       Vandringen finns for att ta sig fram till ett svar man inte ser.
+
+       rest = 0 men ankaret traffar inte (9 ÷ 3): ankaret ar 2 (= 6), och
+       appen sade "6 ar narmast" om ett tal som ar EXAKT tre 3:or. Mira:
+       "Jag satt och tankte att jag raknat fel." 48 av 64 jamna fall tog
+       den omvagen. Gar det jamnt upp ska appen inte leta.
+
+       Bada ar samma sak — talet bar sitt svar oppet — sa de ar EN flagga. */
+    const tyst = rest === 0 && (q === 1 || steg !== 0);
 
     return {
       kind: steg === 0 ? (rest === 0 ? 'exakt' : 'plan') : (steg > 0 ? 'upp' : 'ner'),
-      /* Dennis 22/9, mot bild (816 ÷ 8, hundratalet): "Den har blev kanske
-         lite lojlig ocksa." Talet var 8 och divisorn 8 — och appen svarade
-         med en hel ankarvandring: "En 8:a ar 8. Tva 8:or ar 16." → "8 —
-         precis!" for att komma fram till att 8:an gar upp i sig sjalv en
-         gang. Vandringen finns for att ta sig fram till ett svar man inte
-         ser; har ser man det. Da ska den halla tyst. */
-      trivial: q === 1 && rest === 0,
+      tyst,
       cur, divisor, q, rest,
-      ankare: [{ n: lag, prod: lag * divisor }, { n: hog, prod: hog * divisor }],
-      bas: { n: bas, prod: bas * divisor },
+      ankare: { n: bas, prod: bas * divisor },
+      bas: { n: bas, prod: bas * divisor },   // alias: bas === ankare
       steg: Math.abs(steg),
-      mellan: cur - bas * divisor      // avstandet fran basen till talet
+      mellan: cur - bas * divisor      // avstandet fran ankaret till talet
     };
   }
 
@@ -1159,7 +1169,8 @@ const MultDivGame = (() => {
                r2: '', r2a: '', r2b: '', r2q: '',
                r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong style="color:${qf}">0</strong>.</span>` };
     }
-    const r1 = `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`;
+    /* ETT ankare. Paret visade ett tal som inte fanns i uppgiften. */
+    const r1 = `<span class="md-walk r1">${ankarRad(w.ankare, N)}.</span>`;
     /* 'kvot' ar sjalva SKRIVANDET i demon. Dennis 22/9: "Vi skriver in
        siffran 1 (for att det far plats 1 femma) och att 1:an ar lite
        betonad. sa de gor skillnad att man ar ute efter antalet femmor,
@@ -1208,45 +1219,43 @@ const MultDivGame = (() => {
     const gapQ = (a, b) => `<span class="md-walk r2"><span class="md-qexpr">` +
       `<strong>${a}</strong> − <strong>${b}</strong> = ?</span></span>`;
     let r2a, r2b, r2q;
-    if (w.kind === 'exakt') {
-      /* Dennis 22/9: "8 — Precis! <- vada 8 precis?" Raden sa ett tal utan
-         att saga VAD som var precis. Nu samma form som de andra tva
-         ("X ar narmast — men lite for mycket" / "X ar narmast. Hur mycket
-         skiljer det?"), sa barnet moter ett monster. */
+    if (w.steg === 0) {
+      /* Ankaret traffar redan kvotsiffran — inget att justera. Ingen
+         krock, ingen avstandsfraga: forr stalldes "8 − 5 = ?" och sedan
+         "Blir nagot over? 8 − 5 = ?" — ordagrant samma subtraktion tva
+         ganger, i 108 av 388 fall med rest. Restfragan gor jobbet ensam. */
       r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
-            `och det stämmer precis!</span>`;
-      r2b = '';                                   // ingen krock att visa
-      r2q = '';                                   // inget avstand att fraga om
+            `och det får plats!</span>`;
+      r2b = '';
+      r2q = '';
     } else if (w.kind === 'ner') {
-      /* Dennis 22/9, mot bild (54 ÷ 6): "6 for mycket — vi tar bort en
-         6:a" lade ett ANTAL bredvid ett OBJEKT med samma siffra, och
-         barnet kan inte veta vilket som ar vilket. Det intraffar i 24 av
-         396 vandringar (6 %), alltid nar talet gar jamnt ut.
-         r2b leder darfor med handlingen och slutar i resultatet — inget
-         losryckt tal bredvid ett likadant objekt.
-
-         r2a sager ocksa VARFOR det stora ankaret valdes. Forr stod bara
-         "60 ar for mycket", och barnet sag att 30 fick plats men 60 inte
-         — det sag ut som fel val. "Narmast" betyder narmast i ANTAL STEG,
-         och det maste sagas, annars ser regeln godtycklig ut. */
-      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
-            `men lite för mycket. Hur mycket?</span>`;
-      r2b = `<span class="md-walk r2">Vi tar bort ${nOr(w.steg, N)} — ` +
-            `då blir det <strong>${w.q * N}</strong>.</span>`;
+      /* Dennis 23/9: "hur mycket (barnet kommer undra 'ska jag svara 4
+         eller 1' dvs 1 st fyra eller vill appen veta att skiljesiffran ar
+         4?" Fragan maste namna BADA andpunkterna, annars finns tva rimliga
+         svar. Orden och uttrycket sager nu samma sak med samma tva tal. */
+      r2a = `<span class="md-walk r2">Hur långt över <strong>${cur}</strong> ` +
+            `är <strong>${w.bas.prod}</strong>?</span>`;
+      /* Barnet har just raknat ut att 40 ar 1 for mycket, och sedan tar
+         appen bort 4. Regeln — att man bara kan ta bort HELA grupper —
+         sades aldrig; den galler i 108 av 132 nedatfall. Och "vi tar bort
+         en" sade aldrig en VAD, sa saken skrivs ut. */
+      /* Overskottet ar hela grupper exakt nar talet gar jamnt upp — och de
+         fallen ar tysta sedan 23/9. Darfor finns bara EN nedat-text:
+         regeln behovs alltid nar raden alls visas (verifierat i test). */
+      r2b = `<span class="md-walk r2">Vi kan bara ta bort hela <strong>${N}</strong>:or — ` +
+          `så vi tar bort ${nOr(w.steg, N)}.` +
+          /* q = 1 landar pa divisorn sjalv; da vore "Da blir det 8" ett
+             ANTAL bredvid ett OBJEKT med samma siffra. Brickan visar
+             landningen, sa meningen slutar dar i stallet. */
+          (w.q === 1 ? '' : ` Då blir det <strong>${w.q * N}</strong>.`) + `</span>`;
       r2q = gapQ(w.bas.prod, cur);
     } else {
-      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. ` +
-            `Hur mycket skiljer det upp till <strong>${cur}</strong>?</span>`;
-      r2b = w.kind === 'plan'
-        ? `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
-          `för lite för en till <strong>${N}</strong>:a.</span>`
-        /* Samma krock som Dennis fann i ner-riktningen, hittad av
-           textsvepet: nar avstandet rakar vara divisorn ("Det skiljer 2 —
-           da far en 2:a till plats") star ett ANTAL bredvid ett OBJEKT med
-           samma siffra. 16 fall. Leder darfor med handlingen och slutar i
-           resultatet, precis som ner-grenen. */
-        : `<span class="md-walk r2">Där får ${nOr(w.steg, N)} till plats — ` +
-          `då blir det <strong>${w.q * N}</strong>.</span>`;
+      r2a = `<span class="md-walk r2">Hur långt är det från <strong>${w.bas.prod}</strong> ` +
+            `upp till <strong>${cur}</strong>?</span>`;
+      /* Leder med handlingen och slutar i resultatet, sa ett ANTAL aldrig
+         star losryckt bredvid ett OBJEKT med samma siffra. */
+      r2b = `<span class="md-walk r2">Där får ${nOr(w.steg, N)} till plats — ` +
+            `då blir det <strong>${w.q * N}</strong>.</span>`;
       r2q = gapQ(cur, w.bas.prod);
     }
     return { w, r1, r2, r2a, r2b, r2q,
@@ -1961,14 +1970,15 @@ const MultDivGame = (() => {
     list.forEach((e, i) => { e.style.left = `${x}px`; e.style.top = `${y}px`; y += hs[i] + gap; });
   }
 
-  /* De tva ankarbrickorna fods: talet och divisorn pulsar (avlasning),
-     sedan poppar brickorna fram en i taget. Ingen kopia flyger. */
+  /* Ankarbrickan fods: talet och divisorn pulsar (avlasning), sedan
+     poppar brickan fram. Ingen kopia flyger. Sedan 23/9 ar det EN bricka
+     — paret visade ett tal som inte fanns i uppgiften. */
   function anchorChipsBorn(step, w, cb) {
     const wrap = mdWrap();
     if (!wrap) { setTimeout(cb, 300); return []; }
     wrap.querySelectorAll('.md-chip, .md-gap, .md-pill').forEach(e => e.remove());
     const cls = CHIP_CLS[Math.min(step.g, 3)];
-    const chips = w.ankare.map(a => {
+    const chips = [w.ankare].map(a => {
       const c = document.createElement('div');
       c.className = `md-chip md-aux md-anchor ${cls}`;
       c.dataset.n = a.n;
@@ -2674,7 +2684,7 @@ const MultDivGame = (() => {
     const rows = anchorWalkRows(item.cur, numB, 'ingen', item.g);
     /* Ingen vandring nar den inte lar ut nagot: q = 0 (inget ryms) eller
        talet AR divisorn (8 i 8). Fragan stalls rakt av. */
-    if (rows.w.kind === 'ingen' || rows.w.trivial) { showHelpUI(); return; }
+    if (rows.w.kind === 'ingen' || rows.w.tyst) { showHelpUI(); return; }
     /* Dennis 22/9, efter prov: "man ska ju klicka for varje steg. inte
        att den skall spelas som en alldeles for snabb film."
 
@@ -2728,7 +2738,7 @@ const MultDivGame = (() => {
       helpBubble(divqHeadHTML(item) + rows.r2a);
       runAnchorPick(item, rows.w, () => {
         if (!levande()) return;
-        if (rows.w.kind === 'exakt') { klart(); return; }
+        if (rows.w.steg === 0) { klart(); return; }   // inget att justera
         if (divWalk) showDivGapQ();     // barnet svarar pa avstandet
       });
     } else {
