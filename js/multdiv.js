@@ -243,6 +243,11 @@ const MultDivGame = (() => {
     .md-chip.chip-in  { animation:md-chip-in .38s cubic-bezier(0.34,1.3,0.4,1) both; }
     .md-chip.chip-pop { animation:md-chip-pop .3s var(--spring) both; }
     .md-l4 .md-chip { font-size:1.15rem; min-width:44px; padding:2px 8px; }
+    /* Kort division: brackets hogermarginal ar bara 41–68 px bred vid 390
+       (uppmatt), och grundbrickans min-width 50 klampade in restbrickan
+       6 px OVER tabellen i 612 ÷ 6. Divisionens brickor bar aldrig mer an
+       en siffra, sa de far ett smalare golv. */
+    .md-chip.md-chip-sm { min-width:34px; padding:3px 9px; }
     /* Flygaren: SAMMA nod som sedan adopteras av spalten/cellen */
     .md-fly { position:absolute; z-index:22; pointer-events:none; display:grid;
       place-items:center; font-family:var(--font-head); font-weight:800; line-height:1; }
@@ -252,12 +257,18 @@ const MultDivGame = (() => {
        med produkten som lattare notation efter sig: "5 · 7 = 35". Nar
        vandringen ar klar slapper notationen taget och antalet ar det
        som flyger ner i kvotrutan — samma nod hela vagen. */
-    .md-chip.md-anchor { min-width:0; padding:3px 8px; font-size:1.2rem; }
-    .md-chip .md-ax { display:inline-block; vertical-align:middle; overflow:hidden;
-      white-space:nowrap; max-width:120px; margin-left:4px;
-      font-size:0.6em; font-weight:800; opacity:0.85; letter-spacing:0.2px;
-      transition:opacity .26s var(--smooth), max-width .26s var(--smooth), margin-left .26s var(--smooth); }
-    .md-chip .md-ax.ax-gone { opacity:0; max-width:0; margin-left:0; }
+    /* Tva rader, inte en: marginalen till hoger om bracket ar bara 68 px
+       vid 390 (uppmatt), och "10 · 7 = 70" pa en rad blir 75 px och
+       klampas in OVER tabellen. Antalet star stort overst, produkten som
+       liten notation under — brickan blir 48 px bred och haller sig i
+       marginalen hela vagen. */
+    .md-chip.md-anchor { flex-direction:column; align-items:center; gap:0;
+      min-width:0; padding:3px 7px; font-size:1.15rem; }
+    .md-chip .md-ax { display:block; overflow:hidden; white-space:nowrap;
+      max-height:1.4em; opacity:0.88; letter-spacing:0.4px;
+      font-size:0.55em; font-weight:800; line-height:1.3;
+      transition:opacity .26s var(--smooth), max-height .26s var(--smooth); }
+    .md-chip .md-ax.ax-gone { opacity:0; max-height:0; }
     .md-chip.md-anchor.moving { transition:left .42s var(--smooth), top .42s var(--smooth); }
     .md-chip.md-anchor.won { box-shadow:0 0 0 3px rgba(255,255,255,0.9),
       0 8px 22px rgba(15,23,42,0.28), inset 0 1px 0 rgba(255,255,255,.35); }
@@ -266,11 +277,13 @@ const MultDivGame = (() => {
     /* Mattet: avstandet mellan ankarets produkt och talet. Ritad som
        anteckning (streckad ram), inte som kvantitet — den ar en matsticka. */
     .md-gap { position:absolute; z-index:8; pointer-events:none;
-      display:flex; align-items:baseline; gap:4px; padding:2px 8px; border-radius:999px;
+      display:flex; flex-direction:column; align-items:center; gap:0;
+      padding:2px 7px; border-radius:14px;
       font-family:var(--font-head); font-weight:900; font-size:1.05rem; line-height:1.2;
       background:rgba(255,255,255,0.96); color:#b45309; border:2px dashed #f59e0b;
       box-shadow:0 4px 12px rgba(245,158,11,0.22); }
-    .md-gap .md-gl { font-size:0.56em; font-weight:800; opacity:0.9; white-space:nowrap; }
+    .md-gap .md-gl { font-size:0.52em; font-weight:800; opacity:0.92;
+      white-space:nowrap; line-height:1.3; letter-spacing:0.2px; }
     .md-gap.over { color:#b91c1c; border-color:#ef4444; box-shadow:0 4px 12px rgba(239,68,68,0.22); }
     .md-gap.zero { color:#15803d; border-color:#22c55e; box-shadow:0 4px 12px rgba(34,197,94,0.22); }
     .md-gap.fading { transition:opacity .3s var(--smooth), transform .3s var(--smooth);
@@ -1613,7 +1626,8 @@ const MultDivGame = (() => {
     // med, så marginalen aldrig har två brickor som säger olika saker.
     wrap.querySelectorAll('.md-chip, .md-gap').forEach(e => e.remove());
     const chip = document.createElement('div');
-    chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]}`;
+    chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]}` +
+      (plan && plan.kind === 'division' ? ' md-chip-sm' : '');
     chip.dataset.g = step.g;
     chip.innerHTML = String(value).split('').map(d => `<span class="md-cd">${d}</span>`).join('');
     chip.style.opacity = '0';
@@ -1773,9 +1787,19 @@ const MultDivGame = (() => {
      dor i samma steg (P5). */
 
   /* Brickans innehall. Antalet ar brickans egen siffra sa chipToCell
-     kan plocka den rakt av; produkten ar notation, inte kvantitet. */
+     kan plocka den rakt av; produkten ar notation, inte kvantitet.
+     Boken (och resten av modulen) skriver gangertecknet som ·. */
   const anchorChipHTML = (n, divisor) =>
-    `<span class="md-cd">${n}</span><span class="md-ax">· ${divisor} = ${n * divisor}</span>`;
+    `<span class="md-cd">${n}</span><span class="md-ax">·${divisor}=${n * divisor}</span>`;
+
+  /* Byt text UTAN att byta nod: `textContent = x` river textnoden och
+     skapar en ny, och da ser en MutationObserver ett objekt som fods och
+     dor i samma steg (P5). Har muteras vardet i noden som redan star. */
+  function setText(el, v) {
+    if (!el) return;
+    if (el.firstChild && el.firstChild.nodeType === 3) el.firstChild.nodeValue = String(v);
+    else el.textContent = String(v);
+  }
 
   /* Stapla brickor pa parkeringsplatsen, lodratt centrerade pa talets
      rad och klippta innanfor wrappen sa de aldrig hamnar utanfor. */
@@ -1832,8 +1856,8 @@ const MultDivGame = (() => {
     if (!el) return;
     el.classList.toggle('over', prod > cur);
     el.classList.toggle('zero', prod === cur);
-    el.querySelector('.md-gv').textContent = String(Math.abs(cur - prod));
-    el.querySelector('.md-gl').textContent = gapLabel(prod, cur);
+    setText(el.querySelector('.md-gv'), Math.abs(cur - prod));
+    setText(el.querySelector('.md-gl'), gapLabel(prod, cur));
   }
 
   /* Divisor-pillret: en ren flygkopia mellan tva landade noder. Den bar
@@ -1889,7 +1913,8 @@ const MultDivGame = (() => {
     setTimeout(() => {
       gapEl = document.createElement('div');
       gapEl.className = 'md-gap';
-      gapEl.innerHTML = '<span class="md-gv"></span><span class="md-gl"></span>';
+      // Textnoderna finns fran start sa setText bara byter varde i dem
+      gapEl.innerHTML = '<span class="md-gv">0</span><span class="md-gl">·</span>';
       gapEl.style.opacity = '0';
       wrap.appendChild(gapEl);
       setGapChip(gapEl, n * w.divisor, w.cur);
@@ -1911,8 +1936,8 @@ const MultDivGame = (() => {
       playCarrySound();
       flyPill(dir > 0 ? gapEl : win, dir > 0 ? win : gapEl, String(w.divisor), 540, () => {
         n += dir;
-        win.querySelector('.md-cd').textContent = String(n);
-        win.querySelector('.md-ax').textContent = `· ${w.divisor} = ${n * w.divisor}`;
+        setText(win.querySelector('.md-cd'), n);
+        setText(win.querySelector('.md-ax'), `·${w.divisor}=${n * w.divisor}`);
         win.classList.remove('chip-in', 'chip-pop'); void win.offsetWidth; win.classList.add('chip-pop');
         setGapChip(gapEl, n * w.divisor, w.cur);
         gapEl.classList.remove('gap-in', 'gap-pop'); void gapEl.offsetWidth; gapEl.classList.add('gap-pop');
@@ -1940,9 +1965,16 @@ const MultDivGame = (() => {
     setTimeout(() => {
       if (ax)  ax.remove();
       if (gap) gap.remove();
-      chip.classList.remove('md-anchor', 'won', 'moving');
+      chip.classList.remove('md-anchor', 'won');
+      // Brickan kroop ihop nar notationen foll bort — den tar tillbaka
+      // sin plats i marginalen innan den flyger, sa den aldrig star
+      // ovanpa tabellen ens ett ogonblick.
+      stackMarginChips([chip], step, 6);
+    }, 300);
+    setTimeout(() => {
+      chip.classList.remove('moving');
       chipToCell('q', step.g, step.q, () => setTimeout(cb, 420));
-    }, 380);
+    }, 740);
   }
 
   /* ══════════════════════════════════════════════════════════
