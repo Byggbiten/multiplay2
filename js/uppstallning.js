@@ -790,7 +790,7 @@ const UppstallningGame = (() => {
       const sum = valA + valB;
       const ans = sum % 10;
       const nextCarry = sum > 9 ? 1 : 0;
-      steps.push({ type:'add_highlight', col:c });
+      steps.push({ type:'add_highlight', col:c, a, b, carry_in:carryVal });
       if (sum > 9) {
         const behover = 10 - effectiveA;
         const kvar = giveVal - behover;
@@ -1577,6 +1577,12 @@ const UppstallningGame = (() => {
         work.querySelectorAll('.sub-paren').forEach(e => e.remove());
         const plus = work.querySelector('.sub-group .nf-op');
         if (plus) plus.remove();
+        /* Uttrycket krympte när parentesen och försvararen försvann, men
+           ytan står kvar på sub_exprs bredare x. Utan omsättning hamnar
+           10 − 5 kant i kant med E-cellen och luften mot tabellen som
+           varje annat steg har försvinner. Stridsplatsen ska ligga i
+           marginalen hela vägen, inte bara när uttrycket är som bredast. */
+        flyWorkToSpot(step.col, 220, false);
       });
       after(1500, cb);
 
@@ -1680,7 +1686,17 @@ const UppstallningGame = (() => {
     if (!step) return '';
     let html = '';
     if (step.type === 'add_highlight') {
-      html = '';
+      /* Steget markerade kolumnen men sa ingenting, så tankerutan blev tom
+         när barnet tryckte fram det — ett dött steg mitt i kedjan. Det får
+         samma kolumnöppning som subtraktionen redan har. Öppningen DÖMER
+         inte: nästa steg är det som avgör om talet går eller behöver
+         tiokompisen. Här sägs bara var vi står. */
+      const ck = COL_KEYS[step.col];
+      const colName = step.col === 0 ? 'E (ental)' : step.col === 1 ? 'T (tiotal)' : 'H (hundratal)';
+      html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: ` +
+             `<strong style="color:${PVC[ck]}">${step.a}</strong> + ` +
+             `<strong style="color:${PVC[ck]}">${step.b}</strong>` +
+             `${step.carry_in ? ' + minnet' : ''}`;
     /* ── Komplementvägen, en kort mening per steg (spec §3c/§3d) ──
        Ingen aritmetik i texten som barnet måste räkna ut: 3:an lämnar
        5:an på riktigt, så "5:an har 2 kvar" räcker som mening. */
