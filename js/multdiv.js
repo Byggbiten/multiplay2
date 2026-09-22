@@ -1342,7 +1342,20 @@ const MultDivGame = (() => {
     } else if (step.t === 'drem_calc') {
       // Resten föds som BRICKA i marginalen ur talet och kvotsiffran (A1)
       const srcs = [...divCurCells(step), document.getElementById(`md-q-${step.g}`)].filter(Boolean);
-      chipBorn(step, step.rem, srcs, () => setTimeout(cb, 150));
+      const kvar = mdChip();
+      if (kvar && kvar.dataset.rest === String(step.rem)) {
+        /* Vandringens mattbricka lever redan och visar ratt tal — den
+           fods inte om. Den glimtar till med kallorna sa kopplingen syns,
+           men den har statt dar hela tiden. */
+        srcs.forEach(el => { el.style.animation = 'md-read-glow 0.52s ease-in-out both'; });
+        kvar.classList.remove('chip-in', 'chip-pop'); void kvar.offsetWidth;
+        kvar.classList.add('chip-pop');
+        App.Sound.play('click');
+        setTimeout(() => { srcs.forEach(el => { el.style.animation = ''; }); }, 520);
+        setTimeout(cb, 700);
+      } else {
+        chipBorn(step, step.rem, srcs, () => setTimeout(cb, 150));
+      }
 
     } else if (step.t === 'drem_place') {
       // Brickan flyger till platsen framför NÄSTA siffra och ÄR resten som
@@ -1960,21 +1973,44 @@ const MultDivGame = (() => {
     }
     const ax  = chip.querySelector('.md-ax');
     const gap = document.querySelector('#md-table-wrap .md-gap');
+    /* Dennis 22/9: mattbrickan SAGER redan hur mycket som blir over — den
+       AR resten. Att slacka den har och lata drem_calc foda en ny lat
+       1:an forsvinna i ett steg och komma tillbaka i nasta, precis det vi
+       har som regel mot. Finns det en rest byter brickan skepnad i
+       stallet och star kvar hela vagen till pappret: samma nod. */
+    const behall = !!gap && step.rem > 0;
     if (ax)  ax.classList.add('ax-gone');
-    if (gap) gap.classList.add('fading');
+    if (gap && !behall) gap.classList.add('fading');
     setTimeout(() => {
-      if (ax)  ax.remove();
-      if (gap) gap.remove();
+      if (ax) ax.remove();
+      if (gap && !behall) gap.remove();
+      if (behall) gapTillRest(gap, step);
       chip.classList.remove('md-anchor', 'won');
       // Brickan kroop ihop nar notationen foll bort — den tar tillbaka
       // sin plats i marginalen innan den flyger, sa den aldrig star
       // ovanpa tabellen ens ett ogonblick.
-      stackMarginChips([chip], step, 6);
+      stackMarginChips(behall ? [chip, gap] : [chip], step, 6);
     }, 300);
     setTimeout(() => {
       chip.classList.remove('moving');
-      chipToCell('q', step.g, step.q, () => setTimeout(cb, 420));
+      chipToCell('q', step.g, step.q, () => {
+        // Kvotsiffran har landat. Resten star ensam kvar och tar mitt-
+        // platsen i marginalen, dar drem_calc sedan hittar den.
+        if (behall && gap.isConnected) stackMarginChips([gap], step, 6);
+        setTimeout(cb, 420);
+      });
     }, 560);
+  }
+
+  /* Mattbrickan -> restbricka. Samma nod, ny skepnad: etiketten
+     ("skiljer") faller bort och siffran blir en vanlig .md-cd, sa att
+     chipToRest kan flyga just den noden ut pa pappret i drem_place. */
+  function gapTillRest(gap, step) {
+    gap.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]} md-chip-sm`;
+    gap.dataset.g = step.g;
+    gap.dataset.rest = String(step.rem);
+    gap.innerHTML = String(step.rem).split('')
+      .map(d => `<span class="md-cd">${d}</span>`).join('');
   }
 
   /* ══════════════════════════════════════════════════════════
