@@ -471,7 +471,10 @@ describe('kort division — hjälpkön', () => {
     expect(tabellradHTML(6, 44, 1)).toBe(
       '<span class="md-tr"><span>6 · 6 = 36</span><span class="md-trs"> · </span><strong>6 · 7 = 42</strong>' +
       '<span class="md-trs"> · </span><s>6 · 8 = 48</s></span><span class="md-trn">42 får plats i 44. 48 är för mycket.</span>');
-    expect(tabellradHTML(6, 42, 1)).toContain('Precis 42. 48 är för mycket.');
+    // Mira 23/9: "Precis 6." läste hon om tre gånger — jämnt fall sägs som det är
+    expect(tabellradHTML(6, 42, 1)).toContain('42 går jämnt ut. 48 är för mycket.');
+    // okänd kolumn får aldrig bli "spalt NaN"
+    expect(tabellradHTML(6, 1, undefined)).not.toMatch(/NaN|undefined/);
     expect(tabellradHTML(6, 7, 1)).not.toContain('6 · 0');
     expect(tabellradHTML(6, 1, 1)).toBe('Ingen — 6 är större än 1. Vi skriver 0 i tiotalet, och hela 1:an blir rest.');
   });
@@ -553,8 +556,10 @@ describe('ovningslaget raknar bara helratt', () => {
 
   it('tredje felet visar vagen utan att kosta en livlina', () => {
     expect(src).toMatch(/if \(helpTries >= 3\) visaVagen\(\)/);
-    // livlinan drar polletten FORST efter att vagen faktiskt visats
-    expect(src).toMatch(/if \(!visaVagen\(\)\) return;\s*\n\s*lifelines--/);
+    // livlinan drar polletten FORST efter att vagen faktiskt visats —
+    // och minns fragan, sa ett andra tryck pa samma fraga ar gratis (Mira 23/9)
+    expect(src).toMatch(/if \(!visaVagen\(\)\) return;\s*\n\s*lifelineShownFor = item;\s*\n\s*lifelines--/);
+    expect(src).toMatch(/lifelineShownFor === item\) \{ visaVagen\(\); return; \}/);
   });
 
   it('fel svar forbrukas: nasta siffra borjar om', () => {

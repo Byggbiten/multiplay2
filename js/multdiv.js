@@ -1048,14 +1048,16 @@ const MultDivGame = (() => {
      så barn räknar — uppåt tills det blir för mycket. */
   function tabellradHTML(N, cur, g) {
     const q = Math.floor(cur / N), r = cur - q * N;
-    if (q === 0) return divStepText({ t: 'ryms_inte', zero: true, N, cur, g });
+    if (q === 0) return isG(g)
+      ? divStepText({ t: 'ryms_inte', zero: true, N, cur, g })
+      : `Ingen — <strong>${N}</strong> är större än <strong>${cur}</strong>. Vi skriver 0, och hela ${cur}:an blir rest.`;
     const rad = k => `${N} · ${k} = ${k * N}`;
     const rows = [];
     if (q > 1) rows.push(`<span>${rad(q - 1)}</span>`);
     rows.push(`<strong>${rad(q)}</strong>`);
     rows.push(`<s>${rad(q + 1)}</s>`);
     const not = r > 0 ? `${q * N} får plats i ${cur}. ${(q + 1) * N} är för mycket.`
-                      : `Precis ${cur}. ${(q + 1) * N} är för mycket.`;
+                      : `${cur} går jämnt ut. ${(q + 1) * N} är för mycket.`;   // Mira: "Precis 6." laste hon om tre ganger
     return `<span class="md-tr">${rows.join('<span class="md-trs"> · </span>')}</span><span class="md-trn">${not}</span>`;
   }
 
@@ -2528,6 +2530,10 @@ const MultDivGame = (() => {
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';
     divStrikeAwait = { gs: [...item.gs], cur: item.cur };
+    /* Mira 23/9: "Tiotalet ar klart — tryck pa det" medan ENTALET lyste
+       (gloden fran flytten lag kvar). Hon tryckte pa den som lyste och
+       fick "Inte den". Prompten maste tanda det den pekar pa. */
+    divLight(item.gs, null, null);
     helpBubble(divHelpAsk(item));
   }
 
@@ -2821,13 +2827,23 @@ const MultDivGame = (() => {
     /* Svaret VISAS i bubblan — ingen auto-fyllning: knappsatsen är kvar
        och barnet måste själv skriva rätt svar för att gå vidare. */
     const expr = helpExprHTML(item);
+    if (item.kind === 'divq') {
+      /* "17 ÷ 3 = 5" ar fel matte — sag det som det ar. */
+      const q = helpExpected(item);
+      helpBubble(`Det ryms <strong>${q}</strong> ${q === 1 ? `hel ${numB}:a` : `hela ${numB}:or`} i <strong>${item.cur}</strong> — skriv in det själv! ✍️`);
+    } else
     helpBubble(`${expr ? `${expr} = ` : 'Svaret är '}<strong>${helpExpected(item)}</strong> — skriv in det själv! ✍️`);
     return true;
   }
 
+  let lifelineShownFor = null;   // fragan vars vag redan visats — visa igen gratis
   function useLifeline() {
-    if (exInputLocked || lifelines <= 0) return;
+    if (exInputLocked) return;
+    const item = helpItem();
+    if (lifelineShownFor && lifelineShownFor === item) { visaVagen(); return; }
+    if (lifelines <= 0) return;
     if (!visaVagen()) return;
+    lifelineShownFor = item;
     lifelines--;
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
