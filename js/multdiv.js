@@ -402,6 +402,10 @@ const MultDivGame = (() => {
        är redan tvåradig (min-height 64), så raden kostar ingen höjd. */
     .md-check { display:block; margin-top:3px; font-size:0.86em;
       font-weight:800; color:#64748b; }
+    /* Uttrycket efter minnesfrågan: parentesen och "= ?" är dämpade, men
+       siffrorna behåller sina egna färger (brickans tal och det röda
+       minnet) — de sätts inline av helpExprHTML och vinner över den här. */
+    .md-qexpr { color:#64748b; font-weight:800; white-space:nowrap; }
 
     /* Numpad + inmatningsfält */
     .md-panel { background:var(--glass-strong); border-radius:var(--radius-md); padding:8px 10px;
@@ -2290,11 +2294,26 @@ const MultDivGame = (() => {
        retorisk fråga — brickan på högersidan bär tabellsvaret. B7: ensam
        siffra + minne har inget tabellsvar att peka på. */
     if (item.step === 'mem') {
+      /* Dennis 22/9: frågan pekade på minnet men aldrig på tabellsvaret —
+         det stod bara på brickan i marginalen, och barnet fick hålla det i
+         huvudet för att veta VAD 6:an ska läggas till. Uttrycket skrivs ut
+         som notation efter frågan. Det är samma gräns som i subtraktionen:
+         aritmetik i text är fel när den ERSÄTTER en rörelse barnet borde
+         se — men här ÄR uträkningen steget, och då skrivs den som den
+         skrivs på papper. Uttrycket byggs av helpExprHTML, samma som
+         livlinan visar, så siffrorna och färgerna aldrig kan gå isär. */
+      const uttryck = `<span class="md-qexpr">(${helpExprHTML(item)} = ?)</span>`;
       if (item.single) {
+        /* Med uttrycket utskrivet sa den gamla meningen bada talen tva
+           ganger ("6:an och 1:an i minne" + "(6 + 1 = ?)") och radbrot vid
+           390 — bubblan vaxte 42 -> 64 px och knappsatsen hoppade 22 px
+           ner under fingret, samma fel som C4 rattade i demon. Kortad, och
+           till SAMMA form som den vanliga minnesfragan: minnets varde star
+           i uttrycket, dar det bara behover sagas en gang. */
         const d = item.x === null ? item.y : item.x;
-        return `Här står <strong style="color:${C}">${d}</strong>:an och <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det?`;
+        return `<strong style="color:${C}">${d}</strong>:an och minnet — vad blir det? ${uttryck}`;
       }
-      return `Nu <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det?`;
+      return `Nu <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det? ${uttryck}`;
     }
     if (item.kind === 'mult') {
       // v31: ren tabellfråga — minnet kommer som egen fråga efteråt
