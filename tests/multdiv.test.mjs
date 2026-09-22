@@ -703,3 +703,41 @@ describe('tyst vandring lacker inte in i fragan', () => {
     expect(src).toMatch(/if \(r\.w\.kind === 'ingen'\) return divqHeadHTML\(item\) \+ r\.r1;/);
   });
 });
+
+/* Dennis 23/9: "14 är närmast men det är också det enda alternativet. Så
+   det blir lite dumt att säga 14 är närmast vi tar det när det inte fanns
+   nåt annat att välja på."
+
+   Ord som "närmast", "bäst" och "hellre" förutsätter att något valdes
+   BORT. Sedan ankarparet blev ett enda ankare finns inget alternativ, och
+   orden blev kvarlevor som påstår ett val som aldrig gjordes. Vakten
+   fäller om de kryper tillbaka. */
+describe('vandringen jamfor aldrig med ett alternativ som inte finns', () => {
+  const { planAnchorWalk, anchorWalkRows } = require('../js/multdiv.js').__test;
+  const strip = h => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const JAMFORANDE = /\b(närmast|närmare|bäst|bättre|hellre|i stället för)\b/i;
+
+  it('inga jamforande ord i nagon rad, i nagon variant', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.kind === 'ingen' || w.tyst) continue;
+      for (const slut of ['kvot', 'full', 'ingen']) {
+        const r = anchorWalkRows(c, d, slut, 0);
+        for (const [n, h] of [['r1', r.r1], ['r2', r.r2], ['r2a', r.r2a], ['r2b', r.r2b], ['r3', r.r3]]) {
+          if (!h) continue;
+          const t = strip(h);
+          if (JAMFORANDE.test(t)) fel.push(`${c}÷${d} ${n} (${slut}): "${t}"`);
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('vakten faller faktiskt pa de gamla meningarna', () => {
+    expect(JAMFORANDE.test('14 är närmast — och det får plats!')).toBe(true);
+    expect(JAMFORANDE.test('4 är närmast. Mellan 4 och 7 skiljer det 3.')).toBe(true);
+    expect(JAMFORANDE.test('4 får plats i 5!')).toBe(false);
+    expect(JAMFORANDE.test('Precis — inget blir över!')).toBe(false);
+  });
+});

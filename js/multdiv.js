@@ -1223,17 +1223,28 @@ const MultDivGame = (() => {
       ? `Vi skriver in siffran <strong class="md-wd" style="color:${qf}">${w.q}</strong>` +
         ` <span class="md-wy">(för att det får plats ${antal})</span>`
       : antal + (w.rest ? `, och <strong>${w.rest}</strong> över` : ' — det går jämnt ut');
+    /* Dennis 23/9: "14 ar narmast men det ar ocksa det enda alternativet.
+       Sa det blir lite dumt att saga 14 ar narmast vi tar det nar det inte
+       fanns nat annat att valja pa."
+
+       Han har ratt, och det galler ALLA varianter, inte bara exakt-
+       traffen. "Narmast" forutsatter att nagot valdes bort. Sedan han
+       bestamde att bara ETT ankare visas finns inget alternativ — ordet ar
+       en kvarleva fran nar vi visade ett par. Meningarna sager nu vad
+       ankaret GOR i stallet for att jamfora det med nagot som inte finns. */
     let r2;
     if (w.kind === 'exakt') {
-      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
+      r2 = `<span class="md-walk r2">Det går precis jämnt ut!</span>`;
     } else if (w.kind === 'plan') {
-      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
-           `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — för lite för en till.</span>`;
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> får plats i ` +
+           `<strong>${cur}</strong>, och <strong>${w.mellan}</strong> blir över — ` +
+           `för lite för en till.</span>`;
     } else if (w.kind === 'upp') {
-      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
-           `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — där får ${nOr(w.steg, N)} till plats.</span>`;
+      r2 = `<span class="md-walk r2">Från <strong>${w.bas.prod}</strong> upp till ` +
+           `<strong>${cur}</strong> är det <strong>${w.mellan}</strong> — ` +
+           `där får ${nOr(w.steg, N)} till plats.</span>`;
     } else {
-      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket. ` +
            `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`;
     }
     /* Dennis, mot bild (105 ÷ 3): "Har gick det lite for snabbt. Ett
@@ -1272,8 +1283,8 @@ const MultDivGame = (() => {
          en rest ligger talet hogre an ankaret och "narmast" stammer. */
       r2a = w.rest === 0
         ? `<span class="md-walk r2">Precis — inget blir över!</span>`
-        : `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
-          `och det får plats!</span>`;
+        : `<span class="md-walk r2"><strong>${w.bas.prod}</strong> får plats i ` +
+          `<strong>${cur}</strong>!</span>`;
       r2b = '';
       r2q = '';
     } else if (w.kind === 'ner') {
