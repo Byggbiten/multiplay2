@@ -338,7 +338,15 @@ const MultDivGame = (() => {
     .md-divwrap { display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
       gap:8px clamp(8px,2vw,18px); padding:2px 0; }
     .md-frac { display:flex; flex-direction:column; align-items:center; gap:4px; }
-    .md-fracrow { display:flex; gap:clamp(3px,0.9vw,7px); }
+    /* C2 (granskning 21/9): mellanresten skrivs uppe till VÄNSTER om nästa
+       täljarsiffra — bokens notation, den stannar. Men med 3,5 px mellan
+       cellerna fanns ingen plats att skriva den på: den låg 7 px in över
+       den föregående, redan strukna siffrans ram (mätt 630÷5 vid 390:
+       resten 91,8–105,4, grannen slutar 98,9). Resten behöver en egen
+       bana, inte en negativ förskjutning in i grannen. Gapet är den
+       banan — 11,7 px vid 390, vilket ger resten ~2,7 px luft åt vänster
+       och låter den luta in över sin EGEN siffras hörn, dit den hör. */
+    .md-fracrow { display:flex; gap:clamp(11px,3vw,16px); }
     .md-fraccol { display:flex; flex-direction:column; align-items:center; gap:2px; }
     .md-flbl { font-size:clamp(0.8rem,1.6vw,1.15rem); font-weight:900; line-height:1.1; }
     .md-fracbar { align-self:stretch; height:4px; border-radius:2px;
@@ -359,11 +367,11 @@ const MultDivGame = (() => {
     .md-cell .nstrike path { stroke-width:1.8; }
     /* C2: resten är minst 16 px, på en vit pill så den läses mot grannens
        ram, och ett steg längre ut från cellen än förr (−12/−11 px). */
-    .md-cell .md-divrem { position:absolute; top:-11px; left:-12px; z-index:3; display:none;
+    .md-cell .md-divrem { position:absolute; top:-11px; left:-9px; z-index:3; display:none;
       font-size:clamp(1rem,2.4vw,1.45rem); padding:0 3px; border-radius:6px;
       background:rgba(255,255,255,0.92); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
     .md-cell .md-divrem.on { display:inline-flex; }
-    .md-cell .md-divslot { position:absolute; top:-13px; left:-13px; z-index:4;
+    .md-cell .md-divslot { position:absolute; top:-13px; left:-10px; z-index:4;
       background:rgba(255,255,255,0.92); cursor:pointer; }
     /* C1: slotten är 16×19 px — träffytan minst 44×44, centrerad */
     .md-cell .md-divslot::after, .md-cell .md-restslot::after { content:''; position:absolute;
@@ -387,6 +395,13 @@ const MultDivGame = (() => {
       font-size:clamp(0.92rem,2vw,1.15rem);
       border:2px solid color-mix(in srgb, var(--accent) 18%, transparent);
       animation:md-bubble-in 0.3s var(--spring); line-height:1.5; }
+    /* D3 (granskning 21/9): verifieringen "kolla: 24 · 4 = 96" är Dennis
+       beslut och stannar — men två likheter i en mening är två idéer att
+       ta in samtidigt. Kontrollen får egen rad, mindre och dämpad, så
+       svaret läses först och frågan "stämmer det?" sedan. Demons bubbla
+       är redan tvåradig (min-height 64), så raden kostar ingen höjd. */
+    .md-check { display:block; margin-top:3px; font-size:0.86em;
+      font-weight:800; color:#64748b; }
 
     /* Numpad + inmatningsfält */
     .md-panel { background:var(--glass-strong); border-radius:var(--radius-md); padding:8px 10px;
@@ -924,11 +939,20 @@ const MultDivGame = (() => {
           ? `<strong>${step.digits[0]}</strong>:an och <strong>${step.digits[1]}</strong>:an är klara — vi stryker dem! ✏️`
           : `<strong>${step.digits[0]}</strong>:an är klar — vi stryker den! ✏️`;
       case 'done':
-        return plan.kind === 'division'
-          ? `Klart! 🎉 ${numA} ÷ ${numB} = <strong>${plan.answer}</strong> — kolla: ${plan.answer} · ${numB} = ${numA}!`
-          : `Klart! 🎉 ${numA} · ${numB} = <strong>${plan.answer}</strong>`;
+        return doneBubbleHTML();
     }
     return '';
+  }
+
+  /* Klart-bubblan byggs pa ETT stalle: demon och hjalplaget hade samma
+     strang ordagrant pa tva rader, och D3-fixen skulle annars behova
+     goras tva ganger. */
+  function doneBubbleHTML() {
+    if (plan.kind !== 'division') {
+      return `Klart! 🎉 ${numA} · ${numB} = <strong>${plan.answer}</strong>`;
+    }
+    return `Klart! 🎉 ${numA} ÷ ${numB} = <strong>${plan.answer}</strong>` +
+           `<span class="md-check">Kolla: ${plan.answer} · ${numB} = ${numA} ✅</span>`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2530,9 +2554,7 @@ const MultDivGame = (() => {
 
   function helpTaskDone() {
     exScore++;
-    helpBubble(plan.kind === 'division'
-      ? `Klart! 🎉 ${numA} ÷ ${numB} = <strong>${plan.answer}</strong> — kolla: ${plan.answer} · ${numB} = ${numA}!`
-      : `Klart! 🎉 ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    helpBubble(doneBubbleHTML());
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';
     App.Sound.play('correct');
