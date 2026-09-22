@@ -338,6 +338,14 @@ const MultDivGame = (() => {
     #md-table-wrap.shake { animation:md-shake 0.3s ease; }
     .md-free-card { padding:6px; }
     .md-free-pad { display:flex; gap:clamp(5px,1.4vw,9px); align-items:stretch; }
+    /* Livlinan star over knappsatsen i fria laget, full bredd: den ar ett
+       eget val barnet gor, inte en granne till siffrorna. */
+    .md-free-ll { width:100%; min-height:44px; margin-bottom:6px; color:#fff;
+      display:flex; align-items:center; justify-content:center; gap:7px;
+      font-size:0.95rem; border-radius:var(--radius-full); }
+    .md-free-ll svg { width:20px; height:20px; flex-shrink:0;
+      fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+    .md-free-ll:disabled { cursor:default; }
     .md-free-keys { flex:1 1 auto; display:grid; grid-template-columns:repeat(3,1fr);
       grid-auto-rows:clamp(46px,min(12vw,9vh),60px); gap:clamp(5px,1.4vw,9px); }
     .md-free-keys .md-nk { width:100%; height:100%; border-radius:16px;
@@ -3126,6 +3134,11 @@ const MultDivGame = (() => {
   ══════════════════════════════════════════════════════════ */
   const ICON_ERASE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6H9.6a2 2 0 0 0-1.5.7L3.4 12l4.7 5.3a2 2 0 0 0 1.5.7H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"/><path d="M17 10l-4 4M13 10l4 4"/></svg>';
   const ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg>';
+  /* Livboj — SVG, inte emoji (regel 11). Ringen, navet och de fyra
+     banden, sa den lases som livboj aven i 20 px. */
+  const ICON_BUOY = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/>' +
+    '<path d="M12 3v5.4M12 15.6V21M3 12h5.4M15.6 12H21"/></svg>';
   const isDivFree = () => plan.kind === 'division';
   const freeCellId = g => (isDivFree() ? 'md-q-' : 'md-ans-') + g;
 
@@ -3141,6 +3154,7 @@ const MultDivGame = (() => {
     /* Ingen rubrik över knappsatsen: rutorna, fokusringen och markören
        säger redan vad som ska göras (Dennis 21/9, additionen). */
     ui.innerHTML = `<div class="md-panel md-free-card">
+      ${isDivFree() ? freeLifelineBtnHTML() : ''}
       <div class="md-free-pad">
         <div class="md-free-keys">
           ${[1,2,3,4,5,6,7,8,9].map(k =>
@@ -3154,6 +3168,46 @@ const MultDivGame = (() => {
       </div>
     </div>`;
     exFreeUpdateSubmit();
+  }
+
+  /* ── LIVLINAN I FRIA LAGET (Dennis 22/9) ─────────────────────────
+     "Rakna sjalv" hade ingen livlina alls — bara knappsatsen. Nu finns
+     ankarvandringen dar ocksa, men som barnets eget val: samma tva per
+     runda som hjalplaget, och samma rakning (ingen poangpaverkan).
+
+     Den galler kort division. Multiplikationens fria lage har ingen
+     vandring att visa — dar skriver barnet hela produkten, och en
+     livlina skulle bara vara facit. */
+  function freeLifelineBtnHTML() {
+    const on = lifelines > 0;
+    return `<button class="md-btn md-free-ll" id="md-free-lifeline"
+      ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()"
+      style="background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'}">` +
+      `${ICON_BUOY} <span>Livlina (${lifelines} kvar)</span></button>`;
+  }
+
+  /* Vilken kvotsiffra star fokusringen pa? Den siffrans arbetstal ar det
+     vandringen ska handla om — inte uppgiftens forsta. Barnet kan ha
+     skrivit tre siffror och fastnat pa den fjarde. */
+  function freeWalkStep() {
+    if (!plan || plan.kind !== 'division' || !plan.pass) return null;
+    return plan.pass.steps.find(st => st.g === exFreeCur && !st.skip) || null;
+  }
+
+  function useFreeLifeline() {
+    if (lifelines <= 0) return;
+    const st = freeWalkStep();
+    if (!st) return;
+    lifelines--;
+    App.Sound.play('click');
+    const btn = document.getElementById('md-free-lifeline');
+    if (btn) btn.outerHTML = freeLifelineBtnHTML();
+    /* Hela vagen, resten med: har finns ingen annan hjalp pa skarmen, till
+       skillnad fran hjalplaget dar vandringen redan spelats. Svaret skrivs
+       anda in for hand — knappsatsen ror vi inte. */
+    const r = anchorWalkRows(st.cur, numB, 'full');
+    const b = document.getElementById('md-bubble');
+    if (b) b.innerHTML = `<div class="md-thought">${r.r1}${r.r2}${r.r3}</div>`;
   }
 
   function exFreeInit() {
@@ -3595,6 +3649,7 @@ const MultDivGame = (() => {
     divTapSlot,                            // divisionens PLACERA-fas (v32)
     divDigitTap,                           // divisionens STRYK-fas (v36)
     exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeRestTap,
+    useFreeLifeline,                       // livlinan i fria laget (22/9)
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     /* Endast för vitest: ren matte-kärna + generator */
