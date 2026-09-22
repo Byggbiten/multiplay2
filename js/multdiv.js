@@ -932,7 +932,7 @@ const MultDivGame = (() => {
       if (s.skip) { steps.push({ t: 'dskip', ...s }); steps.push({ t: 'dtake', ...s }); continue; }
       steps.push({ t: 'dask', ...s });                // "Hur många hela 4:or ryms i 9?"
       const walk = planAnchorWalk(s.cur, pl.b);
-      if (walk.kind !== 'ingen') {
+      if (walk.kind !== 'ingen' && !walk.trivial) {
         steps.push({ t: 'dwalk_anchors', ...s, walk }); // "Fem 7:or är 35. Tio 7:or är 70."
         steps.push({ t: 'dwalk_pick',    ...s, walk }); // valet + frågan: hur mycket skiljer det?
         // 'exakt' har ingen krock att visa — ankaret ÄR talet, ett klick räcker
@@ -1105,6 +1105,13 @@ const MultDivGame = (() => {
 
     return {
       kind: steg === 0 ? (rest === 0 ? 'exakt' : 'plan') : (steg > 0 ? 'upp' : 'ner'),
+      /* Dennis 22/9, mot bild (816 ÷ 8, hundratalet): "Den har blev kanske
+         lite lojlig ocksa." Talet var 8 och divisorn 8 — och appen svarade
+         med en hel ankarvandring: "En 8:a ar 8. Tva 8:or ar 16." → "8 —
+         precis!" for att komma fram till att 8:an gar upp i sig sjalv en
+         gang. Vandringen finns for att ta sig fram till ett svar man inte
+         ser; har ser man det. Da ska den halla tyst. */
+      trivial: q === 1 && rest === 0,
       cur, divisor, q, rest,
       ankare: [{ n: lag, prod: lag * divisor }, { n: hog, prod: hog * divisor }],
       bas: { n: bas, prod: bas * divisor },
@@ -1202,7 +1209,12 @@ const MultDivGame = (() => {
       `<strong>${a}</strong> − <strong>${b}</strong> = ?</span></span>`;
     let r2a, r2b, r2q;
     if (w.kind === 'exakt') {
-      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
+      /* Dennis 22/9: "8 — Precis! <- vada 8 precis?" Raden sa ett tal utan
+         att saga VAD som var precis. Nu samma form som de andra tva
+         ("X ar narmast — men lite for mycket" / "X ar narmast. Hur mycket
+         skiljer det?"), sa barnet moter ett monster. */
+      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
+            `och det stämmer precis!</span>`;
       r2b = '';                                   // ingen krock att visa
       r2q = '';                                   // inget avstand att fraga om
     } else if (w.kind === 'ner') {
@@ -1228,8 +1240,13 @@ const MultDivGame = (() => {
       r2b = w.kind === 'plan'
         ? `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
           `för lite för en till <strong>${N}</strong>:a.</span>`
-        : `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
-          `då får ${nOr(w.steg, N)} till plats.</span>`;
+        /* Samma krock som Dennis fann i ner-riktningen, hittad av
+           textsvepet: nar avstandet rakar vara divisorn ("Det skiljer 2 —
+           da far en 2:a till plats") star ett ANTAL bredvid ett OBJEKT med
+           samma siffra. 16 fall. Leder darfor med handlingen och slutar i
+           resultatet, precis som ner-grenen. */
+        : `<span class="md-walk r2">Där får ${nOr(w.steg, N)} till plats — ` +
+          `då blir det <strong>${w.q * N}</strong>.</span>`;
       r2q = gapQ(cur, w.bas.prod);
     }
     return { w, r1, r2, r2a, r2b, r2q,
@@ -2655,7 +2672,9 @@ const MultDivGame = (() => {
     if (cell && !cell.classList.contains('filled')) cell.classList.add('active-col');
     renderMemCol();
     const rows = anchorWalkRows(item.cur, numB, 'ingen', item.g);
-    if (rows.w.kind === 'ingen') { showHelpUI(); return; } // q = 0 — ingen vandring
+    /* Ingen vandring nar den inte lar ut nagot: q = 0 (inget ryms) eller
+       talet AR divisorn (8 i 8). Fragan stalls rakt av. */
+    if (rows.w.kind === 'ingen' || rows.w.trivial) { showHelpUI(); return; }
     /* Dennis 22/9, efter prov: "man ska ju klicka for varje steg. inte
        att den skall spelas som en alldeles for snabb film."
 
@@ -3906,7 +3925,7 @@ const MultDivGame = (() => {
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planAnchorWalk, planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planCarries, memMismatch, planRests, restMismatch },
+    __test: { planAnchorWalk, anchorWalkRows, planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planCarries, memMismatch, planRests, restMismatch },
   };
   return api;
 })();

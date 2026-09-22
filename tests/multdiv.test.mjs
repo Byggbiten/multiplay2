@@ -304,9 +304,12 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
     for (const s of pl.pass.steps) {
       if (s.skip) { t.push('dskip', 'dtake'); continue; }
       t.push('dask');
-      if (s.q > 0) {
+      const w = planAnchorWalk(s.cur, d);
+      /* Ingen vandring nar den inte lar ut nagot: q = 0 (inget ryms) eller
+         talet AR divisorn (Dennis 22/9, 816 ÷ 8: "lite lojlig"). */
+      if (s.q > 0 && !w.trivial) {
         t.push('dwalk_anchors', 'dwalk_pick');
-        if (planAnchorWalk(s.cur, d).kind !== 'exakt') t.push('dwalk_gap');
+        if (w.kind !== 'exakt') t.push('dwalk_gap');
       }
       t.push('dwrite');
       if (s.rem > 0 && !s.last) t.push('drem_calc', 'drem_place');
@@ -342,16 +345,18 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
     const t = (n, d, lv) => planDivSteps(buildDivPlan(n, d, lv)).map(s => s.t).join(' ');
     const W = 'dwalk_anchors dwalk_pick dwalk_gap ';   // med krock
     const E = 'dwalk_anchors dwalk_pick ';             // 'exakt' — ingen krock
-    /* 84 ÷ 4: bada siffrorna ar 'exakt' (8÷4, 4÷4) — inget att mata */
-    expect(t(84, 4, 1)).toBe('dask ' + E + 'dwrite dstrike dask ' + E + 'dwrite dstrike done');
+    /* 84 ÷ 4: 8÷4 ar 'exakt' (tva 4:or), 4÷4 ar TRIVIAL — talet ar
+       divisorn, sa den siffran far ingen vandring alls. */
+    expect(t(84, 4, 1)).toBe('dask ' + E + 'dwrite dstrike dask dwrite dstrike done');
     /* 96 ÷ 4: 9÷4 'plan', 16÷4 'ner' — bada har krock */
     expect(t(96, 4, 2)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
     /* 738 ÷ 3: plan, ner, upp */
     expect(t(738, 3, 3)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
     /* 336 ÷ 6: ledande hopp, sedan plan + upp */
     expect(t(336, 6, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
-    /* 612 ÷ 6: mittsiffran ger q = 0 — ingen vandring, dask gar rakt pa dwrite */
-    expect(t(612, 6, 4)).toBe('dask ' + E + 'dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
+    /* 612 ÷ 6: forsta siffran ar TRIVIAL (6 i 6), mittsiffran ger q = 0 —
+       bada gar rakt fran dask till dwrite. Entalet (12÷6) ar 'exakt'. */
+    expect(t(612, 6, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
     /* 105 ÷ 3 (Dennis eget): ledande hopp, tiotalet 'upp', entalet 'exakt' */
     expect(t(105, 3, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
   });
@@ -456,5 +461,92 @@ describe('ankarvandringen', () => {
     for (let d = 2; d <= 9; d++) for (let c = 0; c < d; c++) {
       expect(planAnchorWalk(c, d).kind).toBe('ingen');
     }
+  });
+});
+
+/* Dennis 22/9: 816 ÷ 8 gav en hel ankarvandring för att komma fram till
+   att 8:an går upp i sig själv en gång. Vandringen finns för att ta sig
+   fram till ett svar man inte ser — när man ser det ska den hålla tyst. */
+describe('vandringen tiger nar den inte lar ut nagot', () => {
+  const { planAnchorWalk, planDivSteps } = require('../js/multdiv.js').__test;
+  const { buildDivPlan } = require('../js/multdiv.js')._internals;
+
+  it('talet ar divisorn: trivial', () => {
+    for (let d = 2; d <= 9; d++) expect(planAnchorWalk(d, d).trivial).toBe(true);
+  });
+
+  it('trivial galler exakt nar kvoten ar 1 och inget blir over', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = 0; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      const vantat = (c === d);
+      if (!!w.trivial !== vantat) fel.push(`${c}÷${d}: trivial ${w.trivial}, väntat ${vantat}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('816 ÷ 8: hundratalet far inga vandringssteg', () => {
+    const steps = planDivSteps(buildDivPlan(816, 8));
+    const kol2 = steps.filter(s => s.g === 2).map(s => s.t);
+    expect(kol2).not.toContain('dwalk_anchors');
+    expect(kol2).not.toContain('dwalk_pick');
+    expect(kol2).toContain('dask');
+    expect(kol2).toContain('dwrite');
+  });
+
+  it('816 ÷ 8 ger fortfarande 102', () => {
+    const pl = buildDivPlan(816, 8);
+    expect(pl.answer).toBe(102);
+  });
+});
+
+/* ── Textsvepet ───────────────────────────────────────────────────────
+   Dennis 22/9, efter att ha hittat samma fel tre gånger själv: "nu vill
+   jag att du gör ett bättre jobb med att granska det jobb och resultat du
+   får av subagenterna."
+
+   Felen han hittade var inte geometriska — de satt i SPRÅKET, och mina
+   mätningar av pixlar och nodidentitet kunde aldrig se dem. "6 för mycket
+   — vi tar bort en 6:a" lade ett ANTAL bredvid ett OBJEKT med samma
+   siffra, och barnet kan inte veta vilket som är vilket.
+
+   Det här svepet läser varje mening i varje möjlig vandring (divisor 2–9,
+   alla tal) och fäller den mekaniskt om samma heltal förekommer två
+   gånger i samma mening. Det hittade ett sextonde fall av samma klass i
+   upp-riktningen som ingen hade rapporterat.                          */
+describe('textsvepet: ingen mening sager samma tal i tva roller', () => {
+  const { planAnchorWalk, anchorWalkRows } = require('../js/multdiv.js').__test;
+  const strip = h => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+
+  it('r2a och r2b upprepar aldrig ett tal', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.kind === 'ingen' || w.trivial) continue;
+      const r = anchorWalkRows(c, d, 'kvot', 1);
+      for (const [namn, html] of [['r2a', r.r2a], ['r2b', r.r2b]]) {
+        if (!html) continue;
+        const txt = strip(html), tal = txt.match(/\d+/g) || [], sedda = {};
+        for (const t of tal) {
+          sedda[t] = (sedda[t] || 0) + 1;
+          if (sedda[t] > 1) { fel.push(`${c}÷${d} ${namn}: "${txt}"`); break; }
+        }
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('antalet textformer ar litet nog att lasa igenom for hand', () => {
+    const former = new Set();
+    for (let d = 2; d <= 9; d++) for (let c = d; c < 10 * d; c++) {
+      const w = planAnchorWalk(c, d);
+      if (w.kind === 'ingen' || w.trivial) continue;
+      const r = anchorWalkRows(c, d, 'kvot', 1);
+      for (const [n, h] of [['r1', r.r1], ['r2a', r.r2a], ['r2b', r.r2b], ['r3', r.r3]])
+        if (h) former.add(n + '|' + strip(h).replace(/\d+/g, '#'));
+    }
+    /* Växer den här förbi ~40 har någon lagt till en specialformulering
+       som ingen läst igenom. Då ska svepet köras och texterna granskas. */
+    expect(former.size).toBeLessThanOrEqual(40);
   });
 });
