@@ -1264,8 +1264,16 @@ const MultDivGame = (() => {
          krock, ingen avstandsfraga: forr stalldes "8 − 5 = ?" och sedan
          "Blir nagot over? 8 − 5 = ?" — ordagrant samma subtraktion tva
          ganger, i 108 av 388 fall med rest. Restfragan gor jobbet ensam. */
-      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
-            `och det får plats!</span>`;
+      /* Dennis 23/9, mot bild (154 ÷ 7, entalet 14 ÷ 7): raden sa
+         "14 ar narmast" om talet 14. Ordet jamfor tva tal som ar samma
+         tal — 14 ar inte NARA 14, det ÄR 14. 16 fall.
+         Nar ankaret landar rakt pa talet har r1 redan sagt sanningen
+         ("Tva 7:or ar 14"), sa r2a ska BEKRAFTA, inte jamfora. Finns det
+         en rest ligger talet hogre an ankaret och "narmast" stammer. */
+      r2a = w.rest === 0
+        ? `<span class="md-walk r2">Precis — inget blir över!</span>`
+        : `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast — ` +
+          `och det får plats!</span>`;
       r2b = '';
       r2q = '';
     } else if (w.kind === 'ner') {
