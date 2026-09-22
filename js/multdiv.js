@@ -2717,6 +2717,12 @@ const MultDivGame = (() => {
   function helpBubble(html) {
     const area = document.getElementById('md-bubble');
     if (!area) return;
+    /* Samma text igen ska inte poppa om bubblan. Vandringen satter
+       valraden nar rorelsen sker, och showHelpUI satter SAMMA rad nar
+       knappsatsen kommer — utan den har sparren blinkade bubblan till
+       i overlamningen fast ingenting hade andrats. */
+    const cur = area.firstElementChild;
+    if (cur && html && cur.innerHTML === html) return;
     area.innerHTML = html ? `<div class="md-thought">${html}</div>` : '';
   }
 
