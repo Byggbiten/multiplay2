@@ -2751,13 +2751,17 @@ const MultDivGame = (() => {
   function askText(item) {
     const C = cv(item.g);
     /* v32: divisionens frågor — facit sägs ALDRIG i frågan */
-    if (item.kind === 'divq')
+    if (item.kind === 'divq') {
       /* Dennis 22/9: vandringen SPELAS nu (showDivQ) i stallet for att
          staplas som text. Nar knappsatsen kommer star rubriken kvar med
          valet under — men ALDRIG slutsatsen (slut:'ingen'). Det ar
          skillnaden mot demon: dar landar svaret, har tar barnet sista
-         steget sjalv i numpaden. */
-      return divqHeadHTML(item) + anchorWalkRows(item.cur, numB, 'ingen').r2;
+         steget sjalv i numpaden.
+         q = 0 har ingen vandring och darmed ingen valrad — da ar r1
+         ("Inte ens en 6:a far plats i 1") hela ledtraden. */
+      const r = anchorWalkRows(item.cur, numB, 'ingen');
+      return divqHeadHTML(item) + (r.w.kind === 'ingen' ? r.r1 : r.r2);
+    }
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
