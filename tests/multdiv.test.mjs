@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const MD = require('../js/multdiv.js');
 const { buildPlan, buildDivPlan, digitsOf } = MD._internals;
-const { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue } = MD.__test;
+const { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue, planAnchorWalk } = MD.__test;
 
 /* ── Talrymden = generatorernas intervall (genProblem 466–489, genDivProblem 556–578) ── */
 function* multSpace() {
@@ -290,17 +290,24 @@ describe('fria lagets minnesspalt raknas i rattningen (B5)', () => {
 });
 
 describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => {
-  const DIV_TYPES = new Set(['dskip', 'dtake', 'dask', 'dwalk_anchors', 'dwalk_step',
-                             'dwrite', 'drem_calc', 'drem_place', 'dstrike', 'done']);
+  const DIV_TYPES = new Set(['dskip', 'dtake', 'dask', 'dwalk_anchors', 'dwalk_pick',
+                             'dwalk_gap', 'dwrite', 'drem_calc', 'drem_place',
+                             'dstrike', 'done']);
   /* Ankarvandringen (22/9) ligger mellan fragan och svaret. q = 0 har
      ingen vandring — planAnchorWalk ger kind 'ingen' och dask gar rakt
-     pa dwrite ("Ingen hel 6:a ryms"). */
-  function forvantad(pl) {
+     pa dwrite ("Ingen hel 6:a ryms").
+     23/9: vandringens mitt ar TVA steg — dwalk_pick (valet + "hur mycket
+     skiljer det?") och dwalk_gap (krocken). 'exakt' saknar dwalk_gap:
+     ankaret AR talet, det finns inget avstand att mata. */
+  function forvantad(pl, d) {
     const t = [];
     for (const s of pl.pass.steps) {
       if (s.skip) { t.push('dskip', 'dtake'); continue; }
       t.push('dask');
-      if (s.q > 0) t.push('dwalk_anchors', 'dwalk_step');
+      if (s.q > 0) {
+        t.push('dwalk_anchors', 'dwalk_pick');
+        if (planAnchorWalk(s.cur, d).kind !== 'exakt') t.push('dwalk_gap');
+      }
       t.push('dwrite');
       if (s.rem > 0 && !s.last) t.push('drem_calc', 'drem_place');
       t.push('dstrike');
@@ -313,7 +320,7 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
     for (const [n, d, lv] of divSpace()) {
       const pl = buildDivPlan(n, d, lv), st = planDivSteps(pl);
       for (const s of st) if (!DIV_TYPES.has(s.t)) fel.add(s.t);
-      if (JSON.stringify(st.map(s => s.t)) !== JSON.stringify(forvantad(pl))) avv.push(`${n}÷${d}`);
+      if (JSON.stringify(st.map(s => s.t)) !== JSON.stringify(forvantad(pl, d))) avv.push(`${n}÷${d}`);
     }
     expect([...fel]).toEqual([]);
     expect(avv).toEqual([]);
@@ -333,13 +340,20 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
   });
   it('granskningens tal: verbatim kedja', () => {
     const t = (n, d, lv) => planDivSteps(buildDivPlan(n, d, lv)).map(s => s.t).join(' ');
-    const W = 'dwalk_anchors dwalk_step ';
-    expect(t(84, 4, 1)).toBe('dask ' + W + 'dwrite dstrike dask ' + W + 'dwrite dstrike done');
+    const W = 'dwalk_anchors dwalk_pick dwalk_gap ';   // med krock
+    const E = 'dwalk_anchors dwalk_pick ';             // 'exakt' — ingen krock
+    /* 84 ÷ 4: bada siffrorna ar 'exakt' (8÷4, 4÷4) — inget att mata */
+    expect(t(84, 4, 1)).toBe('dask ' + E + 'dwrite dstrike dask ' + E + 'dwrite dstrike done');
+    /* 96 ÷ 4: 9÷4 'plan', 16÷4 'ner' — bada har krock */
     expect(t(96, 4, 2)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    /* 738 ÷ 3: plan, ner, upp */
     expect(t(738, 3, 3)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    /* 336 ÷ 6: ledande hopp, sedan plan + upp */
     expect(t(336, 6, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
     /* 612 ÷ 6: mittsiffran ger q = 0 — ingen vandring, dask gar rakt pa dwrite */
-    expect(t(612, 6, 4)).toBe('dask ' + W + 'dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    expect(t(612, 6, 4)).toBe('dask ' + E + 'dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
+    /* 105 ÷ 3 (Dennis eget): ledande hopp, tiotalet 'upp', entalet 'exakt' */
+    expect(t(105, 3, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + E + 'dwrite dstrike done');
   });
   it('hjalpkon och demon ar samma kedja: varje siffra far en fraga i bada', () => {
     const avv = [];
@@ -377,7 +391,7 @@ describe('fria lagets rester raknas i rattningen (division A4)', () => {
    Testerna låser de tre egenskaper som gör vägen gåbar för ett barn:
    den stämmer, ankarna ramar in svaret, och steget är kort.          */
 describe('ankarvandringen', () => {
-  const { planAnchorWalk } = require('../js/multdiv.js').__test;
+
 
   it('45 ÷ 7 ger Dennis egen vandring', () => {
     const w = planAnchorWalk(45, 7);

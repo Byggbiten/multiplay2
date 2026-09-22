@@ -931,7 +931,10 @@ const MultDivGame = (() => {
       const walk = planAnchorWalk(s.cur, pl.b);
       if (walk.kind !== 'ingen') {
         steps.push({ t: 'dwalk_anchors', ...s, walk }); // "Fem 7:or är 35. Tio 7:or är 70."
-        steps.push({ t: 'dwalk_step',    ...s, walk }); // valet, avståndet, justeringen
+        steps.push({ t: 'dwalk_pick',    ...s, walk }); // valet + frågan: hur mycket skiljer det?
+        // 'exakt' har ingen krock att visa — ankaret ÄR talet, ett klick räcker
+        if (walk.kind !== 'exakt')
+          steps.push({ t: 'dwalk_gap',   ...s, walk }); // måttet föds, brickan krockar
       }
       steps.push({ t: 'dwrite', ...s });              // "Sex 7:or."
       if (s.rem > 0 && !s.last) {
@@ -1022,8 +1025,10 @@ const MultDivGame = (() => {
          rorelsen, bubblan bara meningen som hor till just det steget. */
       case 'dwalk_anchors':
         return anchorWalkRows(step.cur, numB, 'kvot', step.g).r1;
-      case 'dwalk_step':
-        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r2;
+      case 'dwalk_pick':
+        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r2a;
+      case 'dwalk_gap':
+        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r2b;
       case 'dwrite':
         /* Slutsatsen sist och ensam i sitt steg (P4). Resten foregrips
            inte (slut:'kvot') — den ar ett eget steg strax efter. */
@@ -1139,7 +1144,7 @@ const MultDivGame = (() => {
     const qf = g === undefined ? 'var(--deep)' : cv(g);
     if (w.kind === 'ingen') {
       return { w, r1: `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>`,
-               r2: '',
+               r2: '', r2a: '', r2b: '',
                r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong style="color:${qf}">0</strong>.</span>` };
     }
     const r1 = `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`;
@@ -1168,7 +1173,36 @@ const MultDivGame = (() => {
       r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
            `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`;
     }
-    return { w, r1, r2, r3: slut === 'ingen' ? '' : `<span class="md-walk r3">${svar}.</span>` };
+    /* Dennis, mot bild (105 ÷ 3): "Har gick det lite for snabbt. Ett
+       mellansteg dar man ser att 6 ar narmast, och kanske en fraga-
+       stallning: Hur mycket skiljer det mellan 6 och 10?" — och som
+       hard grans: "det far inte bli for mycket forklaringar och
+       sidoekvationer. men iaf, ett mellansteg sa de hinner med att
+       uppfatta."
+
+       Darfor tva korta rader i stallet for en lang: r2a staller fragan
+       nar ankaret ar valt, r2b svarar den nar krocken skett. Inga
+       likheter i texten — brickorna visar dem. r2 star kvar orord for
+       livlinan i fria laget, som SAMMANFATTAR i stallet for att stega. */
+    let r2a, r2b;
+    if (w.kind === 'exakt') {
+      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
+      r2b = '';                                   // ingen krock att visa
+    } else if (w.kind === 'ner') {
+      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — hur mycket?</span>`;
+      r2b = `<span class="md-walk r2"><strong>${Math.abs(w.mellan)}</strong> för mycket — ` +
+            `vi tar bort ${nOr(w.steg, N)}.</span>`;
+    } else {
+      r2a = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. ` +
+            `Hur mycket skiljer det upp till <strong>${cur}</strong>?</span>`;
+      r2b = w.kind === 'plan'
+        ? `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
+          `för lite för en till <strong>${N}</strong>:a.</span>`
+        : `<span class="md-walk r2">Det skiljer <strong>${w.mellan}</strong> — ` +
+          `då får ${nOr(w.steg, N)} till plats.</span>`;
+    }
+    return { w, r1, r2, r2a, r2b,
+             r3: slut === 'ingen' ? '' : `<span class="md-walk r3">${svar}.</span>` };
   }
 
   function skipBubbleHTML(cur, g) {
@@ -1373,9 +1407,13 @@ const MultDivGame = (() => {
       divHighlight(step);
       anchorChipsBorn(step, step.walk, () => setTimeout(cb, 180));
 
-    } else if (step.t === 'dwalk_step') {
-      // Valet + måttet + justeringen som en sammanhängande rörelse
-      runAnchorWalkStep(step, step.walk, () => setTimeout(cb, 150));
+    } else if (step.t === 'dwalk_pick') {
+      // Ankaret väljs — måttet kommer först i nästa steg
+      runAnchorPick(step, step.walk, () => setTimeout(cb, 150));
+
+    } else if (step.t === 'dwalk_gap') {
+      // Måttet föds och divisor-brickan krockar med det
+      runAnchorGap(step, step.walk, () => setTimeout(cb, 150));
 
     } else if (step.t === 'dwrite') {
       anchorChipToQuot(step, cb);
@@ -1941,28 +1979,52 @@ const MultDivGame = (() => {
     setTimeout(() => { p.remove(); cb && cb(); }, dur + 60);
   }
 
-  /* Valet, avstandet och justeringen — EN sammanhangande rorelse.
-     Det ankare som inte anvands tonas ner och forsvinner, det valda
-     glider till marginalens fasta plats och glod, mattet fods under
-     det, och sedan flyttar `steg` divisor-brickor mellan de tva:
-     'upp' = ur gapet IN i ankaret (dar far en till plats),
-     'ner' = ur ankaret UT i gapet (vi tar bort en).
-     'exakt'/'plan' justerar inte — bara mattet. */
-  function runAnchorWalkStep(step, w, cb) {
+  /* Vandringens mitt ar TVA steg, inte ett (Dennis 23/9, mot bild av
+     105 ÷ 3): "Har gick det lite for snabbt. Ett mellansteg dar man ser
+     att 6 ar narmast, och kanske en fragestallning: Hur mycket skiljer
+     det mellan 6 och 10? Nar man klickar, da sker den dar krocken."
+
+     A — runAnchorPick: det bortvalda ankaret tonas bort, det valda glod
+         och tar marginalplatsen. INGET matt an; bubblan staller fragan.
+     B — runAnchorGap: mattet fods med avstandet, och divisor-brickan
+         flyger in (eller ut) och TAR sin del — ankaret raknas om och
+         mattet raknas ner i samma rorelse.
+     'exakt' har ingen B: ankaret AR talet, det finns inget avstand att
+     mata. Darfor kostar exakt ETT klick och de andra tva. */
+  const walkWinner = w => {
     const wrap = mdWrap();
     const chips = wrap ? Array.from(wrap.querySelectorAll('.md-chip.md-anchor')) : [];
-    if (!wrap || !chips.length) { setTimeout(cb, 300); return; }
-    const win  = chips.find(c => Number(c.dataset.n) === w.bas.n) || chips[0];
-    const lose = chips.find(c => c !== win);
-    const dir  = w.kind === 'upp' ? 1 : w.kind === 'ner' ? -1 : 0;
-    let n = w.bas.n, gapEl = null;
+    return chips.find(c => Number(c.dataset.n) === w.bas.n) || chips[0] || null;
+  };
 
+  function runAnchorPick(step, w, cb) {
+    const wrap = mdWrap();
+    const chips = wrap ? Array.from(wrap.querySelectorAll('.md-chip.md-anchor')) : [];
+    const win = walkWinner(w);
+    if (!wrap || !win) { setTimeout(cb, 300); return; }
+    const lose = chips.find(c => c !== win);
     if (lose) lose.classList.add('fading');
     setTimeout(() => {
       if (lose) lose.remove();
       win.classList.add('moving', 'won');
       stackMarginChips([win], step, 6);
+      App.Sound.play('click');
     }, 400);
+    setTimeout(() => {
+      /* Ankaret ar inte langre en hjalpbricka utan RAKNEBRICKAN som
+         dwrite skickar ner i kvotrutan. Sker redan har sa 'exakt', som
+         saknar steg B, ocksa far sin bricka. */
+      win.classList.remove('md-aux');
+      cb && cb();
+    }, 900);
+  }
+
+  function runAnchorGap(step, w, cb) {
+    const wrap = mdWrap();
+    const win = walkWinner(w);
+    if (!wrap || !win) { setTimeout(cb, 300); return; }
+    const dir = w.kind === 'upp' ? 1 : w.kind === 'ner' ? -1 : 0;
+    let n = w.bas.n, gapEl = null;
 
     setTimeout(() => {
       gapEl = document.createElement('div');
@@ -1976,14 +2038,9 @@ const MultDivGame = (() => {
       gapEl.style.opacity = '';
       gapEl.classList.add('gap-in');
       App.Sound.play('click');
-    }, 700);
+    }, 200);
 
-    const done = () => setTimeout(() => {
-      // Vandringen ar over: ankaret ar inte langre en hjalpbricka utan
-      // RAKNEBRICKAN som dwrite skickar ner i kvotrutan.
-      win.classList.remove('md-aux');
-      cb && cb();
-    }, 300);
+    const done = () => setTimeout(() => cb && cb(), 300);
 
     const tick = k => {
       if (k >= w.steg) { done(); return; }
@@ -1999,7 +2056,7 @@ const MultDivGame = (() => {
         setTimeout(() => tick(k + 1), 300);
       });
     };
-    setTimeout(() => (dir === 0 ? done() : tick(0)), 1180);
+    setTimeout(() => (dir === 0 ? done() : tick(0)), 700);
   }
 
   /* dwrite: notationen slapper taget och ANTALET flyger ner i kvot-
@@ -2587,28 +2644,39 @@ const MultDivGame = (() => {
       onclick="MultDivGame.divWalkNext()">Nästa steg →</button>`;
   }
 
+  /* Faserna: 0 fragan -> 1 ankarparet fods -> 2 valet + "hur mycket
+     skiljer det?" -> 3 krocken. 'exakt' saknar fas 3 (ankaret AR talet)
+     och gar rakt till knappsatsen efter fas 2 — samma stegning som
+     demon, ett klick per steg. */
   function divWalkNext() {
     if (!divWalk) return;
     const { item, rows } = divWalk;
     const gen = exGen;
+    const levande = () => gen === exGen && helpItem() === item;
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';          // knappen bort medan brickorna ror sig
+    const klart = () => {
+      if (!levande()) return;
+      divWalk = null;
+      exInputLocked = false;
+      showHelpUI();                     // vagen ar gangen — nu svarar barnet
+    };
     if (divWalk.ph === 0) {
       divWalk.ph = 1;
       helpBubble(divqHeadHTML(item) + rows.r1);
-      anchorChipsBorn(item, rows.w, () => {
-        if (gen !== exGen || helpItem() !== item || !divWalk) return;
-        divWalkBtn();
+      anchorChipsBorn(item, rows.w, () => { if (levande() && divWalk) divWalkBtn(); });
+    } else if (divWalk.ph === 1) {
+      divWalk.ph = 2;
+      helpBubble(divqHeadHTML(item) + rows.r2a);
+      runAnchorPick(item, rows.w, () => {
+        if (!levande()) return;
+        if (rows.w.kind === 'exakt') { klart(); return; }
+        if (divWalk) divWalkBtn();
       });
     } else {
-      divWalk.ph = 2;
-      helpBubble(divqHeadHTML(item) + rows.r2);
-      runAnchorWalkStep(item, rows.w, () => {
-        if (gen !== exGen || helpItem() !== item) return;
-        divWalk = null;
-        exInputLocked = false;
-        showHelpUI();                   // vagen ar gangen — nu svarar barnet
-      });
+      divWalk.ph = 3;
+      helpBubble(divqHeadHTML(item) + rows.r2b);
+      runAnchorGap(item, rows.w, klart);
     }
   }
 
@@ -2870,9 +2938,13 @@ const MultDivGame = (() => {
          skillnaden mot demon: dar landar svaret, har tar barnet sista
          steget sjalv i numpaden.
          q = 0 har ingen vandring och darmed ingen valrad — da ar r1
-         ("Inte ens en 6:a far plats i 1") hela ledtraden. */
+         ("Inte ens en 6:a far plats i 1") hela ledtraden.
+         Raden som star kvar ar den SIST spelade (krocken, eller valet
+         nar 'exakt' saknar krock) — samma HTML som bubblan redan visar,
+         sa overlamningen till knappsatsen sker utan att bubblan poppar
+         om (helpBubble jamfor och later den sta). */
       const r = anchorWalkRows(item.cur, numB, 'ingen', item.g);
-      return divqHeadHTML(item) + (r.w.kind === 'ingen' ? r.r1 : r.r2);
+      return divqHeadHTML(item) + (r.r2b || r.r2a || r.r1);
     }
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
