@@ -1201,7 +1201,17 @@ const MultDivGame = (() => {
       </div>`;
     setupCanvas('md-canvas');
     renderMemCol();
-    showStepBubble();
+    /* Dennis 22/9, mot bild: fragan stod vid oppning och kom SEN EN GANG
+       TILL nar han tryckte "Nasta steg". Orsaken satt i demons motor och
+       har funnits sedan v28, aven i live: renderDemoView visade steg 0:s
+       text som forhandsvisning, och forsta klicket visade SAMMA text igen
+       innan det korde steget. Klicket sag ut att inte gora nagot.
+
+       Nu ar steg 0 redan kort nar demon oppnar — det ar vyns utgangslage,
+       inte ett klick. Darmed for varje "Nasta steg" alltid nagot nytt med
+       sig. Regeln "texten fore rorelsen" haller fortfarande: showStepBubble
+       kors alltjamt fore executeStep inne i demoNextStep. */
+    demoNextStep();
   }
 
   /* v28-mönstret: texten för steget som NU animeras visas FÖRE executeStep */
