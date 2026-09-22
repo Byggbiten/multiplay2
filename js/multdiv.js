@@ -481,6 +481,11 @@ const MultDivGame = (() => {
     .md-walk.r0 { display:block; margin-bottom:3px; }
     .md-walk.r1 { font-size:0.86em; color:#64748b; }
     .md-walk.r2 { margin-top:2px; }
+    /* Siffran som skrivs: lite storre an texten runt om, sa ogat fastnar pa
+       den — och skalet efter ar dampat, for det ar en forklaring, inte
+       handlingen. */
+    .md-wd { font-size:1.18em; letter-spacing:0.01em; }
+    .md-wy { color:#64748b; font-weight:800; font-size:0.9em; }
     .md-walk.r3 { margin-top:4px; padding-top:4px; color:var(--deep);
       border-top:1.5px dashed color-mix(in srgb, var(--accent) 30%, transparent); }
 
@@ -1016,15 +1021,15 @@ const MultDivGame = (() => {
       /* Ankarvandringen, en rad per steg (Dennis 22/9): brickorna bar
          rorelsen, bubblan bara meningen som hor till just det steget. */
       case 'dwalk_anchors':
-        return anchorWalkRows(step.cur, numB, 'kvot').r1;
+        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r1;
       case 'dwalk_step':
-        return anchorWalkRows(step.cur, numB, 'kvot').r2;
+        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r2;
       case 'dwrite':
         /* Slutsatsen sist och ensam i sitt steg (P4). Resten foregrips
            inte (slut:'kvot') — den ar ett eget steg strax efter. */
         if (step.q === 0)
           return `Ingen hel ${numB}:a ryms — vi skriver <strong style="color:${cv(step.g)}">0</strong>. ⭕`;
-        return anchorWalkRows(step.cur, numB, 'kvot').r3;
+        return anchorWalkRows(step.cur, numB, 'kvot', step.g).r3;
       case 'drem_calc':
         return step.q > 0
           ? `<strong style="color:#dc2626">${step.rem}</strong> blir över.`
@@ -1101,6 +1106,11 @@ const MultDivGame = (() => {
   }
 
   const TALORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
+  /* Divisorn som SAK, inte som antal: "1 femma", "6 femmor". Dennis 22/9
+     — barnet skriver in ett ANTAL av nagot, och det nagot har ett namn. */
+  const TALSAK = ['nolla','etta','tvåa','trea','fyra','femma','sexa','sjua','åtta','nia'];
+  const TALSAK_FL = ['nollor','ettor','tvåor','treor','fyror','femmor','sexor','sjuor','åttor','nior'];
+  const divisorSak = (N, antal) => (antal === 1 ? TALSAK[N] : TALSAK_FL[N]) || `${N}:or`;
   const talord = n => TALORD[n] || String(n);
   const stor = o => o[0].toUpperCase() + o.slice(1);
   /* "en 7:a" / "två 7:or" — samma bojning som resten av appen anvander. */
@@ -1121,18 +1131,30 @@ const MultDivGame = (() => {
      dwrite) visar EN rad i taget — texten far inte skrivas om pa tva
      stallen, sa bada vagarna laser ur samma byggare. r1 = ankarparet,
      r2 = valet och avstandet, r3 = slutsatsen. */
-  function anchorWalkRows(cur, divisor, slut) {
+  function anchorWalkRows(cur, divisor, slut, g) {
     const w = planAnchorWalk(cur, divisor);
     const N = divisor;
+    /* Kvotsiffran bar sin KOLUMNS platsvardesfarg — samma rod/bla/gron som
+       rutan den ska landa i (Dennis 22/9), sa barnet ser vart den hor. */
+    const qf = g === undefined ? 'var(--deep)' : cv(g);
     if (w.kind === 'ingen') {
       return { w, r1: `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>`,
                r2: '',
-               r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>` };
+               r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong style="color:${qf}">0</strong>.</span>` };
     }
     const r1 = `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`;
-    const svar = `<strong>${stor(talord(w.q))}</strong> ${w.q === 1 ? `${N}:a` : `${N}:or`}` +
-      (w.rest ? (slut === 'kvot' ? '' : `, och <strong>${w.rest}</strong> över`)
-              : ' — det går jämnt ut');
+    /* 'kvot' ar sjalva SKRIVANDET i demon. Dennis 22/9: "Vi skriver in
+       siffran 1 (for att det far plats 1 femma) och att 1:an ar lite
+       betonad. sa de gor skillnad att man ar ute efter antalet femmor,
+       och inte nagot annat." Siffran ar alltsa KVITTOT — antalet femmor
+       ar saken. Darfor star handlingen forst med siffran betonad i
+       kolumnens farg, och skalet efter, dampat.
+       'full' ar en sammanfattning (livlinan) och konstaterar i stallet. */
+    const antal = `<strong style="color:${qf}">${w.q}</strong> ${divisorSak(N, w.q)}`;
+    const svar = slut === 'kvot'
+      ? `Vi skriver in siffran <strong class="md-wd" style="color:${qf}">${w.q}</strong>` +
+        ` <span class="md-wy">(för att det får plats ${antal})</span>`
+      : antal + (w.rest ? `, och <strong>${w.rest}</strong> över` : ' — det går jämnt ut');
     let r2;
     if (w.kind === 'exakt') {
       r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
@@ -2540,7 +2562,7 @@ const MultDivGame = (() => {
     const cell = document.getElementById(`md-q-${item.g}`);
     if (cell && !cell.classList.contains('filled')) cell.classList.add('active-col');
     renderMemCol();
-    const rows = anchorWalkRows(item.cur, numB, 'ingen');
+    const rows = anchorWalkRows(item.cur, numB, 'ingen', item.g);
     if (rows.w.kind === 'ingen') { showHelpUI(); return; } // q = 0 — ingen vandring
     /* Dennis 22/9, efter prov: "man ska ju klicka for varje steg. inte
        att den skall spelas som en alldeles for snabb film."
@@ -2849,7 +2871,7 @@ const MultDivGame = (() => {
          steget sjalv i numpaden.
          q = 0 har ingen vandring och darmed ingen valrad — da ar r1
          ("Inte ens en 6:a far plats i 1") hela ledtraden. */
-      const r = anchorWalkRows(item.cur, numB, 'ingen');
+      const r = anchorWalkRows(item.cur, numB, 'ingen', item.g);
       return divqHeadHTML(item) + (r.w.kind === 'ingen' ? r.r1 : r.r2);
     }
     if (item.kind === 'divrem')
@@ -2979,7 +3001,7 @@ const MultDivGame = (() => {
          upprepa den — da vore den ingen hjalp alls. Den ger det enda
          vandringen haller inne med: slutsatsen. Barnet skriver anda in
          den sjalv i numpaden. */
-      helpBubble(anchorWalkRows(item.cur, numB, 'kvot').r3 +
+      helpBubble(anchorWalkRows(item.cur, numB, 'kvot', item.g).r3 +
                  `<span class="md-walk r1">Skriv in det själv! ✍️</span>`);
       return;
     }
@@ -3245,7 +3267,7 @@ const MultDivGame = (() => {
     /* Hela vagen, resten med: har finns ingen annan hjalp pa skarmen, till
        skillnad fran hjalplaget dar vandringen redan spelats. Svaret skrivs
        anda in for hand — knappsatsen ror vi inte. */
-    const r = anchorWalkRows(st.cur, numB, 'full');
+    const r = anchorWalkRows(st.cur, numB, 'full', st.g);
     const b = document.getElementById('md-bubble');
     if (b) b.innerHTML = `<div class="md-thought">${r.r1}${r.r2}${r.r3}</div>`;
   }
