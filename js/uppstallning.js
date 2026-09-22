@@ -23,7 +23,6 @@ const UppstallningGame = (() => {
   let demoCarries = [];           // carry row values [0=ental,1=tiotal,2=hundratal]
   let demoCarryUsed = [];         // whether carry[c] has been consumed
   let demoAns     = [null,null,null,null]; // filled answer digits
-  let demoBorrowTens = [false, false, false]; // borrow-ten markers active per col
 
   /* Exercise */
   let exerciseIdx   = 0;
@@ -64,23 +63,12 @@ const UppstallningGame = (() => {
   const COL_LABELS = ['E','T','H'];
   const LOG_KEY    = id => `uppstallning_log_${id}`;
 
-  /* Additionens pedagogiska vägval — Dennis 2026-09-20.
+  /* Additionens pedagogiska vägval — Dennis 2026-09-20, utan förbehåll 21/9.
      'storsta' betyder att BÅDE komplementet och minnessiffran utgår från
      den största siffran i kolumnen: en 9:a tar 1 av en 2:a, aldrig tvärtom.
-
-     VARFÖR DEN GAMLA VÄGEN FINNS KVAR: 'oversta' (= det översta talet, appens
-     regel före 20/9) lever kvar i planAdditionColumns som `legacy`-grenen, och
-     karakteriseringstestet i tests/uppstallning.test.mjs håller den vid liv.
-     Skälet är att största-talet-regeln ÄNNU INTE är verifierad mot Miras
-     mattebok (Mitt i Prick 4A). Visar boken att klassrummet alltid fyller det
-     översta talet till 10, vänds hela regeln tillbaka genom att ändra raden
-     nedan till { compTo:'oversta', memTo:'oversta' } — en rad, ingen omskrivning.
-
-     VAD SOM FÅR STRYKA DEN: att boken kontrollerats och bekräftar största-
-     talet-regeln (eller att Dennis säger att frågan är stängd). Då tas
-     `legacy`-grenen i planAdditionColumns bort tillsammans med
-     karakteriseringstestet, i samma commit — den pinnar annars fast ett
-     beteende vi medvetet övergett. */
+     'oversta' finns kvar som värde (hål B-testet kör memTo:'oversta'), men den
+     gamla stegkedjan (add_over9/add_explain/add_cross) är borttagen — Dennis
+     släppte frågan om att verifiera regeln mot matteboken. */
   const ADD_OPTS = { compTo: 'storsta', memTo: 'storsta' };
 
   /* TANKERUTANS TRÖSKEL — Dennis 2026-09-21.
@@ -205,19 +193,11 @@ const UppstallningGame = (() => {
       transform:rotate(-22deg) scaleX(0); transform-origin:left center;
       animation:strike-draw 0.42s ease-out 0.05s forwards; }
     .dw.carry-crossed::after { background:#d97706; }
-    .digit-new { font-size:clamp(0.75rem,1.5vw,0.92rem); font-weight:900; pointer-events:none; white-space:nowrap;
-      animation:fade-up-flex 0.4s ease-out 0.45s both; }
     .small-new-digit { position:absolute; bottom:2px; right:4px;
       font-size:clamp(0.58rem,1.2vw,0.78rem); font-weight:900; pointer-events:none; z-index:2; }
-
-    /* Borrow-ten wrapper och marker */
-    .bt-wrap { position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
-      display:flex; flex-direction:column; align-items:center; gap:2px;
-      pointer-events:none; padding-bottom:2px; z-index:5; }
-    .borrow-ten { font-size:clamp(0.7rem,1.5vw,0.88rem); font-weight:900; color:#dc2626; background:#fee2e2;
-      border:1.5px solid #ef4444; border-radius:6px; padding:1px clamp(4px,0.8vw,6px);
-      pointer-events:none; animation:land-bounce-flex 0.45s ease-out both; white-space:nowrap; }
-    .borrow-ten.used { text-decoration:line-through; opacity:0.4; animation:none; }
+    /* .digit-new, .bt-wrap och .borrow-ten är borta (granskning 21/9, C1):
+       lånet bodde i sidhuvudet ovanpå kolumnbokstaven. Omskrivningen bor nu
+       i cellhörnet (.sub-rw) och tian i marginalen (.nf-work). */
 
     /* Levande minnessiffror (v30) — pennstil: liten, roterad, RÖD.
        Stryks med penndrag när den är använd — RADERAS ALDRIG under uppgiften. */
@@ -509,12 +489,64 @@ const UppstallningGame = (() => {
        tankerutans rad; annars hamnar två absolutpositionerade element på
        samma parkeringsplats och lägger sig ovanpå varandra. */
     .nf-work{position:absolute;z-index:8;pointer-events:none;
-      display:flex;align-items:center;gap:5px;}
+      display:flex;align-items:center;gap:5px;width:max-content;}
     .nf-work .tk-badge.tk-work{position:static;flex:0 0 auto;
       font-size:1.35rem;padding:3px 10px;}
     .tk-badge.tk-pop{animation:tk-pop .3s var(--spring) both;}
     .nf-work.fading{transition:opacity .3s var(--smooth),transform .3s var(--smooth);
       opacity:0;transform:scale(.7);}
+    /* Subtraktionens marginal: "10 − 5". Brickan får bli fixed när den
+       åker ner i svaret — .nf-work .tk-work är annars static och slår
+       .tk-badge.fly-fixed på specificitet. */
+    .nf-work .nf-op{font-size:1.35rem;}
+    .nf-work .tk-badge.tk-work.fly-fixed{position:fixed;}
+
+    /* ══ STRIDSPLATSEN: (10 + 3) − 8 (Dennis 22/9) ══════════════════
+       Parentesgruppen är en pille runt tian och försvararen, så att det
+       SYNS att 10 och 3 hör ihop innan anfallet löser upp dem. När 3:an
+       gått in i 8:an öppnas pillen (.open) och bara tian står kvar —
+       ingenting byts ut, gruppen tonar bara bort runt brickan.
+
+       Övergången ligger på .open, inte på basregeln, och det är avsiktligt:
+       när parentesen SLÅS UPP (klassen tas bort) ska bredden vara färdig
+       med en gång, annars mäter placeWork en yta som fortfarande växer och
+       uttrycket hamnar utanför spalten. När den STÄNGS (klassen läggs på)
+       gäller .open:s egen transition och pillen tonar lugnt bort. */
+    .sub-group{display:flex;align-items:center;gap:4px;padding:3px 8px;
+      border-radius:var(--radius-full);background:rgba(100,116,139,.15);
+      border:2px solid rgba(100,116,139,.34);}
+    .sub-group.open{background:transparent;border-color:transparent;padding:3px 0;gap:0;
+      transition:background .35s var(--smooth),border-color .35s var(--smooth),
+        padding .35s var(--smooth),gap .35s var(--smooth);}
+    .sub-paren{font-family:var(--font-head);font-weight:800;font-size:1.6rem;color:#64748b;
+      line-height:1;transition:opacity .3s var(--smooth);}
+    .sub-term{font-family:var(--font-head);font-weight:800;font-size:1.35rem;line-height:1;
+      display:inline-block;transition:opacity .3s var(--smooth);}
+    .sub-paren.gone,.sub-term.gone,.nf-ghost.gone{opacity:0;}
+
+    /* Den lånade tian skrivs OVANFÖR siffran den tillhör, som på papper.
+       Rubrikraden får därför ett fritt band under sig i subtraktionen —
+       annars hade tian lagt sig över H/T/E-bokstäverna. Måttet bor HÄR och
+       inte i en style-attribut på cellen: en inline-padding vinner över
+       klassregeln, och bandet hade tyst uteblivit. */
+    .up-table thead th{padding-bottom:4px;}
+    .up-table.sub-head thead th{padding-bottom:44px;}
+
+    /* Talet står till VÄNSTER i subtraktionen, inte centrerat. Högerspalten
+       är stridsplatsen och (10 + 3) − 8 är bredare än en centrerad tabell
+       lämnar över: med tabellen mitt i skrevs uttrycket ovanpå kolumnen och
+       barnet såg inte längre pappret. Additionen har inget uttryck att ge
+       plats åt och står kvar centrerad. */
+    .up-table.sub-head{margin-left:4px;}
+
+    /* Subtraktionens papper: röd penna i cellhörnet, samma geometri som
+       additionens .small-new-digit. En andra omskrivning stryker den
+       första och ställer sig bredvid — "1̶0̶ 9" — inget byts ut. */
+    .sub-rw{position:absolute;bottom:2px;right:4px;display:flex;gap:3px;align-items:baseline;
+      font-size:clamp(0.58rem,1.2vw,0.78rem);font-weight:900;color:#dc2626;line-height:1;
+      pointer-events:none;z-index:2;white-space:nowrap;}
+    .sub-rw span{display:inline-block;}
+    .sub-rw span.used{text-decoration:line-through;opacity:.45;}
 
     /* Siffror mitt i en förändring (mockup:630–633).
        Spec §5.2 lät bli .dw.nf-owing eftersom läget "i kolumnen" var
@@ -724,7 +756,6 @@ const UppstallningGame = (() => {
     demoCarries    = [0, 0, 0];
     demoCarryUsed  = [false, false, false];
     demoAns        = [null, null, null, null];
-    demoBorrowTens = [false, false, false];
     demoSteps      = buildDemoSteps();
     renderDemoView();
   }
@@ -737,9 +768,6 @@ const UppstallningGame = (() => {
        modultillståndet. Förvalet 1 är den LÅNGA vägen: tankerutan öppnas
        alltid, vilket är rätt för den som inte har sagt något annat. */
     const o = Object.assign({ compTo: 'oversta', memTo: 'oversta', difficulty: 1 }, opts || {});
-    /* Gamla vägen (båda 'oversta') ska ge EXAKT dagens steglista — samma fält,
-       samma ordning. Därför bär bara den nya vägen §2.3:s extrafält. */
-    const legacy = (o.compTo === 'oversta' && o.memTo === 'oversta');
     /* Samma siffersplit som modulens digs(): [ental, tiotal, hundratal] */
     const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
     const da = digs(numA), db = digs(numB);
@@ -762,7 +790,7 @@ const UppstallningGame = (() => {
       const sum = valA + valB;
       const ans = sum % 10;
       const nextCarry = sum > 9 ? 1 : 0;
-      steps.push({ type:'add_highlight', col:c });
+      steps.push({ type:'add_highlight', col:c, a, b, carry_in:carryVal });
       if (sum > 9) {
         const behover = 10 - effectiveA;
         const kvar = giveVal - behover;
@@ -770,14 +798,7 @@ const UppstallningGame = (() => {
         const base = { col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar,
                        ans, nextCarry, sum, growRow, giveRow, growVal, giveVal,
                        valA, valB, memRow, memDigit, memNew };
-        if (legacy) {
-          /* Gamla vägen, orörd: karakteriseringstestet jämför hela objekt. */
-          steps.push({ type:'add_over9', col:c, a, b, carry_in:carryVal, sum, effectiveA });
-          steps.push({ type:'add_explain', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_cross', col:c, a, b, carry_in:carryVal, effectiveA, behover, kvar, ans, nextCarry });
-          steps.push({ type:'add_carry_fly', col:c, nextCarry });
-          steps.push({ type:'add_result', col:c, a, b, kvar, ans, nextCarry });
-        } else if (isExactTen(growVal, giveVal)) {
+        if (isExactTen(growVal, giveVal)) {
           /* Tiokompis-genvägen (spec §3b): ingen tankeruta, ingen strykning.
              Att ceremonin uteblir ÄR beskedet "den här såg du direkt". */
           /* HÅL B (spec §7.2): är siffran minnet läggs på en 0:a skulle
@@ -850,43 +871,80 @@ const UppstallningGame = (() => {
     return steps;
   }
 
-  function buildDemoSteps() {
-    if (mode === 'addition') {
-      return planAdditionColumns(numA, numB, colCount, { ...ADD_OPTS, difficulty });
-    }
-
+  /* Ren, testbar stegbyggare för subtraktion ("vänd om"-metoden). Läser
+     inget modultillstånd — samma kontrakt som planAdditionColumns. */
+  function planSubtractionColumns(numA, numB, colCount) {
+    const digs = n => [n % 10, Math.floor(n/10) % 10, Math.floor(n/100) % 10];
+    const da = digs(numA), db = digs(numB);
     const steps = [];
-    const da = [...digs(numA)], db = digs(numB);
-    const maxC = colCount;
-
-    {
-      // Kompletteringsmetoden
-      const effA = [...da];
-      for (let c = 0; c < maxC; c++) {
+    const effA = [...da];
+    /* A4 (granskning 21/9): ingen skriver 045 på papper. En kolumn där både
+       talen är tomma får inget steg alls, och när resten av svaret är 0 skrivs
+       ingen siffra — har kolumnen ändå siffror (30 − 29: 2 − 2) får den ett
+       eget steg som SÄGER att det inte blir någon siffra, så att barnet inte
+       lär sig hoppa över kolumner som har något i sig. Entalen skrivs alltid. */
+    const lenA = String(numA).length, lenB = String(numB).length;
+    const rest = c => Math.floor((numA - numB) / Math.pow(10, c));
+    for (let c = 0; c < colCount; c++) {
+      if (c >= lenA && c >= lenB) break;
+      const bEmpty = c >= lenB;
+      if (c > 0 && rest(c) === 0) {
+        if (bEmpty) break;
         steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c] });
-        if (effA[c] < db[c]) {
-          const diff = db[c] - effA[c];
-          const isDouble = c + 1 < maxC && effA[c+1] === 0 && c + 2 < maxC;
-          steps.push({ type: isDouble ? 'sub_cant_double' : 'sub_cant',
-            col:c, a:effA[c], b:db[c] });
-          if (isDouble) {
-            // Mellanlån H → T (separat steg, T visar nytt värde)
-            steps.push({ type:'sub_borrow', srcCol:c+2, dstCol:c+1,
-              srcNew:effA[c+2]-1, dstNew:effA[c+1]+10, mainCol:c });
-            effA[c+2]--; effA[c+1] += 10;
-          }
-          // sub_flip + T→E lån i ETT steg
-          steps.push({ type:'sub_flip_borrow', col:c, a:effA[c], b:db[c], diff,
-            srcCol:c+1, srcNew:effA[c+1]-1 });
-          effA[c+1]--;
-          steps.push({ type:'sub_ten_minus', col:c, diff, ans:10-diff });
-        } else {
-          steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c] });
+        steps.push({ type:'sub_zero_lead', col:c, a:effA[c], b:db[c] });
+        continue;
+      }
+      steps.push({ type:'sub_highlight', col:c, a:effA[c], b:db[c], ...(bEmpty ? { bEmpty:true } : {}) });
+      if (effA[c] < db[c]) {
+        /* LÅNEKEDJAN — en idé per steg (granskning 21/9: A1, A3, B2).
+           Alla steg bär col = kolumnen som inte gick (c); det är HENNES
+           metod, och övningsläget plockar kön per kolumn på det fältet. */
+        const a = effA[c], b = db[c], diff = b - a;
+        const isDouble = c + 1 < colCount && effA[c+1] === 0 && c + 2 < colCount;
+        steps.push({ type:'sub_cant', col:c, a, b, double:isDouble, srcCol: isDouble ? c+2 : c+1 });
+        if (isDouble) {
+          /* Tiotalet är 0 och har inget att låna ut: hundratalet lånar ut
+             först (sub_lend, tian parkerar i marginalen), tian landar som
+             10 på tiotalets papper (sub_land). Ett lån per steg. */
+          steps.push({ type:'sub_lend', col:c, srcCol:c+2, dstCol:c+1,
+            srcOld:effA[c+2], srcNew:effA[c+2]-1, toPaper:true });
+          steps.push({ type:'sub_land', col:c, srcCol:c+2, dstCol:c+1, dstOld:0, dstNew:10 });
+          effA[c+2]--; effA[c+1] = 10;
         }
+        /* Grannen lånar ut en tia: grannen stryks och skrivs om på pappret,
+           och tian hoppar RAKT till kolumnen och lägger sig ovanför siffran
+           — den är inte lösräknande, den är skriven på pappret. */
+        steps.push({ type:'sub_lend', col:c, srcCol:c+1, dstCol:c,
+          srcOld:effA[c+1], srcNew:effA[c+1]-1, toPaper:false });
+        effA[c+1]--;
+        /* STRIDEN I HÖGERSPALTEN (Dennis 22/9). Vändningen ("vi vänder om:
+           8 − 3 = 5") var ett trick utan motivering — femman kom ur
+           ingenstans. Nu visas båda leden i (10 + a) − b = 10 − (b − a):
+           sub_expr ställer upp uttrycket, sub_attack låter a ta a ur b så
+           att 10 − diff står kvar. Är a = 0 hoppas båda över: det finns
+           ingen försvarare som kan ta något, och (10 + 0) vore en parentes
+           utan tanke — tian möter b själv (sub_take). */
+        if (a > 0) {
+          steps.push({ type:'sub_expr',   col:c, a, b, diff });
+          steps.push({ type:'sub_attack', col:c, a, b, diff });
+        } else {
+          steps.push({ type:'sub_take', col:c, a, b, diff });
+        }
+        /* Svaret skrivs SIST, i sitt eget steg: 10 minus diff. */
+        steps.push({ type:'sub_ten_minus', col:c, a, b, diff, ans:10-diff });
+      } else {
+        steps.push({ type:'sub_calc', col:c, a:effA[c], b:db[c], diff:effA[c]-db[c], ...(bEmpty ? { bEmpty:true } : {}) });
       }
     }
     steps.push({ type:'done' });
     return steps;
+  }
+
+  function buildDemoSteps() {
+    if (mode === 'addition') {
+      return planAdditionColumns(numA, numB, colCount, { ...ADD_OPTS, difficulty });
+    }
+    return planSubtractionColumns(numA, numB, colCount);
   }
 
   /* ── Övningslägets vägval (spec §8) ─────────────────────────────────
@@ -903,19 +961,26 @@ const UppstallningGame = (() => {
     'add_lift', 'add_memjoin', 'add_need', 'add_lend',
     'add_ten', 'add_ten_named', 'add_return', 'add_sum',
     'tf_pair', 'add_carry_fly',
+    /* Subtraktionens lånekedja: allt fram till svaret, som är barnets jobb.
+       sub_ten_minus är aldrig med — brickan blir svaret när hon svarat rätt.
+       sub_zero_lead (A4) visas utan att något svar krävs. */
+    'sub_cant', 'sub_lend', 'sub_land', 'sub_expr', 'sub_attack', 'sub_take',
+    'sub_zero_lead',
   ]);
 
-  /* Ren klassning av EN kolumn: vilket av de fyra fallen den är, och vilka
-     steg som ska spelas upp. Ersätter `needsTenFriend: !!overStep`, som blev
-     false för varje kolumn så snart add_over9 slutade byggas — och då slutade
-     övningsläget tyst undervisa metoden. */
+  /* Ren klassning av EN kolumn: vilket av fallen den är, och vilka steg som
+     ska spelas upp. Ersätter `needsTenFriend: !!overStep`, som blev false för
+     varje kolumn så snart add_over9 slutade byggas — och då slutade
+     övningsläget tyst undervisa metoden. Subtraktionen har två egna fall. */
   function exColumnPlan(steps, col) {
     const queue = steps.filter(s => s.col === col && EX_QUEUE_TYPES.has(s.type));
     const har   = t => queue.some(s => s.type === t);
-    const kind  = har('tf_pair')  ? 'exact10'      /* tiokompis-genvägen */
-                : har('add_need') ? 'complement'   /* lån ur det andra talet */
-                : har('add_sum')  ? 'tenPlusRest'  /* hål A: termen är redan 10 */
-                :                   'simple';      /* går direkt, summa ≤ 9 */
+    const kind  = har('tf_pair')       ? 'exact10'      /* tiokompis-genvägen */
+                : har('add_need')      ? 'complement'   /* lån ur det andra talet */
+                : har('add_sum')       ? 'tenPlusRest'  /* hål A: termen är redan 10 */
+                : har('sub_lend')      ? 'borrow'       /* subtraktion: lånekedjan */
+                : har('sub_zero_lead') ? 'zeroLead'     /* subtraktion: ledande nolla, inget svar */
+                :                        'simple';      /* går direkt */
     return { kind, queue };
   }
 
@@ -923,27 +988,40 @@ const UppstallningGame = (() => {
   function preprocessExSteps(steps) {
     const result = [];
     for (let c = 0; c < colCount; c++) {
-      const cantStep    = steps.find(s => (s.type === 'sub_cant' || s.type === 'sub_cant_double') && s.col === c);
-      const flipStep    = steps.find(s => s.type === 'sub_flip_borrow' && s.col === c);
       const tenStep     = steps.find(s => s.type === 'sub_ten_minus'   && s.col === c);
       const calcStep    = steps.find(s => s.type === 'sub_calc'        && s.col === c);
-      const interStep   = steps.find(s => s.type === 'sub_borrow'      && s.mainCol === c);
       const resultStep   = steps.find(s => (s.type === 'add_result' || s.type === 'add_simple') && s.col === c);
       const { kind, queue } = exColumnPlan(steps, c);
       result[c] = {
         correctAnswer:   tenStep?.ans ?? calcStep?.diff ?? resultStep?.ans ?? 0,
         nextCarry:       resultStep?.nextCarry ?? 0,
         sum:             resultStep?.sum ?? null,
-        needsBorrow:     !!cantStep,
-        isDouble:        cantStep?.type === 'sub_cant_double',
-        flipStep:        flipStep    || null,
-        interStep:       interStep   || null,
-        kind,                      /* 'simple' | 'exact10' | 'complement' | 'tenPlusRest' */
+        tenStep:         tenStep     || null,   /* subtraktion: frågan "10 minus diff" */
+        bEmpty:          !!calcStep?.bEmpty,    /* subtraktion: undre cellen är tom */
+        kind,                      /* 'simple' | 'exact10' | 'complement' | 'tenPlusRest' | 'borrow' | 'zeroLead' */
         queue,                     /* demo-stegen, i ordning; exTenPhase[c] är index i den */
         resultStep:      resultStep  || null,
+        /* A4: en kolumn utan steg finns inte på pappret (8 − 3: tiotalet) och
+           en ledande nolla (30 − 29: tiotalet) får inget svar — övningen får
+           aldrig fråga efter en 0:a där. */
+        skip:            !steps.some(s => s.col === c),
+        noAnswer:        steps.some(s => s.type === 'sub_zero_lead' && s.col === c),
       };
     }
     return result;
+  }
+
+  /* Nästa kolumn som övningen ska stanna i, eller -1 när uppgiften är klar.
+     Kolumner som inte finns på pappret hoppas över utan att nämnas. */
+  function exNextCol(from) {
+    for (let c = from + 1; c < colCount; c++) if (!exColData[c]?.skip) return c;
+    return -1;
+  }
+
+  function exProceedFrom(col) {
+    const next = exNextCol(col);
+    if (next < 0) exCheckDone();
+    else advanceToColumn(next);
   }
 
   /* ── Render demo-vy ─────────────────────────────────────── */
@@ -971,7 +1049,17 @@ const UppstallningGame = (() => {
       </div>`;
 
     setupCanvas('up-canvas');
-    showStepBubble();
+    /* Dennis 22/9, mot bild: fragan stod vid oppning och kom SEN EN GANG
+       TILL nar han tryckte "Nasta steg". Orsaken satt i demons motor och
+       har funnits sedan v28, aven i live: renderDemoView visade steg 0:s
+       text som forhandsvisning, och forsta klicket visade SAMMA text igen
+       innan det korde steget. Klicket sag ut att inte gora nagot.
+
+       Nu ar steg 0 redan kort nar demon oppnar — det ar vyns utgangslage,
+       inte ett klick. Darmed for varje "Nasta steg" alltid nagot nytt med
+       sig. Regeln "texten fore rorelsen" haller fortfarande: showStepBubble
+       kors alltjamt fore executeStep inne i demoNextStep. */
+    demoNextStep();
   }
 
   /* ── Nästa steg ─────────────────────────────────────────── */
@@ -994,9 +1082,8 @@ const UppstallningGame = (() => {
   }
 
   function executeStep(step, cb) {
-    /* Övningsläget spelar upp steg ur kolumnens kö och subtraktionens
-       flipStep/interStep kan vara null. Ett saknat steg ska aldrig kunna
-       krascha en körning — det hoppas över. */
+    /* Övningsläget spelar upp steg ur kolumnens kö. Ett saknat steg ska
+       aldrig kunna krascha en körning — det hoppas över. */
     if (!step) { cb && cb(); return; }
     if (step.type === 'add_highlight') {
       highlightCol(step.col);
@@ -1274,20 +1361,6 @@ const UppstallningGame = (() => {
       clearWork(true);
       riseSumChip(step.col, step.sum, paperSources(step.col, !!step.nostrike), cb);
 
-    } else if (step.type === 'add_over9') {
-      highlightCol(step.col);
-      const colKey = COL_KEYS[step.col];
-      ['row-a','row-b'].forEach(row => {
-        const el = document.getElementById(`cell-${row}-${colKey}`);
-        if (el) el.classList.add('problem-cell');
-      });
-      setTimeout(() => {
-        ['row-a','row-b'].forEach(row => {
-          const el = document.getElementById(`cell-${row}-${colKey}`);
-          if (el) el.classList.remove('problem-cell');
-        });
-        cb();
-      }, 1200);
 
     /* add_explain och add_cross är BORTA ur additionen (plan uppgift 6,
        steg 7). De var radfasta: texten sa "Vi tar 1 från 9" när lånet i
@@ -1378,9 +1451,19 @@ const UppstallningGame = (() => {
 
     } else if (step.type === 'sub_highlight') {
       highlightCol(step.col);
+      /* Inget lösräknande från förra kolumnen får läsas som aktuellt. */
+      const gStale = ghostEl(); if (gStale) gStale.remove();
+      clearWork(false);
       setTimeout(cb, 50);
 
-    } else if (step.type === 'sub_cant' || step.type === 'sub_cant_double') {
+    /* ── SUBTRAKTIONENS LÅNEKEDJA (granskning 21/9) ───────────────────
+       Två lager, som i additionen: kolumnen är PAPPRET (strukna siffror,
+       små röda omskrivningar i cellhörnet) och står still när det
+       skrivits. Tian är en BRICKA — den föds ur den strukna siffran,
+       flyger till marginalen och blir där det enda som rör sig. Inget
+       skapas och förstörs i samma steg. */
+    } else if (step.type === 'sub_cant') {
+      highlightCol(step.col);
       const colKey = COL_KEYS[step.col];
       ['row-a','row-b'].forEach(row => {
         const el = document.getElementById(`cell-${row}-${colKey}`);
@@ -1394,111 +1477,160 @@ const UppstallningGame = (() => {
         cb();
       }, 1100);
 
-    } else if (step.type === 'sub_flip_borrow') {
-      // Fas 1 (t=0): stryk A och B i aktiva kolumnen
-      const colKey = COL_KEYS[step.col];
-      const srcKey = COL_KEYS[step.srcCol];
-      const dwA = document.getElementById(`dw-a-${colKey}`);
-      if (dwA) {
-        dwA.classList.add('crossed');
-        const sp = document.createElement('span');
-        sp.className = 'small-new-digit';
-        sp.style.color = '#dc2626';
-        sp.textContent = 0;
-        dwA.appendChild(sp);
-      }
-      const dwB = document.getElementById(`dw-b-${colKey}`);
-      if (dwB) {
-        dwB.classList.add('crossed');
-        const sp = document.createElement('span');
-        sp.className = 'small-new-digit';
-        sp.style.color = '#dc2626';
-        sp.textContent = step.diff;
-        dwB.appendChild(sp);
-      }
-      // Fas 2 (t=500ms): stryk src-kolumnen, visa srcNew
-      setTimeout(() => {
+    /* Lånet: grannen pulsar, stryks och skrivs om på pappret; ur den
+       strukna siffran föds tian som bricka och hoppar RAKT till kolumnen
+       till höger, där den lägger sig ovanför siffran. Omvägen ut till
+       marginalen och tillbaka är borta (Dennis 22/9: två rörelser för en
+       händelse) — tian tillhör pappret, inte lösräknandet.
+       När den landat byter meningen till vad pappret nu säger. */
+    } else if (step.type === 'sub_lend') {
+      highlightCol(step.col);
+      pop(upDw('a', step.srcCol), 300);
+      after(250, () => {
         playBorrowSound();
-        const srcDw = document.getElementById(`dw-a-${srcKey}`);
-        if (srcDw) {
-          srcDw.classList.add('crossed');
-          // Ersätt befintlig digit-new (i bt-wrap, om dubbellån lämnade en) med srcNew
-          const srcBtWrap = document.getElementById(`bt-wrap-${srcKey}`);
-          const existing = srcBtWrap ? srcBtWrap.querySelector('.digit-new') : null;
-          if (existing) {
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = `display:flex;gap:3px;align-items:center;pointer-events:none;white-space:nowrap;`;
-            wrapper.innerHTML =
-              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;text-decoration:line-through;opacity:0.4">${existing.textContent}</span>` +
-              `<span style="color:${PVC[srcKey]};font-size:clamp(0.75rem,1.5vw,0.92rem);font-weight:900;animation:land-bounce-flex 0.45s ease-out both">${step.srcNew}</span>`;
-            existing.replaceWith(wrapper);
-          } else {
-            const sp = document.createElement('span');
-            sp.className = 'digit-new';
-            sp.style.color = PVC[srcKey];
-            sp.textContent = step.srcNew;
-            if (srcBtWrap) srcBtWrap.appendChild(sp); else srcDw.appendChild(sp);
-          }
-        }
+        subRewrite('a', step.srcCol, step.srcNew);
         demoEffA[step.srcCol] = step.srcNew;
-        // Fas 3 (t=1000ms): token flyger + borrow-ten visas
-        setTimeout(() => {
-          showBorrowTen(step.col);
-          animateBorrowToken(step.srcCol, step.col, null, () => {
-            setTimeout(cb, 300);
-          });
-        }, 500);
-      }, 500);
+        const chip = bornTenChip(step.srcCol, step.dstCol);
+        const w = chip && workEl();
+        if (w) w.dataset.place = 'above';
+      });
+      after(700, () => flyWorkToSpot(step.dstCol, 600));
+      after(1340, () => showStepBubble({ ...step, type: 'sub_left' }));
+      after(1600, cb);
 
-    } else if (step.type === 'sub_borrow') {
-      // Mellanlån (H→T vid dubbellån) — separat steg
-      playBorrowSound();
-      const srcKey = COL_KEYS[step.srcCol];
-      const dstKey = COL_KEYS[step.dstCol];
-      const srcDw = document.getElementById(`dw-a-${srcKey}`);
-      if (srcDw) {
-        srcDw.classList.add('crossed');
-        const sp = document.createElement('span');
-        sp.className = 'digit-new';
-        sp.style.color = PVC[srcKey];
-        sp.textContent = step.srcNew;
-        const srcBtWrap = document.getElementById(`bt-wrap-${srcKey}`);
-        if (srcBtWrap) srcBtWrap.appendChild(sp); else srcDw.appendChild(sp);
-      }
-      demoEffA[step.srcCol] = step.srcNew;
-      setTimeout(() => {
-        animateBorrowToken(step.srcCol, step.dstCol, null, () => {
-          const dstDw = document.getElementById(`dw-a-${dstKey}`);
-          if (dstDw) {
-            dstDw.classList.add('crossed');
-            const sp2 = document.createElement('span');
-            sp2.className = 'digit-new';
-            sp2.style.color = PVC[dstKey];
-            sp2.textContent = step.dstNew;
-            const dstBtWrap = document.getElementById(`bt-wrap-${dstKey}`);
-            if (dstBtWrap) dstBtWrap.appendChild(sp2); else dstDw.appendChild(sp2);
-          }
-          demoEffA[step.dstCol] = step.dstNew;
-          setTimeout(cb, 300);
-        });
-      }, 400);
+    /* Dubbellånets landning: tian ovanför tiotalet går in i cellen och
+       BLIR det som står skrivet där — 0:an stryks, "10" skrivs. Brickan
+       föddes i förra steget och förbrukas först när siffran står. */
+    } else if (step.type === 'sub_land') {
+      highlightCol(step.col);
+      const work = workEl();
+      if (!work) { subRewrite('a', step.dstCol, step.dstNew); demoEffA[step.dstCol] = step.dstNew; after(600, cb); return; }
+      pop(workChip(), 300, 'tk-pop');
+      after(200, () => flyWorkTo(work, upDw('a', step.dstCol), 600));
+      after(850, () => {
+        subRewrite('a', step.dstCol, step.dstNew);
+        demoEffA[step.dstCol] = step.dstNew;
+        work.remove();
+        showStepBubble({ ...step, type: 'sub_landed' });
+      });
+      after(1350, cb);
 
+    /* ── STRIDEN I HÖGERSPALTEN (Dennis 22/9) ──────────────────────────
+       Kolumnen är pappret; högerspalten är stridsplatsen. När lånet är
+       klart hoppar de inblandade talen dit ut och gör upp där, och först
+       svaret återvänder ner i svarscellen.
+
+       sub_expr: tian lämnar pappret och tar plats i högerspalten, och
+       försvararen och anfallaren följer efter som kopior — originalen står
+       kvar i kolumnen, för det som är skrivet ska stå kvar (P5). Kvar står
+       (10 + 3) − 8, med parentesen som en synlig grupp. */
+    } else if (step.type === 'sub_expr') {
+      highlightCol(step.col);
+      const work = workEl();
+      if (!work) { after(300, cb); return; }
+      const colr = PVC[COL_KEYS[step.col]];
+      work.dataset.place = '';              /* tian går ut till stridsplatsen */
+      flyWorkToSpot(step.col, 600);
+      after(680, () => { subBuildExpr(work, step.col, step.a, step.b); flyWorkToSpot(step.col, 260, false); });
+      after(880, () => {
+        ['a', 'b'].forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`; });
+        const dst = { a: work.querySelector('.sub-term[data-slot="a"]'), b: ghostEl() };
+        ['a', 'b'].forEach(r => flyCopyIn(document.body, upDw(r, step.col), dst[r], String(step[r]), {
+          dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.2rem', color: colr, endColor: colr, fade: true
+        }, null));
+      });
+      after(1300, () => ['a', 'b'].forEach(r => { const dw = upDw(r, step.col); if (dw) dw.style.animation = ''; }));
+      after(1420, () => {
+        const ta = work.querySelector('.sub-term[data-slot="a"]');
+        if (ta) { ta.classList.remove('gone'); pop(ta, 320, 'tk-pop'); }
+        const g = ghostEl();
+        if (g) { g.classList.remove('gone'); g.classList.add('filled'); pop(g, 320, 'pop'); }
+      });
+      after(1820, cb);
+
+    /* sub_attack: försvararen lämnar parentesen och går in i anfallaren.
+       3 av 8:an förbrukas och 5:an SYNS uppstå ur samma siffra — den byts
+       mitt i pulsen, det är inte en ny siffra som skrivs dit. Parentesen
+       öppnas i samma rörelse, och kvar står 10 − 5 åt sub_ten_minus. */
+    } else if (step.type === 'sub_attack') {
+      highlightCol(step.col);
+      const work = workEl();
+      if (!work) { after(300, cb); return; }
+      const grp = work.querySelector('.sub-group');
+      const ta  = work.querySelector('.sub-term[data-slot="a"]');
+      const g   = ghostEl();
+      pop(ta, 320, 'tk-pop');
+      after(320, () => {
+        /* Samma nod hela vägen: trean flyttas med transform, den skapas
+           aldrig om på vägen (P5). */
+        if (ta && g) {
+          const tR = ta.getBoundingClientRect(), gR = g.getBoundingClientRect();
+          ta.style.transition = `transform ${Ts(520)} cubic-bezier(0.34,1.06,0.5,1), opacity ${Ts(260)} var(--smooth)`;
+          void ta.offsetWidth;
+          ta.style.transform =
+            `translate(${gR.left + gR.width / 2 - (tR.left + tR.width / 2)}px,` +
+            `${gR.top + gR.height / 2 - (tR.top + tR.height / 2)}px) scale(0.8)`;
+        }
+        if (grp) grp.classList.add('open');
+        work.querySelectorAll('.sub-paren').forEach(e => e.classList.add('gone'));
+        const plus = work.querySelector('.sub-group .nf-op');
+        if (plus) plus.classList.remove('in');
+      });
+      after(870, () => {
+        if (ta) ta.classList.add('gone');
+        playBorrowSound();
+        if (g) { pop(g, 340, 'pop'); after(150, () => { g.textContent = step.diff; }); }
+      });
+      after(1200, () => {
+        if (ta) ta.remove();
+        work.querySelectorAll('.sub-paren').forEach(e => e.remove());
+        const plus = work.querySelector('.sub-group .nf-op');
+        if (plus) plus.remove();
+        /* Uttrycket krympte när parentesen och försvararen försvann, men
+           ytan står kvar på sub_exprs bredare x. Utan omsättning hamnar
+           10 − 5 kant i kant med E-cellen och luften mot tabellen som
+           varje annat steg har försvinner. Stridsplatsen ska ligga i
+           marginalen hela vägen, inte bara när uttrycket är som bredast. */
+        flyWorkToSpot(step.col, 220, false);
+      });
+      after(1500, cb);
+
+    /* a = 0: det finns ingen försvarare som kan ta något ur anfallaren, och
+       (10 + 0) vore en parentes utan tanke. Tian går ut till stridsplatsen
+       och möter åttan själv: "10 − 8". */
+    } else if (step.type === 'sub_take') {
+      highlightCol(step.col);
+      const work = workEl();
+      const colr = PVC[COL_KEYS[step.col]];
+      if (work) work.dataset.place = '';
+      flyWorkToSpot(step.col, 600);
+      after(680, () => {
+        subDrawOp(step.col);
+        const g = drawGhost(step.col, step.diff, null, 'a');
+        if (g) g.classList.add('gone');
+        flyWorkToSpot(step.col, 260, false);
+      });
+      after(880, () => {
+        const dw = upDw('b', step.col);
+        if (dw) dw.style.animation = `nf-read-glow ${Ts(520)} ease-in-out both`;
+        flyCopyIn(document.body, dw, ghostEl(), String(step.b), {
+          dur: 520, easing: 'cubic-bezier(0.34,1.06,0.5,1)', fixed: true,
+          fontSize: '1.2rem', color: colr, endColor: colr, fade: true
+        }, null);
+      });
+      after(1300, () => { const dw = upDw('b', step.col); if (dw) dw.style.animation = ''; });
+      after(1420, () => {
+        const g = ghostEl();
+        if (g) { g.classList.remove('gone'); g.classList.add('filled'); pop(g, 320, 'pop'); }
+      });
+      after(1780, cb);
+
+    /* Svaret sist: differensen sugs in i tian, brickan blir svarssiffran
+       och åker ner i cellen (samma avslut som additionens add_result). */
     } else if (step.type === 'sub_ten_minus') {
       highlightCol(step.col);
-      const colKey = COL_KEYS[step.col];
-      // Kryssa av borrow-ten-markören
-      useBorrowTen(step.col);
-      setTimeout(() => {
-        const ansCell = document.getElementById(`ans-${colKey}`);
-        if (ansCell) {
-          ansCell.innerHTML = `<span style="color:${PVC[colKey]};animation:drop-down 0.55s ease-out both;display:inline-block">${step.ans}</span>`;
-          ansCell.classList.add('filled');
-          ansCell.style.borderColor = PVC[colKey];
-        }
-        demoAns[step.col] = step.ans;
-        App.Sound.play('correct');
-        setTimeout(cb, 700);
-      }, 400);
+      subCollapseTen(step.col, step.ans, cb);
 
     } else if (step.type === 'sub_calc') {
       highlightCol(step.col);
@@ -1514,6 +1646,13 @@ const UppstallningGame = (() => {
         App.Sound.play('correct');
         setTimeout(cb, 700);
       }, 300);
+
+    /* A4: kolumnen har siffror men svaret är en ledande nolla (30 − 29).
+       Ingen siffra skrivs — steget finns för att SÄGA det. */
+    } else if (step.type === 'sub_zero_lead') {
+      highlightCol(step.col);
+      ['a', 'b'].forEach(r => pop(upDw(r, step.col), 300));
+      setTimeout(cb, 900);
 
     } else {
       cb();
@@ -1557,11 +1696,17 @@ const UppstallningGame = (() => {
     if (!step) return '';
     let html = '';
     if (step.type === 'add_highlight') {
-      html = '';
-    } else if (step.type === 'add_over9') {
+      /* Steget markerade kolumnen men sa ingenting, så tankerutan blev tom
+         när barnet tryckte fram det — ett dött steg mitt i kedjan. Det får
+         samma kolumnöppning som subtraktionen redan har. Öppningen DÖMER
+         inte: nästa steg är det som avgör om talet går eller behöver
+         tiokompisen. Här sägs bara var vi står. */
       const ck = COL_KEYS[step.col];
-      const ciStr = step.carry_in ? ` + <span style="color:#d97706">${step.carry_in}</span> (minne)` : '';
-      html = `<span style="color:${PVC[ck]}">${step.a}</span> + <span style="color:${PVC[ck]}">${step.b}</span>${ciStr}... Hmm, det blir mer än 9! 🤔`;
+      const colName = step.col === 0 ? 'E (ental)' : step.col === 1 ? 'T (tiotal)' : 'H (hundratal)';
+      html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: ` +
+             `<strong style="color:${PVC[ck]}">${step.a}</strong> + ` +
+             `<strong style="color:${PVC[ck]}">${step.b}</strong>` +
+             `${step.carry_in ? ' + minnet' : ''}`;
     /* ── Komplementvägen, en kort mening per steg (spec §3c/§3d) ──
        Ingen aritmetik i texten som barnet måste räkna ut: 3:an lämnar
        5:an på riktigt, så "5:an har 2 kvar" räcker som mening. */
@@ -1640,35 +1785,73 @@ const UppstallningGame = (() => {
     } else if (step.type === 'sub_highlight') {
       const ck = COL_KEYS[step.col];
       const colName = step.col === 0 ? 'E (ental)' : step.col === 1 ? 'T (tiotal)' : 'H (hundratal)';
-      if (step.a >= step.b) {
+      if (step.bEmpty) {
+        /* A4: undre cellen är tom — då finns inget "− 0" att läsa upp. */
+        html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong>:an står ensam — inget att ta bort.`;
+      } else if (step.a >= step.b) {
         html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — det går! ✅`;
       } else {
         html = `Kolumn <strong style="color:${PVC[ck]}">${colName}</strong>: <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> — hmm...`;
       }
+    /* ── Lånekedjan: en kort mening per steg, ETT namn på lånet (B1):
+       det som lånas är "en tia", brickan säger 10, och sedan heter den
+       "tian". Ingen uträkning i texten — resultatet sägs, barnet räknar
+       inte (P6). Svaret nämns först i sub_ten_minus, där det skrivs.
+
+       BERÄTTELSEN BOR I VERBEN (Dennis 22/9). Övre radens siffror
+       försvarar, undre radens anfaller — därför lånar man: försvararen är
+       för svag och kallar in förstärkning från grannen till vänster.
+       Metaforen bärs av att raderna beter sig olika, inte av att ordet
+       upprepas; varje mening är lika kort som eller kortare än den den
+       ersätter. Och verbet måste ha täckning i bilden: står det "skickar
+       över" ska något flyga, står det "tar av" ska något minska synligt. */
     } else if (step.type === 'sub_cant') {
       const ck = COL_KEYS[step.col];
-      html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte!</span><br>
-        Vi lånar ett tiotal från nästa kolumn 🔄`;
-    } else if (step.type === 'sub_cant_double') {
-      const ck = COL_KEYS[step.col];
-      html = `<span style="color:#ef4444">⚠️ <strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> går inte!</span><br>
-        Tiotalet är 0 — vi måste låna från hundratalet! 🔄`;
-    } else if (step.type === 'sub_flip_borrow') {
-      const ck = COL_KEYS[step.col];
+      html = step.double
+        ? `<strong style="color:${PVC[ck]}">${step.a}</strong>:an klarar inte <strong style="color:${PVC[ck]}">${step.b}</strong>:an — och tiotalet har inget att låna ut.`
+        : `<strong style="color:${PVC[ck]}">${step.a}</strong>:an klarar inte <strong style="color:${PVC[ck]}">${step.b}</strong>:an — vi måste låna.`;
+    } else if (step.type === 'sub_lend') {
       const sk = COL_KEYS[step.srcCol];
-      html = `Vi vänder om: <strong style="color:${PVC[ck]}">${step.b}</strong> − <strong style="color:${PVC[ck]}">${step.a}</strong> = <strong>${step.diff}</strong>, lånar 1 från <strong style="color:${PVC[sk]}">${step.srcNew+1}</strong> → <strong style="color:${PVC[sk]}">${step.srcNew}</strong><br>
-        Svaret blir <strong style="color:${PVC[ck]}">10 − ${step.diff} = ${10-step.diff}</strong> 💡`;
-    } else if (step.type === 'sub_borrow') {
-      const sKey = COL_KEYS[step.srcCol];
-      const dKey = COL_KEYS[step.dstCol];
-      html = `<span style="color:${PVC[sKey]}">${step.srcNew+1}</span> → <strong style="color:${PVC[sKey]}">${step.srcNew}</strong> (ger ett tiotal till T)<br>
-        T: <span style="color:${PVC[dKey]}">${step.dstNew-10}</span> → <strong style="color:${PVC[dKey]}">${step.dstNew}</strong> ✅`;
-    } else if (step.type === 'sub_ten_minus') {
+      html = step.toPaper
+        ? `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an skickar en tia till tiotalet.`
+        : `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an skickar över en tia.`;
+    } else if (step.type === 'sub_left') {
+      const sk = COL_KEYS[step.srcCol];
+      html = `<strong style="color:${PVC[sk]}">${step.srcOld}</strong>:an har <strong style="color:#dc2626">${step.srcNew}</strong> kvar.`;
+    } else if (step.type === 'sub_land') {
+      html = `Tian landar hos tiotalet.`;
+    } else if (step.type === 'sub_landed') {
+      html = `Nu står det <strong style="color:#dc2626">${step.dstNew}</strong> i tiotalet.`;
+    } else if (step.type === 'sub_expr') {
+      /* Dennis 22/9, ordagrant. Steget är uppställningen av uttrycket och
+         inget annat — vad det blir sägs i nästa steg, när det syns. */
       const ck = COL_KEYS[step.col];
-      html = `<strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong> ✅`;
+      html = `Nu har vi (<strong style="color:${PVC[ck]}">10</strong> + <strong style="color:${PVC[ck]}">${step.a}</strong>) − <strong style="color:${PVC[ck]}">${step.b}</strong>.`;
+    } else if (step.type === 'sub_attack') {
+      /* Dennis 21/9: "Vi vänder om: 8 − 3 = 5" förklarade aldrig VARFÖR vi
+         vände, och femman dök upp ur ingenstans. Nu säger meningen vem som
+         gör vad, och båda talen den nämner ändras framför ögonen på barnet:
+         3:an far in i 8:an, och 8:an blir en 5:a. Dennis bild är att de
+         "anfaller" — rörelsen bär den, texten behöver inte ordet. */
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.a}</strong>:an tar <strong style="color:${PVC[ck]}">${step.a}</strong> av <strong style="color:${PVC[ck]}">${step.b}</strong>:an — <strong style="color:${PVC[ck]}">${step.diff}</strong> står kvar.`;
+    } else if (step.type === 'sub_take') {
+      /* a = 0: ingen försvarare att skicka in, tian får klara sig själv. */
+      const ck = COL_KEYS[step.col];
+      html = `Tian möter <strong style="color:${PVC[ck]}">${step.b}</strong>:an själv.`;
+    } else if (step.type === 'sub_ten_minus') {
+      /* Dennis 21/9: namnge tian som DEN LÅNADE — det knyter ihop steget
+         med brickan i högerspalten och med lånet några steg tidigare. */
+      const ck = COL_KEYS[step.col];
+      html = `Och nu använder vi lånetian! <strong style="color:${PVC[ck]}">10</strong> − <strong style="color:${PVC[ck]}">${step.diff}</strong> = <strong style="color:${PVC[ck]}">${step.ans}</strong>`;
     } else if (step.type === 'sub_calc') {
       const ck = COL_KEYS[step.col];
-      html = `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+      html = step.bEmpty
+        ? `<strong style="color:${PVC[ck]}">${step.a}</strong>:an skrivs ner som den är.`
+        : `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> = <strong style="color:${PVC[ck]}">${step.diff}</strong>`;
+    } else if (step.type === 'sub_zero_lead') {
+      const ck = COL_KEYS[step.col];
+      html = `<strong style="color:${PVC[ck]}">${step.a}</strong> − <strong style="color:${PVC[ck]}">${step.b}</strong> är 0 — här blir det ingen siffra.`;
     } else if (step.type === 'done') {
       html = `Klart! 🎉 ${numA} ${mode==='addition'?'+':'−'} ${numB} = <strong>${mode==='addition'?numA+numB:numA-numB}</strong>`;
     }
@@ -1740,26 +1923,6 @@ const UppstallningGame = (() => {
     strikeMemEl(cell ? cell.querySelector('.mem-digit') : null);
   }
 
-  /* ── Borrow-ten hjälpare ────────────────────────────────── */
-  function showBorrowTen(col) {
-    const key = COL_KEYS[col];
-    const wrap = document.getElementById(`bt-wrap-${key}`);
-    if (!wrap) return;
-    const el = document.createElement('div');
-    el.id = `borrow-ten-${key}`;
-    el.className = 'borrow-ten';
-    el.textContent = '10';
-    wrap.appendChild(el);
-    demoBorrowTens[col] = true;
-  }
-
-  function useBorrowTen(col) {
-    const key = COL_KEYS[col];
-    const el = document.getElementById(`borrow-ten-${key}`);
-    if (el) el.classList.add('used');
-    demoBorrowTens[col] = false;
-  }
-
   /* ── Animera carry-token ────────────────────────────────── */
   function animateCarryToken(fromCol, toCol, cb) {
     const srcKey = COL_KEYS[fromCol];
@@ -1802,44 +1965,9 @@ const UppstallningGame = (() => {
     }, 750);
   }
 
-  /* ── Animera borrow-token ───────────────────────────────── */
-  function animateBorrowToken(srcCol, dstCol, _label, cb) {
-    const srcKey = COL_KEYS[srcCol];
-    const dstKey = COL_KEYS[dstCol];
-    const wrap = document.getElementById('up-table-wrap');
-    const srcCell = document.getElementById(`cell-row-a-${srcKey}`);
-    const dstCell = document.getElementById(`cell-row-a-${dstKey}`);
-    if (!wrap || !srcCell || !dstCell) { setTimeout(cb, 300); return; }
-
-    const wRect  = wrap.getBoundingClientRect();
-    const sRect  = srcCell.getBoundingClientRect();
-    const dRect  = dstCell.getBoundingClientRect();
-
-    const token = document.createElement('div');
-    token.textContent = '+10';
-    token.style.cssText = `position:absolute;
-      left:${sRect.left - wRect.left + sRect.width/2 - 18}px;
-      top:${sRect.top - wRect.top + sRect.height/2 - 14}px;
-      padding:3px 7px;border-radius:999px;
-      background:#fee2e2;border:2px solid #ef4444;
-      font-size:0.85rem;font-weight:900;color:#dc2626;
-      pointer-events:none;z-index:20;
-      transition:left 0.75s cubic-bezier(0.25,0.46,0.45,0.94),
-                 top 0.75s cubic-bezier(0.25,0.46,0.45,0.94);`;
-    wrap.style.position = 'relative';
-    wrap.appendChild(token);
-
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      token.style.left = `${dRect.left - wRect.left + dRect.width/2 - 18}px`;
-      token.style.top  = `${dRect.top  - wRect.top  + dRect.height/2 - 14}px`;
-    }));
-
-    setTimeout(() => {
-      token.style.opacity = '0';
-      token.style.transition += ',opacity 0.3s';
-      setTimeout(() => { token.remove(); cb(); }, 350);
-    }, 800);
-  }
+  /* animateBorrowToken ("+10"-tokenen som teleporterade, granskning 21/9 A2)
+     är borta: tian är nu EN bricka som föds ur den strukna siffran
+     (bornTenChip) och flyger som helhet (flyWorkToSpot/flyWorkTo). */
 
   /* ══════════════════════════════════════════════════════════
      TIOKOMPIS-GENVÄGEN — hjälpare (spec §4, mockupen är facit)
@@ -1949,15 +2077,43 @@ const UppstallningGame = (() => {
   const workEl   = () => document.querySelector('.nf-work');
   const workChip = () => document.querySelector('.nf-work .tk-work');
 
-  /* Lodrätt centrerad på den rad minnet gick till; vågrätt på samma
-     parkeringsplats som spöket och summebrickan. */
+  /* ── TIANS PLATS ÄR PAPPRET, INTE MARGINALEN (Dennis 22/9) ──────────
+     Regeln "allt lösräknande ligger på talets högersida" gäller fullt ut.
+     Den lånade tian är inget undantag från den — den är inte lösräknande.
+     Den är SKRIVEN PÅ PAPPRET, och på papper skrivs den ovanför siffran
+     den tillhör. Därför ligger den över cellen: kolumnen är pappret,
+     högerspalten är stridsplatsen. Först när talen ska göra upp hoppar
+     de ut till högerspalten (sub_expr/sub_take), och där stannar allt
+     räknande tills svaret återvänder ner i svarscellen.
+
+     Ytan bär valet i dataset.place, så att varje befintlig ompositionering
+     (drawGhost, subCollapseTen, flyWorkToSpot) hamnar rätt av sig själv.
+     Additionen sätter aldrig flaggan och rör sig inte ur marginalen. */
   function placeWork(work, col, row) {
+    if (work && work.dataset.place === 'above') return placeWorkAbove(work, col);
     const wrap = upWrap(), anchor = upCell(row || 'a', col);
     if (!wrap || !work || !anchor) return;
     const wR = wrap.getBoundingClientRect(), aR = anchor.getBoundingClientRect();
     const bb = work.getBoundingClientRect();
     work.style.top  = (aR.top - wR.top + aR.height / 2 - bb.height / 2) + 'px';
     work.style.left = rightMarginSpot(bb.width) + 'px';
+  }
+
+  /* Ovanför den mottagande cellen, i det fria bandet under rubrikraden
+     (.up-table.sub-head). Det är BRICKANS mitt som ankras över cellens
+     mitt — inte ytans — så att tian står rakt över sin siffra även när
+     resten av ett uttryck hänger med på ytan. */
+  function placeWorkAbove(work, col) {
+    const wrap = upWrap(), cell = upCell('a', col);
+    if (!wrap || !work || !cell) return;
+    const wR = wrap.getBoundingClientRect(), cR = cell.getBoundingClientRect();
+    const bb = work.getBoundingClientRect();
+    const chip = work.querySelector('.tk-work');
+    const cb = chip ? chip.getBoundingClientRect() : bb;
+    const mitt = (cb.left - bb.left) + cb.width / 2;
+    const left = (cR.left - wR.left) + cR.width / 2 - mitt;
+    work.style.left = Math.max(2, Math.min(left, wR.width - bb.width - 2)) + 'px';
+    work.style.top  = (cR.top - wR.top - bb.height - 4) + 'px';
   }
 
   function ensureWork(col, row) {
@@ -1982,6 +2138,159 @@ const UppstallningGame = (() => {
     if (!fade) { w.remove(); return; }
     w.classList.add('fading');
     after(320, () => w.remove());
+  }
+
+  /* ── SUBTRAKTIONENS PAPPER OCH BRICKA (granskning 21/9) ─────────────
+     Pappret: strykning + omskrivning med röd penna i cellens hörn. En andra
+     omskrivning i samma cell stryker den första och ställer sig bredvid:
+     "1̶0̶ 9". Inget objekt byts ut (D4) — spåret står kvar hela uppgiften. */
+  function subRewrite(row, col, text) {
+    const dw = upDw(row, col);
+    if (!dw) return null;
+    dw.classList.add('crossed');
+    let box = dw.querySelector('.sub-rw');
+    if (!box) {
+      box = document.createElement('span');
+      box.className = 'sub-rw';
+      dw.appendChild(box);
+    } else {
+      box.querySelectorAll('span').forEach(s => s.classList.add('used'));
+    }
+    const s = document.createElement('span');
+    s.textContent = text;
+    s.style.animation = `land-bounce-flex ${Ts(400)} ease-out both`;
+    box.appendChild(s);
+    return s;
+  }
+
+  /* Brickan: tian FÖDS ur den strukna siffran. Arbetsytan (.nf-work, samma
+     som additionens korta väg) ställs över källcellen med brickan i sig och
+     hoppar sedan som helhet till sin plats — brickan är ett och samma
+     objekt från födsel till dess den blir svarssiffran. Färgen är
+     MOTTAGARENS platsvärdesfärg: det är tio av hennes enheter.
+
+     Brickan föds redan inuti .sub-group, fast öppen (genomskinlig). Utan
+     den skulle sub_expr behöva flytta brickan in i gruppen, och en flyttad
+     nod är en nod som tas bort och skapas igen i samma steg (P5). Nu växer
+     parentesen bara omkring en bricka som står still. */
+  function bornTenChip(srcCol, dstCol) {
+    const wrap = upWrap(), src = upCell('a', srcCol);
+    if (!wrap || !src) return null;
+    const work = ensureWork(dstCol, 'a');
+    if (!work) return null;
+    work.innerHTML = '';
+    work.style.transition = 'none';
+    const grp = document.createElement('div');
+    grp.className = 'sub-group open';
+    const chip = document.createElement('div');
+    chip.className = 'tk-badge tk-work ' + badgeColorClass(dstCol);
+    chip.innerHTML = '<span class="tk-d">1</span><span class="tk-d">0</span>';
+    chip.style.animationDuration = Ts(380);
+    grp.appendChild(chip);
+    work.appendChild(grp);
+    const wR = wrap.getBoundingClientRect(), sR = src.getBoundingClientRect();
+    const bb = work.getBoundingClientRect();
+    work.style.left = (sR.left - wR.left + sR.width / 2 - bb.width / 2) + 'px';
+    work.style.top  = (sR.top  - wR.top  + sR.height / 2 - bb.height / 2) + 'px';
+    return chip;
+  }
+
+  /* Hela arbetsytan flyger (brickan följer med som barn). */
+  function flyWorkTo(work, targetEl, dur) {
+    const wrap = upWrap();
+    if (!work || !targetEl || !wrap) return;
+    const wR = wrap.getBoundingClientRect(), tR = targetEl.getBoundingClientRect();
+    const bb = work.getBoundingClientRect();
+    work.style.transition = `left ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1), top ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1)`;
+    void work.offsetWidth;
+    work.style.left = (tR.left - wR.left + tR.width / 2 - bb.width / 2) + 'px';
+    work.style.top  = (tR.top  - wR.top  + tR.height / 2 - bb.height / 2) + 'px';
+    after(dur + 40, () => { work.style.transition = ''; });
+  }
+
+  /* Flytta ytan till sin plats för kolumnen — ovanför cellen eller ute i
+     högerspalten, beroende på dataset.place. Hette flyWorkToMargin när
+     marginalen var enda platsen. */
+  function flyWorkToSpot(col, dur, pulsa) {
+    const work = workEl();
+    if (!work) return;
+    work.style.transition = `left ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1), top ${Ts(dur)} cubic-bezier(0.34,1.06,0.5,1)`;
+    void work.offsetWidth;
+    placeWork(work, col, 'a');
+    after(dur + 40, () => {
+      work.style.transition = '';
+      if (pulsa !== false) pop(workChip(), 300, 'tk-pop');
+    });
+  }
+
+  /* ── UTTRYCKET ( 10 + 3 ) − 8 ───────────────────────────────────────
+     Byggs RUNT tian, som redan står i .sub-group: parentesen och plusset
+     skjuts in före och efter brickan, och gruppen stängs (pillen syns) så
+     att 10 och 3 läses som ett. Slottarna föds tomma — siffrorna kommer
+     flygande från pappret, de uppstår inte i rutan. Platsvärdesfärg på
+     båda, precis som i kolumnen. */
+  function subBuildExpr(work, col, a, b) {
+    const grp  = work && work.querySelector('.sub-group');
+    const chip = grp && grp.querySelector('.tk-work');
+    if (!grp || !chip) return null;
+    const colr = PVC[COL_KEYS[col]];
+    const spann = (cls, txt) => {
+      const e = document.createElement('span');
+      e.className = cls;
+      e.textContent = txt;
+      return e;
+    };
+    grp.insertBefore(spann('sub-paren', '('), chip);
+    const plus = spann('nf-op', '+');
+    grp.appendChild(plus);
+    const ta = spann('sub-term gone', a);
+    ta.dataset.slot = 'a';
+    ta.style.color = colr;
+    grp.appendChild(ta);
+    grp.appendChild(spann('sub-paren', ')'));
+    grp.classList.remove('open');
+    requestAnimationFrame(() => plus.classList.add('in'));
+    /* Anfallaren står utanför parentesen: "… ) − 8". */
+    subDrawOp(col);
+    const g = drawGhost(col, b, null, 'a');
+    if (g) g.classList.add('gone');
+    return g;
+  }
+
+  /* Minustecknet mellan tian och differensen: "10 − 5" ska läsas som en
+     uträkning, inte som talet 105. `:scope >` är inte kosmetik — plusset
+     inne i parentesen är också en .nf-op, och en osållad querySelector
+     hade rivit det uttryck vi just byggt. */
+  function subDrawOp(col) {
+    const work = workEl();
+    if (!work || work.dataset.col !== String(col)) return null;
+    const old = work.querySelector(':scope > .nf-op'); if (old) old.remove();
+    const op = document.createElement('span');
+    op.className = 'nf-op';
+    op.textContent = '−';
+    work.appendChild(op);
+    requestAnimationFrame(() => op.classList.add('in'));
+    return op;
+  }
+
+  /* 10 minus diff: differensen sugs in i tian, brickan blir svarssiffran
+     och åker ner i cellen. Demon och övningsläget delar den — i övningen
+     är det barnets rätta siffra som utlöser den (spec §8: brickan ÄR svaret). */
+  function subCollapseTen(col, ans, cb) {
+    const chip = workChip();
+    if (!chip) { fillAnsCell(col, ans); App.Sound.play('correct'); after(700, () => cb && cb()); return; }
+    const g = ghostEl(), op = document.querySelector('.nf-work > .nf-op');
+    if (g) pop(g, 300, 'pop');
+    after(120, () => {
+      absorbGhost();
+      if (op) { op.classList.remove('in'); after(320, () => op.remove()); }
+    });
+    after(460, () => {
+      chip.innerHTML = `<span class="tk-d">${ans}</span>`;
+      pop(chip, 320, 'tk-pop');
+      const w = workEl(); if (w) placeWork(w, col, 'a');
+    });
+    after(900, () => flyChipToAnswer(chip, col, ans, () => { clearWork(false); cb && cb(); }));
   }
 
   /* Platsen som lånet ska fylla. I rutan står den INLINE direkt efter
@@ -2294,7 +2603,6 @@ const UppstallningGame = (() => {
       const v = showA(c.idx);
       return `<td style="text-align:center;vertical-align:bottom">
         <div class="col-cell" id="cell-row-a-${c.key}" style="border-color:${PVC[c.key]}">
-          <div class="bt-wrap" id="bt-wrap-${c.key}"></div>
           <div class="dw" id="dw-a-${c.key}">
             <span style="color:${PVC[c.key]}">${v !== null ? v : ''}</span>
           </div>
@@ -2325,11 +2633,11 @@ const UppstallningGame = (() => {
     }).join('');
 
     return `
-      <table class="up-table">
+      <table class="up-table${mode === 'addition' ? '' : ' sub-head'}">
         <thead>
           <tr>
             <td></td>
-            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]};padding-bottom:4px">${c.label}</th>`).join('')}
+            ${cols.map(c => `<th style="text-align:center;font-size:1.3rem;font-weight:900;color:${PVC[c.key]}">${c.label}</th>`).join('')}
             <td></td>
           </tr>
         </thead>
@@ -2379,12 +2687,11 @@ const UppstallningGame = (() => {
     exInput       = '';
     exAnswers     = [null, null, null];
     exColData     = preprocessExSteps(buildDemoSteps());
-    // Initiera delad demo-state som executeStep/highlightCol/showBorrowTen använder
+    // Initiera delad demo-state som executeStep/highlightCol använder
     demoEffA       = [...digs(numA)];
     demoCarries    = [0, 0, 0];
     demoCarryUsed  = [false, false, false];
     demoAns        = [null, null, null, null];
-    demoBorrowTens = [false, false, false];
     exTenPhase     = [0, 0, 0];
     exFreeCells        = [null, null, null];
     exFreeCur          = 0;
@@ -2471,25 +2778,25 @@ const UppstallningGame = (() => {
       return;
     }
 
-    /* ── Help mode (med hjälp) — oförändrad ───────────── */
+    /* ── Help mode (med hjälp) ─────────────────────────── */
     const colKey      = COL_KEYS[col];
-    const needsBorrow = !!(exColData[col]?.needsBorrow) && !demoBorrowTens[col];
     /* Vägvalet, inte längre needsTenFriend: kön är kolumnens metod och
-       exTenPhase[col] är hur långt barnet har tagit sig i den. */
+       exTenPhase[col] är hur långt barnet har tagit sig i den. Subtraktionens
+       lån går samma väg (granskning 21/9, punkt 9) — lånaknappen och
+       exDoBorrow/exContinueBorrow är borta. */
     const queue       = exColData[col]?.queue || [];
     const phase       = exTenPhase[col] || 0;
 
     const bubble = document.getElementById('ex-bubble');
     if (bubble) {
-      const msg = exBubbleMsg(col, needsBorrow);
+      const msg = exBubbleMsg(col);
       bubble.innerHTML = msg ? `<div class="thought-bubble">${msg}</div>` : '';
     }
 
-    if (needsBorrow) {
-      // Subtraktion-lån (oförändrad)
-      ui.innerHTML = `<button class="up-btn" id="ex-borrow-btn" onclick="UppstallningGame.exDoBorrow()"
-        style="width:100%;height:58px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-size:1rem;border-radius:var(--radius-full);animation:borrow-glow 1.2s ease-in-out infinite;box-shadow:0 4px 12px rgba(245,158,11,0.5)">
-        👆 Tryck här för att låna!</button>`;
+    if (queue.length && phase === 0 && exColData[col]?.noAnswer) {
+      // Ledande nolla (A4): bara ett steg att se, inget att lära ut
+      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStepNext()">
+        Nästa steg <svg class="icn"><use href="#i-play"/></svg></button>`;
 
     } else if (queue.length && phase === 0) {
       // Metoden är inte visad än — lockknappen öppnar den första gesten
@@ -2501,6 +2808,15 @@ const UppstallningGame = (() => {
       // Mitt i metoden — ett steg per tryck, samma kedja som demon
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exTenStepNext()">
         Nästa steg <svg class="icn"><use href="#i-play"/></svg></button>`;
+
+    } else if (exColData[col]?.noAnswer) {
+      /* A4: ledande nolla — steget är visat, ingen siffra ska skrivas.
+         Vidare av sig själv; låset hindrar dubbla timers om vyn ritas om. */
+      ui.innerHTML = '';
+      if (!exInputLocked) {
+        exInputLocked = true;
+        setTimeout(() => { exInputLocked = false; exProceedFrom(col); }, 700);
+      }
 
     } else {
       // Metoden är genomgången (eller kolumnen gick direkt): visa numpad
@@ -2517,7 +2833,7 @@ const UppstallningGame = (() => {
     }
   }
 
-  function exBubbleMsg(col, needsBorrow) {
+  function exBubbleMsg(col) {
     if (!helpMode) return '';
     const ck   = COL_KEYS[col];
     const aVal = demoEffA[col];
@@ -2526,15 +2842,23 @@ const UppstallningGame = (() => {
     const phase = exTenPhase[col] || 0;
     let msg = '';
 
-    if (needsBorrow) {
-      msg = exColData[col]?.isDouble
-        ? `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Tiotalet är 0 — du behöver låna från hundratalet.</span>`
-        : `<span style="color:#ef4444">⚠️ ${aVal} − ${bVal} går inte! Du behöver låna.</span>`;
-
-    } else if (phase < queue.length) {
+    if (phase < queue.length) {
       /* ORDAGRANT demons text för samma steg — en idé per steg, inga egna
          formuleringar i övningsläget (spec §8). */
       msg = bubbleHTML(queue[phase]);
+
+    } else if (queue.length && exColData[col]?.noAnswer) {
+      /* A4: ledande nolla — inget att fråga efter. Stegets ord står kvar
+         tills nästa kolumn tar över; annars faller kolumnen ner i låne-
+         frågan och säger "Vad är 10 minus 0?" (fynd i hjälplägesrundan). */
+      msg = bubbleHTML(queue[queue.length - 1]);
+
+    } else if (queue.length && exColData[col]?.kind === 'borrow') {
+      /* Lånekedjan är genomgången: "10 − 5" står i marginalen och det barnet
+         ska göra är att säga vad tian har kvar. Samma ord som demons
+         sub_ten_minus, som fråga. */
+      const diff = exColData[col]?.tenStep?.diff ?? (bVal - aVal);
+      msg = `Vad är <strong style="color:${PVC[ck]}">10</strong> minus <strong style="color:${PVC[ck]}">${diff}</strong>?`;
 
     } else if (queue.length) {
       /* Metoden är genomgången: summan står i marginalen, och det barnet ska
@@ -2543,14 +2867,14 @@ const UppstallningGame = (() => {
       const sum = exColData[col]?.sum ?? queue[queue.length - 1]?.sum;
       msg = `Vad är sista siffran i <strong style="color:${PVC[ck]}">${sum}</strong>?`;
 
-    } else if (demoBorrowTens[col]) {
-      const diff = exColData[col]?.flipStep?.diff ?? (bVal - aVal + 10);
-      msg = `Du lånade en 10:a! Vad är <strong style="color:#dc2626">10</strong> − <strong style="color:${PVC[ck]}">${diff}</strong>?`;
-
     } else if (mode === 'addition') {
       const ci    = demoCarries[col] || 0;
       const extra = ci ? ` + <span style="color:#d97706">${ci}</span> (minne)` : '';
       msg = `Vad är <strong style="color:${PVC[ck]}">${aVal}</strong> + <strong style="color:${PVC[ck]}">${bVal}</strong>${extra}?`;
+
+    } else if (exColData[col]?.bEmpty) {
+      /* A4: undre cellen är tom — fråga inte efter "3 − 0". */
+      msg = `Inget under <strong style="color:${PVC[ck]}">${aVal}</strong>:an — vad skrivs här?`;
 
     } else {
       msg = `Vad är <strong style="color:${PVC[ck]}">${aVal}</strong> − <strong style="color:${PVC[ck]}">${bVal}</strong>?`;
@@ -2582,11 +2906,10 @@ const UppstallningGame = (() => {
       /* Kolumnindexet MÅSTE fångas här: allt nedan kan köra efter att
          advanceToColumn() flyttat exCurrentCol. */
       const col     = exCurrentCol;
-      const next    = col + 1;
+      const next    = exNextCol(col);
       const ansCell = document.getElementById(`ans-${colKey}`);
 
       const finish = () => {
-        if (demoBorrowTens[col]) useBorrowTen(col);
         /* Minnet från en kolumn som gick direkt. I alla andra kolumner har
            barnet redan placerat minnet i kön (add_carry_fly) — flög det en
            gång till här blev det två minnessiffror av en. Kolumner med
@@ -2605,10 +2928,7 @@ const UppstallningGame = (() => {
           }, 400);
         }
         smallBurst();
-        const proceed = () => {
-          if (next >= colCount) exCheckDone();
-          else advanceToColumn(next);
-        };
+        const proceed = () => exProceedFrom(col);
         if (mode === 'addition' && helpMode && demoCarries[col] === 1 && !demoCarryUsed[col]
             && col < colCount - 1) {
           // STRYKA-fas (v30): minnet i denna kolumn är nu använt — barnet stryker det.
@@ -2627,7 +2947,7 @@ const UppstallningGame = (() => {
             const ui = document.getElementById('ex-col-ui');
             if (ui) ui.innerHTML = `<div style="font-size:12px;font-weight:800;color:#dc2626;text-align:center;padding:8px">👆 Tryck på minnessiffran för att stryka den!</div>`;
           }, 700);
-        } else if (next >= colCount) {
+        } else if (next < 0) {
           setTimeout(exCheckDone, 900);
         } else {
           setTimeout(() => advanceToColumn(next), 400);
@@ -2638,6 +2958,14 @@ const UppstallningGame = (() => {
          ska den landa i cellen — annars står brickan kvar och ljuger, och
          svarssiffran föds ur intet bredvid den. Den skrivna gissningen tas
          bort först: det är brickan som blir siffran. */
+      /* Subtraktionen: "10 − 5" i marginalen är svaret — differensen sugs in
+         i tian och brickan blir siffran, precis som demons sub_ten_minus. */
+      const wc = (mode !== 'addition') ? workChip() : null;
+      if (wc) {
+        if (ansCell) { ansCell.innerHTML = ''; ansCell.classList.remove('active-col'); }
+        subCollapseTen(col, correctDigit, finish);
+        return;
+      }
       const chip = upSumChip();
       if (chip) {
         if (ansCell) { ansCell.innerHTML = ''; ansCell.classList.remove('active-col'); }
@@ -2672,55 +3000,6 @@ const UppstallningGame = (() => {
         color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
       const ansCell = document.getElementById(`ans-${colKey}`);
       if (ansCell) ansCell.innerHTML = '';
-    }
-  }
-
-  function exDoBorrow() {
-    if (exInputLocked) return;
-    const c = exCurrentCol;
-    exInputLocked = true;
-    const btn = document.getElementById('ex-borrow-btn');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Lånar...'; }
-
-    const colData = exColData[c];
-    const flip    = colData.flipStep;
-    const ck      = COL_KEYS[c];
-
-    // Visa förklaringsbubbla (utan svar – barnet ska räkna ut det själv)
-    const bubble = document.getElementById('ex-bubble');
-    if (bubble && flip) {
-      bubble.innerHTML = `<div class="thought-bubble">Vi vänder om: <strong style="color:${PVC[ck]}">${flip.b}</strong> − <strong style="color:${PVC[ck]}">${flip.a}</strong> = <strong>${flip.diff}</strong>. Nu måste vi räkna ut <strong style="color:#dc2626">10 − ${flip.diff}</strong> för att få svaret! 💡</div>`;
-    }
-
-    // Visa "Fortsätt"-knapp istället för tidsbaserad paus
-    const ui = document.getElementById('ex-col-ui');
-    if (ui) {
-      ui.innerHTML = `<button class="btn btn-primary btn-block" id="ex-continue-btn" onclick="UppstallningGame.exContinueBorrow()">
-        Fortsätt <svg class="icn"><use href="#i-play"/></svg></button>`;
-    }
-  }
-
-  function exContinueBorrow() {
-    const c       = exCurrentCol;
-    const colData = exColData[c];
-    const btn     = document.getElementById('ex-continue-btn');
-    if (btn) btn.disabled = true;
-
-    if (colData.isDouble) {
-      executeStep(colData.interStep, () => {
-        playBorrowSound();
-        setTimeout(() => {
-          executeStep(colData.flipStep, () => {
-            exInputLocked = false;
-            showExColUI(c);
-          });
-        }, 300);
-      });
-    } else {
-      executeStep(colData.flipStep, () => {
-        exInputLocked = false;
-        showExColUI(c);
-      });
     }
   }
 
@@ -3065,7 +3344,9 @@ const UppstallningGame = (() => {
     const dr = digs(mode === 'addition' ? numA + numB : numA - numB);
     let correct = true;
     for (let c = 0; c < colCount; c++) {
-      if (exAnswers[c] !== dr[c]) { correct = false; break; }
+      /* A4: en kolumn utan svar (tom på pappret, eller en ledande nolla)
+         står som null — det ÄR rätt när siffran där är 0. */
+      if ((exAnswers[c] ?? 0) !== dr[c]) { correct = false; break; }
     }
     if (correct) { if (!skipScore) exScore++; App.Sound.play('correct'); smallBurst(); }
     else App.Sound.play('wrong');
@@ -3304,13 +3585,13 @@ const UppstallningGame = (() => {
     init, showModeSelect, setDifficulty,
     startDemo, demoNextStep,
     startExercise,
-    exPress, exDoBorrow, exContinueBorrow,
+    exPress,
     exTenStepNext,
     memTableTap,
     exFreePress, exFreeSubmit, exFreeErase,
     upToggleEraser, upClearCanvas,
     goBack,
-    __test: { planAdditionColumns, exColumnPlan },
+    __test: { planAdditionColumns, planSubtractionColumns, exColumnPlan },
   };
 })();
 

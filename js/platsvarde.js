@@ -19,6 +19,7 @@ const PlatsvardeGame = (() => {
   let pvCanvas = null, pvCtx = null;
   let pvDrawing = false, pvErasing = false;
   let pvLastX = 0, pvLastY = 0;
+  let pvResizeObs = null, pvPen = '#5b21b6';
 
   /* Answer state */
   let decompAnswers = ['', '', ''];
@@ -29,6 +30,14 @@ const PlatsvardeGame = (() => {
   const PV_COLORS = { ental: '#22c55e', tiotal: '#3b82f6', hundratal: '#ef4444' };
   const POS_LABELS = { hundratal: 'Hundratal', tiotal: 'Tiotal', ental: 'Ental' };
   const LOG_KEY = id => `platsvarde_log_${id}`;
+  /* SVG som UI-ikoner, aldrig emoji (DESIGN-SYSTEM rad 9; granskning D1).
+     Sudd/bock är samma paths som i uppstallning.js. */
+  const ICON_ERASE  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6H9.6a2 2 0 0 0-1.5.7L3.4 12l4.7 5.3a2 2 0 0 0 1.5.7H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"/><path d="M17 10l-4 4M13 10l4 4"/></svg>';
+  const ICON_CHECK  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg>';
+  const ICON_UNDO   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>';
+  const ICON_PEN    = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4Z"/><path d="M13 7l3 3"/></svg>';
+  const ICON_ERASER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 20 3.5 15.5a2 2 0 0 1 0-2.8l8.2-8.2a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8L13 19"/><path d="M6.5 12.5l6 6M8 20h12"/></svg>';
+  const ICON_TRASH  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
   /* ── Init ───────────────────────────────────────────────── */
   function init(p) {
@@ -204,21 +213,29 @@ const PlatsvardeGame = (() => {
     const a2Dig  = getDigitAt(a2Num, a2Pos);
     const a2Mul  = a2Pos === 'hundratal' ? 100 : a2Pos === 'tiotal' ? 10 : 1;
     const a2Cor  = a2Dig * a2Mul;
-    const a2Pool = [a2Cor, a2Dig, a2Dig * (a2Mul < 100 ? a2Mul * 10 : 10),
-                    a2Dig * (a2Mul === 1 ? 10 : 1)].filter((v, i, a) => a.indexOf(v) === i);
-    while (a2Pool.length < 4) a2Pool.push(a2Pool[a2Pool.length - 1] + 1);
-    qs.push({ level: 'A', type: 'A2', num: a2Num, target: a2Pos, correct: a2Cor, options: shuffle(a2Pool).slice(0, 4) });
+    /* Distraktorer ska vara platsvärdesförväxlingar, inte grannar
+       (granskning B2): samma siffra på fel plats (×10/÷10), grannsiffrornas
+       värde i sin egen position, och grannsiffrorna på fel plats. Fyll på
+       med k×10^p; inga två alternativ får skilja med exakt 1. */
+    const MULS = { hundratal: 100, tiotal: 10, ental: 1 };
+    const a2Cand = [];
+    [100, 10, 1].filter(m => m !== a2Mul).forEach(m => a2Cand.push(a2Dig * m));
+    positions.filter(p => p !== a2Pos).forEach(p => a2Cand.push(getDigitAt(a2Num, p) * MULS[p]));
+    positions.filter(p => p !== a2Pos).forEach(p =>
+      [100, 10, 1].filter(m => m !== MULS[p]).forEach(m => a2Cand.push(getDigitAt(a2Num, p) * m)));
+    const a2Opts = fillUnique([a2Cor, ...a2Cand], 4,
+      () => (1 + Math.floor(Math.random() * 9)) * [1, 10, 100][Math.floor(Math.random() * 3)],
+      (v, out) => out.every(o => Math.abs(o - v) !== 1));
+    qs.push({ level: 'A', type: 'A2', num: a2Num, target: a2Pos, correct: a2Cor, options: shuffle(a2Opts) });
 
     // A3: Hur många [position]er?
     const a3Num  = genNum3();
     const a3Pos  = positions[Math.floor(Math.random() * 3)];
     const a3Dig  = getDigitAt(a3Num, a3Pos);
-    const a3Pool = [a3Dig];
-    for (let d = 1; d <= 9 && a3Pool.length < 4; d++) {
-      const v = (a3Dig + d) % 10;
-      if (!a3Pool.includes(v)) a3Pool.push(v);
-    }
-    qs.push({ level: 'A', type: 'A3', num: a3Num, target: a3Pos, correct: a3Dig, options: shuffle(a3Pool.slice(0, 4)) });
+    /* Talen saknar nollor, så 0 vore gratis uteslutning (granskning D7):
+       distraktorer 1–9, aldrig 0, slumpade i stället för a3Dig+1, +2, +3. */
+    const a3Pool = fillUnique([a3Dig], 4, () => 1 + Math.floor(Math.random() * 9));
+    qs.push({ level: 'A', type: 'A3', num: a3Num, target: a3Pos, correct: a3Dig, options: shuffle(a3Pool) });
 
     /* ── Nivå B: 2 frågor ── */
     // B1: Sätt ihop tal
@@ -226,7 +243,17 @@ const PlatsvardeGame = (() => {
     const bT = 1 + Math.floor(Math.random() * 9);
     const bE = 1 + Math.floor(Math.random() * 9);
     const b1Cor  = bH * 100 + bT * 10 + bE;
-    const b1Opts = shuffle([b1Cor, bH * 100 + bE * 10 + bT, bE * 100 + bT * 10 + bH, bT * 100 + bH * 10 + bE]);
+    /* Distraktorer = samma siffror på fel platser. När två siffror är lika
+       kollapsar permutationerna (t.ex. 553/535 vid t === e), så listan
+       dedupliceras och fylls på med tal där EN siffra bytts (granskning B1). */
+    const b1Perms = [bH * 100 + bE * 10 + bT, bE * 100 + bT * 10 + bH, bT * 100 + bH * 10 + bE,
+                     bT * 100 + bE * 10 + bH, bE * 100 + bH * 10 + bT];
+    const b1Opts = shuffle(fillUnique([b1Cor, ...b1Perms], 4, () => {
+      const d = [bH, bT, bE], i = Math.floor(Math.random() * 3);
+      let nd; do { nd = 1 + Math.floor(Math.random() * 9); } while (nd === d[i]);
+      d[i] = nd;
+      return d[0] * 100 + d[1] * 10 + d[2];
+    }));
     qs.push({ level: 'B', type: 'B1', h: bH, t: bT, e: bE, correct: b1Cor, options: b1Opts });
 
     // B2: Dela upp tal
@@ -254,13 +281,10 @@ const PlatsvardeGame = (() => {
     }
     qs.push({ level: 'C', type: 'C2', num: c2Num, word: numberToSwedish(c2Num), correct: c2Num, options: shuffle(c2Opts) });
 
-    // C3: Tal → ord (till)
+    // C3: Ord → tal (till) — var en kopia av C1; nu två av varje riktning (granskning D6)
     const c3Num  = genNum3();
-    const c3Word = numberToSwedish(c3Num);
-    let c3W1, c3W2;
-    do { c3W1 = numberToSwedish(genNum3()); } while (c3W1 === c3Word);
-    do { c3W2 = numberToSwedish(genNum3()); } while (c3W2 === c3Word || c3W2 === c3W1);
-    qs.push({ level: 'C', type: 'C1', num: c3Num, correct: c3Word, options: shuffle([c3Word, c3W1, c3W2]) });
+    const c3Opts = fillUnique([c3Num], 4, genNum3);
+    qs.push({ level: 'C', type: 'C2', num: c3Num, word: numberToSwedish(c3Num), correct: c3Num, options: shuffle(c3Opts) });
 
     /* ── Nivå D: 2 frågor ── */
     // D1: Störst/minst
@@ -297,28 +321,47 @@ const PlatsvardeGame = (() => {
       <style id="pv-rs">
         #screen-addsub { max-width:100% !important; width:100% !important; padding:0 !important; }
         #screen-addsub .app-header { max-width:100% !important; }
-        #addsub-root { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+        /* Ingen height:100vh här (granskning C6): .screen är redan height:100 %
+           och #addsub-root flex:1 — 100vh är högre än synlig vy i iOS Safari
+           och tryckte Kladd-knapparna under verktygsfältet. */
+        #addsub-root { display:flex; flex-direction:column; overflow:hidden; }
         #pv-main { flex:1; display:flex; flex-direction:row; gap:8px; padding:8px; overflow:hidden; min-height:0; }
-        #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; padding-bottom:8px; }
+        #pv-left { flex:55; display:flex; flex-direction:column; gap:6px; overflow-y:auto; overflow-x:hidden; min-height:0; padding-bottom:8px; }
         #pv-scratch { flex:45; background:var(--glass); border-radius:var(--radius-lg); padding:8px;
           border:1px solid var(--glass-line); box-shadow:var(--shadow-panel);
           display:flex; flex-direction:column; gap:5px; min-height:0; }
+        /* Porträtt (granskning C2/C3): frågekortet tar sin naturliga höjd,
+           kladden tar ALLT som blir över — samma grepp som additionens
+           sömlösa kladd. Golvet 238 px = etikett + 150 px canvas + 44 px
+           knappar + mellanrum; under det får #pv-left rulla i stället. */
         @media (orientation:portrait) {
           #pv-main { flex-direction:column; }
-          #pv-left { flex:1; }
-          #pv-scratch { flex:0 0 40vh; }
+          #pv-left { flex:0 1 auto; }
+          #pv-scratch { flex:1 1 0; min-height:238px; }
         }
-        #pv-canvas { flex:1; width:100%; display:block; touch-action:none; cursor:crosshair;
+        #pv-canvas { flex:1; min-height:0; width:100%; display:block; touch-action:none; cursor:crosshair;
           border-radius:var(--radius-md); border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
           background:rgba(255,255,255,0.75); }
         .pv-card { background:var(--glass-strong); border-radius:var(--radius-lg); padding:10px;
           border:1px solid var(--glass-line); box-shadow:var(--shadow-panel); }
         .pv-digit-row { display:flex; justify-content:center; gap:10px; margin:8px 0; }
+        /* A1-rutorna är NEUTRALA tills svaret är givet: ingen etikett, ingen
+           positionsfärg — annars blir uppgiften ordmatchning (granskning B4).
+           .revealed slår på färg + etikett; etiketten står i --deep på en
+           tonad yta, 14 px, så färgen bär ramen och inte brödtexten (C5). */
         .pv-digit-box { display:flex; flex-direction:column; align-items:center; gap:4px; width:clamp(52px,10vw,80px);
           border-radius:var(--radius-lg); padding:10px 0; cursor:pointer;
-          transition:transform 0.25s var(--spring),box-shadow 0.25s;
-          border-width:2.5px; border-style:solid; }
+          transition:transform 0.25s var(--spring),box-shadow 0.25s,border-color 0.3s;
+          border:2.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          background:var(--glass-strong); }
         .pv-digit-box:hover { transform:scale(1.08); box-shadow:0 8px 20px var(--glow); }
+        .pv-digit-box .pv-dg { font-size:2.5rem; font-weight:900; line-height:1; color:var(--deep);
+          transition:color 0.3s; }
+        .pv-digit-box .pv-dl { font-size:14px; font-weight:800; color:var(--deep); line-height:1.3;
+          padding:1px 8px; border-radius:var(--radius-full); opacity:0; transition:opacity 0.3s; }
+        .pv-digit-box.revealed { border-color:var(--pvc); }
+        .pv-digit-box.revealed .pv-dg { color:var(--pvc); }
+        .pv-digit-box.revealed .pv-dl { opacity:1; background:color-mix(in srgb, var(--pvc) 18%, #fff); }
         .pv-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
         .pv-choice-btn { padding:10px; border-radius:var(--radius-md); background:var(--glass-strong);
           border:2px solid color-mix(in srgb, var(--accent) 22%, transparent); color:var(--deep);
@@ -327,26 +370,42 @@ const PlatsvardeGame = (() => {
           transition:all 0.25s var(--spring); }
         .pv-choice-btn:hover { border-color:var(--accent); transform:translateY(-2px) scale(1.02);
           box-shadow:0 8px 20px var(--glow); }
-        .pv-decomp-field { width:clamp(40px,8vw,60px); height:clamp(40px,8vw,60px); border-radius:var(--radius-md); font-size:var(--text-2xl);
+        /* Utfall på plats: rätt lyser, fel dämpas och låses, övriga tonas i facit. */
+        .pv-choice-btn.pv-correct { border-color:#22c55e; background:rgba(34,197,94,0.14);
+          animation:pv-land 0.45s ease-out both; }
+        .pv-choice-btn.pv-wrong { opacity:0.4; pointer-events:none; border-style:dashed; }
+        .pv-choice-btn.pv-dim { opacity:0.55; pointer-events:none; }
+        .pv-choice-btn.pv-correct:hover, .pv-choice-btn.pv-dim:hover { transform:none; box-shadow:none; }
+        /* Facit i fält/slot: siffran landar där barnet hade fel. */
+        .pv-fixed { background:rgba(34,197,94,0.14) !important; animation:pv-land 0.45s ease-out both; }
+        @keyframes pv-land {
+          0%   { transform:scale(1.18); }
+          60%  { transform:scale(0.96); }
+          100% { transform:scale(1); }
+        }
+        /* Träffytor (granskning C1): 12vw är 46,8 px vid 390 — golvet 46/48
+           gäller alltid; clamp-maxen nås först på surfplatta. */
+        .pv-decomp-field { width:clamp(46px,12vw,60px); height:clamp(46px,12vw,60px); border-radius:var(--radius-md); font-size:1.6rem;
           font-family:var(--font-head); font-variant-numeric:tabular-nums;
           font-weight:900; border:2.5px solid; display:flex; align-items:center; justify-content:center;
           cursor:pointer; transition:all 0.15s; background:var(--glass-strong); position:relative; }
         .pv-decomp-field.active { outline:3px solid var(--accent);
           animation:pv-free-glow 1.2s ease-in-out infinite; }
-        .pv-free-arrow { position:absolute; bottom:calc(100% + 2px); left:50%;
-          transform:translateX(-50%); font-size:clamp(1rem,2.2vw,1.3rem);
-          pointer-events:none; z-index:6; animation:pv-arrow-bounce 0.9s ease-in-out infinite; }
         @keyframes pv-free-glow {
           0%,100% { box-shadow:0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
           50%      { box-shadow:0 0 20px color-mix(in srgb, var(--accent) 75%, transparent); }
         }
-        @keyframes pv-arrow-bounce {
-          0%,100% { transform:translateX(-50%) translateY(0); }
-          50%      { transform:translateX(-50%) translateY(-7px); }
-        }
-        .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(40px,8vw,52px)); gap:6px; justify-content:center; margin-top:8px; }
-        .pv-nk { width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:var(--radius-full);
-          font-size:var(--text-base); font-family:var(--font-head); font-weight:900;
+        /* B2 kompakt (granskning C2): fälten till vänster, knappsatsen till
+           höger — kortet blir ~260 px och ryms vid 390×664 utan scroll.
+           Etiketten står i --deep; fältet bär positionsfärgen (C5). */
+        .pv-b2 { display:flex; gap:14px; align-items:center; justify-content:center; }
+        .pv-b2-fields { display:flex; flex-direction:column; gap:8px; }
+        .pv-b2-row { display:flex; align-items:center; gap:8px; }
+        .pv-b2-lbl { font-size:16px; font-weight:800; color:var(--deep); }
+        .pv-numpad { display:grid; grid-template-columns:repeat(3,clamp(48px,12vw,56px)); gap:6px; justify-content:center; }
+        .pv-nk { width:clamp(48px,12vw,56px); height:clamp(48px,12vw,56px); border-radius:var(--radius-full);
+          font-size:var(--text-lg); font-family:var(--font-head); font-weight:900;
+          display:inline-flex; align-items:center; justify-content:center; padding:0;
           cursor:pointer; background:var(--glass-strong);
           border:1.5px solid color-mix(in srgb, var(--accent) 32%, transparent);
           color:var(--deep); transition:transform 0.2s var(--spring); }
@@ -356,24 +415,47 @@ const PlatsvardeGame = (() => {
           border-color:transparent; color:#fff; box-shadow:0 4px 12px var(--glow); }
         .pv-nk:disabled { opacity:0.5; cursor:default; box-shadow:none; }
         .pv-nk:disabled:hover { transform:none; }
+        .pv-nk svg, .pv-kb svg, .pv-ob-act svg { width:22px; height:22px; fill:none; stroke:currentColor;
+          stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+        .pv-kb { flex:1; height:44px; border-radius:var(--radius-md); font-weight:800; font-size:14px;
+          cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;
+          border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+        .pv-kb svg { width:18px; height:18px; }
+        .pv-ob-act { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
         .pv-order-pool { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:6px 0; }
-        .pv-order-btn { padding:5px 10px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:800;
+        .pv-order-btn { min-height:44px; padding:4px 10px; border-radius:var(--radius-md); font-weight:800;
           cursor:pointer; border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);
           background:var(--glass-strong); transition:all 0.25s var(--spring); }
         .pv-order-btn.placed { opacity:0.45; border-style:dashed; border-color:var(--accent);
           outline:2px solid color-mix(in srgb, var(--accent) 25%, transparent);
           background:color-mix(in srgb, var(--accent) 8%, transparent); }
-        .pv-slot { width:clamp(50px,10vw,72px); height:44px; border-radius:var(--radius-md);
+        .pv-slot { width:clamp(64px,16vw,84px); height:46px; border-radius:var(--radius-md);
           border:2px dashed color-mix(in srgb, var(--accent) 32%, transparent);
-          display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-sm);
+          display:inline-flex; align-items:center; justify-content:center; font-size:var(--text-lg);
           font-weight:800; color:color-mix(in srgb, var(--accent) 45%, transparent); }
         .pv-slot.filled { background:color-mix(in srgb, var(--accent) 10%, transparent);
           border:2px solid var(--accent); color:var(--accent); cursor:pointer; }
+        /* Fel-/facitrutan: text + Nästa på samma rad, Nästa minst 44 pt hög. */
+        .pv-fb-wrong { display:flex; align-items:center; gap:8px;
+          background:linear-gradient(135deg,#fff7ed,#fef3c7); border:2px solid #f59e0b;
+          border-radius:var(--radius-md); padding:6px 6px 6px 12px;
+          font-size:14px; font-weight:700; color:#92400e; }
+        /* min-width:0 + overflow-wrap: ett långt talord ("åttahundranittiotre")
+           fick annars raden att bli 395 px bred och #pv-left att visa en
+           vågrät rullist som åt 16 px höjd (mätt vid 390×664). */
+        .pv-fb-wrong > span { flex:1; min-width:0; text-align:center; overflow-wrap:anywhere; }
+        .pv-next { flex:0 0 auto; min-height:44px; padding:0 14px 0 18px; border:none; cursor:pointer;
+          border-radius:var(--radius-full); display:inline-flex; align-items:center; gap:4px;
+          font-family:var(--font-head); font-weight:800; font-size:var(--text-base); color:#fff;
+          background:linear-gradient(135deg,var(--accent),var(--accent-light));
+          box-shadow:0 4px 12px var(--glow); }
+        .pv-next svg { width:20px; height:20px; fill:none; stroke:currentColor;
+          stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
       </style>
 
-      <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:5px 10px;
+      <div id="pv-hdr" style="display:flex;align-items:center;gap:8px;padding:4px 10px;
         border-bottom:1px solid color-mix(in srgb, var(--accent) 15%, transparent);min-height:44px;flex-shrink:0">
-        <button class="btn-back" style="flex-shrink:0;min-height:36px;padding:4px 12px 4px 8px;font-size:13px"
+        <button class="btn-back" style="flex-shrink:0;min-height:44px;padding:4px 12px 4px 8px;font-size:14px"
           onclick="PlatsvardeGame.confirmAbort()">Avbryt</button>
         <div class="num" style="flex:1;text-align:center;font-family:var(--font-head);font-weight:700;font-size:14px;color:var(--deep)">
           ${getLevelLabel(q)} &middot; ${qIndex + 1}/10
@@ -389,19 +471,16 @@ const PlatsvardeGame = (() => {
           <div id="pv-feedback"></div>
         </div>
         <div id="pv-scratch">
-          <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;
-            letter-spacing:0.06em;flex-shrink:0">✏️ Kladd</div>
+          <div style="font-size:14px;font-weight:800;color:var(--deep);text-transform:uppercase;
+            letter-spacing:0.06em;flex-shrink:0">Kladd</div>
           <canvas id="pv-canvas"></canvas>
           <div style="display:flex;gap:5px;flex-shrink:0">
-            <button onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)">🖊️ Rita</button>
-            <button onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🧹 Sudd</button>
-            <button onclick="PlatsvardeGame.pvClearCanvas()"
-              style="flex:1;height:30px;border-radius:var(--radius-md);font-weight:800;font-size:11px;
-              cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)">🗑️ Rensa</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvToggleEraser(false)" id="pv-draw"
+              style="background:var(--accent);color:#fff;border-color:var(--accent)">${ICON_PEN} Rita</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvToggleEraser(true)" id="pv-erase"
+              style="background:var(--tint);color:var(--deep)">${ICON_ERASER} Sudd</button>
+            <button class="pv-kb" onclick="PlatsvardeGame.pvClearCanvas()"
+              style="background:var(--tint);color:var(--deep)">${ICON_TRASH} Rensa</button>
           </div>
         </div>
       </div>
@@ -426,22 +505,16 @@ const PlatsvardeGame = (() => {
   }
 
   /* ── Render-hjälpare ────────────────────────────────────── */
-  function renderMonoColor(n, color, size) {
-    size = size || '1.25rem';
-    return String(n).split('').map(d =>
-      `<span style="color:${color};font-weight:900;font-size:${size}">${d}</span>`
-    ).join('');
-  }
-
   function coloredDigit(d, pos) {
     return `<span style="color:${PV_COLORS[pos]};font-weight:900">${d}</span>`;
   }
 
   function renderColoredNumber(n, size = '2rem') {
+    /* Positionen räknas från höger: index i + (3 − längd) i den fulla
+       ordningen. Den gamla kortade listan för 1–2 siffror gav undefined
+       (mätt: "70" fick 7 grön, 0 ofärgad) när A2 började visa 7/70/700. */
     const s = String(n);
-    const posOrder = s.length >= 3
-      ? ['hundratal', 'tiotal', 'ental']
-      : s.length === 2 ? ['tiotal', 'ental'] : ['ental'];
+    const posOrder = ['hundratal', 'tiotal', 'ental'];
     return s.split('').map((d, i) =>
       `<span style="color:${PV_COLORS[posOrder[i + (3 - s.length)]]};font-weight:900;font-size:${size}">${d}</span>`
     ).join('');
@@ -457,11 +530,10 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-digit-row">
           ${['hundratal','tiotal','ental'].map((pos, i) => `
-            <button class="pv-digit-box" id="pv-digit-${pos}"
-              style="background:rgba(0,0,0,0.03);border-color:${PV_COLORS[pos]}"
+            <button class="pv-digit-box" id="pv-digit-${pos}" style="--pvc:${PV_COLORS[pos]}"
               onclick="PlatsvardeGame.handleDigitClick('${pos}')">
-              <span style="font-size:2.5rem;font-weight:900;color:${PV_COLORS[pos]};line-height:1">${s[i]}</span>
-              <span style="font-size:10px;font-weight:800;color:${PV_COLORS[pos]}">${POS_LABELS[pos]}</span>
+              <span class="pv-dg">${s[i]}</span>
+              <span class="pv-dl">${POS_LABELS[pos]}</span>
             </button>
           `).join('')}
         </div>
@@ -481,8 +553,8 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
-              ${renderMonoColor(opt, PV_COLORS[q.target], '1.25rem')}
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+              ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
         </div>
@@ -503,7 +575,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               <span style="font-weight:900;font-size:var(--text-xl)">${opt}</span>
             </button>
           `).join('')}
@@ -523,7 +595,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
@@ -544,24 +616,26 @@ const PlatsvardeGame = (() => {
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Dela upp: ${renderColoredNumber(q.num, '1.5rem')}
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
-          ${fields.map(f => `
-            <div style="display:flex;align-items:center;gap:8px">
-              <div id="pv-dc-${f.idx}" class="pv-decomp-field"
-                style="border-color:${PV_COLORS[f.pos]};color:${PV_COLORS[f.pos]}"
-                onclick="PlatsvardeGame.setDecompActive(${f.idx})">
-                <span id="pv-dc-val-${f.idx}">?</span>
+        <div class="pv-b2">
+          <div class="pv-b2-fields">
+            ${fields.map(f => `
+              <div class="pv-b2-row">
+                <div id="pv-dc-${f.idx}" class="pv-decomp-field"
+                  style="border-color:${PV_COLORS[f.pos]};color:${PV_COLORS[f.pos]}"
+                  onclick="PlatsvardeGame.setDecompActive(${f.idx})">
+                  <span id="pv-dc-val-${f.idx}">?</span>
+                </div>
+                <span class="pv-b2-lbl">${f.label}</span>
               </div>
-              <span style="color:${PV_COLORS[f.pos]};font-weight:800;font-size:var(--text-base)">${f.label}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div class="pv-numpad">
-          ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
-            <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
-              ${k==='✓' ? 'id="pv-dc-ok" disabled' : ''}
-              onclick="PlatsvardeGame.decompPress('${k}')">${k}</button>
-          `).join('')}
+            `).join('')}
+          </div>
+          <div class="pv-numpad">
+            ${['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => `
+              <button class="pv-nk${k==='⌫'?' pv-nk-del':k==='✓'?' pv-nk-ok':''}"
+                ${k==='✓' ? 'id="pv-dc-ok" disabled aria-label="Klar"' : k==='⌫' ? 'aria-label="Sudda"' : ''}
+                onclick="PlatsvardeGame.decompPress('${k}')">${k==='⌫' ? ICON_ERASE : k==='✓' ? ICON_CHECK : k}</button>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -569,17 +643,19 @@ const PlatsvardeGame = (() => {
 
   /* C1: Tal → ord */
   function renderC1(q) {
+    /* Talet 2,5 rem och 8 px marginaler: kortet 260 px så facitraden (60 px)
+       ryms i #pv-left:s 333 px vid 390×664 utan att kladden går under 150. */
     return `
       <div class="pv-card">
-        <div style="text-align:center;margin-bottom:10px;letter-spacing:2px">
-          ${renderColoredNumber(q.num, '3rem')}
+        <div style="text-align:center;margin-bottom:8px;letter-spacing:2px">
+          ${renderColoredNumber(q.num, '2.5rem')}
         </div>
-        <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:10px">
+        <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Hur skrivs talet med bokstäver?
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" style="text-align:left;padding:10px 12px"
+            <button class="pv-choice-btn" data-val="${escHtml(opt)}" style="text-align:left;padding:8px 12px;min-height:44px"
               onclick="PlatsvardeGame.handleChoice('${escApos(opt)}','${escApos(q.correct)}')">
               ${escHtml(opt)}
             </button>
@@ -602,7 +678,7 @@ const PlatsvardeGame = (() => {
         </div>
         <div class="pv-choice-grid">
           ${q.options.map(opt => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
+            <button class="pv-choice-btn" data-val="${opt}" onclick="PlatsvardeGame.handleChoice(${opt},${q.correct})">
               ${renderColoredNumber(opt, '1.5rem')}
             </button>
           `).join('')}
@@ -613,15 +689,16 @@ const PlatsvardeGame = (() => {
 
   /* D1: Störst/minst */
   function renderD1(q) {
-    const col = q.askMax ? PV_COLORS.hundratal : PV_COLORS.ental;
+    /* Störst/minst i modulens accentfärg — platsvärdesfärgerna betyder
+       BARA platsvärde (granskning B5). */
     return `
       <div class="pv-card">
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:10px">
-          Vilket tal är <span style="color:${col};font-weight:900">${q.askMax ? 'störst' : 'minst'}</span>?
+          Vilket tal är <span style="color:var(--deep);font-weight:900">${q.askMax ? 'störst' : 'minst'}</span>?
         </div>
         <div class="pv-choice-grid">
           ${q.nums.map(n => `
-            <button class="pv-choice-btn" onclick="PlatsvardeGame.handleChoice(${n},${q.correct})">
+            <button class="pv-choice-btn" data-val="${n}" onclick="PlatsvardeGame.handleChoice(${n},${q.correct})">
               ${renderColoredNumber(n, '1.5rem')}
             </button>
           `).join('')}
@@ -637,8 +714,8 @@ const PlatsvardeGame = (() => {
       <div class="pv-card">
         <div style="font-size:var(--text-base);font-weight:800;color:var(--color-text);margin-bottom:8px">
           Ordna från
-          <span style="color:${PV_COLORS.ental};font-weight:900">minst</span> →
-          <span style="color:${PV_COLORS.hundratal};font-weight:900">störst</span>:
+          <span style="color:var(--deep);font-weight:900">minst</span> →
+          <span style="color:var(--deep);font-weight:900">störst</span>:
         </div>
         <div style="display:flex;gap:4px;justify-content:center;margin-bottom:8px" id="pv-order-slots">
           ${[0,1,2,3].map(i => `<div class="pv-slot" id="pv-slot-${i}">?</div>`).join('')}
@@ -647,23 +724,23 @@ const PlatsvardeGame = (() => {
           ${q.nums.map(n => `
             <button class="pv-order-btn" id="pv-ob-${n}"
               onclick="PlatsvardeGame.handleOrderClick(${n})">
-              ${renderColoredNumber(n, '0.9rem')}
+              ${renderColoredNumber(n, '1.5rem')}
             </button>
           `).join('')}
         </div>
         <div style="display:flex;gap:8px;margin-top:6px">
-          <button onclick="PlatsvardeGame.orderUndo()"
-            style="flex:1;height:40px;border-radius:var(--radius-full);
+          <button class="pv-ob-act" onclick="PlatsvardeGame.orderUndo()"
+            style="flex:1;height:48px;border-radius:var(--radius-full);
             background:var(--tint);color:var(--deep);
             border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
             font-weight:800;cursor:pointer">
-            ↩ Ångra
+            ${ICON_UNDO} Ångra
           </button>
-          <button id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
-            style="flex:2;height:40px;border-radius:var(--radius-full);
+          <button class="pv-ob-act" id="pv-order-confirm" onclick="PlatsvardeGame.submitOrder()" disabled
+            style="flex:2;height:48px;border-radius:var(--radius-full);
             background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--deep);border:none;
             font-weight:800;cursor:pointer;opacity:0.5">
-            ✓ Klar
+            ${ICON_CHECK} Klar
           </button>
         </div>
       </div>
@@ -676,21 +753,100 @@ const PlatsvardeGame = (() => {
   function handleChoice(val, correct) {
     if (inputLocked) return;
     inputLocked = true;
-    processAnswer(String(val) === String(correct), String(correct));
+    const isCorrect = String(val) === String(correct);
+    /* Den tryckta knappen bär utfallet: rätt lyser grönt, fel dämpas och
+       låses så samma knapp inte kan tryckas igen (granskning D4). */
+    const btn = findChoiceBtn(val);
+    if (btn) btn.classList.add(isCorrect ? 'pv-correct' : 'pv-wrong');
+    processAnswer(isCorrect, String(correct));
+  }
+
+  function findChoiceBtn(val) {
+    const all = document.querySelectorAll('.pv-choice-btn');
+    for (const b of all) if (b.dataset && b.dataset.val === String(val)) return b;
+    return null;
   }
 
   function handleDigitClick(pos) {
     if (inputLocked) return;
     inputLocked = true;
     const isCorrect = pos === currentQ.target;
-    ['hundratal', 'tiotal', 'ental'].forEach(p => {
-      const btn = document.getElementById(`pv-digit-${p}`);
-      if (!btn) return;
+    const btn = document.getElementById(`pv-digit-${pos}`);
+    if (isCorrect) {
+      lockDigitBoxes();
+      revealDigitPositions();
+      if (btn) btn.style.background = 'rgba(34,197,94,0.25)';
+    } else if (btn) {
+      /* Fel: BARA den tryckta rutan dämpas och låses — de andra förblir
+         tryckbara och rätt svar ges inte bort (granskning A1). */
+      btn.style.background = 'rgba(239,68,68,0.2)';
+      btn.style.opacity    = '0.45';
       btn.style.pointerEvents = 'none';
-      if (p === currentQ.target) btn.style.background = 'rgba(34,197,94,0.25)';
-      if (p === pos && !isCorrect) btn.style.background = 'rgba(239,68,68,0.2)';
-    });
+    }
     processAnswer(isCorrect, POS_LABELS[currentQ.target]);
+  }
+
+  function lockDigitBoxes() {
+    ['hundratal', 'tiotal', 'ental'].forEach(p => {
+      const b = document.getElementById(`pv-digit-${p}`);
+      if (b) b.style.pointerEvents = 'none';
+    });
+  }
+
+  /* Först när svaret är givet får rutorna sin positionsfärg och etikett. */
+  function revealDigitPositions() {
+    ['hundratal', 'tiotal', 'ental'].forEach(p => {
+      const b = document.getElementById(`pv-digit-${p}`);
+      if (b) b.classList.add('revealed');
+    });
+  }
+
+  /* Facit efter två fel: svaret landar i frågans egna rutor och står kvar
+     tills barnet trycker Nästa (granskning B6). */
+  function revealAnswer() {
+    const q = currentQ;
+    switch (q.type) {
+      case 'A1': {
+        lockDigitBoxes();
+        revealDigitPositions();
+        const t = document.getElementById(`pv-digit-${q.target}`);
+        if (t) { t.style.background = 'rgba(34,197,94,0.25)'; t.style.opacity = '1'; }
+        break;
+      }
+      case 'A2': case 'A3': case 'B1': case 'C1': case 'C2': case 'D1': {
+        /* Rätt knapp lyser upp på sin plats; de övriga dämpas. */
+        document.querySelectorAll('.pv-choice-btn').forEach(b => {
+          if (b.dataset.val === String(q.correct)) b.classList.add('pv-correct');
+          else if (!b.classList.contains('pv-wrong')) b.classList.add('pv-dim');
+        });
+        break;
+      }
+      case 'B2': {
+        /* Siffrorna landar i sina fält i sin färg; fält som var fel markeras. */
+        setDecompActive(-1);
+        const cor = [q.correct.h, q.correct.t, q.correct.e];
+        cor.forEach((d, i) => {
+          const v = document.getElementById(`pv-dc-val-${i}`);
+          const f = document.getElementById(`pv-dc-${i}`);
+          if (v) v.textContent = String(d);
+          if (f && parseInt(decompAnswers[i]) !== d) f.classList.add('pv-fixed');
+        });
+        document.querySelectorAll('.pv-nk').forEach(b => { b.disabled = true; });
+        break;
+      }
+      case 'D2': {
+        /* Rätt ordning läggs i de fyra platserna. */
+        const wrongIdx = orderPlaced.map((n, i) => n !== q.correct[i] ? i : -1).filter(i => i >= 0);
+        orderPlaced = [...q.correct];
+        updateOrderUI();
+        wrongIdx.forEach(i => {
+          const s = document.getElementById(`pv-slot-${i}`);
+          if (s) s.classList.add('pv-fixed');
+        });
+        [0, 1, 2, 3].forEach(i => { const s = document.getElementById(`pv-slot-${i}`); if (s) s.onclick = null; });
+        break;
+      }
+    }
   }
 
   function setDecompActive(idx) {
@@ -698,17 +854,9 @@ const PlatsvardeGame = (() => {
     [0, 1, 2].forEach(i => {
       const el = document.getElementById(`pv-dc-${i}`);
       if (!el) return;
-      const active = i === idx;
-      el.classList.toggle('active', active);
-      let arrow = el.querySelector('.pv-free-arrow');
-      if (active && !arrow) {
-        arrow = document.createElement('span');
-        arrow.className = 'pv-free-arrow';
-        arrow.textContent = '👇';
-        el.appendChild(arrow);
-      } else if (!active && arrow) {
-        arrow.remove();
-      }
+      /* Bara glow-ramen visar aktivt fält — pilen täckte rubriken
+         (granskning C4) och var en emoji-ikon (D1). */
+      el.classList.toggle('active', i === idx);
     });
   }
 
@@ -775,7 +923,7 @@ const PlatsvardeGame = (() => {
       if (orderPlaced[i] !== undefined) {
         const num = orderPlaced[i];
         slot.className = 'pv-slot filled';
-        slot.innerHTML = renderColoredNumber(num, '0.9rem');
+        slot.innerHTML = renderColoredNumber(num, '1.5rem');
         slot.onclick = () => handleOrderClick(num); // klick på fylld slot tar bort talet
       } else {
         slot.className = 'pv-slot';
@@ -821,8 +969,10 @@ const PlatsvardeGame = (() => {
       setTimeout(nextQuestion, 1400);
     } else if (attempts >= 2) {
       App.Sound.play('wrong');
-      showFeedback(false, `Rätt svar: <strong>${correctDisplay}</strong>`);
-      setTimeout(nextQuestion, 2200);
+      /* Facit är något som ska läras: det står kvar tills barnet trycker
+         Nästa — ingen timer (granskning B6). */
+      revealAnswer();
+      showFeedback(false, `Rätt svar: <strong>${correctDisplay}</strong>`, true);
     } else {
       inputLocked = false;
       App.Sound.play('wrong');
@@ -830,17 +980,20 @@ const PlatsvardeGame = (() => {
     }
   }
 
-  function showFeedback(correct, msg) {
+  function showFeedback(correct, msg, withNext) {
     const fb = document.getElementById('pv-feedback');
     if (!fb) return;
+    const nextBtn = withNext
+      ? `<button class="pv-next" onclick="PlatsvardeGame.nextQuestion()">Nästa
+           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`
+      : '';
     fb.innerHTML = correct
       ? `<div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #22c55e;
           border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-base);
           font-weight:800;color:#166534;text-align:center;animation:bounce-in 0.3s var(--ease-bounce)">
-          ✅ Rätt! 🌟</div>`
-      : `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #f59e0b;
-          border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-sm);
-          font-weight:700;color:#92400e;text-align:center">❌ ${msg}</div>`;
+          Rätt! 🌟</div>`
+      : `<div class="pv-fb-wrong">
+          <span>${msg}</span>${nextBtn}</div>`;
   }
 
   function celebrationBurst() {
@@ -852,12 +1005,14 @@ const PlatsvardeGame = (() => {
       const el = document.createElement('span');
       el.className = 'confetti-piece';
       el.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+      /* Konfettin ska vara borta när nästa fråga kommer efter 1,4 s
+         (granskning D3): 0,9–1,2 s fall, städas vid 1,3 s. */
       el.style.cssText = `left:${Math.random()*100}%;font-size:${14+Math.random()*18}px;
         color:#${Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')};
-        animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.3}s`;
+        animation-duration:${0.9+Math.random()*0.3}s;animation-delay:${Math.random()*0.1}s`;
       container.appendChild(el);
     }
-    setTimeout(() => { container.innerHTML = ''; }, 3000);
+    setTimeout(() => { container.innerHTML = ''; }, 1300);
   }
 
   /* ── Navigation ─────────────────────────────────────────── */
@@ -903,15 +1058,41 @@ const PlatsvardeGame = (() => {
     pvCanvas = document.getElementById('pv-canvas');
     if (!pvCanvas) return;
     pvErasing = false;
+    if (pvResizeObs) { pvResizeObs.disconnect(); pvResizeObs = null; }
     requestAnimationFrame(() => {
       const r = pvCanvas.getBoundingClientRect();
-      pvCanvas.width  = r.width  || 300;
-      pvCanvas.height = r.height || 160;
+      pvCanvas.width  = Math.round(r.width)  || 300;
+      pvCanvas.height = Math.round(r.height) || 160;
       pvCtx = pvCanvas.getContext('2d');
+      /* Pennan i modulens djupa färg — blått är tiotalsfärgen (granskning D5). */
+      pvPen = (getComputedStyle(pvCanvas).getPropertyValue('--deep') || '').trim() || '#5b21b6';
       pvCanvas.addEventListener('pointerdown',  pvPD);
       pvCanvas.addEventListener('pointermove',  pvPM);
       pvCanvas.addEventListener('pointerup',    pvPU);
       pvCanvas.addEventListener('pointercancel', pvPU);
+      /* Rotation/omfördelning: rita om ritningen i nya måttet i stället
+         för att låta den sträckas (granskning D5). */
+      if (typeof ResizeObserver !== 'undefined') {
+        pvResizeObs = new ResizeObserver(pvResize);
+        pvResizeObs.observe(pvCanvas);
+      }
+    });
+  }
+
+  function pvResize() {
+    /* Utanför observer-callbacken (rAF): att sätta canvas.width/height
+       inne i den ger "ResizeObserver loop completed" i konsolen. */
+    requestAnimationFrame(() => {
+      if (!pvCanvas || !pvCtx) return;
+      const r = pvCanvas.getBoundingClientRect();
+      const w = Math.round(r.width), h = Math.round(r.height);
+      if (!w || !h || (w === pvCanvas.width && h === pvCanvas.height)) return;
+      const copy = document.createElement('canvas');
+      copy.width = pvCanvas.width; copy.height = pvCanvas.height;
+      copy.getContext('2d').drawImage(pvCanvas, 0, 0);
+      pvCanvas.width = w; pvCanvas.height = h;
+      pvCtx = pvCanvas.getContext('2d');
+      pvCtx.drawImage(copy, 0, 0); // 1:1 — strecken behåller sin storlek, sträcks inte
     });
   }
 
@@ -936,7 +1117,7 @@ const PlatsvardeGame = (() => {
     } else {
       pvCtx.globalCompositeOperation = 'source-over';
       pvCtx.lineWidth = 2 + (e.pressure || 0.5) * 3;
-      pvCtx.strokeStyle = '#3b82f6';
+      pvCtx.strokeStyle = pvPen;
     }
     pvCtx.lineCap = 'round'; pvCtx.lineJoin = 'round';
     pvCtx.beginPath(); pvCtx.moveTo(pvLastX, pvLastY);
@@ -975,6 +1156,17 @@ const PlatsvardeGame = (() => {
   function getLevelLabel(q) {
     const map = { A: 'Nivå A – Platsvärde', B: 'Nivå B – Bygga tal', C: 'Nivå C – Talord', D: 'Nivå D – Jämföra' };
     return map[q.level] || 'Platsvärde';
+  }
+
+  /* Unika alternativ: tar seed i ordning (rätt svar först), hoppar över
+     dubbletter och sådant ok() avvisar, fyller sedan på med gen() tills n. */
+  function fillUnique(seed, n, gen, ok) {
+    const out = [];
+    const tryAdd = v => { if (!out.includes(v) && (!ok || ok(v, out))) out.push(v); };
+    seed.forEach(v => { if (out.length < n) tryAdd(v); });
+    let guard = 0;
+    while (out.length < n && guard++ < 1000) tryAdd(gen());
+    return out;
   }
 
   function shuffle(arr) {
@@ -1018,6 +1210,21 @@ const PlatsvardeGame = (() => {
     setDecompActive, decompPress, submitDecomp,
     handleOrderClick, orderUndo, submitOrder,
     pvToggleEraser, pvClearCanvas,
-    confirmAbort,
+    confirmAbort, nextQuestion,
+    /* Testkrokar (vitest) — samma mönster som uppstallning.js. */
+    __test: {
+      generateQuestions, renderColoredNumber,
+      setStateForTest(s) {
+        if ('questions'   in s) questions   = s.questions;
+        if ('qIndex'      in s) qIndex      = s.qIndex;
+        if ('currentQ'    in s) currentQ    = s.currentQ;
+        if ('attempts'    in s) attempts    = s.attempts;
+        if ('inputLocked' in s) inputLocked = s.inputLocked;
+        if ('score'       in s) score       = s.score;
+      },
+      getState() { return { qIndex, attempts, inputLocked, score }; },
+    },
   };
 })();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = PlatsvardeGame;
