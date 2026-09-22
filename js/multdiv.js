@@ -246,6 +246,44 @@ const MultDivGame = (() => {
     /* Flygaren: SAMMA nod som sedan adopteras av spalten/cellen */
     .md-fly { position:absolute; z-index:22; pointer-events:none; display:grid;
       place-items:center; font-family:var(--font-head); font-weight:800; line-height:1; }
+
+    /* ANKARVANDRINGENS BRICKOR (Dennis 22/9) — samma marginal, samma
+       tvalagersmodell. Ankarbrickan ar ANTALET (brickans egen .md-cd)
+       med produkten som lattare notation efter sig: "5 · 7 = 35". Nar
+       vandringen ar klar slapper notationen taget och antalet ar det
+       som flyger ner i kvotrutan — samma nod hela vagen. */
+    .md-chip.md-anchor { min-width:0; padding:3px 8px; font-size:1.2rem; }
+    .md-chip .md-ax { display:inline-block; vertical-align:middle; overflow:hidden;
+      white-space:nowrap; max-width:120px; margin-left:4px;
+      font-size:0.6em; font-weight:800; opacity:0.85; letter-spacing:0.2px;
+      transition:opacity .26s var(--smooth), max-width .26s var(--smooth), margin-left .26s var(--smooth); }
+    .md-chip .md-ax.ax-gone { opacity:0; max-width:0; margin-left:0; }
+    .md-chip.md-anchor.moving { transition:left .42s var(--smooth), top .42s var(--smooth); }
+    .md-chip.md-anchor.won { box-shadow:0 0 0 3px rgba(255,255,255,0.9),
+      0 8px 22px rgba(15,23,42,0.28), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.fading { transition:opacity .34s var(--smooth), transform .34s var(--smooth);
+      opacity:0; transform:scale(0.72); }
+    /* Mattet: avstandet mellan ankarets produkt och talet. Ritad som
+       anteckning (streckad ram), inte som kvantitet — den ar en matsticka. */
+    .md-gap { position:absolute; z-index:8; pointer-events:none;
+      display:flex; align-items:baseline; gap:4px; padding:2px 8px; border-radius:999px;
+      font-family:var(--font-head); font-weight:900; font-size:1.05rem; line-height:1.2;
+      background:rgba(255,255,255,0.96); color:#b45309; border:2px dashed #f59e0b;
+      box-shadow:0 4px 12px rgba(245,158,11,0.22); }
+    .md-gap .md-gl { font-size:0.56em; font-weight:800; opacity:0.9; white-space:nowrap; }
+    .md-gap.over { color:#b91c1c; border-color:#ef4444; box-shadow:0 4px 12px rgba(239,68,68,0.22); }
+    .md-gap.zero { color:#15803d; border-color:#22c55e; box-shadow:0 4px 12px rgba(34,197,94,0.22); }
+    .md-gap.fading { transition:opacity .3s var(--smooth), transform .3s var(--smooth);
+      opacity:0; transform:scale(0.78); }
+    .md-gap.gap-in  { animation:md-chip-in .38s cubic-bezier(0.34,1.3,0.4,1) both; }
+    .md-gap.gap-pop { animation:md-chip-pop .3s var(--spring) both; }
+    /* Divisor-brickan som flyttar mellan mattet och ankaret — ren
+       flygkopia (facit: uppstallning.js flyCopyIn med fade:true). */
+    .md-pill { position:absolute; z-index:24; pointer-events:none; display:grid;
+      place-items:center; min-width:26px; height:26px; padding:0 7px; border-radius:999px;
+      font-family:var(--font-head); font-weight:900; font-size:0.95rem; color:#fff;
+      background:linear-gradient(135deg,#0d9488,#5eead4);
+      box-shadow:0 5px 14px rgba(13,148,136,0.45); }
     /* Avläsningspulsen ändrar bara text-shadow — en skriven siffra får
        aldrig skalas om (P1: pappret står still). */
     @keyframes md-read-glow {
@@ -406,13 +444,11 @@ const MultDivGame = (() => {
        siffrorna behåller sina egna färger (brickans tal och det röda
        minnet) — de sätts inline av helpExprHTML och vinner över den här. */
     .md-qexpr { color:#64748b; font-weight:800; white-space:nowrap; }
-    /* ANKARVANDRINGEN: livlinan visar en liten stege i stallet for ett
-       svar. Raderna ar olika tunga med flit — ankarparet ar bakgrund,
-       valet ar sjalva tanken, landningen ar slutsatsen. Bubblan far
-       vaxa har och bara har (.md-bub-walk): alla andra bubblor har fast
-       hojd sa knappsatsen star still, men vandringen ar ett medvetet
-       avbrott barnet sjalv bett om genom att trycka pa livlinan. */
-    #md-bubble.md-bub-walk { min-height:0; }
+    /* ANKARVANDRINGEN: raderna ar olika tunga med flit — ankarparet ar
+       bakgrund, valet ar sjalva tanken, landningen ar slutsatsen. Sedan
+       22/9 visas EN rad i taget bredvid brickorna, sa bubblan behover
+       inte langre vaxa (.md-bub-walk ar borta): den har fast hojd i bada
+       lagena och knappen/knappsatsen star still hela uppgiften igenom. */
     /* Vandringen ar FAST i demon och hjalplaget (Dennis 22/9), sa bubblan
        far en egen fast hojd i de lagena i stallet for att vaxa och krympa
        mellan stegen — knappen och knappsatsen ska sta still. Hojden ar
@@ -855,12 +891,22 @@ const MultDivGame = (() => {
      dstrike (penndraget). Ledande hopp: dskip ("går inte") + dtake
      ("vi tar med nästa siffra") som två steg. Sista siffran får samma
      kedja som alla andra (B3) — demon och hjälpet är samma kedja. */
+  /* Ankarvandringen (Dennis 22/9) ligger MELLAN fragan och svaret:
+     dwalk_anchors foder de tva ankarbrickorna i marginalen, dwalk_step
+     valjer ett av dem, matter avstandet till talet och justerar. q = 0
+     har ingen vandring (planAnchorWalk ger kind 'ingen') — da gar dask
+     direkt till dwrite med dagens "Ingen hel 6:a ryms"-text. */
   function planDivSteps(pl) {
     const steps = [], nd = digitsOf(pl.a);
     for (const s of pl.pass.steps) {
       if (s.skip) { steps.push({ t: 'dskip', ...s }); steps.push({ t: 'dtake', ...s }); continue; }
       steps.push({ t: 'dask', ...s });                // "Hur många hela 4:or ryms i 9?"
-      steps.push({ t: 'dwrite', ...s });              // "2 stycken!"
+      const walk = planAnchorWalk(s.cur, pl.b);
+      if (walk.kind !== 'ingen') {
+        steps.push({ t: 'dwalk_anchors', ...s, walk }); // "Fem 7:or är 35. Tio 7:or är 70."
+        steps.push({ t: 'dwalk_step',    ...s, walk }); // valet, avståndet, justeringen
+      }
+      steps.push({ t: 'dwrite', ...s });              // "Sex 7:or."
       if (s.rem > 0 && !s.last) {
         steps.push({ t: 'drem_calc', ...s });         // "1 blir över." — brickan föds
         steps.push({ t: 'drem_place', ...s });        // "1:an ställer sig framför 6:an."
@@ -945,16 +991,18 @@ const MultDivGame = (() => {
         return skipBubbleHTML(step.cur, step.g);
       case 'dtake':
         return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
+      /* Ankarvandringen, en rad per steg (Dennis 22/9): brickorna bar
+         rorelsen, bubblan bara meningen som hor till just det steget. */
+      case 'dwalk_anchors':
+        return anchorWalkRows(step.cur, numB, 'kvot').r1;
+      case 'dwalk_step':
+        return anchorWalkRows(step.cur, numB, 'kvot').r2;
       case 'dwrite':
-        /* Dennis 22/9: ankarvandringen ar FAST i demon — det ar har
-           metoden lars ut, inte bakom en knapp barnet maste be om.
-           Svarssteget sager inte langre bara "5 stycken!" utan visar
-           vagen dit och slutar i siffran. Inga extra klick: samma steg,
-           mer innehall. Resten foregrips inte (slut:'kvot') — den ar ett
-           eget steg strax efter. */
+        /* Slutsatsen sist och ensam i sitt steg (P4). Resten foregrips
+           inte (slut:'kvot') — den ar ett eget steg strax efter. */
         if (step.q === 0)
           return `Ingen hel ${numB}:a ryms — vi skriver <strong style="color:${cv(step.g)}">0</strong>. ⭕`;
-        return anchorWalkHTML(step.cur, numB, { slut: 'kvot' });
+        return anchorWalkRows(step.cur, numB, 'kvot').r3;
       case 'drem_calc':
         return step.q > 0
           ? `<strong style="color:#dc2626">${step.rem}</strong> blir över.`
@@ -1047,35 +1095,36 @@ const MultDivGame = (() => {
                       steg strax efter och ska inte foregripas)
      slut: 'ingen' — ingen slutsats alls (hjalplaget: stegen leder fram,
                       barnet tar sista steget sjalv)                    */
-  function anchorWalkHTML(cur, divisor, opts) {
-    const slut = (opts && opts.slut) || 'full';
+  /* Raderna var for sig. Animationen (dwalk_anchors / dwalk_step /
+     dwrite) visar EN rad i taget — texten far inte skrivas om pa tva
+     stallen, sa bada vagarna laser ur samma byggare. r1 = ankarparet,
+     r2 = valet och avstandet, r3 = slutsatsen. */
+  function anchorWalkRows(cur, divisor, slut) {
     const w = planAnchorWalk(cur, divisor);
     const N = divisor;
     if (w.kind === 'ingen') {
-      return `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>` +
-             (slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>`);
+      return { w, r1: `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>`,
+               r2: '',
+               r3: slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>` };
     }
-    const rader = [
-      `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`
-    ];
+    const r1 = `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`;
     const svar = `<strong>${stor(talord(w.q))}</strong> ${w.q === 1 ? `${N}:a` : `${N}:or`}` +
       (w.rest ? (slut === 'kvot' ? '' : `, och <strong>${w.rest}</strong> över`)
               : ' — det går jämnt ut');
-
+    let r2;
     if (w.kind === 'exakt') {
-      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`);
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`;
     } else if (w.kind === 'plan') {
-      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
-                 `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — för lite för en till.</span>`);
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
+           `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — för lite för en till.</span>`;
     } else if (w.kind === 'upp') {
-      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
-                 `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — där får ${nOr(w.steg, N)} till plats.</span>`);
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är närmast. Mellan ${w.bas.prod} och ` +
+           `<strong>${cur}</strong> skiljer det <strong>${w.mellan}</strong> — där får ${nOr(w.steg, N)} till plats.</span>`;
     } else {
-      rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
-                 `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`);
+      r2 = `<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
+           `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`;
     }
-    if (slut !== 'ingen') rader.push(`<span class="md-walk r3">${svar}.</span>`);
-    return rader.join('');
+    return { w, r1, r2, r3: slut === 'ingen' ? '' : `<span class="md-walk r3">${svar}.</span>` };
   }
 
   function skipBubbleHTML(cur, g) {
@@ -1265,10 +1314,17 @@ const MultDivGame = (() => {
       divHighlight(step);
       setTimeout(cb, 900);
 
+    } else if (step.t === 'dwalk_anchors') {
+      // Ankarparet föds i marginalen ur talet och divisorn
+      divHighlight(step);
+      anchorChipsBorn(step, step.walk, () => setTimeout(cb, 180));
+
+    } else if (step.t === 'dwalk_step') {
+      // Valet + måttet + justeringen som en sammanhängande rörelse
+      runAnchorWalkStep(step, step.walk, () => setTimeout(cb, 150));
+
     } else if (step.t === 'dwrite') {
-      writeDigit('q', step.g, step.q);
-      App.Sound.play('correct');
-      setTimeout(cb, 800);
+      anchorChipToQuot(step, cb);
 
     } else if (step.t === 'drem_calc') {
       // Resten föds som BRICKA i marginalen ur talet och kvotsiffran (A1)
@@ -1486,7 +1542,13 @@ const MultDivGame = (() => {
      sig, och dess siffror ÄR de element som landar i svaret respektive
      minnesspalten — inget skapas och förstörs i samma steg. */
   const mdWrap = () => document.getElementById('md-table-wrap');
-  const mdChip = () => document.querySelector('#md-table-wrap .md-chip');
+  /* .md-aux = vandringens hjalpbrickor (ankarna, mattet). De ar brickor
+     men inte RAKNEBRICKAN — mdChip() ska aldrig rakna dem, for da skulle
+     chipToCell/chipToRest plocka fel nod. Nar vandringen ar klar tappar
+     det valda ankaret sitt .md-aux och ÄR rakneBRICKAN. */
+  const mdChip = () => document.querySelector('#md-table-wrap .md-chip:not(.md-aux)');
+  const clearAuxChips = () => document.querySelectorAll('#md-table-wrap .md-chip.md-aux, #md-table-wrap .md-gap')
+    .forEach(e => e.remove());
   const CHIP_CLS = ['chip-green', 'chip-blue', 'chip-red', 'chip-purple'];
 
   /* Parkeringsplatsen: fri marginal till HÖGER om tabellen, samma x hela
@@ -1547,7 +1609,9 @@ const MultDivGame = (() => {
   function chipBorn(step, value, srcEls, cb) {
     const wrap = mdWrap();
     if (!wrap) { setTimeout(cb, 300); return null; }
-    const old = mdChip(); if (old) old.remove(); // säkerhetsnät — normalt förbrukad
+    // säkerhetsnät — normalt förbrukad. Vandringens hjälpbrickor städas
+    // med, så marginalen aldrig har två brickor som säger olika saker.
+    wrap.querySelectorAll('.md-chip, .md-gap').forEach(e => e.remove());
     const chip = document.createElement('div');
     chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]}`;
     chip.dataset.g = step.g;
@@ -1688,6 +1752,197 @@ const MultDivGame = (() => {
       App.Sound.play('correct');
       cb && cb();
     }, dur + 40);
+  }
+
+  /* ══ ANKARVANDRINGEN SOM BRICKSPEL (Dennis 22/9) ═══════════════════
+     Vandringen var text i tankerutan. Nu ar den samma sorts rorelse som
+     lanekedjan i subtraktionen: ankarna FODS som brickor i hogermargi-
+     nalen, det ena valjs och det andra tonas bort, avstandet mellan
+     ankarets produkt och talet blir ett eget matt, och justeringen sker
+     genom att divisor-brickor flyttar mellan mattet och ankaret.
+
+     Tre objekt, alla i marginalen — aldrig ovanpa talet (P1):
+       · ankarbrickan  .md-chip.md-anchor  — ANTALET (.md-cd) + produkten
+                                             som lattare notation (.md-ax)
+       · mattet        .md-gap             — avstandet, ritat som
+                                             anteckning (streckad ram)
+       · divisor-pillret .md-pill          — ren flygkopia mellan de tva
+                                             (facit: flyCopyIn, fade:true)
+     Ankarbrickan lever fran dwalk_anchors till dwrite, dar den slapper
+     notationen och ar den nod som landar i kvotrutan. Inget fods och
+     dor i samma steg (P5). */
+
+  /* Brickans innehall. Antalet ar brickans egen siffra sa chipToCell
+     kan plocka den rakt av; produkten ar notation, inte kvantitet. */
+  const anchorChipHTML = (n, divisor) =>
+    `<span class="md-cd">${n}</span><span class="md-ax">· ${divisor} = ${n * divisor}</span>`;
+
+  /* Stapla brickor pa parkeringsplatsen, lodratt centrerade pa talets
+     rad och klippta innanfor wrappen sa de aldrig hamnar utanfor. */
+  function stackMarginChips(els, step, gap) {
+    const wrap = mdWrap();
+    const list = els.filter(Boolean);
+    if (!wrap || !list.length) return;
+    const wR = wrap.getBoundingClientRect();
+    const ref = divCurCells(step);
+    if (!ref.length) return;
+    const top = Math.min(...ref.map(e => e.getBoundingClientRect().top));
+    const bot = Math.max(...ref.map(e => e.getBoundingClientRect().bottom));
+    const mid = (top - wR.top) + (bot - top) / 2;
+    const hs = list.map(e => e.getBoundingClientRect().height);
+    const totH = hs.reduce((a, b) => a + b, 0) + gap * (list.length - 1);
+    let y = Math.max(2, Math.min(mid - totH / 2, Math.max(2, wR.height - totH - 2)));
+    const w = Math.max(...list.map(e => e.getBoundingClientRect().width));
+    const x = mdRightMarginSpot(w);
+    list.forEach((e, i) => { e.style.left = `${x}px`; e.style.top = `${y}px`; y += hs[i] + gap; });
+  }
+
+  /* De tva ankarbrickorna fods: talet och divisorn pulsar (avlasning),
+     sedan poppar brickorna fram en i taget. Ingen kopia flyger. */
+  function anchorChipsBorn(step, w, cb) {
+    const wrap = mdWrap();
+    if (!wrap) { setTimeout(cb, 300); return []; }
+    wrap.querySelectorAll('.md-chip, .md-gap, .md-pill').forEach(e => e.remove());
+    const cls = CHIP_CLS[Math.min(step.g, 3)];
+    const chips = w.ankare.map(a => {
+      const c = document.createElement('div');
+      c.className = `md-chip md-aux md-anchor ${cls}`;
+      c.dataset.n = a.n;
+      c.innerHTML = anchorChipHTML(a.n, w.divisor);
+      c.style.opacity = '0';
+      wrap.appendChild(c);
+      return c;
+    });
+    stackMarginChips(chips, step, 6);
+    const srcs = [...divCurCells(step), document.getElementById('md-d-0')].filter(Boolean);
+    srcs.forEach(el => { el.style.animation = 'md-read-glow 0.52s ease-in-out both'; });
+    setTimeout(() => { srcs.forEach(el => { el.style.animation = ''; }); }, 540);
+    chips.forEach((c, i) => setTimeout(() => {
+      c.style.opacity = ''; c.classList.add('chip-in'); App.Sound.play('click');
+    }, 320 + i * 260));
+    setTimeout(() => cb && cb(), 320 + chips.length * 260 + 360);
+    return chips;
+  }
+
+  /* Mattets text foljer tecknet och far aldrig ljuga: under talet =
+     "skiljer", over talet = "för mycket", exakt = "precis". */
+  const gapLabel = (prod, cur) => prod < cur ? 'skiljer' : prod > cur ? 'för mycket' : 'precis';
+
+  function setGapChip(el, prod, cur) {
+    if (!el) return;
+    el.classList.toggle('over', prod > cur);
+    el.classList.toggle('zero', prod === cur);
+    el.querySelector('.md-gv').textContent = String(Math.abs(cur - prod));
+    el.querySelector('.md-gl').textContent = gapLabel(prod, cur);
+  }
+
+  /* Divisor-pillret: en ren flygkopia mellan tva landade noder. Den bar
+     ingen egen sanning — bada andarna poppar till sina nya varden nar
+     den kommer fram, precis som flyCopyIn + pop i subtraktionen. */
+  function flyPill(fromEl, toEl, text, dur, cb) {
+    const wrap = mdWrap();
+    if (!wrap || !fromEl || !toEl) { setTimeout(cb, 200); return; }
+    const wR = wrap.getBoundingClientRect();
+    const fR = fromEl.getBoundingClientRect(), tR = toEl.getBoundingClientRect();
+    const p = document.createElement('div');
+    p.className = 'md-pill';
+    p.textContent = text;
+    p.style.opacity = '0';
+    wrap.appendChild(p);
+    const pw = p.offsetWidth, ph = p.offsetHeight;
+    p.style.left = `${fR.left - wR.left + fR.width / 2 - pw / 2}px`;
+    p.style.top  = `${fR.top  - wR.top  + fR.height / 2 - ph / 2}px`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      p.style.transition = `left ${dur}ms cubic-bezier(0.34,1.06,0.5,1),` +
+        `top ${dur}ms cubic-bezier(0.34,1.06,0.5,1),opacity 180ms linear`;
+      p.style.opacity = '1';
+      p.style.left = `${tR.left - wR.left + tR.width / 2 - pw / 2}px`;
+      p.style.top  = `${tR.top  - wR.top  + tR.height / 2 - ph / 2}px`;
+    }));
+    setTimeout(() => { p.style.opacity = '0'; }, Math.max(120, dur - 140));
+    setTimeout(() => { p.remove(); cb && cb(); }, dur + 60);
+  }
+
+  /* Valet, avstandet och justeringen — EN sammanhangande rorelse.
+     Det ankare som inte anvands tonas ner och forsvinner, det valda
+     glider till marginalens fasta plats och glod, mattet fods under
+     det, och sedan flyttar `steg` divisor-brickor mellan de tva:
+     'upp' = ur gapet IN i ankaret (dar far en till plats),
+     'ner' = ur ankaret UT i gapet (vi tar bort en).
+     'exakt'/'plan' justerar inte — bara mattet. */
+  function runAnchorWalkStep(step, w, cb) {
+    const wrap = mdWrap();
+    const chips = wrap ? Array.from(wrap.querySelectorAll('.md-chip.md-anchor')) : [];
+    if (!wrap || !chips.length) { setTimeout(cb, 300); return; }
+    const win  = chips.find(c => Number(c.dataset.n) === w.bas.n) || chips[0];
+    const lose = chips.find(c => c !== win);
+    const dir  = w.kind === 'upp' ? 1 : w.kind === 'ner' ? -1 : 0;
+    let n = w.bas.n, gapEl = null;
+
+    if (lose) lose.classList.add('fading');
+    setTimeout(() => {
+      if (lose) lose.remove();
+      win.classList.add('moving', 'won');
+      stackMarginChips([win], step, 6);
+    }, 400);
+
+    setTimeout(() => {
+      gapEl = document.createElement('div');
+      gapEl.className = 'md-gap';
+      gapEl.innerHTML = '<span class="md-gv"></span><span class="md-gl"></span>';
+      gapEl.style.opacity = '0';
+      wrap.appendChild(gapEl);
+      setGapChip(gapEl, n * w.divisor, w.cur);
+      stackMarginChips([win, gapEl], step, 6);
+      gapEl.style.opacity = '';
+      gapEl.classList.add('gap-in');
+      App.Sound.play('click');
+    }, 800);
+
+    const done = () => setTimeout(() => {
+      // Vandringen ar over: ankaret ar inte langre en hjalpbricka utan
+      // RAKNEBRICKAN som dwrite skickar ner i kvotrutan.
+      win.classList.remove('md-aux');
+      cb && cb();
+    }, 380);
+
+    const tick = k => {
+      if (k >= w.steg) { done(); return; }
+      playCarrySound();
+      flyPill(dir > 0 ? gapEl : win, dir > 0 ? win : gapEl, String(w.divisor), 540, () => {
+        n += dir;
+        win.querySelector('.md-cd').textContent = String(n);
+        win.querySelector('.md-ax').textContent = `· ${w.divisor} = ${n * w.divisor}`;
+        win.classList.remove('chip-in', 'chip-pop'); void win.offsetWidth; win.classList.add('chip-pop');
+        setGapChip(gapEl, n * w.divisor, w.cur);
+        gapEl.classList.remove('gap-in', 'gap-pop'); void gapEl.offsetWidth; gapEl.classList.add('gap-pop');
+        stackMarginChips([win, gapEl], step, 6);
+        setTimeout(() => tick(k + 1), 360);
+      });
+    };
+    setTimeout(() => (dir === 0 ? done() : tick(0)), 1360);
+  }
+
+  /* dwrite: notationen slapper taget och ANTALET flyger ner i kvot-
+     rutan. Brickan forbrukas forst nar siffran star dar (chipToCell). */
+  function anchorChipToQuot(step, cb) {
+    const chip = mdChip();
+    if (!chip || !chip.classList.contains('md-anchor')) {
+      writeDigit('q', step.g, step.q);
+      App.Sound.play('correct');
+      setTimeout(cb, 800);
+      return;
+    }
+    const ax  = chip.querySelector('.md-ax');
+    const gap = document.querySelector('#md-table-wrap .md-gap');
+    if (ax)  ax.classList.add('ax-gone');
+    if (gap) gap.classList.add('fading');
+    setTimeout(() => {
+      if (ax)  ax.remove();
+      if (gap) gap.remove();
+      chip.classList.remove('md-anchor', 'won', 'moving');
+      chipToCell('q', step.g, step.q, () => setTimeout(cb, 420));
+    }, 380);
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2096,6 +2351,9 @@ const MultDivGame = (() => {
     document.querySelectorAll('.md-divslot').forEach(el => el.remove());
     // v36: städa ev. kvarhängande stryk-puls (md-prob används transient i demo)
     document.querySelectorAll('#md-table-wrap .md-prob').forEach(el => el.classList.remove('md-prob'));
+    // Vandringens hjälpbrickor hör till EN fråga och följer aldrig med
+    // till nästa (räknebrickan, som saknar .md-aux, rörs inte).
+    clearAuxChips();
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = '';
     const item = helpItem();
@@ -2104,6 +2362,7 @@ const MultDivGame = (() => {
     if (item.kind === 'flydown') { helpFlyDown(item); return; }
     if (item.kind === 'divplace') { showDivPlace(item); return; }
     if (item.kind === 'divstrike') { showDivStrike(item); return; }
+    if (item.kind === 'divq') { showDivQ(item); return; }
     if (item.kind === 'mult') doHighlight({ phase: 'mult', aCol: item.col, mCol: item.mCol, g: item.g });
     else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ phase: 'add', g: item.g });
     else if (item.kind === 'memwrite') doHighlight(item.rowKey === 'ans' && plan.kind === 'twostep' ? { phase: 'add', g: item.g } : { phase: 'mult', aCol: item.col, mCol: item.g - item.col, g: item.g });
@@ -2173,6 +2432,46 @@ const MultDivGame = (() => {
     if (!memAwait || exInputLocked) return;
     if (ev.target && ev.target.closest && ev.target.closest('#md-memcol')) return;
     memGuide();
+  }
+
+  /* ── Divisionens FRÅGA med ankarvandring (Dennis 22/9) ────────────
+     Samma animation som demon, men den STANNAR före svaret: ankarparet
+     föds, det ena väljs, avståndet mäts och justeras — och sedan låses
+     frågan upp för svar. Vandringen är en FÖLJD, inga nya frågor att
+     besvara: barnet trycker inte en enda gång extra, knappsatsen dyker
+     bara upp när vägen är gången. Frågeraden (r0) står kvar hela tiden
+     så bubblans innehåll byts under en fast rubrik i stället för att
+     hoppa. */
+  const divqHeadHTML = item =>
+    `<span class="md-walk r0">Hur många hela <strong>${numB}</strong>:or ryms i ` +
+    `<strong style="color:${cv(item.g)}">${item.cur}</strong>? 🤔</span>`;
+
+  function showDivQ(item) {
+    divHighlight(item);
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
+    const cell = document.getElementById(`md-q-${item.g}`);
+    if (cell && !cell.classList.contains('filled')) cell.classList.add('active-col');
+    renderMemCol();
+    const rows = anchorWalkRows(item.cur, numB, 'ingen');
+    if (rows.w.kind === 'ingen') { showHelpUI(); return; } // q = 0 — ingen vandring
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';          // knappsatsen kommer när vägen är gången
+    exInputLocked = true;
+    const gen = exGen;
+    helpBubble(divqHeadHTML(item));
+    setTimeout(() => {
+      if (gen !== exGen || helpItem() !== item) return;
+      helpBubble(divqHeadHTML(item) + rows.r1);
+      anchorChipsBorn(item, rows.w, () => {
+        if (gen !== exGen || helpItem() !== item) return;
+        helpBubble(divqHeadHTML(item) + rows.r2);
+        runAnchorWalkStep(item, rows.w, () => {
+          if (gen !== exGen || helpItem() !== item) return;
+          exInputLocked = false;
+          showHelpUI();               // frågan låses upp — barnet svarar själv
+        });
+      });
+    }, 1000);
   }
 
   /* ── Divisionens PLACERA-fas (v32): "Var ska resten stå?" ──
@@ -2386,9 +2685,6 @@ const MultDivGame = (() => {
   function helpBubble(html) {
     const area = document.getElementById('md-bubble');
     if (!area) return;
-    /* Vandringens extra hojd galler bara vandringen — nasta bubbla far
-       tillbaka det fasta golvet, annars hoppar knappsatsen efterat. */
-    if (!/md-walk/.test(html || '')) area.classList.remove('md-bub-walk');
     area.innerHTML = html ? `<div class="md-thought">${html}</div>` : '';
   }
 
@@ -2424,13 +2720,12 @@ const MultDivGame = (() => {
     const C = cv(item.g);
     /* v32: divisionens frågor — facit sägs ALDRIG i frågan */
     if (item.kind === 'divq')
-      /* Dennis 22/9: fast har ocksa — men UTAN slutsats. Stegen leder
-         fram till svaret och barnet tar sista steget sjalv i numpaden.
-         Det ar skillnaden mot demon: dar visas hela vagen, har visas
-         vagen men inte malet. */
-      return `<span class="md-walk r0">Hur många hela <strong>${numB}</strong>:or ryms i ` +
-             `<strong style="color:${C}">${item.cur}</strong>? 🤔</span>` +
-             anchorWalkHTML(item.cur, numB, { slut: 'ingen' });
+      /* Dennis 22/9: vandringen SPELAS nu (showDivQ) i stallet for att
+         staplas som text. Nar knappsatsen kommer star rubriken kvar med
+         valet under — men ALDRIG slutsatsen (slut:'ingen'). Det ar
+         skillnaden mot demon: dar landar svaret, har tar barnet sista
+         steget sjalv i numpaden. */
+      return divqHeadHTML(item) + anchorWalkRows(item.cur, numB, 'ingen').r2;
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
@@ -2554,12 +2849,12 @@ const MultDivGame = (() => {
        Ingen poängpåverkan, ingen effekt på Minnesmästare. */
     const expected = helpExpected(item);
     if (item.kind === 'divq') {
-      /* Dennis 22/9: livlinan gav bort svaret. Nu ger den vagen dit —
-         via ett ankare ur 1/2/5/10-tabellen och ett kort avstand. Svaret
-         star sist, for barnet skriver det anda in sjalv i numpaden. */
-      const b = document.getElementById('md-bubble');
-      if (b) b.classList.add('md-bub-walk');
-      helpBubble(anchorWalkHTML(item.cur, numB));
+      /* Vandringen har redan spelats (showDivQ), sa livlinan far inte
+         upprepa den — da vore den ingen hjalp alls. Den ger det enda
+         vandringen haller inne med: slutsatsen. Barnet skriver anda in
+         den sjalv i numpaden. */
+      helpBubble(anchorWalkRows(item.cur, numB, 'kvot').r3 +
+                 `<span class="md-walk r1">Skriv in det själv! ✍️</span>`);
       return;
     }
     const expr = helpExprHTML(item);
@@ -2627,8 +2922,10 @@ const MultDivGame = (() => {
       App.Sound.play('correct');
       const gen = exGen;
       if (item.kind === 'divq') {
-        // Kvotsiffran skrivs i kvoten efter "=" (v36) — sedan ev. rest-frågan
-        writeDigit('q', item.g, item.q);
+        // Kvotsiffran skrivs i kvoten efter "=" (v36) — sedan ev. rest-frågan.
+        // Vandringens ankarbricka BÄR antalet, så den är det som landar i
+        // rutan (samma rörelse som demons dwrite). Utan bricka (q = 0)
+        // skrivs siffran som förut.
         const txt = item.q === 0
           ? `Rätt! Ingen hel ${numB}:a ryms — <strong style="color:${cv(item.g)}">0</strong> i kvoten. ⭕`
           : (item.remIn > 0 && item.rem === 0)
@@ -2636,7 +2933,9 @@ const MultDivGame = (() => {
             : `Rätt! <strong style="color:${cv(item.g)}">${item.q}</strong> ${item.q === 1 ? 'styck' : 'stycken'} ✅`;
         helpBubble(txt);
         smallBurst();
-        setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 900);
+        anchorChipToQuot(item, () => {
+          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 300);
+        });
         return;
       }
       if (item.kind === 'divrem') {

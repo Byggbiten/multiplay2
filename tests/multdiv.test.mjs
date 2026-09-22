@@ -290,12 +290,18 @@ describe('fria lagets minnesspalt raknas i rattningen (B5)', () => {
 });
 
 describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => {
-  const DIV_TYPES = new Set(['dskip', 'dtake', 'dask', 'dwrite', 'drem_calc', 'drem_place', 'dstrike', 'done']);
+  const DIV_TYPES = new Set(['dskip', 'dtake', 'dask', 'dwalk_anchors', 'dwalk_step',
+                             'dwrite', 'drem_calc', 'drem_place', 'dstrike', 'done']);
+  /* Ankarvandringen (22/9) ligger mellan fragan och svaret. q = 0 har
+     ingen vandring — planAnchorWalk ger kind 'ingen' och dask gar rakt
+     pa dwrite ("Ingen hel 6:a ryms"). */
   function forvantad(pl) {
     const t = [];
     for (const s of pl.pass.steps) {
       if (s.skip) { t.push('dskip', 'dtake'); continue; }
-      t.push('dask', 'dwrite');
+      t.push('dask');
+      if (s.q > 0) t.push('dwalk_anchors', 'dwalk_step');
+      t.push('dwrite');
       if (s.rem > 0 && !s.last) t.push('drem_calc', 'drem_place');
       t.push('dstrike');
     }
@@ -327,11 +333,13 @@ describe('kort divisionens nya stegkedja (GRANSKNING A1/B1/B3/B4/B5/B6)', () => 
   });
   it('granskningens tal: verbatim kedja', () => {
     const t = (n, d, lv) => planDivSteps(buildDivPlan(n, d, lv)).map(s => s.t).join(' ');
-    expect(t(84, 4, 1)).toBe('dask dwrite dstrike dask dwrite dstrike done');
-    expect(t(96, 4, 2)).toBe('dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
-    expect(t(738, 3, 3)).toBe('dask dwrite drem_calc drem_place dstrike dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
-    expect(t(336, 6, 4)).toBe('dskip dtake dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
-    expect(t(612, 6, 4)).toBe('dask dwrite dstrike dask dwrite drem_calc drem_place dstrike dask dwrite dstrike done');
+    const W = 'dwalk_anchors dwalk_step ';
+    expect(t(84, 4, 1)).toBe('dask ' + W + 'dwrite dstrike dask ' + W + 'dwrite dstrike done');
+    expect(t(96, 4, 2)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    expect(t(738, 3, 3)).toBe('dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    expect(t(336, 6, 4)).toBe('dskip dtake dask ' + W + 'dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
+    /* 612 ÷ 6: mittsiffran ger q = 0 — ingen vandring, dask gar rakt pa dwrite */
+    expect(t(612, 6, 4)).toBe('dask ' + W + 'dwrite dstrike dask dwrite drem_calc drem_place dstrike dask ' + W + 'dwrite dstrike done');
   });
   it('hjalpkon och demon ar samma kedja: varje siffra far en fraga i bada', () => {
     const avv = [];
