@@ -1285,9 +1285,11 @@ const MultDivGame = (() => {
       r2b = `<span class="md-walk r2">Vi kan bara ta bort hela <strong>${N}</strong>:or — ` +
           `så vi tar bort ${nOr(w.steg, N)}.` +
           /* q = 1 landar pa divisorn sjalv; da vore "Da blir det 8" ett
-             ANTAL bredvid ett OBJEKT med samma siffra. Brickan visar
-             landningen, sa meningen slutar dar i stallet. */
-          (w.q === 1 ? '' : ` Då blir det <strong>${w.q * N}</strong>.`) + `</span>`;
+             ANTAL bredvid ett OBJEKT med samma siffra. Men att bara kapa
+             meningen lamnar barnet hangande — varje annan variant slutar i
+             ett resultat. Den landar i ANTALET i stallet, utan siffra, sa
+             den sager samma sak utan att krocka. */
+          (w.q === 1 ? ' Då ryms bara en.' : ` Då blir det <strong>${w.q * N}</strong>.`) + `</span>`;
       r2q = gapQ(w.bas.prod, cur);
     } else {
       r2a = `<span class="md-walk r2">Hur långt är det från <strong>${w.bas.prod}</strong> ` +
@@ -2883,7 +2885,7 @@ const MultDivGame = (() => {
       divGuideFb('Nästan — resten ska stå här 👉');
     } else if (divStrikeAwait) {
       // v36: fel-tap i STRYK-fasen räknas som mem-miss (mem-tap-mönstret)
-      memMistakes++; helpTaskClean = false; helpTaskClean = false;
+      memMistakes++; helpTaskClean = false;
       divGuideFb(`Inte den — det är <strong>${divStrikeAwait.digit}</strong>:an i ` +
                  `${pvNamn(divStrikeAwait.g)} som ska strykas 👀`);
     }
@@ -2927,7 +2929,7 @@ const MultDivGame = (() => {
       const gen = exGen;
       setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 800);
     } else {
-      memMistakes++; helpTaskClean = false; helpTaskClean = false;
+      memMistakes++; helpTaskClean = false;
       divGuideFb(`Inte den — det är <strong>${divStrikeAwait.digit}</strong>:an i ` +
                  `${pvNamn(divStrikeAwait.g)} som ska strykas 👀`);
     }
@@ -3010,7 +3012,7 @@ const MultDivGame = (() => {
       if (!memAwait || memAwait.type !== 'place' || exInputLocked) return;
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
-        memMistakes++; helpTaskClean = false; helpTaskClean = false; helpTaskClean = false;
+        memMistakes++; helpTaskClean = false;
         App.Sound.play('wrong');
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
