@@ -413,7 +413,14 @@ const MultDivGame = (() => {
        hojd sa knappsatsen star still, men vandringen ar ett medvetet
        avbrott barnet sjalv bett om genom att trycka pa livlinan. */
     #md-bubble.md-bub-walk { min-height:0; }
+    /* Vandringen ar FAST i demon och hjalplaget (Dennis 22/9), sa bubblan
+       far en egen fast hojd i de lagena i stallet for att vaxa och krympa
+       mellan stegen — knappen och knappsatsen ska sta still. Hojden ar
+       uppmatt vid 390 pa det hogsta fallet. */
+    #md-bubble.md-bub-demo.md-bub-tall { min-height:118px; }
+    #md-bubble.md-bub-tall:not(.md-bub-demo) { min-height:107px; }
     .md-walk { display:block; line-height:1.45; }
+    .md-walk.r0 { display:block; margin-bottom:3px; }
     .md-walk.r1 { font-size:0.86em; color:#64748b; }
     .md-walk.r2 { margin-top:2px; }
     .md-walk.r3 { margin-top:4px; padding-top:4px; color:var(--deep);
@@ -939,11 +946,15 @@ const MultDivGame = (() => {
       case 'dtake':
         return `Vi tar med <strong style="color:${cv(step.g - 1)}">${step.next}</strong>:an — nu har vi <strong>${step.cur * 10 + step.next}</strong>!`;
       case 'dwrite':
+        /* Dennis 22/9: ankarvandringen ar FAST i demon — det ar har
+           metoden lars ut, inte bakom en knapp barnet maste be om.
+           Svarssteget sager inte langre bara "5 stycken!" utan visar
+           vagen dit och slutar i siffran. Inga extra klick: samma steg,
+           mer innehall. Resten foregrips inte (slut:'kvot') — den ar ett
+           eget steg strax efter. */
         if (step.q === 0)
           return `Ingen hel ${numB}:a ryms — vi skriver <strong style="color:${cv(step.g)}">0</strong>. ⭕`;
-        if (step.remIn > 0 && step.rem === 0)
-          return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'} — precis jämnt! ✅`;
-        return `<strong style="color:${cv(step.g)}">${step.q}</strong> ${step.q === 1 ? 'styck' : 'stycken'}!`;
+        return anchorWalkHTML(step.cur, numB, { slut: 'kvot' });
       case 'drem_calc':
         return step.q > 0
           ? `<strong style="color:#dc2626">${step.rem}</strong> blir över.`
@@ -1030,18 +1041,26 @@ const MultDivGame = (() => {
   /* Vandringen i ord. Tre rader: ankarparet, valet, och landningen.
      Sista raden sager kvotsiffran — livlinan ar till for att barnet ska
      FORSTA, och svaret skrivs anda in for hand i numpaden. */
-  function anchorWalkHTML(cur, divisor) {
+  /* slut: 'full'  — hela vagen, resten med (fria lagets livlina: barnet
+                      har ingen annan hjalp och behover se allt)
+     slut: 'kvot'  — stannar vid kvotsiffran (demon: resten ar ett eget
+                      steg strax efter och ska inte foregripas)
+     slut: 'ingen' — ingen slutsats alls (hjalplaget: stegen leder fram,
+                      barnet tar sista steget sjalv)                    */
+  function anchorWalkHTML(cur, divisor, opts) {
+    const slut = (opts && opts.slut) || 'full';
     const w = planAnchorWalk(cur, divisor);
     const N = divisor;
     if (w.kind === 'ingen') {
       return `<span class="md-walk r1">Inte ens ${nOr(1, N)} får plats i <strong>${cur}</strong>.</span>` +
-             `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>`;
+             (slut === 'ingen' ? '' : `<span class="md-walk r3">Kvotsiffran blir <strong>0</strong>.</span>`);
     }
     const rader = [
       `<span class="md-walk r1">${ankarRad(w.ankare[0], N)}. ${ankarRad(w.ankare[1], N)}.</span>`
     ];
     const svar = `<strong>${stor(talord(w.q))}</strong> ${w.q === 1 ? `${N}:a` : `${N}:or`}` +
-      (w.rest ? `, och <strong>${w.rest}</strong> över` : ' — det går jämnt ut');
+      (w.rest ? (slut === 'kvot' ? '' : `, och <strong>${w.rest}</strong> över`)
+              : ' — det går jämnt ut');
 
     if (w.kind === 'exakt') {
       rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> — precis!</span>`);
@@ -1055,7 +1074,7 @@ const MultDivGame = (() => {
       rader.push(`<span class="md-walk r2"><strong>${w.bas.prod}</strong> är för mycket — men nästan. ` +
                  `Ta bort ${nOr(w.steg, N)}: <strong>${w.q * N}</strong>. Det får plats!</span>`);
     }
-    rader.push(`<span class="md-walk r3">${svar}.</span>`);
+    if (slut !== 'ingen') rader.push(`<span class="md-walk r3">${svar}.</span>`);
     return rader.join('');
   }
 
@@ -1104,7 +1123,7 @@ const MultDivGame = (() => {
       <div id="md-main">
         <div id="md-left">
           <div id="md-table-wrap" class="${plan.kind === 'twostep' ? 'md-l4' : ''}">${buildTableHTML(false)}</div>
-          <div id="md-bubble" class="md-bub-demo"></div>
+          <div id="md-bubble" class="md-bub-demo${plan.kind === 'division' ? ' md-bub-tall' : ''}"></div>
           <div id="md-next-area">${nextBtnHTML()}</div>
         </div>
         <div id="md-right">${scratchHTML()}</div>
@@ -1950,7 +1969,7 @@ const MultDivGame = (() => {
       <div id="md-main">
         <div id="md-left">
           <div id="md-table-wrap" class="${plan.kind === 'twostep' && !free ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
-          <div id="md-bubble"></div>
+          <div id="md-bubble"${plan.kind === 'division' ? ' class="md-bub-tall"' : ''}></div>
           <div id="md-ui"></div>
           <div id="md-feedback"></div>
         </div>
@@ -2405,7 +2424,13 @@ const MultDivGame = (() => {
     const C = cv(item.g);
     /* v32: divisionens frågor — facit sägs ALDRIG i frågan */
     if (item.kind === 'divq')
-      return `Hur många hela <strong>${numB}</strong>:or ryms i <strong style="color:${C}">${item.cur}</strong>? 🤔`;
+      /* Dennis 22/9: fast har ocksa — men UTAN slutsats. Stegen leder
+         fram till svaret och barnet tar sista steget sjalv i numpaden.
+         Det ar skillnaden mot demon: dar visas hela vagen, har visas
+         vagen men inte malet. */
+      return `<span class="md-walk r0">Hur många hela <strong>${numB}</strong>:or ryms i ` +
+             `<strong style="color:${C}">${item.cur}</strong>? 🤔</span>` +
+             anchorWalkHTML(item.cur, numB, { slut: 'ingen' });
     if (item.kind === 'divrem')
       return `Blir något över? <strong>${item.cur}</strong> − <strong>${item.q * numB}</strong> = ?`;
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
