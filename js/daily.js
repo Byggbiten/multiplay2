@@ -73,8 +73,20 @@ const DailyTraining = (() => {
   /* ══════════════════════════════════════════════════════
      URVALSMOTORN
   ══════════════════════════════════════════════════════ */
+  /* Gångertabellens "Tabeller och gånger" (mult_settings_<id>.upto):
+     standard upp till 10, 11:an och 12:an är extraval. */
+  function multUpTo(profileId) {
+    const n = Number(readJSON(`mult_settings_${profileId}`, {}).upto);
+    return n === 11 || n === 12 ? n : 10;
+  }
+
   function computeSelection(profileId, dateStr) {
-    const stats = readStats(profileId);
+    const upTo = multUpTo(profileId);
+    const all = readStats(profileId), stats = {};
+    Object.keys(all).forEach(k => {
+      const [a, b] = k.split('x').map(Number);
+      if (a <= upTo && b <= upTo) stats[k] = all[k];
+    });
     const rnd = mulberry32(hashSeed(`${dateStr}|${profileId}`));
 
     // Kandidater ur statistiken – sorterade nycklar först så att

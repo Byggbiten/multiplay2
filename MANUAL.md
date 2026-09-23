@@ -45,91 +45,90 @@ Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till 
 ## ✖️ Gångertabellen
 
 ### Översikt
-Gångertabellens huvudvy visar:
-- Din avatar och ditt namn
-- Knappar för **📊 Stats** och **📝 Sessionslogg**
-- En **talintervall-väljare** (Range Selector)
-- Timer-knappar för tidsbegränsad träning
-- Knappen **"🎲 Gör ett eget Matteprov"**
-- Ett rutnät med alla 12 tabeller (1:an – 12:an)
+Gångertabellens huvudvy (v60) visar, uppifrån, allt utan att scrolla:
+- **Tabellkartan** (kompakt) – som standard 10 × 10 (inställningen *Tabeller och gånger*: upp till 10, 11 eller 12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
+  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Bredvid står hur många tal som är kvar att lära (Ny + Övar),
+  lådornas antal och hur många som är dags att fylla på. Kartan visar bara framstegen; den går inte att trycka på.
+- **Träna en tabell** – snabbval 1–10 i två rader (11 och 12 under **Extra** när Gånger går dit). Varje knapp har en **medalj** och en tunn stapel för andelen tal i Kan.
+  Medaljen bygger på lådorna för tabellens tal (t × 1 … t × Gånger), inte på andelen rätt: ingen medalj så länge något tal är nytt,
+  **brons** när alla tal har övats, **silver** när minst hälften är Kan, **guld** när alla är Kan (Dags igen räknas som Kan).
+  En blek prick vid medaljen betyder att något av tabellens tal är dags att fylla på.
+  Ett tryck öppnar tabellens **startskärm** (medaljerna förklarade, en rad per varv) med **Starta** och **Ändra varv**: två tryck till första frågan.
+- **De svåra talen** (v62) – ett kort under Träna en tabell med "Du kan N av 21" och en tunn Kan-stapel (Dags igen räknas som Kan).
+  Det är de 21 par som lektionen *Tabellen är mindre än du tror* lämnar kvar: a × b med a och b bland 3, 4, 6, 7, 8 och 9
+  (samma 21 oavsett Gånger). Ett tryck öppnar startskärmen: en 6 × 6-karta i lådornas färger (varje par på en plats, spegelrutan tom),
+  valet **Alla 21** eller **Bara de du inte kan än (N)** (standard när N är 5 eller fler; när alla sitter visas bara Alla 21 och en rad beröm),
+  varven och **Starta**/**Ändra varv**. Passet är det vanliga övningspasset med nötloopen: varje valt par en gång per varv, a × b eller b × a
+  lottas per fråga, blandad ordning utom i Se svaret först (ordnat efter första och andra talet). Kvittot och loggen säger "De svåra talen".
+  På 11 och 12 är kartan något mindre, så att hela hemvyn fortfarande syns utan att scrolla.
+- **Varvraden** – "Varje pass: fyra varv" med varvens ikoner. **Ändra** öppnar passinställningen, där man också kan välja flera tabeller och starta ett blandat pass.
+- Tre mindre ingångar: **Öva blandat**, **Lär dig strategin** och **Rekordrunda**.
+- Längst ner: **Statistik** och **Logg**. Kugghjulet uppe till höger öppnar **inställningarna**.
 
-### 🎯 Talintervall-väljare (Range Selector)
-Högst upp finns ett reglage där du kan bestämma vilket intervall av multiplikatorer du vill träna på.
+### Övningspass
+Tanken är att nöta, inte att sätta prov: "kör den här tabellen fyra varv, sen är du klar".
+- **Ställ in passet:** välj en tabell (eller flera att blanda). 1–10 är vanliga val, 11 och 12 ligger under **Extra**.
+  **Gånger** (upp till 10, 11 eller 12) är samma inställning som styr kartan och alla övningar.
+- **Varv:** tre stegare, 0–4 varv var: **Se svaret först** (svaret visas, sedan frågas det, i ordning 1, 2, 3 …),
+  **Flerval** och **Fri inmatning** (blandad ordning). Varven körs från lätt till svårt. Snabbval: **Kort** (1 flerval + 1 fri),
+  **Vanligt** (1 + 2 + 1) och **Långt** (1 + 3 + 2). Raden under visar varv, frågor och ungefärlig tid.
+- **Nötloopen:** varje fråga ställs en gång per varv. Vid fel visas rätt svar ("7 × 8 = 56"), och samma fråga kommer direkt igen
+  tills den blir rätt. **Så kan du tänka** öppnar strategirektangeln om man vill. Frågan läggs sedan in en gång till, minst två frågor senare
+  (sist om varvet nästan är slut) – bara ett extra tillfälle per fråga och varv.
+  Bara första försöket på varje ställd fråga räknas i statistiken och lådorna.
+- Mellan varven visas en kort mellanskärm. **Avbryt** frågar först; ett avbrutet pass sparas inte.
+- **Du är klar!** visar ett kvitto för en vuxen: datum och tid, tabeller och gånger, varven, rätt på första försöket,
+  fel som rättades och tid. En vuxen **håller inne** "Sett av en vuxen" i 1,5 sekund – då stämplas kvittot och stämpeln syns i loggen.
+- Första avklarade övningspasset per dag ger ett vanligt Capybara-kort (skälet för De svåra talen: "Övningspass med de svåra talen, fyra varv").
 
-- **Standard:** 1–12 (t.ex. 7×1 till 7×12)
-- Du kan dra i reglaget för att ändra, t.ex. bara 2–6 (7×2 till 7×6)
-- Intervallet visas tydligt och gäller för alla tabeller
+### Lär dig strategin
+Första valet är lektionen **Tabellen är mindre än du tror** (förr *Så krymper tabellen* på huvudvyn): på en egen karta med neutrala rutor
+stryks 1:an, 10:an, 2:an och 5:an (och 11:an/12:an), sedan tvillingarna – kvar blir de 21 svåra rutorna. Följer *Tabeller och gånger*.
+I slutsteget leder **Träna de svåra** till startskärmen för De svåra talen (v62).
+Välj annars tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
+(a × b = a rader med b prickar i varje) och en strategi steg för steg, ett klick per steg.
+När strategin är klar kan rektangeln vändas ett kvarts varv: samma prickar, samma svar.
 
-### ⏰ Sessions-timer
-Du kan aktivera en timer som räknar ner under din träning:
+### Öva blandat
+Ett pass med ungefär elva frågor (inom Gånger):
+- De nio kända platserna tas i första hand bland tal som är **Dags igen**, sedan bland **Övar**, sedan bland **Kan**.
+- Ett **nytt tal** per pass (lätt först) visas med rektangeln och frågas sedan två gånger – aldrig direkt efter att det visats.
+- Fel svar ger en förklaring med rektangeln, och talet kommer tillbaka lite senare i passet.
+- Efter passet visar kartan vilka tal som bytt låda.
 
-- Välj mellan **10, 15, 20 eller 30 minuter**
-- Timern syns alltid i toppen av skärmen medan den är aktiv
-- Du kan **stoppa** timern manuellt med "Stoppa"-knappen
-- När tiden är slut visas en **gratulations-dialog** med:
-  - Hur länge du tränade
-  - Möjlighet att starta en ny timer
-  - Möjlighet att se dina resultat
-  - Möjlighet att fortsätta träna fritt
+### Lådorna (påfyllning över tid)
+Reglerna gäller varje besvarad fråga, i alla flöden (Övningspass, Öva blandat, Rekordrunda, Dagens träning, Fokuserad träning):
+- Ett rätt svar räknas en gång per dag och par.
+- **Ny** → **Övar** vid första rätta svaret. **Övar** → **Kan** efter rätt svar tre olika dagar.
+- Ett **Kan**-tal blir **Dags igen** efter 1, 3, 7, 14 och sedan 30 dagar. Rätt svar då fyller på det (grönt igen, längre intervall).
+- Fel på ett **Kan**-tal ger **Övar**; då räcker två olika dagar för att bli **Kan** igen.
+- Första gången byggs lådorna ur den befintliga statistiken.
 
-### Välja en tabell att träna på
-Klicka på valfri tabell i rutnätet (t.ex. "7:an"). Varje tabell-kort visar:
-- Tabellens nummer och eventuell medalj
-- Vilka tal du tränar på (t.ex. 7 × 1–12)
-- Din träffprocent (om du har tränat förut)
+### Rekordrunda
+Öppnar när du kan 10 tal. Bara tal ur lådan **Kan**. Antingen **eget rekord** (så många rätt i rad som möjligt)
+eller **klocka** (så många rätt som möjligt på en minut).
 
-### Träningsflödet (per tabell)
+### Inställningar (kugghjulet)
+- **Strategi:** Fast (appen visar en väg) eller Välj väg (barnet väljer när det finns två).
+- **Tempo:** Klocka eller Eget rekord i rekordrundan.
+- **Tabeller och gånger:** Upp till 10 (standard), upp till 11 eller upp till 12. Styr kartan, räknarna, Öva blandat, Rekordrunda,
+  lektionen *Tabellen är mindre än du tror*, medaljerna och övningspassets gånger. Lådorna för dolda tal ligger kvar orörda.
+- **Svar:** Val (fyra alternativ) eller Fri (skriv svaret själv) i Öva blandat och Rekordrunda. Övningspasset styr svarssättet per varv.
+- **Omvända frågor:** Av eller På (t.ex. "Vilket gångertal blir 56?", bara med Val).
 
-#### Steg 1: Välj svarsläge
-- **📝 Flervalstest** – Välj bland 4 svarsalternativ
-- **⌨️ Fri inmatning** – Skriv in svaret själv med siffertangenter
+Inställningarna sparas per profil.
 
-#### Steg 2: Välj aktivitet
-- **📖 Lär dig först** – Visar hela tabellen med alla tal och svar så du kan studera dem
-- **🎯 Interaktiv träning** – Steg-för-steg träning med animationer
-- **🚀 Börja testa direkt** – Hoppa direkt till provet
-
-#### Interaktiv träning
-1. Varje tal visas först med sitt svar som en animation ("Kom ihåg detta! 📚")
-2. Sedan måste du själv svara (flerval eller fri inmatning)
-3. Rätt svar → grön markering + ljud → vidare till nästa
-4. Fel svar → röd markering + ljud → du får försöka igen
-5. Alla tal gås igenom framåt (min→max) och sedan bakåt (max→min)
-6. Tal du svarat fel på kommer tillbaka i slutet tills du klarat alla
-7. En progress-bar visar hur långt du kommit
-
-#### Testfasen
-- Frågor presenteras en i taget
-- Flerval: 4 alternativ visas, klicka på rätt svar
-- Fri inmatning: Skriv in svaret med siffertangenter
-- Direkt feedback med ljud (rätt/fel)
-- Fel-frågor återkommer tills de besvaras korrekt
-
-#### Resultat
-Efter provet visas:
-- Din procent (t.ex. "87%")
-- Antal rätt av totalt
-- Emoji och uppmuntrande meddelande baserat på resultat
-- Möjlighet att **testa igen** eller **gå tillbaka till menyn**
-
-### 🎲 Eget Matteprov (Custom Test)
-Du kan skapa ett eget prov som blandar flera tabeller:
-
-1. Klicka **"🎲 Gör ett eget Matteprov →"**
-2. Välj **2–3 tabeller** (max 3) genom att klicka på dem
-3. Du kan justera talintervallet med Range Selector även här
-4. Klicka **"Starta ditt matteprov! 🚀"**
-5. Samma träningsflöde som ovan, men med blandade frågor från alla valda tabeller
+*Eget matteprov* är borttaget ur huvudvyn i v58 – övningspasset med flera tabeller ersätter det.
 
 ### 📊 Statistik (Stats)
-Klicka på **"📊 Stats"** i huvudvyn för att se:
+Klicka på **Statistik** längst ner i huvudvyn för att se:
 
 - **Tabellöversikt** – Alla 12 tabeller med träffprocent, antal försök, och eventuell medalj
 - **💪 Träna mer på dessa** – Dina 5 svåraste tal (de med lägst träffprocent)
 - **🎯 Fokuserad träning** – Om du har tal med ≥25% felfrekvens (minst 4 försök) kan du klicka "Träna på problemtalen" för riktad träning
 - **🏆 Dina medaljer** – Förklaring av medaljsystemet
-- **📅 Träningshistorik** – Lista över avslutade timer-sessioner med datum och tid
-- **⚙️ Nollställ all statistik** – Raderar all data permanent (kräver bekräftelse)
+- **📅 Träningshistorik** – De senaste passen, rekordrundorna och proven med datum och tid
+- **⚙️ Nollställ all statistik** – Raderar statistik, logg, lådor och rekord permanent (kräver bekräftelse)
 
 #### Medaljsystemet
 | Medalj | Krav |
@@ -247,6 +246,21 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Capybara-samlingen
+
+24 capybarakort (10 vanliga, 8 sällsynta, 6 legendariska) delas ut som belöning efter resultat: första testet,
+var tredje test eller pass, medaljnivåerna (75, 85 och 95 %), 100 % i en modul, Minnesmästare, dagar i rad med
+Dagens träning, dagens första övningspass och när en hel tabell kan. Max ett kort per resultat; resten väntar i en kö.
+- **Nivåer (v59):** varje kort finns som vanligt, **silver** och **guld** – 72 belöningar av samma bilder.
+  När alla 24 kort finns blir varje ny belöning en uppgradering till silver, och när alla är silver en uppgradering till guld.
+  Sällsyntheten gäller även uppgraderingar. Grattis-rutan för hela samlingen kommer när alla 24 är guld.
+- **Hel tabell:** när alla tal i en tabell (1 till Gånger, 10 som standard) ligger i **Kan** (Dags igen räknas) ger det ett
+  vanligt kort eller en uppgradering, en gång per tabell. Kortet delas ut vid nästa resultat.
+- **Samlingen** visar t.ex. "24 av 24 kort · 5 silver · 0 guld". Tryck på ett kort för att se det stort under
+  **Så fick du den**: en rad per nivå med datum och skäl. Kort från före v59 visar "Du fick den innan appen sparade hur".
+
+---
+
 ## 🔊 Ljudeffekter
 
 Appen har inbyggda ljudeffekter som ger direkt feedback:
@@ -293,11 +307,11 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | Funktion | Beskrivning |
 |----------|-------------|
 | Profilsystem | Skapa, välja och ta bort profiler med avatarer |
-| Gångertabellen | Träna multiplikation 1–12 med anpassningsbart intervall |
+| Gångertabellen | Tabellkartan med lådor, strategier med prickrektangel, smarta pass och rekordrunda |
 | Svarslägen | Flerval (4 alternativ) eller fri inmatning |
-| Interaktiv träning | Animerad steg-för-steg inlärning med felhantering |
-| Eget matteprov | Blanda 2–3 tabeller i ett eget prov |
-| Sessions-timer | Timed träning (10/15/20/30 min) med gratulations-dialog |
+| Lär dig strategin | Strategi steg för steg med prickrektangel |
+| Övningspass | Nöta en eller flera tabeller i varv, med kvitto för en vuxen |
+| Rekordrunda | Eget rekord i rad eller en minut på klockan |
 | Statistik | Detaljerad statistik per tabell och per tal |
 | Medaljer | Brons/Silver/Guld baserat på träffprocent |
 | Fokuserad träning | Automatisk identifiering och träning av problemtal |

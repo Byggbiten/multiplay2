@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Gångertabellen — mockup (tabellkartan)</title>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+/* ── Tokens ur styles/app.css. Gångertabellen har modultemat "mult" (lila), samma komponenter ── */
+:root{
+  --font-head:'Baloo 2',cursive; --font-body:'Nunito',sans-serif;
+  --ink:#3b1d6e; --ink-soft:#6d5a96; --deep:#4c1d95;
+  --accent:#9333ea; --accent-light:#c084fc; --accent-2:#f97316; --glow:rgba(192,132,252,.45); --tint:#f6efff;
+  --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.86); --glass-line:rgba(255,255,255,.9);
+  --shadow-panel:0 10px 34px rgba(93,63,158,.10),0 2px 6px rgba(93,63,158,.06);
+  --radius-md:18px; --radius-lg:24px; --radius-full:999px;
+  --spring:cubic-bezier(.34,1.3,.4,1); --smooth:cubic-bezier(.4,0,.2,1);
+  /* lådorna */
+  --kan:#2fbf68; --ovar:#fbbf24; --ny:#ffffff;
+  /* rektangelns två delar */
+  --pA:#3b82f6; --pB:#f97316;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--font-body);color:var(--ink);overflow:hidden;
+  background:linear-gradient(160deg,#fdf4ff 0%,#fce7f3 34%,#eff6ff 68%,#f0fdf4 100%);}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+button:disabled{cursor:default}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+.app{width:390px;height:844px;margin:0 auto;display:flex;flex-direction:column;gap:6px;padding:4px 10px 8px;overflow:hidden;position:relative}
+
+/* Header (app-header) */
+.hdr{display:flex;align-items:center;justify-content:space-between;min-height:46px;flex-shrink:0}
+.btn-back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 16px 8px 12px;border-radius:var(--radius-full);
+  background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel);color:var(--deep);font-weight:800;font-size:14px}
+.btn-back svg{width:18px;height:18px}
+.title{font-family:var(--font-head);font-weight:700;font-size:21px;color:var(--deep);flex:1;text-align:center;white-space:nowrap}
+.hdr .sp{width:96px;display:flex;justify-content:flex-end}
+.cap{display:none;align-items:center;min-height:36px;padding:0 13px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);
+  box-shadow:var(--shadow-panel);font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--deep);white-space:nowrap}
+.cap.on{display:inline-flex}
+
+/* Labbreglage (inte app-UI: dämpade, samma form som förlagans labbfot) */
+.labbox{flex-shrink:0;display:flex;flex-direction:column;gap:3px;padding:2px 4px 5px;border-bottom:1.5px dashed rgba(59,29,110,.18)}
+.trow{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink-soft)}
+.trow .sp1{flex:1}
+.tg{display:flex;gap:2px;background:rgba(255,255,255,.6);border-radius:999px;padding:2px}
+.tg button{min-height:26px;padding:0 9px;border-radius:999px;font-size:11.5px;font-weight:800;color:var(--ink-soft)}
+.tg button.on{background:var(--ink);color:#fff}
+.lbtn{min-height:26px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:800;color:var(--ink-soft);background:rgba(255,255,255,.6);display:inline-flex;align-items:center;gap:4px}
+.lbtn svg{width:13px;height:13px}
+.labstat{height:15px;line-height:15px;font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.labstat b{font-weight:900;color:var(--ink)}
+.labtag{display:inline-block;font-size:9.5px;letter-spacing:.08em;font-weight:900;padding:0 5px;border-radius:4px;background:rgba(59,29,110,.1);margin-right:5px;line-height:14px}
+
+/* Skärmar */
+.screens{flex:1;min-height:0;position:relative}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;gap:6px}
+.screen.on{display:flex;animation:scrin .32s var(--smooth) both}
+.card{background:var(--glass-strong);border-radius:var(--radius-lg);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)}
+.grow{flex:1;min-height:0}
+
+/* Knappar */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 24px;border-radius:var(--radius-full);
+  font-size:16px;font-weight:800;line-height:1;white-space:nowrap;user-select:none;width:100%;
+  transition:transform .25s var(--spring),box-shadow .25s var(--smooth),opacity .15s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 8px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-sec{background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 28%,transparent);color:var(--deep);box-shadow:var(--shadow-panel)}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn:disabled{opacity:.42;box-shadow:none}
+.btn-pill{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--glass-strong);
+  border:1.5px solid color-mix(in srgb,var(--accent) 26%,transparent);color:var(--deep);font-weight:800;font-size:14px;white-space:nowrap;
+  transition:transform .25s var(--spring)}
+.btn-pill svg{width:18px;height:18px}
+.btn-pill:active{transform:scale(.96)}
+.slot{height:52px;flex-shrink:0;display:flex}
+.choice{display:none;gap:8px;width:100%}
+.choice .btn{flex:1;padding:0 10px;font-size:15px;white-space:normal;line-height:1.15}
+.slot.choosing .choice{display:flex}
+.slot.choosing > .btn{display:none}
+
+/* Bubblan — fast höjd, knappen står still */
+.bubble{flex-shrink:0;display:flex}
+.b92{height:92px}.b76{height:76px}
+.thought{flex:1;background:#fff;border-radius:var(--radius-md);padding:8px 14px;box-shadow:var(--shadow-panel);font-weight:800;color:var(--ink);
+  font-size:16px;line-height:1.4;border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden}
+.thought.pop{animation:bubblein .3s var(--spring)}
+.thought .sm{font-size:13.5px;color:#64748b}
+
+/* ── Tabellkartan ─────────────────────────────── */
+.mapcard{padding:10px 12px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.maphead{display:flex;align-items:center;justify-content:space-between;height:44px;gap:8px}
+.mhl{display:flex;align-items:center;gap:8px;line-height:1}
+.mhl b{font-family:var(--font-head);font-weight:800;font-size:36px;color:var(--deep);display:inline-block;line-height:.9}
+.mhl b.pop{animation:pop .5s var(--spring)}
+.mhl span{font-weight:800;font-size:13.5px;color:var(--ink-soft);line-height:1.15}
+.mhl .mtitle{font-family:var(--font-head);font-weight:800;font-size:19px;color:var(--deep)}
+.map{display:grid;grid-template-columns:repeat(13,24px);grid-auto-rows:24px;gap:2px;justify-content:center;position:relative}
+.mh{display:grid;place-items:center;font-size:10.5px;font-weight:900;color:var(--ink-soft);transition:opacity .4s var(--smooth)}
+.mh.x{color:var(--accent)}
+.mh.dim{opacity:.22}
+.mc{position:relative;border-radius:6px;background:var(--ny);box-shadow:inset 0 0 0 1px rgba(76,29,149,.16);
+  transition:opacity .45s var(--smooth),transform .5s var(--smooth)}
+.mc.kan{background:var(--kan);box-shadow:none}
+.mc.ovar{background:var(--ovar);box-shadow:none}
+.mc::before{content:'';position:absolute;inset:0;border-radius:inherit;background:#e4d7fb;opacity:0;transition:opacity .45s var(--smooth)}
+.map.neutral .mc::before{opacity:1}
+.mc::after{content:'';position:absolute;inset:-2px;border-radius:8px;border:2px solid var(--accent);opacity:0;transition:opacity .25s}
+.mc.mark{transform:scale(.8)}
+.mc.mark::after{opacity:1}
+.mc.gone{opacity:.1;transform:scale(.55)}
+.mc.fly{transition:transform .75s var(--smooth),opacity .3s .5s}
+.mc.flown{opacity:0}
+.mc.twin{animation:twin .75s var(--spring)}
+.mc.glow{animation:twin .8s ease-in-out}
+.mc .nf{position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .6s var(--smooth)}
+.mc .nf.on{opacity:1}
+.mc.chg{animation:chg .8s var(--spring)}
+.mc.chg::after{animation:ring .9s var(--smooth)}
+.legend{display:flex;justify-content:center;align-items:center;gap:14px;height:20px;font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-1px}
+.legend .sw-ny{background:#fff;box-shadow:inset 0 0 0 1px rgba(76,29,149,.25)}
+.legend b{font-family:var(--font-head);font-size:16px;color:var(--deep)}
+.legend b.pop{display:inline-block;animation:pop .5s var(--spring)}
+
+/* Hubbens ingångar */
+.hubact{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end}
+.entries{display:flex;flex-direction:column;gap:8px}
+.shrinkbox{display:none;flex-direction:column;gap:8px}
+.ebtn{display:flex;align-items:center;gap:12px;padding:0 14px 0 10px;border-radius:20px;text-align:left;min-height:54px;width:100%;
+  transition:transform .25s var(--spring),opacity .15s}
+.ebtn:active:not(:disabled){transform:scale(.97)}
+.ebtn:disabled{opacity:.5}
+.ebtn .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.ebtn .et{display:flex;flex-direction:column;line-height:1.15;flex:1;min-width:0}
+.ebtn .et b{font-family:var(--font-head);font-weight:800;font-size:19px}
+.ebtn .et small{font-size:12.5px;font-weight:700;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ebtn.pri{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 8px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,.35);min-height:60px}
+.ebtn.pri .ic{background:rgba(255,255,255,.22)}
+.ebtn.sec{background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 24%,transparent);color:var(--deep);box-shadow:var(--shadow-panel)}
+.ebtn.sec .ic{background:var(--tint);color:var(--accent)}
+.ebtn .chev{width:18px;height:18px;opacity:.6}
+
+/* ── Lär dig strategin ────────────────────────── */
+.seg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex-shrink:0}
+.seg button{min-height:44px;border-radius:14px;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 20%,transparent);
+  font-family:var(--font-head);font-weight:800;font-size:16px;color:var(--deep);transition:transform .2s var(--spring)}
+.seg button.on{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 5px 14px var(--glow)}
+.seg button:active{transform:scale(.95)}
+.stepper{display:flex;align-items:center;justify-content:space-between;height:48px;flex-shrink:0;padding:0 2px}
+.stp{width:48px;height:48px;border-radius:50%;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 24%,transparent);
+  display:grid;place-items:center;color:var(--deep);box-shadow:var(--shadow-panel);transition:transform .2s var(--spring),opacity .15s}
+.stp:active:not(:disabled){transform:scale(.92)}
+.stp:disabled{opacity:.3;box-shadow:none}
+.steq{font-family:var(--font-head);font-weight:800;font-size:32px;color:var(--deep);line-height:1}
+.steq .x,.qbig .x,.oq .x{color:var(--accent-2);margin:0 .14em}
+.rectcard{flex:1;min-height:0;padding:12px;display:flex}
+
+/* Prickrektangeln */
+.rhost{position:relative;flex:1;min-height:0}
+.rgrid{position:absolute;transition:transform .85s var(--smooth)}
+.dot{position:absolute;border-radius:50%;background:#cdbdf3;opacity:0;
+  transition:opacity .45s var(--smooth),background-color .4s var(--smooth),box-shadow .4s,transform .45s var(--spring)}
+.dot.on{opacity:1}
+.dot.A{background:var(--pA)}
+.dot.B{background:var(--pB)}
+.dot.ex{background:#fff;box-shadow:inset 0 0 0 2px var(--pB)}
+.dot.ex.A{background:var(--pA);box-shadow:none}
+.dot.on.dim{opacity:.16}
+.rline{position:absolute;height:3px;border-radius:2px;background:var(--deep);transform:scaleX(0);transform-origin:left center;transition:transform .5s var(--smooth)}
+.rline.on{transform:scaleX(1)}
+.rstrike{position:absolute;height:3px;border-radius:2px;background:#dc2626;transform:scaleX(0);transform-origin:left center;transition:transform .45s var(--smooth),opacity .35s}
+.rstrike.on{transform:scaleX(1)}
+.rmargin{position:absolute;transition:opacity .35s var(--smooth)}
+.rmargin.fade{opacity:0}
+.rbrace{position:absolute;width:3px;border-radius:2px;transition:background-color .4s}
+.rchip{position:absolute;display:inline-flex;align-items:center;height:var(--ch,24px);padding:0 8px;border-radius:999px;font-family:var(--font-head);font-weight:800;
+  font-size:var(--cf,14px);color:#fff;white-space:nowrap;background:var(--c);box-shadow:0 5px 14px color-mix(in srgb,var(--c) 38%,transparent);
+  transition:background-color .4s,box-shadow .4s}
+.rchip.in{animation:chipin .45s var(--spring) both}
+.rresult{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-head);font-weight:800;
+  font-size:21px;color:var(--deep);opacity:0;transition:opacity .35s}
+.rresult.on{opacity:1}
+.rresult.on span.in{display:inline-block;animation:pop .5s var(--spring)}
+.cA{color:var(--pA)}.cB{color:var(--pB)}
+
+/* ── Öva / Rekordrunda ────────────────────────── */
+.pdots{height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px}
+.pd{width:10px;height:10px;border-radius:50%;background:rgba(76,29,149,.16);transition:transform .3s var(--spring),background-color .3s}
+.pd.intro{border-radius:3px;transform:rotate(45deg) scale(.9)}
+.pd.ok{background:var(--kan)}
+.pd.bad{background:#ef4444}
+.pd.cur{transform:scale(1.45);background:var(--accent)}
+.pd.intro.cur{transform:rotate(45deg) scale(1.3)}
+.pd.re{box-shadow:0 0 0 2px #fca5a5}
+.pmain{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:6px}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative}
+.qtag{height:24px;padding:0 11px;border-radius:999px;background:var(--tint);color:var(--accent);font-size:12.5px;font-weight:900;display:inline-flex;align-items:center;visibility:hidden}
+.qtag.on{visibility:visible}
+.qbig{font-family:var(--font-head);font-weight:800;font-size:64px;line-height:1;color:var(--deep);letter-spacing:1px;text-align:center}
+.qbig .qa{color:var(--accent)}
+.qbig .rq{display:block;font-size:17px;letter-spacing:0;color:var(--ink-soft);margin-bottom:6px;font-family:var(--font-body);font-weight:800}
+.qbig.swap{animation:swapin .35s var(--smooth)}
+.qbig .rbig{display:block;font-size:72px}
+.qbig .rsub{display:block;font-size:17px;letter-spacing:0;color:var(--ink-soft);font-family:var(--font-body);font-weight:800;margin-top:4px}
+.ctrl{height:258px;flex-shrink:0;transition:opacity .25s}
+.ctrl.off{opacity:.35;pointer-events:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;height:100%}
+.opt{border-radius:24px;font-family:var(--font-head);font-weight:800;font-size:40px;background:var(--glass-strong);color:var(--deep);
+  border:2px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);transition:transform .2s var(--spring),background-color .25s,border-color .25s}
+.opt.pair{font-size:30px}
+.opt:active{transform:scale(.96)}
+.opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
+.opt.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+.fdisp{height:48px;border-radius:18px;border:3px solid var(--accent-light);background:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-weight:800;font-size:32px;color:var(--deep);margin-bottom:6px;transition:border-color .25s,background-color .25s}
+.fdisp .ph{color:#c4b5fd}
+.fdisp.ok{border-color:#22c55e;background:#dcfce7;color:#15803d}
+.fdisp.bad{border-color:#ef4444;background:#fee2e2;color:#b91c1c}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:46px;gap:6px}
+.key{border-radius:16px;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 24%,transparent);font-family:var(--font-head);
+  font-weight:800;font-size:22px;color:var(--deep);display:grid;place-items:center;transition:transform .2s var(--spring)}
+.key:active{transform:scale(.94)}
+.key.kok{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;font-size:18px}
+.overlay{position:absolute;inset:0;padding:10px 12px 12px;background:#fcfaff;display:flex;flex-direction:column;gap:6px;opacity:0;pointer-events:none;transform:scale(.98);
+  transition:opacity .4s var(--smooth),transform .4s var(--smooth);z-index:5}
+.overlay.on{opacity:1;pointer-events:auto;transform:none}
+.ohead{height:34px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.oq{font-family:var(--font-head);font-weight:800;font-size:26px;color:var(--deep);white-space:nowrap}
+.oq .oa{color:var(--accent)}
+.oq .oa.ok{color:#15803d;display:inline-block;animation:pop .5s var(--spring)}
+.oq s{color:#dc2626;font-size:19px;margin-left:10px;text-decoration-thickness:2.5px}
+.otag{height:26px;padding:0 11px;border-radius:999px;background:var(--tint);color:var(--accent);font-size:12.5px;font-weight:900;display:inline-flex;align-items:center}
+.shake{animation:shake .4s ease-in-out}
+
+/* Rekordspåret */
+.track{height:58px;flex-shrink:0;padding:8px 16px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.trtop{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:13px;color:var(--ink-soft)}
+.trtop b{font-family:var(--font-head);font-size:19px;color:var(--deep);display:inline-block}
+.trtop b.pop{animation:pop .45s var(--spring)}
+.bar{position:relative;height:12px;border-radius:999px;background:rgba(76,29,149,.12)}
+.bar .fill{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-light));transform-origin:left center;transform:scaleX(0);transition:transform .45s var(--smooth)}
+.bar.beat .fill{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.bar.clock .fill{transition:transform 1s linear}
+.bar .flag{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;border-radius:2px;background:#f59e0b;box-shadow:0 0 0 2px #fff}
+.bar .flag.off{display:none}
+
+@keyframes scrin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bubblein{from{transform:scale(.9) translateY(4px);opacity:.4}to{transform:scale(1) translateY(0);opacity:1}}
+@keyframes chipin{0%{transform:scale(.4);opacity:0}65%{transform:scale(1.14);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes pop{0%{transform:scale(.5);opacity:.2}65%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes twin{0%,100%{transform:scale(1)}50%{transform:scale(1.28)}}
+@keyframes chg{0%{transform:scale(1)}45%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes ring{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.8)}}
+@keyframes swapin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="hdr">
+    <button class="btn-back" id="backBtn"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Tillbaka</button>
+    <span class="title" id="title">Gångertabellen</span>
+    <span class="sp"><span class="cap" id="cap"></span></span>
+  </div>
+
+  <div class="labbox">
+    <div class="trow">
+      <span>Strategi</span><span class="tg" data-k="strat"><button data-v="fast">Fast</button><button data-v="valj">Välj väg</button></span>
+      <span class="sp1"></span>
+      <span>Svar</span><span class="tg" data-k="answer"><button data-v="val">Val</button><button data-v="fri">Fri</button></span>
+    </div>
+    <div class="trow">
+      <span>Tempo</span><span class="tg" data-k="tempo"><button data-v="klocka">Klocka</button><button data-v="rekord">Eget rekord</button></span>
+      <span class="sp1"></span>
+      <span>Omvända</span><span class="tg" data-k="rev"><button data-v="av">Av</button><button data-v="pa">På</button></span>
+    </div>
+    <div class="trow">
+      <span>Start</span><span class="tg" data-k="preset"><button data-v="mira">Mira</button><button data-v="nyb">Nybörjare</button><button data-v="nara">Nästan klar</button></span>
+      <span class="sp1"></span>
+      <button class="lbtn" id="resetBtn"><svg class="i" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3M4.5 17.5V12H10"/></svg>Nollställ</button>
+    </div>
+    <div class="labstat" id="labstat"></div>
+  </div>
+
+  <div class="screens">
+    <!-- ═════ HUBBEN ═════ -->
+    <section class="screen" id="scr-hub">
+      <div class="card mapcard">
+        <div class="maphead"><div class="mhl" id="hubHead"></div><button class="btn-pill" id="shrinkBtn"></button></div>
+        <div class="map" id="hubMap"></div>
+        <div class="legend" id="hubLegend"></div>
+      </div>
+      <div class="hubact">
+        <div class="entries" id="hubEntries">
+          <button class="ebtn sec" id="goLearn"><span class="ic" id="icLearn"></span><span class="et"><b>Lär dig strategin</b><small id="subLearn"></small></span><span id="chevLearn"></span></button>
+          <button class="ebtn pri" id="goPrac"><span class="ic" id="icPrac"></span><span class="et"><b>Öva</b><small id="subPrac"></small></span><span id="chevPrac"></span></button>
+          <button class="ebtn sec" id="goRec"><span class="ic" id="icRec"></span><span class="et"><b>Rekordrunda</b><small id="subRec"></small></span><span id="chevRec"></span></button>
+        </div>
+        <div class="shrinkbox" id="hubShrink">
+          <div class="bubble b92"><div class="thought" id="hubBubble"></div></div>
+          <div class="slot"><button class="btn btn-primary" id="shrinkNext"></button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═════ LÄR DIG STRATEGIN ═════ -->
+    <section class="screen" id="scr-learn">
+      <div class="seg" id="learnTabs"></div>
+      <div class="stepper">
+        <button class="stp" id="bPrev" aria-label="Talet före"></button>
+        <div class="steq" id="learnEq"></div>
+        <button class="stp" id="bNext" aria-label="Talet efter"></button>
+      </div>
+      <div class="card rectcard"><div class="rhost" id="learnHost"></div></div>
+      <div class="bubble b92"><div class="thought" id="learnBubble"></div></div>
+      <div class="slot" id="learnSlot"><button class="btn btn-primary" id="learnMain"></button><div class="choice" id="learnChoice"></div></div>
+      <button class="btn btn-sec" id="learnFlip" style="min-height:44px"></button>
+    </section>
+
+    <!-- ═════ ÖVA ═════ -->
+    <section class="screen" id="scr-prac">
+      <div class="pdots" id="pracDots"></div>
+      <div class="pmain">
+        <div class="card stage"><span class="qtag" id="pracTag"></span><div class="qbig" id="pracQ"></div></div>
+        <div class="ctrl" id="pracCtrl"></div>
+        <div class="card overlay" id="pracOver">
+          <div class="ohead"><div class="oq" id="pracOQ"></div><span class="otag" id="pracOTag"></span></div>
+          <div class="rhost" id="pracHost"></div>
+        </div>
+      </div>
+      <div class="bubble b76"><div class="thought" id="pracBubble"></div></div>
+      <div class="slot" id="pracSlot"><button class="btn btn-primary" id="pracMain"></button><div class="choice" id="pracChoice"></div></div>
+    </section>
+
+    <!-- ═════ SLUTBILD EFTER PASSET ═════ -->
+    <section class="screen" id="scr-end">
+      <div class="card mapcard">
+        <div class="maphead"><div class="mhl" id="endHead"></div></div>
+        <div class="map" id="endMap"></div>
+        <div class="legend" id="endLegend"></div>
+      </div>
+      <div class="grow"></div>
+      <div class="bubble b92"><div class="thought" id="endBubble"></div></div>
+      <div class="slot"><button class="btn btn-primary" id="endMain"></button></div>
+    </section>
+
+    <!-- ═════ REKORDRUNDA ═════ -->
+    <section class="screen" id="scr-rec">
+      <div class="card track"><div class="trtop"><span id="recL"></span><span id="recR"></span></div><div class="bar" id="recBar"><i class="fill" id="recFill"></i><i class="flag" id="recFlag"></i></div></div>
+      <div class="pmain">
+        <div class="card stage"><span class="qtag" id="recTag"></span><div class="qbig" id="recQ"></div></div>
+        <div class="ctrl" id="recCtrl"></div>
+      </div>
+      <div class="bubble b76"><div class="thought" id="recBubble"></div></div>
+      <div class="slot"><button class="btn btn-primary" id="recMain"></button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════
+   GRUNDER
+═══════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const frame = () => new Promise(r => { requestAnimationFrame(() => requestAnimationFrame(r)); setTimeout(r, 60); });   // rAF står still i dolda flikar
+const LEAD = 280;                                    // texten först, rörelsen sen
+const ICON = {
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  fwd:'<path d="M9 5l7 7-7 7"/>',
+  next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  again:'<path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3M4.5 17.5V12H10"/>',
+  flip:'<path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M17.7 2.5v3.8h-3.8M6.3 21.5v-3.8h3.8"/>',
+  shrink:'<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+  play:'<path d="M8 5.5l11 6.5-11 6.5z"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  del:'<path d="M20 6H9l-5 6 5 6h11z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
+  map:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/>',
+};
+const svg = (k, style = '') => `<svg class="i" viewBox="0 0 24 24"${style ? ` style="${style}"` : ''}>${ICON[k]}</svg>`;
+const X = ' × ';
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const TALORD = ['inga','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv'];
+const talord = n => n <= 12 ? TALORD[n] : String(n);
+
+/* ═══════════════════════════════════════════════════════════
+   TILLSTÅND: en låda per tal. a×b och b×a delar alltid låda.
+═══════════════════════════════════════════════════════════ */
+const KEY = (a, b) => a <= b ? `${a}x${b}` : `${b}x${a}`;
+const PAIRS = []; for (let a = 1; a <= 12; a++) for (let b = a; b <= 12; b++) PAIRS.push([a, b]);   // 78 unika par
+const BOXNAME = { ny:'ny', ovar:'övar', kan:'kan' };
+const S = { strat:'fast', answer:'val', tempo:'rekord', rev:'pa', preset:'mira', screen:'hub', boxes:{}, record:{ streak:0, clock:0 }, passNo:0, learn:{ a:7, b:8 } };
+const box = (a, b) => S.boxes[KEY(a, b)];
+function counts(bx = S.boxes){ const c = { ny:0, ovar:0, kan:0 }; for (const k in bx) c[bx[k]]++; return c; }
+const leftToLearn = (bx = S.boxes) => PAIRS.length - counts(bx).kan;
+
+const MIRA_OVAR = ['6x6','6x7','6x9','7x7','8x8','9x9','6x11','7x11','8x11','9x11','11x11'];
+function presetBoxes(p){
+  const B = {};
+  for (const [a, b] of PAIRS){
+    const k = KEY(a, b), has = s => s.includes(a) || s.includes(b);
+    if (p === 'mira')     B[k] = has([1,2,3,4,5,10]) ? 'kan' : MIRA_OVAR.includes(k) ? 'ovar' : 'ny';
+    else if (p === 'nyb') B[k] = has([1,10]) ? 'kan' : has([2,5]) ? 'ovar' : 'ny';
+    else                  B[k] = ['6x8','7x8','7x12'].includes(k) ? 'ovar' : k === '8x9' ? 'ny' : 'kan';
+  }
+  return B;
+}
+const PRESET_REC = { mira:{ streak:12, clock:19 }, nyb:{ streak:0, clock:0 }, nara:{ streak:24, clock:27 } };
+function applyPreset(p){
+  S.preset = p; S.boxes = presetBoxes(p); S.record = { ...PRESET_REC[p] }; S.passNo = 0;
+  SH.on = false; SH.i = -1;
+  renderLab(); goto('hub');
+}
+
+function rng(seed){ return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffle(arr, r = Math.random){ const a = [...arr]; for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ═══════════════════════════════════════════════════════════
+   SVARSALTERNATIV
+   Vanlig fråga: distraktorer = tabellgrannar a×(b±1), (a±1)×b och diagonalgrannar.
+   Omvänd fråga: fyra gångertal som delar en faktor; den andra faktorn är ett
+   fönster med fyra tal i rad där rätt svar kan ligga var som helst.
+═══════════════════════════════════════════════════════════ */
+function distractors(a, b){
+  // Raka grannar (samma tabell, ett steg) går före snedgrannar: 21 och 25 till 4 × 6
+  // är tabellprodukter men ser slumpade ut och kan uteslutas på udda/jämnt.
+  const c = a * b, direct = [], diag = [];
+  const add = (L, x, y) => { if (x < 1 || y < 1) return; const v = x * y; if (v !== c && !direct.includes(v) && !diag.includes(v)) L.push(v); };
+  add(direct, a, b - 1); add(direct, a, b + 1); add(direct, a - 1, b); add(direct, a + 1, b);
+  add(diag, a - 1, b + 1); add(diag, a + 1, b - 1); add(diag, a - 1, b - 1); add(diag, a + 1, b + 1);
+  const near = (x, y) => Math.abs(x - c) - Math.abs(y - c) || x - y;
+  const cand = [...direct.sort(near), ...diag.sort(near)];
+  for (let v = c + 1; cand.length < 3; v++) if (!cand.includes(v)) cand.push(v);   // bara 1 × 1 behöver detta
+  const pick = cand.slice(0, 3);
+  const below = pick.filter(v => v < c).length, above = 3 - below;
+  if (!below || !above){                       // båda sidor om svaret, annars räcker "välj minsta/största"
+    const other = cand.slice(3).find(v => below ? v > c : v < c);
+    if (other !== undefined) pick[2] = other;
+  }
+  // Udda × udda ger udda svar men bara jämna grannar: då pekar udda/jämnt ut svaret.
+  // Byt in ett udda tal två steg bort i samma tabell (7 × 9: 7 × 7 = 49), svaren kvar på båda sidor.
+  if (c % 2 && !pick.some(v => v % 2)){
+    const odds = [a * (b - 2), a * (b + 2), (a - 2) * b, (a + 2) * b]
+      .filter(v => v >= 1 && v !== c && v % 2 && !pick.includes(v)).sort(near);
+    swap: for (const o of odds){
+      for (const i of [...pick.keys()].sort((x, y) => Math.abs(pick[y] - c) - Math.abs(pick[x] - c))){
+        const t = pick.slice(); t[i] = o;
+        if (t.some(v => v < c) && t.some(v => v > c)){ pick.splice(0, 3, ...t); break swap; }
+      }
+    }
+  }
+  return pick;
+}
+const options = (a, b) => [a * b, ...distractors(a, b)].sort((x, y) => x - y);
+
+function reverseOptions(a, b, r = Math.random){
+  const c = a * b;
+  const cands = [[a, b], [b, a]].filter(([f]) => f !== 1);
+  const [f, g] = cands.length ? cands[Math.floor(r() * cands.length)] : [a, b];
+  const wins = [];
+  for (let s = g - 3; s <= g; s++) if (s >= 1 && s + 3 <= 12) wins.push([s, s + 1, s + 2, s + 3]);
+  const xs = wins[Math.floor(r() * wins.length)].filter(x => f * x !== c || x === g);
+  const firsts = shuffle([true, true, false, false], r);     // faktorn står först i exakt två alternativ
+  return shuffle(xs, r).map((x, i) => {
+    const A = firsts[i] ? f : x, B = firsts[i] ? x : f;
+    return { a:A, b:B, v:f * x, ok:x === g, label:`${A}${X}${B}` };
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STRATEGIERNA. Konvention: a × b = a rader med b prickar i varje.
+═══════════════════════════════════════════════════════════ */
+function waysFor(a){
+  switch (a){
+    case 1:  return [{ kind:'one' }];
+    case 2:  return [{ kind:'double', levels:[1,2] }];
+    case 3:  return [{ kind:'split', k1:2, k2:1 }];
+    case 4:  return [{ kind:'double', levels:[1,2,4] }, { kind:'minus', N:5, k:1 }];
+    case 5:  return [{ kind:'half' }];
+    case 6:  return [{ kind:'split', k1:5, k2:1 }, { kind:'split', k1:3, k2:3 }];
+    case 7:  return [{ kind:'split', k1:5, k2:2 }, { kind:'minus', N:10, k:3 }];
+    case 8:  return [{ kind:'double', levels:[1,2,4,8] }, { kind:'split', k1:5, k2:3 }];
+    case 9:  return [{ kind:'minus', N:10, k:1 }, { kind:'split', k1:5, k2:4 }];
+    case 10: return [{ kind:'ten' }];
+    case 11: return [{ kind:'split', k1:10, k2:1 }];
+    case 12: return [{ kind:'split', k1:10, k2:2 }];
+  }
+}
+/* hur enkel en faktors väg är som radantal (lägre = enklare); används när Öva väljer vilket håll rektangeln ritas */
+const wayRank = a => ({ 1:0, 10:1, 2:2, 5:3, 11:4, 3:5, 4:5, 9:6, 12:6, 6:7, 8:7, 7:8 })[a];
+const rowsFor = (a, w) => w.kind === 'minus' ? w.N : (w.kind === 'half' || w.kind === 'ten') ? 10 : a;
+const rader = n => n === 1 ? 'en rad' : `${n} rader`;
+const prickar = n => n === 1 ? 'en prick' : `${n} prickar`;
+function wayLabel(w){
+  if (w.kind === 'split')  return `${w.k1} rader + ${rader(w.k2)}`;
+  if (w.kind === 'double') return ['', '', 'Dubbelt en gång', 'Dubbelt två gånger', 'Dubbelt tre gånger'][w.levels.length];
+  if (w.kind === 'minus')  return `${w.N} rader − ${rader(w.k)}`;
+  if (w.kind === 'half')   return 'Hälften av 10 rader';
+  return '';
+}
+function introText(a, b){
+  if (a === 1) return `1${X}${b} är en rad med ${prickar(b)}.`;
+  if (a === b) return `${a}${X}${a} är ${a} rader. Varje rad har lika många prickar.`;
+  if (b === 1) return `${a}${X}1 är ${a} rader med en prick i varje.`;
+  return `${a}${X}${b} är ${a} rader med ${b} prickar i varje.`;
+}
+function stepsFor(a, b, w){
+  const ab = a * b, st = [];
+  const res = html => ({ do:'result', html });
+  if (w.kind === 'split'){
+    const { k1, k2 } = w, p1 = k1 * b, p2 = k2 * b;
+    st.push({ text:`Vi drar ett streck efter ${rader(k1)}.`, acts:[{ do:'split', at:k1 }, { do:'color', from:0, to:k1, c:'A' }, { do:'color', from:k1, to:a, c:'B' }] });
+    st.push({ text:`Den blå delen: ${k1}${X}${b} = ${p1}.`, acts:[{ do:'chip', from:0, to:k1, c:'A', html:`${k1}${X}${b} = ${p1}` }] });
+    st.push({ text:`Den orange delen: ${k2}${X}${b} = ${p2}.`, acts:[{ do:'chip', from:k1, to:a, c:'B', html:`${k2}${X}${b} = ${p2}` }] });
+    st.push({ text:`Ihop: ${p1} + ${p2} = ${ab}. Så ${a}${X}${b} = ${ab}.`, acts:[res(`<span class="cA">${p1}</span> + <span class="cB">${p2}</span> = <span class="in">${ab}</span>`)] });
+  } else if (w.kind === 'double'){
+    const L = w.levels;
+    st.push({ text:`Börja med en rad: ${prickar(b)}.`, acts:[{ do:'color', from:0, to:1, c:'A' }, { do:'chip', from:0, to:1, c:'A', html:`1${X}${b} = ${b}` }] });
+    const lead = ['', 'Dubbelt', 'Dubbelt igen', 'Dubbelt en gång till'];
+    for (let i = 1; i < L.length; i++){
+      const n = L[i], prev = L[i - 1], v = prev * b;
+      st.push({ text:`${lead[i]}: ${v} + ${v} = ${2 * v}. Nu är det ${n} rader.`,
+        acts:[{ do:'color', from:0, to:prev, c:'A' }, { do:'chipsTo', c:'A' }, { do:'color', from:prev, to:n, c:'B' }, { do:'chip', from:prev, to:n, c:'B', html:`${n}${X}${b} = ${n * b}` }] });
+    }
+    st.push({ text:`${a === 2 ? 'Båda raderna' : `Alla ${a} rader`}: ${a}${X}${b} = ${ab}.`, acts:[{ do:'color', from:0, to:a, c:'A' }, { do:'chipsTo', c:'A' }, res(`${a}${X}${b} = <span class="in">${ab}</span>`)] });
+  } else if (w.kind === 'minus'){
+    const { N, k } = w, full = N * b, cut = k * b;
+    st.push({ text:`Tänk dig ${k === 1 ? 'en rad' : `${k} rader`} till. Då blir det ${N} rader.`, acts:[{ do:'color', from:0, to:a, c:'A' }, { do:'extra', from:a, to:N }] });
+    st.push({ text:`${N} rader: ${N}${X}${b} = ${full}.`, acts:[{ do:'chip', from:0, to:N, c:'A', html:`${N}${X}${b} = ${full}` }] });
+    st.push({ text: k === 1 ? `Ta bort raden igen. Den har ${prickar(b)}.` : `Ta bort de ${k} raderna igen. De har ${k}${X}${b} = ${cut} prickar.`,
+      acts:[{ do:'strike', from:a, to:N }, { do:'chip', from:a, to:N, c:'B', html:`− ${cut}`, lane:1 }] });
+    st.push({ text:`${full} − ${cut} = ${ab}. Så ${a}${X}${b} = ${ab}.`, acts:[res(`<span class="cA">${full}</span> − <span class="cB">${cut}</span> = <span class="in">${ab}</span>`)] });
+  } else if (w.kind === 'half'){
+    st.push({ text:'Tänk dig 5 rader till. Då blir det 10 rader.', acts:[{ do:'color', from:0, to:5, c:'A' }, { do:'extra', from:5, to:10 }] });
+    st.push({ text:`10 rader: 10${X}${b} = ${10 * b}.`, acts:[{ do:'chip', from:0, to:10, c:'A', html:`10${X}${b} = ${10 * b}` }] });
+    st.push({ text:'5 rader är hälften av 10 rader.', acts:[{ do:'dim', from:5, to:10 }, { do:'chip', from:0, to:5, c:'D', html:'hälften', lane:1 }] });
+    st.push({ text:`Hälften av ${10 * b} är ${5 * b}. Så 5${X}${b} = ${5 * b}.`, acts:[res(`hälften av ${10 * b} = <span class="in">${5 * b}</span>`)] });
+  } else if (w.kind === 'one'){
+    st.push({ text:`En rad med ${prickar(b)} är ${b}. Så 1${X}${b} = ${b}.`, acts:[{ do:'color', from:0, to:1, c:'A' }, res(`1${X}${b} = <span class="in">${b}</span>`)] });
+  } else if (w.kind === 'ten'){
+    const tior = b === 1 ? 'en tia' : `${b} tior`;
+    st.push({ text:`Tio rader med ${b} i varje är ${tior}.`, acts:[{ do:'color', from:0, to:10, c:'A' }, { do:'chip', from:0, to:10, c:'A', html:tior }] });
+    st.push({ text:`${cap(tior)} är ${10 * b}. Så 10${X}${b} = ${10 * b}.`, acts:[res(`10${X}${b} = <span class="in">${10 * b}</span>`)] });
+  }
+  return st;
+}
+/* hela kedjan (intro + stegen) för en väg — för testning */
+const strategySteps = (a, b, k = 0) => { const w = waysFor(a)[k]; return w ? [{ text:introText(a, b), acts:[] }, ...stepsFor(a, b, w)] : null; };
+
+/* Gångaren: en strategi steg för steg, delad av Lär dig och Öva */
+function makeWalker(a, b){
+  const ways = waysFor(a);
+  // fast: bara första vägen ritas; välj väg: plats för båda så rektangeln inte flyttar sig vid valet
+  const used = S.strat === 'valj' ? ways : ways.slice(0, 1);
+  return { a, b, ways, way:null, steps:null, i:0, stage:'intro', rows:Math.max(...used.map(w => rowsFor(a, w))) };
+}
+const needsChoice = W => S.strat === 'valj' && W.ways.length > 1 && W.stage === 'intro';
+function walkerChoose(W, k){ W.way = W.ways[k]; W.steps = stepsFor(W.a, W.b, W.way); W.i = 0; W.stage = 'run'; }
+async function walkerStep(W, rect, sayFn){
+  if (W.stage === 'intro' || W.stage === 'choice') walkerChoose(W, 0);
+  const s = W.steps[W.i++];
+  if (W.i >= W.steps.length) W.stage = 'done';
+  sayFn(s.text);
+  await wait(LEAD);
+  await rect.apply(s.acts);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRICKREKTANGELN
+═══════════════════════════════════════════════════════════ */
+const COL = { A:'#3b82f6', B:'#f97316', D:'#7c3aed' };
+function makeRect(host){
+  const R = {};
+  let grid, margin, result, dots = [], a, b, rows, p, x0, y0, gh, W;
+  R.setup = (A, B, ROWS) => {
+    a = A; b = B; rows = ROWS;
+    W = host.clientWidth; const H = host.clientHeight;
+    const resH = 34, marginW = 118, mgap = 12;
+    gh = H - resH - 6;
+    p = Math.max(10, Math.min(26, Math.floor(gh / Math.max(rows, b)), Math.floor((W - marginW - mgap) / Math.max(a, b))));
+    const d = Math.round(p * .7), off = (p - d) / 2;
+    x0 = Math.round((W - (b * p + mgap + marginW)) / 2); y0 = Math.round((gh - rows * p) / 2);
+    host.innerHTML = '<div class="rgrid"></div><div class="rmargin"></div><div class="rresult"></div>';
+    [grid, margin, result] = host.children;
+    Object.assign(grid.style, { left:x0 + 'px', top:y0 + 'px', width:b * p + 'px', height:rows * p + 'px', transform:'' });
+    Object.assign(margin.style, { left:(x0 + b * p + mgap) + 'px', top:y0 + 'px', width:marginW + 'px', height:rows * p + 'px' });
+    margin.style.setProperty('--ch', Math.min(24, p - 1) + 'px');
+    margin.style.setProperty('--cf', (p >= 22 ? 14 : 12) + 'px');
+    Object.assign(result.style, { top:(gh + 6) + 'px', height:resH + 'px' });
+    let html = '';
+    for (let r = 0; r < rows; r++) for (let c = 0; c < b; c++)
+      html += `<i class="dot${r >= a ? ' ex' : ''}" data-r="${r}" style="left:${c * p + off}px;top:${r * p + off}px;width:${d}px;height:${d}px"></i>`;
+    grid.innerHTML = html;
+    dots = [...grid.querySelectorAll('.dot')];
+  };
+  R.reveal = async () => {
+    const vis = dots.filter(el => +el.dataset.r < a);
+    vis.forEach(el => el.style.transitionDelay = (+el.dataset.r * 35) + 'ms');
+    await frame();
+    vis.forEach(el => el.classList.add('on'));
+    await wait(a * 35 + 450);
+    vis.forEach(el => el.style.transitionDelay = '');
+  };
+  const rowDots = (f, t) => dots.filter(el => { const r = +el.dataset.r; return r >= f && r < t; });
+  const line = (cls, top, extra) => { const l = document.createElement('div'); l.className = cls; Object.assign(l.style, { left:(-extra) + 'px', width:(b * p + 2 * extra) + 'px', top:top + 'px' }); grid.append(l); return l; };
+  async function act(x){
+    switch (x.do){
+      case 'color': rowDots(x.from, x.to).forEach(el => { el.classList.remove('A', 'B'); el.classList.add(x.c); }); await wait(120); return;
+      case 'split': { const l = line('rline', x.at * p - 1.5, 6); await frame(); l.classList.add('on'); await wait(420); return; }
+      case 'extra': rowDots(x.from, x.to).forEach(el => el.classList.add('on')); await wait(480); return;
+      case 'strike': {
+        const ls = []; for (let r = x.from; r < x.to; r++) ls.push(line('rstrike', r * p + p / 2 - 1.5, 4));
+        await frame(); ls.forEach(l => l.classList.add('on')); rowDots(x.from, x.to).forEach(el => el.classList.add('dim')); await wait(450); return;
+      }
+      case 'dim': rowDots(x.from, x.to).forEach(el => el.classList.add('dim')); await wait(420); return;
+      case 'chip': {
+        const lane = x.lane || 0, mid = (x.from + x.to) / 2 * p, ch = Math.min(24, p - 1);
+        const br = document.createElement('div'); br.className = 'rbrace';
+        Object.assign(br.style, { left:(lane * 6) + 'px', top:(x.from * p + 3) + 'px', height:Math.max(4, (x.to - x.from) * p - 6) + 'px', background:COL[x.c] });
+        const c = document.createElement('div'); c.className = 'rchip in'; c.style.setProperty('--c', COL[x.c]); c.innerHTML = x.html;
+        Object.assign(c.style, { left:(lane * 6 + 9) + 'px', top:(mid - ch / 2) + 'px' });
+        c.addEventListener('animationend', () => c.classList.remove('in'), { once:true });
+        margin.append(br, c); await wait(450); return;
+      }
+      case 'chipsTo':
+        margin.querySelectorAll('.rchip').forEach(c => c.style.setProperty('--c', COL[x.c]));
+        margin.querySelectorAll('.rbrace').forEach(c => c.style.background = COL[x.c]); return;
+      case 'result': result.innerHTML = x.html; result.classList.remove('on'); void result.offsetWidth; result.classList.add('on'); await wait(500); return;
+      case 'rotate': {
+        margin.classList.add('fade');
+        rowDots(a, rows).forEach(el => el.classList.remove('on'));
+        grid.querySelectorAll('.rstrike').forEach(l => l.style.opacity = 0);
+        await wait(320);
+        const cx = b * p / 2, cy = a * p / 2, tx = W / 2 - x0 - cx, ty = gh / 2 - y0 - cy;
+        grid.style.transformOrigin = `${cx}px ${cy}px`;
+        grid.style.transform = `translate(${tx}px,${ty}px) rotate(-90deg)`;
+        await wait(880); return;
+      }
+    }
+  }
+  R.apply = async acts => { for (const x of acts) await act(x); };
+  R.result = html => { result.innerHTML = html; result.classList.add('on'); };
+  R.info = () => ({ a, b, rows, p, W, gh });
+  return R;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GEMENSAMT: bubbla, labbrad, lås, skärmbyte
+═══════════════════════════════════════════════════════════ */
+function say(id, t1, t2 = ''){
+  const th = $(id);
+  th.innerHTML = `<span>${t1}</span>${t2 ? `<span class="sm">${t2}</span>` : ''}`;
+  th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
+}
+function lab(html){ $('labstat').innerHTML = `<span class="labtag">LABB</span>${html}`; }
+let busy = false;
+async function run(fn){
+  if (busy) return;
+  busy = true; refresh();
+  try { await fn(); } finally { busy = false; refresh(); }
+}
+function refresh(){ ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec })[S.screen](); }
+function btn(el, label, icon, after = true){ el.innerHTML = after ? `${label} ${icon ? svg(icon) : ''}` : `${icon ? svg(icon) : ''} ${label}`; }
+const TITLES = { hub:'Gångertabellen', learn:'Lär dig strategin', prac:'Öva', end:'Passet klart', rec:'Rekordrunda' };
+function goto(name){
+  if (S.screen === 'rec') stopClock();
+  busy = false;
+  S.screen = name;
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 'scr-' + name));
+  $('title').textContent = TITLES[name];
+  $('cap').classList.toggle('on', name === 'prac');
+  ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec })[name]();
+}
+
+/* Lab-reglage */
+function renderLab(){
+  document.querySelectorAll('.labbox .tg').forEach(tg => {
+    const k = tg.dataset.k;
+    tg.querySelectorAll('button').forEach(b => b.classList.toggle('on', S[k] === b.dataset.v));
+  });
+}
+document.querySelectorAll('.labbox .tg').forEach(tg => tg.querySelectorAll('button').forEach(b => b.onclick = () => {
+  const k = tg.dataset.k, v = b.dataset.v;
+  if (k === 'preset'){ applyPreset(v); return; }
+  if (S[k] === v) return;
+  S[k] = v; renderLab(); onLabChange(k);
+}));
+$('resetBtn').onclick = () => applyPreset(S.preset);
+function onLabChange(k){
+  if (S.screen === 'hub') renderHub();
+  if (S.screen === 'learn' && k === 'strat') startLearn();
+  if (S.screen === 'prac' && (k === 'answer' || k === 'rev')) pracLabChange();
+  if (S.screen === 'rec' && (k === 'tempo' || k === 'answer')) enterRec();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABELLKARTAN (komponent: hubben och slutbilden har var sin)
+═══════════════════════════════════════════════════════════ */
+function makeMap(el){
+  const cells = [], rowH = [], colH = [];
+  el.innerHTML = '';
+  const mk = (cls, txt = '') => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; el.append(d); return d; };
+  mk('mh x', '×');
+  for (let c = 1; c <= 12; c++) colH[c] = mk('mh', c);
+  for (let a = 1; a <= 12; a++){
+    rowH[a] = mk('mh', a); cells[a] = [];
+    for (let b = 1; b <= 12; b++){ const d = mk('mc'); d.dataset.a = a; d.dataset.b = b; cells[a][b] = d; }
+  }
+  const all = () => cells.flatMap((row, a) => row ? row.slice(1).map((el, i) => ({ el, a, b:i + 1 })) : []);
+  return {
+    el, cells, rowH, colH, all,
+    paint(bx){
+      el.classList.remove('neutral');
+      rowH.forEach(h => h && h.classList.remove('dim')); colH.forEach(h => h && h.classList.remove('dim'));
+      for (const { el:c, a, b } of all()){ c.className = 'mc ' + bx[KEY(a, b)]; c.style.transform = ''; c.innerHTML = ''; }
+    },
+  };
+}
+const legendHTML = (c, pop = false) => `<span><i style="background:var(--kan)"></i>Kan <b${pop ? ' class="pop"' : ''}>${c.kan}</b></span><span><i style="background:var(--ovar)"></i>Övar <b${pop ? ' class="pop"' : ''}>${c.ovar}</b></span><span><i class="sw-ny"></i>Ny <b${pop ? ' class="pop"' : ''}>${c.ny}</b></span>`;
+const countHTML = (n, pop = false) => n === 0
+  ? `<b${pop ? ' class="pop"' : ''}>0</b><span>tal kvar —<br>hela tabellen är grön</span>`
+  : `<b${pop ? ' class="pop"' : ''}>${n}</b><span>tal kvar<br>att lära</span>`;
+
+/* ═══════════════════════════════════════════════════════════
+   HUBBEN + "Så krymper tabellen"
+═══════════════════════════════════════════════════════════ */
+const hubMap = makeMap($('hubMap'));
+const SH = { on:false, i:-1 };
+const SHRINK = [
+  { text:() => 'Hela tabellen har 144 rutor. Nu stryker vi en del i taget.', act:'neutral' },
+  { text:() => `Gånger 1 ändrar inget: 1${X}7 = 7. Vi stryker 1:ans rad och kolumn.`, rm:[1] },
+  { text:() => `Gånger 10 sätter en nolla efter talet: 10${X}7 = 70. Vi stryker 10:ans rad och kolumn.`, rm:[10] },
+  { text:() => `Gånger 2 är dubbelt: 2${X}7 = 7 + 7. Vi stryker 2:ans rad och kolumn.`, rm:[2] },
+  { text:() => `Gånger 5 är hälften av gånger 10: 5${X}7 är hälften av 70. Vi stryker 5:ans rad och kolumn.`, rm:[5] },
+  { text:() => `11:an och 12:an är 10:an och lite till: 12${X}7 = 70 + 14. Vi stryker deras rader och kolumner.`, rm:[11, 12] },
+  { text:() => `3${X}7 och 7${X}3 blir lika mycket. Därför räcker det att lära sig varje par en gång.`, act:'twins' },
+  { text:n => `Kvar: ${n} rutor. Det är de svåra — och dem övar vi på.`, act:'final' },
+];
+const liveCells = () => hubMap.all().filter(c => !c.el.classList.contains('gone') && !c.el.classList.contains('flown'));
+function shrinkCount(n, pop){ $('hubLegend').innerHTML = `<span>Kvar i tabellen: <b${pop ? ' class="pop"' : ''}>${n}</b> rutor</span>`; }
+
+function enterHub(){ SH.on = false; SH.i = -1; renderHub(); }
+function renderHub(){
+  if (SH.on) return;
+  hubMap.paint(S.boxes);
+  const c = counts();
+  $('hubHead').innerHTML = countHTML(leftToLearn());
+  $('hubLegend').innerHTML = legendHTML(c);
+  $('icLearn').innerHTML = svg('bulb'); $('icPrac').innerHTML = svg('play'); $('icRec').innerHTML = svg(c.kan < 10 ? 'lock' : 'trophy');
+  ['chevLearn', 'chevPrac', 'chevRec'].forEach(id => $(id).innerHTML = svg('fwd', 'width:18px;height:18px;opacity:.55'));
+  $('subLearn').textContent = 'Välj en tabell och se hur du kan tänka';
+  const pv = buildPass(), nq = pv.filter(it => it.kind === 'q').length, hasNew = pv.some(it => it.kind === 'intro');
+  $('subPrac').textContent = `${nq} frågor · ${hasNew ? 'ett nytt tal' : 'inga nya tal just nu'}`;
+  $('subRec').textContent = c.kan < 10 ? 'Öppnar när du kan 10 tal'
+    : S.tempo === 'klocka' ? 'Bara tal du kan · en minut på klockan'
+    : S.record.streak > 0 ? `Bara tal du kan · rekord ${S.record.streak} i rad` : 'Bara tal du kan · sätt ett rekord';
+  lab(`${{ mira:'Mira', nyb:'Nybörjare', nara:'Nästan klar' }[S.preset]} · unika par: kan <b>${c.kan}</b> · övar <b>${c.ovar}</b> · ny <b>${c.ny}</b> (av 78)`);
+  refreshHub();
+}
+function refreshHub(){
+  $('hubEntries').style.display = SH.on ? 'none' : 'flex';
+  $('hubShrink').style.display = SH.on ? 'flex' : 'none';
+  $('shrinkBtn').innerHTML = SH.on ? `${svg('close')}Avsluta` : `${svg('shrink')}Så krymper tabellen`;
+  $('shrinkBtn').disabled = busy;
+  $('goRec').disabled = counts().kan < 10;
+  const last = SH.i >= SHRINK.length - 1;
+  btn($('shrinkNext'), last ? 'Tillbaka till kartan' : 'Nästa steg', last ? 'map' : 'next');
+  $('shrinkNext').disabled = busy;
+}
+function exitShrink(){ SH.on = false; SH.i = -1; renderHub(); }
+async function shrinkStep(k){
+  const st = SHRINK[k]; SH.i = k;
+  const tables = st.rm;
+  say('hubBubble', st.text(k === SHRINK.length - 1 ? liveCells().length : 0));
+  lab(`Så krymper tabellen · steg <b>${k + 1}</b> av ${SHRINK.length} · text först, rörelsen sen`);
+  refreshHub();
+  await wait(LEAD + 120);
+  if (st.act === 'neutral'){
+    hubMap.el.classList.add('neutral'); await wait(500); shrinkCount(144, true);
+  } else if (tables){
+    const hit = liveCells().filter(c => tables.includes(c.a) || tables.includes(c.b));
+    tables.forEach(t => { hubMap.rowH[t].classList.add('dim'); hubMap.colH[t].classList.add('dim'); });
+    hit.forEach(c => c.el.classList.add('mark'));
+    await wait(520);
+    hit.forEach(c => { c.el.classList.remove('mark'); c.el.classList.add('gone'); });
+    await wait(480);
+    shrinkCount(liveCells().length, true);
+  } else if (st.act === 'twins'){
+    const up = liveCells().filter(c => c.b > c.a);
+    up.forEach(c => {
+      const twin = hubMap.cells[c.b][c.a];
+      c.el.classList.add('fly');
+      c.el.style.transform = `translate(${(c.a - c.b) * 26}px,${(c.b - c.a) * 26}px)`;
+      c.el.classList.add('flown');
+      setTimeout(() => { twin.classList.remove('twin'); void twin.offsetWidth; twin.classList.add('twin'); }, 600);
+    });
+    await wait(1400);
+    shrinkCount(liveCells().length, true);
+  } else if (st.act === 'final'){
+    liveCells().forEach(c => c.el.classList.add('glow'));
+    await wait(850);
+    liveCells().forEach(c => c.el.classList.remove('glow'));
+  }
+}
+$('shrinkBtn').onclick = () => {
+  if (busy) return;
+  if (SH.on){ exitShrink(); return; }
+  SH.on = true;
+  $('hubHead').innerHTML = '<span class="mtitle">Så krymper tabellen</span>';   // "tal kvar att lära" är ett annat tal — visas inte samtidigt
+  run(() => shrinkStep(0));
+};
+$('shrinkNext').onclick = () => {
+  if (busy) return;
+  if (SH.i >= SHRINK.length - 1){ exitShrink(); return; }
+  run(() => shrinkStep(SH.i + 1));
+};
+$('goLearn').onclick = () => goto('learn');
+$('goPrac').onclick = () => goto('prac');
+$('goRec').onclick = () => { if (counts().kan >= 10) goto('rec'); };
+$('backBtn').onclick = () => { if (S.screen !== 'hub') goto('hub'); else if (SH.on) exitShrink(); };
+
+/* ═══════════════════════════════════════════════════════════
+   LÄR DIG STRATEGIN
+═══════════════════════════════════════════════════════════ */
+const LT = [2, 4, 5, 6, 7, 8, 9];
+const learnRect = makeRect($('learnHost'));
+let LW = null, LF = 0;                                 // LF: 0 ej vänd, 1 vänd (väntar på slutsats), 2 klar
+$('learnTabs').innerHTML = LT.map(t => `<button data-t="${t}">${t}:an</button>`).join('');
+$('learnTabs').querySelectorAll('button').forEach(b => b.onclick = () => { if (busy) return; S.learn.a = +b.dataset.t; startLearn(); });
+$('bPrev').innerHTML = svg('back'); $('bNext').innerHTML = svg('fwd');
+$('bPrev').onclick = () => { if (busy || S.learn.b <= 1) return; S.learn.b--; startLearn(); };
+$('bNext').onclick = () => { if (busy || S.learn.b >= 12) return; S.learn.b++; startLearn(); };
+function enterLearn(){ startLearn(); }
+function startLearn(){
+  const { a, b } = S.learn;
+  LW = makeWalker(a, b); LF = 0;
+  $('learnTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.t === a));
+  $('learnEq').innerHTML = `${a}<span class="x">×</span>${b}`;
+  learnRect.setup(a, b, LW.rows);
+  learnLab();
+  run(async () => { say('learnBubble', introText(a, b)); await wait(LEAD); await learnRect.reveal(); });
+}
+function learnLab(){
+  const W = LW, ways = W.ways;
+  const now = W.way ? ` · visar: <b>${wayLabel(W.way).toLowerCase()}</b>` : '';
+  lab(ways.length < 2 ? `${W.a}:an har en väg${now}` : S.strat === 'fast' ? `Strategi fast: appen väljer första vägen${now}` : `Strategi välj väg: barnet väljer mellan två vägar${now}`);
+}
+function refreshLearn(){
+  const W = LW, slot = $('learnSlot');
+  slot.classList.toggle('choosing', W.stage === 'choice');
+  const again = W.stage === 'done' && LF !== 1;
+  btn($('learnMain'), again ? 'Igen' : 'Nästa steg', again ? 'again' : 'next');
+  $('learnMain').disabled = busy;
+  btn($('learnFlip'), 'Vänd rektangeln', 'flip', false);
+  $('learnFlip').disabled = busy || !(W.stage === 'done' && LF === 0 && W.a !== W.b);
+  $('bPrev').disabled = S.learn.b <= 1; $('bNext').disabled = S.learn.b >= 12;
+  $('learnChoice').querySelectorAll('button').forEach(b => b.disabled = busy);
+}
+$('learnMain').onclick = () => {
+  if (busy) return;
+  const W = LW;
+  if (W.stage === 'done' && LF !== 1){ startLearn(); return; }
+  if (W.stage === 'done' && LF === 1){
+    run(async () => {
+      const { a, b } = W, ab = a * b;
+      say('learnBubble', `Nu är det ${b} rader med ${a} prickar i varje. Samma prickar, samma svar: ${b}${X}${a} = ${ab}.`);
+      await wait(LEAD);
+      await learnRect.apply([{ do:'result', html:`${a}${X}${b} = <span class="in">${b}${X}${a}</span> = ${ab}` }]);
+      LF = 2;
+    });
+    return;
+  }
+  if (needsChoice(W)){ showChoice('learn', W); return; }
+  run(async () => { await walkerStep(W, learnRect, t => say('learnBubble', t)); learnLab(); });
+};
+$('learnFlip').onclick = () => {
+  if (busy || LW.stage !== 'done' || LF !== 0 || LW.a === LW.b) return;
+  LF = 1;
+  run(async () => { say('learnBubble', 'Vi vänder rektangeln ett kvarts varv.'); await wait(LEAD); await learnRect.apply([{ do:'rotate' }]); });
+};
+/* Välj väg: två likvärdiga knappar, inga jämförelseord */
+function showChoice(where, W){
+  W.stage = 'choice';
+  const host = $(where + 'Choice'), bub = where + 'Bubble';
+  host.innerHTML = W.ways.map((w, k) => `<button class="btn btn-sec" data-k="${k}">${wayLabel(w)}</button>`).join('');
+  say(bub, 'Det finns två vägar. Vilken vill du ta?');
+  host.querySelectorAll('button').forEach(b => b.onclick = () => {
+    if (busy) return;
+    walkerChoose(W, +b.dataset.k);
+    const rect = where === 'learn' ? learnRect : pracRect;
+    run(async () => {
+      await walkerStep(W, rect, t => say(bub, t));
+      if (where === 'learn') learnLab(); else afterExplainStep();
+    });
+  });
+  refresh();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ÖVA — smart pass med inkrementell repetition
+═══════════════════════════════════════════════════════════ */
+const PRESETS = ['mira', 'nyb', 'nara'];
+function buildPass(){
+  const r = rng(1000 + S.passNo * 7 + PRESETS.indexOf(S.preset) * 101);
+  const byBox = k => PAIRS.filter(([a, b]) => box(a, b) === k);
+  const ny = byBox('ny').sort((x, y) => Math.max(...x) - Math.max(...y) || Math.min(...x) - Math.min(...y));
+  const nw = ny[0] || null;
+  const ov = shuffle(byBox('ovar'), r), kn = shuffle(byBox('kan'), r);
+  const known = ov.slice(0, 4).map(p => ({ p, src:'ovar' }));
+  while (known.length < 9 && kn.length) known.push({ p:kn.shift(), src:'kan' });
+  for (let i = 4; known.length < 9 && i < ov.length; i++) known.push({ p:ov[i], src:'ovar' });
+  const K = shuffle(known, r).map(({ p, src }) => { const [a, b] = r() < .5 ? p : [p[1], p[0]]; return { kind:'q', a, b, src }; });
+  [2, 5, 8].forEach(i => { if (K[i]) K[i].rev = true; });          // ungefär var fjärde fråga (bara övar/kan)
+  if (!nw) return K;
+  const N = { a:nw[0], b:nw[1], src:'ny', isNew:true };
+  // nytt tal: visas med rektangeln, frågas först efter tre andra frågor, och en gång till senare
+  return [K[0], { kind:'intro', ...N }, K[1], K[2], K[3], { kind:'q', ...N }, K[4], K[5], K[6], { kind:'q', ...N }, K[7], K[8]].filter(Boolean);
+}
+let P = null;
+const pracRect = makeRect($('pracHost'));
+const isRev = it => it && it.kind === 'q' && it.rev && S.answer === 'val' && S.rev === 'pa';
+
+function makeCtrl(host, onAnswer){
+  const C = { opts:null, typed:'', locked:true, pair:false };
+  function draw(){
+    if (S.answer === 'val'){
+      host.innerHTML = `<div class="opts">${[0,1,2,3].map(i => `<button class="opt${C.pair ? ' pair' : ''}" data-i="${i}">${C.opts ? C.opts[i].label : ''}</button>`).join('')}</div>`;
+      host.querySelectorAll('.opt').forEach(b => b.onclick = () => { if (C.locked || !C.opts || busy) return; onAnswer(C.opts[+b.dataset.i], b); });
+    } else {
+      host.innerHTML = `<div class="fdisp"><span class="ft"></span></div><div class="keys">${[1,2,3,4,5,6,7,8,9].map(d => `<button class="key" data-d="${d}">${d}</button>`).join('')}<button class="key" data-d="del" aria-label="Sudda">${svg('del')}</button><button class="key" data-d="0">0</button><button class="key kok" data-d="ok">OK</button></div>`;
+      host.querySelectorAll('.key').forEach(b => b.onclick = () => {
+        if (C.locked || !C.opts || busy) return;
+        const d = b.dataset.d;
+        if (d === 'del') C.typed = C.typed.slice(0, -1);
+        else if (d === 'ok'){ if (C.typed) onAnswer({ label:C.typed, v:+C.typed }, host.querySelector('.fdisp')); return; }
+        else if (C.typed.length < 3) C.typed += d;
+        showTyped();
+      });
+      showTyped();
+    }
+    host.classList.toggle('off', C.locked && !C.answered);
+  }
+  function showTyped(){ const t = host.querySelector('.ft'); if (t){ t.textContent = C.typed || '?'; t.classList.toggle('ph', !C.typed); } }
+  C.set = (opts, locked, pair = false) => { C.opts = opts; C.typed = ''; C.locked = locked; C.answered = false; C.pair = pair; draw(); };
+  C.done = () => { C.locked = true; C.answered = true; host.classList.remove('off'); };
+  C.mark = (label, cls) => {
+    if (S.answer === 'val') host.querySelectorAll('.opt').forEach(b => { if (b.textContent === String(label)) b.classList.add(cls); });
+    else { const d = host.querySelector('.fdisp'); d.classList.add(cls); }
+  };
+  return C;
+}
+const ctrlP = makeCtrl($('pracCtrl'), (o, el) => pracAnswer(o, el));
+
+function enterPrac(){
+  P = { items:buildPass(), i:0, st:[], res:{}, correct:0, answered:0, phase:'q', W:null, wrongLabel:null, reasks:{} };
+  P.before = { ...S.boxes };
+  goItem(0);
+}
+const curItem = () => P.items[P.i];
+function renderDots(){
+  const host = $('pracDots');
+  if (host.children.length !== P.items.length) host.innerHTML = P.items.map(() => '<span class="pd"></span>').join('');
+  [...host.children].forEach((d, i) => {
+    const it = P.items[i];
+    d.className = 'pd' + (it.kind === 'intro' ? ' intro' : '') + (it.reask ? ' re' : '') + (P.st[i] ? ' ' + P.st[i] : '') + (i === P.i ? ' cur' : '');
+  });
+  const qs = P.items.filter(it => it.kind === 'q'), done = P.items.slice(0, P.i + 1).filter(it => it.kind === 'q').length;
+  $('cap').textContent = `${Math.min(done, qs.length)} / ${qs.length}`;
+}
+function goItem(i){
+  P.i = i;
+  const it = curItem();
+  if (!it){ finishPass(); return; }
+  renderDots();
+  if (it.kind === 'intro') showIntro(it); else showQuestion(it);
+}
+function qHTML(it){
+  if (isRev(it)) return `<span class="rq">Vilket gångertal blir</span>${it.a * it.b}`;
+  return `${it.a}<span class="x">×</span>${it.b} = <span class="qa">?</span>`;
+}
+function showQuestion(it){
+  P.phase = 'q'; P.wrongLabel = null; P.pending = null;
+  $('pracOver').classList.remove('on');
+  const q = $('pracQ'); q.innerHTML = qHTML(it); q.classList.remove('swap'); void q.offsetWidth; q.classList.add('swap');
+  const tag = it.reask ? 'Tillbaka igen' : it.isNew ? 'Det nya talet' : '';
+  $('pracTag').textContent = tag; $('pracTag').classList.toggle('on', !!tag);
+  if (isRev(it)){
+    if (!it.ropts) it.ropts = reverseOptions(it.a, it.b, rng(it.a * 31 + it.b * 7 + S.passNo));
+    ctrlP.set(it.ropts, false, true);
+    say('pracBubble', it.reask ? 'Samma fråga igen. Nu vet du hur du kan tänka.' : 'Räkna efter — bara ett av gångertalen stämmer.');
+  } else {
+    ctrlP.set(options(it.a, it.b).map(v => ({ label:String(v), v })), false);
+    say('pracBubble', it.reask ? `${it.a}${X}${it.b} igen. Nu vet du hur du kan tänka.`
+      : it.isNew ? 'Det här är talet du nyss lärde dig.'
+      : S.answer === 'val' ? 'Vilket svar stämmer?' : 'Skriv svaret och tryck OK.');
+  }
+  pracLab();
+  refreshPrac();
+}
+function pracLab(){
+  const it = curItem(); if (!it) return;
+  const src = `<b>${BOXNAME[it.src]}</b>`;
+  if (it.kind === 'intro') lab(`Nytt tal ur lådan ${src} · frågas först efter tre andra frågor`);
+  else if (it.reask) lab(`Tillbaka efter fel · ur lådan ${src} · ${it.a}${X}${it.b} delar låda med ${it.b}${X}${it.a}`);
+  else if (isRev(it)) lab(`Omvänd fråga · ur lådan ${src} · alternativen delar en faktor, två har den först`);
+  else if (it.rev) lab(`Frågan kom ur lådan ${src} · omvänd fråga visas bara i val-läget med Omvända på`);
+  else lab(`Frågan kom ur lådan ${src}${it.isNew ? ' (nytt i passet)' : ''} · ${it.a}${X}${it.b} delar låda med ${it.b}${X}${it.a}`);
+}
+function pracLabChange(){
+  const it = curItem();
+  if (P && P.phase === 'q' && it && it.kind === 'q') showQuestion(it);
+}
+function refreshPrac(){
+  if (!P) return;
+  const it = curItem(), slot = $('pracSlot');
+  slot.classList.toggle('choosing', P.phase === 'explain' && P.W && P.W.stage === 'choice');
+  const m = $('pracMain');
+  const lastQ = P.i >= P.items.length - 1;
+  if (P.phase === 'q'){ btn(m, 'Nästa fråga', 'next'); m.disabled = true; }
+  else if (P.phase === 'answered'){ btn(m, lastQ ? 'Se kartan' : 'Nästa fråga', lastQ ? 'map' : 'next'); m.disabled = busy; }
+  else if (P.phase === 'explain'){ btn(m, 'Nästa steg', 'next'); m.disabled = busy; }
+  else if (P.phase === 'explained'){ btn(m, lastQ && !willReask() ? 'Se kartan' : 'Fortsätt', lastQ && !willReask() ? 'map' : 'next'); m.disabled = busy; }
+  $('pracChoice').querySelectorAll('button').forEach(b => b.disabled = busy);
+}
+function willReask(){ const it = curItem(); return it && it.kind === 'q' && P.wrongLabel !== null && reaskSpot() !== null; }
+function reaskSpot(){
+  const it = curItem(), k = KEY(it.a, it.b);
+  if ((P.reasks[k] || 0) >= 2) return null;
+  if (P.items.slice(P.i + 1).some(x => x.kind === 'q' && KEY(x.a, x.b) === k)) return null;    // kommer redan tillbaka
+  return Math.min(P.i + 4, P.items.length);
+}
+function openOverlay(it, head, tag){
+  $('pracOQ').innerHTML = head; $('pracOTag').textContent = tag;
+  $('pracOver').classList.add('on');
+  P.W = makeWalker(it.a, it.b);
+  pracRect.setup(it.a, it.b, P.W.rows);
+}
+function showIntro(it){
+  P.phase = 'explain'; P.wrongLabel = null;
+  ctrlP.set(null, true);
+  $('pracQ').innerHTML = ''; $('pracTag').classList.remove('on');
+  pracLab();
+  run(async () => {
+    say('pracBubble', `Ett nytt tal! ${introText(it.a, it.b)}`);
+    await wait(LEAD);
+    openOverlay(it, `Nytt: ${it.a}<span class="x">×</span>${it.b} = <span class="oa">?</span>`, 'Nytt tal');
+    await pracRect.reveal();
+  });
+}
+function pracAnswer(o, el){
+  const it = curItem(); if (P.phase !== 'q') return;
+  const rev = isRev(it), ok = rev ? o.ok : o.v === it.a * it.b, k = KEY(it.a, it.b);
+  P.answered++;
+  P.res[k] = P.res[k] || { asked:0, wrong:false };
+  P.res[k].asked++;
+  ctrlP.done();
+  if (ok){
+    P.correct++; P.st[P.i] = 'ok'; P.phase = 'answered';
+    ctrlP.mark(o.label, 'ok');
+    say('pracBubble', `Rätt! ${rev ? `${o.a}${X}${o.b}` : `${it.a}${X}${it.b}`} = ${it.a * it.b}.`);
+    renderDots(); refreshPrac();
+    return;
+  }
+  P.res[k].wrong = true; P.st[P.i] = 'bad'; P.wrongLabel = o.label;
+  ctrlP.mark(o.label, 'bad');
+  el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  P.phase = 'explain'; renderDots();
+  // förklaringen ritar det par barnet skulle hitta (i omvänd fråga: rätt alternativ som det står)
+  const ro = rev ? it.ropts.find(x => x.ok) : null;
+  const ea = rev ? ro.a : it.a, eb = rev ? ro.b : it.b;
+  const head = `${ea}<span class="x">×</span>${eb} = <span class="oa">?</span><s>${o.label}</s>`;
+  // Har den andra faktorn en enklare väg (t.ex. 8 × 2 → 2 × 8, dubbelt)? Då vänder vi — i ett eget steg.
+  const swap = wayRank(eb) < wayRank(ea);
+  run(async () => {
+    if (swap){
+      say('pracBubble', `Inte riktigt. ${ea}${X}${eb} är lika mycket som ${eb}${X}${ea}.`);
+      P.pending = { t:introText(eb, ea), a:eb, b:ea, head };
+      await wait(LEAD);
+      return;
+    }
+    say('pracBubble', `Inte riktigt. ${introText(ea, eb)}`);
+    await wait(LEAD + 150);
+    openOverlay({ a:ea, b:eb }, head, 'Så kan du tänka');
+    await pracRect.reveal();
+  });
+}
+function afterExplainStep(){
+  if (P.W.stage === 'done'){
+    const oa = $('pracOQ').querySelector('.oa');
+    oa.textContent = P.W.a * P.W.b; oa.classList.add('ok');
+    P.phase = 'explained';
+  }
+}
+$('pracMain').onclick = () => {
+  if (busy || !P) return;
+  if (P.phase === 'answered'){ goItem(P.i + 1); return; }
+  if (P.phase === 'explained'){
+    if (willReask()){
+      const it = curItem(), k = KEY(it.a, it.b);
+      P.reasks[k] = (P.reasks[k] || 0) + 1;
+      P.items.splice(reaskSpot(), 0, { ...it, reask:true, ropts:it.ropts });
+    }
+    goItem(P.i + 1); return;
+  }
+  if (P.phase === 'explain'){
+    if (P.pending){
+      const pd = P.pending; P.pending = null;
+      run(async () => {
+        say('pracBubble', pd.t);
+        await wait(LEAD);
+        openOverlay({ a:pd.a, b:pd.b }, pd.head, 'Så kan du tänka');
+        await pracRect.reveal();
+      });
+      return;
+    }
+    if (needsChoice(P.W)){ showChoice('prac', P.W); return; }
+    run(async () => { await walkerStep(P.W, pracRect, t => say('pracBubble', t)); afterExplainStep(); });
+  }
+};
+const UP = { ny:'ovar', ovar:'kan', kan:'kan' }, DOWN = { kan:'ovar', ovar:'ny', ny:'ny' };
+function finishPass(){
+  const before = P.before, after = { ...S.boxes }, moves = [];
+  for (const k in P.res){
+    const from = before[k], to = P.res[k].wrong ? DOWN[from] : UP[from];
+    if (to !== from){ after[k] = to; moves.push({ k, from, to }); }
+  }
+  P.moves = moves; P.after = after;
+  S.boxes = after; S.passNo++;                        // sparas direkt; slutbilden visar före → efter
+  goto('end');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SLUTBILDEN: kartan där de ändrade rutorna byter färg
+═══════════════════════════════════════════════════════════ */
+const endMap = makeMap($('endMap'));
+const E = { i:0 };
+function enterEnd(){
+  if (!P || !P.after){ goto('hub'); return; }
+  E.i = 0;
+  endMap.paint(P.before);
+  $('endHead').innerHTML = countHTML(leftToLearn(P.before));
+  $('endLegend').innerHTML = legendHTML(counts(P.before));
+  say('endBubble', `Passet är klart. Du svarade rätt på ${P.correct} av ${P.answered} frågor.`);
+  lab(`Regel: allt rätt i passet ⇒ en låda upp · något fel ⇒ en låda ner · ${P.moves.length} par byter låda`);
+  refreshEnd();
+}
+function endSummary(){
+  const g = { toKan:0, nyOvar:0, kanOvar:0, ovarNy:0 };
+  P.moves.forEach(m => { if (m.to === 'kan') g.toKan++; else if (m.from === 'ny') g.nyOvar++; else if (m.from === 'kan') g.kanOvar++; else g.ovarNy++; });
+  const parts = [];
+  if (g.toKan)   parts.push(`${talord(g.toKan)} blev ${g.toKan === 1 ? 'grönt' : 'gröna'}`);
+  if (g.nyOvar)  parts.push(`${talord(g.nyOvar)} blev ${g.nyOvar === 1 ? 'gult' : 'gula'}`);
+  if (g.kanOvar) parts.push(`${talord(g.kanOvar)} gick tillbaka till gult`);
+  if (g.ovarNy)  parts.push(`${talord(g.ovarNy)} gick tillbaka till vitt`);
+  if (!parts.length) return `Alla tal stannar i sin låda. Nu är det ${leftToLearn(P.after)} tal kvar att lära.`;
+  parts[0] = parts[0].replace(/^(\S+)/, '$1 tal');
+  const s = parts.length === 1 ? parts[0] : parts.slice(0, -1).join(', ') + ' och ' + parts[parts.length - 1];
+  return `${cap(s)}. Nu är det ${leftToLearn(P.after)} tal kvar att lära.`;
+}
+function refreshEnd(){
+  const m = $('endMain');
+  const lastStep = E.i >= 2 || (E.i >= 1 && !P.moves.length);
+  btn(m, lastStep ? 'Till kartan' : 'Nästa steg', lastStep ? 'map' : 'next');
+  m.disabled = busy;
+}
+$('endMain').onclick = () => {
+  if (busy) return;
+  if (E.i >= 2 || (E.i >= 1 && !P.moves.length)){ goto('hub'); return; }
+  if (E.i === 0 && P.moves.length){
+    E.i = 1;
+    run(async () => {
+      say('endBubble', 'Talen du övade flyttar till sin nya låda.');
+      await wait(LEAD + 120);
+      const cells = [];
+      P.moves.forEach(mv => { const [a, b] = mv.k.split('x').map(Number); cells.push([endMap.cells[a][b], mv.to]); if (a !== b) cells.push([endMap.cells[b][a], mv.to]); });
+      cells.forEach(([c, to]) => { const i = document.createElement('i'); i.className = 'nf'; i.style.background = `var(--${to})`; if (to === 'ny') i.style.boxShadow = 'inset 0 0 0 1px rgba(76,29,149,.16)'; c.append(i); });
+      await frame();
+      cells.forEach(([c]) => { c.querySelector('.nf').classList.add('on'); c.classList.add('chg'); });
+      await wait(900);
+      cells.forEach(([c, to]) => { c.className = 'mc ' + to; c.innerHTML = ''; });
+    });
+    return;
+  }
+  E.i = 2;
+  run(async () => {
+    say('endBubble', endSummary());
+    await wait(LEAD);
+    $('endHead').innerHTML = countHTML(leftToLearn(P.after), true);
+    $('endLegend').innerHTML = legendHTML(counts(P.after), true);
+    await wait(400);
+  });
+};
+
+/* ═══════════════════════════════════════════════════════════
+   REKORDRUNDA — bara lådan "kan", mot eget förra resultat
+═══════════════════════════════════════════════════════════ */
+let R = null, clockId = null;
+const ctrlR = makeCtrl($('recCtrl'), (o, el) => recAnswer(o, el));
+function stopClock(){ clearInterval(clockId); clockId = null; }
+function enterRec(){
+  stopClock();
+  const pool = PAIRS.filter(([a, b]) => box(a, b) === 'kan');
+  R = { phase:'intro', streak:0, correct:0, left:60, pool, queue:[], q:null, max:Math.min(30, pool.length),
+        prev:S.tempo === 'klocka' ? S.record.clock : S.record.streak, beat:false };
+  const q = $('recQ');
+  if (pool.length < 10){
+    q.innerHTML = `<span class="rbig">${svg('lock', 'width:56px;height:56px')}</span><span class="rsub">Öppnar när du kan 10 tal</span>`;
+    say('recBubble', `Du kan ${pool.length ? pool.length : 'inga'} tal än så länge. Öva lite till, så öppnas rundan.`);
+  } else if (S.tempo === 'rekord'){
+    q.innerHTML = R.prev > 0 ? `<span class="rbig">${R.prev}</span><span class="rsub">i rad är ditt rekord</span>` : `<span class="rbig">${svg('trophy', 'width:60px;height:60px')}</span><span class="rsub">Inget rekord än</span>`;
+    say('recBubble', 'Bara tal du kan. Hur många klarar du i rad?', 'Ingen klocka — bara du mot ditt rekord.');
+  } else {
+    q.innerHTML = `<span class="rbig">60</span><span class="rsub">sekunder</span>`;
+    say('recBubble', 'Bara tal du kan. Hur många hinner du på en minut?');
+  }
+  $('recTag').classList.remove('on');
+  ctrlR.set(null, true);
+  lab(`Bara lådan <b>kan</b> (${pool.length} par) · runda max ${R.max} · rundan flyttar inga tal mellan lådor (att ta ställning till)`);
+  recTrack(); refreshRec();
+}
+function recTrack(pop = false){
+  const bar = $('recBar'), fill = $('recFill'), flag = $('recFlag');
+  bar.classList.toggle('clock', S.tempo === 'klocka');
+  if (S.tempo === 'rekord'){
+    const L = Math.max(20, R.prev + 6);
+    $('recL').innerHTML = `<b${pop ? ' class="pop"' : ''}>${R.streak}</b> i rad`;
+    $('recR').innerHTML = R.prev > 0 ? `Rekord: <b>${R.prev}</b>` : 'Inget rekord än';
+    fill.style.transform = `scaleX(${Math.min(1, R.streak / L)})`;
+    flag.classList.toggle('off', R.prev <= 0);
+    flag.style.left = (R.prev / L * 100) + '%';
+    bar.classList.toggle('beat', R.streak > R.prev && R.prev > 0);
+  } else {
+    $('recL').innerHTML = `<b${pop ? ' class="pop"' : ''}>${R.correct}</b> rätt`;
+    $('recR').innerHTML = `<b>${R.left}</b> s kvar`;
+    fill.style.transform = `scaleX(${R.left / 60})`;
+    flag.classList.add('off'); bar.classList.remove('beat');
+  }
+}
+function refreshRec(){
+  const m = $('recMain');
+  m.className = 'btn ' + (R.phase === 'run' ? 'btn-sec' : 'btn-primary');
+  if (R.pool.length < 10){ btn(m, 'Till kartan', 'map'); m.disabled = false; return; }
+  if (R.phase === 'intro') btn(m, 'Starta', 'play');
+  else if (R.phase === 'run') btn(m, 'Avsluta rundan', 'close', false);
+  else if (R.phase === 'miss') btn(m, 'Se resultatet', 'next');
+  else btn(m, 'Kör igen', 'again');
+  m.disabled = busy;
+}
+function nextRecQ(){
+  if (!R.queue.length) R.queue = shuffle(R.pool);
+  const p = R.queue.shift(), [a, b] = Math.random() < .5 ? p : [p[1], p[0]];
+  R.q = { a, b };
+  const q = $('recQ'); q.innerHTML = `${a}<span class="x">×</span>${b} = <span class="qa">?</span>`; q.classList.remove('swap'); void q.offsetWidth; q.classList.add('swap');
+  ctrlR.set(options(a, b).map(v => ({ label:String(v), v })), false);
+}
+function recAnswer(o, el){
+  if (R.phase !== 'run') return;
+  const { a, b } = R.q, ab = a * b;
+  if (o.v === ab){
+    R.correct++; R.streak++;
+    const firstBeat = S.tempo === 'rekord' && R.prev > 0 && R.streak === R.prev + 1;
+    say('recBubble', S.tempo === 'klocka' ? `Rätt! ${R.correct} hittills.` : firstBeat ? `Nytt rekord! ${R.streak} i rad.` : `Rätt! ${R.streak} i rad.`);
+    recTrack(true);
+    if (S.tempo === 'rekord' && R.streak >= R.max){ endRec(); return; }
+    nextRecQ();
+    return;
+  }
+  if (S.tempo === 'klocka'){
+    say('recBubble', `Det var ${a}${X}${b} = ${ab}. Nästa!`);
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    nextRecQ(); return;
+  }
+  ctrlR.done(); ctrlR.mark(o.label, 'bad'); ctrlR.mark(String(ab), 'ok');
+  el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  R.phase = 'miss';
+  say('recBubble', `${a}${X}${b} = ${ab}. Rundan är slut.`);
+  refreshRec();
+}
+function endRec(){
+  stopClock();
+  R.phase = 'end'; ctrlR.set(null, true); $('recTag').classList.remove('on');
+  const n = S.tempo === 'klocka' ? R.correct : R.streak, prev = R.prev;
+  const q = $('recQ');
+  q.innerHTML = `<span class="rbig">${n}</span><span class="rsub">${S.tempo === 'klocka' ? 'rätt på en minut' : 'i rad'}</span>`;
+  q.classList.remove('swap'); void q.offsetWidth; q.classList.add('swap');
+  let t;
+  if (S.tempo === 'klocka'){ t = `${n} rätt på en minut.`; S.record.clock = n; }
+  else {
+    if (n >= R.max && n > 0) t = `Alla ${n} rätt i rad!`;
+    else if (n === 0) t = 'Inget i rad den här gången.';
+    else if (prev === 0) t = `${n} i rad. Det är ditt första rekord.`;
+    else if (n > prev) t = `Nytt rekord: ${n} i rad! Förra rekordet var ${prev}.`;
+    else if (n === prev) t = `${n} i rad — lika många som ditt rekord.`;
+    else t = `${n} i rad. Ditt rekord är ${prev}.`;
+    if (n > prev) S.record.streak = n;
+  }
+  say('recBubble', t);
+  refreshRec();
+}
+$('recMain').onclick = () => {
+  if (busy) return;
+  if (R.pool.length < 10){ goto('hub'); return; }
+  if (R.phase === 'intro'){
+    R.phase = 'run';
+    say('recBubble', S.tempo === 'klocka' ? 'Klockan går. Kör!' : 'Kör! Svara så många rätt i rad du kan.');
+    nextRecQ(); recTrack(); refreshRec();
+    if (S.tempo === 'klocka') clockId = setInterval(() => { R.left--; recTrack(); if (R.left <= 0) endRec(); }, 1000);
+    return;
+  }
+  if (R.phase === 'run'){ endRec(); return; }
+  if (R.phase === 'miss'){ endRec(); return; }
+  enterRec();
+};
+
+/* ═══════════════════════════════════════════════════════════
+   Exponerat för verifiering
+═══════════════════════════════════════════════════════════ */
+window.MOCK = {
+  S, KEY, PAIRS, get boxes(){ return { ...S.boxes }; }, box, counts, leftToLearn, presetBoxes, applyPreset,
+  goto, distractors, options, reverseOptions, strategyWays:waysFor, strategySteps, stepsFor, introText, wayLabel,
+  buildPass, get pass(){ return P; }, get learn(){ return { walker:LW, flip:LF, rect:learnRect.info() }; }, get rec(){ return R; },
+  SHRINK, get shrink(){ return SH; }, get busy(){ return busy; },
+};
+
+renderLab();
+applyPreset('mira');
+</script>
+</body>
+</html>
