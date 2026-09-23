@@ -263,7 +263,7 @@ const ClockLogic = (() => {
   const NEAR_LEAD = 'Nästan rätt! Bra försök, låt mig visa!';
   const FAR_LEAD = 'Bra försök! Låt mig visa.';
   const wrongLead = near => near ? NEAR_LEAD : FAR_LEAD;
-  const PRAISE = ['Precis!', 'Snyggt räknat!', 'Helt rätt!', 'Rätt!'];
+  const PRAISE = ['Snyggt!', 'Snyggt räknat!', 'Helt rätt!', 'Rätt!'];   // inte 'Precis!': den bekräftande förklaringen börjar med 'Precis som …'
   const praise = i => PRAISE[((i % PRAISE.length) + PRAISE.length) % PRAISE.length];
   const CONFIRM = 'Precis som du redan räknat ut: ';
 
