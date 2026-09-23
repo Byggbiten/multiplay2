@@ -43,8 +43,12 @@ describe('distractors – alla 144 tal', () => {
   });
 
   it('raka grannar går först: 4 × 6 får 20, 28 och 18', () => {
-    expect(distractors(4, 6).sort((x, y) => x - y)).toEqual([18, 20, 28]);
-    expect(options(4, 6)).toEqual([18, 20, 24, 28]);
+    // raka grannar: 18, 20, 28, 30 — tre av dem, med svaret 24 på båda sidor
+    for (let s = 1; s <= 20; s++){
+      const d = distractors(4, 6, seeded(s));
+      expect(d.every(v => [18, 20, 28, 30].includes(v)), String(d)).toBe(true);
+      expect([...options(4, 6, seeded(s))].sort((x, y) => x - y)).toContain(24);
+    }
   });
 });
 
@@ -815,5 +819,30 @@ describe('hemvyn (v60)', () => {
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(problems('Kvar blir 21 svåra rutor. Dem övar vi på.')).toEqual([]);
     expect(/\p{Extended_Pictographic}/u.test(hub + section('tstart') + section('learn'))).toBe(false);
+  });
+});
+
+/* Mira 23/9: rätt svar låg alltid nere till vänster i 3:ans tabell (sorterat + fast fördelning).
+   Platsen på skärmen och storleksplatsen får aldrig avslöja svaret. */
+describe('flerval: platsen avslöjar inte svaret', () => {
+  it('rätt svar hamnar på alla fyra platser, ingen plats över 40 % inom en tabell', () => {
+    const r = seeded(7);
+    for (let a = 2; a <= 12; a++){
+      const pos = [0, 0, 0, 0]; let n = 0;
+      for (let b = 1; b <= 12; b++) for (let k = 0; k < 60; k++){ pos[options(a, b, r).indexOf(a * b)]++; n++; }
+      pos.forEach((p, i) => expect(p / n, `${a}:an plats ${i}`).toBeGreaterThan(0.1));
+      pos.forEach((p, i) => expect(p / n, `${a}:an plats ${i}`).toBeLessThan(0.4));
+    }
+  });
+  it('storleksplatsen varierar: svaret är ibland näst minst, ibland näst störst', () => {
+    const r = seeded(11);
+    for (let a = 2; a <= 10; a++){
+      const rk = [0, 0, 0, 0]; let n = 0;
+      for (let b = 2; b <= 10; b++) for (let k = 0; k < 40; k++){
+        const o = [...options(a, b, r)].sort((x, y) => x - y); rk[o.indexOf(a * b)]++; n++;
+      }
+      expect(rk[1] / n, `${a}:an näst minst`).toBeGreaterThan(0.2);
+      expect(rk[2] / n, `${a}:an näst störst`).toBeGreaterThan(0.2);
+    }
   });
 });

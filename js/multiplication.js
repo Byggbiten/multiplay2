@@ -830,7 +830,7 @@ const MultGame = (() => {
      Omvänd fråga: fyra gångertal som delar en faktor; den andra faktorn är ett
      fönster med fyra tal i rad där rätt svar kan ligga var som helst.
   ═══════════════════════════════════════════════════════════ */
-  function distractors(a, b){
+  function distractors(a, b, r = Math.random){
     // Raka grannar (samma tabell, ett steg) går före snedgrannar: 21 och 25 till 4 × 6
     // är tabellprodukter men ser slumpade ut och kan uteslutas på udda/jämnt.
     const c = a * b, direct = [], diag = [];
@@ -840,27 +840,35 @@ const MultGame = (() => {
     const near = (x, y) => Math.abs(x - c) - Math.abs(y - c) || x - y;
     const cand = [...direct.sort(near), ...diag.sort(near)];
     for (let v = c + 1; cand.length < 3; v++) if (!cand.includes(v)) cand.push(v);   // bara 1 × 1 behöver detta
-    const pick = cand.slice(0, 3);
-    const below = pick.filter(v => v < c).length, above = 3 - below;
-    if (!below || !above){                       // båda sidor om svaret, annars räcker "välj minsta/största"
-      const other = cand.slice(3).find(v => below ? v > c : v < c);
-      if (other !== undefined) pick[2] = other;
+    // Båda sidor om svaret (annars räcker "välj minsta/största"), och fördelningen lottas:
+    // ibland två under och ett över, ibland tvärtom. En fast fördelning gav svaret samma
+    // storleksplats varje gång (3:ans tabell: alltid näst störst) — Mira tryckte bara där.
+    const lo = cand.filter(v => v < c), hi = cand.filter(v => v > c);
+    const splits = [1, 2].filter(k => lo.length >= k && hi.length >= 3 - k);
+    let pick;
+    if (splits.length){
+      const k = splits[Math.floor(r() * splits.length)];
+      pick = [...lo.slice(0, k), ...hi.slice(0, 3 - k)];
+    } else {
+      pick = cand.slice(0, 3);                   // bara små tal (1 × 1) saknar två sidor
     }
     // Udda × udda ger udda svar men bara jämna grannar: då pekar udda/jämnt ut svaret.
     // Byt in ett udda tal två steg bort i samma tabell (7 × 9: 7 × 7 = 49), svaren kvar på båda sidor.
     if (c % 2 && !pick.some(v => v % 2)){
-      const odds = [a * (b - 2), a * (b + 2), (a - 2) * b, (a + 2) * b]
-        .filter(v => v >= 1 && v !== c && v % 2 && !pick.includes(v)).sort(near);
-      swap: for (const o of odds){
-        for (const i of [...pick.keys()].sort((x, y) => Math.abs(pick[y] - c) - Math.abs(pick[x] - c))){
-          const t = pick.slice(); t[i] = o;
-          if (t.some(v => v < c) && t.some(v => v > c)){ pick.splice(0, 3, ...t); break swap; }
-        }
+      // Bytet sker på samma sida om svaret (lägre mot lägre, högre mot högre), så att den
+      // lottade fördelningen står sig — annars blev svaret näst störst vid varje udda svar.
+      const odds = shuffle([a * (b - 2), a * (b + 2), (a - 2) * b, (a + 2) * b]
+        .filter(v => v >= 1 && v !== c && v % 2 && !pick.includes(v)), r);
+      for (const o of odds){
+        const same = [...pick.keys()].filter(i => (pick[i] < c) === (o < c))
+          .sort((x, y) => Math.abs(pick[y] - c) - Math.abs(pick[x] - c));
+        if (same.length){ pick[same[0]] = o; break; }
       }
     }
     return pick;
   }
-  const options = (a, b) => [a * b, ...distractors(a, b)].sort((x, y) => x - y);
+  // Ordningen på skärmen lottas vid varje visning (även vid omfrågan), så platsen avslöjar aldrig svaret.
+  const options = (a, b, r = Math.random) => shuffle([a * b, ...distractors(a, b, r)], r);
 
   function reverseOptions(a, b, r = Math.random){
     const c = a * b;
