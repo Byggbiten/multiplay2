@@ -2067,6 +2067,9 @@ const MultGame = (() => {
     $('suSum').textContent = planSummary(pl);
     $('suGo').disabled = !pl.tables.length || !pl.rounds;
     btn($('suGo'), 'Starta passet', 'play', false);
+    // Varven styr alla snabbval: spara direkt vid varje ändring, inte först vid start,
+    // annars försvinner ändringen när barnet trycker Tillbaka.
+    if (pl.tables.length && pl.rounds) saveOvp({ tables:pl.tables, counts:SU.counts });
   }
   function refreshSetup(){}
   function startFromSetup(){
