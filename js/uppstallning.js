@@ -295,10 +295,6 @@ const UppstallningGame = (() => {
       background:linear-gradient(180deg,#fff,var(--tint));
       box-shadow:inset 0 0 0 2.5px color-mix(in srgb, var(--accent) 40%, transparent),
                  0 4px 14px rgba(93,63,158,0.08); }
-    .btn-klar[disabled]::after { content:''; position:absolute; inset:0; pointer-events:none;
-      background:linear-gradient(170deg,transparent 38%,
-        color-mix(in srgb, var(--accent) 17%, transparent) 50%, transparent 62%);
-      transform:translateY(-130%); animation:klar-sheen 2.6s var(--smooth) infinite; }
     .btn-klar:not([disabled]) { color:#fff;
       background:linear-gradient(135deg,var(--accent),var(--accent-light));
       box-shadow:0 8px 22px var(--glow); }
@@ -306,7 +302,6 @@ const UppstallningGame = (() => {
     .btn-klar.wake { animation:land-bounce-flex 0.42s ease-out both; }
     .btn-klar.done[disabled] { color:#fff; background:linear-gradient(135deg,#22c55e,#86efac);
       box-shadow:0 8px 22px rgba(34,197,94,0.35); }
-    .btn-klar.done[disabled]::after { display:none; }
 
     /* Fria lägets tips efter ett felaktigt Klar. Egen klass, inte hjälplägets
        inline-stil: rutan skjuter ner knappsatsen och kladden, så varje pixel
@@ -403,7 +398,6 @@ const UppstallningGame = (() => {
     @keyframes cell-hop {
       0% { transform:scale(0.86); } 55% { transform:scale(1.1); } 100% { transform:scale(1); }
     }
-    @keyframes klar-sheen { 0% { transform:translateY(-130%); } 55%,100% { transform:translateY(130%); } }
     @keyframes mem-strike-draw { to { stroke-dashoffset:0; } }
     @keyframes mem-digit-pulse {
       0%,100% { transform:rotate(-4deg) scale(1); }
