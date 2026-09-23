@@ -263,21 +263,17 @@ describe('fria lagets minnesspalt raknas i rattningen (B5)', () => {
   });
 });
 
-describe('fria lagets rester raknas i rattningen (division A4)', () => {
-  const { planRests, restMismatch } = MD.__test;
+/* Dennis 23/9: i Räkna själv skriver barnet inte resterna (de hålls i
+   kladden) — restMismatch och rest-platserna är rivna. planRests lever:
+   den styr vilka rester som landar på pappret vid rätt svar. */
+describe('fria lagets rester landar pa pappret vid ratt svar', () => {
+  const { planRests } = MD.__test;
   it('planRests: resten hamnar framfor NASTA siffra (g-1), aldrig efter sista', () => {
     expect(planRests(buildDivPlan(96, 4, 2))).toEqual({ 0: 1 });
     expect(planRests(buildDivPlan(738, 3, 3))).toEqual({ 1: 1, 0: 1 });
     expect(planRests(buildDivPlan(336, 6, 4))).toEqual({ 0: 3 });
     expect(planRests(buildDivPlan(612, 6, 4))).toEqual({ 0: 1 });
     expect(planRests(buildDivPlan(84, 4, 1))).toEqual({});
-  });
-  it('restMismatch: forsta avvikelsen vanster->hoger, saknade rester ar ok', () => {
-    expect(restMismatch({}, { 0: 1 })).toBeNull();
-    expect(restMismatch({ 0: 1 }, { 0: 1 })).toBeNull();
-    expect(restMismatch({ 0: 2 }, { 0: 1 })).toEqual({ g: 0, wrote: 2, want: 1 });
-    expect(restMismatch({ 1: 1, 0: 3 }, { 1: 1, 0: 1 })).toEqual({ g: 0, wrote: 3, want: 1 });
-    expect(restMismatch({ 1: 2 }, {})).toEqual({ g: 1, wrote: 2, want: null });
   });
 });
 

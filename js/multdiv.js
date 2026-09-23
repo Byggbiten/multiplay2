@@ -102,7 +102,6 @@ const MultDivGame = (() => {
      vänster från entalet, div vänster→höger från högsta positionen (C3). */
   let exFreeCells = [], exFreeCur = 0;   // rutan med fokus (mult: 0 = entalet; div: width-1 = vänstra)
   let exFreeFirstAttempt = true;
-  let exDivRests = {}, exDivRestG = null; // divisionens frivilliga rester i fria läget (A4)
 
   /* Kladd-canvas */
   let mdCanvas = null, mdCtx = null, mdDrawing = false, mdErasing = false;
@@ -324,6 +323,18 @@ const MultDivGame = (() => {
       background:rgba(34,197,94,0.14); animation:md-land 0.45s ease-out both; }
     #md-table-wrap.shake { animation:md-shake 0.3s ease; }
     .md-free-card { padding:6px; }
+    /* Kladden tar vid DIREKT efter knappsatsen i fria läget (porträtt), som
+       additionen (Dennis 23/9): inget glapp, kortkanterna möts, och ytan
+       som blir över går till ritytan. */
+    @media (orientation:portrait) {
+      #md-main.free-seam #md-left  { padding-bottom:0; }
+      #md-main.free-seam #md-right { padding-top:0; }
+      #md-main.free-seam #md-feedback:empty { display:none; }
+      #md-main.free-seam .md-free-card { border-bottom-left-radius:0;
+        border-bottom-right-radius:0; border-bottom:none; }
+      #md-main.free-seam .md-scratch { border-top-left-radius:0;
+        border-top-right-radius:0; padding-top:6px; }
+    }
     .md-free-pad { display:flex; gap:clamp(5px,1.4vw,9px); align-items:stretch; }
     /* Livlinan star over knappsatsen i fria laget, full bredd: den ar ett
        eget val barnet gor, inte en granne till siffrorna. */
@@ -343,6 +354,16 @@ const MultDivGame = (() => {
     .md-free-keys .md-nk:active { transform:scale(0.94); box-shadow:none;
       background:color-mix(in srgb, var(--accent) 12%, #fff); }
     .md-free-keys .k-zero { grid-column:2 / span 2; }
+    /* Divisionens fria läge (Dennis 23/9): fyra kolumner. Klar i fjärde
+       kolumnen, tre rader hög; livlinan under 9:an och Klar; 0:an en
+       vanlig tangent. Explicit placerade celler läggs ut först, så
+       siffrorna fyller kolumn 1–3 av sig själva. */
+    .md-free-keys.k4 { grid-template-columns:repeat(3,1fr) clamp(88px,24.5vw,118px); }
+    .md-free-keys.k4 .md-klar { flex:none; width:100%; height:100%; grid-column:4; grid-row:1 / span 3; }
+    .md-free-keys.k4 .md-free-ll { grid-column:3 / span 2; grid-row:4; width:100%; height:100%;
+      min-height:0; margin:0; border-radius:16px; font-size:clamp(0.85rem,2.6vw,1rem); gap:6px; }
+    .md-free-ll .ll-n { display:inline-grid; place-items:center; min-width:22px; height:22px;
+      padding:0 5px; border-radius:11px; background:rgba(255,255,255,0.3); font-size:0.85em; }
     .md-free-keys .k-erase { color:var(--deep); background:var(--tint); display:grid; place-items:center; }
     .md-free-keys .k-erase svg { width:26px; height:26px; fill:none; stroke:currentColor;
       stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
@@ -430,13 +451,8 @@ const MultDivGame = (() => {
       background:rgba(255,255,255,0.97); cursor:pointer;
       box-shadow:0 2px 8px rgba(220,38,38,0.28); }
     /* C1: slotten är 16×19 px — träffytan minst 44×44, centrerad */
-    .md-cell .md-divslot::after, .md-cell .md-restslot::after { content:''; position:absolute;
+    .md-cell .md-divslot::after { content:''; position:absolute;
       left:50%; top:50%; transform:translate(-50%,-50%); width:max(44px,140%); height:max(44px,140%); }
-    /* Fria lägets rest-plats (A4): statisk streckad ruta där resten kan
-       skrivas; tappbar via cellen (.md-rtap). Döljs när en rest står där. */
-    .md-cell.md-rtap { cursor:pointer; }
-    .md-cell .md-restslot { position:absolute; top:-13px; left:-13px; z-index:4;
-      border-color:rgba(220,38,38,0.35); background:rgba(255,255,255,0.92); }
 
     /* Avsluta-bekraftelsen ar ett OVERLAGG: i floden tog den 54 px fran
        kladden (128 px mot golvet 150). Nu ror den ingen layout alls. */
@@ -1953,13 +1969,12 @@ const MultDivGame = (() => {
       ? g => ` onclick="event.stopPropagation();MultDivGame.divDigitTap(${g})"` : () => '';
     /* Fria läget (A4): varje täljarsiffra utom den första har en tappbar
        rest-plats uppe till vänster — där demon ritar resten. */
-    const restTap = freeMode ? g => g < L - 1 : () => false;
 
     const numCols = gs.map((g, i) => `
       <div class="md-fraccol">
         <span class="md-flbl" style="color:${cv(g)}">${LBL[g]}</span>
-        <div class="md-cell${tap(g) ? ' md-ntap' : ''}${restTap(g) ? ' md-rtap' : ''}" id="md-n-${g}" style="border-color:${cv(g)}"${tap(g)}${restTap(g) ? ` onclick="event.stopPropagation();MultDivGame.exFreeRestTap(${g})"` : ''}>
-          <span style="color:${cv(g)}">${nd[i]}</span>${restTap(g) ? '<span class="mem-slot md-restslot" aria-label="Plats för rest"></span>' : ''}</div>
+        <div class="md-cell${tap(g) ? ' md-ntap' : ''}" id="md-n-${g}" style="border-color:${cv(g)}"${tap(g)}>
+          <span style="color:${cv(g)}">${nd[i]}</span></div>
       </div>`).join('');
 
     /* Kvotrutorna genereras från KVOTENS bredd (C3): inget spökhål efter
@@ -2207,7 +2222,7 @@ const MultDivGame = (() => {
         <span class="header-title">${modeTitle()}</span>
         <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
       </div>
-      <div id="md-main">
+      <div id="md-main"${free ? ' class="free-seam"' : ''}>
         <div id="md-left">
           <div id="md-table-wrap" class="${plan.kind === 'twostep' && !free ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
           <div id="md-bubble"${plan.kind === 'division' ? ' class="md-bub-tall"' : ''}></div>
@@ -2571,7 +2586,6 @@ const MultDivGame = (() => {
       }
     } else if (memColMode === 'free') {
       if (exInputLocked) return;
-      if (plan.kind === 'division') { exFreeRestPick(null); return; } // ✕/sudda i rest-väljaren
       memPickerOpen = !memPickerOpen;
       renderMemPicker();
       App.Sound.play('click');
@@ -2615,7 +2629,7 @@ const MultDivGame = (() => {
     return `<div class="md-mempick">
       <span class="md-mempick-lbl">${plan.kind === 'division' ? 'Resten:' : 'Minnessiffra:'}</span>
       ${[1,2,3,4,5,6,7,8,9].map(d => `<button class="md-nk md-pk" onclick="MultDivGame.memPick(${d})">${d}</button>`).join('')}
-      ${cancel ? `<button class="md-nk md-pk md-pk-x" aria-label="${plan.kind === 'division' && exDivRestG !== null && exDivRests[exDivRestG] ? 'Sudda resten' : 'Stäng'}" onclick="MultDivGame.memTapSlot()">${plan.kind === 'division' && exDivRestG !== null && exDivRests[exDivRestG] ? ICON_ERASE : '✕'}</button>` : ''}
+      ${cancel ? `<button class="md-nk md-pk md-pk-x" aria-label="Stäng" onclick="MultDivGame.memTapSlot()">✕</button>` : ''}
     </div>`;
   }
 
@@ -2656,7 +2670,6 @@ const MultDivGame = (() => {
       });
       return;
     }
-    if (plan.kind === 'division') { exFreeRestPick(d); return; }
     memPickerOpen = false;
     renderMemPicker();
     mdMemList.push({ val: d, used: false });
@@ -3046,9 +3059,11 @@ const MultDivGame = (() => {
        rest-rutorna mellan siffrorna sag ut som dekoration. EN rad: vad
        som ska skrivas, och att rest-rutorna finns om man vill anvanda
        dem. Inte en forklaring — en startpunkt. */
+    /* Dennis 23/9: i divisionens Räkna själv tas rutan bort — barnen ska
+       räkna i kladden, och varje pixel där är kladdyta. Tom bubbla döljs
+       (#md-bubble:empty); livlinan skriver fortfarande i den. */
     helpBubble(plan.kind === 'division'
-      ? `Skriv kvoten i rutorna efter <strong>=</strong>, en siffra i taget. ` +
-        `<span class="md-qexpr">Rest? Tryck på den lilla rutan framför nästa siffra.</span>`
+      ? ''
       : `Skriv svaret i rutorna, en siffra i taget. ` +
         `<span class="md-qexpr">Minnessiffra? Tryck i spalten till höger.</span>`);
     renderFreePad();
@@ -3060,8 +3075,25 @@ const MultDivGame = (() => {
     if (!ui) return;
     /* Ingen rubrik över knappsatsen: rutorna, fokusringen och markören
        säger redan vad som ska göras (Dennis 21/9, additionen). */
+    if (isDivFree()) {
+      /* Dennis 23/9: livlinan mindre, under 9:an och Klar; Klar tre rader
+         hög; 0:an lika stor som de andra. Ett grid i fyra kolumner. */
+      ui.innerHTML = `<div class="md-panel md-free-card">
+        <div class="md-free-keys k4">
+          ${[1,2,3,4,5,6,7,8,9].map(k =>
+            `<button class="md-nk" onclick="MultDivGame.exFreePress('${k}')">${k}</button>`).join('')}
+          <button class="md-nk k-erase" aria-label="Sudda sista siffran"
+            onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
+          <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
+          ${freeLifelineBtnHTML()}
+          <button class="md-klar" id="md-free-submit" disabled
+            onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
+        </div>
+      </div>`;
+      exFreeUpdateSubmit();
+      return;
+    }
     ui.innerHTML = `<div class="md-panel md-free-card">
-      ${isDivFree() ? freeLifelineBtnHTML() : ''}
       <div class="md-free-pad">
         <div class="md-free-keys">
           ${[1,2,3,4,5,6,7,8,9].map(k =>
@@ -3087,7 +3119,7 @@ const MultDivGame = (() => {
     return `<button class="md-btn md-free-ll" id="md-free-lifeline"
       ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()"
       style="background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'}">` +
-      `${ICON_BUOY} <span>Livlina (${lifelines} kvar)</span></button>`;
+      `${ICON_BUOY}<span>Livlina</span><span class="ll-n">${lifelines}</span></button>`;
   }
 
   /* Vilken kvotsiffra står fokusringen på? Den siffrans arbetstal är det
@@ -3112,7 +3144,6 @@ const MultDivGame = (() => {
   function exFreeInit() {
     exFreeCells = Array(plan.width).fill(null);
     exFreeCur = isDivFree() ? plan.width - 1 : 0;   // div: börja längst till vänster
-    exDivRests = {}; exDivRestG = null;
     exFreePaintCells();
     requestAnimationFrame(() => exFreePlaceRing(false));
   }
@@ -3217,36 +3248,6 @@ const MultDivGame = (() => {
     exFreeUpdateSubmit();
   }
 
-  /* ── Divisionens rest-platser i fria läget (A4) ──
-     Tap på platsen uppe till vänster om en täljarsiffra öppnar väljaren
-     1–9; siffran skrivs som röd rest-prefix (samma .md-divrem som demon
-     ritar). Frivilligt — men räknas i rättningen. */
-  function exFreeRestTap(g) {
-    if (exInputLocked || helpMode || !isDivFree()) return;
-    exDivRestG = g;
-    memPickerOpen = true;
-    renderMemPicker();
-    App.Sound.play('click');
-  }
-
-  function exFreeRestPick(d) {
-    const g = exDivRestG;
-    memPickerOpen = false; exDivRestG = null;
-    renderMemPicker();
-    if (g === null) return;
-    const cell = document.getElementById(`md-n-${g}`);
-    if (d === null) {
-      delete exDivRests[g];
-      const old = cell && cell.querySelector('.md-divrem'); if (old) old.remove();
-      const slot = cell && cell.querySelector('.md-restslot'); if (slot) slot.style.display = '';
-    } else {
-      exDivRests[g] = d;
-      divWriteRem(g, d);
-      const slot = cell && cell.querySelector('.md-restslot'); if (slot) slot.style.display = 'none';
-    }
-    App.Sound.play('click');
-  }
-
   /* Minneskedjan enligt planen — de minnen som FAKTISKT uppstår, i den
      ordning barnet möter dem (p1 → p2 → additionen). */
   function planCarries(pl) {
@@ -3272,17 +3273,6 @@ const MultDivGame = (() => {
     return out;
   }
 
-  /* Barnets rester jämförs per plats (vänster→höger): första avvikelsen
-     pekas ut. Saknade rester är ok (frivilligt). Ren funktion. */
-  function restMismatch(written, expected) {
-    const gs = Object.keys(written).map(Number).sort((a, b) => b - a);
-    for (const g of gs) {
-      if (!(g in expected)) return { g, wrote: written[g], want: null };
-      if (written[g] !== expected[g]) return { g, wrote: written[g], want: expected[g] };
-    }
-    return null;
-  }
-
   function freeTip(msg) {
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = `<div class="md-free-tip">${msg}</div>`;
@@ -3294,20 +3284,14 @@ const MultDivGame = (() => {
     const val = exFreeValue();
     const div = isDivFree();
     const nd = div ? digitsOf(numA) : null;
-    const mm = div ? restMismatch(exDivRests, planRests(plan))
+    const mm = div ? null
                    : memMismatch(mdMemList.map(e => e.val), planCarries(plan));
-    const noteOk = () => div
-      ? (mm.want === null
-        ? `Rätt svar! Resten <strong>${mm.wrote}</strong> framför ${nd[mm.g]}:an behövdes inte 👆`
-        : `Rätt svar! Resten framför ${nd[mm.g]}:an skulle vara <strong>${mm.want}</strong>, inte ${mm.wrote} 👆`)
-      : (mm.want === null
+    // Barnets anteckningar rättas bara i multiplikationen (minnesspalten);
+    // i divisionen håller barnet resterna i kladden (Dennis 23/9).
+    const noteOk = () => (mm.want === null
         ? `Rätt svar! Minnessiffran <strong>${mm.wrote}</strong> behövdes inte här 👆`
         : `Rätt svar! Minnessiffran <strong>${mm.wrote}</strong> skulle vara <strong>${mm.want}</strong> 👆`);
-    const noteWrong = () => div
-      ? (mm.want === null
-        ? `Kolla resten <strong>${mm.wrote}</strong> framför ${nd[mm.g]}:an — den behövs inte 👆`
-        : `Kolla resten framför ${nd[mm.g]}:an — den stämmer inte 👆`)
-      : (mm.want === null
+    const noteWrong = () => (mm.want === null
         ? `Kolla minnessiffran <strong>${mm.wrote}</strong> — den behövs inte här 👆`
         : `Kolla minnessiffran <strong>${mm.wrote}</strong> — den stämmer inte 👆`);
     if (val === plan.answer) {
@@ -3322,7 +3306,16 @@ const MultDivGame = (() => {
       smallBurst();
       // Svaret stämmer — en anteckning som inte stämde nämns milt, utan straff
       if (mm) freeTip(noteOk());
-      setTimeout(() => finishTask(true), mm ? 1600 : 900);
+      /* Dennis 23/9: barnet skrev inte resterna — de fanns i kladden. Vid
+         rätt svar landar de på pappret, vänster→höger, så uträkningen står
+         komplett innan nästa tal. */
+      let extra = 0;
+      if (div) {
+        const rests = Object.entries(planRests(plan)).map(([g, v]) => [+g, v]).sort((a, b) => b[0] - a[0]);
+        rests.forEach(([g, v], i) => setTimeout(() => { divWriteRem(g, v); App.Sound.play('click'); }, 350 + i * 380));
+        extra = rests.length ? 350 + rests.length * 380 + 500 : 0;
+      }
+      setTimeout(() => finishTask(true), (mm ? 1600 : 900) + extra);
     } else {
       exFreeFirstAttempt = false;             // fel förbrukar första försöket
       App.Sound.play('wrong');
@@ -3585,7 +3578,7 @@ const MultDivGame = (() => {
     memTap, memTapSlot, memPick,           // minnesspalten (v30)
     divTapSlot,                            // divisionens PLACERA-fas (v32)
     divDigitTap,                           // divisionens STRYK-fas (v36)
-    exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeRestTap,
+    exFreePress, exFreeErase, exFreeSubmit, exFreeFocus,
     avslutaOvning, avslutaAngra,           // bekraftelse nar en runda ar pabörjad
     useFreeLifeline,                       // livlinan i fria laget (22/9)
     mdToggleEraser, mdClearCanvas,
@@ -3595,7 +3588,7 @@ const MultDivGame = (() => {
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
     __test: { planMultSteps, planDivSteps, divStepText, planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
-              tabellradHTML, planCarries, memMismatch, planRests, restMismatch,
+              tabellradHTML, planCarries, memMismatch, planRests,
               /* headless-verifiering (aldrig anropade av appen) */
               forceNext: (a, b) => { forcedNext = { a, b }; },
               peek: () => ({ item: helpItem(), locked: exInputLocked, demoStep, steps: demoSteps.length,
