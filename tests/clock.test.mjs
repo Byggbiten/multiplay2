@@ -2,7 +2,9 @@
    Ordtexten för alla 144 femminuterstider, stegen och deras tider, de riktade
    felalternativen och deras platser, visarnas koppling och dragningen, medaljerna
    och lådorna per steg (MP.spaced), Hur lång tid, Capy-händelserna och ett
-   textsvep över lektions- och förklaringstexterna. */
+   textsvep över lektions- och förklaringstexterna.
+   v64: lektionerna som data (försök, link-betoningen, räknesummorna, tidsgränsen per
+   steg), nästan-fel-regeln, den digitala omräkningen minus 12 och den bekräftande förklaringen. */
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
@@ -113,14 +115,22 @@ describe('Hur lång tid: skillnaden', () => {
     expect(CL.durWords(125)).toBe('2 timmar och 5 minuter');
     expect(CL.durWords(1)).toBe('1 minut');
   });
-  it('förklaringen: först hela timmar, sedan minuterna, summan sist', () => {
+  it('förklaringen: först hela timmar, sedan minuterna räknade i femsteg, summan sist', () => {
     const e = CL.explainSteps(CL.taskByKey('tid', '5:15-6:45'));
     expect(e).toHaveLength(4);
+    expect(e[0].acts.find(a => a.do === 'time').t).toBe(CL.toTot(5, 15));
     expect(e[1].text).toMatch(/^Först hela timmar/);
-    expect(e[1].go).toBe(CL.toTot(6, 15));
+    expect(e[1].acts.find(a => a.do === 'go').t).toBe(CL.toTot(6, 15));
     expect(e[2].text).toMatch(/^Sedan minuterna/);
-    expect(e[2].go).toBe(CL.toTot(6, 45));
+    expect(e[2].acts.find(a => a.do === 'count')).toMatchObject({ from:15, to:45, c:'gone', move:true });   // 6:15 → 6:45
     expect(e[3].text).toBe('Det tar 1 timme och 30 minuter.');
+    // räkningen landar alltid på sluttiden, också förbi tolv (12:40 → 1:25)
+    for (const t of CL.stepById('tid').tasks) {
+      const ex = CL.explainSteps(t), go = ex[1].acts.find(a => a.do === 'go'), c = ex[2].acts.find(a => a.do === 'count');
+      const afterHours = go ? go.t : CL.toTot(t.h1, t.m1);
+      const end = c ? afterHours - CL.mOf(afterHours) + c.to : afterHours;
+      expect(CL.sameOnDial(end, CL.toTot(t.h2, t.m2)), t.key).toBe(true);
+    }
   });
 });
 
@@ -404,6 +414,7 @@ function problems(text) {
   }
   return out;
 }
+const FORMS = 105;                     // antalet genomlästa textformer (v64: lästa för hand 23/9)
 const form = t => t.replace(/\d{1,2}:\d{2}/g, 'TT').replace(/\d+/g, '#')
   .replace(/(?<!\p{L})(ett|två|tre|fyra|fem|sex|sju|åtta|nio|tio|elva|tolv|tjugo|kvart)(?!\p{L})/giu, 'W');
 
@@ -425,50 +436,239 @@ describe('textsvepet – lektioner och förklaringar', () => {
     const texts = CL.allTexts();
     for (const id of Object.keys(CL.LESSONS)) CL.LESSONS[id].forEach(s => expect(texts).toContain(s.text));
     expect(Object.keys(CL.LESSONS).sort()).toEqual(CL.STEPS.map(s => s.id).sort());
-    for (const t of ALL_TASKS) for (const mode of ['read', 'set']) CL.explainSteps(t, mode).forEach(s => expect(texts).toContain(s.text));
-    expect(texts.length).toBe(Object.values(CL.LESSONS).reduce((n, l) => n + l.length, 0) + ALL_TASKS.length * 2 * 4);
+    for (const t of ALL_TASKS) for (const mode of ['read', 'set']) for (const confirm of [false, true])
+      CL.explainSteps(t, mode, { confirm }).forEach(s => expect(texts).toContain(s.text));
+    [...CL.PRAISE, CL.NEAR_LEAD, CL.FAR_LEAD, CL.RETRY_OK, CL.LESSON_END].forEach(x => expect(texts).toContain(x));
+    const expl = ALL_TASKS.reduce((n, t) => n + ['read', 'set'].reduce((k, mode) => k + CL.explainSteps(t, mode).length + CL.explainSteps(t, mode, { confirm:true }).length, 0), 0);
+    expect(texts.length).toBe(Object.values(CL.LESSONS).reduce((n, l) => n + l.length, 0) + expl + CL.PRAISE.length + 4);
+    // försökens uppmaningar sveps för sig (de får vara frågor)
+    for (const id in CL.LESSON_TRIES) for (const tr of CL.lessonTries(id)) expect(CL.promptTexts()).toContain(CL.tryPrompt(CL.taskByKey(id, tr.key), tr.type));
   });
   it('ingen text bryter mot språkreglerna', () => {
     const bad = [...new Set(CL.allTexts().flatMap(problems))];
     expect(bad).toEqual([]);
   });
-  it('antalet textformer är genomläst: 98 (växer det, läs de nya formerna och höj talet)', () => {
-    expect(new Set(CL.allTexts().map(form)).size).toBe(98);
+  it('försökens uppmaningar följer språkreglerna (frågor är tillåtna där)', () => {
+    const bad = [...new Set(CL.promptTexts().flatMap(problems))].filter(x => !x.startsWith('fråga:'));
+    expect(bad).toEqual([]);
+    CL.promptTexts().filter(x => !x.startsWith('Nu du igen')).forEach(x => expect(x.startsWith(CL.TRY_HEAD)).toBe(true));
   });
-  it('förklaringen vid fel: fyra klickade steg, minutvisaren först, timvisaren sedan, slutsatsen sist', () => {
+  it('meta: svepet fäller de nya fällorna – samma tal som minuter och som timord', () => {
+    expect(problems('Det är 10 minuter kvar innan tio: tio i tio.')).toHaveLength(1);
+    expect(problems('Klockan har gått över fem med 5 minuter: fem över fem.')).toHaveLength(1);
+    expect(problems('20 − 12 = 8, alltså åtta på kvällen.')).toHaveLength(1);
+    expect(problems('Ett dygn har 24 timmar: 12 + 12 = 24.')).toHaveLength(1);
+    expect(problems('Varför minus 12?')).toHaveLength(1);
+    expect(problems('Det är 10 minuter kvar innan nästa hela timme: tio i tio.')).toEqual([]);
+    expect(problems('Du lägger dig ungefär klockan 20:00: åtta på kvällen.')).toEqual([]);
+    expect(problems('Klockan är 13:00. 13 − 12 = 1.')).toEqual([]);
+  });
+  it('antalet textformer är genomläst: FORMS (växer det, läs de nya formerna och höj talet)', () => {
+    expect(new Set(CL.allTexts().map(form)).size).toBe(FORMS);
+  });
+  it('förklaringen vid fel: minutvisaren först, räkningen, namnet med betoningen, slutsatsen sist', () => {
+    const hls = st => st.acts.filter(a => a.do === 'hl').map(a => a.w);
     for (const t of ALL_TASKS.filter(x => x.kind === 'time')) {
       const e = CL.explainSteps(t, 'read');
-      expect(e.map(x => x.hl), t.key).toEqual(['m', 'm', 'h', 'both']);
-      expect(e[3].text).toBe(`Klockan är ${CL.answerText(t)}.`);
-      expect(e[3].done).toBe(true);
+      expect(e.length, t.key).toBe(t.m === 25 || t.m === 35 ? 5 : 4);
+      expect(hls(e[0]), t.key).toEqual(['m']);
+      expect(e[e.length - 1]).toMatchObject({ text:`Klockan är ${CL.answerText(t)}.`, done:true });
+      // räkningen står i andra steget och landar på talet i tidens namn
+      const c = e[1].acts.find(a => a.do === 'count');
+      if (t.m === 0) expect(c).toBeUndefined(); else expect(c.to - c.from, t.key).toBe(CL.countTotal(t.m));
+      // orden visas först i namnsteget, inte före (slutsatsen sist)
+      expect(e[0].acts.find(a => a.do === 'trio')).toMatchObject({ words:false });
+      expect(e[2].acts.some(a => a.do === 'words'), t.key).toBe(true);
     }
-    expect(CL.explainSteps(CL.taskByKey('runt', '2:35'), 'read').map(x => x.text)).toEqual([
-      'Titta på den röda visaren. Den pekar på 7. Det är 35 minuter.',
-      '35 minuter är 5 minuter efter halv. Det heter fem över halv.',
-      'Den blå visaren har gått lite förbi mitten mellan 2 och 3. Halv betyder halvvägs till nästa timme: tre.',
-      'Klockan är fem över halv tre.',
+    // Dennis exempel: tjugo i åtta – 20 minuter kvar innan åtta, i och innan betonas ihop
+    const tia = CL.explainSteps({ kind:'time', h:7, m:40 }, 'read');
+    expect(tia.map(x => x.text)).toEqual([
+      'Titta på den röda visaren. Den pekar på 8.',
+      'Vi räknar minuterna som är kvar till 12.',
+      'Det är 20 minuter kvar innan åtta: tjugo i åtta.',
+      'Klockan är tjugo i åtta.',
     ]);
-    // Dennis exempel: fem i halv tre
-    const fih = CL.explainSteps({ kind:'time', h:2, m:25 }, 'read').map(x => x.text);
-    expect(fih[0]).toBe('Titta på den röda visaren. Den pekar på 5. Det är 25 minuter.');
-    expect(fih[1]).toMatch(/Det heter fem i halv\.$/);
-    expect(fih[2]).toMatch(/Halv betyder halvvägs till nästa timme: tre\.$/);
-    expect(fih[3]).toBe('Klockan är fem i halv tre.');
+    expect(tia[1].acts.find(a => a.do === 'count')).toMatchObject({ from:40, to:60, c:'left' });
+    expect(tia[2].link).toEqual(['i', 'innan']);
+    // fem i halv tre och fem över halv tre: räknat från halv, samma timme som vid halv
+    const fih = CL.explainSteps({ kind:'time', h:2, m:25 }, 'read');
+    expect(fih[1].acts.find(a => a.do === 'count')).toMatchObject({ from:25, to:30, c:'left' });
+    expect(fih[2]).toMatchObject({ text:'Det är 5 minuter kvar innan halv: fem i halv tre.', link:['i', 'innan'] });
+    expect(fih[3].text).toMatch(/Timmen är samma som vid halv tre\.$/);
+    const foh = CL.explainSteps({ kind:'time', h:2, m:35 }, 'read');
+    expect(foh[2]).toMatchObject({ text:'5 minuter har gått över halv: fem över halv tre.', link:['över', 'gått över'] });
     // ställfrågan: klockan ställs rätt i första steget
-    expect(CL.explainSteps({ kind:'time', h:2, m:25 }, 'set')[0]).toMatchObject({ go:true, text:'Den röda visaren ska peka på 5. Det är 25 minuter.' });
-    // digital: kopplingen till urtavlan och orden
+    expect(CL.explainSteps({ kind:'time', h:2, m:25 }, 'set')[0].acts.find(a => a.do === 'go')).toMatchObject({ t:CL.toTot(2, 25), near:true });
+    // digital: minus 12 i första steget, dygnsdelen i slutsatsen
     const dg = CL.explainSteps(CL.taskByKey('digital', '14:30'));
-    expect(dg[0]).toMatchObject({ show:'analog', text:'Titta på timmen: 14. Efter 12 börjar urtavlan om, så 14 är 2 på eftermiddagen.' });
-    expect(dg[3].text).toBe('14:30 är halv tre på eftermiddagen.');
+    expect(dg[0].text).toBe('Timmen är 14. Efter 12 tar vi minus 12.');
+    expect(dg[0].acts.map(a => a.do)).toEqual(expect.arrayContaining(['showAnalog', 'minus12']));
+    expect(dg[dg.length - 1].text).toBe('14:30 är halv tre på eftermiddagen.');
+    expect(CL.explainSteps(CL.taskByKey('digital', '08:35'))[0].text).toBe('Timmen är 08. Före 12 behövs inget minus.');
   });
-  it('halvlektionen: halv tre betyder halvvägs till tre, med visaren som glider och timmens första halva färgad', () => {
+  it('den bekräftande förklaringen vid rätt: "Precis som du redan räknat ut", räkningen i första steget', () => {
+    const c = CL.explainSteps({ kind:'time', h:7, m:40 }, 'read', { confirm:true });
+    expect(c.map(x => x.text)).toEqual([
+      'Precis som du redan räknat ut: den röda visaren pekar på 8.',
+      'Det är 20 minuter kvar innan åtta: tjugo i åtta.',
+      'Klockan är tjugo i åtta.',
+    ]);
+    expect(c[0].acts.find(a => a.do === 'count')).toMatchObject({ from:40, to:60 });
+    for (const t of ALL_TASKS) for (const mode of ['read', 'set']) {
+      const x = CL.explainSteps(t, mode, { confirm:true });
+      expect(x[0].text.startsWith(CL.CONFIRM), t.key).toBe(true);
+      expect(x[x.length - 1].done).toBe(true);
+      // rätt ställd klocka står redan rätt: ingen go till målet i bekräftelsen
+      if (t.kind !== 'dur') expect(x.some(s => s.acts.some(a => a.do === 'go' && a.near)), t.key).toBe(false);
+    }
+  });
+  it('samma tal får inte två roller i namnsteget: tio i tio, fem över fem', () => {
+    expect(CL.explainSteps({ kind:'time', h:9, m:50 })[2].text).toBe('Det är 10 minuter kvar innan nästa hela timme: tio i tio.');
+    expect(CL.explainSteps({ kind:'time', h:5, m:5 })[2].text).toBe('Klockan har gått över den hela timmen med 5 minuter: fem över fem.');
+    for (let h = 1; h <= 12; h++) for (const m of FIVES) for (const mode of ['read', 'set'])
+      CL.explainSteps({ kind:'time', h, m }, mode).forEach(x => expect(problems(x.text), `${h}:${m}`).toEqual([]));
+  });
+});
+
+/* ── Lektionerna: data, räkningen, betoningen, försöken ─────────── */
+const wordCount = (text, w) => [...text.matchAll(new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, 'giu'))].length;
+describe('lektionerna (v64): tre representationer, räkning, betoning och försök', () => {
+  it('varje lektion: text i varje steg, rörelsen i acts, minst en läs- och en ställuppgift ur stegets egna tider', () => {
+    expect(Object.keys(CL.LESSON_TRIES).sort()).toEqual(CL.STEPS.map(s => s.id).sort());
+    for (const s of CL.STEPS) {
+      CL.LESSONS[s.id].forEach(st => { expect(typeof st.text).toBe('string'); expect(Array.isArray(st.acts)).toBe(true); });
+      const tr = CL.lessonTries(s.id);
+      expect(tr.length, s.id).toBeGreaterThanOrEqual(2);
+      expect(tr.length, s.id).toBeLessThanOrEqual(3);
+      expect(tr.some(t => t.type === 'read'), s.id).toBe(true);
+      expect(tr.some(t => t.type === 'set'), s.id).toBe(true);
+      tr.forEach(t => expect(CL.taskByKey(s.id, t.key), `${s.id} ${t.key}`).toBeTruthy());   // lådan finns: försöket räknas som i Öva
+    }
+  });
+  it('varje link pekar på ord som finns i stegets text: förklaringsordet en gång, tidsordet utanför det', () => {
+    const steps = [...Object.values(CL.LESSONS).flat()];
+    for (const t of ALL_TASKS) for (const mode of ['read', 'set']) for (const confirm of [false, true]) steps.push(...CL.explainSteps(t, mode, { confirm }));
+    const linked = steps.filter(st => st.link);
+    expect(linked.length).toBeGreaterThan(100);
+    const pairs = new Set();
+    for (const st of linked) {
+      const [a, b] = st.link;
+      pairs.add(`${a}/${b}`);
+      expect(wordCount(st.text, b), st.text).toBe(1);
+      const bi = st.text.toLowerCase().indexOf(b), outside = [...st.text.matchAll(new RegExp(`(?<!\\p{L})${a}(?!\\p{L})`, 'giu'))].filter(m => m.index + m[0].length <= bi || m.index >= bi + b.length);
+      expect(outside.length, st.text).toBeGreaterThanOrEqual(1);
+    }
+    expect([...pairs].sort()).toEqual(['halv/halvvägs', 'i/innan', 'över/gått över']);
+    // Dennis exempel finns i lektionerna
+    const all = Object.values(CL.LESSONS).flat();
+    expect(all.find(st => st.text === 'Det är 20 minuter kvar innan åtta: tjugo i åtta.').link).toEqual(['i', 'innan']);
+    expect(all.find(st => st.text === 'Halv tre betyder halvvägs till tre.').link).toEqual(['halv', 'halvvägs']);
+    expect(all.find(st => st.text === 'Klockan har gått över fyra med en kvart: kvart över fyra.').link).toEqual(['över', 'gått över']);
+  });
+  it('räknesummorna stämmer för alla minuter: "5", "5 + 5 = 10" … framåt och kvar till 12', () => {
+    expect(CL.sumText(1)).toBe('5');
+    expect(CL.sumText(2)).toBe('5 + 5 = 10');
+    expect(CL.sumText(4)).toBe('5 + 5 + 5 + 5 = 20');
+    for (let k = 1; k <= 12; k++) {
+      const txt = CL.sumText(k);
+      const terms = txt.split('=')[0].split('+').map(x => +x.trim());
+      expect(terms).toHaveLength(k);
+      expect(terms.every(x => x === 5)).toBe(true);
+      expect(k === 1 ? 5 : +txt.split('=')[1]).toBe(5 * k);
+    }
+    const said = { 5:5, 10:10, 15:15, 20:20, 25:5, 30:30, 35:5, 40:20, 45:15, 50:10, 55:5 };    // talet i tidens namn
+    for (const m of FIVES) {
+      const c = CL.countSpec(m);
+      if (m === 0) { expect(c).toBe(null); continue; }
+      expect(c.to - c.from, `${m}`).toBe(said[m]);
+      expect(CL.countTotal(m)).toBe(said[m]);
+      expect(c.c, `${m}`).toBe(m <= 20 || m === 30 || m === 35 ? 'gone' : 'left');
+      // räkningen börjar eller slutar där visaren står
+      expect([c.from, c.to]).toContain(m);
+      const n = (c.to - c.from) / 5;
+      expect(+CL.sumText(n).split('=').pop()).toBe(said[m]);
+    }
+  });
+  it('den digitala omräkningen: minus 12 för 13–23, 12 är 12, 00 är 12 utan minus', () => {
+    for (let hh = 13; hh <= 23; hh++) expect(CL.digitalHour(hh)).toEqual({ dial:hh - 12, minus:true });
+    expect(CL.digitalHour(12)).toEqual({ dial:12, minus:false });
+    expect(CL.digitalHour(0)).toEqual({ dial:12, minus:false });
+    for (let hh = 1; hh <= 11; hh++) expect(CL.digitalHour(hh)).toEqual({ dial:hh, minus:false });
+    expect(CL.digitalHour(24)).toEqual({ dial:12, minus:false });
+    // och talet på urtavlan är det timordet säger (ett på eftermiddagen, åtta på kvällen)
+    expect(CL.digitalWords(13, 0)).toBe('ett på eftermiddagen');
+    expect(CL.digitalWords(20, 0)).toBe('åtta på kvällen');
+    expect(CL.digitalWords(22, 30)).toBe('halv elva på kvällen');
+    // lektionen: 13:00 → 1, läggdags 20:00 och 22:30, skolan 08:00 utan minus
+    const dig = CL.LESSONS.digital;
+    const at = txt => dig.find(s => s.text.startsWith(txt));
+    expect(at('Klockan är 13:00').acts.some(a => a.do === 'minus12')).toBe(true);
+    expect(at('Du lägger dig').acts.find(a => a.do === 'bed')).toMatchObject({ at:CL.toTot(20, 0) });
+    expect(at('Vuxna lägger sig').acts.find(a => a.do === 'bed')).toMatchObject({ at:CL.toTot(22, 30) });
+    expect(at('Före 12 behövs inget minus').acts.some(a => a.do === 'minus12')).toBe(false);
+  });
+  it('nästan-fel: 5 minuter, en timme runt halv, över/i förväxlat – inget annat', () => {
+    const r = seeded(3);
+    for (const t of ALL_TASKS.filter(x => x.kind !== 'dur')) {
+      const tt = CL.toTot(t.h, t.m);
+      expect(CL.nearMiss(t, tt + 5), t.key).toBe('fem');
+      expect(CL.nearMiss(t, tt - 5), t.key).toBe('fem');
+      expect(CL.nearMiss(t, tt), t.key).toBe(null);                              // rätt är inte ett fel
+      expect(CL.nearMiss(t, tt + 60), t.key).toBe(t.m >= 25 && t.m <= 35 ? 'timme' : null);
+      expect(CL.nearMiss(t, tt + 120), t.key).toBe(null);
+      const oi = CL.wrongTime('overi', t.h, t.m, r);
+      if (oi !== null) expect(CL.nearMiss(t, oi), t.key).toBe('overi');
+      const hf = CL.wrongTime('halvfem', t.h, t.m, r);
+      if (hf !== null) expect(CL.nearMiss(t, hf), t.key).toBe('overi');
+      if (t.m !== 25 && t.m !== 35 && !(oi !== null && CL.sameOnDial(oi, tt + 10))) expect(CL.nearMiss(t, tt + 10), t.key).toBe(null);   // fem i sju ↔ fem över sju är 10 minuter isär
+    }
+    // digital: rätt ord men fel del av dygnet är inte nära; en ställd urtavla kan inte visa dygnsdelen
+    const d = CL.taskByKey('digital', '14:30');
+    expect(CL.nearMiss(d, CL.toTot(2, 30), 'read')).toBe(null);
+    expect(CL.nearMiss(d, CL.toTot(2, 35), 'set')).toBe('fem');
+    expect(CL.nearMiss(d, CL.toTot(16, 30), 'read')).toBe(null);                // 14 läst som 4
+    // hur lång tid: 5 minuter fel
+    const u = CL.taskByKey('tid', '5:15-6:45');
+    expect(CL.nearMiss(u, 95)).toBe('fem');
+    expect(CL.nearMiss(u, 30)).toBe(null);
+    // läsalternativens typer: fem, över/i och fem i/över halv är alltid nära; en timme bara runt halv
+    for (const t of ALL_TASKS) for (let k = 1; k <= 6; k++) for (const o of CL.readOptions(t, seeded(k * 31 + t.key.length)).filter(x => !x.ok)) {
+      const near = CL.nearMiss(t, o.val, 'read');
+      if (['fem', 'overi', 'halvfem'].includes(o.type)) expect(near, `${t.key} ${o.type}`).toBeTruthy();
+      if (o.type === 'timme') expect(!!near, `${t.key} timme`).toBe(t.kind !== 'dur' && t.m >= 25 && t.m <= 35);
+      if (['period', 'siffra', 'kors', 'steg', 'timmar'].includes(o.type)) expect(near, `${t.key} ${o.type}`).toBe(null);
+    }
+    // orden: "Nästan rätt" bara när det är nära
+    expect(CL.wrongLead('fem')).toBe('Nästan rätt! Bra försök, låt mig visa!');
+    expect(CL.wrongLead(null)).toBe('Bra försök! Låt mig visa.');
+    expect(CL.wrongLead(null)).not.toMatch(/nästan/i);
+  });
+  it('ett steg rör sig högst ungefär 2 sekunder (Nästa-knappen är låst så länge)', () => {
+    const steps = [...Object.values(CL.LESSONS).flat()];
+    for (const t of ALL_TASKS) for (const mode of ['read', 'set']) for (const confirm of [false, true]) steps.push(...CL.explainSteps(t, mode, { confirm }));
+    for (const st of steps) expect(CL.stepMs(st), st.text).toBeLessThanOrEqual(1800);
+  });
+  it('visaren går åt rätt håll: varvet runt dygnet går framåt', () => {
+    for (const id in CL.LESSONS) {
+      let cur = null;
+      for (const st of CL.LESSONS[id]) for (const a of st.acts) {
+        if (a.do === 'rev') { expect(a.t, `${id}: ${st.text}`).toBeGreaterThan(cur); }
+        if (['time', 'go', 'rev'].includes(a.do)) cur = a.t;
+      }
+    }
+  });
+  it('lektionerna enligt manuset: halv tre betyder halvvägs till tre, tjugo i åtta, runt halv, 13 − 12', () => {
     const L = CL.LESSONS.halv;
-    const go = L.find(s => s.acts.some(a => a.do === 'go'));
-    expect(go.acts.find(a => a.do === 'go').t).toBe(CL.toTot(2, 30));
-    expect(L.some(s => s.acts.some(a => a.do === 'fill' && a.from === 0 && a.to === 30))).toBe(true);
+    expect(L.find(s => s.acts.some(a => a.do === 'count')).acts.find(a => a.do === 'count')).toMatchObject({ from:0, to:30, move:true });
     expect(L.some(s => s.acts.some(a => a.do === 'arc'))).toBe(true);
-    expect(L[L.length - 1].text).toBe('Halv tre betyder halvvägs till tre.');
-    // texten före rörelsen: varje steg har en text, och rörelsen ligger i acts
-    for (const id in CL.LESSONS) CL.LESSONS[id].forEach(s => { expect(typeof s.text).toBe('string'); expect(Array.isArray(s.acts)).toBe(true); });
+    expect(L.some(s => s.text === 'Halv tre betyder halvvägs till tre.')).toBe(true);
+    const F = CL.LESSONS.ftt;
+    expect(F.find(s => s.acts.some(a => a.do === 'count' && a.c === 'left')).acts.find(a => a.do === 'count')).toMatchObject({ from:40, to:60 });
+    const R = CL.LESSONS.runt;
+    expect(R.some(s => s.acts.some(a => a.do === 'go' && a.t === CL.toTot(7, 25)))).toBe(true);
+    expect(R.some(s => s.acts.some(a => a.do === 'go' && a.t === CL.toTot(7, 35)))).toBe(true);
+    expect(R.some(s => s.acts.some(a => a.do === 'map' && a.parts.includes('runt')))).toBe(true);
+    // de tre representationerna tänds i varje lektion
+    for (const id in CL.LESSONS) expect(CL.LESSONS[id].some(s => s.acts.some(a => a.do === 'trio' && a.on)), id).toBe(true);
   });
 });
