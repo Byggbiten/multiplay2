@@ -370,3 +370,320 @@ describe('textsvepet – strategitexterna', () => {
     expect(T.introText(3, 8)).toBe('3 × 8 är 3 rader med 8 prickar i varje.');
   });
 });
+
+/* ═══════════════════════════════════════════════════════════
+   v58: Gånger 1–10/11/12, övningspasset (nötloopen, varven, kvittot)
+   och Capybara-regeln för övningspasset
+═══════════════════════════════════════════════════════════ */
+const { pairsUpTo, shrinkSteps, normCounts, roundTypes, presetFor, PRESETS, cleanTables, buildRounds,
+        passPlan, planSummary, tablesLabel, createDrill, receiptFor, praiseFor, durTxt } = T;
+
+describe('Gånger: 1–10 döljer 11:an och 12:an', () => {
+  const D = '2026-09-23';
+  it('räknarna räknar bara talen upp till 10 (55 par), lådorna för 11 och 12 rörs inte', () => {
+    const P = pairsFromStats({}, D);
+    P['7x11'] = { ...freshPair(), box:'ovar', okDays:1 };
+    P['12x12'] = { ...freshPair(), box:'kan', level:1, due:addDays(D, -2) };
+    P['3x4'] = { ...freshPair(), box:'kan', level:1, due:addDays(D, 3) };
+    const V10 = visMap(P, D, 10);
+    expect(Object.keys(V10)).toHaveLength(55);
+    expect(Object.keys(V10).some(k => k.split('x').some(n => +n > 10))).toBe(false);
+    expect(counts(V10)).toEqual({ kan:1, due:0, ovar:0, ny:54 });
+    expect(leftToLearn(V10)).toBe(54);
+    const V11 = visMap(P, D, 11);
+    expect(Object.keys(V11)).toHaveLength(66);
+    expect(counts(V11)).toEqual({ kan:1, due:0, ovar:1, ny:64 });
+    const V12 = visMap(P, D, 12);
+    expect(counts(V12)).toEqual({ kan:1, due:1, ovar:1, ny:75 });
+    expect(P['7x11'].box).toBe('ovar');                      // dolda lådor ligger kvar
+    expect(pairsUpTo(10)).toHaveLength(55);
+  });
+
+  it('Öva blandat med 1–10 tar aldrig med 11:an eller 12:an', () => {
+    const r = seeded(7);
+    for (let t = 0; t < 120; t++) {
+      const P = {};
+      for (const [a, b] of PAIRS) {
+        const x = r();
+        P[KEY(a, b)] = x < .4 ? freshPair() : x < .7 ? { ...freshPair(), box:'ovar', okDays:1 } : { ...freshPair(), box:'kan', level:1, due:addDays(D, Math.floor(r() * 9) - 4) };
+      }
+      const items = buildPass(P, 1000 + t, D, 10);
+      checkPass(items, `läge ${t}`);
+      expect(items.every(it => it.a <= 10 && it.b <= 10), `läge ${t}`).toBe(true);
+    }
+  });
+
+  it('standard är upp till 10; ett sparat värde gäller före standard', () => {
+    expect(T.UPTO_DEFAULT).toBe('10');
+    expect(T.settingsFrom(null).upto).toBe('10');
+    expect(T.settingsFrom({}).upto).toBe('10');
+    expect(T.settingsFrom({ strat:'valj', tempo:'klocka', rev:'av', answer:'free' }))       // profil från v57: inget upto sparat
+      .toEqual({ strat:'valj', tempo:'klocka', rev:'av', answer:'free', upto:'10' });
+    expect(T.settingsFrom({ upto:'12' }).upto).toBe('12');
+    expect(T.settingsFrom({ upto:'11' }).upto).toBe('11');
+    expect(T.settingsFrom({ upto:12 }).upto).toBe('12');
+    expect(T.settingsFrom({ upto:'9' }).upto).toBe('10');                                  // ogiltigt → standard
+  });
+
+  it('Så krymper tabellen räknar rätt i 10×10, 11×11 och 12×12', () => {
+    expect(T.shrinkRemain(10)).toEqual([100, 81, 64, 49, 36, 21, 21]);
+    expect(T.shrinkRemain(11)).toEqual([121, 100, 81, 64, 49, 36, 21, 21]);
+    expect(T.shrinkRemain(12)).toEqual([144, 121, 100, 81, 64, 36, 21, 21]);
+    expect(shrinkSteps(10).map(s => s.text(21)).join(' ')).not.toMatch(/11|12/);
+    expect(shrinkSteps(10)[6].text(21)).toBe('Kvar: 21 rutor. Det är de svåra — och dem övar vi på.');
+  });
+
+  it('Så krymper tabellen följer Gånger', () => {
+    expect(shrinkSteps(12)).toHaveLength(8);
+    expect(shrinkSteps(11)).toHaveLength(8);
+    expect(shrinkSteps(10)).toHaveLength(7);
+    expect(shrinkSteps(10)[0].text()).toBe('Hela tabellen har 100 rutor. Nu stryker vi en del i taget.');
+    expect(shrinkSteps(10).some(s => s.rm && s.rm.some(n => n > 10))).toBe(false);
+    expect(shrinkSteps(11).find(s => s.rm && s.rm.includes(11)).rm).toEqual([11]);
+    for (const n of [10, 11, 12]) shrinkSteps(n).forEach(s => expect(problems(s.text(40))).toEqual([]));
+  });
+});
+
+describe('övningspasset – varvbygget', () => {
+  it('stegarna ger varven i ordningen lätt till svårt, 0–4 per stegare', () => {
+    expect(roundTypes({ free:1, choice:2, show:1 })).toEqual(['show', 'choice', 'choice', 'free']);
+    expect(roundTypes({ show:0, choice:0, free:0 })).toEqual([]);
+    expect(normCounts({ show:9, choice:-2, free:'2' })).toEqual({ show:4, choice:0, free:2 });
+    expect(roundTypes({ show:4, choice:4, free:4 })).toHaveLength(12);
+  });
+
+  it('snabbvalen sätter bara stegarna', () => {
+    const by = k => PRESETS.find(p => p.k === k).c;
+    expect(roundTypes(by('kort'))).toEqual(['choice', 'free']);
+    expect(roundTypes(by('vanligt'))).toEqual(['show', 'choice', 'choice', 'free']);
+    expect(roundTypes(by('langt'))).toEqual(['show', 'choice', 'choice', 'choice', 'free', 'free']);
+    expect(presetFor({ show:1, choice:2, free:1 })).toBe('vanligt');
+    expect(presetFor({ show:2, choice:2, free:1 })).toBe(null);
+    PRESETS.forEach(p => expect(Object.keys(p.c).sort()).toEqual(['choice', 'free', 'show']));
+  });
+
+  it('Se svaret först går i ordning 1, 2, 3 …, tabell för tabell; övriga varv har samma frågor blandat', () => {
+    const rounds = buildRounds({ tables:[8, 7], counts:{ show:1, choice:1, free:1 } }, 10, seeded(3));
+    expect(rounds.map(r => r.type)).toEqual(['show', 'choice', 'free']);
+    expect(rounds[0].items.map(it => `${it.a}x${it.b}`)).toEqual([
+      ...[1,2,3,4,5,6,7,8,9,10].map(m => `7x${m}`), ...[1,2,3,4,5,6,7,8,9,10].map(m => `8x${m}`)]);
+    const key = it => `${it.a}x${it.b}`;
+    for (const r of rounds.slice(1)) {
+      expect(r.items).toHaveLength(20);
+      expect(r.items.map(key).sort()).toEqual(rounds[0].items.map(key).sort());
+      expect(r.items.map(key)).not.toEqual(rounds[0].items.map(key));
+    }
+  });
+
+  it('11:an och 12:an är extraval: de kan väljas även med Gånger upp till 10; plan och summering', () => {
+    expect(cleanTables([12, 7, 7, 11, 3, 13, 0])).toEqual([3, 7, 11, 12]);
+    const x = buildRounds({ tables:[11], counts:{ show:1 } }, 10);
+    expect(x[0].items.map(it => `${it.a}x${it.b}`)).toEqual([1,2,3,4,5,6,7,8,9,10].map(m => `11x${m}`));
+    expect(passPlan({ tables:[11, 12], counts:{ choice:1 } }, 10)).toMatchObject({ tables:[11, 12], questions:20 });
+    const pl = passPlan({ tables:[7], counts:{ show:1, choice:2, free:1 } }, 10);
+    expect(pl).toMatchObject({ tables:[7], rounds:4, questions:40 });
+    expect(pl.minutes).toBe(8);                                  // 10·14 + 20·10 + 10·12 s ≈ 8 min
+    expect(planSummary(pl)).toBe('Fyra varv · 40 frågor · ungefär 8 minuter');
+    expect(planSummary(passPlan({ tables:[], counts:{ choice:1 } }, 12))).toBe('Välj minst en tabell.');
+    expect(planSummary(passPlan({ tables:[3], counts:{} }, 12))).toBe('Välj minst ett varv.');
+    expect(tablesLabel([7], 10)).toBe('7:ans tabell');
+    expect(tablesLabel([6, 7, 8], 12)).toBe('6:an, 7:an och 8:an');
+    expect(tablesLabel([1,2,3,4,5,6,7,8,9,10], 10)).toBe('Alla tabeller');
+    expect(tablesLabel([2, 3, 4, 6], 12)).toBe('Fyra tabeller blandat');
+  });
+
+  it('summeringen: inget tal har två roller i samma rad', () => {
+    for (let n = 1; n <= 12; n++) for (const c of [{ show:1 }, { choice:4 }, { show:4, choice:4, free:4 }, { free:2 }]) {
+      const s = planSummary(passPlan({ tables:[1,2,3,4,5,6,7,8,9,10,11,12].slice(0, n), counts:c }, 12));
+      const nums = s.match(/\d+/g) || [];
+      expect(new Set(nums).size, s).toBe(nums.length);
+      expect(problems(s), s).toEqual([]);
+    }
+  });
+});
+
+/* Kör ett varv med givna fel. wrongs(slot, försök) → true om svaret ska vara fel. */
+function runDrill(items, wrongs, seed = 1) {
+  const d = createDrill(items, seeded(seed));
+  const log = [], recorded = [];
+  for (let guard = 0; !d.isDone() && guard < 10000; guard++) {
+    const cur = d.current();
+    const tries = log.filter(x => x.pos === d.progress().done).length;
+    const ok = !wrongs(cur, tries);
+    const res = d.answer(ok);
+    log.push({ pos:d.progress().done - (ok ? 1 : 0), a:cur.a, b:cur.b, extra:cur.extra, retry:cur.retry, ok, ...res });
+    if (res.record) recorded.push({ a:cur.a, b:cur.b, ok });      // appens recordAnswer körs bara här
+  }
+  return { d, log, recorded };
+}
+const ten = [1,2,3,4,5,6,7,8,9,10].map(m => ({ a:7, b:m }));
+
+describe('nötloopen (createDrill)', () => {
+  it('allt rätt: varje fråga ställs en gång, varvet tar slut', () => {
+    const { d, log, recorded } = runDrill(ten, () => false);
+    expect(d.isDone()).toBe(true);
+    expect(log).toHaveLength(10);
+    expect(recorded).toHaveLength(10);
+    expect(d.queue()).toHaveLength(10);
+    expect(d.current()).toBe(null);
+    expect(d.answer(true)).toBe(null);
+  });
+
+  it('fel ger samma fråga direkt igen tills den blir rätt', () => {
+    const d = createDrill(ten, seeded(5));
+    d.answer(true); d.answer(true);                              // 7×1, 7×2
+    expect(d.current()).toMatchObject({ a:7, b:3, retry:false });
+    d.answer(false);
+    expect(d.current()).toMatchObject({ a:7, b:3, retry:true });
+    d.answer(false); d.answer(false);
+    expect(d.current()).toMatchObject({ a:7, b:3, retry:true });
+    d.answer(true);
+    expect(d.current()).toMatchObject({ a:7, b:4, retry:false });
+  });
+
+  it('exakt ett extratillfälle, minst två frågor bort, på en slumpad plats', () => {
+    const spots = new Set();
+    for (let seed = 1; seed <= 60; seed++) {
+      const d = createDrill(ten, seeded(seed));
+      d.answer(true);                                            // 7×1
+      const r = d.answer(false);                                 // 7×2 fel (index 1)
+      expect(r.insertedAt).toBeGreaterThanOrEqual(1 + 3);
+      d.answer(false);                                           // fel igen: inget nytt extra
+      d.answer(true);
+      const q = d.queue();
+      expect(q).toHaveLength(11);
+      const pos = q.map((x, i) => x.b === 2 ? i : -1).filter(i => i >= 0);
+      expect(pos).toHaveLength(2);
+      expect(q[pos[1]].extra).toBe(true);
+      expect(pos[1] - pos[0] - 1).toBeGreaterThanOrEqual(2);     // två andra frågor emellan
+      spots.add(pos[1]);
+    }
+    expect(spots.size).toBeGreaterThan(3);                       // platsen slumpas
+  });
+
+  it('inget extra på extratillfället: fel där ger samma loop men ingen ny fråga', () => {
+    const { d, log } = runDrill(ten, (cur, tries) => cur.b === 4 && tries < 2);   // 7×4 fel två gånger varje gång den ställs
+    const q = d.queue();
+    expect(q.filter(x => x.b === 4)).toHaveLength(2);
+    expect(q).toHaveLength(11);
+    const extraAsks = log.filter(x => x.b === 4 && x.extra);
+    expect(extraAsks.map(x => x.ok)).toEqual([false, false, true]);
+    expect(extraAsks.every(x => x.insertedAt === null)).toBe(true);
+  });
+
+  it('nära slutet läggs extrat sist', () => {
+    for (const wrongAt of [8, 9]) {
+      const { d, log } = runDrill(ten, (cur, tries) => cur.b === wrongAt + 1 && !cur.extra && tries === 0);
+      const q = d.queue();
+      expect(q[q.length - 1]).toMatchObject({ b:wrongAt + 1, extra:true });
+      expect(log.find(x => x.insertedAt !== null && x.insertedAt !== undefined).insertedAt).toBe(10);
+    }
+  });
+
+  it('recordAnswer bara på första försöket, inklusive extratillfället', () => {
+    const { d, log, recorded } = runDrill(ten, (cur, tries) => [3, 6].includes(cur.b) && tries < (cur.extra ? 1 : 3));
+    // 7×3 och 7×6: tre fel + rätt; extratillfällena: ett fel + rätt
+    expect(recorded).toHaveLength(12);                            // 10 frågor + 2 extratillfällen
+    expect(recorded.filter(x => !x.ok)).toHaveLength(4);          // första försöken som var fel
+    expect(log.filter(x => x.retry).every(x => x.record === false)).toBe(true);
+    expect(d.stats()).toEqual({ asked:12, firstOk:8, wrongFirst:4, attempts:log.length });
+  });
+
+  it('varvet tar alltid slut, även med många fel', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const r = seeded(seed * 13);
+      const items = [3, 7].flatMap(a => [1,2,3,4,5,6,7,8,9,10,11,12].map(b => ({ a, b })));
+      const { d, recorded } = runDrill(items, () => r() < .45, seed);
+      expect(d.isDone()).toBe(true);
+      const extras = d.queue().filter(x => x.extra).length;
+      expect(extras).toBeLessThanOrEqual(items.length);
+      expect(recorded).toHaveLength(items.length + extras);
+      const ids = d.queue().filter(x => x.extra).map(x => x.id);
+      expect(new Set(ids).size).toBe(ids.length);                // högst ett extra per fråga
+    }
+  });
+});
+
+describe('kvittot', () => {
+  it('siffrorna summeras över varven', () => {
+    const rc = receiptFor([
+      { type:'show', asked:11, firstOk:10, wrongFirst:1 },
+      { type:'choice', asked:12, firstOk:10, wrongFirst:2 },
+      { type:'free', asked:10, firstOk:10, wrongFirst:0 },
+    ], 8 * 60000 + 20500);
+    expect(rc).toEqual({ correct:30, total:33, pct:91, fixed:3, secs:501, rounds:['show', 'choice', 'free'] });
+    expect(durTxt(rc.secs)).toBe('8 min 21 s');
+    expect(durTxt(45)).toBe('45 s');
+    expect(durTxt(120)).toBe('2 min');
+  });
+
+  it('ett körts varv ger samma siffror i kvittot', () => {
+    const { d } = runDrill(ten, (cur, tries) => cur.b === 5 && tries === 0 && !cur.extra);
+    const st = d.stats();
+    const rc = receiptFor([{ type:'choice', ...st }], 1000);
+    expect(rc).toMatchObject({ correct:10, total:11, fixed:1, pct:91 });
+  });
+
+  it('passets förklaringstext följer språkreglerna för alla 144 tal', () => {
+    for (const [a, b] of ALL) {
+      const e = T.passExplainFor(a, b);
+      expect(e.ea * e.eb).toBe(a * b);
+      expect(problems(e.text), `${a}×${b}`).toEqual([]);
+    }
+    expect(T.passExplainFor(7, 2).text).toBe('7 × 2 är lika mycket som 2 × 7. 2 × 7 är 2 rader med 7 prickar i varje.');
+  });
+
+  it('berömmet är aldrig negativt och varierar med resultatet', () => {
+    const texts = [0, 30, 59, 60, 84, 85, 99, 100].map(praiseFor);
+    expect(new Set(texts).size).toBe(4);
+    texts.forEach(t => expect(/inte|tyvärr|dåligt|sämre|fel svar/i.test(t), t).toBe(false));
+  });
+});
+
+describe('Capybara: övningspasset', () => {
+  const Capy = require('../js/capy.js');
+  const { milestones, defaultState } = Capy._test;
+  const ev = pct => ({ type:'ovningspass', data:{ module:'mult', pct } });
+
+  it('första övningspasset per dag ger ett vanligt kort först i kön, andra samma dag inte', () => {
+    const st = defaultState();
+    st.pending = ['viktad'];                                     // något som redan väntade
+    milestones(st, ev(50), '2026-09-23');
+    expect(st.pending[0]).toBe('vanlig');
+    expect(st.tests).toBe(1);
+    const n = st.pending.length;
+    milestones(st, ev(50), '2026-09-23');
+    expect(st.pending.filter(x => x === 'vanlig')).toHaveLength(1);
+    expect(st.pending.length).toBe(n);                           // tests = 2: ingen dragning
+    milestones(st, ev(50), '2026-09-23');                        // tests = 3: var 3:e test
+    expect(st.pending.slice(-1)[0]).toBe('viktad');
+    milestones(st, ev(50), '2026-09-24');                        // ny dag
+    expect(st.pending[0]).toBe('vanlig');
+    expect(st.pending.filter(x => x === 'vanlig')).toHaveLength(2);
+  });
+
+  it('dagens vanliga kort och var 3:e test ger inte dubbelt samma pass', () => {
+    const st = defaultState(); st.tests = 2;
+    milestones(st, ev(10), '2026-09-23');
+    expect(st.pending).toEqual(['vanlig']);
+  });
+
+  it('medaljlogiken via pct gäller som för test', () => {
+    const st = defaultState();
+    milestones(st, ev(100), '2026-09-23');
+    expect(st.medals).toEqual({ b:false, s:false, g:true });
+    expect(st.pending).toEqual(['vanlig', 'sallsynt', 'legendarisk']);
+    expect(st.perfect.mult).toBe(true);
+    milestones(st, ev(100), '2026-09-23');                       // ingen ny legendarisk för samma modul
+    expect(st.pending.filter(x => x === 'legendarisk')).toHaveLength(1);
+  });
+
+  it('testhändelsen beter sig som förut', () => {
+    const st = defaultState();
+    milestones(st, { type:'test', data:{ module:'mult', pct:80 } }, '2026-09-23');
+    expect(st.pending).toEqual(['vanlig', 'viktad']);
+    milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
+    milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
+    expect(st.pending).toEqual(['vanlig', 'viktad', 'sallsynt', 'legendarisk']);
+  });
+});

@@ -45,28 +45,45 @@ Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till 
 ## ✖️ Gångertabellen
 
 ### Översikt
-Gångertabellens huvudvy (v57) visar:
-- **Tabellkartan** – alla 144 rutor (1–12 × 1–12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
-  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Överst står hur många tal som är kvar att lära (Ny + Övar).
-- **Så krymper tabellen** – en genomgång steg för steg av varför bara de svåra paren är kvar att lära.
-- Tre ingångar: **Lär dig strategin**, **Öva** och **Rekordrunda**.
-- En diskret rad längst ner: **Eget matteprov**, **Statistik** och **Logg**.
-- Kugghjulet uppe till höger öppnar **inställningarna**.
+Gångertabellens huvudvy (v58) visar, uppifrån:
+- **Tabellkartan** – som standard 10 × 10 (inställningen *Tabeller och gånger*: upp till 10, 11 eller 12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
+  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Överst står hur många tal som är kvar att lära (Ny + Övar) och hur många som är dags att fylla på.
+  Tryck på ett **radnummer** i kartan för att ställa in ett övningspass med den tabellen.
+- **Så krymper tabellen** (den lilla runda knappen vid räknaren) – en genomgång steg för steg av varför bara de svåra paren är kvar att lära.
+- **Övningspasset** – det sparade passet (t.ex. "7:ans tabell", fyra varv) med **Starta** och **Ändra**.
+- Tre mindre ingångar: **Öva blandat**, **Lär dig strategin** och **Rekordrunda**.
+- Längst ner: **Statistik** och **Logg**. Kugghjulet uppe till höger öppnar **inställningarna**.
+
+### Övningspass
+Tanken är att nöta, inte att sätta prov: "kör den här tabellen fyra varv, sen är du klar".
+- **Ställ in passet:** välj en tabell (eller flera att blanda). 1–10 är vanliga val, 11 och 12 ligger under **Extra**.
+  **Gånger** (upp till 10, 11 eller 12) är samma inställning som styr kartan och alla övningar.
+- **Varv:** tre stegare, 0–4 varv var: **Se svaret först** (svaret visas, sedan frågas det, i ordning 1, 2, 3 …),
+  **Flerval** och **Fri inmatning** (blandad ordning). Varven körs från lätt till svårt. Snabbval: **Kort** (1 flerval + 1 fri),
+  **Vanligt** (1 + 2 + 1) och **Långt** (1 + 3 + 2). Raden under visar varv, frågor och ungefärlig tid.
+- **Nötloopen:** varje fråga ställs en gång per varv. Vid fel visas rätt svar ("7 × 8 = 56"), och samma fråga kommer direkt igen
+  tills den blir rätt. **Så kan du tänka** öppnar strategirektangeln om man vill. Frågan läggs sedan in en gång till, minst två frågor senare
+  (sist om varvet nästan är slut) – bara ett extra tillfälle per fråga och varv.
+  Bara första försöket på varje ställd fråga räknas i statistiken och lådorna.
+- Mellan varven visas en kort mellanskärm. **Avbryt** frågar först; ett avbrutet pass sparas inte.
+- **Du är klar!** visar ett kvitto för en vuxen: datum och tid, tabeller och gånger, varven, rätt på första försöket,
+  fel som rättades och tid. En vuxen **håller inne** "Sett av en vuxen" i 1,5 sekund – då stämplas kvittot och stämpeln syns i loggen.
+- Första avklarade övningspasset per dag ger ett vanligt Capybara-kort.
 
 ### Lär dig strategin
 Välj tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
 (a × b = a rader med b prickar i varje) och en strategi steg för steg, ett klick per steg.
 När strategin är klar kan rektangeln vändas ett kvarts varv: samma prickar, samma svar.
 
-### Öva
-Ett pass med ungefär elva frågor:
+### Öva blandat
+Ett pass med ungefär elva frågor (inom Gånger):
 - De nio kända platserna tas i första hand bland tal som är **Dags igen**, sedan bland **Övar**, sedan bland **Kan**.
 - Ett **nytt tal** per pass (lätt först) visas med rektangeln och frågas sedan två gånger – aldrig direkt efter att det visats.
 - Fel svar ger en förklaring med rektangeln, och talet kommer tillbaka lite senare i passet.
 - Efter passet visar kartan vilka tal som bytt låda.
 
 ### Lådorna (påfyllning över tid)
-Reglerna gäller varje besvarad fråga, i alla flöden (Öva, Rekordrunda, Dagens träning, Eget matteprov):
+Reglerna gäller varje besvarad fråga, i alla flöden (Övningspass, Öva blandat, Rekordrunda, Dagens träning, Fokuserad träning):
 - Ett rätt svar räknas en gång per dag och par.
 - **Ny** → **Övar** vid första rätta svaret. **Övar** → **Kan** efter rätt svar tre olika dagar.
 - Ett **Kan**-tal blir **Dags igen** efter 1, 3, 7, 14 och sedan 30 dagar. Rätt svar då fyller på det (grönt igen, längre intervall).
@@ -80,19 +97,14 @@ eller **klocka** (så många rätt som möjligt på en minut).
 ### Inställningar (kugghjulet)
 - **Strategi:** Fast (appen visar en väg) eller Välj väg (barnet väljer när det finns två).
 - **Tempo:** Klocka eller Eget rekord i rekordrundan.
-- **Svar:** Val (fyra alternativ) eller Fri (skriv svaret själv). Gäller även Eget matteprov.
+- **Tabeller och gånger:** Upp till 10 (standard), upp till 11 eller upp till 12. Styr kartan, räknarna, Öva blandat, Rekordrunda,
+  Så krymper tabellen och övningspassets gånger. Lådorna för dolda tal ligger kvar orörda.
+- **Svar:** Val (fyra alternativ) eller Fri (skriv svaret själv) i Öva blandat och Rekordrunda. Övningspasset styr svarssättet per varv.
 - **Omvända frågor:** Av eller På (t.ex. "Vilket gångertal blir 56?", bara med Val).
 
 Inställningarna sparas per profil.
 
-### 🎲 Eget Matteprov (Custom Test)
-Du kan skapa ett eget prov som blandar flera tabeller:
-
-1. Klicka **Eget matteprov** längst ner i huvudvyn
-2. Välj **2–3 tabeller** (max 3) genom att klicka på dem
-3. Du kan justera talintervallet med reglaget
-4. Klicka **"Starta ditt matteprov! 🚀"**
-5. Frågorna blandas från alla valda tabeller; fel frågor kommer tillbaka tills de besvarats rätt
+*Eget matteprov* är borttaget ur huvudvyn i v58 – övningspasset med flera tabeller ersätter det.
 
 ### 📊 Statistik (Stats)
 Klicka på **Statistik** längst ner i huvudvyn för att se:
@@ -269,7 +281,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | Gångertabellen | Tabellkartan med lådor, strategier med prickrektangel, smarta pass och rekordrunda |
 | Svarslägen | Flerval (4 alternativ) eller fri inmatning |
 | Lär dig strategin | Strategi steg för steg med prickrektangel |
-| Eget matteprov | Blanda 2–3 tabeller i ett eget prov |
+| Övningspass | Nöta en eller flera tabeller i varv, med kvitto för en vuxen |
 | Rekordrunda | Eget rekord i rad eller en minut på klockan |
 | Statistik | Detaljerad statistik per tabell och per tal |
 | Medaljer | Brons/Silver/Guld baserat på träffprocent |

@@ -402,6 +402,7 @@ const Capy = (() => {
       s3: false, s7: false,           // daily-streak 3 / 7 (engångs)
       matteGiven: false,              // alla medaljer → Matte-Capy (engångs)
       lastDaily: '',                  // dubblettskydd: 1 daily-event/dag
+      lastOvningspass: '',            // första övningspasset per dag ger ett vanligt kort
       allDoneShown: false,            // varm grattis-text visad
       pending: [],                    // kö av intjänade dragningar
     };
@@ -482,55 +483,66 @@ const Capy = (() => {
   }
 
   /* ── Milstolpar per event ──────────────────────────────
-     event = { type:'test'|'daily', data:{...} }
-       test:  { module, pct, memStar? }
-       daily: { pct, streak }
-     Returnerar upplåst kort eller null. REN SIDOEFFEKT:
-     får aldrig påverka quiz-/poängsemantiken. */
-  function award(profile, event) {
-    if (!profile || !profile.id || !event || !event.data) return null;
-    const id = profile.id;
-    const st = readState(id);
-    const cards = readCards(id);
-    const d = event.data;
+     event = { type:'test'|'ovningspass'|'daily', data:{...} }
+       test:        { module, pct, memStar? }
+       ovningspass: { module, pct }   (Gångertabellens övningspass, v58)
+       daily:       { pct, streak }
+     milestones() är ren: uppdaterar st (räknare + pending-kön) för
+     dagen `day` (YYYY-MM-DD). award() nedan drar kortet.
 
+     Övningspasset: första avklarade passet per dag lägger ett vanligt
+     kort FÖRST i kön (det delas ut direkt). Passet räknas också som ett
+     avklarat test (st.tests) för medaljerna och var 3:e test, men samma
+     pass ger aldrig både dagens vanliga kort och var-3:e-dragningen –
+     högst en ny dragning per pass utöver medaljerna. */
+  function medalMilestones(st, d) {
+    const pct = typeof d.pct === 'number' ? d.pct : null;
+    if (pct === null) return;
+    const lvl = pct >= 95 ? 'g' : pct >= 85 ? 's' : pct >= 75 ? 'b' : null;
+    if (lvl && !st.medals[lvl]) {
+      st.medals[lvl] = true;
+      st.pending.push(lvl === 'b' ? 'viktad' : 'sallsynt');
+    }
+    // Alla medalj-nivåer samlade → Matte-Capy
+    if (st.medals.b && st.medals.s && st.medals.g && !st.matteGiven) {
+      st.matteGiven = true;
+      st.pending.push('matte');
+    }
+    // 100 %-pass: legendarisk dragning, en gång per modul
+    if (pct === 100 && d.module && !st.perfect[d.module]) {
+      st.perfect[d.module] = true;
+      st.pending.push('legendarisk');
+    }
+  }
+
+  function milestones(st, event, day) {
+    const d = event.data;
     if (event.type === 'test') {
       st.tests++;
       // Första kortet direkt efter första testet – alltid ett vanligt kort
       if (st.tests === 1) st.pending.push('vanlig');
       // Var 3:e avklarat test
       else if (st.tests % 3 === 0) st.pending.push('viktad');
-
-      // Ny medalj-nivå (första gången per nivå)
-      const pct = typeof d.pct === 'number' ? d.pct : null;
-      if (pct !== null) {
-        const lvl = pct >= 95 ? 'g' : pct >= 85 ? 's' : pct >= 75 ? 'b' : null;
-        if (lvl && !st.medals[lvl]) {
-          st.medals[lvl] = true;
-          st.pending.push(lvl === 'b' ? 'viktad' : 'sallsynt');
-        }
-        // Alla medalj-nivåer samlade → Matte-Capy
-        if (st.medals.b && st.medals.s && st.medals.g && !st.matteGiven) {
-          st.matteGiven = true;
-          st.pending.push('matte');
-        }
-        // 100 %-pass: legendarisk dragning, en gång per modul
-        if (pct === 100 && d.module && !st.perfect[d.module]) {
-          st.perfect[d.module] = true;
-          st.pending.push('legendarisk');
-        }
-      }
+      medalMilestones(st, d);
       // Minnesmästare-stjärna
       if (d.memStar) {
         st.memStars++;
         if (st.memStars <= 3) st.pending.push('memmaster');
         else if (st.memStars % 5 === 0) st.pending.push('viktad');
       }
+    } else if (event.type === 'ovningspass') {
+      st.tests++;
+      if (st.lastOvningspass !== day) {
+        st.lastOvningspass = day;
+        st.pending.unshift('vanlig');
+      } else if (st.tests % 3 === 0) {
+        st.pending.push('viktad');
+      }
+      medalMilestones(st, d);
     } else if (event.type === 'daily') {
       // Endast första avklarade passet per dag räknas (inte "Kör igen")
-      const today = dayStr();
-      if (st.lastDaily !== today) {
-        st.lastDaily = today;
+      if (st.lastDaily !== day) {
+        st.lastDaily = day;
         const streak = typeof d.streak === 'number' ? d.streak : 0;
         if (streak >= 3 && !st.s3) { st.s3 = true; st.pending.push('sallsynt'); }
         if (streak >= 7 && !st.s7) { st.s7 = true; st.pending.push('legendarisk'); }
@@ -540,6 +552,17 @@ const Capy = (() => {
         }
       }
     }
+    return st;
+  }
+
+  /* Returnerar upplåst kort eller null. REN SIDOEFFEKT:
+     får aldrig påverka quiz-/poängsemantiken. */
+  function award(profile, event) {
+    if (!profile || !profile.id || !event || !event.data) return null;
+    const id = profile.id;
+    const st = readState(id);
+    const cards = readCards(id);
+    milestones(st, event, dayStr());
 
     // Dela ut max ETT kort per resultat – resten väntar i kön
     let unlocked = null;
@@ -842,7 +865,10 @@ const Capy = (() => {
     showCollection, // Samlingen-vyn
     cardCount,      // antal kort (hem-profilkortens chip)
     _close: closeOverlay,
+    _test: { milestones, defaultState },   // endast tester: ren milstolpslogik
   };
 })();
 
 if (typeof window !== 'undefined') window.Capy = Capy;
+/* CJS-export för vitest (samma mönster som shared.js) */
+if (typeof module !== 'undefined' && module.exports) module.exports = Capy;
