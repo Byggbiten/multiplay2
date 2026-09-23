@@ -391,6 +391,7 @@ const MultGame = (() => {
     /* ── Ställ in ett övningspass ── */
     #mult-root .gt #mt-scr-setup{gap:8px}
     #mult-root .gt .sucard{padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+    #mult-root .gt #mt-scr-setup.varv-only > .sucard:nth-child(-n+2){display:none}
     #mult-root .gt .su-lab{display:flex;flex-direction:column;line-height:1.15}
     #mult-root .gt .su-lab b{font-family:var(--font-head);font-weight:800;font-size:18px;color:var(--deep)}
     #mult-root .gt .su-lab small{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
@@ -2210,10 +2211,16 @@ const MultGame = (() => {
   function quickPassCfg(table, saved){ return { tables:cleanTables([table]), counts:countsFrom(saved) }; }
 
   /* ── Ställ in ett övningspass ── */
-  function enterSetup(table){
+  /* arg: ett tabellnummer (från tabellens startskärm), { from:'hstart' } (från De svåra talen)
+     eller inget (varvraden på hemvyn). Tillbaka leder dit man kom ifrån. Från De svåra talen
+     visas bara varven och knappen heter Klar — annars startade den ett tabellpass. */
+  function enterSetup(arg){
+    const table = typeof arg === 'number' ? arg : null;
+    const from = table ? 'tstart' : (arg && arg.from) || null;
     const saved = loadOvp();
     const tables = table ? [table] : saved ? cleanTables(saved.tables) : [];
-    SU = { tables, counts:countsFrom(saved) };
+    SU = { tables, counts:countsFrom(saved), from, fromT:table };
+    $('scr-setup').classList.toggle('varv-only', from === 'hstart');
     renderSetup();
   }
   function renderSetup(){
@@ -2236,15 +2243,17 @@ const MultGame = (() => {
     });
     const pl = passPlan(SU, n);
     $('suSum').textContent = planSummary(pl);
-    $('suGo').disabled = !pl.tables.length || !pl.rounds;
-    btn($('suGo'), 'Starta passet', 'play', false);
+    const varvOnly = SU.from === 'hstart';
+    $('suGo').disabled = !pl.rounds || (!varvOnly && !pl.tables.length);
+    if (varvOnly) btn($('suGo'), 'Klar', 'check', false); else btn($('suGo'), 'Starta passet', 'play', false);
     // Varven styr alla snabbval: spara direkt vid varje ändring, inte först vid start,
     // annars försvinner ändringen när barnet trycker Tillbaka.
-    if (pl.tables.length && pl.rounds) saveOvp({ tables:pl.tables, counts:SU.counts });
+    if (pl.rounds && (pl.tables.length || varvOnly)) saveOvp({ tables:SU.tables, counts:SU.counts });
   }
   function refreshSetup(){}
   function startFromSetup(){
     if (!SU) return;
+    if (SU.from === 'hstart'){ snd('click'); goto('hstart'); return; }   // varven är redan sparade
     const pl = passPlan(SU, UPTO());
     if (!pl.tables.length || !pl.rounds) return;
     saveOvp({ tables:pl.tables, counts:SU.counts });
@@ -2734,6 +2743,8 @@ const MultGame = (() => {
   function bindTrainer(){
     $('backBtn').onclick = () => {
       if (S.screen === 'pass'){ confirmCancelPass(); return; }
+      if (S.screen === 'setup' && SU && SU.from === 'hstart'){ goto('hstart'); return; }
+      if (S.screen === 'setup' && SU && SU.from === 'tstart' && SU.fromT){ goto('tstart', SU.fromT); return; }
       if (S.screen !== 'hub') goto('hub');
       else { stopClock(); App.goBackToGameSelect(); }
     };
@@ -2751,7 +2762,7 @@ const MultGame = (() => {
     $('hubHard').onclick = () => { if (!busy){ snd('click'); goto('hstart'); } };
     $('hsPick').querySelectorAll('button').forEach(b => b.onclick = () => { if (!HS || busy || HS.mode === b.dataset.v) return; HS.mode = b.dataset.v; snd('click'); renderHStart(); });
     $('hsGo').onclick = startHStart;
-    $('hsEdit').onclick = () => { if (!busy) goto('setup'); };
+    $('hsEdit').onclick = () => { if (!busy) goto('setup', { from:'hstart' }); };
     $('tsGo').onclick = startTStart;
     $('tsEdit').onclick = () => { if (!busy && TS) goto('setup', TS.t); };
     $('goLearn').onclick = () => { if (!busy) goto('learn'); };
