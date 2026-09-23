@@ -4,7 +4,9 @@
    Hubben (tabellkartan, Lär dig strategin, Öva, Rekordrunda) är
    design-lab/gangertabell-mockup.html fört in i appen: mockupens
    CSS, texter, stegordning och animationer är specen.
-   Eget matteprov, Statistik och Logg finns kvar som förut.
+   v58: hubben har en kompakt karta, övningspasset (nötloopen i varv
+   med kvitto för en vuxen), tre mindre ingångar och Statistik/Logg.
+   Eget matteprov är borttaget; övningspasset med flera tabeller ersätter det.
    Lila magi-temat sätts automatiskt via #mult-root i app.css.
    ============================================================ */
 'use strict';
@@ -13,11 +15,9 @@ const MultGame = (() => {
 
   /* ── Tillstånd ─────────────────────────────────────── */
   let profile      = null;
-  let rangeMin     = 1;
-  let rangeMax     = 12;
   let answerMode   = 'choice';   // 'choice' | 'free'  (inställningen "Svar": Val / Fri)
 
-  /* ── Modulspecifik CSS för Eget matteprov, Statistik och Logg ── */
+  /* ── Modulspecifik CSS för frågesessionen, Statistik och Logg ── */
   const MULT_CSS = `
     #mult-root .mult-gap{gap:12px}
     #mult-root .mult-spacer{width:52px;flex:0 0 auto}
@@ -25,15 +25,11 @@ const MultGame = (() => {
     #mult-root .app-header .header-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #mult-root .mult-sub{text-align:center;color:var(--ink-soft);font-weight:700;font-size:14px}
 
-    /* Tabellrutnät (Statistik, Eget matteprov) */
+    /* Tabellrutnät (Statistik) */
     #mult-root .tables-panel{flex:1;min-height:0;display:flex;flex-direction:column}
     #mult-root .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;flex:1;align-content:space-evenly}
     #mult-root .mult-tbar{display:block;height:5px;border-radius:999px;background:rgba(93,63,158,.12);margin-top:7px;overflow:hidden}
     #mult-root .mult-tbar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
-    #mult-root .range-lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-    #mult-root .range-lab b{font-size:15px;color:var(--deep)}
-    #mult-root .range-lab .num{font-family:var(--font-head);font-weight:700;font-size:19px;color:var(--accent)}
-    #mult-root .range-row{display:flex;gap:10px;align-items:center}
     @media (min-width:700px){
       #mult-root .tgrid .table-card{min-height:118px}
     }
@@ -41,7 +37,7 @@ const MultGame = (() => {
       #mult-root .tgrid{grid-template-columns:repeat(4,1fr);gap:8px}
     }
 
-    /* Quiz-vyer (Eget matteprov, Dagens träning, fokuserad träning) */
+    /* Quiz-vyer (Dagens träning, fokuserad träning) */
     #mult-root .header-progress{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:64px;padding:8px 13px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel);font-family:var(--font-head);font-weight:800;font-size:15px;line-height:1;color:var(--deep);flex:0 0 auto}
     #mult-root .header-progress .hp-bar{width:100%;min-width:40px;height:4px;border-radius:999px;background:rgba(93,63,158,.15);overflow:hidden}
     #mult-root .header-progress .hp-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s var(--spring)}
@@ -77,6 +73,10 @@ const MultGame = (() => {
     #mult-root .mult-empty{align-items:center;gap:14px}
     #mult-root .mult-empty-emoji{font-size:4rem}
     #mult-root .history-icon svg{width:22px;height:22px;color:var(--accent)}
+    #mult-root .history-icon svg.icn{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+    #mult-root .mult-stamp{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:2px 9px 2px 6px;border:2px solid #16a34a;border-radius:8px;
+      color:#15803d;font-size:11.5px;font-weight:900;white-space:nowrap;transform:rotate(-2deg);background:rgba(220,252,231,.6)}
+    #mult-root .mult-stamp svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 
     /* Modal-innehåll (modalen ligger på body – därför oprefixat) */
     .mult-modal-emoji{font-size:3.2rem;text-align:center;margin-bottom:8px}
@@ -131,6 +131,8 @@ const MultGame = (() => {
     #mult-root .gsh-tg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(76,29,149,.07);border-radius:999px;padding:3px}
     #mult-root .gsh-tg button{min-height:44px;border-radius:999px;font-weight:800;font-size:15px;color:var(--ink-soft);transition:background-color .2s,color .2s}
     #mult-root .gsh-tg button.on{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(76,29,149,.14)}
+    #mult-root .gsh-tg button small{display:block;font-size:11px;font-weight:700;opacity:.75;line-height:1.1}
+    #mult-root .gsh-tg button{line-height:1.1;padding:0 4px}
     #mult-root .gsh-done{display:inline-flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;font-size:16px;font-weight:800;color:#fff;
       background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 8px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,.35)}
 
@@ -210,19 +212,6 @@ const MultGame = (() => {
     #mult-root .gt .hubact{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end}
     #mult-root .gt .entries{display:flex;flex-direction:column;gap:8px}
     #mult-root .gt .shrinkbox{display:none;flex-direction:column;gap:8px}
-    #mult-root .gt .ebtn{display:flex;align-items:center;gap:12px;padding:0 14px 0 10px;border-radius:20px;text-align:left;min-height:54px;width:100%;
-      transition:transform .25s var(--spring),opacity .15s}
-    #mult-root .gt .ebtn:active:not(:disabled){transform:scale(.97)}
-    #mult-root .gt .ebtn:disabled{opacity:.5}
-    #mult-root .gt .ebtn .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
-    #mult-root .gt .ebtn .et{display:flex;flex-direction:column;line-height:1.15;flex:1;min-width:0}
-    #mult-root .gt .ebtn .et b{font-family:var(--font-head);font-weight:800;font-size:19px}
-    #mult-root .gt .ebtn .et small{font-size:12.5px;font-weight:700;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #mult-root .gt .ebtn.pri{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 8px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,.35);min-height:60px}
-    #mult-root .gt .ebtn.pri .ic{background:rgba(255,255,255,.22)}
-    #mult-root .gt .ebtn.sec{background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 24%,transparent);color:var(--deep);box-shadow:var(--shadow-panel)}
-    #mult-root .gt .ebtn.sec .ic{background:var(--tint);color:var(--accent)}
-    #mult-root .gt .ebtn .chev{width:18px;height:18px;opacity:.6}
 
     /* ── Lär dig strategin ────────────────────────── */
     #mult-root .gt .seg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex-shrink:0}
@@ -332,6 +321,148 @@ const MultGame = (() => {
     #mult-root .gt .bar .flag{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;border-radius:2px;background:#f59e0b;box-shadow:0 0 0 2px #fff}
     #mult-root .gt .bar .flag.off{display:none}
 
+    /* ── Hubben v58: kompakt karta, övningspasset, tre ingångar ── */
+    #mult-root .gt .mapcard.sm{padding:8px 12px;gap:6px}
+    #mult-root .gt .mapcard.sm .maphead{height:40px}
+    #mult-root .gt .mapcard.sm .mhl b{font-size:30px}
+    #mult-root .gt .mhr{display:flex;align-items:center;gap:8px}
+    #mult-root .gt .mhr .refill{height:auto}
+    #mult-root .gt .iconpill{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:var(--glass-strong);
+      border:1.5px solid color-mix(in srgb,var(--accent) 26%,transparent);color:var(--deep);transition:transform .25s var(--spring)}
+    #mult-root .gt .iconpill:active{transform:scale(.92)}
+    #mult-root .gt .iconpill svg.i{width:20px;height:20px}
+    #mult-root .gt .rowbtn{position:relative;padding:0;border:0;background:none;border-radius:6px;color:var(--accent);font-size:11.5px;font-weight:900;font-family:inherit;cursor:pointer}
+    #mult-root .gt .rowbtn::after{content:'';position:absolute;top:-1px;bottom:-1px;left:-12px;right:-1px}
+    #mult-root .gt .rowbtn:active{background:var(--tint)}
+    #mult-root .gt .map.rows-off .rowbtn{pointer-events:none;color:var(--ink-soft)}
+    #mult-root .gt .hubact{justify-content:center;gap:8px}
+    #mult-root .gt .hubact .hubmore{margin-top:auto}
+    #mult-root .gt .passcard{padding:12px 14px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;
+      border:1.5px solid color-mix(in srgb,var(--accent) 30%,transparent);background:linear-gradient(160deg,#fff 30%,var(--tint))}
+    #mult-root .gt .pc-head{display:flex;align-items:center;gap:12px;min-width:0}
+    #mult-root .gt .pc-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 5px 14px var(--glow)}
+    #mult-root .gt .pc-ic svg.i{width:24px;height:24px}
+    #mult-root .gt .pc-t{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+    #mult-root .gt .pc-t small{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+    #mult-root .gt .pc-t b{font-family:var(--font-head);font-weight:800;font-size:23px;color:var(--deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #mult-root .gt .pc-meta{display:flex;align-items:center;gap:10px;height:26px;font-weight:800;font-size:14px;color:var(--ink-soft);white-space:nowrap;overflow:hidden}
+    #mult-root .gt .pc-rs{display:flex;gap:4px;flex-shrink:0}
+    #mult-root .gt .rig{display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:13px;font-weight:900;color:var(--ink-soft)}
+    #mult-root .gt .ri{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    #mult-root .gt .ri svg.i{width:16px;height:16px}
+    #mult-root .gt .ri-show{background:#dbeafe;color:#1d4ed8}
+    #mult-root .gt .ri-choice{background:#f3e8ff;color:#7e22ce}
+    #mult-root .gt .ri-free{background:#ffedd5;color:#c2410c}
+    #mult-root .gt .pc-btns{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+    #mult-root .gt .pc-btns .btn{min-height:56px;font-size:17px}
+    #mult-root .gt .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex-shrink:0}
+    #mult-root .gt .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;padding:8px 4px;border-radius:20px;
+      background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:center;
+      transition:transform .25s var(--spring),opacity .15s}
+    #mult-root .gt .tile:active:not(:disabled){transform:scale(.96)}
+    #mult-root .gt .tile:disabled{opacity:.5}
+    #mult-root .gt .tile .ic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--accent);margin-bottom:3px}
+    #mult-root .gt .tile b{font-family:var(--font-head);font-weight:800;font-size:15px;line-height:1.08}
+    #mult-root .gt .tile small{font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+
+    /* ── Ställ in ett övningspass ── */
+    #mult-root .gt #mt-scr-setup{gap:8px}
+    #mult-root .gt .sucard{padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+    #mult-root .gt .su-lab{display:flex;flex-direction:column;line-height:1.15}
+    #mult-root .gt .su-lab b{font-family:var(--font-head);font-weight:800;font-size:18px;color:var(--deep)}
+    #mult-root .gt .su-lab small{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+    #mult-root .gt .su-lab.su-row{flex-direction:row;align-items:center;justify-content:space-between;gap:8px}
+    #mult-root .gt .chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+    #mult-root .gt .xrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:center}
+    #mult-root .gt .xlab{grid-column:1 / 4;justify-self:end;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+    #mult-root .gt .xchips{grid-column:4 / 6;grid-template-columns:1fr 1fr}
+    #mult-root .gt .chips button.dim{opacity:.5;border-style:dashed;color:var(--ink-soft)}
+    #mult-root .gt .chips button{height:46px;border-radius:14px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);
+      font-family:var(--font-head);font-weight:800;font-size:19px;color:var(--deep);transition:transform .2s var(--spring),opacity .2s}
+    #mult-root .gt .chips button:active:not(:disabled){transform:scale(.93)}
+    #mult-root .gt .chips button.on{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 5px 14px var(--glow)}
+    #mult-root .gt .chips button:disabled{opacity:.25}
+    #mult-root .gt .presets{display:flex;gap:2px;background:rgba(76,29,149,.07);border-radius:999px;padding:3px}
+    #mult-root .gt .presets button{min-height:44px;padding:0 12px;border-radius:999px;font-weight:800;font-size:14px;color:var(--ink-soft);transition:background-color .2s,color .2s}
+    #mult-root .gt .presets button.on{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(76,29,149,.14)}
+    #mult-root .gt .rrow{display:flex;align-items:center;gap:10px;min-height:52px}
+    #mult-root .gt .rrow .ri{width:36px;height:36px;border-radius:12px;transition:opacity .2s}
+    #mult-root .gt .rrow .ri svg.i{width:20px;height:20px}
+    #mult-root .gt .rrow .rt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15;transition:opacity .2s}
+    #mult-root .gt .rrow .rt b{font-weight:900;font-size:15px;color:var(--ink)}
+    #mult-root .gt .rrow .rt small{font-size:12px;font-weight:700;color:var(--ink-soft)}
+    #mult-root .gt .rrow.zero .rt,#mult-root .gt .rrow.zero .ri{opacity:.5}
+    #mult-root .gt .rstep{display:flex;align-items:center;gap:6px}
+    #mult-root .gt .rstep .stp{width:44px;height:44px}
+    #mult-root .gt .rstep .rn{width:22px;text-align:center;font-family:var(--font-head);font-weight:800;font-size:22px;color:var(--deep)}
+    #mult-root .gt .su-sum{text-align:center;font-weight:800;font-size:15px;color:var(--deep);height:22px;flex-shrink:0}
+
+    /* ── Passet ── */
+    #mult-root .gt #mt-scr-pass .trtop{gap:10px;white-space:nowrap}
+    #mult-root .gt #mt-psL{min-width:0;overflow:hidden;text-overflow:ellipsis}
+    #mult-root .gt .rps{display:flex;gap:5px;align-items:center;flex-shrink:0}
+    #mult-root .gt .rps.many{gap:3px}
+    #mult-root .gt .rps.many .rp{width:7px;height:7px}
+    #mult-root .gt .rp{width:9px;height:9px;border-radius:50%;background:rgba(76,29,149,.16);transition:background-color .3s}
+    #mult-root .gt .rp.ok{background:var(--kan)}
+    #mult-root .gt .rp.cur{background:var(--accent);box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--accent)}
+    #mult-root .gt .qbig .qok{color:#15803d;display:inline-block;animation:gt-pop .45s var(--spring)}
+    #mult-root .gt .qbig .okc{color:var(--kan);line-height:1}
+    #mult-root .gt .qbig .rbt{display:block;font-size:34px;margin-top:6px}
+    #mult-root .gt .rlist{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,44px);gap:8px;align-content:center;height:100%}
+    #mult-root .gt .rl{display:flex;align-items:center;gap:8px;min-height:0;padding:0 12px;border-radius:14px;background:var(--glass-strong);
+      border:1.5px solid color-mix(in srgb,var(--accent) 16%,transparent);font-weight:800;font-size:13.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden}
+    #mult-root .gt .rl svg.i{width:18px;height:18px}
+    #mult-root .gt .rl.ok{background:#dcfce7;border-color:#86efac;color:#15803d}
+    #mult-root .gt .rl.next{border-color:var(--accent);color:var(--deep);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 22%,transparent)}
+    #mult-root .gt .oq .qok{color:#15803d}
+    #mult-root .gt .duo{display:none;gap:8px;width:100%}
+    #mult-root .gt .duo .btn{flex:1;padding:0 10px;font-size:15px}
+    #mult-root .gt .slot.duoing .duo{display:flex}
+    #mult-root .gt .slot.duoing > .btn{display:none}
+    #mult-root .gt .slot.choosing .duo{display:none}
+
+    /* ── Du är klar! – kvittot ── */
+    #mult-root .gt #mt-scr-done{gap:8px}
+    #mult-root .gt .dn-head{display:flex;flex-direction:column;align-items:center;text-align:center;flex-shrink:0;padding-top:2px}
+    #mult-root .gt .dn-star{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#fbbf24,#f59e0b);
+      box-shadow:0 8px 20px rgba(245,158,11,.35);animation:gt-pop .6s var(--spring)}
+    #mult-root .gt .dn-star svg.i{width:30px;height:30px;fill:#fff;stroke-width:1.6}
+    #mult-root .gt .dn-head h2{font-family:var(--font-head);font-weight:800;font-size:34px;color:var(--deep);line-height:1.05;margin:6px 0 0}
+    #mult-root .gt .dn-head p{font-weight:800;font-size:15px;color:var(--ink-soft);margin:3px 0 0;min-height:20px}
+    #mult-root .gt .receipt{position:relative;padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;background:#fff}
+    #mult-root .gt .rc-top{display:flex;flex-direction:column;gap:1px;padding-bottom:7px;border-bottom:1.5px dashed rgba(76,29,149,.2)}
+    #mult-root .gt .rc-k{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+    #mult-root .gt .rc-k svg.i{width:16px;height:16px}
+    #mult-root .gt .rc-when{font-weight:800;font-size:15px;color:var(--deep)}
+    #mult-root .gt .rc-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;font-weight:700;color:var(--ink-soft)}
+    #mult-root .gt .rc-row b{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);text-align:right}
+    #mult-root .gt .rc-rounds{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:6px 0;border-top:1.5px dashed rgba(76,29,149,.2);border-bottom:1.5px dashed rgba(76,29,149,.2)}
+    #mult-root .gt .rv{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--ink);white-space:nowrap}
+    #mult-root .gt .rv svg.i{width:16px;height:16px;color:#16a34a;stroke-width:3}
+    #mult-root .gt .rv em{font-style:normal;color:var(--ink-soft)}
+    #mult-root .gt .rc-foot{position:relative;height:70px;display:grid;place-items:center;border:2px dashed rgba(22,163,74,.35);border-radius:14px;margin-top:2px}
+    #mult-root .gt .slot-ph{font-size:13px;font-weight:800;color:rgba(21,128,61,.6);transition:opacity .2s}
+    #mult-root .gt .slot-ph.off{opacity:0}
+    #mult-root .gt .stamp{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;opacity:0}
+    #mult-root .gt .stamp.on{animation:gt-stamp .55s cubic-bezier(.2,1.4,.4,1) both}
+    #mult-root .gt .st-tx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+    #mult-root .gt .st-in{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border:3px solid #16a34a;border-radius:12px;color:#15803d;
+      transform:rotate(-5deg);background:rgba(240,253,244,.9);box-shadow:inset 0 0 0 2px rgba(22,163,74,.18)}
+    #mult-root .gt .st-in svg.i{width:26px;height:26px;stroke-width:3.2}
+    #mult-root .gt .st-in b{font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+    #mult-root .gt .st-in small{font-size:12px;font-weight:800}
+    #mult-root .gt .dn-ask{text-align:center;font-weight:900;font-size:16px;color:var(--deep);margin:0;flex-shrink:0;min-height:22px}
+    #mult-root .gt .hold{position:relative;overflow:hidden;min-height:58px;flex-shrink:0;border-radius:999px;border:2px solid #16a34a;background:#fff;color:#15803d;
+      font-weight:900;font-size:16px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+    #mult-root .gt .hold-fill{position:absolute;inset:0;background:linear-gradient(90deg,#bbf7d0,#4ade80);transform:scaleX(0);transform-origin:left center}
+    #mult-root .gt .hold.holding .hold-fill{transform:scaleX(1);transition:transform 1.5s linear}
+    #mult-root .gt .hold-t{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    #mult-root .gt .hold.done{background:#dcfce7}
+    #mult-root .gt .hold:disabled{opacity:1}
+    @keyframes gt-stamp{0%{opacity:0;transform:scale(2.4)}60%{opacity:1;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+
     @keyframes gt-scrin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     @keyframes gt-bubblein{from{transform:scale(.9) translateY(4px);opacity:.4}to{transform:scale(1) translateY(0);opacity:1}}
     @keyframes gt-chipin{0%{transform:scale(.4);opacity:0}65%{transform:scale(1.14);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -351,6 +482,10 @@ const MultGame = (() => {
   const BOX_KEY   = id => `mult_boxes_${id}`;     // lådorna per par + passräknaren
   const REC_KEY   = id => `mult_record_${id}`;    // rekordrundans rekord
   const SET_KEY   = id => `mult_settings_${id}`;  // kugghjulets inställningar
+  /* Tabeller och gånger: standard upp till 10. 11:an och 12:an är extraval. */
+  const UPTO_DEFAULT = '10';
+  const UPTO_OPTS = [['10', 'Upp till 10<small>(standard)</small>'], ['11', 'Upp till 11'], ['12', 'Upp till 12']];
+  const OVP_KEY   = id => `mult_ovpass_${id}`;    // det sparade övningspasset
 
   function readJSON(key) {
     try { return JSON.parse(localStorage.getItem(key)); }
@@ -378,7 +513,7 @@ const MultGame = (() => {
   function getLog() { return sessionLog().get(); }
 
   /* Varje besvarad fråga i alla flöden (Öva, Rekordrunda, Dagens träning,
-     Eget matteprov, fokuserad träning) går hit: statistiken som förut,
+     Övningspass, fokuserad träning) går hit: statistiken som förut,
      och lådorna enligt reglerna i applyAnswer. */
   function recordAnswer(table, multiplier, correct) {
     const T = loadTrainer();          // första gången: lådorna byggs ur statistiken FÖRE detta svar
@@ -468,7 +603,9 @@ const MultGame = (() => {
 
   /* Hur paret ser ut på kartan: ett kan-tal vars due passerats är "Dags igen" (bleknat grönt). */
   const vis = (st, day = today()) => (st.box === 'kan' && st.due && day >= st.due) ? 'due' : st.box;
-  function visMap(pairs, day = today()) { const V = {}; for (const [a, b] of PAIRS) V[KEY(a, b)] = vis(pairs[KEY(a, b)], day); return V; }
+  const pairsUpTo = n => PAIRS.filter(([a, b]) => a <= n && b <= n);
+  /* n = hur långt tabellerna går (Gånger). Tal utanför syns inte och räknas inte. */
+  function visMap(pairs, day = today(), n = 12) { const V = {}; for (const [a, b] of pairsUpTo(n)) V[KEY(a, b)] = vis(pairs[KEY(a, b)], day); return V; }
   function counts(V) { const c = { kan:0, due:0, ovar:0, ny:0 }; for (const k in V) c[V[k]]++; return c; }
   const leftToLearn = V => { const c = counts(V); return c.ny + c.ovar; };   // "tal kvar att lära"
 
@@ -510,25 +647,39 @@ const MultGame = (() => {
   function saveRecord(r) { writeJSON(REC_KEY(profile.id), r); }
 
   /* ── Inställningarna (kugghjulet). Sparas per profil. ── */
-  const SET = { strat:'fast', tempo:'rekord', rev:'pa' };
+  const SET = { strat:'fast', tempo:'rekord', rev:'pa', upto:'10' };
   const SETTINGS = [
+    { k:'upto',   label:'Tabeller och gånger', help:'Hur långt kartan och övningarna går. 11:an och 12:an är extra.', opts:UPTO_OPTS },
     { k:'strat',  label:'Strategi', help:'Fast: en väg visas. Välj väg: barnet väljer mellan två.', opts:[['fast', 'Fast'], ['valj', 'Välj väg']] },
     { k:'tempo',  label:'Tempo', help:'Rekordrundan mot klockan eller mot eget rekord i rad.', opts:[['klocka', 'Klocka'], ['rekord', 'Eget rekord']] },
     { k:'answer', label:'Svar', help:'Fyra svar att välja bland, eller skriv svaret själv.', opts:[['choice', 'Val'], ['free', 'Fri']] },
     { k:'rev',    label:'Omvända frågor', help:'Till exempel: vilket gångertal blir 56? Visas bara med Val.', opts:[['av', 'Av'], ['pa', 'På']] },
   ];
   const getSetting = k => k === 'answer' ? answerMode : SET[k];
+  /* Sparade inställningar → giltiga värden. Saknas ett värde (t.ex. profiler från v57,
+     som inte har upto) gäller standard: upp till 10. Ett sparat värde gäller före standard. */
+  function settingsFrom(raw) {
+    const s = raw && typeof raw === 'object' ? raw : {};
+    return {
+      strat: s.strat === 'valj' ? 'valj' : 'fast',
+      tempo: s.tempo === 'klocka' ? 'klocka' : 'rekord',
+      rev:   s.rev === 'av' ? 'av' : 'pa',
+      upto:  ['10', '11', '12'].includes(String(s.upto)) ? String(s.upto) : UPTO_DEFAULT,
+      answer: s.answer === 'free' ? 'free' : 'choice',
+    };
+  }
   function loadSettings() {
-    const s = (profile && readJSON(SET_KEY(profile.id))) || {};
-    SET.strat = s.strat === 'valj' ? 'valj' : 'fast';
-    SET.tempo = s.tempo === 'klocka' ? 'klocka' : 'rekord';
-    SET.rev   = s.rev === 'av' ? 'av' : 'pa';
-    answerMode = s.answer === 'free' ? 'free' : 'choice';
+    const s = settingsFrom(profile && readJSON(SET_KEY(profile.id)));
+    SET.strat = s.strat; SET.tempo = s.tempo; SET.rev = s.rev; SET.upto = s.upto;
+    answerMode = s.answer;
   }
   function saveSettings() {
-    if (profile) writeJSON(SET_KEY(profile.id), { strat:SET.strat, tempo:SET.tempo, rev:SET.rev, answer:answerMode });
+    if (profile) writeJSON(SET_KEY(profile.id), { strat:SET.strat, tempo:SET.tempo, rev:SET.rev, upto:SET.upto, answer:answerMode });
   }
   const isVal = () => answerMode === 'choice';
+  /* "Gånger": 1–10, 1–11 eller 1–12. Styr kartans storlek, räknarna, Öva blandat,
+     Rekordrunda och övningspasset. Lådorna för dolda tal ligger kvar orörda. */
+  const UPTO = () => +SET.upto;
 
   /* ═══════════════════════════════════════════════════════════
      GRUNDER (ur mockupen)
@@ -555,6 +706,16 @@ const MultGame = (() => {
     test:'<rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.2" fill="currentColor" stroke="none"/>',
     stats:'<path d="M5 19v-6M12 19V5.5M19 19v-9"/>',
     log:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    repeat:'<path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11.5V10a4 4 0 0 1 4-4h13"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 12.5V14a4 4 0 0 1-4 4h-13"/>',
+    eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    grid4:'<rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/>',
+    pencil:'<path d="M4 20h4L19 9a2.83 2.83 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    star:'<path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17.2l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    minus:'<path d="M6 12h12"/>',
+    plus:'<path d="M12 6v12M6 12h12"/>',
+    shuffle:'<path d="M16 3.5h4.5V8"/><path d="M4 20L20.5 3.5"/><path d="M20.5 16v4.5H16"/><path d="M14.5 14.5l6 6"/><path d="M4 4l5 5"/>',
+    hand:'<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4a1.5 1.5 0 0 1 3 0v6.5"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v8a6.5 6.5 0 0 1-6.5 6.5h-.8a6 6 0 0 1-4.6-2.2L3.6 15a1.6 1.6 0 0 1 2.4-2.1L9 15V8a1.5 1.5 0 0 1 3 0"/>',
   };
   const svg = (k, style = '') => `<svg class="i" viewBox="0 0 24 24"${style ? ` style="${style}"` : ''}>${ICON[k]}</svg>`;
   const X = ' × ';
@@ -765,9 +926,9 @@ const MultGame = (() => {
     return { items:out, dropped:pend.reduce((s, p) => s + p.left, 0) };
   }
 
-  function buildPass(pairs, seed, day = today()){
+  function buildPass(pairs, seed, day = today(), n = 12){
     const r = rng(seed);
-    const by = k => PAIRS.filter(([a, b]) => vis(pairs[KEY(a, b)], day) === k);
+    const by = k => pairsUpTo(n).filter(([a, b]) => vis(pairs[KEY(a, b)], day) === k);
     const ny = by('ny').sort(easyFirst);
     const dueP = by('due').sort((p, q) => { const x = pairs[KEY(...p)].due, y = pairs[KEY(...q)].due; return x < y ? -1 : x > y ? 1 : easyFirst(p, q); });
     const ov = shuffle(by('ovar'), r), kn = shuffle(by('kan'), r);
@@ -788,16 +949,138 @@ const MultGame = (() => {
   const passSeed = T => 1000 + T.passNo * 7 + (profile ? hashStr(String(profile.id)) % 997 : 0);
 
   /* ═══════════════════════════════════════════════════════════
+     ÖVNINGSPASSET (rena funktioner – testas i tests/multiplication.test.mjs)
+     Ett pass = valda tabeller × gånger 1–n, körda i varv. Varven går från
+     lätt till svårt: Se svaret först (i ordning), Flerval, Fri inmatning
+     (blandad ordning). Inom varje varv gäller nötloopen i createDrill.
+  ═══════════════════════════════════════════════════════════ */
+  const RTYPES = ['show', 'choice', 'free'];
+  const RNAME  = { show:'Se svaret först', choice:'Flerval', free:'Fri inmatning' };
+  const RHELP  = { show:'Svaret visas, sedan frågar jag. I ordning.', choice:'Fyra svar att välja bland.', free:'Skriv svaret själv.' };
+  const PRESETS = [
+    { k:'kort',    label:'Kort',    c:{ show:0, choice:1, free:1 } },
+    { k:'vanligt', label:'Vanligt', c:{ show:1, choice:2, free:1 } },
+    { k:'langt',   label:'Långt',   c:{ show:1, choice:3, free:2 } },
+  ];
+  const RMAX = 4;                                       // varje stegare 0–4
+  const EST_S = { show:14, choice:10, free:12 };        // grov tid per fråga (sekunder)
+
+  const clampCount = v => Math.max(0, Math.min(RMAX, Math.round(Number(v) || 0)));
+  function normCounts(c){ c = c || {}; return { show:clampCount(c.show), choice:clampCount(c.choice), free:clampCount(c.free) }; }
+  /* Stegarna → varvens ordning, alltid lätt till svårt */
+  function roundTypes(counts){ const c = normCounts(counts), out = []; for (const t of RTYPES) for (let i = 0; i < c[t]; i++) out.push(t); return out; }
+  const presetFor = counts => { const c = normCounts(counts); return (PRESETS.find(p => RTYPES.every(t => p.c[t] === c[t])) || {}).k || null; };
+  /* Tabellerna 1–12. 11:an och 12:an är extraval och får väljas även när Gånger går upp till 10. */
+  function cleanTables(tables){ return [...new Set((tables || []).map(Number))].filter(t => Number.isInteger(t) && t >= 1 && t <= 12).sort((x, y) => x - y); }
+  /* Frågorna i ett varv. Se svaret först: tabell för tabell, 1, 2, 3 … Övriga: blandat. */
+  function roundItems(type, tables, n, r = Math.random){
+    const items = [];
+    for (const t of tables) for (let m = 1; m <= n; m++) items.push({ a:t, b:m });
+    return type === 'show' ? items : shuffle(items, r);
+  }
+  function buildRounds(cfg, n, r = Math.random){
+    const tables = cleanTables(cfg && cfg.tables);
+    return roundTypes(cfg && cfg.counts).map(type => ({ type, items:roundItems(type, tables, n, r) }));
+  }
+  function passPlan(cfg, n){
+    const tables = cleanTables(cfg && cfg.tables), types = roundTypes(cfg && cfg.counts);
+    const perRound = tables.length * n;
+    const secs = types.reduce((s, t) => s + EST_S[t] * perRound, 0);
+    return { tables, types, rounds:types.length, questions:perRound * types.length, minutes:secs ? Math.max(1, Math.round(secs / 60)) : 0 };
+  }
+  const varvTxt = n => `${cap(talord(n))} varv`;
+  const minTxt = m => m === 1 ? 'en minut' : `${m} minuter`;
+  function planSummary(pl){
+    if (!pl.tables.length) return 'Välj minst en tabell.';
+    if (!pl.rounds) return 'Välj minst ett varv.';
+    return `${varvTxt(pl.rounds)} · ${pl.questions} frågor · ungefär ${minTxt(pl.minutes)}`;
+  }
+  function tablesLabel(tables, n){
+    if (tables.length === 1) return `${tables[0]}:ans tabell`;
+    if (tables.length === 12 || (tables.length === n && tables[n - 1] === n)) return 'Alla tabeller';
+    if (tables.length <= 3) return tables.slice(0, -1).map(t => `${t}:an`).join(', ') + ` och ${tables[tables.length - 1]}:an`;
+    return `${cap(talord(tables.length))} tabeller blandat`;
+  }
+
+  /* NÖTLOOPEN i ett varv.
+     - Varje fråga ställs en gång.
+     - Fel svar: samma fråga direkt igen (retry), om och om tills den blir rätt.
+     - Första felet på en fråga lägger in den EN gång till, på en slumpad plats
+       minst två frågor bort (två andra frågor emellan). Är varvet nästan slut
+       läggs den sist. Extratillfället får aldrig ett eget extratillfälle.
+     - answer() säger om svaret ska räknas (record): bara första försöket på
+       varje ställd fråga, inklusive extratillfället – aldrig upprepningarna. */
+  function createDrill(items, r = Math.random){
+    const q = items.map((it, i) => ({ a:it.a, b:it.b, id:i, extra:false }));
+    const hasExtra = new Set();
+    let idx = 0, retry = false;
+    const st = { asked:0, firstOk:0, wrongFirst:0, attempts:0 };
+    return {
+      current(){ return idx < q.length ? { ...q[idx], retry } : null; },
+      answer(ok){
+        if (idx >= q.length) return null;
+        const slot = q[idx], record = !retry;
+        let insertedAt = null;
+        st.attempts++;
+        if (record){ st.asked++; if (ok) st.firstOk++; else st.wrongFirst++; }
+        if (ok){ idx++; retry = false; }
+        else {
+          retry = true;
+          if (!slot.extra && !hasExtra.has(slot.id)){
+            hasExtra.add(slot.id);
+            const lo = idx + 3, hi = q.length;            // insättningsindex: två andra frågor emellan
+            insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
+            q.splice(insertedAt, 0, { a:slot.a, b:slot.b, id:slot.id, extra:true });
+          }
+        }
+        return { record, ok:!!ok, insertedAt };
+      },
+      isDone(){ return idx >= q.length; },
+      progress(){ return { done:idx, total:q.length }; },
+      stats(){ return { ...st }; },
+      queue(){ return q.map(x => ({ ...x })); },
+    };
+  }
+
+  /* "Så kan du tänka" i passet: har den andra faktorn en enklare väg (7 × 2 → 2 × 7,
+     dubbelt)? Då ritas den som rader, som i Öva. */
+  function passExplainFor(a, b){
+    const swap = wayRank(b) < wayRank(a), ea = swap ? b : a, eb = swap ? a : b;
+    return { ea, eb, text:swap ? `${a}${X}${b} är lika mycket som ${ea}${X}${eb}. ${introText(ea, eb)}` : introText(ea, eb) };
+  }
+
+  /* Kvittots siffror ur varvens resultat ({type, asked, firstOk, wrongFirst}) */
+  function receiptFor(results, ms){
+    const correct = results.reduce((s, x) => s + x.firstOk, 0);
+    const total   = results.reduce((s, x) => s + x.asked, 0);
+    const fixed   = results.reduce((s, x) => s + x.wrongFirst, 0);
+    return { correct, total, pct:total ? Math.round(100 * correct / total) : 0, fixed, secs:Math.max(0, Math.round((ms || 0) / 1000)), rounds:results.map(x => x.type) };
+  }
+  function durTxt(secs){
+    if (secs < 60) return `${secs} s`;
+    const m = Math.floor(secs / 60), s = secs % 60;
+    return s ? `${m} min ${s} s` : `${m} min`;
+  }
+  /* Beröm som varierar med resultatet men aldrig är negativt */
+  function praiseFor(pct){
+    if (pct >= 100) return 'Varje svar satt på första försöket.';
+    if (pct >= 85)  return 'Starkt jobbat! Nästan allt satt direkt.';
+    if (pct >= 60)  return 'Bra nött! Du rättade varje fel.';
+    return 'Du nötte dig igenom hela passet. Varje fel blev rätt till slut.';
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      TRÄNARENS TILLSTÅND (per montering av hubben)
   ═══════════════════════════════════════════════════════════ */
   const S = { screen:'hub', T:null, record:{ streak:0, clock:0 }, learn:{ a:7, b:8 } };
-  let hubMap = null, endMap = null, learnRect = null, pracRect = null, ctrlP = null, ctrlR = null;
+  let hubMap = null, endMap = null, learnRect = null, pracRect = null, passRect = null, ctrlP = null, ctrlR = null, ctrlS = null;
+  let PS = null, SU = null;                              // övningspasset som körs · inställningsskärmen
   const SH = { on:false, i:-1 };
   let LW = null, LF = 0;                                 // LF: 0 ej vänd, 1 vänd (väntar på slutsats), 2 klar
   let P = null, R = null, clockId = null;
   const E = { i:0 };
   let busy = false;
-  const curVis = () => visMap(S.T.pairs);
+  const curVis = () => visMap(S.T.pairs, today(), UPTO());
   const reloadT = () => { S.T = loadTrainer(); };
 
   /* Gångaren: en strategi steg för steg, delad av Lär dig och Öva */
@@ -911,36 +1194,50 @@ const MultGame = (() => {
   }
   function refresh(){
     if (!$('app')) return;
-    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec })[S.screen]();
+    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec, setup:refreshSetup, pass:refreshPass, done:() => {} })[S.screen]();
   }
   function btn(el, label, icon, after = true){ el.innerHTML = after ? `${label} ${icon ? svg(icon) : ''}` : `${icon ? svg(icon) : ''} ${label}`; }
-  const TITLES = { hub:'Gångertabellen', learn:'Lär dig strategin', prac:'Öva', end:'Passet klart', rec:'Rekordrunda' };
-  function goto(name){
+  const TITLES = { hub:'Gångertabellen', learn:'Lär dig strategin', prac:'Öva blandat', end:'Passet klart', rec:'Rekordrunda',
+                   setup:'Ställ in passet', pass:'Övningspass', done:'Övningspass' };
+  function goto(name, arg){
     if (S.screen === 'rec') stopClock();
+    if (S.screen === 'pass' && name !== 'pass' && PS) PS.token++;   // väntande steg i passet får inte köra vidare
     busy = false;
+    closeModalSafe();
     S.screen = name;
     document.querySelectorAll('#mt-app .gscr').forEach(s => s.classList.toggle('on', s.id === 'mt-scr-' + name));
     $('title').textContent = TITLES[name];
     $('cap').classList.toggle('on', name === 'prac');
-    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec })[name]();
+    $('backBtn').textContent = name === 'pass' ? 'Avbryt' : 'Tillbaka';
+    $('gear').style.visibility = (name === 'pass' || name === 'done') ? 'hidden' : '';
+    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec, setup:enterSetup, pass:enterPass, done:enterDone })[name](arg);
   }
 
   /* ═══════════════════════════════════════════════════════════
      TABELLKARTAN (komponent: hubben och slutbilden har var sin)
   ═══════════════════════════════════════════════════════════ */
-  function makeMap(el){
+  /* n = hur långt tabellerna går (10, 11, 12), cell = rutans storlek i px.
+     onRow: radnumren blir knappar (hubben: tryck på 7 → övningspass med 7:an). */
+  function makeMap(el, n = 12, cell = 24, onRow = null){
     const cells = [], rowH = [], colH = [];
     el.innerHTML = '';
-    const mk = (cls, txt = '') => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; el.append(d); return d; };
+    el.style.gridTemplateColumns = `repeat(${n + 1},${cell}px)`;
+    el.style.gridAutoRows = `${cell}px`;
+    const mk = (cls, txt = '', tag = 'div') => { const d = document.createElement(tag); d.className = cls; d.textContent = txt; el.append(d); return d; };
     mk('mh x', '×');
-    for (let c = 1; c <= 12; c++) colH[c] = mk('mh', c);
-    for (let a = 1; a <= 12; a++){
-      rowH[a] = mk('mh', a); cells[a] = [];
-      for (let b = 1; b <= 12; b++){ const d = mk('mc'); d.dataset.a = a; d.dataset.b = b; cells[a][b] = d; }
+    for (let c = 1; c <= n; c++) colH[c] = mk('mh', c);
+    for (let a = 1; a <= n; a++){
+      if (onRow){
+        rowH[a] = mk('mh rowbtn', a, 'button');
+        rowH[a].setAttribute('aria-label', `Övningspass med ${a}:ans tabell`);
+        rowH[a].onclick = () => onRow(a);
+      } else rowH[a] = mk('mh', a);
+      cells[a] = [];
+      for (let b = 1; b <= n; b++){ const d = mk('mc'); d.dataset.a = a; d.dataset.b = b; cells[a][b] = d; }
     }
     const all = () => cells.flatMap((row, a) => row ? row.slice(1).map((c, i) => ({ el:c, a, b:i + 1 })) : []);
     return {
-      el, cells, rowH, colH, all,
+      el, cells, rowH, colH, all, n, pitch:cell + 2,
       paint(V){
         el.classList.remove('neutral');
         rowH.forEach(h => h && h.classList.remove('dim')); colH.forEach(h => h && h.classList.remove('dim'));
@@ -957,25 +1254,47 @@ const MultGame = (() => {
   const countHTML = (n, pop = false) => n === 0
     ? `${bTag(pop)}0</b><span>tal kvar —<br>hela tabellen är grön</span>`
     : `${bTag(pop)}${n}</b><span>tal kvar<br>att lära</span>`;
-  const refillHTML = m => m > 0 ? `<i></i>${m} tal att fylla på` : '';
+  const refillHTML = m => m > 0 ? `<i></i>${m} att fylla på` : '';
 
   /* ═══════════════════════════════════════════════════════════
      HUBBEN + "Så krymper tabellen"
   ═══════════════════════════════════════════════════════════ */
-  const SHRINK = [
-    { text:() => 'Hela tabellen har 144 rutor. Nu stryker vi en del i taget.', act:'neutral' },
-    { text:() => `Gånger 1 ändrar inget: 1${X}7 = 7. Vi stryker 1:ans rad och kolumn.`, rm:[1] },
-    { text:() => `Gånger 10 sätter en nolla efter talet: 10${X}7 = 70. Vi stryker 10:ans rad och kolumn.`, rm:[10] },
-    { text:() => `Gånger 2 är dubbelt: 2${X}7 = 7 + 7. Vi stryker 2:ans rad och kolumn.`, rm:[2] },
-    { text:() => `Gånger 5 är hälften av gånger 10: 5${X}7 är hälften av 70. Vi stryker 5:ans rad och kolumn.`, rm:[5] },
-    { text:() => `11:an och 12:an är 10:an och lite till: 12${X}7 = 70 + 14. Vi stryker deras rader och kolumner.`, rm:[11, 12] },
-    { text:() => `3${X}7 och 7${X}3 blir lika mycket. Därför räcker det att lära sig varje par en gång.`, act:'twins' },
-    { text:n => `Kvar: ${n} rutor. Det är de svåra — och dem övar vi på.`, act:'final' },
-  ];
+  /* Stegen beror på hur långt tabellerna går: med 1–10 finns inget 11/12-steg */
+  function shrinkSteps(n = 12){
+    const big = n === 12 ? { text:() => `11:an och 12:an är 10:an och lite till: 12${X}7 = 70 + 14. Vi stryker deras rader och kolumner.`, rm:[11, 12] }
+      : n === 11 ? { text:() => `11:an är 10:an och lite till: 11${X}7 = 70 + 7. Vi stryker 11:ans rad och kolumn.`, rm:[11] } : null;
+    return [
+      { text:() => `Hela tabellen har ${n * n} rutor. Nu stryker vi en del i taget.`, act:'neutral' },
+      { text:() => `Gånger 1 ändrar inget: 1${X}7 = 7. Vi stryker 1:ans rad och kolumn.`, rm:[1] },
+      { text:() => `Gånger 10 sätter en nolla efter talet: 10${X}7 = 70. Vi stryker 10:ans rad och kolumn.`, rm:[10] },
+      { text:() => `Gånger 2 är dubbelt: 2${X}7 = 7 + 7. Vi stryker 2:ans rad och kolumn.`, rm:[2] },
+      { text:() => `Gånger 5 är hälften av gånger 10: 5${X}7 är hälften av 70. Vi stryker 5:ans rad och kolumn.`, rm:[5] },
+      ...(big ? [big] : []),
+      { text:() => `3${X}7 och 7${X}3 blir lika mycket. Därför räcker det att lära sig varje par en gång.`, act:'twins' },
+      { text:k => `Kvar: ${k} rutor. Det är de svåra — och dem övar vi på.`, act:'final' },
+    ];
+  }
+  let SHRINK = shrinkSteps(12);
+  /* Rutorna kvar efter varje steg (samma regler som animationen: strukna rader och
+     kolumner försvinner, tvillingarna ovanför diagonalen flyger till sin spegelbild). */
+  function shrinkRemain(n = 12){
+    let live = [];
+    for (let a = 1; a <= n; a++) for (let b = 1; b <= n; b++) live.push([a, b]);
+    return shrinkSteps(n).map(st => {
+      if (st.rm) live = live.filter(([a, b]) => !st.rm.includes(a) && !st.rm.includes(b));
+      if (st.act === 'twins') live = live.filter(([a, b]) => b <= a);
+      return live.length;
+    });
+  }
   const liveCells = () => hubMap.all().filter(c => !c.el.classList.contains('gone') && !c.el.classList.contains('flown'));
   function shrinkCount(n, pop){ $('hubLegend').innerHTML = `<span>Kvar i tabellen: ${bTag(pop)}${n}</b> rutor</span>`; }
 
   function enterHub(){ SH.on = false; SH.i = -1; reloadT(); renderHub(); }
+  const RICON = { show:'eye', choice:'grid4', free:'pencil' };
+  /* En liten ikon per varv. Fler än sex varv får inte plats på raden – då en ikon per sort med antal. */
+  const roundIcons = types => types.length <= 6
+    ? types.map(t => `<i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>`).join('')
+    : RTYPES.filter(t => types.includes(t)).map(t => `<span class="rig"><i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>×${types.filter(x => x === t).length}</span>`).join('');
   function renderHub(){
     if (SH.on) return;
     const V = curVis(), c = counts(V);
@@ -983,26 +1302,43 @@ const MultGame = (() => {
     $('hubHead').innerHTML = countHTML(leftToLearn(V));
     $('hubLegend').innerHTML = legendHTML(c);
     $('hubRefill').innerHTML = refillHTML(c.due);
-    $('hubRefill').style.display = c.due > 0 ? '' : 'none';
     const kanAll = c.kan + c.due;
-    $('icLearn').innerHTML = svg('bulb'); $('icPrac').innerHTML = svg('play'); $('icRec').innerHTML = svg(kanAll < 10 ? 'lock' : 'trophy');
-    ['chevLearn', 'chevPrac', 'chevRec'].forEach(id => $(id).innerHTML = svg('fwd', 'width:18px;height:18px;opacity:.55'));
-    $('subLearn').textContent = 'Välj en tabell och se hur du kan tänka';
-    const pv = buildPass(S.T.pairs, passSeed(S.T));
-    const nq = pv.filter(it => it.kind === 'q').length, nNew = pv.filter(it => it.kind === 'intro').length;
-    $('subPrac').textContent = `${nq} frågor · ${nNew === 0 ? 'inga nya tal just nu' : nNew === 1 ? 'ett nytt tal' : `${talord(nNew)} nya tal`}`;
-    $('subRec').textContent = kanAll < 10 ? 'Öppnar när du kan 10 tal'
-      : SET.tempo === 'klocka' ? 'Bara tal du kan · en minut på klockan'
-      : S.record.streak > 0 ? `Bara tal du kan · rekord ${S.record.streak} i rad` : 'Bara tal du kan · sätt ett rekord';
+    // Övningspasset: det sparade passet, eller en uppmaning att ställa in ett
+    const cfg = usableOvp();
+    if (cfg){
+      const pl = passPlan(cfg, UPTO());
+      $('pcTitle').textContent = tablesLabel(pl.tables, UPTO());
+      $('pcRounds').innerHTML = roundIcons(pl.types);
+      $('pcSub').textContent = `${varvTxt(pl.rounds)} · ${pl.questions} frågor`;
+      $('pcEdit').style.display = '';
+      $('pcGo').style.gridColumn = '';
+      btn($('pcGo'), 'Starta', 'play', false);
+    } else {
+      $('pcTitle').textContent = 'Ställ in ett övningspass';
+      $('pcRounds').innerHTML = '';
+      $('pcSub').textContent = 'Välj tabell och hur många varv';
+      $('pcEdit').style.display = 'none';
+      $('pcGo').style.gridColumn = '1 / -1';
+      btn($('pcGo'), 'Ställ in', 'next');
+    }
+    $('icRec').innerHTML = svg(kanAll < 10 ? 'lock' : 'trophy');
+    const pv = buildPass(S.T.pairs, passSeed(S.T), today(), UPTO());
+    $('subPrac').textContent = `${pv.filter(it => it.kind === 'q').length} frågor`;
+    $('subLearn').textContent = 'Så kan du tänka';
+    $('subRec').textContent = kanAll < 10 ? 'När du kan 10 tal'
+      : SET.tempo === 'klocka' ? 'En minut'
+      : S.record.streak > 0 ? `Rekord ${S.record.streak} i rad` : 'Sätt ett rekord';
     refreshHub();
   }
   function refreshHub(){
     $('hubEntries').style.display = SH.on ? 'none' : 'flex';
-    $('hubMore').style.display = SH.on ? 'none' : 'flex';
+    $('hubMore').style.visibility = SH.on ? 'hidden' : '';
     $('hubShrink').style.display = SH.on ? 'flex' : 'none';
-    if (SH.on) $('hubRefill').style.display = 'none';
-    $('shrinkBtn').innerHTML = SH.on ? `${svg('close')}Avsluta` : `${svg('shrink')}Så krymper tabellen`;
+    $('hubRefill').style.visibility = (SH.on || !$('hubRefill').innerHTML) ? 'hidden' : '';
+    $('shrinkBtn').innerHTML = SH.on ? svg('close') : svg('shrink');
+    $('shrinkBtn').setAttribute('aria-label', SH.on ? 'Avsluta Så krymper tabellen' : 'Så krymper tabellen');
     $('shrinkBtn').disabled = busy;
+    $('hubMap').classList.toggle('rows-off', SH.on);
     const c = counts(curVis());
     $('goRec').disabled = c.kan + c.due < 10;
     const last = SH.i >= SHRINK.length - 1;
@@ -1017,7 +1353,7 @@ const MultGame = (() => {
     refreshHub();
     await wait(LEAD + 120);
     if (st.act === 'neutral'){
-      hubMap.el.classList.add('neutral'); await wait(500); shrinkCount(144, true);
+      hubMap.el.classList.add('neutral'); await wait(500); shrinkCount(hubMap.n * hubMap.n, true);
     } else if (tables){
       const hit = liveCells().filter(c => tables.includes(c.a) || tables.includes(c.b));
       tables.forEach(t => { hubMap.rowH[t].classList.add('dim'); hubMap.colH[t].classList.add('dim'); });
@@ -1031,7 +1367,7 @@ const MultGame = (() => {
       up.forEach(c => {
         const twin = hubMap.cells[c.b][c.a];
         c.el.classList.add('fly');
-        c.el.style.transform = `translate(${(c.a - c.b) * 26}px,${(c.b - c.a) * 26}px)`;
+        c.el.style.transform = `translate(${(c.a - c.b) * hubMap.pitch}px,${(c.b - c.a) * hubMap.pitch}px)`;
         c.el.classList.add('flown');
         setTimeout(() => { twin.classList.remove('twin'); void twin.offsetWidth; twin.classList.add('twin'); }, 600);
       });
@@ -1050,6 +1386,7 @@ const MultGame = (() => {
   const LT = [2, 4, 5, 6, 7, 8, 9];
   function enterLearn(){ startLearn(); }
   function startLearn(){
+    S.learn.b = Math.min(S.learn.b, UPTO());
     const { a, b } = S.learn;
     LW = makeWalker(a, b); LF = 0;
     $('learnTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.t === a));
@@ -1065,7 +1402,7 @@ const MultGame = (() => {
     $('learnMain').disabled = busy;
     btn($('learnFlip'), 'Vänd rektangeln', 'flip', false);
     $('learnFlip').disabled = busy || !(W.stage === 'done' && LF === 0 && W.a !== W.b);
-    $('bPrev').disabled = S.learn.b <= 1; $('bNext').disabled = S.learn.b >= 12;
+    $('bPrev').disabled = S.learn.b <= 1; $('bNext').disabled = S.learn.b >= UPTO();
     $('learnChoice').querySelectorAll('button').forEach(b => b.disabled = busy);
   }
   function onLearnMain(){
@@ -1099,7 +1436,7 @@ const MultGame = (() => {
     host.querySelectorAll('button').forEach(b => b.onclick = () => {
       if (busy) return;
       walkerChoose(W, +b.dataset.k);
-      const rect = where === 'learn' ? learnRect : pracRect;
+      const rect = where === 'learn' ? learnRect : where === 'pass' ? passRect : pracRect;
       run(async () => {
         await walkerStep(W, rect, t => say(bub, t));
         if (where === 'prac') afterExplainStep();
@@ -1113,10 +1450,12 @@ const MultGame = (() => {
   ═══════════════════════════════════════════════════════════ */
   const isRev = it => it && it.kind === 'q' && it.rev && isVal() && SET.rev === 'pa';
 
-  function makeCtrl(host, onAnswer){
+  /* valFn: flerval (true) eller knappsats (false). Öva och Rekordrunda följer
+     inställningen "Svar"; övningspasset styr det per varv. */
+  function makeCtrl(host, onAnswer, valFn = isVal){
     const C = { opts:null, typed:'', locked:true, pair:false };
     function draw(){
-      if (isVal()){
+      if (valFn()){
         host.innerHTML = `<div class="opts">${[0,1,2,3].map(i => `<button class="opt${C.pair ? ' pair' : ''}" data-i="${i}">${C.opts && C.opts[i] ? C.opts[i].label : ''}</button>`).join('')}</div>`;
         host.querySelectorAll('.opt').forEach(b => b.onclick = () => { if (C.locked || !C.opts || busy) return; onAnswer(C.opts[+b.dataset.i], b); });
       } else {
@@ -1137,7 +1476,7 @@ const MultGame = (() => {
     C.set = (opts, locked, pair = false) => { C.opts = opts; C.typed = ''; C.locked = locked; C.answered = false; C.pair = pair; draw(); };
     C.done = () => { C.locked = true; C.answered = true; host.classList.remove('off'); };
     C.mark = (label, cls) => {
-      if (isVal()) host.querySelectorAll('.opt').forEach(b => { if (b.textContent === String(label)) b.classList.add(cls); });
+      if (valFn()) host.querySelectorAll('.opt').forEach(b => { if (b.textContent === String(label)) b.classList.add(cls); });
       else { const d = host.querySelector('.fdisp'); if (d) d.classList.add(cls); }
     };
     return C;
@@ -1145,7 +1484,7 @@ const MultGame = (() => {
 
   function enterPrac(){
     reloadT();
-    P = { items:buildPass(S.T.pairs, passSeed(S.T)), i:0, st:[], res:{}, correct:0, answered:0, phase:'q', W:null, wrongLabel:null, reasks:{} };
+    P = { items:buildPass(S.T.pairs, passSeed(S.T), today(), UPTO()), i:0, st:[], res:{}, correct:0, answered:0, phase:'q', W:null, wrongLabel:null, reasks:{} };
     P.before = curVis();
     goItem(0);
   }
@@ -1305,7 +1644,7 @@ const MultGame = (() => {
   function finishPass(){
     reloadT();
     const before = P.before, after = curVis(), moves = [];
-    for (const k in P.res) if (before[k] !== after[k]) moves.push({ k, from:before[k], to:after[k] });
+    for (const k in P.res) if (before[k] && after[k] && before[k] !== after[k]) moves.push({ k, from:before[k], to:after[k] });
     P.moves = moves; P.after = after;
     S.T.passNo++; saveTrainer(S.T);                      // nästa pass blir ett annat
     const pct = P.answered ? Math.round(100 * P.correct / P.answered) : 0;
@@ -1388,7 +1727,7 @@ const MultGame = (() => {
   function enterRec(){
     stopClock();
     reloadT();
-    const pool = PAIRS.filter(([a, b]) => S.T.pairs[KEY(a, b)].box === 'kan');
+    const pool = pairsUpTo(UPTO()).filter(([a, b]) => S.T.pairs[KEY(a, b)].box === 'kan');
     R = { phase:'intro', streak:0, correct:0, answered:0, left:60, pool, queue:[], q:null, max:Math.min(30, pool.length),
           prev:SET.tempo === 'klocka' ? S.record.clock : S.record.streak, beat:false };
     const q = $('recQ');
@@ -1509,6 +1848,304 @@ const MultGame = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════
+     ÖVNINGSPASSET: sparat pass, inställning, körning, kvitto
+  ═══════════════════════════════════════════════════════════ */
+  function loadOvp(){
+    const r = profile && readJSON(OVP_KEY(profile.id));
+    if (!r || !Array.isArray(r.tables)) return null;
+    return { tables:r.tables.map(Number), counts:normCounts(r.counts) };
+  }
+  function saveOvp(cfg){ if (profile) writeJSON(OVP_KEY(profile.id), { tables:cfg.tables, counts:normCounts(cfg.counts) }); }
+  /* Det sparade passet så som det kan köras med nuvarande Gånger (null = inget att starta) */
+  function usableOvp(){
+    const c = loadOvp(); if (!c) return null;
+    const tables = cleanTables(c.tables);
+    return tables.length && roundTypes(c.counts).length ? { tables, counts:c.counts } : null;
+  }
+
+  /* ── Ställ in ett övningspass ── */
+  function enterSetup(table){
+    const saved = loadOvp();
+    const counts = saved && roundTypes(saved.counts).length ? saved.counts : { ...PRESETS[1].c };
+    const tables = table ? [table] : saved ? cleanTables(saved.tables) : [];
+    SU = { tables, counts:normCounts(counts) };
+    renderSetup();
+  }
+  function renderSetup(){
+    if (!SU) return;
+    const n = UPTO();
+    SU.tables = cleanTables(SU.tables);
+    $('scr-setup').querySelectorAll('.chips button').forEach(b => {
+      const t = +b.dataset.t, on = SU.tables.includes(t);
+      b.classList.toggle('on', on); b.classList.toggle('dim', t > n && !on); b.setAttribute('aria-pressed', on);
+    });
+    $('suUpto').querySelectorAll('button').forEach(b => { const on = b.dataset.v === SET.upto; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    const pk = presetFor(SU.counts);
+    $('suPresets').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.k === pk));
+    RTYPES.forEach(t => {
+      const row = $('suR-' + t);
+      row.querySelector('.rn').textContent = SU.counts[t];
+      row.querySelector('[data-d="-1"]').disabled = SU.counts[t] <= 0;
+      row.querySelector('[data-d="1"]').disabled = SU.counts[t] >= RMAX;
+      row.classList.toggle('zero', SU.counts[t] === 0);
+    });
+    const pl = passPlan(SU, n);
+    $('suSum').textContent = planSummary(pl);
+    $('suGo').disabled = !pl.tables.length || !pl.rounds;
+    btn($('suGo'), 'Starta passet', 'play', false);
+  }
+  function refreshSetup(){}
+  function startFromSetup(){
+    if (!SU) return;
+    const pl = passPlan(SU, UPTO());
+    if (!pl.tables.length || !pl.rounds) return;
+    saveOvp({ tables:pl.tables, counts:SU.counts });
+    snd('click');
+    goto('pass', { tables:pl.tables, counts:SU.counts });
+  }
+
+  /* ── Körningen ──
+     PS.phase: 'show' (svaret visas) · 'q' (fråga) · 'right' (rätt, går vidare själv)
+               'wrong' (rätt svar visas) · 'explain' (strategirektangeln) · 'between' (mellan varven) */
+  const passVal = () => !!PS && PS.rounds[PS.ri] && PS.rounds[PS.ri].type !== 'free';
+  function enterPass(cfg){
+    cfg = cfg || usableOvp();
+    if (!cfg){ goto('setup'); return; }
+    const n = UPTO();
+    PS = { cfg, upto:n, tables:cleanTables(cfg.tables), rounds:buildRounds(cfg, n), ri:0, drill:null, phase:'q', res:[],
+           start:Date.now(), token:(PS ? PS.token : 0) + 1, W:null, justFixed:false };
+    if (!PS.rounds.length || !PS.tables.length){ goto('setup'); return; }
+    startRound(0);
+  }
+  function startRound(i){
+    PS.ri = i;
+    PS.drill = createDrill(PS.rounds[i].items);
+    PS.justFixed = false;
+    renderPassTrack();
+    nextQ(true);
+  }
+  function renderPassTrack(){
+    const R0 = PS.rounds[PS.ri], p = PS.drill ? PS.drill.progress() : { done:0, total:1 };
+    const done = PS.phase === 'between';
+    $('psL').innerHTML = `Varv <b>${PS.ri + 1}</b> av ${PS.rounds.length} · ${RNAME[R0.type]}`;
+    $('psR').classList.toggle('many', PS.rounds.length > 6);
+    $('psR').innerHTML = PS.rounds.map((r, k) => `<i class="rp${k < PS.ri || (k === PS.ri && done) ? ' ok' : k === PS.ri ? ' cur' : ''}"></i>`).join('');
+    $('psFill').style.transform = `scaleX(${done ? 1 : p.total ? p.done / p.total : 0})`;
+  }
+  function stageQ(html, tag){
+    const q = $('psQ'); q.innerHTML = html; q.classList.remove('swap'); void q.offsetWidth; q.classList.add('swap');
+    $('psTag').textContent = tag || ''; $('psTag').classList.toggle('on', !!tag);
+  }
+  const eqHTML = (a, b, ans) => `${a}<span class="x">×</span>${b} = ${ans === undefined ? '<span class="qa">?</span>' : `<span class="qok">${ans}</span>`}`;
+  function nextQ(first = false){
+    if (!PS || S.screen !== 'pass') return;
+    if (PS.drill.isDone()){ roundDone(); return; }
+    const cur = PS.drill.current(), type = PS.rounds[PS.ri].type;
+    $('psOver').classList.remove('on'); PS.W = null;
+    renderPassTrack();
+    if (type === 'show' && !cur.retry){
+      PS.phase = 'show';
+      stageQ(eqHTML(cur.a, cur.b, cur.a * cur.b), cur.extra ? 'Tillbaka igen' : 'Titta');
+      ctrlS.set(options(cur.a, cur.b).map(v => ({ label:String(v), v })), true);
+      say('passBubble', `Titta: ${cur.a}${X}${cur.b} = ${cur.a * cur.b}.`, 'Tryck på Fråga mig när du är redo.');
+      refreshPass();
+      return;
+    }
+    askQ(first);
+  }
+  function askQ(first = false){
+    const cur = PS.drill.current(), type = PS.rounds[PS.ri].type;
+    PS.phase = 'q';
+    $('psOver').classList.remove('on'); PS.W = null;
+    stageQ(eqHTML(cur.a, cur.b), cur.retry ? 'En gång till' : cur.extra ? 'Tillbaka igen' : '');
+    ctrlS.set(options(cur.a, cur.b).map(v => ({ label:String(v), v })), false);
+    const intro = first ? (type === 'free' ? 'Nu skriver du svaret själv.' : type === 'choice' ? 'Nu blandas frågorna.' : '') : '';
+    say('passBubble',
+      cur.retry ? 'Samma fråga en gång till.'
+      : cur.extra ? 'Den här frågan kommer tillbaka en gång till.'
+      : type === 'show' ? 'Vilket svar var det?'
+      : type === 'free' ? 'Skriv svaret och tryck OK.' : 'Vilket svar stämmer?', intro);
+    refreshPass();
+  }
+  function passAnswer(o, el){
+    if (!PS || PS.phase !== 'q') return;
+    const cur = PS.drill.current(), ab = cur.a * cur.b, ok = o.v === ab;
+    const res = PS.drill.answer(ok);
+    if (res.record) recordAnswer(cur.a, cur.b, ok);        // bara första försöket räknas
+    ctrlS.done();
+    snd(ok ? 'correct' : 'wrong');
+    if (ok){
+      PS.phase = 'right';
+      ctrlS.mark(o.label, 'ok');
+      stageQ(eqHTML(cur.a, cur.b, ab), cur.retry ? 'En gång till' : cur.extra ? 'Tillbaka igen' : '');
+      say('passBubble', cur.retry && PS.justFixed ? 'Rätt! Den frågan kommer tillbaka en gång till i varvet.' : `Rätt! ${cur.a}${X}${cur.b} = ${ab}.`);
+      PS.justFixed = false;
+      renderPassTrack(); refreshPass();
+      const tok = PS.token;
+      run(async () => { await wait(cur.retry ? 1400 : 700); if (PS && PS.token === tok) nextQ(); });
+      return;
+    }
+    PS.phase = 'wrong';
+    PS.justFixed = res.insertedAt !== null || PS.justFixed;
+    ctrlS.mark(o.label, 'bad');
+    if (passVal()) ctrlS.mark(String(ab), 'ok');
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    stageQ(eqHTML(cur.a, cur.b, ab), 'Rätt svar');
+    say('passBubble', `Det blir ${ab}.`, 'Titta en gång till och svara sedan igen.');
+    renderPassTrack(); refreshPass();
+  }
+  function passExplain(){
+    if (busy || !PS || PS.phase !== 'wrong') return;
+    const cur = PS.drill.current();
+    PS.phase = 'explain';
+    const { ea, eb, text } = passExplainFor(cur.a, cur.b);
+    run(async () => {
+      say('passBubble', text);
+      await wait(LEAD);
+      $('psOQ').innerHTML = eqHTML(ea, eb, ea * eb);
+      $('psOver').classList.add('on');
+      PS.W = makeWalker(ea, eb);
+      passRect.setup(ea, eb, PS.W.rows);
+      await passRect.reveal();
+    });
+  }
+  function passExplainStep(){
+    if (busy || !PS || PS.phase !== 'explain' || !PS.W || PS.W.stage === 'done') return;
+    if (needsChoice(PS.W)){ showChoice('pass', PS.W); return; }
+    run(async () => { await walkerStep(PS.W, passRect, t => say('passBubble', t)); });
+  }
+  function passRetry(){
+    if (busy || !PS || (PS.phase !== 'wrong' && PS.phase !== 'explain')) return;
+    askQ();
+  }
+  function roundDone(){
+    const st = PS.drill.stats();
+    PS.res.push({ type:PS.rounds[PS.ri].type, asked:st.asked, firstOk:st.firstOk, wrongFirst:st.wrongFirst });
+    if (PS.ri >= PS.rounds.length - 1){ finishOvp(); return; }
+    PS.phase = 'between';
+    $('psOver').classList.remove('on');
+    renderPassTrack();
+    const nxt = PS.rounds[PS.ri + 1].type;
+    stageQ(`<span class="rbig okc">${svg('check', 'width:64px;height:64px')}</span><span class="rbt">Varv ${PS.ri + 1} klart!</span><span class="rsub">Nästa: ${RNAME[nxt]}</span>`, '');
+    ctrlS.set(null, true);
+    $('psCtrl').innerHTML = `<div class="rlist">${PS.rounds.map((r, k) => `<span class="rl${k <= PS.ri ? ' ok' : k === PS.ri + 1 ? ' next' : ''}">${svg(k <= PS.ri ? 'check' : RICON[r.type])}<span>${RNAME[r.type]}</span></span>`).join('')}</div>`;
+    $('psCtrl').classList.remove('off');
+    snd('correct');
+    say('passBubble', 'Bra jobbat! Fortsätt när du är redo.', RHELP[nxt]);
+    refreshPass();
+  }
+  function onPassMain(){
+    if (busy || !PS) return;
+    if (PS.phase === 'show'){ askQ(); return; }
+    if (PS.phase === 'between'){ startRound(PS.ri + 1); return; }
+  }
+  function refreshPass(){
+    if (!PS) return;
+    const ph = PS.phase, duo = ph === 'wrong' || ph === 'explain';
+    $('psSlot').classList.toggle('choosing', ph === 'explain' && !!PS.W && PS.W.stage === 'choice');
+    $('psSlot').classList.toggle('duoing', duo);
+    const m = $('psMain');
+    m.style.visibility = (ph === 'q' || ph === 'right') ? 'hidden' : '';
+    if (ph === 'show') btn(m, 'Fråga mig', 'next');
+    else if (ph === 'between') btn(m, 'Fortsätt', 'next');
+    m.disabled = busy;
+    const help = $('psHelp');
+    if (ph === 'explain'){ btn(help, 'Nästa steg', 'next'); help.disabled = busy || !PS.W || PS.W.stage === 'done'; }
+    else { btn(help, 'Så kan du tänka', 'bulb', false); help.disabled = busy; }
+    btn($('psRetry'), 'Svara igen', 'again');
+    $('psRetry').disabled = busy;
+    $('passChoice').querySelectorAll('button').forEach(b => b.disabled = busy);
+  }
+  function confirmCancelPass(){
+    showModal(`
+      <h3 class="modal-title">Vill du avbryta passet?</h3>
+      <p class="mult-modal-txt">Om du avbryter nu sparas inte passet.</p>
+      <div class="mult-modal-stack">
+        <button class="btn btn-primary" onclick="MultGame.hideModal()">Fortsätt passet</button>
+        <button class="btn btn-ghost" onclick="MultGame._cancelPass()">Avbryt passet</button>
+      </div>
+    `);
+  }
+  function finishOvp(){
+    const R0 = receiptFor(PS.res, Date.now() - PS.start);
+    const entry = { type:'ovningspass', tables:PS.tables, upto:PS.upto, rounds:R0.rounds, correct:R0.correct, total:R0.total, pct:R0.pct, fixed:R0.fixed, secs:R0.secs };
+    addSessionLog(entry);
+    const saved = getLog()[0];
+    PS.logId = saved && saved.type === 'ovningspass' ? saved.id : null;
+    PS.receipt = { ...entry, date:saved && saved.date || new Date().toISOString(), seen:null };
+    goto('done');
+    snd('fanfare');
+    confetti(R0.pct >= 90 ? 110 : 70);
+    // Capybara-samlingen: ren sidoeffekt EFTER loggen – får aldrig kasta
+    try { if (window.Capy) Capy.award(profile, { type:'ovningspass', data:{ module:'mult', pct:R0.pct } }); } catch (_) {}
+  }
+
+  /* ── Du är klar! – kvittot till en vuxen ── */
+  const fmtWhen = iso => { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
+  const fmtStamp = iso => { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { day:'numeric', month:'short' })} ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
+  function receiptHTML(e){
+    return `
+      <div class="rc-top"><span class="rc-k">${svg('repeat')}Övningspass</span><span class="rc-when">${cap(fmtWhen(e.date))}</span></div>
+      <div class="rc-row"><span>Tabeller</span><b>${e.tables.map(t => `${t}:an`).join(', ')}</b></div>
+      <div class="rc-row"><span>Gånger</span><b>1–${e.upto}</b></div>
+      <div class="rc-rounds">${e.rounds.map((t, k) => `<span class="rv">${svg('check')}<em>${k + 1}.</em> ${RNAME[t]}</span>`).join('')}</div>
+      <div class="rc-row"><span>Rätt på första försöket</span><b>${e.correct} av ${e.total}</b></div>
+      <div class="rc-row"><span>Fel som rättades</span><b>${e.fixed}</b></div>
+      <div class="rc-row"><span>Tid</span><b>${durTxt(e.secs)}</b></div>`;
+  }
+  function stampHTML(iso){ return `<span class="st-in">${svg('check')}<span class="st-tx"><b>Sett av en vuxen</b><small>${fmtStamp(iso)}</small></span></span>`; }
+  function enterDone(){
+    if (!PS || !PS.receipt){ goto('hub'); return; }
+    const e = PS.receipt;
+    $('dnPraise').textContent = praiseFor(e.pct);
+    $('dnCard').innerHTML = receiptHTML(e) + `<div class="rc-foot"><span class="slot-ph" id="mt-rcPh">Plats för en vuxens stämpel</span><div class="stamp" id="mt-rcStamp"></div></div>`;
+    $('dnAsk').textContent = 'Visa kvittot för en vuxen.';
+    resetHold();
+  }
+  let holdT = null;
+  const HOLD_MS = 1500;
+  function resetHold(){
+    clearTimeout(holdT); holdT = null;
+    const h = $('dnHold'); if (!h) return;
+    h.classList.remove('holding', 'done'); h.disabled = false;
+    h.innerHTML = `<i class="hold-fill"></i><span class="hold-t">${svg('hand')}Håll inne: Sett av en vuxen</span>`;
+  }
+  function holdStart(ev){
+    const h = $('dnHold');
+    if (!PS || !PS.receipt || PS.receipt.seen || h.disabled) return;
+    if (ev && ev.cancelable) ev.preventDefault();
+    clearTimeout(holdT);
+    h.classList.remove('holding'); void h.offsetWidth; h.classList.add('holding');
+    holdT = setTimeout(stampReceipt, HOLD_MS);
+  }
+  function holdEnd(){
+    if (!holdT) return;
+    clearTimeout(holdT); holdT = null;
+    $('dnHold').classList.remove('holding');
+  }
+  function stampReceipt(){
+    holdT = null;
+    if (!PS || !PS.receipt || PS.receipt.seen) return;
+    const iso = new Date().toISOString();
+    PS.receipt.seen = iso;
+    if (PS.logId) updateLogEntry(PS.logId, { seen:iso });
+    const st = $('rcStamp'); st.innerHTML = stampHTML(iso); st.classList.add('on');
+    $('rcPh').classList.add('off');
+    const h = $('dnHold'); h.classList.remove('holding'); h.classList.add('done'); h.disabled = true;
+    h.innerHTML = `<span class="hold-t">${svg('check')}Kvittot är stämplat</span>`;
+    $('dnAsk').textContent = 'Snyggt! Nu finns kvittot i loggen.';
+    snd('correct');
+  }
+  function updateLogEntry(id, patch){
+    try {
+      const log = getLog(), e = log.find(x => x.id === id);
+      if (!e) return false;
+      Object.assign(e, patch);
+      return MP.safeSetItem(LOG_KEY(profile.id), JSON.stringify(log));
+    } catch (_) { return false; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      INSTÄLLNINGSARKET
   ═══════════════════════════════════════════════════════════ */
   function renderSheet(){
@@ -1525,6 +2162,15 @@ const MultGame = (() => {
     saveSettings(); renderSheet(); onSettingChange(k);
   }
   function onSettingChange(k){
+    if (k === 'upto'){
+      buildMaps();
+      if (S.screen === 'hub'){ if (SH.on){ SH.on = false; SH.i = -1; busy = false; } renderHub(); }
+      else if (S.screen === 'end') goto('hub');
+      else if (S.screen === 'setup') renderSetup();
+      else if (S.screen === 'learn') startLearn();
+      else if (S.screen === 'rec') enterRec();
+      return;
+    }
     if (S.screen === 'hub' && !SH.on) renderHub();
     if (S.screen === 'learn' && k === 'strat') startLearn();
     if (S.screen === 'prac' && (k === 'answer' || k === 'rev')) pracSettingChange();
@@ -1534,7 +2180,7 @@ const MultGame = (() => {
   /* ═══════════════════════════════════════════════════════════
      MONTERING
   ═══════════════════════════════════════════════════════════ */
-  const ebtn = (id, cls, title) => `<button class="ebtn ${cls}" id="mt-go${id}"><span class="ic" id="mt-ic${id}"></span><span class="et"><b>${title}</b><small id="mt-sub${id}"></small></span><span id="mt-chev${id}"></span></button>`;
+  const tile = (id, icon, title) => `<button class="tile" id="mt-go${id}"><span class="ic" id="mt-ic${id}">${icon ? svg(icon) : ''}</span><b>${title}</b><small id="mt-sub${id}"></small></button>`;
   function trainerHTML(){
     return `
       <style id="mult-css">${MULT_CSS}${GT_CSS}</style>
@@ -1549,28 +2195,79 @@ const MultGame = (() => {
       <div class="gt" id="mt-app">
         <div class="gscrs">
           <section class="gscr" id="mt-scr-hub">
-            <div class="card mapcard">
-              <div class="maphead"><div class="mhl" id="mt-hubHead"></div><button class="btn-pill" id="mt-shrinkBtn"></button></div>
+            <div class="card mapcard sm">
+              <div class="maphead"><div class="mhl" id="mt-hubHead"></div><div class="mhr"><span class="refill" id="mt-hubRefill"></span><button class="iconpill" id="mt-shrinkBtn" title="Så krymper tabellen"></button></div></div>
               <div class="map" id="mt-hubMap"></div>
               <div class="legend" id="mt-hubLegend"></div>
-              <div class="refill" id="mt-hubRefill"></div>
             </div>
             <div class="hubact">
               <div class="entries" id="mt-hubEntries">
-                ${ebtn('Learn', 'sec', 'Lär dig strategin')}
-                ${ebtn('Prac', 'pri', 'Öva')}
-                ${ebtn('Rec', 'sec', 'Rekordrunda')}
+                <div class="card passcard">
+                  <div class="pc-head"><span class="pc-ic">${svg('repeat')}</span><div class="pc-t"><small>Övningspass</small><b id="mt-pcTitle"></b></div></div>
+                  <div class="pc-meta"><span class="pc-rs" id="mt-pcRounds"></span><span class="pc-sub" id="mt-pcSub"></span></div>
+                  <div class="pc-btns"><button class="btn btn-sec" id="mt-pcEdit">Ändra</button><button class="btn btn-primary" id="mt-pcGo"></button></div>
+                </div>
+                <div class="tiles">
+                  ${tile('Prac', 'shuffle', 'Öva blandat')}
+                  ${tile('Learn', 'bulb', 'Lär dig strategin')}
+                  ${tile('Rec', '', 'Rekordrunda')}
+                </div>
               </div>
               <div class="shrinkbox" id="mt-hubShrink">
                 <div class="bubble b92"><div class="thought" id="mt-hubBubble"></div></div>
                 <div class="slot"><button class="btn btn-primary" id="mt-shrinkNext"></button></div>
               </div>
               <div class="hubmore" id="mt-hubMore">
-                <button class="mlink" id="mt-goTest">${svg('test')}Eget matteprov</button>
                 <button class="mlink" id="mt-goStats">${svg('stats')}Statistik</button>
                 <button class="mlink" id="mt-goLog">${svg('log')}Logg</button>
               </div>
             </div>
+          </section>
+
+          <section class="gscr" id="mt-scr-setup">
+            <div class="card sucard">
+              <div class="su-lab"><b>Tabeller</b><small>Välj en tabell, eller flera att blanda</small></div>
+              <div class="chips" id="mt-suTables">${[1,2,3,4,5,6,7,8,9,10].map(t => `<button data-t="${t}">${t}</button>`).join('')}</div>
+              <div class="xrow"><span class="xlab">Extra</span><div class="chips xchips">${[11, 12].map(t => `<button data-t="${t}">${t}</button>`).join('')}</div></div>
+            </div>
+            <div class="card sucard">
+              <div class="su-lab"><b>Gånger</b><small>Gäller hela gångertabellen: kartan och alla övningar</small></div>
+              <div class="gsh-tg" id="mt-suUpto" style="grid-template-columns:repeat(3,1fr)">${UPTO_OPTS.map(([v, l]) => `<button data-v="${v}">${l}</button>`).join('')}</div>
+            </div>
+            <div class="card sucard">
+              <div class="su-lab su-row"><b>Varv</b><div class="presets" id="mt-suPresets">${PRESETS.map(p => `<button data-k="${p.k}">${p.label}</button>`).join('')}</div></div>
+              ${RTYPES.map(t => `<div class="rrow" id="mt-suR-${t}"><span class="ri ri-${t}">${svg(RICON[t])}</span><span class="rt"><b>${RNAME[t]}</b><small>${RHELP[t]}</small></span><span class="rstep"><button class="stp" data-t="${t}" data-d="-1" aria-label="Ett varv färre">${svg('minus')}</button><b class="rn"></b><button class="stp" data-t="${t}" data-d="1" aria-label="Ett varv till">${svg('plus')}</button></span></div>`).join('')}
+            </div>
+            <div class="grow"></div>
+            <div class="su-sum" id="mt-suSum"></div>
+            <div class="slot"><button class="btn btn-primary" id="mt-suGo"></button></div>
+          </section>
+
+          <section class="gscr" id="mt-scr-pass">
+            <div class="card track"><div class="trtop"><span id="mt-psL"></span><span class="rps" id="mt-psR"></span></div><div class="bar"><i class="fill" id="mt-psFill"></i></div></div>
+            <div class="pmain">
+              <div class="card stage"><span class="qtag" id="mt-psTag"></span><div class="qbig" id="mt-psQ"></div></div>
+              <div class="ctrl" id="mt-psCtrl"></div>
+              <div class="card overlay" id="mt-psOver">
+                <div class="ohead"><div class="oq" id="mt-psOQ"></div><span class="otag">Så kan du tänka</span></div>
+                <div class="rhost" id="mt-psHost"></div>
+              </div>
+            </div>
+            <div class="bubble b76"><div class="thought" id="mt-passBubble"></div></div>
+            <div class="slot" id="mt-psSlot">
+              <button class="btn btn-primary" id="mt-psMain"></button>
+              <div class="duo"><button class="btn btn-sec" id="mt-psHelp"></button><button class="btn btn-primary" id="mt-psRetry"></button></div>
+              <div class="choice" id="mt-passChoice"></div>
+            </div>
+          </section>
+
+          <section class="gscr" id="mt-scr-done">
+            <div class="dn-head"><span class="dn-star">${svg('star')}</span><h2>Du är klar!</h2><p id="mt-dnPraise"></p></div>
+            <div class="card receipt" id="mt-dnCard"></div>
+            <div class="grow"></div>
+            <p class="dn-ask" id="mt-dnAsk"></p>
+            <button class="hold" id="mt-dnHold" aria-label="Sett av en vuxen. Håll inne en och en halv sekund."></button>
+            <button class="btn btn-sec" id="mt-dnHome" style="min-height:48px">${svg('map')} Till kartan</button>
           </section>
 
           <section class="gscr" id="mt-scr-learn">
@@ -1626,7 +2323,7 @@ const MultGame = (() => {
         <div class="gsh-bg" id="mt-sheetBg"></div>
         <div class="gsh-panel" role="dialog" aria-modal="true" aria-label="Inställningar">
           <div class="gsh-head"><b>Inställningar</b><button class="gsh-x" id="mt-sheetX" aria-label="Stäng">${svg('close')}</button></div>
-          ${SETTINGS.map(r => `<div class="gsh-row"><div class="gsh-lab"><b>${r.label}</b><small>${r.help}</small></div><div class="gsh-tg" data-k="${r.k}">${r.opts.map(([v, l]) => `<button data-v="${v}">${l}</button>`).join('')}</div></div>`).join('')}
+          ${SETTINGS.map(r => `<div class="gsh-row"><div class="gsh-lab"><b>${r.label}</b><small>${r.help}</small></div><div class="gsh-tg" data-k="${r.k}" style="grid-template-columns:repeat(${r.opts.length},1fr)">${r.opts.map(([v, l]) => `<button data-v="${v}">${l}</button>`).join('')}</div></div>`).join('')}
           <button class="gsh-done" id="mt-sheetDone">Klar</button>
         </div>
       </div>
@@ -1635,6 +2332,7 @@ const MultGame = (() => {
 
   function bindTrainer(){
     $('backBtn').onclick = () => {
+      if (S.screen === 'pass'){ confirmCancelPass(); return; }
       if (S.screen !== 'hub') goto('hub');
       else if (SH.on){ if (!busy) exitShrink(); }
       else { stopClock(); App.goBackToGameSelect(); }
@@ -1647,6 +2345,7 @@ const MultGame = (() => {
       if (busy) return;
       if (SH.on){ exitShrink(); return; }
       SH.on = true;
+      SHRINK = shrinkSteps(UPTO());
       $('hubHead').innerHTML = '<span class="mtitle">Så krymper tabellen</span>';   // "tal kvar att lära" är ett annat tal — visas inte samtidigt
       run(() => shrinkStep(0));
     };
@@ -1658,13 +2357,38 @@ const MultGame = (() => {
     $('goLearn').onclick = () => { if (!busy) goto('learn'); };
     $('goPrac').onclick = () => { if (!busy) goto('prac'); };
     $('goRec').onclick = () => { const c = counts(curVis()); if (!busy && c.kan + c.due >= 10) goto('rec'); };
-    $('goTest').onclick = () => { if (!busy) showCustomTest(); };
+    $('pcGo').onclick = () => { if (busy) return; const cfg = usableOvp(); if (cfg){ snd('click'); goto('pass', cfg); } else goto('setup'); };
+    $('pcEdit').onclick = () => { if (!busy) goto('setup'); };
+    $('scr-setup').querySelectorAll('.chips button').forEach(b => b.onclick = () => {
+      if (!SU || b.disabled) return;
+      const t = +b.dataset.t;
+      SU.tables = SU.tables.includes(t) ? SU.tables.filter(x => x !== t) : [...SU.tables, t];
+      snd('click'); renderSetup();
+    });
+    $('suUpto').querySelectorAll('button').forEach(b => b.onclick = () => setSetting('upto', b.dataset.v));
+    $('suPresets').querySelectorAll('button').forEach(b => b.onclick = () => { if (!SU) return; SU.counts = { ...PRESETS.find(p => p.k === b.dataset.k).c }; snd('click'); renderSetup(); });
+    $('scr-setup').querySelectorAll('.rrow .stp').forEach(b => b.onclick = () => {
+      if (!SU || b.disabled) return;
+      SU.counts[b.dataset.t] = clampCount(SU.counts[b.dataset.t] + +b.dataset.d);
+      snd('click'); renderSetup();
+    });
+    $('suGo').onclick = startFromSetup;
+    $('psMain').onclick = onPassMain;
+    $('psHelp').onclick = () => { if (PS && PS.phase === 'explain') passExplainStep(); else passExplain(); };
+    $('psRetry').onclick = passRetry;
+    const hold = $('dnHold');
+    hold.addEventListener('pointerdown', holdStart);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => hold.addEventListener(ev, holdEnd));
+    hold.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat){ e.preventDefault(); holdStart(); } });
+    hold.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') holdEnd(); });
+    hold.addEventListener('contextmenu', e => e.preventDefault());
+    $('dnHome').onclick = () => goto('hub');
     $('goStats').onclick = () => { if (!busy) showStats(); };
     $('goLog').onclick = () => { if (!busy) showLog(); };
 
     $('learnTabs').querySelectorAll('button').forEach(b => b.onclick = () => { if (busy) return; S.learn.a = +b.dataset.t; startLearn(); });
     $('bPrev').onclick = () => { if (busy || S.learn.b <= 1) return; S.learn.b--; startLearn(); };
-    $('bNext').onclick = () => { if (busy || S.learn.b >= 12) return; S.learn.b++; startLearn(); };
+    $('bNext').onclick = () => { if (busy || S.learn.b >= UPTO()) return; S.learn.b++; startLearn(); };
     $('learnMain').onclick = onLearnMain;
     $('learnFlip').onclick = onLearnFlip;
     $('pracMain').onclick = onPracMain;
@@ -1675,140 +2399,66 @@ const MultGame = (() => {
   /* ── Init ──────────────────────────────────────────── */
   function init(p) {
     profile  = p;
-    rangeMin = 1;
-    rangeMax = 12;
     loadSettings();
     stopTimer();
     renderMain();
   }
 
   /* Hubben (Gångertabellens startvy). Anropas också av Tillbaka-knapparna i
-     Eget matteprov, Statistik och Logg. */
+     Statistik och Logg. */
   function renderMain() {
     stopClock();
     closeModalSafe();
     const root = document.getElementById('mult-root');
     if (!root) return;
     root.innerHTML = trainerHTML();
-    busy = false; P = null; R = null; LW = null; SH.on = false; SH.i = -1;
+    busy = false; P = null; R = null; LW = null; PS = null; SU = null; SH.on = false; SH.i = -1;
     S.screen = 'hub';
     S.T = loadTrainer();
     S.record = loadRecord();
-    hubMap = makeMap($('hubMap'));
-    endMap = makeMap($('endMap'));
+    buildMaps();
     learnRect = makeRect($('learnHost'));
     pracRect = makeRect($('pracHost'));
+    passRect = makeRect($('psHost'));
     ctrlP = makeCtrl($('pracCtrl'), (o, el) => pracAnswer(o, el));
     ctrlR = makeCtrl($('recCtrl'), (o, el) => recAnswer(o, el));
+    ctrlS = makeCtrl($('psCtrl'), (o, el) => passAnswer(o, el), passVal);
     bindTrainer();
     goto('hub');
   }
   function closeModalSafe(){ try { hideModal(); } catch (_) {} }
+  /* Kartornas storlek följer Gånger: hubbens rutor 20/22/24 px, slutbildens 24/26/28 px */
+  function buildMaps(){
+    const n = UPTO();
+    hubMap = makeMap($('hubMap'), n, { 10:24, 11:22, 12:20 }[n], a => { if (!busy && !SH.on){ snd('click'); goto('setup', a); } });
+    endMap = makeMap($('endMap'), n, { 10:28, 11:26, 12:24 }[n]);
+  }
 
   /* Stoppar rekordrundans klocka (anropas av app.js när Gångertabellen lämnas). */
   function stopTimer() { stopClock(); }
 
   /* ══════════════════════════════════════════════════════
-     EGET MATTEPROV
+     FRÅGESESSION (Fokuserad träning i Statistik, Dagens träning)
+     Eget matteprov är borttaget ur hubben (v58): övningspasset med
+     flera tabeller ersätter det.
   ══════════════════════════════════════════════════════ */
-  function showCustomTest() {
-    snd('click');
-    stopClock();
-    let selected = [];
-
-    const root = document.getElementById('mult-root');
-    root.innerHTML = `
-      ${baseStyle()}
-      <div class="app-header">
-        <button class="btn-back" onclick="MultGame.renderMain()">Tillbaka</button>
-        <span class="header-title">Eget Matteprov</span>
-        <span class="mult-spacer"></span>
-      </div>
-      <div class="wrap mult-gap">
-        <p class="mult-sub">Välj 2–3 tabeller att blanda 🎲</p>
-        <div class="tgrid" id="custom-grid">
-          ${[1,2,3,4,5,6,7,8,9,10,11,12].map(t => `
-            <div class="table-card" id="ct-${t}" onclick="MultGame._toggleCustomTable(${t})" tabindex="0" role="checkbox">
-              <div class="table-number num">${t}:an</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <!-- Range -->
-        <div class="card">
-          <div class="range-lab"><b>Talintervall</b><span class="num" id="custom-range-label">${rangeMin} – ${rangeMax}</span></div>
-          <div class="range-row">
-            <input type="range" class="range-input" id="custom-range-min" min="1" max="12" value="${rangeMin}" oninput="MultGame._updateCustomRange()" aria-label="Från">
-            <input type="range" class="range-input" id="custom-range-max" min="1" max="12" value="${rangeMax}" oninput="MultGame._updateCustomRange()" aria-label="Till">
-          </div>
-        </div>
-
-        <button class="btn btn-accent btn-lg btn-block" id="btn-start-custom" disabled onclick="MultGame._startCustom()">
-          Starta ditt matteprov!
-        </button>
-        <p class="mult-sub" id="custom-hint">
-          Välj minst 2 tabeller
-        </p>
-      </div>
-    `;
-
-    MultGame._toggleCustomTable = (t) => {
-      const idx = selected.indexOf(t);
-      if (idx === -1) {
-        if (selected.length >= 3) {
-          document.getElementById(`ct-${selected[0]}`).classList.remove('selected');
-          selected.shift();
-        }
-        selected.push(t);
-        document.getElementById(`ct-${t}`).classList.add('selected');
-      } else {
-        selected.splice(idx, 1);
-        document.getElementById(`ct-${t}`).classList.remove('selected');
-      }
-      snd('click');
-      const btnEl = document.getElementById('btn-start-custom');
-      const hint = document.getElementById('custom-hint');
-      btnEl.disabled = selected.length < 2;
-      hint.textContent = selected.length < 2 ? 'Välj minst 2 tabeller' : `${selected.length} tabeller valda – kör! 🎉`;
-    };
-
-    MultGame._updateCustomRange = () => {
-      let min = parseInt(document.getElementById('custom-range-min').value);
-      let max = parseInt(document.getElementById('custom-range-max').value);
-      if (min > max) { max = min; document.getElementById('custom-range-max').value = max; }
-      rangeMin = min; rangeMax = max;
-      document.getElementById('custom-range-label').textContent = `${min} – ${max}`;
-    };
-
-    MultGame._startCustom = () => {
-      if (selected.length < 2) return;
-      snd('click');
-      // Bygg blandad frågelista
-      const questions = [];
-      selected.forEach(t => {
-        for (let m = rangeMin; m <= rangeMax; m++) questions.push({ table: t, mult: m });
-      });
-      runCustomSession(MP.shuffle(questions), selected);
-    };
-  }
-
   /* Kör en blandad session med given frågelista.
-     opts (alla valfria – utelämnade = exakt gamla Matteprov-beteendet):
+     opts (alla valfria – utelämnade = Fokuserad träning från Statistik):
        headerTitle  – rubrik i headern
        hint         – text ovanför frågan ('' döljer raden)
-       onCancel     – Avbryt-knappens handling (default: showCustomTest)
-       onDone(stats)– egen resultathantering (default: showCustomResult)
+       onCancel     – Avbryt-knappens handling (default: Statistik)
+       onDone(stats)– egen resultathantering (default: showFocusResult)
      Återanvänds av Dagens träning (js/daily.js) via runFocusedSession. */
   function runCustomSession(questions, tables, opts) {
     opts = opts || {};
     const quiz = MP.createRetryQuiz(questions);
-    const headerTitle = opts.headerTitle || 'Matteprov';
+    const headerTitle = opts.headerTitle || 'Fokuserad träning';
     const hint = (opts.hint !== undefined) ? opts.hint : `${tables.join(', ')}-tabellerna`;
-    MultGame._sessionCancel = opts.onCancel || showCustomTest;
+    MultGame._sessionCancel = opts.onCancel || showStats;
 
     function finish() {
       if (opts.onDone) { opts.onDone(quiz.stats()); return; }
-      showCustomResult(quiz.stats(), tables);
+      showFocusResult(quiz.stats(), tables);
     }
 
     function renderQ() {
@@ -1854,13 +2504,13 @@ const MultGame = (() => {
     renderQ();
   }
 
-  function showCustomResult(stats, tables) {
+  function showFocusResult(stats, tables) {
     const correct = stats.firstTryCorrect;
     const total   = stats.total;
     const pct     = stats.pct;
     snd(pct >= 80 ? 'fanfare' : 'correct');
     if (pct === 100) confetti(80);
-    addSessionLog({ type: 'custom', tables, correct, total, pct, rangeMin, rangeMax });
+    addSessionLog({ type: 'focus', tables, correct, total, pct });
     const { emoji, msg } = MP.feedbackMessage(pct);
     const cls = RESULT_CLS[MP.resultTier(pct)];
     const root = document.getElementById('mult-root');
@@ -1874,11 +2524,8 @@ const MultGame = (() => {
           <p class="result-note num">${correct} rätt av ${total} – ${tables.join(', ')}-tabellerna</p>
         </div>
         <div class="result-actions">
-          <button class="btn btn-accent btn-lg" onclick="MultGame.showCustomTest()">
-            <svg class="icn"><use href="#i-refresh"/></svg>
-            Nytt matteprov
-          </button>
-          <button class="btn btn-ghost btn-lg" onclick="MultGame.renderMain()">Tillbaka</button>
+          <button class="btn btn-accent btn-lg" onclick="MultGame.showStats()">Till statistiken</button>
+          <button class="btn btn-ghost btn-lg" onclick="MultGame.renderMain()">Till kartan</button>
         </div>
       </div>
     `;
@@ -1993,16 +2640,20 @@ const MultGame = (() => {
 
   /* Loggposternas ikon och rubrik. Öva-pass och rekordrundor (nya) har SVG-ikoner. */
   const LOG_SVG = {
-    pass:   `<svg class="icn" viewBox="0 0 24 24">${ICON.play}</svg>`,
+    pass:   `<svg class="icn" viewBox="0 0 24 24">${ICON.shuffle}</svg>`,
     record: `<svg class="icn" viewBox="0 0 24 24">${ICON.trophy}</svg>`,
+    ovningspass: `<svg class="icn" viewBox="0 0 24 24">${ICON.repeat}</svg>`,
+    focus:  `<svg class="icn" viewBox="0 0 24 24">${ICON.bulb}</svg>`,
   };
   function logIcon(e) {
     if (LOG_SVG[e.type]) return LOG_SVG[e.type];
     return e.type === 'timer' ? '⏰' : e.type === 'custom' ? '🎲' : '✖️';
   }
   function logLabel(e, long) {
-    if (e.type === 'pass') return 'Öva';
+    if (e.type === 'pass') return 'Öva blandat';
     if (e.type === 'record') return 'Rekordrunda';
+    if (e.type === 'ovningspass') return `Övningspass (${(e.tables || []).map(t => `${t}:an`).join(long ? ', ' : ',')})`;
+    if (e.type === 'focus') return 'Fokuserad träning';
     if (e.type === 'timer') return 'Timerträning';
     if (e.type === 'custom') return `Eget prov (${e.tables?.join(long ? ', ' : ',')})`;
     return long ? `${e.table}:ans tabell` : `${e.table}:an`;
@@ -2017,6 +2668,8 @@ const MultGame = (() => {
     if (e.type === 'timer') return `Tidsträning i ${e.minutes} minut${e.minutes !== 1 ? 'er' : ''}`;
     if (e.type === 'pass') return `${e.correct} rätt av ${e.total}`;
     if (e.type === 'record') return e.tempo === 'klocka' ? `${e.n} rätt på en minut` : `${e.n} rätt i rad`;
+    if (e.type === 'focus') return `${e.correct} rätt av ${e.total}`;
+    if (e.type === 'ovningspass') return `${varvTxt((e.rounds || []).length).toLowerCase()} · ${e.correct} rätt av ${e.total} på första försöket · ${durTxt(e.secs || 0)}`;
     return `${e.correct} rätt av ${e.total} | Intervall ${e.rangeMin}–${e.rangeMax}`;
   }
 
@@ -2140,6 +2793,7 @@ const MultGame = (() => {
           <div class="history-main">
             <div class="history-title">${logLabel(e, true)} ${i===0?'<span class="mult-new">NY!</span>':''}</div>
             <div class="history-sub">${dateStr} kl. ${timeStr} · ${logSub(e)}</div>
+            ${e.type === 'ovningspass' && e.seen ? `<span class="mult-stamp"><svg viewBox="0 0 24 24">${ICON.check}</svg>Sett av en vuxen · ${fmtStamp(e.seen)}</span>` : ''}
           </div>
           ${logValue(e, true)}
         </div>
@@ -2162,7 +2816,7 @@ const MultGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════
-     SVARSGRÄNSSNITT (Eget matteprov, Dagens träning)
+     SVARSGRÄNSSNITT (Fokuserad träning, Dagens träning)
   ══════════════════════════════════════════════════════ */
   function buildAnswerUI(table, mult, correctAnswer, callback) {
     if (answerMode === 'choice') {
@@ -2255,7 +2909,6 @@ const MultGame = (() => {
   return {
     init,
     renderMain,
-    showCustomTest,
     showStats,
     showLog,
     startFocusedTraining,
@@ -2267,10 +2920,8 @@ const MultGame = (() => {
 
     // Händelsehanterare (sätts dynamiskt av renderfunktioner)
     _sessionCancel: null,
-    _toggleCustomTable: null,
-    _updateCustomRange: null,
-    _startCustom: null,
     _doReset: null,
+    _cancelPass(){ hideModal(); if (S.screen === 'pass') goto('hub'); },
 
     _handleChoice(selected, correct) {
       const wasCorrect = selected === correct;
@@ -2333,10 +2984,12 @@ const MultGame = (() => {
       KEY, PAIRS, distractors, options, reverseOptions,
       waysFor, stepsFor, introText, wayLabel, strategySteps, strategyTexts, TXT, wayRank,
       applyAnswer, freshPair, vis, visMap, counts, leftToLearn, pairsFromStats, addDays, intervalFor, INTERVALS,
-      buildPass, schedulePass, easyFirst, orient, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
+      buildPass, schedulePass, easyFirst, orient, pairsUpTo, shrinkSteps, shrinkRemain,
+      RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary, tablesLabel,
+      createDrill, receiptFor, praiseFor, durTxt, passExplainFor, settingsFrom, UPTO_DEFAULT, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
       setToday: d => { todayOverride = d || null; },
       today,
-      peek: () => ({ screen:S.screen, busy, pass:P, rec:R, learn:LW && { walker:LW, flip:LF }, trainer:S.T, settings:{ ...SET, answer:answerMode } }),
+      peek: () => ({ screen:S.screen, busy, pass:P, rec:R, ovp:PS, setup:SU, learn:LW && { walker:LW, flip:LF }, trainer:S.T, settings:{ ...SET, answer:answerMode } }),
     },
   };
 })();
