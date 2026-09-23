@@ -1706,20 +1706,25 @@ const MultGame = (() => {
   }
   function refreshEnd(){
     const m = $('endMain');
+    if (!P || !P.moves) return;                 // passet nollställt (vyn lämnad)
     const lastStep = E.i >= 2 || (E.i >= 1 && !P.moves.length);
     btn(m, lastStep ? 'Till kartan' : 'Nästa steg', lastStep ? 'map' : 'next');
     m.disabled = busy;
   }
   function onEndMain(){
     if (busy) return;
-    if (E.i >= 2 || (E.i >= 1 && !P.moves.length)){ goto('hub'); return; }
-    if (E.i === 0 && P.moves.length){
+    if (!P || !P.moves){ goto('hub'); return; }
+    // Animationen håller sitt eget pass: lämnas vyn under väntan nollställs P (null-krasch 'moves').
+    const PP = P;
+    if (E.i >= 2 || (E.i >= 1 && !PP.moves.length)){ goto('hub'); return; }
+    if (E.i === 0 && PP.moves.length){
       E.i = 1;
       run(async () => {
         say('endBubble', 'Talen du övade flyttar till sin nya låda.');
         await wait(LEAD + 120);
         const cells = [];
-        P.moves.forEach(mv => { const [a, b] = mv.k.split('x').map(Number); cells.push([endMap.cells[a][b], mv.to]); if (a !== b) cells.push([endMap.cells[b][a], mv.to]); });
+        if (P !== PP) return;                   // vyn lämnad under väntan
+        PP.moves.forEach(mv => { const [a, b] = mv.k.split('x').map(Number); cells.push([endMap.cells[a][b], mv.to]); if (a !== b) cells.push([endMap.cells[b][a], mv.to]); });
         cells.forEach(([c, to]) => { const i = document.createElement('i'); i.className = 'nf'; i.style.background = `var(--${to})`; if (to === 'ny') i.style.boxShadow = 'inset 0 0 0 1px rgba(76,29,149,.16)'; c.append(i); });
         await frame();
         cells.forEach(([c]) => { c.querySelector('.nf').classList.add('on'); c.classList.add('chg'); });
@@ -1732,8 +1737,9 @@ const MultGame = (() => {
     run(async () => {
       say('endBubble', endSummary());
       await wait(LEAD);
-      $('endHead').innerHTML = countHTML(leftToLearn(P.after), true);
-      $('endLegend').innerHTML = legendHTML(counts(P.after), true);
+      if (P !== PP) return;                     // vyn lämnad under väntan
+      $('endHead').innerHTML = countHTML(leftToLearn(PP.after), true);
+      $('endLegend').innerHTML = legendHTML(counts(PP.after), true);
       await wait(400);
     });
   }

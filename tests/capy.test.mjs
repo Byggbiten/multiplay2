@@ -65,7 +65,7 @@ describe('migrering från gamla formatet { kortId: ISO-datum }', () => {
   });
 
   it('nytt format läses oförändrat, och blandat gammalt/nytt går ihop', () => {
-    const nu = { glass: { tier: 2, got: [{ tier: 1, date: 'a', reason: 'Tre test till' }, { tier: 2, date: 'b', reason: 'Minnesmästare' }] } };
+    const nu = { glass: { tier: 2, got: [{ tier: 1, date: 'a', reason: 'Du gjorde tre test till' }, { tier: 2, date: 'b', reason: 'Minnesmästare' }] } };
     const n = C.normalizeCards({ ...nu, sov: OLD.sov });
     expect(n.glass).toEqual(nu.glass);
     expect(n.sov.tier).toBe(1);
@@ -96,7 +96,7 @@ describe('migrering från gamla formatet { kortId: ISO-datum }', () => {
     expect(Object.keys(saved)).toHaveLength(24);
     expect(saved[got2.card.id].got).toEqual([
       { tier: 1, date: '2026-08-01T00:00:00.000Z', reason: null },
-      { tier: 2, date: expect.any(String), reason: 'Tre test till' },
+      { tier: 2, date: expect.any(String), reason: 'Du gjorde tre test till' },
     ]);
     expect(calls.allDone).toBe(0);
   });
@@ -138,11 +138,11 @@ describe('nivåordningen', () => {
 
   it('grant lägger en rad per nivå och behåller de tidigare', () => {
     let cards = C.grant({}, 'glass', 'Första testet i Klockan', 'd1');
-    cards = C.grant(cards, 'glass', 'Tre test till', 'd2');
+    cards = C.grant(cards, 'glass', 'Du gjorde tre test till', 'd2');
     cards = C.grant(cards, 'glass', 'Minnesmästare', 'd3');
     expect(cards.glass).toEqual({ tier: 3, got: [
       { tier: 1, date: 'd1', reason: 'Första testet i Klockan' },
-      { tier: 2, date: 'd2', reason: 'Tre test till' },
+      { tier: 2, date: 'd2', reason: 'Du gjorde tre test till' },
       { tier: 3, date: 'd3', reason: 'Minnesmästare' },
     ] });
   });
@@ -230,7 +230,7 @@ describe('skälstexterna', () => {
     st.pending = [];
     reasons(st, { type: 'test', data: { module: 'clock', pct: 50 } });
     expect(reasons(st, { type: 'test', data: { module: 'friends', pct: 100 } })).toEqual([
-      'Tre test till', 'Första gången 95 % eller mer', '100 % i 10-Kompisar',
+      'Du gjorde tre test till', 'Första gången 95 % eller mer', '100 % i 10-Kompisar',
     ]);
     st.pending = [];
     expect(reasons(st, { type: 'test', data: { module: 'uppstallning', pct: 80 } })).toEqual(['Första gången 75 % eller mer']);
@@ -239,7 +239,7 @@ describe('skälstexterna', () => {
       'Första gången 85 % eller mer', 'Alla tre medaljerna samlade',
     ]);
     st.pending = [];
-    expect(reasons(st, { type: 'test', data: { module: 'mult', pct: 100 } })).toEqual(['Tre test till', '100 % i Gångertabellen']);
+    expect(reasons(st, { type: 'test', data: { module: 'mult', pct: 100 } })).toEqual(['Du gjorde tre test till', '100 % i Gångertabellen']);
   });
 
   it('Minnesmästare och var femte stjärna', () => {
@@ -266,7 +266,7 @@ describe('skälstexterna', () => {
     expect(r({})).toBe('Dagens första övningspass');
     // Andra passet samma dag, var 3:e
     const st = C.defaultState(); st.lastOvningspass = DAY; st.tests = 2;
-    expect(reasons(st, { type: 'ovningspass', data: { module: 'mult', pct: 50, tables: [7], rounds: 4 } })).toEqual(['Tre pass till']);
+    expect(reasons(st, { type: 'ovningspass', data: { module: 'mult', pct: 50, tables: [7], rounds: 4 } })).toEqual(['Du gjorde tre pass till']);
   });
 
   it('tabell: "Du kan hela 7:ans tabell"', () => {

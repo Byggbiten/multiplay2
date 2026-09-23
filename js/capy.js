@@ -401,7 +401,7 @@ const Capy = (() => {
      nästa utdelning sparas – då i nytt format. Ett kort tappas aldrig:
      varje sann post blir minst tier 1, okända kort-id följer med orörda. */
   const MAX_TIER = 3;
-  const TIER_LABEL = { 1:'Vanlig', 2:'Silver', 3:'Guld' };
+  const TIER_LABEL = { 1:'Nytt kort', 2:'Silver', 3:'Guld' };   // inte 'Vanlig': det ordet är sällsyntheten
   const clampTier = t => Math.min(MAX_TIER, Math.max(1, Math.round(Number(t)) || 1));
 
   function normEntry(v) {
@@ -584,7 +584,7 @@ const Capy = (() => {
     const mod = MODULE_NAME[d.module] || '';
     switch (kind) {
       case 'first':   return mod ? `Första testet i ${mod}` : 'Första testet';
-      case 'three':   return event.type === 'ovningspass' ? 'Tre pass till' : 'Tre test till';
+      case 'three':   return event.type === 'ovningspass' ? 'Du gjorde tre pass till' : 'Du gjorde tre test till';
       case 'medal-b': return 'Första gången 75 % eller mer';
       case 'medal-s': return 'Första gången 85 % eller mer';
       case 'medal-g': return 'Första gången 95 % eller mer';
