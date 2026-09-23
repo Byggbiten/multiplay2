@@ -644,46 +644,48 @@ describe('Capybara: övningspasset', () => {
   const Capy = require('../js/capy.js');
   const { milestones, defaultState } = Capy._test;
   const ev = pct => ({ type:'ovningspass', data:{ module:'mult', pct } });
+  /* v59: köposter är { spec, reason } (gamla strängar kan finnas kvar i kön) */
+  const specs = st => st.pending.map(p => typeof p === 'string' ? p : p.spec);
 
   it('första övningspasset per dag ger ett vanligt kort först i kön, andra samma dag inte', () => {
     const st = defaultState();
     st.pending = ['viktad'];                                     // något som redan väntade
     milestones(st, ev(50), '2026-09-23');
-    expect(st.pending[0]).toBe('vanlig');
+    expect(specs(st)[0]).toBe('vanlig');
     expect(st.tests).toBe(1);
     const n = st.pending.length;
     milestones(st, ev(50), '2026-09-23');
-    expect(st.pending.filter(x => x === 'vanlig')).toHaveLength(1);
+    expect(specs(st).filter(x => x === 'vanlig')).toHaveLength(1);
     expect(st.pending.length).toBe(n);                           // tests = 2: ingen dragning
     milestones(st, ev(50), '2026-09-23');                        // tests = 3: var 3:e test
-    expect(st.pending.slice(-1)[0]).toBe('viktad');
+    expect(specs(st).slice(-1)[0]).toBe('viktad');
     milestones(st, ev(50), '2026-09-24');                        // ny dag
-    expect(st.pending[0]).toBe('vanlig');
-    expect(st.pending.filter(x => x === 'vanlig')).toHaveLength(2);
+    expect(specs(st)[0]).toBe('vanlig');
+    expect(specs(st).filter(x => x === 'vanlig')).toHaveLength(2);
   });
 
   it('dagens vanliga kort och var 3:e test ger inte dubbelt samma pass', () => {
     const st = defaultState(); st.tests = 2;
     milestones(st, ev(10), '2026-09-23');
-    expect(st.pending).toEqual(['vanlig']);
+    expect(specs(st)).toEqual(['vanlig']);
   });
 
   it('medaljlogiken via pct gäller som för test', () => {
     const st = defaultState();
     milestones(st, ev(100), '2026-09-23');
     expect(st.medals).toEqual({ b:false, s:false, g:true });
-    expect(st.pending).toEqual(['vanlig', 'sallsynt', 'legendarisk']);
+    expect(specs(st)).toEqual(['vanlig', 'sallsynt', 'legendarisk']);
     expect(st.perfect.mult).toBe(true);
     milestones(st, ev(100), '2026-09-23');                       // ingen ny legendarisk för samma modul
-    expect(st.pending.filter(x => x === 'legendarisk')).toHaveLength(1);
+    expect(specs(st).filter(x => x === 'legendarisk')).toHaveLength(1);
   });
 
   it('testhändelsen beter sig som förut', () => {
     const st = defaultState();
     milestones(st, { type:'test', data:{ module:'mult', pct:80 } }, '2026-09-23');
-    expect(st.pending).toEqual(['vanlig', 'viktad']);
+    expect(specs(st)).toEqual(['vanlig', 'viktad']);
     milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
     milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
-    expect(st.pending).toEqual(['vanlig', 'viktad', 'sallsynt', 'legendarisk']);
+    expect(specs(st)).toEqual(['vanlig', 'viktad', 'sallsynt', 'legendarisk']);
   });
 });

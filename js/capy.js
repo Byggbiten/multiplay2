@@ -17,9 +17,14 @@
    3) VYERNA      – NYTT KORT-overlayn (flip + skimmer + konfetti)
       och Samlingen (screen-collection / #capy-root).
 
+   v59: tre nivåer per kort (vanlig → silver → guld) = 72 belöningar
+   av samma bilder. Silverfasen börjar när alla 24 finns, guldfasen
+   när alla 24 är silver. Varje nivå sparar datum och skäl.
+
    Lagring (raderas i Store.deleteProfile):
-     capy_cards_<id>  – { kortId: ISO-datum } (aldrig förlora kort)
-     capy_state_<id>  – milstolpe-räknare + pending-kö
+     capy_cards_<id>  – { kortId: { tier, got:[{ tier, date, reason }] } }
+                        (≤ v58: { kortId: ISO-datum } – läses fortfarande)
+     capy_state_<id>  – milstolpe-räknare + pending-kö [{ spec, reason }]
    ============================================================ */
 'use strict';
 
@@ -387,10 +392,67 @@ const Capy = (() => {
     catch (_) { return fallback; }
   }
 
-  function readCards(profileId) { return readJSON(CARDS_KEY(profileId), {}); }
+  /* ── Nivåerna (v59): vanlig → silver → guld ────────────
+     capy_cards_<id> = { kortId: { tier:1|2|3, got:[{ tier, date, reason }] } }
+     got = en rad per förtjänad nivå: datum (ISO) och skälet (svensk
+     mening, eller null om appen inte visste det).
+     GAMMALT FORMAT (≤ v58): { kortId: ISO-datum }. Läses fortfarande och
+     blir tier 1 med sitt datum och reason:null. Inget skrivs om förrän
+     nästa utdelning sparas – då i nytt format. Ett kort tappas aldrig:
+     varje sann post blir minst tier 1, okända kort-id följer med orörda. */
+  const MAX_TIER = 3;
+  const TIER_LABEL = { 1:'Vanlig', 2:'Silver', 3:'Guld' };
+  const clampTier = t => Math.min(MAX_TIER, Math.max(1, Math.round(Number(t)) || 1));
+
+  function normEntry(v) {
+    if (typeof v === 'string') return v ? { tier:1, got:[{ tier:1, date:v, reason:null }] } : null;
+    if (v && typeof v === 'object') {
+      const got = (Array.isArray(v.got) ? v.got : [])
+        .filter(g => g && typeof g === 'object')
+        .map(g => ({ tier:clampTier(g.tier), date:typeof g.date === 'string' ? g.date : null,
+                     reason:typeof g.reason === 'string' && g.reason ? g.reason : null }));
+      const top = got.reduce((m, g) => Math.max(m, g.tier), 0);
+      const tier = clampTier(Math.max(Number(v.tier) || 0, top, 1));
+      if (!got.some(g => g.tier === 1)) got.unshift({ tier:1, date:null, reason:null });
+      got.sort((a, b) => a.tier - b.tier);
+      return { tier, got };
+    }
+    // Annat sant värde (true, tal …) räknades som ägt i gamla koden – behåll det
+    return v ? { tier:1, got:[{ tier:1, date:null, reason:null }] } : null;
+  }
+
+  function normalizeCards(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    for (const k of Object.keys(raw)) {
+      const e = normEntry(raw[k]);
+      if (e) out[k] = e;
+    }
+    return out;
+  }
+
+  function readCards(profileId) { return normalizeCards(readJSON(CARDS_KEY(profileId), {})); }
 
   function saveCards(profileId, cards) {
     return MP.safeSetItem(CARDS_KEY(profileId), JSON.stringify(cards));
+  }
+
+  const tierOf = (cards, id) => (cards[id] ? cards[id].tier : 0);
+
+  /* Samlingens nivå = lägsta nivån bland alla 24 (0 = något kort saknas,
+     1 = alla vanliga → silverfasen, 2 = alla silver → guldfasen, 3 = allt guld) */
+  function levelOf(cards) {
+    return CARDS.reduce((m, c) => Math.min(m, tierOf(cards, c.id)), MAX_TIER);
+  }
+
+  /* Antal kort som nått minst nivån t (räknaren: "5 silver" = 5 kort med silver eller guld) */
+  const countAtLeast = (cards, t) => CARDS.filter(c => tierOf(cards, c.id) >= t).length;
+
+  /* Ny post för kortet efter en utdelning (ny nivå = nuvarande + 1) */
+  function grant(cards, id, reason, dateISO) {
+    const prev = cards[id] || { tier:0, got:[] };
+    const tier = prev.tier + 1;
+    return { ...cards, [id]: { tier, got:[...prev.got, { tier, date:dateISO, reason:reason || null }] } };
   }
 
   function defaultState() {
@@ -403,20 +465,33 @@ const Capy = (() => {
       matteGiven: false,              // alla medaljer → Matte-Capy (engångs)
       lastDaily: '',                  // dubblettskydd: 1 daily-event/dag
       lastOvningspass: '',            // första övningspasset per dag ger ett vanligt kort
-      allDoneShown: false,            // varm grattis-text visad
-      pending: [],                    // kö av intjänade dragningar
+      tables: {},                     // hela tabeller i Kan: { '7': 'YYYY-MM-DD' } (engångs per tabell)
+      allDoneShown: false,            // (≤ v58: alla 24 vanliga) – läses inte längre
+      allGoldShown: false,            // v59: varm grattis-text när alla 24 är guld
+      pending: [],                    // kö av intjänade dragningar: [{ spec, reason }]
     };
   }
 
-  function readState(profileId) {
-    const st = readJSON(STATE_KEY(profileId), null);
+  /* Köposter: { spec, reason }. Gamla strängar (≤ v58) → { spec, reason:null }. */
+  function normPending(p) {
+    if (typeof p === 'string' && p) return { spec:p, reason:null };
+    if (p && typeof p === 'object' && typeof p.spec === 'string' && p.spec) {
+      return { spec:p.spec, reason:typeof p.reason === 'string' && p.reason ? p.reason : null };
+    }
+    return null;
+  }
+
+  function normState(st) {
     const def = defaultState();
     if (!st || typeof st !== 'object') return def;
     // Robust mot äldre/trasig state – fyll i saknade fält
     Object.keys(def).forEach(k => { if (st[k] === undefined) st[k] = def[k]; });
-    if (!Array.isArray(st.pending)) st.pending = [];
+    if (!st.tables || typeof st.tables !== 'object') st.tables = {};
+    st.pending = (Array.isArray(st.pending) ? st.pending : []).map(normPending).filter(Boolean);
     return st;
   }
+
+  function readState(profileId) { return normState(readJSON(STATE_KEY(profileId), null)); }
 
   function saveState(profileId, st) {
     MP.safeSetItem(STATE_KEY(profileId), JSON.stringify(st));
@@ -431,166 +506,243 @@ const Capy = (() => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-  /* ── Dragning: slumpat OLÅST kort ur rätt pool ─────────
-     Poolordning vid tom pool (dubblettskydd): vanlig → sällsynt
-     → generisk legendarisk → vilket olåst kort som helst. */
+  /* ── Dragning: slumpat kort PÅ SAMLINGENS NIVÅ ur rätt pool ─
+     "Valbart" = kortet ligger på samlingens lägsta nivå (levelOf):
+       nivå 0 → kort som saknas (ny dragning, som före v59)
+       nivå 1 → vanliga kort som blir silver
+       nivå 2 → silverkort som blir guld
+     Samma sällsynthet och samma reservkedja i alla faser: en sällsynt
+     dragning uppgraderar ett sällsynt kort; finns inget valbart sådant
+     följs kedjan (t.ex. sällsynt → vanlig → legendarisk → vilket som helst).
+     Minnesmästar- och Matte-Capy ingår inte i den generiska legendariska
+     poolen – de nås via sina milstolpar eller via sista reserven. */
   const GENERIC_LEG = ['guld', 'regnbage', 'drak', 'stjarn'];
-
-  function unowned(cards, rar) {
-    return CARDS.filter(c => c.rar === rar && !cards[c.id]);
-  }
 
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  function anyUnowned(cards) {
-    return CARDS.filter(c => !cards[c.id]);
-  }
-
-  function drawFromChain(cards, chain) {
+  function drawFromChain(cards, chain, level) {
+    const ok = c => tierOf(cards, c.id) === level;
     for (const rar of chain) {
       const pool = (rar === 'legendarisk')
-        ? GENERIC_LEG.map(id => byId[id]).filter(c => !cards[c.id])
-        : unowned(cards, rar);
+        ? GENERIC_LEG.map(id => byId[id]).filter(ok)
+        : CARDS.filter(c => c.rar === rar && ok(c));
       if (pool.length > 0) return pick(pool);
     }
-    const rest = anyUnowned(cards);
+    const rest = CARDS.filter(ok);
     return rest.length > 0 ? pick(rest) : null;
   }
 
+  /* Returnerar kortet som ska få nästa nivå, eller null när allt är guld */
   function resolveDraw(spec, cards, st) {
-    const ownedCount = Object.keys(cards).length;
+    const level = levelOf(cards);
+    if (level >= MAX_TIER) return null;
+    const ok = id => tierOf(cards, id) === level;
+    // Framsteg inom fasen (antal kort redan lyfta över nivån) styr viktningen
+    const progress = CARDS.filter(c => tierOf(cards, c.id) > level).length;
 
     if (spec === 'matte') {
-      if (!cards['matte']) return byId['matte'];
-      return drawFromChain(cards, ['legendarisk', 'sallsynt', 'vanlig']);
+      if (ok('matte')) return byId['matte'];
+      return drawFromChain(cards, ['legendarisk', 'sallsynt', 'vanlig'], level);
     }
     if (spec === 'memmaster') {
       // Chans på Minnesmästar-Capy: 50 % per stjärna, garanterad från 3:e
-      if (!cards['minnesmastare'] && (st.memStars >= 3 || Math.random() < 0.5)) {
+      if (ok('minnesmastare') && (st.memStars >= 3 || Math.random() < 0.5)) {
         return byId['minnesmastare'];
       }
-      return drawFromChain(cards, ['sallsynt', 'vanlig', 'legendarisk']);
+      return drawFromChain(cards, ['sallsynt', 'vanlig', 'legendarisk'], level);
     }
-    if (spec === 'legendarisk') return drawFromChain(cards, ['legendarisk', 'sallsynt', 'vanlig']);
-    if (spec === 'sallsynt')    return drawFromChain(cards, ['sallsynt', 'vanlig', 'legendarisk']);
-    if (spec === 'vanlig')      return drawFromChain(cards, ['vanlig', 'sallsynt', 'legendarisk']);
+    if (spec === 'legendarisk') return drawFromChain(cards, ['legendarisk', 'sallsynt', 'vanlig'], level);
+    if (spec === 'sallsynt')    return drawFromChain(cards, ['sallsynt', 'vanlig', 'legendarisk'], level);
+    if (spec === 'vanlig')      return drawFromChain(cards, ['vanlig', 'sallsynt', 'legendarisk'], level);
 
     // 'viktad': vanliga kort först, senare mer sällsynta
-    const pRare = ownedCount < 4 ? 0.15 : ownedCount < 9 ? 0.35 : 0.55;
+    const pRare = progress < 4 ? 0.15 : progress < 9 ? 0.35 : 0.55;
     const first = Math.random() < pRare ? 'sallsynt' : 'vanlig';
     const second = first === 'sallsynt' ? 'vanlig' : 'sallsynt';
-    return drawFromChain(cards, [first, second, 'legendarisk']);
+    return drawFromChain(cards, [first, second, 'legendarisk'], level);
+  }
+
+  /* ── Skälen: kort svensk mening om vad hon gjorde ─────── */
+  const MODULE_NAME = {
+    mult:'Gångertabellen', clock:'Klockan', friends:'10-Kompisar',
+    multdiv:'Multiplikation & Division', uppstallning:'Addition & Subtraktion',
+  };
+  const TALORD = ['noll', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio', 'elva', 'tolv'];
+  const talord = n => (n >= 0 && n <= 12 ? TALORD[n] : String(n));
+
+  function tablesPhrase(tables) {
+    const t = (Array.isArray(tables) ? tables : []).map(Number).filter(x => Number.isInteger(x) && x > 0);
+    if (!t.length) return '';
+    if (t.length >= 4) return `${talord(t.length)} tabeller`;
+    const names = t.map(x => `${x}:ans`);
+    const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} och ${names[names.length - 1]}`;
+    return `${list} tabell`;
+  }
+
+  function reasonFor(kind, event) {
+    const d = (event && event.data) || {};
+    const mod = MODULE_NAME[d.module] || '';
+    switch (kind) {
+      case 'first':   return mod ? `Första testet i ${mod}` : 'Första testet';
+      case 'three':   return event.type === 'ovningspass' ? 'Tre pass till' : 'Tre test till';
+      case 'medal-b': return 'Första gången 75 % eller mer';
+      case 'medal-s': return 'Första gången 85 % eller mer';
+      case 'medal-g': return 'Första gången 95 % eller mer';
+      case 'matte':   return 'Alla tre medaljerna samlade';
+      case 'perfect': return event.type === 'daily' ? '100 % i Dagens träning' : (mod ? `100 % i ${mod}` : '100 % på ett test');
+      case 'mem':     return 'Minnesmästare';
+      case 'mem5':    return `Minnesmästare för ${d.memCount}:e gången`;
+      case 's3':      return 'Tre dagar i rad med Dagens träning';
+      case 's7':      return 'Sju dagar i rad med Dagens träning';
+      case 'pass': {
+        const tp = tablesPhrase(d.tables);
+        const r = Number(d.rounds);
+        const varv = r > 0 ? `${talord(r)} varv` : '';
+        if (!tp) return varv ? `Dagens första övningspass, ${varv}` : 'Dagens första övningspass';
+        return varv ? `Övningspass i ${tp}, ${varv}` : `Övningspass i ${tp}`;
+      }
+      case 'tabell':  return `Du kan hela ${d.table}:ans tabell`;
+      default:        return null;
+    }
   }
 
   /* ── Milstolpar per event ──────────────────────────────
-     event = { type:'test'|'ovningspass'|'daily', data:{...} }
+     event = { type:'test'|'ovningspass'|'daily'|'tabell', data:{...} }
        test:        { module, pct, memStar? }
-       ovningspass: { module, pct }   (Gångertabellens övningspass, v58)
+       ovningspass: { module, pct, tables:[7], rounds:4 }   (Gångertabellens övningspass)
        daily:       { pct, streak }
+       tabell:      { table }   (v59: alla t×1 … t×N i lådan Kan, en gång per tabell)
      milestones() är ren: uppdaterar st (räknare + pending-kön) för
-     dagen `day` (YYYY-MM-DD). award() nedan drar kortet.
+     dagen `day` (YYYY-MM-DD). Varje köpost bär sitt skäl: { spec, reason }.
+     award() nedan drar kortet.
 
      Övningspasset: första avklarade passet per dag lägger ett vanligt
      kort FÖRST i kön (det delas ut direkt). Passet räknas också som ett
      avklarat test (st.tests) för medaljerna och var 3:e test, men samma
      pass ger aldrig både dagens vanliga kort och var-3:e-dragningen –
      högst en ny dragning per pass utöver medaljerna. */
-  function medalMilestones(st, d) {
+  function medalMilestones(st, event) {
+    const d = event.data;
     const pct = typeof d.pct === 'number' ? d.pct : null;
     if (pct === null) return;
+    const q = (spec, kind) => st.pending.push({ spec, reason:reasonFor(kind, event) });
     const lvl = pct >= 95 ? 'g' : pct >= 85 ? 's' : pct >= 75 ? 'b' : null;
     if (lvl && !st.medals[lvl]) {
       st.medals[lvl] = true;
-      st.pending.push(lvl === 'b' ? 'viktad' : 'sallsynt');
+      q(lvl === 'b' ? 'viktad' : 'sallsynt', 'medal-' + lvl);
     }
     // Alla medalj-nivåer samlade → Matte-Capy
     if (st.medals.b && st.medals.s && st.medals.g && !st.matteGiven) {
       st.matteGiven = true;
-      st.pending.push('matte');
+      q('matte', 'matte');
     }
     // 100 %-pass: legendarisk dragning, en gång per modul
     if (pct === 100 && d.module && !st.perfect[d.module]) {
       st.perfect[d.module] = true;
-      st.pending.push('legendarisk');
+      q('legendarisk', 'perfect');
     }
   }
 
   function milestones(st, event, day) {
     const d = event.data;
+    const q = (spec, kind, ev) => st.pending.push({ spec, reason:reasonFor(kind, ev || event) });
     if (event.type === 'test') {
       st.tests++;
       // Första kortet direkt efter första testet – alltid ett vanligt kort
-      if (st.tests === 1) st.pending.push('vanlig');
+      if (st.tests === 1) q('vanlig', 'first');
       // Var 3:e avklarat test
-      else if (st.tests % 3 === 0) st.pending.push('viktad');
-      medalMilestones(st, d);
+      else if (st.tests % 3 === 0) q('viktad', 'three');
+      medalMilestones(st, event);
       // Minnesmästare-stjärna
       if (d.memStar) {
         st.memStars++;
-        if (st.memStars <= 3) st.pending.push('memmaster');
-        else if (st.memStars % 5 === 0) st.pending.push('viktad');
+        if (st.memStars <= 3) q('memmaster', 'mem');
+        else if (st.memStars % 5 === 0) q('viktad', 'mem5', { type:event.type, data:{ ...d, memCount:st.memStars } });
       }
     } else if (event.type === 'ovningspass') {
       st.tests++;
       if (st.lastOvningspass !== day) {
         st.lastOvningspass = day;
-        st.pending.unshift('vanlig');
+        st.pending.unshift({ spec:'vanlig', reason:reasonFor('pass', event) });
       } else if (st.tests % 3 === 0) {
-        st.pending.push('viktad');
+        q('viktad', 'three');
       }
-      medalMilestones(st, d);
+      medalMilestones(st, event);
     } else if (event.type === 'daily') {
       // Endast första avklarade passet per dag räknas (inte "Kör igen")
       if (st.lastDaily !== day) {
         st.lastDaily = day;
         const streak = typeof d.streak === 'number' ? d.streak : 0;
-        if (streak >= 3 && !st.s3) { st.s3 = true; st.pending.push('sallsynt'); }
-        if (streak >= 7 && !st.s7) { st.s7 = true; st.pending.push('legendarisk'); }
+        if (streak >= 3 && !st.s3) { st.s3 = true; q('sallsynt', 's3'); }
+        if (streak >= 7 && !st.s7) { st.s7 = true; q('legendarisk', 's7'); }
         if (d.pct === 100 && !st.perfect.daily) {
           st.perfect.daily = true;
-          st.pending.push('legendarisk');
+          q('legendarisk', 'perfect');
         }
+      }
+    } else if (event.type === 'tabell') {
+      // Hel tabell i Kan: alltid ett vanligt kort (eller en uppgradering), en gång per tabell
+      const t = Number(d.table);
+      if (Number.isInteger(t) && t > 0 && !st.tables[t]) {
+        st.tables[t] = day;
+        q('vanlig', 'tabell', { type:'tabell', data:{ table:t } });
       }
     }
     return st;
   }
 
-  /* Returnerar upplåst kort eller null. REN SIDOEFFEKT:
+  /* ── Kärnan i award(), ren (utan lagring/vyer) ─────────
+     Kör milstolparna och drar högst EN köpost. Returnerar
+       { st, cards, entry, card, tier, allDone }
+     card/tier = det som delades ut (tier 1 = nytt kort, 2 = silver, 3 = guld).
+     allDone = alla 24 guld och grattis-texten inte visad än.
+
+     'tabell' KÖAR BARA (ingen dragning, ingen overlay): händelsen kommer
+     mitt i en fråga (direkt efter att lådorna sparats), och resultatets
+     egen award (övningspass, test …) följer strax. Resultatet drar då
+     köns första post – max ETT kort per resultat gäller. Står passets
+     eget kort först (dagens första övningspass läggs först i kön) väntar
+     tabellkortet till nästa resultat. Kommer tabellen i ett flöde utan
+     resultat-award (t.ex. Rekordrunda) väntar det också på nästa
+     resultat – inget tappas, allt ligger i kön. */
+  function awardCore(st, cards, event, day, nowISO) {
+    milestones(st, event, day);
+    const out = { st, cards, entry:null, card:null, tier:0, allDone:false };
+    if (event.type === 'tabell' || st.pending.length === 0) return out;
+    const entry = st.pending.shift();
+    const card = resolveDraw(entry.spec, cards, st);
+    if (card) {
+      out.cards = grant(cards, card.id, entry.reason, nowISO);
+      out.entry = entry; out.card = card; out.tier = out.cards[card.id].tier;
+      return out;
+    }
+    // Alla 24 är guld – töm kön, varm grattis-text en gång
+    st.pending = [];
+    if (!st.allGoldShown) { st.allGoldShown = true; out.allDone = true; }
+    return out;
+  }
+
+  /* Returnerar { card, tier, reason } eller null. REN SIDOEFFEKT:
      får aldrig påverka quiz-/poängsemantiken. */
   function award(profile, event) {
     if (!profile || !profile.id || !event || !event.data) return null;
     const id = profile.id;
-    const st = readState(id);
-    const cards = readCards(id);
-    milestones(st, event, dayStr());
-
-    // Dela ut max ETT kort per resultat – resten väntar i kön
-    let unlocked = null;
-    if (st.pending.length > 0) {
-      const spec = st.pending.shift();
-      unlocked = resolveDraw(spec, cards, st);
-      if (unlocked) {
-        cards[unlocked.id] = new Date().toISOString();
-        if (!saveCards(id, cards)) {
-          // Quota-fel: kortet får ALDRIG tappas — lägg tillbaka specen i kön
-          // och visa ingen overlay (barnet ska bara se kort som är sparade)
-          st.pending.unshift(spec);
-          unlocked = null;
-        }
+    const r = awardCore(readState(id), readCards(id), event, dayStr(), new Date().toISOString());
+    const st = r.st;
+    let got = null;
+    if (r.card) {
+      if (saveCards(id, r.cards)) {
+        got = { card:r.card, tier:r.tier, reason:r.entry.reason };
       } else {
-        // Alla 24 ägs – varm grattis-text (en gång), töm kön
-        st.pending = [];
-        if (!st.allDoneShown) {
-          st.allDoneShown = true;
-          saveState(id, st);
-          showAllDone(profile);
-          return null;
-        }
+        // Quota-fel: kortet får ALDRIG tappas — lägg tillbaka köposten
+        // och visa ingen overlay (barnet ska bara se kort som är sparade)
+        st.pending.unshift(r.entry);
       }
     }
     saveState(id, st);
-    if (unlocked) showUnlock(unlocked);
-    return unlocked;
+    if (r.allDone) { ui.showAllDone(profile); return null; }
+    if (got) ui.showUnlock(got.card, got.tier, got.reason);
+    return got;
   }
 
   /* ══════════════════════════════════════════════════════
@@ -613,25 +765,45 @@ const Capy = (() => {
     return el;
   }
 
-  function showUnlock(card) {
+  /* Kortet med raritetsram – och från silver en metallram, skimmer och
+     en liten nivåetikett. Samma bild i alla nivåer. */
+  function cardHTML(c, tier, opts) {
+    const o = opts || {};
+    const t = tier >= 2 ? ` capy-tier-${tier}` : '';
+    return `
+      <div class="capy-cc capy-rar-${c.rar}${t}${o.cls || ''}"${o.style ? ` style="${o.style}"` : ''}>
+        <div class="capy-cc-in">
+          ${cardSVG(c)}
+          ${tier >= 2 ? `<span class="capy-tier-tag">${TIER_LABEL[tier]}</span>` : ''}
+          <span class="capy-cc-name">${MP.escapeHtml(c.name)}${o.emoji ? ' ' + c.emoji : ''}</span>
+          <span class="capy-cc-rar">${RAR_LABEL[c.rar]}</span>
+        </div>
+      </div>`;
+  }
+
+  /* Skälet under kortet i overlayn (utelämnas när det saknas, t.ex. gamla köposter) */
+  const whyHTML = reason => reason
+    ? `<p class="capy-ov-why"><small>Så fick du den</small>${MP.escapeHtml(reason)}</p>` : '';
+
+  /* tier 1 = nytt kort, 2 = blev silver, 3 = blev guld */
+  function showUnlock(card, tier, reason) {
+    tier = tier || 1;
+    const up = tier >= 2;
+    const name = MP.escapeHtml(card.name);
+    const lvl = up ? TIER_LABEL[tier].toLowerCase() : '';
     const el = overlayShell(`
-      <div class="capy-ov-in" role="dialog" aria-label="Nytt kort: ${MP.escapeHtml(card.name)}">
-        <span class="capy-ov-badge">✦ NYTT KORT! ✦</span>
-        <div class="capy-flip">
+      <div class="capy-ov-in" role="dialog" aria-label="${up ? `${name} blev ${lvl}` : `Nytt kort: ${name}`}">
+        <span class="capy-ov-badge${up ? ` capy-badge-${tier}` : ''}">${up ? `✦ ${TIER_LABEL[tier].toUpperCase()} ✦` : '✦ NYTT KORT! ✦'}</span>
+        <div class="capy-flip${up ? ` capy-flip-t${tier}` : ''}">
           <div class="capy-flip-in">
             <div class="capy-face capy-face-back"><span>?</span></div>
             <div class="capy-face capy-face-front">
-              <div class="capy-cc capy-rar-${card.rar} capy-reveal">
-                <div class="capy-cc-in">
-                  ${cardSVG(card)}
-                  <span class="capy-cc-name">${MP.escapeHtml(card.name)} ${card.emoji}</span>
-                  <span class="capy-cc-rar">${RAR_LABEL[card.rar]}</span>
-                </div>
-              </div>
+              ${cardHTML(card, tier, { cls:' capy-reveal', emoji:!up })}
             </div>
           </div>
         </div>
-        <p class="capy-ov-txt">${MP.escapeHtml(card.flavor)}</p>
+        ${up ? `<p class="capy-ov-up">${name} blev ${lvl}!</p>` : `<p class="capy-ov-txt">${MP.escapeHtml(card.flavor)}</p>`}
+        ${whyHTML(reason)}
         <div class="capy-ov-actions">
           <button class="btn btn-primary" onclick="Capy._close()">Fortsätt</button>
           <button class="btn btn-ghost" onclick="Capy._close(); Capy.showCollection()">
@@ -647,19 +819,19 @@ const Capy = (() => {
       if (!el.isConnected) return;
       try {
         App.Sound.play('fanfare');
-        App.Confetti.burst(card.rar === 'legendarisk' ? 160 : 100);
+        App.Confetti.burst(tier === 3 || card.rar === 'legendarisk' ? 160 : 100);
       } catch (_) { /* ljud/konfetti är grädde, aldrig krav */ }
     }, 750);
   }
 
   function showAllDone(profile) {
     overlayShell(`
-      <div class="capy-ov-in" role="dialog" aria-label="Hela samlingen klar">
-        <span class="capy-ov-badge">🦫 HELA SAMLINGEN! 🦫</span>
-        <p class="capy-ov-done">Wow, ${MP.escapeHtml(profile.name)}!<br>Alla 24 capybaror bor nu hos dig 💜</p>
+      <div class="capy-ov-in" role="dialog" aria-label="Hela samlingen i guld">
+        <span class="capy-ov-badge capy-badge-3">✦ HELA SAMLINGEN I GULD ✦</span>
+        <p class="capy-ov-done">Wow, ${MP.escapeHtml(profile.name)}!<br>Alla 24 capybaror är guld nu.</p>
         <p class="capy-ov-txt">Du är en sann capybara-vän. Fortsätt träna – de hejar på dig allihop!</p>
         <div class="capy-ov-actions">
-          <button class="btn btn-primary" onclick="Capy._close()">Tack! 🎉</button>
+          <button class="btn btn-primary" onclick="Capy._close()">Tack!</button>
           <button class="btn btn-ghost" onclick="Capy._close(); Capy.showCollection()">Se samlingen</button>
         </div>
       </div>`);
@@ -670,9 +842,59 @@ const Capy = (() => {
     }, 300);
   }
 
+  /* Vyerna award() anropar – utbytbara i tester (_test.ui) */
+  const ui = { showUnlock, showAllDone };
+
+  /* ── Datum i detaljvyn: "23 sep 2026" (lokal tid) ── */
+  const MONTHS = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  function fmtDate(iso) {
+    if (typeof iso !== 'string' || !iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return null;
+    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  const NO_REASON = 'Du fick den innan appen sparade hur';
+
+  /* Ett ägt kort stort: nivån och en rad per förtjänad nivå */
+  function showDetail(id) {
+    const profile = App.getCurrentProfile();
+    const c = byId[id];
+    if (!profile || !c) return;
+    const e = readCards(profile.id)[id];
+    if (!e) return;
+    try { App.Sound.play('click'); } catch (_) {}
+    const rows = e.got.slice().sort((a, b) => a.tier - b.tier).map(g => {
+      const date = fmtDate(g.date);
+      return `
+        <li class="capy-got">
+          <span class="capy-got-tag capy-got-${g.tier}">${TIER_LABEL[g.tier]}</span>
+          <span class="capy-got-txt">${date ? `<b>${date}</b>` : ''}${MP.escapeHtml(g.reason || NO_REASON)}</span>
+        </li>`;
+    }).join('');
+    overlayShell(`
+      <div class="capy-ov-in capy-det" role="dialog" aria-label="${MP.escapeHtml(c.name)}${e.tier >= 2 ? ', ' + TIER_LABEL[e.tier].toLowerCase() : ''}">
+        <div class="capy-det-card">${cardHTML(c, e.tier)}</div>
+        <p class="capy-ov-txt">${MP.escapeHtml(c.flavor)}</p>
+        <h3 class="capy-det-h">Så fick du den</h3>
+        <ul class="capy-got-list">${rows}</ul>
+        <div class="capy-ov-actions">
+          <button class="btn btn-primary" onclick="Capy._close()">Stäng</button>
+        </div>
+      </div>`);
+  }
+
   /* ══════════════════════════════════════════════════════
      4) SAMLINGEN-VYN (screen-collection / #capy-root)
   ══════════════════════════════════════════════════════ */
+  /* Räknaren: "24 av 24 kort · 5 silver · 0 guld" (silver/guld visas när
+     silverfasen börjat; "5 silver" = kort som nått minst silver) */
+  function counterText(cards) {
+    const n = countAtLeast(cards, 1);
+    const base = `${n} av ${TOTAL} kort`;
+    if (levelOf(cards) < 1) return base;
+    return `${base} · ${countAtLeast(cards, 2)} silver · ${countAtLeast(cards, 3)} guld`;
+  }
+
   function showCollection() {
     const profile = App.getCurrentProfile();
     if (!profile) { App.showHome(); return; }
@@ -680,19 +902,19 @@ const Capy = (() => {
     App.Sound.play('click');
 
     const cards = readCards(profile.id);
-    const n = Object.keys(cards).length;
-    const pctW = Math.round((n / TOTAL) * 100);
+    const level = levelOf(cards);
+    // Stapeln visar fasen som pågår: nya kort → silver → guld
+    const phase = Math.min(level, MAX_TIER - 1);
+    const pctW = Math.round((countAtLeast(cards, phase + 1) / TOTAL) * 100);
 
-    const grid = CARDS.map(c => {
-      if (cards[c.id]) {
+    const grid = CARDS.map((c, i) => {
+      const t = tierOf(cards, c.id);
+      if (t > 0) {
+        const lbl = `${c.name}${t >= 2 ? ', ' + TIER_LABEL[t].toLowerCase() : ''}. Visa hur du fick den`;
         return `
-          <div class="capy-cc capy-rar-${c.rar}">
-            <div class="capy-cc-in">
-              ${cardSVG(c)}
-              <span class="capy-cc-name">${MP.escapeHtml(c.name)}</span>
-              <span class="capy-cc-rar">${RAR_LABEL[c.rar]}</span>
-            </div>
-          </div>`;
+          <button type="button" class="capy-cell" aria-label="${MP.escapeHtml(lbl)}" onclick="Capy._detail('${c.id}')">
+            ${cardHTML(c, t, { style:`--d:${((i * 7) % 12) * 0.55}s` })}
+          </button>`;
       }
       return `
         <div class="capy-locked" aria-label="Hemligt kort">
@@ -700,6 +922,12 @@ const Capy = (() => {
           <small>HEMLIGT</small>
         </div>`;
     }).join('');
+
+    const hint = level >= MAX_TIER ? 'Hela samlingen är guld. Tryck på ett kort för att se hur du fick det.'
+      : level === 2 ? 'Nu blir silverkorten guld, ett i taget. Tryck på ett kort för att se hur du fick det.'
+      : level === 1 ? 'Nu blir korten silver, ett i taget. Tryck på ett kort för att se hur du fick det.'
+      : countAtLeast(cards, 1) > 0 ? 'Träna och klara test för att låsa upp fler. Tryck på ett kort för att se hur du fick det.'
+      : 'Träna och klara test för att låsa upp fler capybara-kompisar!';
 
     const root = document.getElementById('capy-root');
     if (!root) return;
@@ -715,11 +943,11 @@ const Capy = (() => {
       </div>
       <div class="wrap capy-wrap">
         <div class="card capy-progress">
-          <b class="num">🦫 ${n} av ${TOTAL} kort</b>
-          <div class="progress-bar"><i style="width:${pctW}%"></i></div>
+          <b class="num">🦫 ${counterText(cards)}</b>
+          <div class="progress-bar${phase > 0 ? ` capy-bar-${phase + 1}` : ''}"><i style="width:${pctW}%"></i></div>
         </div>
         <div class="capy-grid">${grid}</div>
-        <p class="capy-hint">Träna och klara test för att låsa upp fler capybara-kompisar! ✨</p>
+        <p class="capy-hint">${hint}</p>
       </div>`;
 
     Router.show('screen-collection');
@@ -747,7 +975,7 @@ const Capy = (() => {
 
 /* ---- Rutnätet: iPad utan scroll, mobil scrollar INUTI rutnätet ---- */
 .capy-grid{
-  display:grid; grid-template-columns:repeat(6,1fr); gap:11px;
+  display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:11px;
   flex:1; min-height:0; overflow-y:auto; padding:4px 2px;
   align-content:space-evenly;
   scrollbar-width:thin; scrollbar-color:#d8c6f7 transparent;
@@ -783,6 +1011,57 @@ const Capy = (() => {
 .capy-rar-vanlig .capy-cc-rar{background:#fce7f3; color:#9d2463;}
 .capy-rar-sallsynt .capy-cc-rar{background:#ede9fe; color:#5b21b6;}
 .capy-rar-legendarisk .capy-cc-rar{background:linear-gradient(135deg,#fbbf24,#fcd34d); color:#7c4a03;}
+
+/* ---- Nivåer (v59): silver och guld = metallram + långsamt skimmer över samma bild ---- */
+.capy-tier-2{
+  background:linear-gradient(135deg,#f8fafc 0%,#a3b1c6 20%,#eef2f7 42%,#6b7a90 66%,#e2e8f0 84%,#94a3b8 100%);
+  box-shadow:0 6px 18px rgba(100,116,139,.42), inset 0 0 0 1px rgba(255,255,255,.55);
+}
+.capy-tier-3{
+  padding:4px;
+  background:linear-gradient(135deg,#fff8d6 0%,#f5b301 16%,#fde68a 34%,#b7791f 52%,#fcd34d 70%,#fff3c4 84%,#d69e2e 100%);
+  box-shadow:0 0 0 1px rgba(183,121,31,.4), 0 8px 26px rgba(245,179,1,.5), 0 0 22px rgba(253,230,138,.75);
+}
+.capy-tier-2 .capy-cc-in{background:linear-gradient(180deg,rgba(248,250,252,.97),rgba(226,232,240,.95));}
+.capy-tier-3 .capy-cc-in{background:linear-gradient(180deg,rgba(255,252,238,.98),rgba(254,240,190,.95));}
+/* Skimret sveper långsamt (bara transform – billigt för GPU:n), förskjutet per kort via --d */
+.capy-tier-2 .capy-cc-in::after{
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.85) 50%,transparent 60%);
+  animation:capyMetal 7s ease-in-out infinite; animation-delay:var(--d,0s);
+}
+.capy-tier-3 .capy-cc-in::after{
+  background:linear-gradient(105deg,transparent 36%,rgba(253,224,71,.35) 44%,rgba(255,255,255,.95) 50%,rgba(251,191,36,.45) 56%,transparent 64%);
+  animation:capyMetal 4.5s ease-in-out infinite; animation-delay:var(--d,0s);
+}
+@keyframes capyMetal{0%{translate:-120% 0}38%{translate:120% 0}100%{translate:120% 0}}
+/* Guld: två gnistrande stjärnor i hörnen */
+.capy-tier-3::before,.capy-tier-3::after{
+  content:''; position:absolute; z-index:3; width:18px; height:18px; pointer-events:none;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
+  background:radial-gradient(circle,#fff 0 28%,#fde68a 55%,#f59e0b 100%);
+  animation:capyTwinkle 2.6s ease-in-out infinite;
+}
+.capy-tier-3::before{top:-6px; right:-6px;}
+.capy-tier-3::after{bottom:-5px; left:-5px; width:13px; height:13px; animation-delay:1.3s;}
+@keyframes capyTwinkle{0%,100%{opacity:.45; transform:scale(.7)}50%{opacity:1; transform:scale(1.1) rotate(25deg)}}
+.capy-tier-tag{
+  position:absolute; top:7px; right:7px; z-index:2;
+  font-size:9.5px; font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+  padding:2px 7px; border-radius:999px; box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
+.capy-tier-2 .capy-tier-tag{background:linear-gradient(135deg,#f8fafc,#cbd5e1 50%,#a3b1c6); color:#1e293b;}
+.capy-tier-3 .capy-tier-tag{background:linear-gradient(135deg,#fef3c7,#fbbf24 50%,#e8a317); color:#4a2a02;}
+
+/* ---- Samlingens kort är knappar (öppnar "Så fick du den") ---- */
+.capy-cell{
+  appearance:none; -webkit-appearance:none; background:none; border:0; padding:0; margin:0;
+  font:inherit; color:inherit; text-align:center; cursor:pointer; display:block; width:100%; min-width:0;
+  border-radius:20px; -webkit-tap-highlight-color:transparent;
+}
+.capy-cell:focus-visible{outline:3px solid #9333ea; outline-offset:2px;}
+.capy-cell:active .capy-cc{transform:scale(.97);}
+.capy-progress .capy-bar-2 > i{background:linear-gradient(90deg,#94a3b8,#e2e8f0,#64748b);}
+.capy-progress .capy-bar-3 > i{background:linear-gradient(90deg,#f59e0b,#fde68a,#d97706);}
 
 /* ---- Låsta kort: "?"-silhuett ---- */
 .capy-locked{
@@ -834,27 +1113,60 @@ const Capy = (() => {
 .capy-ov-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;}
 .capy-ov-actions .btn{min-height:48px; font-size:15px;}
 
+/* ---- Overlayn: uppgradering, skälet, detaljvyn ---- */
+.capy-ov-badge.capy-badge-2{background:linear-gradient(135deg,#a3b1c6,#eef2f7 50%,#7c8aa0); color:#1e293b; box-shadow:0 6px 16px rgba(100,116,139,.45);}
+.capy-ov-badge.capy-badge-3{background:linear-gradient(135deg,#f5b301,#fde68a 50%,#d69e2e); color:#4a2a02; box-shadow:0 6px 18px rgba(245,179,1,.55);}
+.capy-flip-t2 .capy-face-back{background:linear-gradient(135deg,#eef2f7,#94a3b8 55%,#cbd5e1); box-shadow:0 10px 26px rgba(100,116,139,.35);}
+.capy-flip-t3 .capy-face-back{background:linear-gradient(135deg,#fde68a,#f5b301 55%,#fcd34d); box-shadow:0 10px 26px rgba(245,179,1,.45);}
+.capy-ov-up{font-family:var(--font-head); font-weight:800; font-size:22px; color:var(--deep); margin:12px 0 0; line-height:1.2;}
+.capy-ov-why{margin:10px 0 0; font-weight:800; font-size:15px; color:var(--deep); line-height:1.3;}
+.capy-ov-why small{display:block; font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:2px;}
+.capy-det-card{width:170px; margin:0 auto;}
+.capy-det .capy-ov-txt{margin-top:10px;}
+.capy-det-h{font-family:var(--font-head); font-weight:800; font-size:17px; color:var(--deep); margin:12px 0 6px; text-align:left;}
+.capy-got-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; text-align:left;}
+.capy-got{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border-radius:14px; background:#faf5ff; border:1px solid rgba(192,132,252,.25);}
+.capy-got-tag{flex:none; min-width:60px; text-align:center; font-size:10px; font-weight:900; letter-spacing:.08em;
+  text-transform:uppercase; padding:3px 8px; border-radius:999px; margin-top:1px;}
+.capy-got-1{background:#fce7f3; color:#9d2463;}
+.capy-got-2{background:linear-gradient(135deg,#f8fafc,#cbd5e1 50%,#a3b1c6); color:#1e293b;}
+.capy-got-3{background:linear-gradient(135deg,#fef3c7,#fbbf24 50%,#e8a317); color:#4a2a02;}
+.capy-got-txt{display:flex; flex-direction:column; font-size:14px; font-weight:700; color:var(--ink); line-height:1.3;}
+.capy-got-txt b{font-size:12px; font-weight:800; color:var(--ink-soft);}
+
 /* ---- Responsivt ---- */
 @media (max-width:700px){
-  .capy-grid{grid-template-columns:repeat(4,1fr); gap:8px; align-content:start;}
+  .capy-grid{grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; align-content:start;}
   .capy-cc{border-radius:16px; padding:2px;}
   .capy-cc-in{border-radius:14px; padding:6px 4px;}
   .capy-grid .capy-cc-name{font-size:10.5px;}
   .capy-grid .capy-cc-rar{display:none;}
   .capy-locked{padding:6px 4px;}
   .capy-locked small{font-size:8px;}
-  .capy-progress{padding:9px 13px; gap:12px; margin-bottom:8px;}
+  .capy-progress{padding:9px 13px; gap:6px 12px; margin-bottom:8px; flex-wrap:wrap;}
   .capy-progress b{font-size:14.5px;}
-  .capy-hint{display:none;}
+  .capy-progress .progress-bar{flex:1 1 90px;}
+  .capy-hint{font-size:12.5px; margin-top:6px;}
   .capy-flip{width:150px;}
+  .capy-cell{border-radius:16px;}
+  .capy-grid .capy-tier-tag{top:4px; right:4px; font-size:8px; padding:1px 5px; letter-spacing:.05em;}
+  .capy-grid .capy-tier-3{padding:3px;}
+  .capy-grid .capy-tier-3::before{width:14px; height:14px; top:-5px; right:-5px;}
+  .capy-grid .capy-tier-3::after{width:10px; height:10px;}
+  .capy-det-card{width:150px;}
+  .capy-ov-up{font-size:20px;}
 }
 @media (min-width:1000px){
-  .capy-grid{grid-template-columns:repeat(8,1fr);}
+  .capy-grid{grid-template-columns:repeat(8,minmax(0,1fr));}
   .capy-grid .capy-cc-rar{display:none;}
 }
 @media (prefers-reduced-motion:reduce){
   .capy-flip-in{animation:none; transform:rotateY(180deg);}
   .capy-cc:hover{transform:none;}
+  /* Metallen står still: ramen och etiketten syns, inget sveper eller gnistrar */
+  .capy-tier-2 .capy-cc-in::after,.capy-tier-3 .capy-cc-in::after,
+  .capy-tier-3::before,.capy-tier-3::after{animation:none;}
+  .capy-cell:active .capy-cc{transform:none;}
 }`;
     document.head.appendChild(s);
   }
@@ -865,7 +1177,11 @@ const Capy = (() => {
     showCollection, // Samlingen-vyn
     cardCount,      // antal kort (hem-profilkortens chip)
     _close: closeOverlay,
-    _test: { milestones, defaultState },   // endast tester: ren milstolpslogik
+    _detail: showDetail,                   // samlingens kort-tryck → "Så fick du den"
+    /* endast tester: ren logik + utbytbara vyer */
+    _test: { milestones, defaultState, normState, normPending, normalizeCards, normEntry, levelOf, tierOf,
+             countAtLeast, grant, resolveDraw, awardCore, reasonFor, tablesPhrase, counterText, fmtDate,
+             CARDS, TOTAL, MAX_TIER, ui },
   };
 })();
 

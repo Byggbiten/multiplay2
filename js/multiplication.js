@@ -527,6 +527,18 @@ const MultGame = (() => {
       const k = KEY(table, multiplier);
       if (T.pairs[k]) { applyAnswer(T.pairs[k], !!correct, today()); saveTrainer(T); }
     } catch (_) { /* lådorna får aldrig stoppa ett svar */ }
+    // Capybara-samlingen (v59): hel tabell i Kan → händelsen 'tabell'. EFTER att lådorna
+    // sparats, i try/catch. Capy ger den en gång per tabell och profil och KÖAR bara kortet
+    // (ingen overlay mitt i en fråga): resultatets egen award (passet, testet) drar sedan
+    // köns första post, så max ett kort per resultat gäller. Står passets eget kort först i
+    // kön kommer tabellkortet vid nästa resultat.
+    try {
+      if (typeof window !== 'undefined' && window.Capy && profile && correct) {
+        for (const t of fullTables(T.pairs, UPTO(), table === multiplier ? [table] : [table, multiplier])) {
+          Capy.award(profile, { type:'tabell', data:{ table:t } });
+        }
+      }
+    } catch (_) { /* samlingen får aldrig stoppa ett svar */ }
   }
 
   function getTablePercent(table) {
@@ -608,6 +620,12 @@ const MultGame = (() => {
   function visMap(pairs, day = today(), n = 12) { const V = {}; for (const [a, b] of pairsUpTo(n)) V[KEY(a, b)] = vis(pairs[KEY(a, b)], day); return V; }
   function counts(V) { const c = { kan:0, due:0, ovar:0, ny:0 }; for (const k in V) c[V[k]]++; return c; }
   const leftToLearn = V => { const c = counts(V); return c.ny + c.ovar; };   // "tal kvar att lära"
+  /* Hela tabeller: tabell t är klar när alla t×1 … t×n ligger i lådan kan ("Dags igen" räknas
+     som kan – samma låda). Bara tabeller inom Gånger (t ≤ n). Ren; tables = kandidaterna. */
+  function fullTables(pairs, n, tables) {
+    return tables.filter(t => t >= 1 && t <= n && pairsUpTo(n).every(([a, b]) =>
+      (a !== t && b !== t) || (pairs[KEY(a, b)] && pairs[KEY(a, b)].box === 'kan')));
+  }
 
   /* Första gången: lådorna byggs ur befintlig statistik (`${table}x${mult}` → {correct,total}).
      a×b och b×a slås ihop. Minst 3 försök och minst 90 % rätt → kan (level 1, due utspritt
@@ -2077,7 +2095,7 @@ const MultGame = (() => {
     snd('fanfare');
     confetti(R0.pct >= 90 ? 110 : 70);
     // Capybara-samlingen: ren sidoeffekt EFTER loggen – får aldrig kasta
-    try { if (window.Capy) Capy.award(profile, { type:'ovningspass', data:{ module:'mult', pct:R0.pct } }); } catch (_) {}
+    try { if (window.Capy) Capy.award(profile, { type:'ovningspass', data:{ module:'mult', pct:R0.pct, tables:PS.tables, rounds:R0.rounds.length } }); } catch (_) {}
   }
 
   /* ── Du är klar! – kvittot till en vuxen ── */
@@ -2983,7 +3001,7 @@ const MultGame = (() => {
     _test: {
       KEY, PAIRS, distractors, options, reverseOptions,
       waysFor, stepsFor, introText, wayLabel, strategySteps, strategyTexts, TXT, wayRank,
-      applyAnswer, freshPair, vis, visMap, counts, leftToLearn, pairsFromStats, addDays, intervalFor, INTERVALS,
+      applyAnswer, freshPair, vis, visMap, counts, leftToLearn, fullTables, pairsFromStats, addDays, intervalFor, INTERVALS,
       buildPass, schedulePass, easyFirst, orient, pairsUpTo, shrinkSteps, shrinkRemain,
       RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary, tablesLabel,
       createDrill, receiptFor, praiseFor, durTxt, passExplainFor, settingsFrom, UPTO_DEFAULT, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
