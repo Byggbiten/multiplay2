@@ -232,6 +232,21 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Capybara-samlingen
+
+24 capybarakort (10 vanliga, 8 sällsynta, 6 legendariska) delas ut som belöning efter resultat: första testet,
+var tredje test eller pass, medaljnivåerna (75, 85 och 95 %), 100 % i en modul, Minnesmästare, dagar i rad med
+Dagens träning, dagens första övningspass och när en hel tabell kan. Max ett kort per resultat; resten väntar i en kö.
+- **Nivåer (v59):** varje kort finns som vanligt, **silver** och **guld** – 72 belöningar av samma bilder.
+  När alla 24 kort finns blir varje ny belöning en uppgradering till silver, och när alla är silver en uppgradering till guld.
+  Sällsyntheten gäller även uppgraderingar. Grattis-rutan för hela samlingen kommer när alla 24 är guld.
+- **Hel tabell:** när alla tal i en tabell (1 till Gånger, 10 som standard) ligger i **Kan** (Dags igen räknas) ger det ett
+  vanligt kort eller en uppgradering, en gång per tabell. Kortet delas ut vid nästa resultat.
+- **Samlingen** visar t.ex. "24 av 24 kort · 5 silver · 0 guld". Tryck på ett kort för att se det stort under
+  **Så fick du den**: en rad per nivå med datum och skäl. Kort från före v59 visar "Du fick den innan appen sparade hur".
+
+---
+
 ## 🔊 Ljudeffekter
 
 Appen har inbyggda ljudeffekter som ger direkt feedback:
