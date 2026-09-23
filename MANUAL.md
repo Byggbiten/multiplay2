@@ -45,12 +45,16 @@ Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till 
 ## ✖️ Gångertabellen
 
 ### Översikt
-Gångertabellens huvudvy (v58) visar, uppifrån:
-- **Tabellkartan** – som standard 10 × 10 (inställningen *Tabeller och gånger*: upp till 10, 11 eller 12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
-  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Överst står hur många tal som är kvar att lära (Ny + Övar) och hur många som är dags att fylla på.
-  Tryck på ett **radnummer** i kartan för att ställa in ett övningspass med den tabellen.
-- **Så krymper tabellen** (den lilla runda knappen vid räknaren) – en genomgång steg för steg av varför bara de svåra paren är kvar att lära.
-- **Övningspasset** – det sparade passet (t.ex. "7:ans tabell", fyra varv) med **Starta** och **Ändra**.
+Gångertabellens huvudvy (v60) visar, uppifrån, allt utan att scrolla:
+- **Tabellkartan** (kompakt) – som standard 10 × 10 (inställningen *Tabeller och gånger*: upp till 10, 11 eller 12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
+  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Bredvid står hur många tal som är kvar att lära (Ny + Övar),
+  lådornas antal och hur många som är dags att fylla på. Kartan visar bara framstegen; den går inte att trycka på.
+- **Träna en tabell** – snabbval 1–10 i två rader (11 och 12 under **Extra** när Gånger går dit). Varje knapp har en **medalj** och en tunn stapel för andelen tal i Kan.
+  Medaljen bygger på lådorna för tabellens tal (t × 1 … t × Gånger), inte på andelen rätt: ingen medalj så länge något tal är nytt,
+  **brons** när alla tal har övats, **silver** när minst hälften är Kan, **guld** när alla är Kan (Dags igen räknas som Kan).
+  En blek prick vid medaljen betyder att något av tabellens tal är dags att fylla på.
+  Ett tryck öppnar tabellens **startskärm** (medaljerna förklarade, en rad per varv) med **Starta** och **Ändra varv**: två tryck till första frågan.
+- **Varvraden** – "Varje pass: fyra varv" med varvens ikoner. **Ändra** öppnar passinställningen, där man också kan välja flera tabeller och starta ett blandat pass.
 - Tre mindre ingångar: **Öva blandat**, **Lär dig strategin** och **Rekordrunda**.
 - Längst ner: **Statistik** och **Logg**. Kugghjulet uppe till höger öppnar **inställningarna**.
 
@@ -71,7 +75,9 @@ Tanken är att nöta, inte att sätta prov: "kör den här tabellen fyra varv, s
 - Första avklarade övningspasset per dag ger ett vanligt Capybara-kort.
 
 ### Lär dig strategin
-Välj tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
+Första valet är lektionen **Tabellen är mindre än du tror** (förr *Så krymper tabellen* på huvudvyn): på en egen karta med neutrala rutor
+stryks 1:an, 10:an, 2:an och 5:an (och 11:an/12:an), sedan tvillingarna – kvar blir de svåra rutorna. Följer *Tabeller och gånger*.
+Välj annars tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
 (a × b = a rader med b prickar i varje) och en strategi steg för steg, ett klick per steg.
 När strategin är klar kan rektangeln vändas ett kvarts varv: samma prickar, samma svar.
 
@@ -98,7 +104,7 @@ eller **klocka** (så många rätt som möjligt på en minut).
 - **Strategi:** Fast (appen visar en väg) eller Välj väg (barnet väljer när det finns två).
 - **Tempo:** Klocka eller Eget rekord i rekordrundan.
 - **Tabeller och gånger:** Upp till 10 (standard), upp till 11 eller upp till 12. Styr kartan, räknarna, Öva blandat, Rekordrunda,
-  Så krymper tabellen och övningspassets gånger. Lådorna för dolda tal ligger kvar orörda.
+  lektionen *Tabellen är mindre än du tror*, medaljerna och övningspassets gånger. Lådorna för dolda tal ligger kvar orörda.
 - **Svar:** Val (fyra alternativ) eller Fri (skriv svaret själv) i Öva blandat och Rekordrunda. Övningspasset styr svarssättet per varv.
 - **Omvända frågor:** Av eller På (t.ex. "Vilket gångertal blir 56?", bara med Val).
 

@@ -376,7 +376,7 @@ describe('textsvepet – strategitexterna', () => {
    och Capybara-regeln för övningspasset
 ═══════════════════════════════════════════════════════════ */
 const { pairsUpTo, shrinkSteps, normCounts, roundTypes, presetFor, PRESETS, cleanTables, buildRounds,
-        passPlan, planSummary, tablesLabel, createDrill, receiptFor, praiseFor, durTxt } = T;
+        passPlan, planSummary, createDrill, receiptFor, praiseFor, durTxt } = T;
 
 describe('Gånger: 1–10 döljer 11:an och 12:an', () => {
   const D = '2026-09-23';
@@ -430,7 +430,9 @@ describe('Gånger: 1–10 döljer 11:an och 12:an', () => {
     expect(T.shrinkRemain(11)).toEqual([121, 100, 81, 64, 49, 36, 21, 21]);
     expect(T.shrinkRemain(12)).toEqual([144, 121, 100, 81, 64, 36, 21, 21]);
     expect(shrinkSteps(10).map(s => s.text(21)).join(' ')).not.toMatch(/11|12/);
-    expect(shrinkSteps(10)[6].text(21)).toBe('Kvar: 21 rutor. Det är de svåra — och dem övar vi på.');
+    // v60: "rutor", inte "tal" – får inte förväxlas med hemvyns "N tal kvar att lära"
+    expect(shrinkSteps(10)[6].text(21)).toBe('Kvar blir 21 svåra rutor. Dem övar vi på.');
+    for (const n of [10, 11, 12]) expect(shrinkSteps(n).slice(-1)[0].text(21)).not.toMatch(/\btal\b|kvar att lära/);
   });
 
   it('Så krymper tabellen följer Gånger', () => {
@@ -486,10 +488,6 @@ describe('övningspasset – varvbygget', () => {
     expect(planSummary(pl)).toBe('Fyra varv · 40 frågor · ungefär 8 minuter');
     expect(planSummary(passPlan({ tables:[], counts:{ choice:1 } }, 12))).toBe('Välj minst en tabell.');
     expect(planSummary(passPlan({ tables:[3], counts:{} }, 12))).toBe('Välj minst ett varv.');
-    expect(tablesLabel([7], 10)).toBe('7:ans tabell');
-    expect(tablesLabel([6, 7, 8], 12)).toBe('6:an, 7:an och 8:an');
-    expect(tablesLabel([1,2,3,4,5,6,7,8,9,10], 10)).toBe('Alla tabeller');
-    expect(tablesLabel([2, 3, 4, 6], 12)).toBe('Fyra tabeller blandat');
   });
 
   it('summeringen: inget tal har två roller i samma rad', () => {
@@ -687,5 +685,135 @@ describe('Capybara: övningspasset', () => {
     milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
     milestones(st, { type:'daily', data:{ pct:100, streak:3 } }, '2026-09-23');
     expect(specs(st)).toEqual(['vanlig', 'viktad', 'sallsynt', 'legendarisk']);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   v60: Träna en tabell – medaljerna på lådorna, snabbvalet och
+   hemvyn utan lektionen
+═══════════════════════════════════════════════════════════ */
+describe('medaljerna (Träna en tabell)', () => {
+  const D = '2026-09-23';
+  const kan = (due = addDays(D, 3)) => ({ ...freshPair(), box:'kan', level:1, due });
+  const ovar = () => ({ ...freshPair(), box:'ovar', okDays:1 });
+  /* Lådor där tabell t:s tal t × 1 … t × n får tillståndet f(m) */
+  function withTable(t, n, f) {
+    const P = pairsFromStats({}, D);
+    for (let m = 1; m <= n; m++) P[KEY(t, m)] = f(m);
+    return P;
+  }
+
+  for (const n of [10, 12]) {
+    it(`ingen, brons, silver, guld inom upto ${n}`, () => {
+      // ingen: något tal är fortfarande nytt (även om resten är Kan)
+      let P = withTable(7, n, m => m === 3 ? freshPair() : kan());
+      expect(T.tableMedal(P, 7, n, D)).toMatchObject({ medal:null, kan:n - 1, total:n, due:0 });
+      // brons: allt övat, inget nytt, färre än hälften Kan
+      P = withTable(7, n, m => m <= Math.ceil(n / 2) - 1 ? kan() : ovar());
+      expect(T.tableMedal(P, 7, n, D).medal).toBe('brons');
+      P = withTable(7, n, ovar);
+      expect(T.tableMedal(P, 7, n, D)).toMatchObject({ medal:'brons', kan:0 });
+      // silver: minst hälften Kan
+      P = withTable(7, n, m => m <= n / 2 ? kan() : ovar());
+      expect(T.tableMedal(P, 7, n, D)).toMatchObject({ medal:'silver', kan:n / 2 });
+      P = withTable(7, n, m => m === 1 ? ovar() : kan());
+      expect(T.tableMedal(P, 7, n, D).medal).toBe('silver');
+      // guld: alla Kan
+      P = withTable(7, n, () => kan());
+      expect(T.tableMedal(P, 7, n, D)).toMatchObject({ medal:'guld', kan:n, total:n, share:1, due:0 });
+    });
+
+    it(`Dags igen räknas som Kan och ger markeringen (upto ${n})`, () => {
+      const P = withTable(8, n, m => m % 2 ? kan(addDays(D, -1)) : kan());   // varannan har passerat due
+      const V = visMap(P, D, n);
+      expect(V[KEY(8, 1)]).toBe('due');
+      const m = T.tableMedal(P, 8, n, D);
+      expect(m.medal).toBe('guld');
+      expect(m.due).toBe(n / 2);
+      // samma regel som Capy-händelsen 'tabell'
+      expect(T.fullTables(P, n, [8])).toEqual([8]);
+      // ingen Dags igen → ingen markering
+      expect(T.tableMedal(withTable(8, n, () => kan()), 8, n, D).due).toBe(0);
+      // Dags igen på ett övar-fyllt tal ändrar inte att medaljen byggs på lådan
+      const Q = withTable(8, n, m => m === 2 ? kan(addDays(D, -5)) : ovar());
+      expect(T.tableMedal(Q, 8, n, D)).toMatchObject({ medal:'brons', kan:1, due:1 });
+    });
+  }
+
+  it('andelen rätt används inte: bara lådorna räknas', () => {
+    // 100 % rätt i statistiken men bara ett försök per tal → övar, inte kan
+    const stats = {}; for (let m = 1; m <= 10; m++) stats[`6x${m}`] = { correct:1, total:1 };
+    const P = pairsFromStats(stats, D);
+    expect(T.tableMedal(P, 6, 10, D).medal).toBe('brons');
+  });
+
+  it('talen utanför Gånger räknas inte (tabell 7 med upto 10 ignorerar 7 × 11, 7 × 12)', () => {
+    const P = pairsFromStats({}, D);
+    for (let m = 1; m <= 10; m++) P[KEY(7, m)] = kan();
+    expect(T.tableMedal(P, 7, 10, D).medal).toBe('guld');
+    expect(T.tableMedal(P, 7, 12, D).medal).toBe(null);
+  });
+
+  it('snabbvalen: 1–10 alltid, 11 och 12 under Extra bara när Gånger når dit', () => {
+    expect(T.quickTables(10)).toEqual({ main:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], extra:[] });
+    expect(T.quickTables(11).extra).toEqual([11]);
+    expect(T.quickTables(12).extra).toEqual([11, 12]);
+  });
+
+  it('medaljerna är SVG utan emojis, och de tre skiljer sig åt', () => {
+    const svgs = [null, ...T.MEDALS].map(k => T.medalSVG(k));
+    svgs.forEach(s => { expect(s.startsWith('<svg')).toBe(true); expect(/\p{Extended_Pictographic}/u.test(s)).toBe(false); });
+    expect(new Set(svgs).size).toBe(4);
+  });
+});
+
+describe('snabbvalet bygger passet', () => {
+  it('rätt tabell och de sparade varven', () => {
+    const saved = { tables:[3, 4], counts:{ show:0, choice:2, free:2 } };
+    const cfg = T.quickPassCfg(7, saved);
+    expect(cfg).toEqual({ tables:[7], counts:{ show:0, choice:2, free:2 } });
+    const rounds = buildRounds(cfg, 10, seeded(3));
+    expect(rounds.map(r => r.type)).toEqual(['choice', 'choice', 'free', 'free']);
+    rounds.forEach(r => {
+      expect(r.items).toHaveLength(10);
+      expect(r.items.every(it => it.a === 7)).toBe(true);
+      expect(r.items.map(it => it.b).sort((x, y) => x - y)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    });
+    expect(passPlan(cfg, 12)).toMatchObject({ tables:[7], rounds:4, questions:48 });
+  });
+
+  it('utan sparat pass (eller med noll varv) gäller Vanligt', () => {
+    const vanligt = PRESETS.find(p => p.k === 'vanligt').c;
+    expect(T.quickPassCfg(5, null).counts).toEqual(vanligt);
+    expect(T.quickPassCfg(5, { tables:[5], counts:{ show:0, choice:0, free:0 } }).counts).toEqual(vanligt);
+    expect(T.quickPassCfg(12, null).tables).toEqual([12]);
+  });
+});
+
+describe('hemvyn (v60)', () => {
+  const html = T.trainerHTML();
+  const section = id => { const m = html.match(new RegExp(`<section class="gscr" id="mt-scr-${id}">([\\s\\S]*?)</section>`)); return m ? m[1] : ''; };
+
+  it('hemvyns karta har inte kvar lektionen', () => {
+    const hub = section('hub');
+    expect(hub).toContain('id="mt-hubMap"');
+    expect(hub).not.toMatch(/shrink|krymper|mindre än du tror|lesson/i);
+    expect(hub).not.toMatch(/rowbtn/);
+  });
+
+  it('lektionen ligger i Lär dig strategin, före tabellerna, med en egen karta', () => {
+    const learn = section('learn');
+    expect(learn).toContain('Tabellen är mindre än du tror');
+    expect(learn.indexOf('mt-learnChap')).toBeLessThan(learn.indexOf('mt-learnTabs'));
+    expect(learn).toContain('id="mt-lessonMap"');
+  });
+
+  it('ordningen uppifrån: karta, Träna en tabell, varvraden, tre rutor, Statistik/Logg', () => {
+    const hub = section('hub');
+    const order = ['mt-hubMap', 'mt-hubTCard', 'mt-vrEdit', 'mt-goPrac', 'mt-goLearn', 'mt-goRec', 'mt-goStats', 'mt-goLog'].map(id => hub.indexOf(id));
+    order.forEach(i => expect(i).toBeGreaterThan(-1));
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(problems('Kvar blir 21 svåra rutor. Dem övar vi på.')).toEqual([]);
+    expect(/\p{Extended_Pictographic}/u.test(hub + section('tstart') + section('learn'))).toBe(false);
   });
 });

@@ -7,6 +7,11 @@
    v58: hubben har en kompakt karta, övningspasset (nötloopen i varv
    med kvitto för en vuxen), tre mindre ingångar och Statistik/Logg.
    Eget matteprov är borttaget; övningspasset med flera tabeller ersätter det.
+   v60: kartan visar bara framstegen (mindre rutor, ingen lektion, inga
+   radknappar). Under den: Träna en tabell (snabbval 1–10, Extra 11–12,
+   medaljer på lådorna) → startskärm → passet; varvraden; tre ingångar.
+   "Så krymper tabellen" är lektionen "Tabellen är mindre än du tror" i
+   Lär dig strategin, på en egen neutral karta.
    Lila magi-temat sätts automatiskt via #mult-root i app.css.
    ============================================================ */
 'use strict';
@@ -178,7 +183,6 @@ const MultGame = (() => {
     #mult-root .gt .mhl b{font-family:var(--font-head);font-weight:800;font-size:36px;color:var(--deep);display:inline-block;line-height:.9}
     #mult-root .gt .mhl b.pop{animation:gt-pop .5s var(--spring)}
     #mult-root .gt .mhl span{font-weight:800;font-size:13.5px;color:var(--ink-soft);line-height:1.15}
-    #mult-root .gt .mhl .mtitle{font-family:var(--font-head);font-weight:800;font-size:19px;color:var(--deep)}
     #mult-root .gt .map{display:grid;grid-template-columns:repeat(13,24px);grid-auto-rows:24px;gap:2px;justify-content:center;position:relative}
     #mult-root .gt .mh{display:grid;place-items:center;font-size:10.5px;font-weight:900;color:var(--ink-soft);transition:opacity .4s var(--smooth)}
     #mult-root .gt .mh.x{color:var(--accent)}
@@ -208,10 +212,6 @@ const MultGame = (() => {
     #mult-root .gt .legend b{font-family:var(--font-head);font-size:16px;color:var(--deep)}
     #mult-root .gt .legend b.pop{display:inline-block;animation:gt-pop .5s var(--spring)}
 
-    /* Hubbens ingångar */
-    #mult-root .gt .hubact{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end}
-    #mult-root .gt .entries{display:flex;flex-direction:column;gap:8px}
-    #mult-root .gt .shrinkbox{display:none;flex-direction:column;gap:8px}
 
     /* ── Lär dig strategin ────────────────────────── */
     #mult-root .gt .seg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex-shrink:0}
@@ -321,32 +321,52 @@ const MultGame = (() => {
     #mult-root .gt .bar .flag{position:absolute;top:-5px;bottom:-5px;width:4px;margin-left:-2px;border-radius:2px;background:#f59e0b;box-shadow:0 0 0 2px #fff}
     #mult-root .gt .bar .flag.off{display:none}
 
-    /* ── Hubben v58: kompakt karta, övningspasset, tre ingångar ── */
-    #mult-root .gt .mapcard.sm{padding:8px 12px;gap:6px}
-    #mult-root .gt .mapcard.sm .maphead{height:40px}
-    #mult-root .gt .mapcard.sm .mhl b{font-size:30px}
-    #mult-root .gt .mhr{display:flex;align-items:center;gap:8px}
-    #mult-root .gt .mhr .refill{height:auto}
-    #mult-root .gt .iconpill{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:var(--glass-strong);
-      border:1.5px solid color-mix(in srgb,var(--accent) 26%,transparent);color:var(--deep);transition:transform .25s var(--spring)}
-    #mult-root .gt .iconpill:active{transform:scale(.92)}
-    #mult-root .gt .iconpill svg.i{width:20px;height:20px}
-    #mult-root .gt .rowbtn{position:relative;padding:0;border:0;background:none;border-radius:6px;color:var(--accent);font-size:11.5px;font-weight:900;font-family:inherit;cursor:pointer}
-    #mult-root .gt .rowbtn::after{content:'';position:absolute;top:-1px;bottom:-1px;left:-12px;right:-1px}
-    #mult-root .gt .rowbtn:active{background:var(--tint)}
-    #mult-root .gt .map.rows-off .rowbtn{pointer-events:none;color:var(--ink-soft)}
-    #mult-root .gt .hubact{justify-content:center;gap:8px}
-    #mult-root .gt .hubact .hubmore{margin-top:auto}
-    #mult-root .gt .passcard{padding:12px 14px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;
-      border:1.5px solid color-mix(in srgb,var(--accent) 30%,transparent);background:linear-gradient(160deg,#fff 30%,var(--tint))}
-    #mult-root .gt .pc-head{display:flex;align-items:center;gap:12px;min-width:0}
-    #mult-root .gt .pc-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;color:#fff;
-      background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 5px 14px var(--glow)}
-    #mult-root .gt .pc-ic svg.i{width:24px;height:24px}
-    #mult-root .gt .pc-t{display:flex;flex-direction:column;line-height:1.1;min-width:0}
-    #mult-root .gt .pc-t small{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-    #mult-root .gt .pc-t b{font-family:var(--font-head);font-weight:800;font-size:23px;color:var(--deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #mult-root .gt .pc-meta{display:flex;align-items:center;gap:10px;height:26px;font-weight:800;font-size:14px;color:var(--ink-soft);white-space:nowrap;overflow:hidden}
+    /* ── Hubben v60: kompakt karta (bara framstegen), Träna en tabell, varvraden, tre ingångar ── */
+    #mult-root .gt #mt-scr-hub{gap:8px}
+    #mult-root .gt .mapcard.mini{flex-direction:row;align-items:center;gap:12px;padding:10px 12px}
+    #mult-root .gt .map.mini .mh{font-size:9.5px}
+    #mult-root .gt .map.mini .mc{border-radius:4px}
+    #mult-root .gt .mside{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:9px}
+    #mult-root .gt .mside .mhl{flex-direction:column;align-items:flex-start;gap:3px}
+    #mult-root .gt .mside .mhl b{font-size:32px}
+    #mult-root .gt .mside .mhl span{font-size:13px}
+    #mult-root .gt .mlegend{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+    #mult-root .gt .mlegend span{display:flex;align-items:center;white-space:nowrap}
+    #mult-root .gt .mlegend b{margin-left:auto;padding-left:6px;font-family:var(--font-head);font-size:15px;color:var(--deep)}
+    #mult-root .gt .mlegend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;flex-shrink:0}
+    #mult-root .gt .mlegend .sw-ny{background:#fff;box-shadow:inset 0 0 0 1px rgba(76,29,149,.25)}
+    #mult-root .gt .mlegend .sw-due{background:var(--due);box-shadow:inset 0 0 0 1px rgba(47,191,104,.35)}
+    #mult-root .gt .mside .refill{justify-content:flex-start;height:auto;line-height:1.2}
+    #mult-root .gt #mt-scr-hub .hubmore{margin-top:auto}
+
+    /* Träna en tabell: snabbval 1–10 (11–12 under Extra) med medalj och Kan-stapel */
+    #mult-root .gt .tcard{padding:10px 12px;display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+    #mult-root .gt .tc-head{font-family:var(--font-head);font-weight:800;font-size:18px;color:var(--deep);line-height:1.1}
+    #mult-root .gt .tbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+    #mult-root .gt .tb{display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:58px;padding:6px 4px 8px;border-radius:14px;background:#fff;
+      border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);color:var(--deep);transition:transform .2s var(--spring)}
+    #mult-root .gt .tb:active{transform:scale(.94)}
+    #mult-root .gt .tb-top{display:flex;align-items:center;justify-content:center;gap:4px}
+    #mult-root .gt .tb-top b{font-family:var(--font-head);font-weight:800;font-size:22px;line-height:1;min-width:12px;text-align:center}
+    #mult-root .gt .tb-md{position:relative;width:24px;height:24px;flex-shrink:0}
+    #mult-root .gt .tb .tb-bar{margin:0 4px}
+    #mult-root .gt .tb-bar{display:block;height:4px;border-radius:999px;background:rgba(76,29,149,.1);overflow:hidden}
+    #mult-root .gt .tb-bar i{display:block;height:100%;border-radius:inherit;background:var(--kan)}
+    #mult-root .gt .tx{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:center}
+    #mult-root .gt .tx .xlab{grid-column:1 / 4}
+    #mult-root .gt svg.md{display:block;width:100%;height:100%}
+    #mult-root .gt .mdue{position:absolute;top:-3px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--due);
+      box-shadow:0 0 0 1.5px #fff,inset 0 0 0 1.5px rgba(47,191,104,.5)}
+
+    /* Varvraden: vad som gäller för snabbvalen */
+    #mult-root .gt .varvrow{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;flex-shrink:0}
+    #mult-root .gt .vr-t{display:flex;flex-direction:column;line-height:1.1;flex-shrink:0}
+    #mult-root .gt .vr-t small{font-size:11.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+    #mult-root .gt .vr-t b{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);white-space:nowrap}
+    #mult-root .gt .varvrow .pc-rs{flex:1;min-width:0;overflow:hidden;gap:3px}
+    #mult-root .gt .varvrow .ri{width:22px;height:22px;border-radius:7px}
+    #mult-root .gt .varvrow .ri svg.i{width:14px;height:14px}
+    #mult-root .gt .varvrow .btn-pill{flex-shrink:0}
     #mult-root .gt .pc-rs{display:flex;gap:4px;flex-shrink:0}
     #mult-root .gt .rig{display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:13px;font-weight:900;color:var(--ink-soft)}
     #mult-root .gt .ri{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
@@ -354,8 +374,6 @@ const MultGame = (() => {
     #mult-root .gt .ri-show{background:#dbeafe;color:#1d4ed8}
     #mult-root .gt .ri-choice{background:#f3e8ff;color:#7e22ce}
     #mult-root .gt .ri-free{background:#ffedd5;color:#c2410c}
-    #mult-root .gt .pc-btns{display:grid;grid-template-columns:1fr 2fr;gap:8px}
-    #mult-root .gt .pc-btns .btn{min-height:56px;font-size:17px}
     #mult-root .gt .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex-shrink:0}
     #mult-root .gt .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;padding:8px 4px;border-radius:20px;
       background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:center;
@@ -397,6 +415,44 @@ const MultGame = (() => {
     #mult-root .gt .rstep .stp{width:44px;height:44px}
     #mult-root .gt .rstep .rn{width:22px;text-align:center;font-family:var(--font-head);font-weight:800;font-size:22px;color:var(--deep)}
     #mult-root .gt .su-sum{text-align:center;font-weight:800;font-size:15px;color:var(--deep);height:22px;flex-shrink:0}
+
+    /* ── Startskärmen för en tabell (snabbvalet) ── */
+    #mult-root .gt #mt-scr-tstart{gap:8px}
+    #mult-root .gt .ts-head{padding:12px 14px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+    #mult-root .gt .ts-md{position:relative;width:56px;height:56px;flex-shrink:0}
+    #mult-root .gt .ts-md .mdue{width:14px;height:14px;top:-2px;right:-3px}
+    #mult-root .gt .ts-t{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.1}
+    #mult-root .gt .ts-t b{font-family:var(--font-head);font-weight:800;font-size:30px;color:var(--deep)}
+    #mult-root .gt .ts-t span{font-weight:800;font-size:14px;color:var(--ink-soft)}
+    #mult-root .gt .ts-t .tb-bar{width:150px;height:6px;margin-top:3px}
+    #mult-root .gt .ts-medals{padding:8px 12px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+    #mult-root .gt .tsm{display:flex;align-items:center;gap:10px;min-height:36px;font-size:14px;font-weight:700;color:var(--ink);transition:opacity .2s}
+    #mult-root .gt .tsm b{font-weight:900}
+    #mult-root .gt .tsm .tsm-md{width:26px;height:26px;flex-shrink:0}
+    #mult-root .gt .tsm.off{opacity:.45}
+    #mult-root .gt .tsm .tsm-ok{margin-left:auto;width:22px;height:22px;color:#16a34a;visibility:hidden}
+    #mult-root .gt .tsm:not(.off) .tsm-ok{visibility:visible}
+    #mult-root .gt .tsm .tsm-ok svg.i{width:20px;height:20px;stroke-width:3}
+    #mult-root .gt .tsm.fill{color:var(--ink-soft);font-weight:800;font-size:13px}
+    #mult-root .gt .tsm.fill i{display:block;width:12px;height:12px;border-radius:50%;margin:0 7px;background:var(--due);box-shadow:inset 0 0 0 1.5px rgba(47,191,104,.5)}
+    #mult-root .gt .ts-rounds{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+    #mult-root .gt .ts-rlist{display:grid;grid-template-columns:1fr;gap:4px 10px}
+    #mult-root .gt .ts-rlist.two{grid-template-columns:1fr 1fr}
+    #mult-root .gt .ts-r{display:flex;align-items:center;gap:8px;min-height:30px;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden}
+    #mult-root .gt .ts-r em{font-style:normal;color:var(--ink-soft);min-width:16px}
+    #mult-root .gt .ts-sum{font-size:13px;font-weight:800;color:var(--ink-soft)}
+    #mult-root .gt .ts-go{min-height:60px;font-size:19px}
+    #mult-root .gt .ts-edit{min-height:48px}
+
+    /* ── Lär dig strategin: kapitlet "Tabellen är mindre än du tror" ── */
+    #mult-root .gt .chap{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;flex-shrink:0;border-radius:14px;background:var(--glass-strong);
+      border:1.5px solid color-mix(in srgb,var(--accent) 20%,transparent);font-family:var(--font-head);font-weight:800;font-size:16px;color:var(--deep);transition:transform .2s var(--spring)}
+    #mult-root .gt .chap.on{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 5px 14px var(--glow)}
+    #mult-root .gt .chap:active{transform:scale(.97)}
+    #mult-root .gt #mt-scr-learn .lesson-only{display:none}
+    #mult-root .gt #mt-scr-learn.lesson .lesson-only{display:flex}
+    #mult-root .gt #mt-scr-learn.lesson .strat-only{display:none}
+    #mult-root .gt .lessoncard{flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px 12px}
 
     /* ── Passet ── */
     #mult-root .gt #mt-scr-pass .trtop{gap:10px;white-space:nowrap}
@@ -626,6 +682,29 @@ const MultGame = (() => {
     return tables.filter(t => t >= 1 && t <= n && pairsUpTo(n).every(([a, b]) =>
       (a !== t && b !== t) || (pairs[KEY(a, b)] && pairs[KEY(a, b)].box === 'kan')));
   }
+  /* Medaljen för tabell t (v60), byggd på lådorna – aldrig på andelen rätt.
+     Talen är t × 1 … t × n (n = Gånger). "Dags igen" räknas som Kan (samma låda, samma
+     regel som fullTables och Capy-händelsen 'tabell').
+       ingen:  något tal är fortfarande nytt
+       brons:  alla tal har övats (inget är nytt)
+       silver: minst hälften av talen är Kan
+       guld:   alla tal är Kan
+     due = minst ett av talen är "Dags igen" → medaljen får en blek prick (fyll på). Ren. */
+  const MEDALS = ['brons', 'silver', 'guld'];
+  function tableMedal(pairs, t, n, day = today()){
+    const total = n;
+    let kan = 0, ny = 0, due = 0;
+    for (let m = 1; m <= n; m++){
+      const st = pairs[KEY(t, m)], v = st ? vis(st, day) : 'ny';
+      if (v === 'kan' || v === 'due') kan++;
+      if (v === 'due') due++;
+      if (v === 'ny') ny++;
+    }
+    const medal = ny > 0 ? null : kan === total ? 'guld' : kan * 2 >= total ? 'silver' : 'brons';
+    return { t, medal, kan, total, due, share:total ? kan / total : 0 };
+  }
+  /* Snabbvalen: 1–10 alltid, 11 och 12 (Extra) bara när Gånger når dit */
+  const quickTables = n => ({ main:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], extra:[11, 12].filter(t => t <= n) });
 
   /* Första gången: lådorna byggs ur befintlig statistik (`${table}x${mult}` → {correct,total}).
      a×b och b×a slås ihop. Minst 3 försök och minst 90 % rätt → kan (level 1, due utspritt
@@ -1013,12 +1092,6 @@ const MultGame = (() => {
     if (!pl.rounds) return 'Välj minst ett varv.';
     return `${varvTxt(pl.rounds)} · ${pl.questions} frågor · ungefär ${minTxt(pl.minutes)}`;
   }
-  function tablesLabel(tables, n){
-    if (tables.length === 1) return `${tables[0]}:ans tabell`;
-    if (tables.length === 12 || (tables.length === n && tables[n - 1] === n)) return 'Alla tabeller';
-    if (tables.length <= 3) return tables.slice(0, -1).map(t => `${t}:an`).join(', ') + ` och ${tables[tables.length - 1]}:an`;
-    return `${cap(talord(tables.length))} tabeller blandat`;
-  }
 
   /* NÖTLOOPEN i ett varv.
      - Varje fråga ställs en gång.
@@ -1093,7 +1166,6 @@ const MultGame = (() => {
   const S = { screen:'hub', T:null, record:{ streak:0, clock:0 }, learn:{ a:7, b:8 } };
   let hubMap = null, endMap = null, learnRect = null, pracRect = null, passRect = null, ctrlP = null, ctrlR = null, ctrlS = null;
   let PS = null, SU = null;                              // övningspasset som körs · inställningsskärmen
-  const SH = { on:false, i:-1 };
   let LW = null, LF = 0;                                 // LF: 0 ej vänd, 1 vänd (väntar på slutsats), 2 klar
   let P = null, R = null, clockId = null;
   const E = { i:0 };
@@ -1212,11 +1284,11 @@ const MultGame = (() => {
   }
   function refresh(){
     if (!$('app')) return;
-    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec, setup:refreshSetup, pass:refreshPass, done:() => {} })[S.screen]();
+    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec, setup:refreshSetup, pass:refreshPass, done:() => {}, tstart:() => {} })[S.screen]();
   }
   function btn(el, label, icon, after = true){ el.innerHTML = after ? `${label} ${icon ? svg(icon) : ''}` : `${icon ? svg(icon) : ''} ${label}`; }
   const TITLES = { hub:'Gångertabellen', learn:'Lär dig strategin', prac:'Öva blandat', end:'Passet klart', rec:'Rekordrunda',
-                   setup:'Ställ in passet', pass:'Övningspass', done:'Övningspass' };
+                   setup:'Ställ in passet', pass:'Övningspass', done:'Övningspass', tstart:'Träna en tabell' };
   function goto(name, arg){
     if (S.screen === 'rec') stopClock();
     if (S.screen === 'pass' && name !== 'pass' && PS) PS.token++;   // väntande steg i passet får inte köra vidare
@@ -1228,28 +1300,24 @@ const MultGame = (() => {
     $('cap').classList.toggle('on', name === 'prac');
     $('backBtn').textContent = name === 'pass' ? 'Avbryt' : 'Tillbaka';
     $('gear').style.visibility = (name === 'pass' || name === 'done') ? 'hidden' : '';
-    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec, setup:enterSetup, pass:enterPass, done:enterDone })[name](arg);
+    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec, setup:enterSetup, pass:enterPass, done:enterDone, tstart:enterTStart })[name](arg);
   }
 
   /* ═══════════════════════════════════════════════════════════
-     TABELLKARTAN (komponent: hubben och slutbilden har var sin)
+     TABELLKARTAN (komponent: hubben, slutbilden och lektionen har var sin)
   ═══════════════════════════════════════════════════════════ */
   /* n = hur långt tabellerna går (10, 11, 12), cell = rutans storlek i px.
-     onRow: radnumren blir knappar (hubben: tryck på 7 → övningspass med 7:an). */
-  function makeMap(el, n = 12, cell = 24, onRow = null){
+     v60: radnumren är vanlig text – snabbvalen under kartan ersätter dem. */
+  function makeMap(el, n = 12, cell = 24){
     const cells = [], rowH = [], colH = [];
     el.innerHTML = '';
     el.style.gridTemplateColumns = `repeat(${n + 1},${cell}px)`;
     el.style.gridAutoRows = `${cell}px`;
-    const mk = (cls, txt = '', tag = 'div') => { const d = document.createElement(tag); d.className = cls; d.textContent = txt; el.append(d); return d; };
+    const mk = (cls, txt = '') => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; el.append(d); return d; };
     mk('mh x', '×');
     for (let c = 1; c <= n; c++) colH[c] = mk('mh', c);
     for (let a = 1; a <= n; a++){
-      if (onRow){
-        rowH[a] = mk('mh rowbtn', a, 'button');
-        rowH[a].setAttribute('aria-label', `Övningspass med ${a}:ans tabell`);
-        rowH[a].onclick = () => onRow(a);
-      } else rowH[a] = mk('mh', a);
+      rowH[a] = mk('mh', a);
       cells[a] = [];
       for (let b = 1; b <= n; b++){ const d = mk('mc'); d.dataset.a = a; d.dataset.b = b; cells[a][b] = d; }
     }
@@ -1274,8 +1342,114 @@ const MultGame = (() => {
     : `${bTag(pop)}${n}</b><span>tal kvar<br>att lära</span>`;
   const refillHTML = m => m > 0 ? `<i></i>${m} att fylla på` : '';
 
+  /* ── Medaljerna (SVG, samma form för alla tre: band + medalj + stjärna; färgen skiljer) ── */
+  const MEDAL_COL = {
+    guld:   { f:'#fcd34d', s:'#d97706', st:'#fffbeb' },
+    silver: { f:'#e2e8f0', s:'#64748b', st:'#ffffff' },
+    brons:  { f:'#c2733a', s:'#6b2f0c', st:'#f1c29a' },
+  };
+  const MEDAL_NAME = { guld:'Guld', silver:'Silver', brons:'Brons' };
+  function medalSVG(kind){
+    if (!kind) return '<svg class="md" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14.3" r="7" fill="none" stroke="rgba(76,29,149,.3)" stroke-width="1.6" stroke-dasharray="2.4 2.4"/></svg>';
+    const c = MEDAL_COL[kind];
+    return `<svg class="md md-${kind}" viewBox="0 0 24 24" aria-hidden="true">` +
+      '<path d="M6 1h4.2l2.9 6.4H8.9z" fill="#a78bfa"/><path d="M18 1h-4.2l-2.9 6.4h4.2z" fill="#7c3aed"/>' +
+      `<circle cx="12" cy="14.3" r="7.6" fill="${c.f}" stroke="${c.s}" stroke-width="1.5"/>` +
+      `<circle cx="12" cy="14.3" r="5.4" fill="none" stroke="${c.s}" stroke-width=".8" opacity=".4"/>` +
+      `<path d="M12 10.4l1.15 2.35 2.6.38-1.88 1.83.44 2.58L12 16.32l-2.31 1.22.44-2.58-1.88-1.83 2.6-.38z" fill="${c.st}" stroke="${c.s}" stroke-width=".7" stroke-linejoin="round"/>` +
+      '</svg>';
+  }
+  const medalWrap = m => `${medalSVG(m.medal)}${m.due ? '<i class="mdue"></i>' : ''}`;
+  function tableBtnHTML(m){
+    const lbl = `${m.t}:ans tabell. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. Du kan ${m.kan} av ${m.total} tal.${m.due ? ' Några tal behöver fyllas på.' : ''}`;
+    return `<button class="tb" data-t="${m.t}" aria-label="${lbl}"><span class="tb-top"><b>${m.t}</b><span class="tb-md">${medalWrap(m)}</span></span>` +
+      `<span class="tb-bar"><i style="width:${Math.round(m.share * 100)}%"></i></span></button>`;
+  }
+
   /* ═══════════════════════════════════════════════════════════
-     HUBBEN + "Så krymper tabellen"
+     HUBBEN (v60): kompakt karta med framstegen, Träna en tabell, varvraden, tre ingångar
+  ═══════════════════════════════════════════════════════════ */
+  function enterHub(){ reloadT(); renderHub(); }
+  const RICON = { show:'eye', choice:'grid4', free:'pencil' };
+  /* En liten ikon per varv. Fler än sex varv får inte plats på raden – då en ikon per sort med antal. */
+  const roundIcons = types => types.length <= 6
+    ? types.map(t => `<i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>`).join('')
+    : RTYPES.filter(t => types.includes(t)).map(t => `<span class="rig"><i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>×${types.filter(x => x === t).length}</span>`).join('');
+  function renderHub(){
+    const n = UPTO(), V = curVis(), c = counts(V);
+    hubMap.paint(V);
+    $('hubHead').innerHTML = countHTML(leftToLearn(V));
+    $('hubLegend').innerHTML = legendHTML(c);
+    $('hubRefill').innerHTML = refillHTML(c.due);
+    $('hubRefill').style.display = c.due ? '' : 'none';
+    // Träna en tabell: 1–10, och 11–12 under Extra när Gånger når dit
+    const q = quickTables(n), med = t => tableMedal(S.T.pairs, t, n);
+    $('hubTables').innerHTML = q.main.map(t => tableBtnHTML(med(t))).join('');
+    $('hubXTables').innerHTML = q.extra.map(t => tableBtnHTML(med(t))).join('');
+    $('hubExtra').style.display = q.extra.length ? '' : 'none';
+    // Varvraden: varven som snabbvalen kör
+    const types = roundTypes(countsFrom(loadOvp()));
+    $('vrTxt').textContent = varvTxt(types.length);
+    $('vrIcons').innerHTML = roundIcons(types);
+    const kanAll = c.kan + c.due;
+    $('icRec').innerHTML = svg(kanAll < 10 ? 'lock' : 'trophy');
+    const pv = buildPass(S.T.pairs, passSeed(S.T), today(), n);
+    $('subPrac').textContent = `${pv.filter(it => it.kind === 'q').length} frågor`;
+    $('subLearn').textContent = 'Så kan du tänka';
+    $('subRec').textContent = kanAll < 10 ? 'När du kan 10 tal'
+      : SET.tempo === 'klocka' ? 'En minut'
+      : S.record.streak > 0 ? `Rekord ${S.record.streak} i rad` : 'Sätt ett rekord';
+    refreshHub();
+  }
+  function refreshHub(){
+    const c = counts(curVis());
+    $('goRec').disabled = c.kan + c.due < 10;
+  }
+
+  /* ── Startskärmen för en tabell: två tryck från hemvyn till första frågan ── */
+  let TS = null;
+  function enterTStart(t){
+    t = +t;
+    if (!quickTables(UPTO()).main.concat(quickTables(UPTO()).extra).includes(t)){ goto('hub'); return; }
+    reloadT();
+    TS = { t, cfg:quickPassCfg(t, loadOvp()) };
+    renderTStart();
+  }
+  function renderTStart(){
+    if (!TS) return;
+    const n = UPTO(), t = TS.t, m = tableMedal(S.T.pairs, t, n), rank = m.medal ? MEDALS.indexOf(m.medal) : -1;
+    TS.cfg = quickPassCfg(t, loadOvp());
+    $('tsMd').innerHTML = medalWrap(m);
+    $('tsTitle').textContent = `${t}:ans tabell`;
+    $('tsKan').textContent = `Du kan ${m.kan} av ${m.total} tal.`;
+    $('tsBar').style.width = `${Math.round(m.share * 100)}%`;
+    const rows = [
+      ['guld', `<b>Guld:</b> du kan alla tal i ${t}:ans tabell`],
+      ['silver', '<b>Silver:</b> du kan minst hälften av talen'],
+      ['brons', '<b>Brons:</b> du har övat på alla tal'],
+    ];
+    $('tsMedals').innerHTML = rows.map(([k, txt]) =>
+      `<div class="tsm${MEDALS.indexOf(k) <= rank ? '' : ' off'}"><span class="tsm-md">${medalSVG(k)}</span><span>${txt}</span><span class="tsm-ok">${svg('check')}</span></div>`).join('') +
+      (m.due ? `<div class="tsm fill"><i></i><span>${m.due} tal att fylla på</span></div>` : '');
+    const pl = passPlan(TS.cfg, n);
+    $('tsRounds').classList.toggle('two', pl.types.length > 5);
+    $('tsRounds').innerHTML = pl.types.map((ty, k) => `<span class="ts-r"><em>${k + 1}.</em><i class="ri ri-${ty}">${svg(RICON[ty])}</i>${RNAME[ty]}</span>`).join('');
+    $('tsSum').textContent = planSummary(pl);
+    btn($('tsGo'), 'Starta', 'play', false);
+    $('tsEdit').textContent = 'Ändra varv';
+  }
+  function startTStart(){
+    if (busy || !TS) return;
+    const cfg = quickPassCfg(TS.t, loadOvp());
+    if (!cfg.tables.length || !roundTypes(cfg.counts).length) return;
+    snd('click');
+    goto('pass', cfg);                                   // samma pass som passinställningen startar
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     LEKTIONEN "Tabellen är mindre än du tror" (Lär dig strategin, v60)
+     Förr "Så krymper tabellen" på hemvyn. Spelas på en egen karta med
+     neutrala rutor – hemvyns karta rörs aldrig av en lektion.
   ═══════════════════════════════════════════════════════════ */
   /* Stegen beror på hur långt tabellerna går: med 1–10 finns inget 11/12-steg */
   function shrinkSteps(n = 12){
@@ -1289,10 +1463,10 @@ const MultGame = (() => {
       { text:() => `Gånger 5 är hälften av gånger 10: 5${X}7 är hälften av 70. Vi stryker 5:ans rad och kolumn.`, rm:[5] },
       ...(big ? [big] : []),
       { text:() => `3${X}7 och 7${X}3 blir lika mycket. Därför räcker det att lära sig varje par en gång.`, act:'twins' },
-      { text:k => `Kvar: ${k} rutor. Det är de svåra — och dem övar vi på.`, act:'final' },
+      // "rutor", inte "tal": hemvyns "N tal kvar att lära" är ett annat tal
+      { text:k => `Kvar blir ${k} svåra rutor. Dem övar vi på.`, act:'final' },
     ];
   }
-  let SHRINK = shrinkSteps(12);
   /* Rutorna kvar efter varje steg (samma regler som animationen: strukna rader och
      kolumner försvinner, tvillingarna ovanför diagonalen flyger till sin spegelbild). */
   function shrinkRemain(n = 12){
@@ -1304,115 +1478,86 @@ const MultGame = (() => {
       return live.length;
     });
   }
-  const liveCells = () => hubMap.all().filter(c => !c.el.classList.contains('gone') && !c.el.classList.contains('flown'));
-  function shrinkCount(n, pop){ $('hubLegend').innerHTML = `<span>Kvar i tabellen: ${bTag(pop)}${n}</b> rutor</span>`; }
-
-  function enterHub(){ SH.on = false; SH.i = -1; reloadT(); renderHub(); }
-  const RICON = { show:'eye', choice:'grid4', free:'pencil' };
-  /* En liten ikon per varv. Fler än sex varv får inte plats på raden – då en ikon per sort med antal. */
-  const roundIcons = types => types.length <= 6
-    ? types.map(t => `<i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>`).join('')
-    : RTYPES.filter(t => types.includes(t)).map(t => `<span class="rig"><i class="ri ri-${t}" title="${RNAME[t]}">${svg(RICON[t])}</i>×${types.filter(x => x === t).length}</span>`).join('');
-  function renderHub(){
-    if (SH.on) return;
-    const V = curVis(), c = counts(V);
-    hubMap.paint(V);
-    $('hubHead').innerHTML = countHTML(leftToLearn(V));
-    $('hubLegend').innerHTML = legendHTML(c);
-    $('hubRefill').innerHTML = refillHTML(c.due);
-    const kanAll = c.kan + c.due;
-    // Övningspasset: det sparade passet, eller en uppmaning att ställa in ett
-    const cfg = usableOvp();
-    if (cfg){
-      const pl = passPlan(cfg, UPTO());
-      $('pcTitle').textContent = tablesLabel(pl.tables, UPTO());
-      $('pcRounds').innerHTML = roundIcons(pl.types);
-      $('pcSub').textContent = `${varvTxt(pl.rounds)} · ${pl.questions} frågor`;
-      $('pcEdit').style.display = '';
-      $('pcGo').style.gridColumn = '';
-      btn($('pcGo'), 'Starta', 'play', false);
-    } else {
-      $('pcTitle').textContent = 'Ställ in ett övningspass';
-      $('pcRounds').innerHTML = '';
-      $('pcSub').textContent = 'Välj tabell och hur många varv';
-      $('pcEdit').style.display = 'none';
-      $('pcGo').style.gridColumn = '1 / -1';
-      btn($('pcGo'), 'Ställ in', 'next');
-    }
-    $('icRec').innerHTML = svg(kanAll < 10 ? 'lock' : 'trophy');
-    const pv = buildPass(S.T.pairs, passSeed(S.T), today(), UPTO());
-    $('subPrac').textContent = `${pv.filter(it => it.kind === 'q').length} frågor`;
-    $('subLearn').textContent = 'Så kan du tänka';
-    $('subRec').textContent = kanAll < 10 ? 'När du kan 10 tal'
-      : SET.tempo === 'klocka' ? 'En minut'
-      : S.record.streak > 0 ? `Rekord ${S.record.streak} i rad` : 'Sätt ett rekord';
-    refreshHub();
+  const LS = { on:false, i:-1, steps:shrinkSteps(10) };
+  let lessonMap = null;
+  const LESSON_CELL = { 10:26, 11:24, 12:22 };
+  const liveCells = () => lessonMap.all().filter(c => !c.el.classList.contains('gone') && !c.el.classList.contains('flown'));
+  function lessonCount(n, pop){ $('lessonCount').innerHTML = `<span>Kvar i tabellen: ${bTag(pop)}${n}</b> rutor</span>`; }
+  function startLesson(){
+    const n = UPTO();
+    LS.on = true; LS.i = -1; LS.steps = shrinkSteps(n);
+    $('scr-learn').classList.add('lesson');
+    lessonMap = makeMap($('lessonMap'), n, LESSON_CELL[n]);
+    lessonMap.el.classList.add('neutral');              // neutrala rutor från start – inte Miras färger
+    lessonCount(n * n);
+    refreshLearn();
+    run(() => lessonStep(0));
   }
-  function refreshHub(){
-    $('hubEntries').style.display = SH.on ? 'none' : 'flex';
-    $('hubMore').style.visibility = SH.on ? 'hidden' : '';
-    $('hubShrink').style.display = SH.on ? 'flex' : 'none';
-    $('hubRefill').style.visibility = (SH.on || !$('hubRefill').innerHTML) ? 'hidden' : '';
-    $('shrinkBtn').innerHTML = SH.on ? svg('close') : svg('shrink');
-    $('shrinkBtn').setAttribute('aria-label', SH.on ? 'Avsluta Så krymper tabellen' : 'Så krymper tabellen');
-    $('shrinkBtn').disabled = busy;
-    $('hubMap').classList.toggle('rows-off', SH.on);
-    const c = counts(curVis());
-    $('goRec').disabled = c.kan + c.due < 10;
-    const last = SH.i >= SHRINK.length - 1;
-    btn($('shrinkNext'), last ? 'Tillbaka till kartan' : 'Nästa steg', last ? 'map' : 'next');
-    $('shrinkNext').disabled = busy;
-  }
-  function exitShrink(){ SH.on = false; SH.i = -1; renderHub(); }
-  async function shrinkStep(k){
-    const st = SHRINK[k]; SH.i = k;
-    const tables = st.rm;
-    say('hubBubble', st.text(k === SHRINK.length - 1 ? liveCells().length : 0));
-    refreshHub();
+  async function lessonStep(k){
+    const st = LS.steps[k]; LS.i = k;
+    const tables = st.rm, M = lessonMap;
+    say('lessonBubble', st.text(k === LS.steps.length - 1 ? liveCells().length : 0));
+    refreshLearn();
     await wait(LEAD + 120);
     if (st.act === 'neutral'){
-      hubMap.el.classList.add('neutral'); await wait(500); shrinkCount(hubMap.n * hubMap.n, true);
+      M.el.classList.add('neutral'); await wait(500); lessonCount(M.n * M.n, true);
     } else if (tables){
       const hit = liveCells().filter(c => tables.includes(c.a) || tables.includes(c.b));
-      tables.forEach(t => { hubMap.rowH[t].classList.add('dim'); hubMap.colH[t].classList.add('dim'); });
+      tables.forEach(t => { M.rowH[t].classList.add('dim'); M.colH[t].classList.add('dim'); });
       hit.forEach(c => c.el.classList.add('mark'));
       await wait(520);
       hit.forEach(c => { c.el.classList.remove('mark'); c.el.classList.add('gone'); });
       await wait(480);
-      shrinkCount(liveCells().length, true);
+      lessonCount(liveCells().length, true);
     } else if (st.act === 'twins'){
       const up = liveCells().filter(c => c.b > c.a);
       up.forEach(c => {
-        const twin = hubMap.cells[c.b][c.a];
+        const twin = M.cells[c.b][c.a];
         c.el.classList.add('fly');
-        c.el.style.transform = `translate(${(c.a - c.b) * hubMap.pitch}px,${(c.b - c.a) * hubMap.pitch}px)`;
+        c.el.style.transform = `translate(${(c.a - c.b) * M.pitch}px,${(c.b - c.a) * M.pitch}px)`;
         c.el.classList.add('flown');
         setTimeout(() => { twin.classList.remove('twin'); void twin.offsetWidth; twin.classList.add('twin'); }, 600);
       });
       await wait(1400);
-      shrinkCount(liveCells().length, true);
+      lessonCount(liveCells().length, true);
     } else if (st.act === 'final'){
       liveCells().forEach(c => c.el.classList.add('glow'));
       await wait(850);
       liveCells().forEach(c => c.el.classList.remove('glow'));
     }
   }
+  function onLessonMain(){
+    if (busy || !LS.on) return;
+    if (LS.i >= LS.steps.length - 1){ startLesson(); return; }
+    run(() => lessonStep(LS.i + 1));
+  }
 
   /* ═══════════════════════════════════════════════════════════
      LÄR DIG STRATEGIN
   ═══════════════════════════════════════════════════════════ */
   const LT = [2, 4, 5, 6, 7, 8, 9];
-  function enterLearn(){ startLearn(); }
+  function enterLearn(){ LS.on = false; startLearn(); }
   function startLearn(){
+    if (LS.on){ startLesson(); return; }
+    $('scr-learn').classList.remove('lesson');          // rektangeln mäter sin yta: den måste synas först
     S.learn.b = Math.min(S.learn.b, UPTO());
     const { a, b } = S.learn;
     LW = makeWalker(a, b); LF = 0;
-    $('learnTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.t === a));
     $('learnEq').innerHTML = `${a}<span class="x">×</span>${b}`;
     learnRect.setup(a, b, LW.rows);
     run(async () => { say('learnBubble', introText(a, b)); await wait(LEAD); await learnRect.reveal(); });
   }
   function refreshLearn(){
+    $('scr-learn').classList.toggle('lesson', LS.on);
+    $('learnChap').classList.toggle('on', LS.on);
+    $('learnChap').setAttribute('aria-pressed', LS.on);
+    $('learnTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', !LS.on && +x.dataset.t === S.learn.a));
+    if (LS.on){
+      const last = LS.i >= LS.steps.length - 1;
+      btn($('lessonMain'), last ? 'Igen' : 'Nästa steg', last ? 'again' : 'next');
+      $('lessonMain').disabled = busy;
+      return;
+    }
     const W = LW; if (!W) return;
     $('learnSlot').classList.toggle('choosing', W.stage === 'choice');
     const again = W.stage === 'done' && LF !== 1;
@@ -1886,13 +2031,18 @@ const MultGame = (() => {
     const tables = cleanTables(c.tables);
     return tables.length && roundTypes(c.counts).length ? { tables, counts:c.counts } : null;
   }
+  /* Varven som gäller för snabbvalen: det sparade passets varv, annars Vanligt. Ren. */
+  function countsFrom(saved){
+    return saved && roundTypes(saved.counts).length ? normCounts(saved.counts) : { ...PRESETS[1].c };
+  }
+  /* Snabbvalet: passet med EN tabell och de sparade varven. Samma cfg som passinställningen ger. Ren. */
+  function quickPassCfg(table, saved){ return { tables:cleanTables([table]), counts:countsFrom(saved) }; }
 
   /* ── Ställ in ett övningspass ── */
   function enterSetup(table){
     const saved = loadOvp();
-    const counts = saved && roundTypes(saved.counts).length ? saved.counts : { ...PRESETS[1].c };
     const tables = table ? [table] : saved ? cleanTables(saved.tables) : [];
-    SU = { tables, counts:normCounts(counts) };
+    SU = { tables, counts:countsFrom(saved) };
     renderSetup();
   }
   function renderSetup(){
@@ -1917,6 +2067,9 @@ const MultGame = (() => {
     $('suSum').textContent = planSummary(pl);
     $('suGo').disabled = !pl.tables.length || !pl.rounds;
     btn($('suGo'), 'Starta passet', 'play', false);
+    // Varven styr alla snabbval: spara direkt vid varje ändring, inte först vid start,
+    // annars försvinner ändringen när barnet trycker Tillbaka.
+    if (pl.tables.length && pl.rounds) saveOvp({ tables:pl.tables, counts:SU.counts });
   }
   function refreshSetup(){}
   function startFromSetup(){
@@ -2188,14 +2341,15 @@ const MultGame = (() => {
   function onSettingChange(k){
     if (k === 'upto'){
       buildMaps();
-      if (S.screen === 'hub'){ if (SH.on){ SH.on = false; SH.i = -1; busy = false; } renderHub(); }
+      if (S.screen === 'hub') renderHub();
       else if (S.screen === 'end') goto('hub');
+      else if (S.screen === 'tstart') enterTStart(TS && TS.t);
       else if (S.screen === 'setup') renderSetup();
       else if (S.screen === 'learn') startLearn();
       else if (S.screen === 'rec') enterRec();
       return;
     }
-    if (S.screen === 'hub' && !SH.on) renderHub();
+    if (S.screen === 'hub') renderHub();
     if (S.screen === 'learn' && k === 'strat') startLearn();
     if (S.screen === 'prac' && (k === 'answer' || k === 'rev')) pracSettingChange();
     if (S.screen === 'rec' && (k === 'tempo' || k === 'answer')) enterRec();
@@ -2219,33 +2373,49 @@ const MultGame = (() => {
       <div class="gt" id="mt-app">
         <div class="gscrs">
           <section class="gscr" id="mt-scr-hub">
-            <div class="card mapcard sm">
-              <div class="maphead"><div class="mhl" id="mt-hubHead"></div><div class="mhr"><span class="refill" id="mt-hubRefill"></span><button class="iconpill" id="mt-shrinkBtn" title="Så krymper tabellen"></button></div></div>
-              <div class="map" id="mt-hubMap"></div>
-              <div class="legend" id="mt-hubLegend"></div>
-            </div>
-            <div class="hubact">
-              <div class="entries" id="mt-hubEntries">
-                <div class="card passcard">
-                  <div class="pc-head"><span class="pc-ic">${svg('repeat')}</span><div class="pc-t"><small>Övningspass</small><b id="mt-pcTitle"></b></div></div>
-                  <div class="pc-meta"><span class="pc-rs" id="mt-pcRounds"></span><span class="pc-sub" id="mt-pcSub"></span></div>
-                  <div class="pc-btns"><button class="btn btn-sec" id="mt-pcEdit">Ändra</button><button class="btn btn-primary" id="mt-pcGo"></button></div>
-                </div>
-                <div class="tiles">
-                  ${tile('Prac', 'shuffle', 'Öva blandat')}
-                  ${tile('Learn', 'bulb', 'Lär dig strategin')}
-                  ${tile('Rec', '', 'Rekordrunda')}
-                </div>
-              </div>
-              <div class="shrinkbox" id="mt-hubShrink">
-                <div class="bubble b92"><div class="thought" id="mt-hubBubble"></div></div>
-                <div class="slot"><button class="btn btn-primary" id="mt-shrinkNext"></button></div>
-              </div>
-              <div class="hubmore" id="mt-hubMore">
-                <button class="mlink" id="mt-goStats">${svg('stats')}Statistik</button>
-                <button class="mlink" id="mt-goLog">${svg('log')}Logg</button>
+            <div class="card mapcard mini">
+              <div class="map mini" id="mt-hubMap"></div>
+              <div class="mside">
+                <div class="mhl" id="mt-hubHead"></div>
+                <div class="mlegend" id="mt-hubLegend"></div>
+                <span class="refill" id="mt-hubRefill"></span>
               </div>
             </div>
+            <div class="card tcard" id="mt-hubTCard">
+              <div class="tc-head">Träna en tabell</div>
+              <div class="tbtns" id="mt-hubTables"></div>
+              <div class="tx" id="mt-hubExtra"><span class="xlab">Extra</span><div class="tbtns xchips" id="mt-hubXTables"></div></div>
+            </div>
+            <div class="card varvrow">
+              <span class="vr-t"><small>Varje pass</small><b id="mt-vrTxt"></b></span>
+              <span class="pc-rs" id="mt-vrIcons"></span>
+              <button class="btn-pill" id="mt-vrEdit">Ändra</button>
+            </div>
+            <div class="tiles">
+              ${tile('Prac', 'shuffle', 'Öva blandat')}
+              ${tile('Learn', 'bulb', 'Lär dig strategin')}
+              ${tile('Rec', '', 'Rekordrunda')}
+            </div>
+            <div class="hubmore" id="mt-hubMore">
+              <button class="mlink" id="mt-goStats">${svg('stats')}Statistik</button>
+              <button class="mlink" id="mt-goLog">${svg('log')}Logg</button>
+            </div>
+          </section>
+
+          <section class="gscr" id="mt-scr-tstart">
+            <div class="card ts-head">
+              <span class="ts-md" id="mt-tsMd"></span>
+              <div class="ts-t"><b id="mt-tsTitle"></b><span id="mt-tsKan"></span><span class="tb-bar"><i id="mt-tsBar"></i></span></div>
+            </div>
+            <div class="card ts-medals" id="mt-tsMedals"></div>
+            <div class="card ts-rounds">
+              <div class="su-lab"><b>Varv</b></div>
+              <div class="ts-rlist" id="mt-tsRounds"></div>
+              <div class="ts-sum" id="mt-tsSum"></div>
+            </div>
+            <div class="grow"></div>
+            <button class="btn btn-primary ts-go" id="mt-tsGo"></button>
+            <button class="btn btn-sec ts-edit" id="mt-tsEdit"></button>
           </section>
 
           <section class="gscr" id="mt-scr-setup">
@@ -2295,16 +2465,20 @@ const MultGame = (() => {
           </section>
 
           <section class="gscr" id="mt-scr-learn">
+            <button class="chap" id="mt-learnChap" aria-pressed="false">${svg('shrink')}Tabellen är mindre än du tror</button>
             <div class="seg" id="mt-learnTabs">${LT.map(t => `<button data-t="${t}">${t}:an</button>`).join('')}</div>
-            <div class="stepper">
+            <div class="stepper strat-only">
               <button class="stp" id="mt-bPrev" aria-label="Talet före">${svg('back')}</button>
               <div class="steq" id="mt-learnEq"></div>
               <button class="stp" id="mt-bNext" aria-label="Talet efter">${svg('fwd')}</button>
             </div>
-            <div class="card rectcard"><div class="rhost" id="mt-learnHost"></div></div>
-            <div class="bubble b92"><div class="thought" id="mt-learnBubble"></div></div>
-            <div class="slot" id="mt-learnSlot"><button class="btn btn-primary" id="mt-learnMain"></button><div class="choice" id="mt-learnChoice"></div></div>
-            <button class="btn btn-sec" id="mt-learnFlip" style="min-height:44px"></button>
+            <div class="card rectcard strat-only"><div class="rhost" id="mt-learnHost"></div></div>
+            <div class="bubble b92 strat-only"><div class="thought" id="mt-learnBubble"></div></div>
+            <div class="slot strat-only" id="mt-learnSlot"><button class="btn btn-primary" id="mt-learnMain"></button><div class="choice" id="mt-learnChoice"></div></div>
+            <button class="btn btn-sec strat-only" id="mt-learnFlip" style="min-height:44px"></button>
+            <div class="card lessoncard lesson-only"><div class="map" id="mt-lessonMap"></div><div class="legend" id="mt-lessonCount"></div></div>
+            <div class="bubble b92 lesson-only"><div class="thought" id="mt-lessonBubble"></div></div>
+            <div class="slot lesson-only"><button class="btn btn-primary" id="mt-lessonMain"></button></div>
           </section>
 
           <section class="gscr" id="mt-scr-prac">
@@ -2358,31 +2532,24 @@ const MultGame = (() => {
     $('backBtn').onclick = () => {
       if (S.screen === 'pass'){ confirmCancelPass(); return; }
       if (S.screen !== 'hub') goto('hub');
-      else if (SH.on){ if (!busy) exitShrink(); }
       else { stopClock(); App.goBackToGameSelect(); }
     };
     $('gear').onclick = openSheet;
     $('sheetBg').onclick = closeSheet; $('sheetX').onclick = closeSheet; $('sheetDone').onclick = closeSheet;
     $('sheet').querySelectorAll('.gsh-tg').forEach(tg => tg.querySelectorAll('button').forEach(b => b.onclick = () => setSetting(tg.dataset.k, b.dataset.v)));
 
-    $('shrinkBtn').onclick = () => {
-      if (busy) return;
-      if (SH.on){ exitShrink(); return; }
-      SH.on = true;
-      SHRINK = shrinkSteps(UPTO());
-      $('hubHead').innerHTML = '<span class="mtitle">Så krymper tabellen</span>';   // "tal kvar att lära" är ett annat tal — visas inte samtidigt
-      run(() => shrinkStep(0));
+    // Träna en tabell: ett tryck → startskärmen för den tabellen
+    $('hubTCard').onclick = e => {
+      const b = e.target.closest('.tb');
+      if (!b || busy) return;
+      snd('click'); goto('tstart', +b.dataset.t);
     };
-    $('shrinkNext').onclick = () => {
-      if (busy) return;
-      if (SH.i >= SHRINK.length - 1){ exitShrink(); return; }
-      run(() => shrinkStep(SH.i + 1));
-    };
+    $('vrEdit').onclick = () => { if (!busy) goto('setup'); };
+    $('tsGo').onclick = startTStart;
+    $('tsEdit').onclick = () => { if (!busy && TS) goto('setup', TS.t); };
     $('goLearn').onclick = () => { if (!busy) goto('learn'); };
     $('goPrac').onclick = () => { if (!busy) goto('prac'); };
     $('goRec').onclick = () => { const c = counts(curVis()); if (!busy && c.kan + c.due >= 10) goto('rec'); };
-    $('pcGo').onclick = () => { if (busy) return; const cfg = usableOvp(); if (cfg){ snd('click'); goto('pass', cfg); } else goto('setup'); };
-    $('pcEdit').onclick = () => { if (!busy) goto('setup'); };
     $('scr-setup').querySelectorAll('.chips button').forEach(b => b.onclick = () => {
       if (!SU || b.disabled) return;
       const t = +b.dataset.t;
@@ -2410,7 +2577,9 @@ const MultGame = (() => {
     $('goStats').onclick = () => { if (!busy) showStats(); };
     $('goLog').onclick = () => { if (!busy) showLog(); };
 
-    $('learnTabs').querySelectorAll('button').forEach(b => b.onclick = () => { if (busy) return; S.learn.a = +b.dataset.t; startLearn(); });
+    $('learnTabs').querySelectorAll('button').forEach(b => b.onclick = () => { if (busy) return; LS.on = false; S.learn.a = +b.dataset.t; startLearn(); });
+    $('learnChap').onclick = () => { if (!busy){ snd('click'); startLesson(); } };
+    $('lessonMain').onclick = onLessonMain;
     $('bPrev').onclick = () => { if (busy || S.learn.b <= 1) return; S.learn.b--; startLearn(); };
     $('bNext').onclick = () => { if (busy || S.learn.b >= UPTO()) return; S.learn.b++; startLearn(); };
     $('learnMain').onclick = onLearnMain;
@@ -2436,7 +2605,7 @@ const MultGame = (() => {
     const root = document.getElementById('mult-root');
     if (!root) return;
     root.innerHTML = trainerHTML();
-    busy = false; P = null; R = null; LW = null; PS = null; SU = null; SH.on = false; SH.i = -1;
+    busy = false; P = null; R = null; LW = null; PS = null; SU = null; TS = null; LS.on = false; LS.i = -1;
     S.screen = 'hub';
     S.T = loadTrainer();
     S.record = loadRecord();
@@ -2451,10 +2620,11 @@ const MultGame = (() => {
     goto('hub');
   }
   function closeModalSafe(){ try { hideModal(); } catch (_) {} }
-  /* Kartornas storlek följer Gånger: hubbens rutor 20/22/24 px, slutbildens 24/26/28 px */
+  /* Kartornas storlek följer Gånger: hubbens kompakta rutor 18/16/15 px, slutbildens 28/26/24 px.
+     Lektionens karta byggs när lektionen startar (LESSON_CELL). */
   function buildMaps(){
     const n = UPTO();
-    hubMap = makeMap($('hubMap'), n, { 10:24, 11:22, 12:20 }[n], a => { if (!busy && !SH.on){ snd('click'); goto('setup', a); } });
+    hubMap = makeMap($('hubMap'), n, { 10:18, 11:16, 12:15 }[n]);
     endMap = makeMap($('endMap'), n, { 10:28, 11:26, 12:24 }[n]);
   }
 
@@ -3009,7 +3179,8 @@ const MultGame = (() => {
       waysFor, stepsFor, introText, wayLabel, strategySteps, strategyTexts, TXT, wayRank,
       applyAnswer, freshPair, vis, visMap, counts, leftToLearn, fullTables, pairsFromStats, addDays, intervalFor, INTERVALS,
       buildPass, schedulePass, easyFirst, orient, pairsUpTo, shrinkSteps, shrinkRemain,
-      RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary, tablesLabel,
+      tableMedal, MEDALS, quickTables, quickPassCfg, countsFrom, medalSVG, trainerHTML,
+      RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary,
       createDrill, receiptFor, praiseFor, durTxt, passExplainFor, settingsFrom, UPTO_DEFAULT, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
       setToday: d => { todayOverride = d || null; },
       today,
