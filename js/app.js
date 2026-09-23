@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v56';
+const APP_VERSION = 'v57';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -151,6 +151,9 @@ const Store = {
     [
       `mult_stats_${id}`,               // multiplication.js
       `mult_log_${id}`,                 // multiplication.js
+      `mult_boxes_${id}`,               // multiplication.js (lådorna)
+      `mult_record_${id}`,              // multiplication.js (rekordrundan)
+      `mult_settings_${id}`,            // multiplication.js (kugghjulet)
       `clock_log_${id}`,                // clock.js
       `friends_log_${id}`,              // tenfriends.js
       `uppstallning_log_${id}`,         // uppstallning.js

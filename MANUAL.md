@@ -45,91 +45,64 @@ Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till 
 ## ✖️ Gångertabellen
 
 ### Översikt
-Gångertabellens huvudvy visar:
-- Din avatar och ditt namn
-- Knappar för **📊 Stats** och **📝 Sessionslogg**
-- En **talintervall-väljare** (Range Selector)
-- Timer-knappar för tidsbegränsad träning
-- Knappen **"🎲 Gör ett eget Matteprov"**
-- Ett rutnät med alla 12 tabeller (1:an – 12:an)
+Gångertabellens huvudvy (v57) visar:
+- **Tabellkartan** – alla 144 rutor (1–12 × 1–12). Varje par (t.ex. 3 × 7 och 7 × 3) ligger i en låda:
+  **Kan** (grön), **Dags igen** (bleknat grön), **Övar** (gul) eller **Ny** (vit). Överst står hur många tal som är kvar att lära (Ny + Övar).
+- **Så krymper tabellen** – en genomgång steg för steg av varför bara de svåra paren är kvar att lära.
+- Tre ingångar: **Lär dig strategin**, **Öva** och **Rekordrunda**.
+- En diskret rad längst ner: **Eget matteprov**, **Statistik** och **Logg**.
+- Kugghjulet uppe till höger öppnar **inställningarna**.
 
-### 🎯 Talintervall-väljare (Range Selector)
-Högst upp finns ett reglage där du kan bestämma vilket intervall av multiplikatorer du vill träna på.
+### Lär dig strategin
+Välj tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
+(a × b = a rader med b prickar i varje) och en strategi steg för steg, ett klick per steg.
+När strategin är klar kan rektangeln vändas ett kvarts varv: samma prickar, samma svar.
 
-- **Standard:** 1–12 (t.ex. 7×1 till 7×12)
-- Du kan dra i reglaget för att ändra, t.ex. bara 2–6 (7×2 till 7×6)
-- Intervallet visas tydligt och gäller för alla tabeller
+### Öva
+Ett pass med ungefär elva frågor:
+- De nio kända platserna tas i första hand bland tal som är **Dags igen**, sedan bland **Övar**, sedan bland **Kan**.
+- Ett **nytt tal** per pass (lätt först) visas med rektangeln och frågas sedan två gånger – aldrig direkt efter att det visats.
+- Fel svar ger en förklaring med rektangeln, och talet kommer tillbaka lite senare i passet.
+- Efter passet visar kartan vilka tal som bytt låda.
 
-### ⏰ Sessions-timer
-Du kan aktivera en timer som räknar ner under din träning:
+### Lådorna (påfyllning över tid)
+Reglerna gäller varje besvarad fråga, i alla flöden (Öva, Rekordrunda, Dagens träning, Eget matteprov):
+- Ett rätt svar räknas en gång per dag och par.
+- **Ny** → **Övar** vid första rätta svaret. **Övar** → **Kan** efter rätt svar tre olika dagar.
+- Ett **Kan**-tal blir **Dags igen** efter 1, 3, 7, 14 och sedan 30 dagar. Rätt svar då fyller på det (grönt igen, längre intervall).
+- Fel på ett **Kan**-tal ger **Övar**; då räcker två olika dagar för att bli **Kan** igen.
+- Första gången byggs lådorna ur den befintliga statistiken.
 
-- Välj mellan **10, 15, 20 eller 30 minuter**
-- Timern syns alltid i toppen av skärmen medan den är aktiv
-- Du kan **stoppa** timern manuellt med "Stoppa"-knappen
-- När tiden är slut visas en **gratulations-dialog** med:
-  - Hur länge du tränade
-  - Möjlighet att starta en ny timer
-  - Möjlighet att se dina resultat
-  - Möjlighet att fortsätta träna fritt
+### Rekordrunda
+Öppnar när du kan 10 tal. Bara tal ur lådan **Kan**. Antingen **eget rekord** (så många rätt i rad som möjligt)
+eller **klocka** (så många rätt som möjligt på en minut).
 
-### Välja en tabell att träna på
-Klicka på valfri tabell i rutnätet (t.ex. "7:an"). Varje tabell-kort visar:
-- Tabellens nummer och eventuell medalj
-- Vilka tal du tränar på (t.ex. 7 × 1–12)
-- Din träffprocent (om du har tränat förut)
+### Inställningar (kugghjulet)
+- **Strategi:** Fast (appen visar en väg) eller Välj väg (barnet väljer när det finns två).
+- **Tempo:** Klocka eller Eget rekord i rekordrundan.
+- **Svar:** Val (fyra alternativ) eller Fri (skriv svaret själv). Gäller även Eget matteprov.
+- **Omvända frågor:** Av eller På (t.ex. "Vilket gångertal blir 56?", bara med Val).
 
-### Träningsflödet (per tabell)
-
-#### Steg 1: Välj svarsläge
-- **📝 Flervalstest** – Välj bland 4 svarsalternativ
-- **⌨️ Fri inmatning** – Skriv in svaret själv med siffertangenter
-
-#### Steg 2: Välj aktivitet
-- **📖 Lär dig först** – Visar hela tabellen med alla tal och svar så du kan studera dem
-- **🎯 Interaktiv träning** – Steg-för-steg träning med animationer
-- **🚀 Börja testa direkt** – Hoppa direkt till provet
-
-#### Interaktiv träning
-1. Varje tal visas först med sitt svar som en animation ("Kom ihåg detta! 📚")
-2. Sedan måste du själv svara (flerval eller fri inmatning)
-3. Rätt svar → grön markering + ljud → vidare till nästa
-4. Fel svar → röd markering + ljud → du får försöka igen
-5. Alla tal gås igenom framåt (min→max) och sedan bakåt (max→min)
-6. Tal du svarat fel på kommer tillbaka i slutet tills du klarat alla
-7. En progress-bar visar hur långt du kommit
-
-#### Testfasen
-- Frågor presenteras en i taget
-- Flerval: 4 alternativ visas, klicka på rätt svar
-- Fri inmatning: Skriv in svaret med siffertangenter
-- Direkt feedback med ljud (rätt/fel)
-- Fel-frågor återkommer tills de besvaras korrekt
-
-#### Resultat
-Efter provet visas:
-- Din procent (t.ex. "87%")
-- Antal rätt av totalt
-- Emoji och uppmuntrande meddelande baserat på resultat
-- Möjlighet att **testa igen** eller **gå tillbaka till menyn**
+Inställningarna sparas per profil.
 
 ### 🎲 Eget Matteprov (Custom Test)
 Du kan skapa ett eget prov som blandar flera tabeller:
 
-1. Klicka **"🎲 Gör ett eget Matteprov →"**
+1. Klicka **Eget matteprov** längst ner i huvudvyn
 2. Välj **2–3 tabeller** (max 3) genom att klicka på dem
-3. Du kan justera talintervallet med Range Selector även här
+3. Du kan justera talintervallet med reglaget
 4. Klicka **"Starta ditt matteprov! 🚀"**
-5. Samma träningsflöde som ovan, men med blandade frågor från alla valda tabeller
+5. Frågorna blandas från alla valda tabeller; fel frågor kommer tillbaka tills de besvarats rätt
 
 ### 📊 Statistik (Stats)
-Klicka på **"📊 Stats"** i huvudvyn för att se:
+Klicka på **Statistik** längst ner i huvudvyn för att se:
 
 - **Tabellöversikt** – Alla 12 tabeller med träffprocent, antal försök, och eventuell medalj
 - **💪 Träna mer på dessa** – Dina 5 svåraste tal (de med lägst träffprocent)
 - **🎯 Fokuserad träning** – Om du har tal med ≥25% felfrekvens (minst 4 försök) kan du klicka "Träna på problemtalen" för riktad träning
 - **🏆 Dina medaljer** – Förklaring av medaljsystemet
-- **📅 Träningshistorik** – Lista över avslutade timer-sessioner med datum och tid
-- **⚙️ Nollställ all statistik** – Raderar all data permanent (kräver bekräftelse)
+- **📅 Träningshistorik** – De senaste passen, rekordrundorna och proven med datum och tid
+- **⚙️ Nollställ all statistik** – Raderar statistik, logg, lådor och rekord permanent (kräver bekräftelse)
 
 #### Medaljsystemet
 | Medalj | Krav |
@@ -293,11 +266,11 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | Funktion | Beskrivning |
 |----------|-------------|
 | Profilsystem | Skapa, välja och ta bort profiler med avatarer |
-| Gångertabellen | Träna multiplikation 1–12 med anpassningsbart intervall |
+| Gångertabellen | Tabellkartan med lådor, strategier med prickrektangel, smarta pass och rekordrunda |
 | Svarslägen | Flerval (4 alternativ) eller fri inmatning |
-| Interaktiv träning | Animerad steg-för-steg inlärning med felhantering |
+| Lär dig strategin | Strategi steg för steg med prickrektangel |
 | Eget matteprov | Blanda 2–3 tabeller i ett eget prov |
-| Sessions-timer | Timed träning (10/15/20/30 min) med gratulations-dialog |
+| Rekordrunda | Eget rekord i rad eller en minut på klockan |
 | Statistik | Detaljerad statistik per tabell och per tal |
 | Medaljer | Brons/Silver/Guld baserat på träffprocent |
 | Fokuserad träning | Automatisk identifiering och träning av problemtal |
