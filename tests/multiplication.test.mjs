@@ -812,9 +812,9 @@ describe('hemvyn (v60)', () => {
     expect(learn).toContain('id="mt-lessonMap"');
   });
 
-  it('ordningen uppifrån: karta, Träna en tabell, varvraden, tre rutor, Statistik/Logg', () => {
+  it('ordningen uppifrån: karta, Träna en tabell, De svåra talen, varvraden, tre rutor, Statistik/Logg', () => {
     const hub = section('hub');
-    const order = ['mt-hubMap', 'mt-hubTCard', 'mt-vrEdit', 'mt-goPrac', 'mt-goLearn', 'mt-goRec', 'mt-goStats', 'mt-goLog'].map(id => hub.indexOf(id));
+    const order = ['mt-hubMap', 'mt-hubTCard', 'mt-hubHard', 'mt-vrEdit', 'mt-goPrac', 'mt-goLearn', 'mt-goRec', 'mt-goStats', 'mt-goLog'].map(id => hub.indexOf(id));
     order.forEach(i => expect(i).toBeGreaterThan(-1));
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(problems('Kvar blir 21 svåra rutor. Dem övar vi på.')).toEqual([]);
@@ -844,5 +844,205 @@ describe('flerval: platsen avslöjar inte svaret', () => {
       expect(rk[1] / n, `${a}:an näst minst`).toBeGreaterThan(0.2);
       expect(rk[2] / n, `${a}:an näst störst`).toBeGreaterThan(0.2);
     }
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   v62: De svåra talen – de 21 paren utan enkel genväg
+═══════════════════════════════════════════════════════════ */
+describe('De svåra talen (v62)', () => {
+  const D = '2026-09-23';
+  const H = [3, 4, 6, 7, 8, 9];
+  const k = ([a, b]) => KEY(a, b);
+  /* Lådor: alla nya, med valda par satta till en låda */
+  function boxes(set = {}) {
+    const p = {};
+    for (const [a, b] of PAIRS) p[KEY(a, b)] = freshPair();
+    for (const [key, box] of Object.entries(set)) {
+      const st = p[key];
+      if (box === 'kan') { st.box = 'kan'; st.level = 1; st.due = addDays(D, 3); }
+      else if (box === 'due') { st.box = 'kan'; st.level = 1; st.due = addDays(D, -1); }
+      else st.box = box;
+    }
+    return p;
+  }
+
+  it('hardPairs: exakt 21 par, a ≤ b, a och b i {3, 4, 6, 7, 8, 9}', () => {
+    const hp = T.hardPairs();
+    expect(hp).toHaveLength(21);
+    expect(new Set(hp.map(k)).size).toBe(21);
+    const want = [];
+    for (const a of H) for (const b of H) if (a <= b) want.push(`${a}x${b}`);
+    expect(hp.map(k).sort()).toEqual(want.sort());
+    hp.forEach(([a, b]) => { expect(a).toBeLessThanOrEqual(b); expect(H).toContain(a); expect(H).toContain(b); });
+  });
+
+  it('samma mängd som lektionens slutsteg, vid upto 10, 11 och 12', () => {
+    const hard = T.hardPairs().map(k).sort();
+    for (const n of [10, 11, 12]) {
+      const live = T.shrinkLive(n);
+      expect(live, `upto ${n}`).toHaveLength(21);
+      expect(live.map(([a, b]) => KEY(a, b)).sort(), `upto ${n}`).toEqual(hard);
+      expect(T.shrinkRemain(n).slice(-1)[0]).toBe(21);
+      // slutstegets text med det antal som lektionen räknar fram
+      expect(shrinkSteps(n).slice(-1)[0].text(live.length)).toBe('Kvar blir 21 svåra rutor. Dem övar vi på.');
+    }
+  });
+
+  it('räknaren "Du kan N av 21": Dags igen räknas som Kan, alla kan ger "alla 21"', () => {
+    T.setToday(D);
+    expect(T.hardInfo(boxes(), D)).toMatchObject({ total:21, kan:0 });
+    const p = boxes({ '3x3':'kan', '4x7':'due', '6x8':'ovar', '2x7':'kan', '7x10':'kan' });   // 2 × 7 och 7 × 10 är inte svåra
+    const info = T.hardInfo(p, D);
+    expect(info.kan).toBe(2);
+    expect(info.counts).toEqual({ kan:1, due:1, ovar:1, ny:18 });
+    expect(T.kanTxt(info.kan, info.total)).toBe('Du kan 2 av 21');
+    expect(T.kanTxt(0, 21)).toBe('Du kan 0 av 21');
+    expect(T.kanTxt(21, 21)).toBe('Du kan alla 21');
+    expect(T.kanTxt(21, 21, ' tal')).toBe('Du kan alla 21 tal');
+    const allKan = boxes(Object.fromEntries(T.hardPairs().map(q => [k(q), 'kan'])));
+    expect(T.hardInfo(allKan, D).kan).toBe(21);
+    // ingen text där samma tal står för två saker
+    for (let n = 0; n <= 21; n++) {
+      const t = `${T.kanTxt(n, 21, ' tal')}.`;
+      const nums = t.match(/\d+/g);
+      expect(new Set(nums).size, t).toBe(nums.length);
+      expect(problems(t), t).toEqual([]);
+    }
+  });
+
+  it('"Bara de du inte kan än" tar bort Kan och Dags igen, behåller Övar och Ny', () => {
+    const p = boxes({ '3x3':'kan', '4x7':'due', '6x8':'ovar' });
+    const sel = T.hardSelection(p, 'weak', D).map(k);
+    expect(sel).toHaveLength(19);
+    expect(sel).not.toContain('3x3');
+    expect(sel).not.toContain('4x7');
+    expect(sel).toContain('6x8');
+    expect(sel).toContain('9x9');
+    expect(T.hardSelection(p, 'all', D)).toHaveLength(21);
+    // alla kan: "weak" faller tillbaka på alla 21 (valet visas inte då)
+    const allKan = boxes(Object.fromEntries(T.hardPairs().map(q => [k(q), 'kan'])));
+    expect(T.hardSelection(allKan, 'weak', D)).toHaveLength(21);
+    expect(T.hardInfo(allKan, D).weak).toHaveLength(0);
+  });
+
+  it('standardvalet: Bara de du inte kan än när N ≥ 5, annars Alla 21', () => {
+    expect(T.hardDefault(21)).toBe('weak');
+    expect(T.hardDefault(5)).toBe('weak');
+    expect(T.hardDefault(4)).toBe('all');
+    expect(T.hardDefault(1)).toBe('all');
+    expect(T.hardDefault(0)).toBe('all');
+    // via lådorna: 17 kan → 4 kvar → Alla 21; 16 kan → 5 kvar → bara de
+    const hp = T.hardPairs();
+    const w = n => T.hardInfo(boxes(Object.fromEntries(hp.slice(0, 21 - n).map(q => [k(q), 'kan']))), D).weak.length;
+    expect(T.hardDefault(w(4))).toBe('all');
+    expect(T.hardDefault(w(5))).toBe('weak');
+  });
+
+  it('passet byggs av parlistan: varje valt par en gång per varv, ordningen lottas per fråga', () => {
+    const pairs = T.hardPairs();
+    const cfg = T.hardCfg(boxes(), 'all', { tables:[7], counts:{ show:1, choice:2, free:1 } }, D);
+    expect(cfg).toMatchObject({ hard:true, counts:{ show:1, choice:2, free:1 } });
+    expect(cfg.pairs).toHaveLength(21);
+    const rounds = buildRounds(cfg, 10, seeded(5));
+    expect(rounds.map(r => r.type)).toEqual(['show', 'choice', 'choice', 'free']);
+    let flipped = 0, straight = 0;
+    for (const r of rounds) {
+      expect(r.items).toHaveLength(21);
+      expect(r.items.map(it => KEY(it.a, it.b)).sort()).toEqual(pairs.map(k).sort());
+      r.items.forEach(it => { if (it.a !== it.b) (it.a > it.b ? flipped++ : straight++); });
+    }
+    expect(flipped).toBeGreaterThan(10);                         // båda ordningarna förekommer
+    expect(straight).toBeGreaterThan(10);
+    // Gånger påverkar inte mängden
+    expect(buildRounds(cfg, 12, seeded(5))[1].items).toHaveLength(21);
+    // planen: 4 varv × 21 frågor
+    const pl = passPlan(cfg, 10);
+    expect(pl).toMatchObject({ rounds:4, perRound:21, questions:84 });
+    expect(planSummary(pl)).toBe(`Fyra varv · 84 frågor · ungefär ${pl.minutes} minuter`);
+    // "Bara de du inte kan än": bara de valda paren
+    const weakCfg = T.hardCfg(boxes({ '3x3':'kan', '4x7':'due' }), 'weak', null, D);
+    const wr = buildRounds(weakCfg, 10, seeded(2));
+    wr.forEach(r => { expect(r.items).toHaveLength(19); expect(r.items.some(it => KEY(it.a, it.b) === '3x3')).toBe(false); });
+    expect(planSummary(passPlan({ pairs:[], counts:{ choice:1 } }, 10))).toBe('Välj minst ett tal.');
+    expect(planSummary(passPlan({ pairs:[[7, 8]], counts:{ choice:1 } }, 10))).toBe('Ett varv · 1 fråga · ungefär en minut');
+  });
+
+  it('cleanPairs: a ≤ b, inga dubbletter, utanför 1–12 stryks', () => {
+    expect(T.cleanPairs([[8, 7], [7, 8], [3, 3], [0, 4], [13, 2], 'x', [6, 4]])).toEqual([[3, 3], [4, 6], [7, 8]]);
+  });
+
+  it('Se svaret först: frågorna ordnade efter a och sedan b; övriga varv blandade', () => {
+    for (let s = 1; s <= 20; s++) {
+      const items = T.pairItems('show', T.hardPairs(), seeded(s));
+      expect(items).toHaveLength(21);
+      for (let i = 1; i < items.length; i++) {
+        const p = items[i - 1], q = items[i];
+        expect(p.a < q.a || (p.a === q.a && p.b < q.b), `${p.a}×${p.b} före ${q.a}×${q.b}`).toBe(true);
+      }
+    }
+    const show = T.pairItems('show', T.hardPairs(), seeded(4)).map(it => KEY(it.a, it.b));
+    const mixed = T.pairItems('choice', T.hardPairs(), seeded(4)).map(it => KEY(it.a, it.b));
+    expect(mixed.slice().sort()).toEqual(show.slice().sort());
+    expect(mixed).not.toEqual(T.hardPairs().map(k));
+  });
+
+  it('nötloopen fungerar som förut med en parlista: recordAnswer bara på första försöket', () => {
+    const items = T.pairItems('choice', T.hardPairs(), seeded(9));
+    const { d, recorded } = runDrill(items, (cur, tries) => cur.a * cur.b === 56 && tries === 0 && !cur.extra, 3);
+    expect(d.isDone()).toBe(true);
+    expect(recorded).toHaveLength(22);                           // 21 par + extratillfället för 7 × 8
+    expect(recorded.filter(x => !x.ok)).toHaveLength(1);
+    expect(d.stats()).toMatchObject({ asked:22, firstOk:21, wrongFirst:1 });
+  });
+
+  it('kvittot och loggen säger "De svåra talen"', () => {
+    const base = { type:'ovningspass', hard:true, tables:[], upto:10, rounds:['show', 'choice'], correct:30, total:42, pct:71, fixed:12, secs:300, date:'2026-09-23T10:00:00.000Z' };
+    const all = { ...base, pairs:T.hardPairs().map(k) };
+    const html = T.receiptHTML(all);
+    expect(html).toContain('<span>Tal</span><b>De svåra talen</b>');
+    expect(html).not.toContain('Tabeller');
+    expect(html).not.toContain('Gånger');
+    expect(T.receiptHTML({ ...base, pairs:['3x4', '7x8'] })).toContain('<b>2 av de svåra talen</b>');
+    expect(T.logLabel(all, true)).toBe('De svåra talen');
+    expect(T.logLabel(all, false)).toBe('De svåra talen');
+    // ett vanligt pass ser ut som förut
+    const table = { ...base, hard:undefined, tables:[7] };
+    expect(T.logLabel(table, true)).toBe('Övningspass (7:an)');
+    expect(T.receiptHTML(table)).toContain('<span>Tabeller</span><b>7:an</b>');
+  });
+
+  it('texterna följer språkreglerna och har inga emojis', () => {
+    const texts = [T.HARD_WHY, T.HARD_ALL_OK, 'Alla 21', 'Träna de svåra', 'De svåra talen', T.hardWhat({ pairs:['3x4'] })];
+    for (let n = 0; n <= 21; n++) texts.push(T.hardWeakLabel(n));
+    texts.forEach(t => expect(problems(t), t).toEqual([]));
+    const html = T.trainerHTML();
+    const hs = html.match(/<section class="gscr" id="mt-scr-hstart">([\s\S]*?)<\/section>/)[1];
+    expect(/\p{Extended_Pictographic}/u.test(hs)).toBe(false);
+    expect(hs).toContain(T.HARD_WHY);
+    // summeringen: inget tal har två roller, för alla urval och varv
+    for (let n = 1; n <= 21; n++) for (const c of [{ show:1 }, { choice:4 }, { show:4, choice:4, free:4 }, { free:2 }, { show:1, choice:2, free:1 }]) {
+      const s = planSummary(passPlan({ pairs:T.hardPairs().slice(0, n), counts:c }, 10));
+      const nums = s.match(/\d+/g) || [];
+      expect(new Set(nums).size, s).toBe(nums.length);
+      expect(problems(s), s).toEqual([]);
+    }
+  });
+
+  it('lektionens slutsteg har knappen Träna de svåra', () => {
+    const html = T.trainerHTML();
+    const learn = html.match(/<section class="gscr" id="mt-scr-learn">([\s\S]*?)<\/section>/)[1];
+    expect(learn).toContain('id="mt-lessonHard"');
+    expect(learn).toContain('id="mt-lessonAgain"');
+  });
+});
+
+describe('Capybara: De svåra talen', () => {
+  const Capy = require('../js/capy.js');
+  it('skälet: "Övningspass med de svåra talen, fyra varv"', () => {
+    const r = ev => Capy._test.reasonFor('pass', { type:'ovningspass', data:{ module:'mult', pct:50, ...ev } });
+    expect(r({ tables:[], rounds:4, hard:true })).toBe('Övningspass med de svåra talen, fyra varv');
+    expect(r({ tables:[], rounds:1, hard:true })).toBe('Övningspass med de svåra talen, ett varv');
+    expect(r({ tables:[7], rounds:4 })).toBe('Övningspass i 7:ans tabell, fyra varv');   // vanliga pass som förut
   });
 });

@@ -598,6 +598,7 @@ const Capy = (() => {
         const tp = tablesPhrase(d.tables);
         const r = Number(d.rounds);
         const varv = r > 0 ? `${talord(r)} varv` : '';
+        if (d.hard) return varv ? `Övningspass med de svåra talen, ${varv}` : 'Övningspass med de svåra talen';
         if (!tp) return varv ? `Dagens första övningspass, ${varv}` : 'Dagens första övningspass';
         return varv ? `Övningspass i ${tp}, ${varv}` : `Övningspass i ${tp}`;
       }
@@ -609,7 +610,7 @@ const Capy = (() => {
   /* ── Milstolpar per event ──────────────────────────────
      event = { type:'test'|'ovningspass'|'daily'|'tabell', data:{...} }
        test:        { module, pct, memStar? }
-       ovningspass: { module, pct, tables:[7], rounds:4 }   (Gångertabellens övningspass)
+       ovningspass: { module, pct, tables:[7], rounds:4, hard? }   (Gångertabellens övningspass; hard = De svåra talen)
        daily:       { pct, streak }
        tabell:      { table }   (v59: alla t×1 … t×N i lådan Kan, en gång per tabell)
      milestones() är ren: uppdaterar st (räknare + pending-kön) för
