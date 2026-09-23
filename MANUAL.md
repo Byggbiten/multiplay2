@@ -151,7 +151,7 @@ Klicka på **"📝 Sessionslogg"** för att se alla avslutade träningssessioner
 
 ## 🕐 Klockan
 
-### Översikt: Klockans trappa (v63)
+### Översikt: Klockans trappa (v63, lektionerna v64)
 Klockan öppnar i **Klockans trappa**: sju steg, ett i taget, alla synliga utan att scrolla.
 Varje steg har en **medalj**, sitt namn, ett exempel och en tunn stapel för andelen tider i Kan:
 
@@ -180,17 +180,42 @@ medaljerna förklarade och passets varv. Två knappar: **Lär dig** (lektionen) 
 **Ändra varv** ställer in varven: **Läs klockan** (fyra svar att välja bland) och **Ställ klockan** (dra visarna),
 0–4 av varje, och snabbvalen **Kort** (1 + 1), **Vanligt** (2 + 2, standard) och **Långt** (3 + 3). Varven sparas direkt.
 
-### Lär dig: lektionerna
-Klickstyrda på en stor klocka, en idé per steg: texten kommer först, sedan rörelsen, slutsatsen sist.
-- **Hela timmar:** minutvisaren rakt upp, den blå visaren visar timmen; sedan går det en timme.
-- **Halv:** minutvisaren går från 12 till 6 medan timvisaren glider halvvägs från 2 mot 3; timmens första halva färgas,
-  timvisarens väg mot 3 visas på kanten. "Halv tre betyder halvvägs till tre."
-- **Kvart:** urtavlan i fyra delar; kvart över när en del har gått, kvart i när en del är kvar.
-- **Fem, tio, tjugo:** minuttalen 5–55 tänds utanför urtavlan; högra halvan är över, vänstra halvan är i.
-- **Runt halv:** fältet runt 6:an (25–35); fem i halv och fem över halv, med nästa timme som vid halv.
-- **Digital tid:** 24-timmarsringen runt urtavlan; 13 är 1 på eftermiddagen; alltid kopplat till urtavlan och orden.
-- **Hur lång tid?:** klockan går fram från starttid till sluttid i klickade steg; först hela timmar, sedan minuterna,
-  som räknas i en rad under klockan.
+### Lär dig: lektionerna (v64)
+Klickstyrda på en stor klocka, en idé per steg: texten kommer först, sedan rörelsen, slutsatsen sist. Ingen
+autouppspelning; **Nästa steg** är låst medan klockan rör sig (högst ungefär 2 sekunder).
+- **Tre representationer samtidigt:** urtavlan, den digitala tiden och tiden i ord under klockan, synkrona och
+  färgkodade (timmar blå, minuter röda, bindeord mörka; timsiffrorna på urtavlan är blå, minuttalen röda).
+  När tiden ändras bläddrar siffrorna och orden tonar in.
+- **Räkningen:** den röda visaren går (eller räknas) i steg om 5 minuter, varje femmingssegment tänds och summan
+  byggs i marginalen: "5", "5 + 5 = 10" … "gått" framåt från 12 (över), "kvar" fram till 12 (i), och runt halv
+  från 6:an.
+- **Betoningen:** bindeordet i tiden och dess ord i förklaringen lyser upp ihop, med en tunn båge mellan dem:
+  **i**/**innan**, **över**/**gått över**, **halv**/**halvvägs**. Exempel: "Det är 20 minuter kvar innan åtta:
+  tjugo i åtta."
+- **Hela timmar:** två visare, den korta blå visar timmen; minutvisaren glider till 12; klockan tre (03:00).
+- **Halv:** två → minutvisaren går ett halvt varv (5 + 5 + 5 + 5 + 5 + 5 = 30), timvisaren glider halvvägs mot 3;
+  "Halv tre betyder halvvägs till tre."; den digitala visar 02:30.
+- **Kvart:** urtavlan i fyra delar; kvart över fyra (gått över), sedan det som är kvar till 12: kvart i fem (innan).
+- **Fem, tio, tjugo:** minuttalen tänds; tio över tre (5 + 5); 07:40 räknat bakifrån: tjugo i åtta; högra
+  halvan över, vänstra i.
+- **Runt halv:** halv åtta; visaren backar till 5 (fem i halv åtta), går till 7 (fem över halv åtta); fältet 25–35;
+  timmen är samma som vid halv.
+- **Digital tid:** timvisaren går två varv per dygn med en dygnsring (1–12, sedan 13–24); 12 + 12 = 24;
+  13:00 → 13 − 12 = 1; varför minus 12 (ett varv redan gånget); läggdags: barn ungefär 20:00 (åtta på kvällen),
+  vuxna runt 22:30 (halv elva på kvällen), med sängar på ringen; före 12 behövs inget minus (skolan 08:00).
+- **Hur lång tid?:** först hela timmar, sedan minuterna i femsteg med summan, ihop.
+
+**Nu får du försöka!** Efter demonstrationen följer 2–3 försök (minst en läsuppgift och en ställuppgift) ur stegets
+egna tider: "Nu får du försöka! Med det vi nyss visade. Vad tror du klockan är här?" eller "… Ställ klockan på …".
+- **Fel:** "Nästan rätt! Bra försök, låt mig visa!" när felet är nära (5 minuter fel, en timme fel runt halv, över/i
+  förväxlat), annars "Bra försök! Låt mig visa." Sedan förklaringen med samma räkning och betoning, och samma
+  uppgift igen (**Försök igen**).
+- **Rätt:** beröm ("Precis!", "Snyggt räknat!" …) och förklaringen ändå, i bekräftande form: "Precis som du redan
+  räknat ut: den röda visaren pekar på 8." → "Det är 20 minuter kvar innan åtta: tjugo i åtta."
+- Försöken räknas i lådorna som i Öva, på första försöket. Sist: **Igen** eller **Öva nu**.
+- Försökens tider är stegets egna (så att lådorna kan räknas): Kvart 9:15, 8:45, ställ kvart i fyra; Fem, tio,
+  tjugo 10:40, 5:50, ställ tjugo över nio; Runt halv 1:25, 2:35, ställ fem över halv fyra; Digital 15:15, 19:20,
+  ställ 20:40; Hur lång tid 5:15–6:45, ställ 40 minuter efter 9:10.
 
 ### Minutkartan (stödhjulet)
 Urtavlan kan visa minuttalen (röda, som minutvisaren) och färgade zoner för **över**, **i** och fältet **runt halv**.
@@ -206,10 +231,14 @@ Samma upplägg som gångertabellens övningspass: varv efter varv, varje varv st
 - **Ställ klockan:** dra visarna. När minutvisaren dras följer timvisaren med, och förbi 12 stegar timmen upp eller ner.
   Timvisaren kan också dras och snäpper till en timme. Minuterna snäpper till 5. **Klar** kontrollerar.
   **Plus och minus** för timme och minut finns kvar under klockan.
-- **Vid fel:** en förklaring i fyra klickade steg (**Nästa steg**), där visaren texten talar om lyses upp, t.ex.
-  "Titta på den röda visaren. Den pekar på 5. Det är 25 minuter." → "Det heter fem i halv." → "Den blå visaren står
-  nästan mitt emellan 2 och 3. Halv betyder halvvägs till nästa timme: tre." → "Klockan är fem i halv tre."
-  I ställfrågor ställs klockan rätt i första steget. Sedan **Svara igen** (samma fråga direkt), och frågan kommer
+- **Rätt:** kort beröm, ingen förklaring, så att nötningen flyter.
+- **Vid fel (v64):** samma varma inledning som i lektionen ("Nästan rätt!" bara vid nästan-fel) och en förklaring i
+  klickade steg på lektionens byggstenar: räkningen med summan, betoningen och de tre representationerna, t.ex.
+  "Titta på den röda visaren. Den pekar på 5." → "Runt halv räknar vi från 6:an." (kvar: 5) → "Det är 5 minuter
+  kvar innan halv: fem i halv tre." → "Den blå visaren är nära mitten mellan 2 och 3. Timmen är samma som vid halv
+  tre." → "Klockan är fem i halv tre." Digital tid börjar med minus 12 ("Timmen är 14. Efter 12 tar vi minus 12.").
+  Under förklaringen syns bara svaret barnet valde (och det rätta när det visats). I ställfrågor ställs klockan rätt
+  i första steget. Sedan **Svara igen** (samma fråga direkt), och frågan kommer
   tillbaka en gång till senare i varvet. Bara första försöket räknas i lådorna.
 - **Du är klar!** visar kvittot för en vuxen (steg, varv, rätt på första försöket, fel som rättades, tid) med
   **Håll inne: Sett av en vuxen**. Stämpeln syns i loggen.

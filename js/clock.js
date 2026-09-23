@@ -1,5 +1,5 @@
 /* ============================================================
-   MULTIPLAY – Klockan (v63: Klockans trappa)
+   MULTIPLAY – Klockan (v64: lektioner med tre representationer, räkning och försök)
    Renderar i #clock-root. Logiken (stegen, felalternativen, visarna,
    lektionerna och förklaringarna) ligger i js/clock-logic.js; lådorna,
    nötloopen och kvittot delas med Gångertabellen via js/shared.js.
@@ -66,6 +66,9 @@ const ClockGame = (() => {
   const snd = t => { try { App.Sound.play(t); } catch (_) {} };
   const confetti = n => { try { App.Confetti.burst(n); } catch (_) {} };
   const wait = ms => new Promise(r => setTimeout(r, ms));
+  /* Reducerad rörelse: animationerna hoppar direkt till slutläget */
+  const RM = () => { try { return !!(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (_) { return false; } };
+  const pause = ms => RM() ? Promise.resolve() : wait(ms);
   const LEAD = 300;                                  // texten först, rörelsen sen
   const p2 = n => String(n).padStart(2, '0');
   const $ = id => document.getElementById('ck-' + id);
@@ -89,8 +92,9 @@ const ClockGame = (() => {
 
     /* Urtavlans SVG-delar */
     #clock-root .ck-tick{stroke:var(--deep)}
-    #clock-root .ck-num{fill:var(--deep);font-family:var(--font-head);font-weight:700;font-size:15px;text-anchor:middle;transition:fill .3s}
-    #clock-root .ck-num.glow{fill:var(--time-h);font-size:19px}
+    #clock-root .ck-num{fill:var(--time-h);font-family:var(--font-head);font-weight:800;font-size:15px;text-anchor:middle;transition:fill .3s,font-size .3s}
+    #clock-root .ck-num.lit{fill:#1d4ed8;font-size:17.5px}
+    #clock-root .ck-num.glow{fill:#1d4ed8;font-size:21px}
     #clock-root .ck-hand-h{stroke:var(--time-h)}
     #clock-root .ck-hand-m{stroke:var(--time-m)}
     #clock-root .ck-cap{fill:var(--accent-2);stroke:#fff;stroke-width:2.5}
@@ -108,9 +112,18 @@ const ClockGame = (() => {
     #clock-root .ckv .ck-map.nums .mn{opacity:1}
     #clock-root .ckv .ck-map .mn.on{opacity:1}
     #clock-root .ckv .zl{font-family:var(--font-head);font-weight:800;font-size:14px;text-anchor:middle}
-    #clock-root .ckv .r24{fill:var(--deep);font-family:var(--font-head);font-weight:800;font-size:12.5px;text-anchor:middle;opacity:0;transition:opacity .4s}
-    #clock-root .ckv.r24on .r24{opacity:.9}
-    #clock-root .ckv.r24pop .r24{fill:var(--accent);font-size:14px}
+    #clock-root .ckv .r24{fill:var(--time-h);font-family:var(--font-head);font-weight:800;font-size:13px;text-anchor:middle;opacity:0;transition:opacity .3s,font-size .3s}
+    #clock-root .ckv.r24on .r24{opacity:.22}
+    #clock-root .ckv.r24on .r24.lit{opacity:1}
+    #clock-root .ckv.r24on .r24.hot{opacity:1;fill:#1d4ed8;font-size:17px}
+    #clock-root .ckv.nomin .hand-m{opacity:0}
+    #clock-root .ckv .hand-m{transition:opacity .2s}
+    #clock-root .ckv .seg{animation:ck-fadein .22s ease-out}
+    #clock-root .ckv .seg-gone{fill:rgba(239,68,68,.2)}
+    #clock-root .ckv .seg-left{fill:rgba(245,158,11,.36)}
+    #clock-root .ckv .lap{fill:none;stroke:#facc15;stroke-width:6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:ck-draw .9s ease-out forwards}
+    #clock-root .ckv .ck-bed{animation:ck-pop .45s var(--spring)}
+    #clock-root .ckv .ck-bed text{font-family:var(--font-head);font-weight:800;font-size:10.5px;text-anchor:middle;fill:var(--deep)}
 
     /* ── Trappan, startskärmen, lektionen och passet (v63) ── */
     #clock-root .ck2{--kan:#2fbf68;--due:#bfead0;--ovar:#fbbf24;max-width:440px;gap:8px}
@@ -343,6 +356,54 @@ const ClockGame = (() => {
     #clock-root .ck-stampmini svg{width:14px;height:14px}
     #clock-root .c-ok{color:#16a34a}#clock-root .c-mid{color:#d97706}#clock-root .c-err{color:#dc2626}
 
+    /* v64: de tre representationerna, summan i marginalen och betoningen */
+    #clock-root .ck2{position:relative}
+    #clock-root .ck-trio{flex-shrink:0;width:100%;display:flex;align-items:center;gap:10px;min-height:46px;padding:0 2px}
+    #clock-root .ck-trio.off{display:none}
+    #clock-root .ck-tdigi{font-family:var(--font-head);font-weight:800;font-size:27px;letter-spacing:1px;line-height:1.1;padding:4px 11px;background:#fff;border:2px solid rgba(47,111,228,.18);border-radius:14px;flex-shrink:0;display:inline-flex;overflow:hidden}
+    #clock-root .ck-tdigi .dg{display:inline-block}
+    #clock-root .ck-tdigi .dg.flip{animation:ck-flip .34s ease-out}
+    #clock-root .ck-twords{flex:1;min-width:0;font-family:var(--font-head);font-weight:800;font-size:19px;line-height:1.2;color:var(--deep)}
+    #clock-root .ck-twords.chg{animation:ck-wordin .32s ease-out}
+    #clock-root .ck-twords .t-p{font-size:15px}
+    #clock-root .ck-trio.nowords .ck-twords{visibility:hidden}
+    #clock-root .ck-stage.digiq .ck-qclock{display:none}
+    #clock-root .ck-stage.digiq .ck-trio{flex:1;justify-content:center}
+    #clock-root .ck-stage.digiq .ck-tdigi{font-size:52px;padding:10px 24px;border-radius:22px}
+    #clock-root .ck-stage.digiq .ck-twords{display:none}
+    #clock-root .ck-stage.exp .ck-prompt{display:none}
+    #clock-root .ck-sumline{display:inline-flex;align-items:baseline;gap:5px;font-family:var(--font-head);font-weight:800;font-size:20px;color:var(--time-k);white-space:nowrap}
+    #clock-root .ck-sumline b{color:var(--time-m);font-weight:900}
+    #clock-root .ck-sumline.h b{color:var(--time-h)}
+    #clock-root .ck-sumline small{font-size:13px;font-weight:900;color:#fff;background:var(--time-m);border-radius:999px;padding:1px 8px;align-self:center}
+    #clock-root .ck-sumline.left small{background:#d97706}
+    #clock-root .ck-sumline.long{font-size:15px;gap:3px}
+    #clock-root .ck-m12 .fly{display:inline-block;animation:ck-flyin .45s var(--spring) .12s both}
+    #clock-root .ck-m12 .eq{display:inline-block;animation:ck-fadein .3s ease-out .5s both}
+    #clock-root .lk{display:inline-block;border-radius:6px;padding:0 3px;margin:0 -1px;transition:background-color .25s,box-shadow .25s}
+    #clock-root .lk.on{background:var(--lk);box-shadow:0 0 0 2px var(--lk-line);animation:ck-lkpulse .7s ease-out}
+    #clock-root .lk-i{--lk:#fde68a;--lk-line:#f59e0b}
+    #clock-root .lk-o{--lk:#a7f3d0;--lk-line:#10b981}
+    #clock-root .lk-h{--lk:#ddd6fe;--lk-line:#8b5cf6}
+    #clock-root .ck-bow{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:6}
+    #clock-root .ck-bow path{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:ck-draw .5s ease-out .15s forwards}
+    #clock-root .ck2 .thought .lead{font-size:15.5px;font-weight:900;color:#b45309}
+    #clock-root .ck2 .thought .lead.good{color:#15803d}
+    #clock-root .ck-ldots i.try{border-radius:3px}
+    #clock-root #ck-lesson .ck-ltag{white-space:nowrap}
+    #clock-root #ck-lesson .ck-ldots{flex:1;justify-content:flex-end;padding-right:4px}
+    #clock-root .ck-ctrl:empty{display:none}
+    /* Under förklaringen: bara svaret barnet valde (och det rätta när det visats) – klockan får platsen */
+    #clock-root .ck-ctrl.exp .ck-opt:not(.bad):not(.ok){display:none}
+    #clock-root .ck-ctrl.exp .ck-opts{grid-template-columns:1fr 1fr}
+    #clock-root .ck-ctrl.exp .ck-setrow{display:none}
+    @keyframes ck-flip{0%{transform:translateY(-40%);opacity:.15}100%{transform:none;opacity:1}}
+    @keyframes ck-wordin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @keyframes ck-lkpulse{0%{transform:scale(1)}35%{transform:scale(1.2)}100%{transform:scale(1)}}
+    @keyframes ck-fadein{from{opacity:0}to{opacity:1}}
+    @keyframes ck-flyin{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+    @keyframes ck-draw{to{stroke-dashoffset:0}}
+
     @keyframes ck-pop{0%{transform:scale(.5);opacity:.2}65%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
     @keyframes ck-bubblein{from{transform:scale(.9) translateY(4px);opacity:.4}to{transform:scale(1) translateY(0);opacity:1}}
     @keyframes ck-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
@@ -439,6 +500,7 @@ const ClockGame = (() => {
     digital:'<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M8 10v4M11 10.5h.01M11 13.5h.01M14 10h2v4"/>',
     fwd:'<path d="M9 5l7 7-7 7"/>',
   };
+  const BED = '<path d="M3 19V6"/><path d="M3 15h18v4"/><path d="M21 15v-2.5a3 3 0 0 0-3-3h-7V15"/><circle cx="7" cy="11.5" r="2"/>';
   const svg = (k, style = '') => `<svg class="i" viewBox="0 0 24 24"${style ? ` style="${style}"` : ''}>${ICON[k]}</svg>`;
   const icn = k => `<svg class="icn" viewBox="0 0 24 24">${ICON[k]}</svg>`;
   const RICON = { read:'grid4', set:'drag' };
@@ -476,10 +538,52 @@ const ClockGame = (() => {
     m = text.match(/^(.+?) i (.+)$/);                  if (m) return r(m[1]) + k(' i ') + b(m[2]) + per;
     return b(text.replace(/\s*\(.*\)$/, '')) + per;
   }
-  /* Förklaringstexten: "röda visaren" röd och "blå visaren" blå, som visarna */
-  const tint = t => SH.escapeHtml(t)
-    .replace(/\b(den röda visaren|röda visaren|den röda|en lång röd)/gi, s => `<span class="t-m">${s}</span>`)
-    .replace(/(den blå visaren|blå visaren|den blå|en kort blå)/gi, s => `<span class="t-h">${s}</span>`);
+  /* Bubbeltexten, färgkodad som klockan (KLOCKLAGEN): tidsnamnen ("tjugo i åtta":
+     minutordet rött, bindeordet mörkt, timordet blått), visarnas namn i sina färger,
+     "20 minuter" rött, "12 timmar" blått, timordet efter till/innan/över/är blått,
+     digital tid blå:röd. link:[ord i tiden, ord i förklaringen] märks för betoningen:
+     förklaringsordet där det först står, tidsordet där det sist står (i tidsnamnet). */
+  const NAMES = (() => { const s = new Set(); for (let h = 1; h <= 12; h++) for (let m = 0; m < 60; m += 5){ const w = CL.words(h, m); if (w.includes(' ')) s.add(w); } return [...s].sort((a, b) => b.length - a.length); })();
+  const NAME_RE = new RegExp(`(?<!\\p{L})(?:${NAMES.join('|')})(?!\\p{L})`, 'giu');
+  const HOURS_W = 'ett|två|tre|fyra|fem|sex|sju|åtta|nio|tio|elva|tolv';
+  const wordRe = w => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, 'giu');
+  const LKW = { i:'lk-i', 'över':'lk-o', halv:'lk-h' };
+  function fmtText(text, link){
+    text = String(text);
+    const n = text.length, cls = Array(n).fill(''), lk = Array(n).fill('');
+    const mark = (a, b, c) => { for (let i = a; i < b; i++) if (!cls[i]) cls[i] = c; };
+    const each = (re, fn) => { for (const m of text.matchAll(re)) fn(m); };
+    let bR = null;
+    if (link){
+      const m = [...text.matchAll(wordRe(link[1]))][0];
+      if (m){ bR = [m.index, m.index + m[0].length]; for (let i = bR[0]; i < bR[1]; i++) lk[i] = 'b'; }
+      const as = [...text.matchAll(wordRe(link[0]))].filter(x => !bR || x.index + x[0].length <= bR[0] || x.index >= bR[1]);
+      const a = as[as.length - 1];
+      if (a) for (let i = a.index; i < a.index + a[0].length; i++) lk[i] = 'a';
+    }
+    each(/(?<!\d)(\d{2}):(\d{2})(?!\d)/g, m => { mark(m.index, m.index + 2, 't-h'); mark(m.index + 2, m.index + 3, 't-k'); mark(m.index + 3, m.index + 5, 't-m'); });
+    each(NAME_RE, m => {
+      let off = m.index; const ws = m[0].split(' ');
+      ws.forEach((w, j) => { mark(off, off + w.length, j === ws.length - 1 ? 't-h' : /^(i|över)$/i.test(w) ? 't-k' : 't-m'); off += w.length + 1; });
+    });
+    each(/den långa röda|den röda visaren|röda visaren|den röda|en lång röd/giu, m => mark(m.index, m.index + m[0].length, 't-m'));
+    each(/den korta blå|den blå visaren|blå visaren|den blå|en kort blå/giu, m => mark(m.index, m.index + m[0].length, 't-h'));
+    each(/(?<!\p{L}|\d)(?:\d+|fem|tio|tjugo) minut(?:er)?(?!\p{L})/giu, m => mark(m.index, m.index + m[0].length, 't-m'));
+    each(/(?<!\p{L}|\d)\d+ tim(?:me|mar)(?!\p{L})/giu, m => mark(m.index, m.index + m[0].length, 't-h'));
+    each(new RegExp(`(?<=(?:till|innan|över|är|mot|vid) )(?:${HOURS_W})(?!\\p{L})`, 'giu'), m => mark(m.index, m.index + m[0].length, 't-h'));
+    each(/(?<!\p{L})(?:halv|kvart)(?!\p{L})/giu, m => mark(m.index, m.index + m[0].length, 't-m'));
+    let out = '', i = 0;
+    while (i < n){
+      let j = i + 1;
+      while (j < n && cls[j] === cls[i] && lk[j] === lk[i]) j++;
+      let h = SH.escapeHtml(text.slice(i, j));
+      if (cls[i]) h = `<span class="${cls[i]}">${h}</span>`;
+      if (lk[i]) h = `<span class="lk lk-${lk[i]} ${LKW[link[0]] || ''}">${h}</span>`;
+      out += h; i = j;
+    }
+    return out;
+  }
+  const tint = t => fmtText(t);
 
   /* ══════════════════════════════════════════════════════
      URTAVLAN: SVG och styrning
@@ -532,7 +636,7 @@ const ClockGame = (() => {
     for (let k = 0; k < 12; k++){
       const [x, y] = pt(112.5, k * 30);
       mn += `<text class="mn" data-k="${k}" x="${f1(x)}" y="${f1(y + 4.5)}">${k === 0 ? '00' : k * 5}</text>`;
-      r24 += `<text class="r24" x="${f1(x)}" y="${f1(y + 4.5)}">${k === 0 ? '00' : k + 12}</text>`;
+      r24 += `<text class="r24" data-k="${k}" x="${f1(x)}" y="${f1(y + 4.5)}"></text>`;
     }
     const hand = (w, len, width, cls) => `<g class="hand hand-${w}" transform="rotate(0 100 100)">
         <line class="hit" x1="100" y1="112" x2="100" y2="${100 - len - 8}"/>
@@ -543,6 +647,7 @@ const ClockGame = (() => {
         ${faceDefs()}
         <g class="ck-map" style="opacity:0"><g class="ck-zones"></g>${mn}</g>
         <g class="ck-r24g">${r24}</g>
+        <g class="ck-deco"></g>
         <circle cx="100" cy="100" r="95" fill="url(#ck-rim)"/>
         <circle cx="100" cy="100" r="87" fill="url(#ck-face)"/>
         <g class="ck-fx"></g>
@@ -555,45 +660,39 @@ const ClockGame = (() => {
   }
   /* Styrningen för en urtavla i DOM:en */
   function ClockView(svgEl, t0){
-    let t = t0 || 0, dragOn = false, which = null, onChange = null, anim = 0;
+    let t = t0 || 0, dragOn = false, which = null, onChange = null, anim = 0, moving = false;
     const hh = svgEl.querySelector('.hand-h'), hm = svgEl.querySelector('.hand-m');
     const map = svgEl.querySelector('.ck-map'), zones = svgEl.querySelector('.ck-zones');
-    const fx = svgEl.querySelector('.ck-fx'), arc = svgEl.querySelector('.ck-arc');
+    const fx = svgEl.querySelector('.ck-fx'), arc = svgEl.querySelector('.ck-arc'), deco = svgEl.querySelector('.ck-deco');
+    const r24s = [...svgEl.querySelectorAll('.r24')];
+    let ringMode = null;
     function draw(){
       const a = CL.handAngles(t);
       hh.setAttribute('transform', `rotate(${a.hour.toFixed(2)} 100 100)`);
       hm.setAttribute('transform', `rotate(${a.minute.toFixed(2)} 100 100)`);
+      if (V && V.onDraw) V.onDraw(t, moving);
     }
-    draw();
-    const V = {
+    let V = null;
+    V = {
       el:svgEl,
+      onDraw:null,                                   // tiden ändrades (de tre representationerna följer med)
       get t(){ return t; },
-      set(tt){ anim++; t = tt; draw(); },
-      /* Visarna går från nuvarande tid till tt (framåt eller bakåt, i minuter) */
-      animateTo(tt, ms = 1200){
+      set(tt){ anim++; moving = false; t = tt; draw(); },
+      /* Visarna går från nuvarande tid till tt (framåt eller bakåt, i minuter).
+         Reducerad rörelse: direkt till slutläget. */
+      animateTo(tt, ms = 1200, onFrame = null){
         const my = ++anim, from = t, d = tt - from, t0 = Date.now();
-        if (!d) return Promise.resolve();
+        if (!d || RM()){ t = tt; moving = false; draw(); if (onFrame) onFrame(t); return Promise.resolve(); }
+        moving = true;
         return new Promise(res => {
           const tick = () => {
-            if (my !== anim){ res(); return; }
+            if (my !== anim){ moving = false; res(); return; }
             const p = Math.min(1, (Date.now() - t0) / ms), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-            t = from + d * e; draw();
-            if (p < 1) setTimeout(tick, 16); else { t = tt; draw(); res(); }
+            if (p < 1){ t = from + d * e; draw(); if (onFrame) onFrame(t); setTimeout(tick, 16); }
+            else { t = tt; moving = false; draw(); if (onFrame) onFrame(t); res(); }
           };
           tick();
         });
-      },
-      /* Minutvisaren stegar fem minuter i taget (Hur lång tid) */
-      async stepTo(tt, onStep, stepMs = 420){
-        const my = ++anim;
-        const n = Math.round((tt - t) / 5);
-        for (let i = 1; i <= n; i++){
-          await V.animateTo(t + 5, stepMs * 0.6);
-          if (onStep) onStep(i);
-          await wait(stepMs * 0.4);
-          if (anim !== my + i) return;          // avbruten av annan rörelse
-          anim = my + i;
-        }
       },
       hl(w){ svgEl.classList.remove('hl-m', 'hl-h', 'hl-both'); if (w) svgEl.classList.add('hl-' + w); },
       /* Minutkartan: level 0–1, parts ⊆ nums/over/i/runt */
@@ -607,14 +706,44 @@ const ClockGame = (() => {
         if (runt)                   z += `<path d="${ringPath(97, 128, 150, 210)}" fill="${ZONE.runt.c}" opacity="${ZONE.runt.o}"/><text class="zl" x="${ZONE.runt.lx}" y="${ZONE.runt.ly}" fill="${ZONE.runt.lc}">${ZONE.runt.lab}</text>`;
         zones.innerHTML = z;
       },
+      /* Minuttalen (röda) tänds ett i taget */
       async numsSeq(){
         map.style.opacity = '1';
         const ns = [...map.querySelectorAll('.mn')];
+        if (RM()){ map.classList.add('nums'); return; }
         ns.forEach(n => n.classList.remove('on'));
-        for (let k = 1; k <= 12; k++){ ns[k % 12].classList.add('on'); await wait(140); }
+        for (let k = 1; k <= 12; k++){ ns[k % 12].classList.add('on'); await wait(120); }
         map.classList.add('nums');
       },
-      ring24(on, pop){ svgEl.classList.toggle('r24on', !!on); svgEl.classList.toggle('r24pop', !!pop); },
+      /* Timsiffrorna (blå) tänds en i taget */
+      async hnumsSeq(){
+        const ns = [...svgEl.querySelectorAll('.ck-num')];
+        if (RM()){ ns.forEach(n => n.classList.add('lit')); return; }
+        for (const n of ns){ n.classList.add('lit'); await wait(100); }
+      },
+      /* Dygnsringen: 'am' = 1–12, 'pm' = 13–24 (13 vid 1:an), null = av */
+      ring24(mode, o = {}){
+        ringMode = mode || null;
+        svgEl.classList.toggle('r24on', !!mode);
+        r24s.forEach(el => {
+          const k = +el.dataset.k;
+          el.textContent = mode === 'am' ? (k || 12) : mode === 'pm' ? (k ? k + 12 : 24) : '';
+          el.classList.remove('hot');
+          el.classList.toggle('lit', !!o.all);
+        });
+      },
+      /* Etiketterna tänds när timvisaren har passerat dem */
+      ringLit(tt){ if (!ringMode) return; r24s.forEach(el => { const L = +el.textContent; el.classList.toggle('lit', tt >= L * 60 - 0.5); }); },
+      async ringSeq(){
+        const order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0].map(k => r24s[k]);
+        order.forEach(el => el.classList.remove('lit'));
+        for (let i = 0; i < order.length; i++){ order[i].classList.add('lit'); V.glowNum(i + 1); if (!RM()) await wait(110); }
+        V.glowNum(null);
+      },
+      ringHot(hr){ r24s.forEach(el => el.classList.toggle('hot', +el.textContent === hr)); },
+      nomin(on){ svgEl.classList.toggle('nomin', !!on); },
+      /* Ett femminuterssegment på urtavlan (räkningen) */
+      seg(from, to, c){ fx.insertAdjacentHTML('beforeend', `<path class="seg seg-${c}" d="${sectorPath(86, from * 6, to * 6)}"/>`); },
       fill(from, to, c){
         const col = c === 'left' ? 'rgba(245,158,11,.28)' : 'rgba(239,68,68,.13)';
         fx.insertAdjacentHTML('beforeend', `<path class="fl-${c}" d="${sectorPath(86, from * 6, to * 6)}" fill="${col}"/>`);
@@ -634,11 +763,26 @@ const ClockGame = (() => {
           `<path d="${p(a1, am)}" fill="none" stroke="#facc15" stroke-width="7" stroke-linecap="round"/>` +
           `<circle cx="${f1(tx)}" cy="${f1(ty)}" r="5.5" fill="#ffffff" stroke="#facc15" stroke-width="2.5"/>`;
       },
+      /* Ett helt varv: en blå ring ritas runt urtavlan */
+      lap(){ arc.innerHTML = '<circle class="lap" cx="100" cy="100" r="91" pathLength="1" transform="rotate(-90 100 100)"/>'; },
+      /* Läggdags: en säng vid tiden på dygnsringen */
+      bed(at, who){
+        const a = CL.handAngles(at).hour, [x, y] = pt(138, a);
+        deco.insertAdjacentHTML('beforeend', `<g class="ck-bed" transform="translate(${f1(x)} ${f1(y)})">
+            <circle r="13" fill="#fff" stroke="#6366f1" stroke-width="2"/>
+            <g transform="translate(-8.5 -8.5) scale(.71)" fill="none" stroke="#4338ca" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${BED}</g>
+            <text y="25">${who}</text></g>`);
+      },
       glowNum(h){ svgEl.querySelectorAll('.ck-num').forEach(n => n.classList.toggle('glow', +n.dataset.h === h)); },
-      clearFx(){ fx.innerHTML = ''; arc.innerHTML = ''; V.glowNum(null); },
+      clearFx(){
+        fx.innerHTML = ''; arc.innerHTML = ''; deco.innerHTML = ''; V.glowNum(null);
+        svgEl.querySelectorAll('.ck-num.lit').forEach(n => n.classList.remove('lit'));
+        r24s.forEach(el => el.classList.remove('hot'));
+      },
       enableDrag(cb){ dragOn = true; onChange = cb; svgEl.classList.add('drag'); },
       disableDrag(){ dragOn = false; which = null; svgEl.classList.remove('drag', 'drag-m', 'drag-h'); },
     };
+    draw();
     function local(e){
       const m = svgEl.getScreenCTM();
       if (!m) return null;
@@ -715,9 +859,9 @@ const ClockGame = (() => {
       test:() => showTestSetup(),
       stats:() => { snd('click'); showStats(); },
       help:() => toggleHelp(),
-      opt:() => passAnswerRead(+arg, b),
+      opt:() => S.screen === 'lesson' ? tryAnswerRead(+arg, b) : passAnswerRead(+arg, b),
       pmain:() => passMain(),
-      adj:() => { const [w, d] = arg.split(','); passAdjust(w, +d); },
+      adj:() => { const [w, d] = arg.split(','); if (S.screen === 'lesson') tryAdjust(w, +d); else passAdjust(w, +d); },
       cancel:() => confirmCancelPass(),
       mapToggle:() => { playMap = !playMap; snd('click'); updateClock(); },
     };
@@ -820,92 +964,349 @@ const ClockGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════
-     SCENEN: gemensamt för lektionen och förklaringen vid fel
+     SCENEN: gemensamt för lektionen, försöken och förklaringen vid fel.
+     De tre representationerna: urtavlan, den digitala tiden och tiden i ord,
+     synkrona. Summan i marginalen (aux) och betoningen av bindeordet.
   ══════════════════════════════════════════════════════ */
-  function say(t1, t2 = '', raw = false){
+  const trioHTML = () => `<div class="ck-trio off" id="ck-trio"><span class="ck-tdigi num" id="ck-tdigi"><span class="dg t-h"></span><span class="t-k">:</span><span class="dg t-m"></span></span><span class="ck-twords" id="ck-twords"></span></div>`;
+  /* Digital tid och ord under klockan: följer visarna. Siffrorna bläddrar när de byts,
+     orden tonar in när visarna står still. */
+  function Trio(el){
+    const [dh, dm] = el.querySelectorAll('.dg'), wd = el.querySelector('.ck-twords');
+    const S = { on:false, digital:false, words:true, hourOnly:false, h:null, m:null, w:null };
+    const flip = e => { e.classList.remove('flip'); void e.offsetWidth; e.classList.add('flip'); };
+    return {
+      S,
+      show(on, o = {}){
+        S.on = !!on; if ('digital' in o) S.digital = !!o.digital; if ('words' in o) S.words = o.words !== false;
+        el.classList.toggle('off', !S.on); el.classList.toggle('nowords', !S.words);
+        S.h = S.m = S.w = null;
+      },
+      words(on){ S.words = !!on; el.classList.toggle('nowords', !S.words); S.w = null; },
+      update(t, moving){
+        if (!S.on) return;
+        t = CL.norm(Math.round(t));
+        const h = CL.hOf(t), m = S.hourOnly ? 0 : CL.mOf(t);
+        const hs = p2(S.digital ? h : CL.h12(h)), ms = p2(m);
+        if (hs !== S.h){ dh.textContent = hs; if (!moving && S.h !== null) flip(dh); S.h = hs; }
+        if (ms !== S.m){ dm.textContent = ms; if (!moving && S.m !== null) flip(dm); S.m = ms; }
+        if (moving || S.hourOnly || !S.words) return;
+        const w = S.digital ? CL.digitalWords(h, m) : CL.words(h, m);
+        if (w !== S.w){
+          wd.innerHTML = (m === 0 ? '<span class="t-k">klockan</span> ' : '') + colorizeTimeText(w);
+          wd.classList.remove('chg'); void wd.offsetWidth; wd.classList.add('chg');
+          S.w = w;
+        }
+      },
+      pulse(){ flip(dh); flip(dm); },
+      /* Ordet i tiden, som eget element (utan mellanrummen runt bindeordet) */
+      wordEl(word){
+        const sp = [...wd.querySelectorAll('span')].reverse().find(x => x.textContent.trim().toLowerCase() === word);
+        if (!sp) return null;
+        const tx = sp.textContent, i = tx.toLowerCase().indexOf(word);
+        sp.innerHTML = `${esc(tx.slice(0, i))}<span class="lkw">${esc(tx.slice(i, i + word.length))}</span>${esc(tx.slice(i + word.length))}`;
+        return sp.querySelector('.lkw');
+      },
+    };
+  }
+  /* Scenens delar i ett paket: urtavlan, marginalen och de tre representationerna */
+  function mkCtx(V, aux, trio, extra = {}){
+    V.onDraw = (t, moving) => { if (trio) trio.update(t, moving); };
+    return { V, aux, trio, ...extra };
+  }
+
+  /* ── Bubblan: färgkodad text och betoningen ─────────── */
+  const esc = s => SH.escapeHtml(String(s));
+  function say(t1, t2 = '', raw = false, o = {}){
     const th = $('bubble'); if (!th) return;
-    th.innerHTML = `<span>${raw ? t1 : tint(t1)}</span>${t2 ? `<span class="sm">${t2}</span>` : ''}`;
+    removeBow();
+    const lead = o.lead ? `<span class="lead${o.good ? ' good' : ''}">${esc(o.lead)}</span>` : '';
+    th.innerHTML = `${lead}<span>${raw ? t1 : fmtText(t1, o.link)}</span>${t2 ? `<span class="sm">${t2}</span>` : ''}`;
     th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
   }
-  /* Kör en lektions- eller förklaringsakt på urtavlan V (aux = raden under klockan) */
-  async function act(V, x, aux, tok){
+  /* Betoningen: ordet i tiden och ordet i förklaringen lyser upp samtidigt, med en tunn båge */
+  const LK = { i:'lk-i', 'över':'lk-o', halv:'lk-h' };
+  const BOWC = { i:'#f59e0b', 'över':'#10b981', halv:'#8b5cf6' };
+  function applyLink(X, link){
+    if (!link) return;
+    const b = $('bubble'); if (!b) return;
+    b.querySelectorAll('.lk').forEach(m => m.classList.add('on'));
+    let tw = null;
+    if (X.trio && X.trio.S.on && X.trio.S.words){ tw = X.trio.wordEl(link[0]); if (tw) tw.classList.add('lk', LK[link[0]], 'on'); }
+    const bb = b.querySelector('.lk-b');
+    if (tw && bb) drawBow(tw, bb, BOWC[link[0]]);
+  }
+  function removeBow(){
+    const r = root(); if (!r) return;
+    r.querySelectorAll('.ck-bow').forEach(x => x.remove());
+    r.querySelectorAll('.ck-twords .lk').forEach(x => x.classList.remove('lk', 'on', 'lk-i', 'lk-o', 'lk-h'));   // betoningen gäller sitt steg
+  }
+  function drawBow(from, to, color){
+    const wrap = root().querySelector('.ck2'); if (!wrap) return;
+    const w = wrap.getBoundingClientRect(), a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+    const x1 = a.left + a.width / 2 - w.left, y1 = a.bottom - w.top + 2, x2 = b.left + b.width / 2 - w.left, y2 = b.top - w.top - 2;
+    const dy = Math.max(16, Math.abs(y2 - y1) * 0.6);
+    wrap.insertAdjacentHTML('beforeend', `<svg class="ck-bow" width="${Math.round(w.width)}" height="${Math.round(w.height)}" aria-hidden="true">
+      <path pathLength="1" stroke="${color}" d="M${f1(x1)} ${f1(y1)}C${f1(x1)} ${f1(y1 + dy)} ${f1(x2)} ${f1(y2 - dy)} ${f1(x2)} ${f1(y2)}"/></svg>`);
+  }
+
+  /* ── Räkningen och summan i marginalen ─────────────── */
+  const sumHTML = text => esc(text).replace(/\d+/g, n => `<b>${n}</b>`);
+  function setSum(aux, html){
+    if (!aux) return;
+    aux.querySelectorAll('.ck-sumline').forEach(x => x.remove());
+    if (html) aux.insertAdjacentHTML('beforeend', html);
+  }
+  /* Den röda visaren går (eller räknas) i steg om 5 minuter; varje femmingssegment tänds
+     och summan byggs: "5", "5 + 5 = 10" … Framåt ("gått") och det som är kvar till 12 ("kvar"). */
+  async function countAct(X, x, tok){
+    const { V, aux } = X;
+    const n = Math.round((x.to - x.from) / 5); if (n <= 0) return;
+    const ms = CL.countStepMs(n), base = Math.round(V.t) - CL.mOf(Math.round(V.t));
+    setSum(aux, `<span class="ck-sumline ${x.c}"><small>${x.c === 'left' ? 'kvar' : 'gått'}</small><span class="st"></span></span>`);
+    const line = aux && aux.querySelector('.ck-sumline'), st = line && line.querySelector('.st');
+    const show = k => { if (st){ st.innerHTML = sumHTML(CL.sumText(k)); line.classList.toggle('long', k > 6); } };
+    if (RM()){
+      for (let k = 1; k <= n; k++) V.seg(x.from + 5 * (k - 1), x.from + 5 * k, x.c);
+      if (x.move) V.set(base + x.to);
+      show(n); return;
+    }
+    for (let k = 1; k <= n; k++){
+      if (tok !== token) return;
+      V.seg(x.from + 5 * (k - 1), x.from + 5 * k, x.c);
+      if (x.move) await V.animateTo(base + x.from + 5 * k, ms * 0.55);
+      if (tok !== token) return;
+      show(k);
+      await wait(ms * (x.move ? 0.45 : 1));
+    }
+  }
+
+  /* Kör en lektions- eller förklaringsakt (X = scenen) */
+  async function act(X, x, tok){
     if (tok !== token) return;
+    const { V, aux, trio } = X;
     switch (x.do){
-      case 'time':  clearWords(aux); V.set(x.t); return;
-      case 'go':    clearWords(aux); await V.animateTo(x.t, x.ms || 1200); return;
+      case 'time':  V.set(x.t); return;
+      case 'go': {
+        const tt = x.near ? nearest(V.t, x.t) : x.t;
+        await V.animateTo(tt, x.ms || 1200);
+        if (x.near && tok === token) V.set(x.t);                // samma läge på urtavlan, rätt tid i den digitala
+        return;
+      }
       case 'hl':    V.hl(x.w); return;
+      case 'trio':  if (trio){ trio.show(x.on !== false, { digital:!!x.digital, words:x.words !== false }); trio.update(V.t, false); } return;
+      case 'words': if (trio){ trio.words(true); trio.update(V.t, false); } return;
       case 'map':   V.setMap(1, x.parts); return;
       case 'nums':  await V.numsSeq(); return;
-      case 'fill':  V.fill(x.from, x.to, x.c); await wait(350); return;
-      case 'quarters': V.quarters(); await wait(300); return;
-      case 'arc':   V.arc(x.from, x.upto); await wait(300); return;
-      case 'arcEnd': V.glowNum(x.at); return;
-      case 'ring24': V.ring24(x.on, x.pop); return;
-      case 'digi':  if (aux) aux.innerHTML = `<span class="wd${x.digital ? ' digi num' : ''}">${colorizeTimeText(x.text)}</span>`; return;
+      case 'hnums': await V.hnumsSeq(); return;
+      case 'glow':  V.glowNum(x.h); return;
+      case 'fill':  V.fill(x.from, x.to, x.c); await pause(350); return;
+      case 'quarters': V.quarters(); await pause(300); return;
+      case 'arc':   V.arc(x.from, x.upto); await pause(300); return;
+      case 'clear': V.clearFx(); return;
+      case 'ring24': V.ring24(x.mode, x); if (x.seq) await V.ringSeq(); return;
+      case 'rev': {
+        V.nomin(true); if (trio) trio.S.hourOnly = true;
+        await V.animateTo(x.t, x.ms || 1600, tt => V.ringLit(tt));
+        V.nomin(false); if (trio) trio.S.hourOnly = false;
+        if (tok === token) V.set(x.t);
+        return;
+      }
+      case 'lap':   V.lap(); return;
+      case 'bed':   V.bed(x.at, x.who); return;
+      case 'minus12': {
+        const hr = CL.hOf(Math.round(V.t)), d = CL.digitalHour(hr);
+        V.ringHot(hr); V.glowNum(d.dial);
+        setSum(aux, `<span class="ck-sumline h ck-m12"><b>${hr}</b><span class="fly">&minus;&nbsp;12</span><span class="eq">=&nbsp;<b>${d.dial}</b></span></span>`);
+        await pause(800); return;
+      }
+      case 'count': await countAct(X, x, tok); return;
+      case 'sum':   setSum(aux, x.text ? `<span class="ck-sumline${x.cls === 'h' ? ' h' : ''}">${sumHTML(x.text)}</span>` : null); return;
+      case 'pulse': if (trio) trio.pulse(); return;
+      case 'showAnalog': if (X.showAnalog) X.showAnalog(); V.set(V.t); return;
       case 'chip': {
         if (!aux) return;
         if (x.reset){ aux.innerHTML = ''; return; }
-        const live = aux.querySelector('.ck-chip.live');
-        if (x.total){ aux.insertAdjacentHTML('beforeend', `<span class="ck-chip tot">= ${x.total}</span>`); return; }
-        if (live){ live.textContent = x.text; live.classList.remove('live'); return; }
+        if (x.total){
+          const line = aux.querySelector('.ck-sumline');
+          if (line){ const tot = +((line.textContent.match(/(\d+)\s*$/) || [0, 0])[1]); line.outerHTML = `<span class="ck-chip">${tot} minuter</span>`; }
+          aux.insertAdjacentHTML('beforeend', `<span class="ck-chip tot">= ${x.total}</span>`); return;
+        }
         aux.insertAdjacentHTML('beforeend', `<span class="ck-chip${/timm/.test(x.text) ? ' h' : ''}">${x.text}</span>`);
-        return;
-      }
-      case 'count': {
-        if (!aux) return;
-        aux.insertAdjacentHTML('beforeend', '<span class="ck-chip live">0 minuter</span>');
-        const live = aux.querySelector('.ck-chip.live');
-        await V.stepTo(x.t, i => { if (live) live.textContent = `${i * 5} minuter`; });
         return;
       }
     }
   }
-  /* Tiden i ord under klockan gäller bara tills visarna rör sig */
-  const clearWords = aux => { if (aux) aux.querySelectorAll('.wd').forEach(w => w.remove()); };
-  async function runActs(V, acts, aux, tok){ for (const x of acts){ if (tok !== token) return; await act(V, x, aux, tok); } }
+  async function runStep(X, st, tok){
+    for (const x of st.acts){ if (tok !== token) return; await act(X, x, tok); }
+    if (tok === token && st.link) applyLink(X, st.link);
+  }
+  /* Svarsknapparna och ställraden (passet och lektionens försök) */
+  const optsHTML = (task, opts) => `<div class="ck-opts${task.kind === 'digital' ? ' one' : ''}">${opts.map((o, i) => `<button class="ck-opt" data-act="opt" data-arg="${i}">${task.kind === 'dur' ? o.text : colorizeTimeText(o.text)}</button>`).join('')}</div>`;
+  const setRowHTML = () => `<div class="ck-setrow">
+      <span class="grp"><button class="ck-stp" data-act="adj" data-arg="h,-1" aria-label="En timme bakåt">${svg('minus')}</button><b class="lab-h">Timme</b><button class="ck-stp" data-act="adj" data-arg="h,1" aria-label="En timme framåt">${svg('plus')}</button></span>
+      <span class="grp"><button class="ck-stp" data-act="adj" data-arg="m,-5" aria-label="Fem minuter bakåt">${svg('minus')}</button><b class="lab-m">Minut</b><button class="ck-stp" data-act="adj" data-arg="m,5" aria-label="Fem minuter framåt">${svg('plus')}</button></span>
+    </div>`;
+  /* Det barnet svarade, i den form nearMiss vill ha */
+  const givenOf = (task, t) => task.kind === 'dur' ? CL.diffFwd(CL.toTot(task.h1, task.m1), Math.round(t)) : Math.round(t);
 
   /* ══════════════════════════════════════════════════════
-     LEKTIONEN ("Lär dig"): klickstyrd, en idé per steg
+     LEKTIONEN ("Lär dig"): klickstyrd, en idé per steg.
+     LS.phase: 'demo' (visa) · 'q' (försöket) · 'exp' (förklaringen efter fel)
+     · 'conf' (bekräftande förklaring efter rätt) · 'ok2' (rätt andra gången) · 'end'
   ══════════════════════════════════════════════════════ */
   let LS = null;
   function enterLesson(stepId){
     const s = CL.stepById(stepId); if (!s) return;
     leave(); S.screen = 'lesson';
-    const steps = CL.LESSONS[stepId];
+    const steps = CL.LESSONS[stepId], tries = CL.lessonTries(stepId);
+    const tight = !steps.some(st => st.acts.some(a => ['map', 'nums', 'ring24'].includes(a.do)));
     root().innerHTML = `
       ${styleTag()}
       ${headerHtml(s.short, 'start')}
       <div class="wrap ck2" id="ck-lesson">
-        <div class="ck-lrow"><span class="ck-ltag">${svg('bulb')}Lär dig</span><div class="ck-ldots" id="ck-ldots">${steps.map(() => '<i></i>').join('')}</div><span class="ck-ltag ck-hidden">${svg('bulb')}Lär dig</span></div>
-        <div class="card ck-stage"><div class="ck-qclock" id="ck-lclock">${clockSVG({ tight:!steps.some(st => st.acts.some(a => ['map', 'nums', 'ring24'].includes(a.do))) })}</div><div class="ck-aux" id="ck-aux"></div></div>
+        <div class="ck-lrow"><span class="ck-ltag" id="ck-ltag"></span><div class="ck-ldots" id="ck-ldots">${steps.map(() => '<i></i>').join('')}${tries.map(() => '<i class="try"></i>').join('')}</div></div>
+        <div class="card ck-stage" id="ck-stage"><div class="ck-qclock" id="ck-lclock">${clockSVG({ tight })}</div><div class="ck-aux" id="ck-aux"></div>${trioHTML()}</div>
+        <div class="ck-ctrl" id="ck-ctrl"></div>
         <div class="bubble b92"><div class="thought" id="ck-bubble"></div></div>
         <div class="slot" id="ck-slot"><button class="btn btn-primary" data-act="lnext" id="ck-main"></button>
           <div class="duo"><button class="btn btn-secondary" data-act="lagain">${svg('again')} Igen</button><button class="btn btn-primary" data-act="pass">Öva nu ${svg('next')}</button></div></div>
       </div>`;
-    LS = { step:stepId, steps, i:-1, V:ClockView($('lclock').querySelector('svg'), CL.toTot(12, 0)) };
+    const V = ClockView($('lclock').querySelector('svg'), CL.toTot(12, 0));
+    LS = { step:stepId, steps, tries, i:-1, phase:'demo', ti:-1, task:null, type:null, first:true, E:null, lead:null, good:false, opts:null, pr:0 };
+    LS.X = mkCtx(V, $('aux'), Trio($('trio')), { showAnalog:() => { $('stage').classList.remove('digiq'); } });
     lessonStep(0);
   }
   function lessonRefresh(){
     if (!LS) return;
-    const last = LS.i >= LS.steps.length - 1;
     const m = $('main'); if (!m) return;
-    m.innerHTML = `Nästa steg ${svg('next')}`;
+    const P = LS.phase, E = LS.E, moreTries = LS.ti < LS.tries.length - 1;
+    let label = 'Nästa steg', icon = 'next', show = true, before = false;
+    if (P === 'demo' && LS.i >= LS.steps.length - 1) label = 'Nu får du försöka';
+    if (P === 'q'){ if (LS.type === 'set'){ label = 'Klar'; icon = 'check'; before = true; } else show = false; }
+    if (P === 'exp' && E.i >= E.steps.length - 1){ label = 'Försök igen'; icon = 'again'; before = true; }
+    if ((P === 'conf' && E.i >= E.steps.length - 1) || P === 'ok2'){ label = moreTries ? 'Nästa uppgift' : 'Klar'; if (!moreTries){ icon = 'check'; before = true; } }
+    m.style.visibility = show ? '' : 'hidden';
+    m.innerHTML = before ? `${svg(icon)} ${label}` : `${label} ${svg(icon)}`;
     m.disabled = busy;
-    $('slot').classList.toggle('duoing', last && !busy);
-    [...$('ldots').children].forEach((d, k) => d.className = k < LS.i ? 'done' : k === LS.i ? 'cur' : '');
+    $('slot').classList.toggle('duoing', P === 'end');
+    const nd = LS.steps.length, trying = P !== 'demo';
+    [...$('ldots').children].forEach((d, k) => {
+      const base = k >= nd ? 'try' : '';
+      let st = '';
+      if (k < nd) st = trying || k < LS.i ? 'done' : k === LS.i ? 'cur' : '';
+      else { const j = k - nd; st = P === 'end' || j < LS.ti || (j === LS.ti && (P === 'conf' || P === 'ok2')) ? 'done' : j === LS.ti ? 'cur' : ''; }
+      d.className = `${base} ${st}`.trim();
+    });
+    const tag = $('ltag');
+    if (tag) tag.innerHTML = trying && P !== 'end' ? `${svg('hand')}Försök ${LS.ti + 1} av ${LS.tries.length}` : `${svg('bulb')}Lär dig`;
   }
   async function lessonStep(k){
     const tok = token, st = LS.steps[k];
     LS.i = k; busy = true; lessonRefresh();
-    say(st.text);
-    await wait(LEAD);
-    await runActs(LS.V, st.acts, $('aux'), tok);
+    say(st.text, '', false, { link:st.link });
+    await pause(LEAD);
+    await runStep(LS.X, st, tok);
     if (tok !== token) return;
     busy = false; lessonRefresh();
   }
   function lessonNext(){
-    if (busy || !LS || LS.i >= LS.steps.length - 1) return;
-    lessonStep(LS.i + 1);
+    if (busy || !LS) return;
+    const E = LS.E;
+    switch (LS.phase){
+      case 'demo':
+        if (LS.i < LS.steps.length - 1) lessonStep(LS.i + 1); else { snd('click'); startTry(0); }
+        return;
+      case 'q':   if (LS.type === 'set') trySubmitSet(); return;
+      case 'exp':
+        if (E.i < E.steps.length - 1) tryExplainStep(E.i + 1); else { snd('click'); startTry(LS.ti, true); }
+        return;
+      case 'conf':
+        if (E.i < E.steps.length - 1){ tryExplainStep(E.i + 1); return; }
+        // sista steget: vidare som efter 'ok2'
+      case 'ok2':
+        snd('click');
+        if (LS.ti < LS.tries.length - 1) startTry(LS.ti + 1); else lessonEnd();
+        return;
+    }
+  }
+  /* Ett försök: "Nu får du försöka! Med det vi nyss visade." */
+  function startTry(j, again = false){
+    const tr = LS.tries[j], task = CL.taskByKey(LS.step, tr.key), X = LS.X, V = X.V;
+    LS.phase = 'q'; LS.ti = j; LS.task = task; LS.type = tr.type; LS.first = !again; LS.E = null; busy = false;
+    removeBow();
+    V.disableDrag(); V.clearFx(); V.hl(null); V.ring24(null);
+    X.aux.innerHTML = '';
+    X.trio.show(false);
+    $('stage').className = 'card ck-stage';
+    $('ctrl').className = 'ck-ctrl';
+    if (tr.type === 'read'){
+      if (task.kind === 'digital'){
+        $('stage').classList.add('digiq');
+        V.set(CL.targetTot(task));
+        X.trio.show(true, { digital:true, words:false }); X.trio.update(V.t, false);
+      } else V.set(task.kind === 'dur' ? CL.toTot(task.h1, task.m1) : CL.targetTot(task));
+      LS.opts = CL.readOptions(task);
+      $('ctrl').innerHTML = optsHTML(task, LS.opts);
+    } else {
+      V.set(CL.setStart(task));
+      V.enableDrag(() => {});
+      $('ctrl').innerHTML = setRowHTML();
+    }
+    say(CL.tryPrompt(task, tr.type, again));
+    lessonRefresh();
+  }
+  function tryAnswerRead(i, el){
+    if (!LS || LS.phase !== 'q' || LS.type !== 'read' || busy) return;
+    const o = LS.opts[i]; if (!o) return;
+    $('ctrl').querySelectorAll('.ck-opt').forEach(b => b.disabled = true);
+    el.classList.add(o.ok ? 'ok' : 'bad');
+    if (!o.ok){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+    tryAnswered(o.ok, o.val);
+  }
+  function tryAdjust(w, d){
+    if (!LS || LS.phase !== 'q' || LS.type !== 'set') return;
+    LS.X.V.set(CL.norm(Math.round(LS.X.V.t) + (w === 'h' ? d * 60 : d)));
+    snd('click');
+  }
+  function trySubmitSet(){
+    const V = LS.X.V, ok = CL.sameOnDial(Math.round(V.t), CL.targetTot(LS.task));
+    $('ctrl').innerHTML = '';
+    tryAnswered(ok, givenOf(LS.task, V.t));
+  }
+  /* Rätt: beröm, och förklaringen kommer ändå – "Precis som du redan räknat ut". Andra gången: kort beröm.
+     Fel: "Nästan rätt!" bara när felet är nära, sedan förklaringen och samma uppgift igen. */
+  function tryAnswered(ok, given){
+    const X = LS.X;
+    X.V.disableDrag();
+    if (LS.first) recordAnswer(LS.step, LS.task.key, ok);     // bara första försöket räknas, som i Öva
+    snd(ok ? 'correct' : 'wrong');
+    if (ok) $('stage').classList.add('ok');
+    if (ok && !LS.first){ LS.phase = 'ok2'; say(CL.RETRY_OK); lessonRefresh(); return; }
+    if (ok){ LS.phase = 'conf'; LS.lead = CL.praise(LS.pr++); LS.good = true; LS.E = { steps:CL.explainSteps(LS.task, LS.type, { confirm:true }), i:-1 }; }
+    else { LS.phase = 'exp'; LS.lead = CL.wrongLead(CL.nearMiss(LS.task, given, LS.type)); LS.good = false; LS.E = { steps:CL.explainSteps(LS.task, LS.type), i:-1 }; }
+    tryExplainStep(0);
+  }
+  async function tryExplainStep(k){
+    const tok = token, E = LS.E, st = E.steps[k];
+    E.i = k; busy = true; lessonRefresh();
+    say(st.text, '', false, { lead:k === 0 ? LS.lead : null, good:LS.good, link:st.link });
+    await pause(LEAD);
+    if (tok !== token) return;
+    if (k === 0){ $('stage').classList.add('exp'); $('ctrl').classList.add('exp'); }
+    await runStep(LS.X, st, tok);
+    if (tok !== token) return;
+    if (st.done && LS.type === 'read'){
+      const b = $('ctrl').querySelectorAll('.ck-opt')[LS.opts.findIndex(o => o.ok)];
+      if (b) b.classList.add('ok');
+    }
+    busy = false; lessonRefresh();
+  }
+  function lessonEnd(){
+    LS.phase = 'end'; LS.X.V.disableDrag();
+    $('ctrl').innerHTML = '';
+    say(CL.LESSON_END);
+    lessonRefresh();
   }
 
   /* ══════════════════════════════════════════════════════
@@ -920,7 +1321,7 @@ const ClockGame = (() => {
     if (!rounds.length){ enterSetup(); return; }
     leave(); S.screen = 'pass';
     const medal0 = CL.stepMedal(loadBoxes(), stepId, today()).medal;
-    PS = { step:stepId, s, rounds, ri:0, drill:null, phase:'q', res:[], start:Date.now(), help:null, level:CL.mapLevel(medal0), V:null, V2:null, E:null, justFixed:false, opts:null };
+    PS = { step:stepId, s, rounds, ri:0, drill:null, phase:'q', res:[], start:Date.now(), help:null, level:CL.mapLevel(medal0), V:null, V2:null, E:null, justFixed:false, opts:null, X:null, lead:null, pr:0 };
     root().innerHTML = `
       ${styleTag()}
       ${headerHtml(s.short, 'cancel', { backLabel:'Avbryt' })}
@@ -994,10 +1395,12 @@ const ClockGame = (() => {
       body = `<div class="ck-prompt">${lead}${target}</div><div class="ck-qclock" id="ck-qclock">${clockSVG()}</div>`;
     }
     $('stage').className = 'card ck-stage';
-    $('stage').innerHTML = top + body + '<div class="ck-aux" id="ck-aux"></div>';
+    $('ctrl').className = 'ck-ctrl';
+    $('stage').innerHTML = top + body + '<div class="ck-aux" id="ck-aux"></div>' + trioHTML();
     const svgs = $('qclock').querySelectorAll('svg');
     PS.V = ClockView(svgs[0], task.kind === 'dur' ? CL.toTot(task.h1, task.m1) : CL.targetTot(task));
     PS.V2 = twoClocks ? ClockView(svgs[1], CL.toTot(task.h2, task.m2)) : null;
+    PS.X = mkCtx(PS.V, $('aux'), Trio($('trio')), { showAnalog:passShowAnalog });
     if (type === 'set'){
       PS.V.set(CL.setStart(task));
       PS.V.enableDrag(() => {});
@@ -1006,14 +1409,10 @@ const ClockGame = (() => {
     // kontrollerna
     if (type === 'read'){
       PS.opts = CL.readOptions(task);                 // ny lottning vid varje visning (även omfrågan)
-      const one = task.kind === 'digital';
-      $('ctrl').innerHTML = `<div class="ck-opts${one ? ' one' : ''}">${PS.opts.map((o, i) => `<button class="ck-opt" data-act="opt" data-arg="${i}">${task.kind === 'dur' ? o.text : colorizeTimeText(o.text)}</button>`).join('')}</div>`;
+      $('ctrl').innerHTML = optsHTML(task, PS.opts);
       setMain('', null, false);
     } else {
-      $('ctrl').innerHTML = `<div class="ck-setrow">
-          <span class="grp"><button class="ck-stp" data-act="adj" data-arg="h,-1" aria-label="En timme bakåt">${svg('minus')}</button><b class="lab-h">Timme</b><button class="ck-stp" data-act="adj" data-arg="h,1" aria-label="En timme framåt">${svg('plus')}</button></span>
-          <span class="grp"><button class="ck-stp" data-act="adj" data-arg="m,-5" aria-label="Fem minuter bakåt">${svg('minus')}</button><b class="lab-m">Minut</b><button class="ck-stp" data-act="adj" data-arg="m,5" aria-label="Fem minuter framåt">${svg('plus')}</button></span>
-        </div>`;
+      $('ctrl').innerHTML = setRowHTML();
       setMain('Klar', 'check', true, false);
     }
     const intro = first ? (type === 'set' ? 'Nu ställer du klockan.' : 'Nu läser du klockan.') : '';
@@ -1026,10 +1425,17 @@ const ClockGame = (() => {
     PS.V.set(CL.norm(Math.round(PS.V.t) + (w === 'h' ? d * 60 : d)));
     snd('click');
   }
+  /* Rätt i passet: bara kort beröm, så att nötningen flyter */
   function rightText(task){
-    if (task.kind === 'digital') return `Rätt! ${CL.digi(task.h, task.m)} är ${CL.digitalWords(task.h, task.m)}.`;
-    if (task.kind === 'dur') return `Rätt! Det tar ${CL.durWords(task.mins)}.`;
-    return `Rätt! Klockan är ${CL.words(task.h, task.m)}.`;
+    const p = CL.praise(PS.pr++);
+    if (task.kind === 'digital') return `${p} ${CL.digi(task.h, task.m)} är ${CL.digitalWords(task.h, task.m)}.`;
+    if (task.kind === 'dur') return `${p} Det tar ${CL.durWords(task.mins)}.`;
+    return `${p} Klockan är ${CL.words(task.h, task.m)}.`;
+  }
+  /* Digital läsfråga: klockan visas i förklaringen, den digitala tiden flyttar ner under den */
+  function passShowAnalog(){
+    const q = $('qclock'); if (q) q.classList.remove('ck-hidden');
+    const d = $('stage') && $('stage').querySelector('.ck-digi2'); if (d) d.style.display = 'none';
   }
   function passAnswerRead(i, el){
     if (!PS || PS.phase !== 'q' || rtype() !== 'read') return;
@@ -1037,9 +1443,9 @@ const ClockGame = (() => {
     $('ctrl').querySelectorAll('.ck-opt').forEach(b => b.disabled = true);
     el.classList.add(o.ok ? 'ok' : 'bad');
     if (!o.ok){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
-    answered(o.ok);
+    answered(o.ok, o.val);
   }
-  function answered(ok){
+  function answered(ok, given){
     const cur = PS.cur, task = PS.task;
     const res = PS.drill.answer(ok);
     if (res.record) recordAnswer(PS.step, task.key, ok);     // bara första försöket räknas
@@ -1059,47 +1465,33 @@ const ClockGame = (() => {
     PS.justFixed = res.insertedAt !== null || PS.justFixed;
     PS.phase = 'explain';
     PS.E = { steps:CL.explainSteps(task, rtype()), i:-1 };
+    PS.lead = CL.wrongLead(CL.nearMiss(task, given, rtype()));
     renderTrack();
     applyMap();
     explainStep(0);
   }
-  /* Ett förklaringssteg: texten först, sedan det klockan visar */
+  /* Ett förklaringssteg: texten först, sedan det klockan visar (lektionens byggstenar) */
   async function explainStep(k){
     const tok = token, E = PS.E, st = E.steps[k], task = PS.task, type = rtype();
     E.i = k; busy = true; setMain('Nästa steg', 'next');
-    say(st.text);
-    await wait(LEAD);
+    say(st.text, '', false, { lead:k === 0 ? PS.lead : null, link:st.link });
+    await pause(LEAD);
     if (tok !== token) return;
-    // Hur lång tid, läsfrågan: de två klockorna blir en, som går från start till slut
-    if (task.kind === 'dur' && k === 0 && PS.V2){
-      $('qclock').className = 'ck-qclock'; $('qclock').innerHTML = clockSVG();
-      PS.V = ClockView($('qclock').querySelector('svg'), CL.toTot(task.h1, task.m1)); PS.V2 = null;
-      PS.V.setMap(1, mapParts());
+    if (k === 0){
+      // Hur lång tid, läsfrågan: de två klockorna blir en, som går från start till slut
+      if (task.kind === 'dur' && PS.V2){
+        $('qclock').className = 'ck-qclock'; $('qclock').innerHTML = clockSVG();
+        PS.V = ClockView($('qclock').querySelector('svg'), CL.toTot(task.h1, task.m1)); PS.V2 = null;
+        PS.X = mkCtx(PS.V, $('aux'), PS.X.trio, { showAnalog:passShowAnalog });
+        PS.V.setMap(1, mapParts());
+      }
+      $('stage').classList.add('exp');
+      $('ctrl').classList.add('exp');
     }
-    const V = PS.V, aux = $('aux');
-    if (st.show === 'analog'){ $('qclock').classList.remove('ck-hidden'); V.set(CL.targetTot(task)); }
-    V.hl(st.hl);
-    if (task.kind === 'dur'){
-      if (k === 0 && aux) aux.innerHTML = '';
-      if (st.at !== undefined) V.set(st.at);
-      if (st.count) await act(V, { do:'count', t:st.go }, aux, tok);
-      else if (st.go !== undefined) await V.animateTo(st.go, 1600);
-      if (tok !== token) return;
-      if (st.chip) await act(V, { do:'chip', text:st.chip }, aux, tok);
-      if (st.total && task.mins > 60 && task.mins % 60) await act(V, { do:'chip', total:st.total }, aux, tok);   // summan bara när den har två delar
-    } else if (type === 'set' && k === 0){
-      await V.animateTo(nearest(V.t, CL.targetTot(task)), 1400);   // klockan ställs rätt medan barnet tittar
-    }
-    // Timsteget: samma bild som i lektionen – timvisarens väg mot nästa timme, och timmen vi säger lyser
-    if (task.kind !== 'dur' && st.hl === 'h' && k > 0){
-      const H = CL.h12(task.h), m = task.m;
-      if (m >= 25 && m <= 35) V.arc(H % 12, m / 60);
-      V.glowNum(m >= 25 ? CL.h12(task.h + 1) : H);
-    }
+    await runStep(PS.X, st, tok);
     if (tok !== token) return;
     if (st.done && type === 'read'){
-      const ok = PS.opts.findIndex(o => o.ok);
-      const b = $('ctrl').querySelectorAll('.ck-opt')[ok];
+      const b = $('ctrl').querySelectorAll('.ck-opt')[PS.opts.findIndex(o => o.ok)];
       if (b) b.classList.add('ok');
     }
     busy = false;
@@ -1112,7 +1504,7 @@ const ClockGame = (() => {
     if (!PS || busy) return;
     if (PS.phase === 'q' && rtype() === 'set'){
       const ok = CL.sameOnDial(Math.round(PS.V.t), CL.targetTot(PS.task));
-      answered(ok);
+      answered(ok, givenOf(PS.task, PS.V.t));
       return;
     }
     if (PS.phase === 'explain'){ if (PS.E.i < PS.E.steps.length - 1) explainStep(PS.E.i + 1); return; }
@@ -1501,7 +1893,7 @@ const ClockGame = (() => {
     _handleReadChoice:null, _adjustSetting:null, _lockSetting:null,
     /* Endast för tester och verifiering */
     _test:{
-      colorizeTimeText, clockSVG, tint,
+      colorizeTimeText, clockSVG, tint, fmtText,
       setToday:d => { todayOverride = d || null; }, today,
       peek:() => ({ screen:S.screen, step:S.step, busy, pass:PS, lesson:LS, token }),
     },

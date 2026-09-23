@@ -1,5 +1,5 @@
 /* ============================================================
-   MULTIPLAY – Klockans logik (window.ClockLogic), v63
+   MULTIPLAY – Klockans logik (window.ClockLogic), v64
    Ren, DOM-fri logik för Klockans trappa: stegen och deras tider,
    ordtexterna, de riktade felalternativen, visarnas koppling och
    dragningen, lektionerna och förklaringarna vid fel (texterna är
@@ -205,172 +205,317 @@ const ClockLogic = (() => {
   }
   const clockShuffle = (arr, r) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-  /* Fyra alternativ { text, type, ok }, ordningen lottad. */
+  /* Fyra alternativ { text, type, ok, val }, ordningen lottad.
+     val = felets tid i minuter sedan midnatt (Hur lång tid: längden i minuter), så att
+     nearMiss kan avgöra om felet var nära. */
   function readOptions(task, r = Math.random){
     const correct = answerText(task);
     const prio = PRIO[task.kind === 'digital' ? 'digital' : task.kind === 'dur' ? 'tid' : stepOfMinute(task.m)];
     const cands = [];
-    const add = (text, type) => { if (text && text !== correct && !cands.some(c => c.text === text)) cands.push({ text, type, ok:false }); };
+    const add = (text, type, val) => { if (text && text !== correct && !cands.some(c => c.text === text)) cands.push({ text, type, ok:false, val }); };
     const txtOf = t => task.kind === 'digital' ? digitalWords(hOf(t), mOf(t)) : wordsT(t);
     const one = type => {
-      if (task.kind === 'dur'){ const v = durWrong(type, task, r); return v && v > 0 ? durWords(v) : null; }
+      if (task.kind === 'dur'){ const v = durWrong(type, task, r); return v && v > 0 ? { text:durWords(v), val:v } : null; }
       const t = wrongTime(type, task.h, task.m, r);
       if (t === null) return null;
       // siffra: 14 läst som 4, men delen av dygnet behålls ("halv fem på eftermiddagen")
-      if (task.kind === 'digital' && type === 'siffra') return `${wordsT(t)} ${periodPhrase(task.h, task.m)}`;
-      return txtOf(t);
+      if (task.kind === 'digital' && type === 'siffra') return { text:`${wordsT(t)} ${periodPhrase(task.h, task.m)}`, val:t };
+      return { text:txtOf(t), val:t };
     };
     const typed = [];
-    for (const type of prio){ const text = one(type); if (text && text !== correct && !typed.some(c => c.text === text)) typed.push({ text, type }); }
+    for (const type of prio){ const o = one(type); if (o && o.text !== correct && !typed.some(c => c.text === o.text)) typed.push({ ...o, type }); }
     // de två mest typiska felen först, sedan ett av de övriga (lottat)
-    typed.slice(0, 2).forEach(c => add(c.text, c.type));
-    clockShuffle(typed.slice(2), r).forEach(c => { if (cands.length < 3) add(c.text, c.type); });
+    typed.slice(0, 2).forEach(c => add(c.text, c.type, c.val));
+    clockShuffle(typed.slice(2), r).forEach(c => { if (cands.length < 3) add(c.text, c.type, c.val); });
     // reserv: tio minuter, två timmar
     const fb = task.kind === 'dur'
-      ? [task.mins + 10, task.mins - 10, task.mins + 15, task.mins + 20].filter(v => v > 0).map(v => durWords(v))
-      : [10, -10, 120, -120, 15, -15].map(d => txtOf(targetTot(task) + d));
-    for (const text of fb){ if (cands.length >= 3) break; add(text, 'reserv'); }
-    return clockShuffle([{ text:correct, type:'ratt', ok:true }, ...cands.slice(0, 3)], r);
+      ? [task.mins + 10, task.mins - 10, task.mins + 15, task.mins + 20].filter(v => v > 0).map(v => ({ text:durWords(v), val:v }))
+      : [10, -10, 120, -120, 15, -15].map(d => { const t = norm(targetTot(task) + d); return { text:txtOf(t), val:t }; });
+    for (const o of fb){ if (cands.length >= 3) break; add(o.text, 'reserv', o.val); }
+    const rightVal = task.kind === 'dur' ? task.mins : targetTot(task);
+    return clockShuffle([{ text:correct, type:'ratt', ok:true, val:rightVal }, ...cands.slice(0, 3)], r);
   }
 
   /* ═══════════════════════════════════════════════════════════
-     FÖRKLARINGEN VID FEL: fyra klickade steg. hl = visaren som lyses upp.
-     mode 'read' (klockan visas) eller 'set' (klockan ställs rätt i steg 1).
+     NÄSTAN RÄTT: ett fel är nära när det är 5 minuter fel, en timme fel
+     runt halv (25–35 minuter), eller när "över" och "i" är förväxlade
+     (också fem i halv ↔ fem över halv). Annars inte – appen säger aldrig
+     "nästan rätt" om ett fel som inte är nära.
+     given: tiden barnet svarade (minuter sedan midnatt), i Hur lång tid längden
+     i minuter. mode: 'read' eller 'set' (en ställd klocka kan inte visa dygnsdelen).
+  ═══════════════════════════════════════════════════════════ */
+  function nearMiss(task, given, mode = 'read'){
+    if (given === null || given === undefined || !Number.isFinite(given)) return null;
+    if (task.kind === 'dur') return Math.abs(given - task.mins) === 5 ? 'fem' : null;
+    const target = toTot(task.h, task.m);
+    const span = task.kind === 'digital' && mode === 'read' ? DAY : HALF_DAY;
+    const mod = x => ((x % span) + span) % span;
+    const d = mod(given - target), dd = Math.min(d, span - d);
+    if (dd === 0) return null;
+    if (dd === 5) return 'fem';
+    if (dd === 60 && task.m >= 25 && task.m <= 35) return 'timme';
+    for (const type of ['overi', 'halvfem']){
+      const w = wrongTime(type, task.h, task.m, Math.random);
+      if (w !== null && mod(given - w) === 0) return 'overi';
+    }
+    return null;
+  }
+  const NEAR_LEAD = 'Nästan rätt! Bra försök, låt mig visa!';
+  const FAR_LEAD = 'Bra försök! Låt mig visa.';
+  const wrongLead = near => near ? NEAR_LEAD : FAR_LEAD;
+  const PRAISE = ['Snyggt!', 'Snyggt räknat!', 'Helt rätt!', 'Rätt!'];   // inte 'Precis!': den bekräftande förklaringen börjar med 'Precis som …'
+  const praise = i => PRAISE[((i % PRAISE.length) + PRAISE.length) % PRAISE.length];
+  const CONFIRM = 'Precis som du redan räknat ut: ';
+
+  /* ═══════════════════════════════════════════════════════════
+     RÄKNINGEN: den röda visaren går i steg om 5 minuter och summan byggs
+     i marginalen: "5", "5 + 5 = 10", "5 + 5 + 5 = 15" …
+     countSpec(m): vad som räknas för minuterna m –
+       över (5–30): det som har gått sedan 12 (0 → m)
+       i (40–55):   det som är kvar till 12 (m → 60)
+       fem i halv:  det som är kvar till halv (25 → 30)
+       fem över halv: det som har gått sedan halv (30 → 35)
+  ═══════════════════════════════════════════════════════════ */
+  const sumText = k => k <= 1 ? '5' : `${Array(k).fill('5').join(' + ')} = ${5 * k}`;
+  function countSpec(m){
+    if (m === 0) return null;
+    if (m === 25) return { from:25, to:30, c:'left' };
+    if (m === 35) return { from:30, to:35, c:'gone' };
+    if (m <= 30) return { from:0, to:m, c:'gone' };
+    return { from:m, to:60, c:'left' };
+  }
+  /* Hur många minuter räkningen landar på (det som står i tidens namn) */
+  const countTotal = m => { const c = countSpec(m); return c ? c.to - c.from : 0; };
+  /* Stegets tid i räkningen: ryms alltid inom ungefär 2 sekunder */
+  const countStepMs = n => Math.min(380, Math.floor(1600 / Math.max(1, n)));
+
+  /* Digital tid: timmen på urtavlan. 13–23 → minus 12. 12 är 12, 00 är 12 (på natten). */
+  function digitalHour(hh){
+    const x = ((hh % 24) + 24) % 24;
+    return { dial:(x % 12) || 12, minus:x > 12 };
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FÖRKLARINGEN (vid fel, och i bekräftande form vid rätt i lektionens
+     försök): klickade steg byggda av lektionens byggstenar – räkningen
+     med summan, betoningen av bindeordet och de tre representationerna.
+     Varje steg: { text, acts, link?, done? } (samma format som lektionerna).
+     mode 'read' (klockan visas) eller 'set' (klockan ställs rätt i första steget).
+     opts.confirm: bekräftande form – "Precis som du redan räknat ut: …".
   ═══════════════════════════════════════════════════════════ */
   const MINORD = { 5:'fem', 10:'tio', 15:'kvart', 20:'tjugo' };
-  function minuteRule(m){
+  const posOf = m => m === 0 ? 12 : m / 5;
+  const lowFirst = s => s[0].toLowerCase() + s.slice(1);
+  /* Räkningen på urtavlan för minuterna m (utan att visaren flyttas) */
+  function countActs(m){
+    const c = countSpec(m);
+    const acts = [];
+    if (m === 25 || m === 35) acts.push({ do:'map', parts:['nums', 'runt'] });
+    if (c) acts.push({ do:'count', from:c.from, to:c.to, c:c.c });
+    return acts;
+  }
+  function countLine(m){
     if (m === 0)  return 'När den röda visaren pekar rakt upp säger vi bara timmen.';
-    if (m === 30) return '30 minuter är en halv timme. Det heter halv.';
-    if (m === 25) return '25 minuter är 5 minuter före halv. Det heter fem i halv.';
-    if (m === 35) return '35 minuter är 5 minuter efter halv. Det heter fem över halv.';
-    if (m < 30)   return `${m} minuter efter hel timme heter ${MINORD[m]} över.`;
-    return `Då är det ${60 - m} minuter kvar till nästa hel timme. Det heter ${MINORD[60 - m]} i.`;
+    if (m === 25 || m === 35) return 'Runt halv räknar vi från 6:an.';
+    if (m <= 30)  return 'Vi räknar minuterna som har gått sedan 12.';
+    return 'Vi räknar minuterna som är kvar till 12.';
   }
-  function hourRule(h, m){
+  /* Namnsteget: varför tiden heter som den heter, med bindeordet betonat */
+  function nameStep(h, m){
+    const H = h12(h), N = h12(h + 1), name = words(h, m);
+    const words_ = { do:'words' };
+    if (m === 0)  return { text:`Den blå visaren pekar på ${H}.`, acts:[words_, { do:'hl', w:'h' }, { do:'glow', h:H }] };
+    // samma tal får inte ha två roller: "gått över fem med 5 minuter" → "gått över den hela timmen med 5 minuter"
+    const hw = m === H ? 'den hela timmen' : hourWord(h), nw = 60 - m === N ? 'nästa hela timme' : hourWord(h + 1);
+    if (m <= 20)  return { text:`Klockan har gått över ${hw} med ${m} minuter: ${name}.`, link:['över', 'gått över'],
+                           acts:[words_, { do:'hl', w:'both' }, { do:'glow', h:H }] };
+    if (m === 25) return { text:`Det är 5 minuter kvar innan halv: ${name}.`, link:['i', 'innan'], acts:[words_, { do:'hl', w:'both' }] };
+    if (m === 30) return { text:`Den blå visaren står mitt emellan ${H} och ${N}. ${cap(name)} betyder halvvägs till ${hourWord(h + 1)}.`, link:['halv', 'halvvägs'],
+                           acts:[words_, { do:'hl', w:'h' }, { do:'arc', from:H % 12, upto:0.5 }, { do:'glow', h:N }] };
+    if (m === 35) return { text:`5 minuter har gått över halv: ${name}.`, link:['över', 'gått över'], acts:[words_, { do:'hl', w:'both' }] };
+    return { text:`Det är ${60 - m} minuter kvar innan ${nw}: ${name}.`, link:['i', 'innan'],
+             acts:[words_, { do:'hl', w:'h' }, { do:'glow', h:N }] };
+  }
+  /* Runt halv: timmen är densamma som vid halv */
+  function halfHourStep(h, m){
     const H = h12(h), N = h12(h + 1);
-    if (m === 0)  return `Den blå visaren pekar på ${H}.`;
-    if (m <= 20)  return `Den blå visaren har gått lite förbi ${H}. Vi säger timmen som har varit: ${hourWord(h)}.`;
-    if (m === 30) return `Den blå visaren står mitt emellan ${H} och ${N}. Halv betyder halvvägs till nästa timme: ${hourWord(h + 1)}.`;
-    if (m === 25) return `Den blå visaren står nästan mitt emellan ${H} och ${N}. Halv betyder halvvägs till nästa timme: ${hourWord(h + 1)}.`;
-    if (m === 35) return `Den blå visaren har gått lite förbi mitten mellan ${H} och ${N}. Halv betyder halvvägs till nästa timme: ${hourWord(h + 1)}.`;
-    return `Den blå visaren är nästan framme vid ${N}. Vi säger timmen som kommer: ${hourWord(h + 1)}.`;
+    return { text:`Den blå visaren är nära mitten mellan ${H} och ${N}. Timmen är samma som vid ${words(h, 30)}.`,
+             acts:[{ do:'hl', w:'h' }, { do:'arc', from:H % 12, upto:m / 60 }, { do:'glow', h:N }] };
   }
-  function minuteLook(m, mode){
-    const pre = mode === 'set' ? 'Den röda visaren ska peka' : 'Titta på den röda visaren. Den pekar';
-    if (m === 0) return `${pre} rakt upp, på 12. Då är det en hel timme.`;
-    return `${pre} på ${m / 5}. Det är ${m} minuter.`;
-  }
-  function explainSteps(task, mode = 'read'){
-    if (task.kind === 'dur') return durExplain(task);
-    const { h, m } = task;
-    if (task.kind === 'digital'){
-      const hh = ((h % 24) + 24) % 24, H = h12(h);
-      const first = hh > 12
-        ? `Titta på timmen: ${hh}. Efter 12 börjar urtavlan om, så ${hh} är ${H} ${periodOf(hh).phrase}.`
-        : `Titta på timmen: ${hh}. Före 12 visar urtavlan samma timme.`;
-      const hourSay = m === 0 ? `Vi säger bara timmen: ${hourWord(h)}.`
-        : m <= 20 ? `Vi säger timmen som har varit: ${hourWord(h)}.`
-        : m <= 35 ? `Halv betyder halvvägs till nästa timme: ${hourWord(h + 1)}.`
-        : `Vi säger timmen som kommer: ${hourWord(h + 1)}.`;
-      return [
-        { text:first, hl:'h', show:'analog' },
-        { text:`Minuterna är ${pad2(m)}. ${minuteRule(m)}`, hl:'m' },
-        { text:hourSay, hl:'h' },
-        { text:`${digi(h, m)} är ${digitalWords(h, m)}.`, hl:'both', done:true },
-      ];
+  function explainSteps(task, mode = 'read', opts = {}){
+    const confirm = !!opts.confirm;
+    if (task.kind === 'dur') return durExplain(task, confirm);
+    const { h, m } = task, target = toTot(h, m), digital = task.kind === 'digital';
+    const out = [];
+    const goActs = mode === 'set' && !confirm ? [{ do:'go', t:target, near:true, ms:1000 }] : [];
+    const trio = { do:'trio', on:true, digital, words:false };
+    if (digital){
+      const hh = ((h % 24) + 24) % 24, dh = digitalHour(hh);
+      const first = hh > 12 ? `Timmen är ${hh}. Efter 12 tar vi minus 12.`
+        : hh === 0 ? 'Timmen är 00. På urtavlan är det 12.'
+        : `Timmen är ${pad2(hh)}. Före 12 behövs inget minus.`;
+      out.push({ text:confirm ? CONFIRM + lowFirst(first) : first,
+                 acts:[trio, ...(mode === 'read' ? [{ do:'showAnalog' }] : []), { do:'hl', w:'h' }, ...goActs, dh.minus ? { do:'minus12' } : { do:'glow', h:dh.dial }] });
+      out.push({ text:m === 0 ? 'Minuterna är 00. Då säger vi bara timmen.' : `Minuterna är ${pad2(m)}. Den röda visaren pekar på ${posOf(m)}.`,
+                 acts:[{ do:'sum', text:null }, { do:'hl', w:'m' }, ...countActs(m)] });
+    } else if (confirm){
+      const look = m === 0 ? `den röda visaren ${mode === 'set' ? 'ska peka' : 'pekar'} rakt upp, på 12.` : `den röda visaren ${mode === 'set' ? 'ska peka' : 'pekar'} på ${posOf(m)}.`;
+      out.push({ text:CONFIRM + look, acts:[trio, { do:'hl', w:'m' }, ...countActs(m)] });
+    } else {
+      const look = mode === 'set'
+        ? (m === 0 ? 'Den röda visaren ska peka rakt upp, på 12.' : `Den röda visaren ska peka på ${posOf(m)}.`)
+        : (m === 0 ? 'Titta på den röda visaren. Den pekar rakt upp, på 12.' : `Titta på den röda visaren. Den pekar på ${posOf(m)}.`);
+      out.push({ text:look, acts:[trio, { do:'hl', w:'m' }, ...goActs] });
+      out.push({ text:countLine(m), acts:[{ do:'hl', w:'m' }, ...countActs(m)] });
     }
-    return [
-      { text:minuteLook(m, mode), hl:'m', go:mode === 'set' },
-      { text:minuteRule(m), hl:'m' },
-      { text:hourRule(h, m), hl:'h' },
-      { text:`Klockan är ${words(h, m)}.`, hl:'both', done:true },
-    ];
+    out.push(nameStep(h, m));
+    if (m === 25 || m === 35) out.push(halfHourStep(h, m));
+    out.push({ text:digital ? `${digi(h, m)} är ${digitalWords(h, m)}.` : `Klockan är ${words(h, m)}.`, acts:[{ do:'hl', w:'both' }], done:true });
+    return out;
   }
-  function durExplain(task){
+  function durExplain(task, confirm = false){
     const hrs = Math.floor(task.mins / 60), rest = task.mins % 60;
-    const start = words(task.h1, task.m1), end = words(task.h2, task.m2);
+    const t1 = toTot(task.h1, task.m1), start = words(task.h1, task.m1), end = words(task.h2, task.m2);
     const hourTxt = hrs === 0 ? 'Först hela timmar: ett helt varv går förbi sluttiden. Här blir det inga hela timmar.'
       : hrs === 1 ? 'Först hela timmar: den röda visaren går ett helt varv. Det är 1 timme.'
       : `Först hela timmar: den röda visaren går två hela varv. Det är ${hrs} timmar.`;
     const minTxt = rest === 0 ? `Inga minuter till: klockan är redan ${end}.`
-      : `Sedan minuterna: den röda visaren går ${rest / 5} steg. Det är ${rest} minuter.`;
+      : `Sedan minuterna: den röda visaren går ${rest / 5} steg.`;
+    const first = `Vi börjar när klockan är ${start}.`;
+    const from = task.m1;
     return [
-      { text:`Vi börjar när klockan är ${start}.`, hl:'both', at:toTot(task.h1, task.m1) },
-      { text:hourTxt, hl:'m', go:toTot(task.h1, task.m1) + hrs * 60, chip:hrs ? durWords(hrs * 60) : null },
-      { text:minTxt, hl:'m', go:toTot(task.h1, task.m1) + task.mins, count:rest > 0, chip:rest ? `${rest} minuter` : null },
-      { text:`Det tar ${durWords(task.mins)}.`, hl:'both', done:true, total:durWords(task.mins) },
+      { text:confirm ? CONFIRM + lowFirst(first) : first,
+        acts:[{ do:'time', t:t1 }, { do:'trio', on:true, digital:false, words:true }, { do:'hl', w:'both' }, { do:'chip', reset:true }] },
+      { text:hourTxt, acts:[{ do:'hl', w:'m' }, ...(hrs ? [{ do:'go', t:t1 + hrs * 60, ms:1600 }, { do:'chip', text:durWords(hrs * 60) }] : [])] },
+      { text:minTxt, acts:[{ do:'hl', w:'m' }, ...(rest ? [{ do:'count', from, to:from + rest, c:'gone', move:true }] : [])] },
+      { text:`Det tar ${durWords(task.mins)}.`, acts:[{ do:'hl', w:'both' }, ...(hrs && rest ? [{ do:'chip', total:durWords(task.mins) }] : [])], done:true },
     ];
   }
 
   /* ═══════════════════════════════════════════════════════════
-     LEKTIONERNA: klickstyrda på en stor klocka. Varje steg är en idé;
+     LEKTIONERNA: klickstyrda på en stor klocka med digital tid och tiden i ord
+     bredvid (de tre representationerna, synkrona). Varje steg är en idé;
      texten visas först, sedan rörelsen (acts), slutsatsen sist.
-     acts: time (sätt), go (rör visarna), hl (lys upp visare), map (minutkartans
-     lager), nums (minuttalen tänds ett i taget), fill (färga en del av urtavlan),
-     quarters (fyra delar), arc (timvisarens väg), ring24, digi (digital tid under
-     klockan), chip (räknaren i marginalen).
+     link:[ordet i tiden, ordet i förklaringen] – de två lyser upp ihop.
+     acts: time (sätt), go (rör visarna), hl (lys upp visare), trio (digital tid
+     och ord under klockan), words (orden tänds), map (minutkartans lager),
+     nums (minuttalen tänds ett i taget), hnums (timsiffrorna tänds), glow (en
+     timsiffra lyser), fill, quarters, arc (timvisarens väg), count (räkningen i
+     femsteg med summan), sum (en rad i marginalen), clear, ring24 (dygnsringen),
+     rev (timvisaren går runt), minus12, lap (ett helt varv), bed (läggdags),
+     pulse (den digitala klockan), chip (Hur lång tid).
+     Efter demonstrationen: försöken (LESSON_TRIES), minst en läs- och en ställuppgift.
   ═══════════════════════════════════════════════════════════ */
   const T = (h, m) => toTot(h, m);
   const LESSONS = {
     hela: [
-      { text:'Klockan har två visare: en kort blå och en lång röd.', acts:[{ do:'time', t:T(3, 0) }, { do:'hl', w:'both' }] },
-      { text:'Den röda visaren pekar rakt upp, på 12. Då är det en hel timme.', acts:[{ do:'hl', w:'m' }] },
-      { text:'Den blå visaren visar timmen. Den pekar på 3.', acts:[{ do:'hl', w:'h' }] },
-      { text:'Klockan är tre.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'tre' }] },
-      { text:'Nu går det en timme. Den röda visaren går ett helt varv, och den blå flyttar ett steg.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(4, 0), ms:2400 }] },
-      { text:'Den blå visaren pekar på 4. Klockan är fyra.', acts:[{ do:'hl', w:'h' }, { do:'digi', text:'fyra' }] },
+      { text:'Klockan har två visare. Den korta blå visar timmen.', acts:[{ do:'time', t:T(2, 40) }, { do:'hl', w:'h' }, { do:'hnums' }] },
+      { text:'Den långa röda visar minuterna.', acts:[{ do:'clear' }, { do:'hl', w:'m' }] },
+      { text:'När den röda visaren pekar rakt upp på 12 är det en hel timme.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(3, 0), ms:1200 }] },
+      { text:'Den blå visaren pekar på 3. Klockan är tre.', acts:[{ do:'hl', w:'h' }, { do:'glow', h:3 }, { do:'trio', on:true }] },
     ],
     halv: [
-      { text:'Klockan är två. Den röda visaren pekar rakt upp, och den blå pekar på 2.', acts:[{ do:'time', t:T(2, 0) }, { do:'hl', w:'both' }, { do:'digi', text:'två' }] },
-      { text:'Nu går den röda visaren ett halvt varv, från 12 ner till 6.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(2, 30), ms:2200 }] },
-      { text:'Den första halvan av timmen har gått.', acts:[{ do:'fill', from:0, to:30, c:'gone' }] },
-      { text:'Titta på den blå visaren. Den har också flyttat sig: den står mitt emellan 2 och 3.', acts:[{ do:'hl', w:'h' }, { do:'arc', from:2, upto:0.5 }] },
-      { text:'Den är halvvägs till 3. Därför heter det halv tre.', acts:[{ do:'arcEnd', at:3 }, { do:'digi', text:'halv tre' }] },
-      { text:'Halv tre betyder halvvägs till tre.', acts:[{ do:'hl', w:'both' }] },
+      { text:'Klockan är två.', acts:[{ do:'time', t:T(2, 0) }, { do:'hl', w:'both' }, { do:'trio', on:true }] },
+      { text:'Den röda visaren går ett halvt varv, från 12 till 6.', acts:[{ do:'hl', w:'m' }, { do:'count', from:0, to:30, c:'gone', move:true }] },
+      { text:'Titta på den blå visaren. Den har också flyttat sig, halvvägs från 2 mot 3.', acts:[{ do:'hl', w:'h' }, { do:'arc', from:2, upto:0.5 }] },
+      { text:'Halv tre betyder halvvägs till tre.', link:['halv', 'halvvägs'], acts:[{ do:'hl', w:'both' }, { do:'glow', h:3 }] },
+      { text:'Den digitala klockan visar 02:30. Det har gått 30 minuter.', acts:[{ do:'pulse' }] },
     ],
     kvart: [
       { text:'Urtavlan kan delas i fyra lika stora delar. Varje del är en kvart.', acts:[{ do:'time', t:T(4, 0) }, { do:'hl', w:null }, { do:'quarters' }] },
-      { text:'Den röda visaren går en del, från 12 till 3.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(4, 15), ms:1400 }, { do:'fill', from:0, to:15, c:'gone' }] },
-      { text:'En kvart har gått sedan fyra. Det heter kvart över fyra.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'kvart över fyra' }] },
-      { text:'Nu går den röda visaren vidare, ända till 9.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(4, 45), ms:1800 }, { do:'fill', from:0, to:45, c:'gone' }] },
-      { text:'Nu är en kvart kvar till fem. Det heter kvart i fem.', acts:[{ do:'fill', from:45, to:60, c:'left' }, { do:'hl', w:'both' }, { do:'digi', text:'kvart i fem' }] },
-      { text:'Kvart över: en kvart har gått. Kvart i: en kvart är kvar.', acts:[{ do:'hl', w:null }] },
+      { text:'Den röda visaren går en del, från 12 till 3.', acts:[{ do:'trio', on:true }, { do:'hl', w:'m' }, { do:'count', from:0, to:15, c:'gone', move:true }] },
+      { text:'Klockan har gått över fyra med en kvart: kvart över fyra.', link:['över', 'gått över'], acts:[{ do:'hl', w:'both' }, { do:'glow', h:4 }] },
+      { text:'Den röda visaren fortsätter till 9.', acts:[{ do:'clear' }, { do:'quarters' }, { do:'sum', text:null }, { do:'hl', w:'m' }, { do:'go', t:T(4, 45), ms:1200 }] },
+      { text:'Nu räknar vi det som är kvar till 12.', acts:[{ do:'count', from:45, to:60, c:'left' }] },
+      { text:'Det är 15 minuter kvar innan fem: kvart i fem.', link:['i', 'innan'], acts:[{ do:'hl', w:'h' }, { do:'glow', h:5 }] },
     ],
     ftt: [
-      { text:'Den röda visaren räknar minuter. Från en siffra till nästa går det 5 minuter.', acts:[{ do:'time', t:T(3, 0) }, { do:'hl', w:'m' }, { do:'nums' }] },
-      { text:'Den högra halvan heter över. Där har timmen nyss börjat.', acts:[{ do:'map', parts:['nums', 'over'] }] },
-      { text:'Den vänstra halvan heter i. Där är nästa timme nära.', acts:[{ do:'map', parts:['nums', 'over', 'i'] }] },
-      { text:'Den röda visaren pekar på 2. Det är 10 minuter efter tre.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(3, 10), ms:900 }] },
-      { text:'Det heter tio över tre.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'tio över tre' }] },
-      { text:'Nu pekar den röda visaren på 8. Då är det 20 minuter kvar till fyra.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(3, 40), ms:1800 }] },
-      { text:'Det heter tjugo i fyra.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'tjugo i fyra' }] },
+      { text:'Varje siffra på urtavlan är 5 minuter för den röda visaren.', acts:[{ do:'time', t:T(3, 0) }, { do:'trio', on:true }, { do:'hl', w:'m' }, { do:'nums' }] },
+      { text:'Den röda visaren går två steg.', acts:[{ do:'count', from:0, to:10, c:'gone', move:true }] },
+      { text:'Klockan har gått över tre med 10 minuter: tio över tre.', link:['över', 'gått över'], acts:[{ do:'hl', w:'both' }, { do:'glow', h:3 }] },
+      { text:'Nu är klockan 07:40. Den röda visaren står på 8.', acts:[{ do:'clear' }, { do:'sum', text:null }, { do:'time', t:T(7, 40) }, { do:'hl', w:'m' }] },
+      { text:'Vi räknar det som är kvar till 12.', acts:[{ do:'count', from:40, to:60, c:'left' }] },
+      { text:'Det är 20 minuter kvar innan åtta: tjugo i åtta.', link:['i', 'innan'], acts:[{ do:'hl', w:'h' }, { do:'glow', h:8 }] },
+      { text:'På högra halvan säger vi över. På vänstra halvan säger vi i.', acts:[{ do:'clear' }, { do:'hl', w:null }, { do:'map', parts:['nums', 'over', 'i'] }] },
     ],
     runt: [
-      { text:'Klockan är halv tre. Den röda visaren pekar på 6.', acts:[{ do:'time', t:T(2, 30) }, { do:'hl', w:'m' }, { do:'map', parts:['nums'] }, { do:'digi', text:'halv tre' }] },
-      { text:'Runt 6 finns ett eget fält, från 5 till 7.', acts:[{ do:'map', parts:['nums', 'runt'] }] },
-      { text:'I fältet räknar vi från halv.', acts:[{ do:'hl', w:null }] },
-      { text:'Den röda visaren går ett steg bakåt. Då är det fem minuter kvar till halv.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(2, 25), ms:700 }] },
-      { text:'Det heter fem i halv tre.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'fem i halv tre' }] },
-      { text:'Den blå visaren är nästan halvvägs till 3. Därför säger vi tre, precis som vid halv tre.', acts:[{ do:'hl', w:'h' }, { do:'arc', from:2, upto:0.5 }] },
-      { text:'Nu går den röda visaren två steg framåt. Då har det gått fem minuter efter halv.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(2, 35), ms:900 }] },
-      { text:'Det heter fem över halv tre.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'fem över halv tre' }] },
+      { text:'Halv åtta. Den röda visaren står på 6.', acts:[{ do:'time', t:T(7, 30) }, { do:'trio', on:true }, { do:'hl', w:'m' }, { do:'map', parts:['nums'] }] },
+      { text:'Den röda visaren backar ett steg, till 5.', acts:[{ do:'go', t:T(7, 25), ms:700 }, { do:'count', from:25, to:30, c:'left' }] },
+      { text:'Det är fem minuter kvar innan halv: fem i halv åtta.', link:['i', 'innan'], acts:[{ do:'hl', w:'both' }] },
+      { text:'Nu går den röda visaren till 7.', acts:[{ do:'clear' }, { do:'hl', w:'m' }, { do:'go', t:T(7, 35), ms:900 }, { do:'count', from:30, to:35, c:'gone' }] },
+      { text:'Fem minuter har gått över halv: fem över halv åtta.', link:['över', 'gått över'], acts:[{ do:'hl', w:'both' }] },
+      { text:'Runt halv räknar vi från 6:an, inte från 12.', acts:[{ do:'clear' }, { do:'sum', text:null }, { do:'hl', w:'m' }, { do:'map', parts:['nums', 'runt'] }] },
+      { text:'Timmen är samma som vid halv: halv åtta, fem i halv åtta, fem över halv åtta.', acts:[{ do:'time', t:T(7, 30) }, { do:'hl', w:'h' }, { do:'arc', from:7, upto:0.5 }, { do:'glow', h:8 }] },
     ],
     digital: [
-      { text:'En digital klocka räknar hela dygnet, från 00 till 23.', acts:[{ do:'time', t:T(12, 0) }, { do:'hl', w:null }, { do:'ring24', on:true }, { do:'digi', text:'12:00', digital:true }] },
-      { text:'Efter 12 fortsätter den med 13, 14, 15 och så vidare.', acts:[{ do:'ring24', on:true, pop:true }] },
-      { text:'13 är 1 på eftermiddagen. Ta bort 12, så får du timmen på urtavlan.', acts:[{ do:'hl', w:'h' }, { do:'go', t:T(13, 0), ms:1600 }, { do:'digi', text:'13:00', digital:true }] },
-      { text:'Klockan 14:30 står den blå visaren mitt emellan 2 och 3.', acts:[{ do:'hl', w:'h' }, { do:'go', t:T(14, 30), ms:1800 }, { do:'digi', text:'14:30', digital:true }] },
-      { text:'14:30 är halv tre på eftermiddagen.', acts:[{ do:'hl', w:'both' }, { do:'digi', text:'halv tre på eftermiddagen' }] },
-      { text:'På kvällen fortsätter det: 20:15 är kvart över åtta på kvällen.', acts:[{ do:'hl', w:'both' }, { do:'time', t:T(20, 15) }, { do:'digi', text:'20:15', digital:true }] },
+      { text:'Den vanliga klockan har 12 timmar på urtavlan.', acts:[{ do:'time', t:T(0, 0) }, { do:'hl', w:'h' }, { do:'hnums' }] },
+      { text:'Under ett dygn går den blå visaren runt två gånger. Första varvet är natten och förmiddagen.',
+        acts:[{ do:'clear' }, { do:'trio', on:true, digital:true }, { do:'ring24', mode:'am' }, { do:'rev', t:T(12, 0), ms:1600 }] },
+      { text:'Andra varvet är eftermiddagen och kvällen.', acts:[{ do:'ring24', mode:'pm', keep:true }, { do:'rev', t:24 * 60, ms:1600 }] },
+      { text:'Ett dygn har 24 timmar: två varv med 12 timmar.', acts:[{ do:'sum', text:'12 + 12 = 24', cls:'h' }] },
+      { text:'Den digitala klockan fortsätter räkna efter 12: 13, 14, 15 och så vidare.',
+        acts:[{ do:'sum', text:null }, { do:'time', t:T(12, 0) }, { do:'ring24', mode:'pm', seq:true }] },
+      { text:'Klockan är 13:00. 13 − 12 = 1.', acts:[{ do:'hl', w:'h' }, { do:'go', t:T(13, 0), ms:1000 }, { do:'minus12' }] },
+      { text:'Vi tar minus 12 eftersom den blå visaren redan har gått ett helt varv. Ett varv är 12 timmar.', acts:[{ do:'hl', w:'h' }, { do:'lap' }] },
+      { text:'Du lägger dig ungefär klockan 20:00: åtta på kvällen.',
+        acts:[{ do:'clear' }, { do:'sum', text:null }, { do:'rev', t:T(20, 0), ms:900 }, { do:'bed', at:T(20, 0), who:'du' }, { do:'minus12' }] },
+      { text:'Vuxna lägger sig ofta runt 22:30: halv elva på kvällen.',
+        acts:[{ do:'go', t:T(22, 30), ms:1000 }, { do:'bed', at:T(22, 30), who:'vuxna' }, { do:'minus12' }] },
+      { text:'Den blå visaren står mitt emellan 10 och 11. Halv elva betyder halvvägs till elva.', link:['halv', 'halvvägs'],
+        acts:[{ do:'hl', w:'h' }, { do:'arc', from:10, upto:0.5 }, { do:'glow', h:11 }] },
+      { text:'Före 12 behövs inget minus. Skolan börjar ungefär 08:00: åtta på morgonen.',
+        acts:[{ do:'clear' }, { do:'sum', text:null }, { do:'ring24', mode:'am', all:true }, { do:'time', t:T(8, 0) }, { do:'hl', w:'h' }, { do:'glow', h:8 }] },
     ],
     tid: [
-      { text:'Vi ska räkna tiden från kvart över tre till kvart i fem.', acts:[{ do:'time', t:T(3, 15) }, { do:'hl', w:'both' }, { do:'chip', reset:true }] },
-      { text:'Först hela timmar. Den röda visaren går ett helt varv: det är 1 timme.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(4, 15), ms:2200 }, { do:'chip', text:'1 timme' }] },
+      { text:'Vi ska räkna tiden från kvart över tre till kvart i fem.', acts:[{ do:'time', t:T(3, 15) }, { do:'trio', on:true }, { do:'hl', w:'both' }, { do:'chip', reset:true }] },
+      { text:'Först hela timmar. Den röda visaren går ett helt varv: det är 1 timme.', acts:[{ do:'hl', w:'m' }, { do:'go', t:T(4, 15), ms:1600 }, { do:'chip', text:'1 timme' }] },
       { text:'Ett varv till skulle gå förbi kvart i fem. Nu räknar vi minuter i stället.', acts:[{ do:'hl', w:null }] },
-      { text:'Den röda visaren går 6 steg, från 3 till 9. Varje steg är 5 minuter, så det blir 30 minuter.', acts:[{ do:'hl', w:'m' }, { do:'count', t:T(4, 45) }, { do:'chip', text:'30 minuter' }] },
+      { text:'Den röda visaren går från 3 till 9. Varje steg är 5 minuter.', acts:[{ do:'hl', w:'m' }, { do:'count', from:15, to:45, c:'gone', move:true }] },
       { text:'Ihop: 1 timme och 30 minuter.', acts:[{ do:'hl', w:'both' }, { do:'chip', total:'1 timme och 30 minuter' }] },
     ],
   };
+
+  /* Försöken efter demonstrationen: tider ur stegets egna tolv (lådorna räknas som i Öva). */
+  const LESSON_TRIES = {
+    hela:    [['read', '7:00'], ['set', '5:00']],
+    halv:    [['read', '6:30'], ['set', '3:30']],
+    kvart:   [['read', '9:15'], ['read', '8:45'], ['set', '3:45']],
+    ftt:     [['read', '10:40'], ['read', '5:50'], ['set', '9:20']],
+    runt:    [['read', '1:25'], ['read', '2:35'], ['set', '3:35']],
+    digital: [['read', '15:15'], ['read', '19:20'], ['set', '20:40']],
+    tid:     [['read', '5:15-6:45'], ['set', '9:10-9:50']],
+  };
+  const lessonTries = id => (LESSON_TRIES[id] || []).map(([type, key]) => ({ type, key }));
+  /* Försökets uppmaning (i bubblan) */
+  const TRY_HEAD = 'Nu får du försöka! Med det vi nyss visade.';
+  function tryPrompt(task, type, again = false){
+    const head = again ? 'Nu du igen.' : TRY_HEAD;
+    if (type === 'set'){
+      if (task.kind === 'dur') return `${head} Klockan är ${words(task.h1, task.m1)}. Ställ klockan ${durWords(task.mins)} senare.`;
+      return `${head} Ställ klockan på ${task.kind === 'digital' ? digi(task.h, task.m) : words(task.h, task.m)}.`;
+    }
+    if (task.kind === 'dur') return `${head} Hur lång tid är det från ${words(task.h1, task.m1)} till ${words(task.h2, task.m2)}?`;
+    return `${head} Vad tror du klockan är här?`;
+  }
+  const RETRY_OK = 'Rätt! Bra att du försökte igen.';
+  const LESSON_END = 'Bra jobbat! Nu kan du öva på hela steget.';
+
+  /* Hur länge ett steg rör sig (ms): Nästa-knappen är låst så länge, högst ungefär 2 s */
+  function actMs(a){
+    switch (a.do){
+      case 'go': return a.ms || 1200;
+      case 'rev': return a.ms || 1600;
+      case 'count': { const n = Math.round((a.to - a.from) / 5); return n * countStepMs(n); }
+      case 'nums': return 12 * 120;
+      case 'hnums': return 12 * 100;
+      case 'fill': return 350;
+      case 'quarters': case 'arc': return 300;
+      case 'minus12': return 800;
+      case 'ring24': return a.seq ? 12 * 110 : 0;
+    }
+    return 0;
+  }
+  const stepMs = st => st.acts.reduce((s, a) => s + actMs(a), 0);
 
   /* ═══════════════════════════════════════════════════════════
      MINUTKARTAN (stödhjulet): vilka lager ett steg visar, och hur stark
@@ -450,11 +595,26 @@ const ClockLogic = (() => {
   /* "Du kan N av 12 tider" – alla: "Du kan alla 12 tider" (samma tal får inte stå för två saker) */
   const kanTxt = (k, total) => k >= total ? `Du kan alla ${total} tider` : `Du kan ${k} av ${total} tider`;
 
-  /* Alla texter barnet kan få se i lektioner och förklaringar (textsvepet) */
+  /* Alla texter barnet kan få se i lektioner och förklaringar (textsvepet):
+     lektionerna, förklaringen vid fel och den bekräftande förklaringen (läs och ställ)
+     för varje tid i varje steg, berömmet och inledningarna vid fel. */
   function allTexts(){
     const out = [];
     for (const id in LESSONS) LESSONS[id].forEach(s => out.push(s.text));
-    for (const s of STEPS) for (const t of s.tasks) for (const mode of ['read', 'set']) explainSteps(t, mode).forEach(x => out.push(x.text));
+    for (const s of STEPS) for (const t of s.tasks) for (const mode of ['read', 'set']){
+      explainSteps(t, mode).forEach(x => out.push(x.text));
+      explainSteps(t, mode, { confirm:true }).forEach(x => out.push(x.text));
+    }
+    out.push(...PRAISE, NEAR_LEAD, FAR_LEAD, RETRY_OK, LESSON_END);
+    return out;
+  }
+  /* Försökens uppmaningar (de får vara frågor) */
+  function promptTexts(){
+    const out = [];
+    for (const id in LESSON_TRIES) for (const tr of lessonTries(id)){
+      const t = taskByKey(id, tr.key);
+      out.push(tryPrompt(t, tr.type), tryPrompt(t, tr.type, true));
+    }
     return out;
   }
 
@@ -463,11 +623,12 @@ const ClockLogic = (() => {
     PERIODS, periodOf, periodPhrase, digitalWords, durWords, diffFwd,
     STEPS, stepById, stepOfMinute, answerText, targetTot, setStart, sameOnDial, taskByKey,
     handAngles, angleOf, angDist, snapMinute, dragMinute, dragHour, pickHand,
-    PRIO, wrongTime, readOptions, explainSteps, minuteRule, hourRule,
-    LESSONS, MAP_PARTS, mapLevel,
+    PRIO, wrongTime, readOptions, explainSteps, nearMiss, wrongLead, NEAR_LEAD, FAR_LEAD, PRAISE, praise, CONFIRM,
+    sumText, countSpec, countTotal, countStepMs, digitalHour,
+    LESSONS, LESSON_TRIES, lessonTries, tryPrompt, TRY_HEAD, RETRY_OK, LESSON_END, actMs, stepMs, MAP_PARTS, mapLevel,
     stepViews, stepMedal, recordBox, validBoxes,
     RTYPES, RNAME, RHELP, PRESETS, RMAX, clampCount, normCounts, roundTypes, presetFor, countsFrom, buildRounds, passPlan, planSummary, varvTxt, talord, cap,
-    kanTxt, allTexts, shuffle:clockShuffle,
+    kanTxt, allTexts, promptTexts, shuffle:clockShuffle,
   };
 })();
 
