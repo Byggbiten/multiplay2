@@ -158,6 +158,188 @@
     catch (_) { return false; }
   };
 
+  /* ══════════════════════════════════════════════════════
+     LÅDORNA OCH PÅFYLLNINGEN (v63: utbrutet ur multiplication.js,
+     delas av Gångertabellen och Klockan). Rena funktioner.
+     Ett tillstånd per uppgift:
+       { box:'ny'|'ovar'|'kan', okDays, level, due, lastOk, relearn }
+     okDays = antal olika lokala kalenderdagar med rätt svar sedan
+     senaste fel; lastOk = senaste dag som räknats; due = YYYY-MM-DD.
+  ══════════════════════════════════════════════════════ */
+  MP.spaced = (function () {
+    const BOXES = ['ny', 'ovar', 'kan'];
+    const MEDALS = ['brons', 'silver', 'guld'];
+    const INTERVALS = [1, 3, 7, 14, 30];               // dagar per level; efter level 5 fortsatt 30
+    const intervalFor = level => INTERVALS[Math.min(Math.max(level, 1), INTERVALS.length) - 1];
+    const pad2 = n => String(n).padStart(2, '0');
+    const fmtDay = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    function addDays(day, n) { const [y, m, d] = day.split('-').map(Number); return fmtDay(new Date(y, m - 1, d + n)); }
+    const fresh = () => ({ box:'ny', okDays:0, level:0, due:null, lastOk:null, relearn:false });
+
+    /* Reglerna, tillämpade vid VARJE besvarad fråga:
+       - Rätt: okDays ökar bara om dagens datum inte redan räknats för uppgiften.
+       - ny + rätt → övar.
+       - övar + rätt → kan när okDays ≥ 3 (≥ 2 efter att uppgiften fallit från kan). level 1, due = idag + 1.
+       - kan + rätt när idag ≥ due → level + 1, due = idag + intervall (1, 3, 7, 14, 30, sedan 30). Före due: inget.
+       - kan + fel → övar, okDays 0 (sedan räcker 2 dagar för kan igen, med level 1).
+       - övar + fel → övar, okDays 0.   ny + fel → ny. */
+    function applyAnswer(st, correct, day) {
+      if (correct) {
+        if (st.lastOk !== day) { st.okDays++; st.lastOk = day; }
+        if (st.box === 'ny') st.box = 'ovar';
+        else if (st.box === 'ovar') {
+          if (st.okDays >= (st.relearn ? 2 : 3)) {
+            st.box = 'kan'; st.level = 1; st.due = addDays(day, intervalFor(1)); st.relearn = false;
+          }
+        } else if (st.box === 'kan' && (!st.due || day >= st.due)) {
+          st.level = (st.level || 1) + 1; st.due = addDays(day, intervalFor(st.level));
+        }
+      } else if (st.box === 'kan') {
+        st.box = 'ovar'; st.okDays = 0; st.lastOk = null; st.relearn = true; st.level = 0; st.due = null;
+      } else if (st.box === 'ovar') {
+        st.okDays = 0; st.lastOk = null;
+      }
+      return st;
+    }
+
+    /* Hur uppgiften ser ut: ett kan-tillstånd vars due passerats är "Dags igen" (bleknat grönt). */
+    const vis = (st, day) => (st.box === 'kan' && st.due && day >= st.due) ? 'due' : st.box;
+
+    /* Medaljen för en grupp uppgifter (en tabell, ett klocksteg), byggd på lådorna –
+       aldrig på andelen rätt. views = varje uppgifts vis-värde ('ny'|'ovar'|'kan'|'due').
+       "Dags igen" räknas som Kan.
+         ingen:  någon uppgift är fortfarande ny
+         brons:  alla uppgifter har övats (ingen är ny)
+         silver: minst hälften är Kan
+         guld:   alla är Kan
+       due = antal "Dags igen" → medaljen får en blek prick (fyll på). */
+    function medal(views) {
+      const total = views.length;
+      let kan = 0, ny = 0, due = 0;
+      for (const v of views) {
+        if (v === 'kan' || v === 'due') kan++;
+        if (v === 'due') due++;
+        if (v === 'ny') ny++;
+      }
+      const m = ny > 0 ? null : kan === total ? 'guld' : kan * 2 >= total ? 'silver' : 'brons';
+      return { medal:m, kan, total, due, share:total ? kan / total : 0 };
+    }
+
+    return { BOXES, MEDALS, INTERVALS, intervalFor, fmtDay, addDays, fresh, applyAnswer, vis, medal };
+  })();
+
+  /* ── NÖTLOOPEN i ett varv (v63: utbruten ur multiplication.js) ──
+     - Varje fråga ställs en gång.
+     - Fel svar: samma fråga direkt igen (retry), om och om tills den blir rätt.
+     - Första felet på en fråga lägger in den EN gång till, på en slumpad plats
+       minst två frågor bort (två andra frågor emellan). Är varvet nästan slut
+       läggs den sist. Extratillfället får aldrig ett eget extratillfälle.
+     - answer() säger om svaret ska räknas (record): bara första försöket på
+       varje ställd fråga, inklusive extratillfället – aldrig upprepningarna.
+     items: valfria objekt; varje post i kön är en kopia med id och extra. */
+  MP.createDrill = function (items, r) {
+    r = r || Math.random;
+    const q = items.map((it, i) => ({ ...it, id:i, extra:false }));
+    const hasExtra = new Set();
+    let idx = 0, retry = false;
+    const st = { asked:0, firstOk:0, wrongFirst:0, attempts:0 };
+    return {
+      current(){ return idx < q.length ? { ...q[idx], retry } : null; },
+      answer(ok){
+        if (idx >= q.length) return null;
+        const slot = q[idx], record = !retry;
+        let insertedAt = null;
+        st.attempts++;
+        if (record){ st.asked++; if (ok) st.firstOk++; else st.wrongFirst++; }
+        if (ok){ idx++; retry = false; }
+        else {
+          retry = true;
+          if (!slot.extra && !hasExtra.has(slot.id)){
+            hasExtra.add(slot.id);
+            const lo = idx + 3, hi = q.length;            // insättningsindex: två andra frågor emellan
+            insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
+            q.splice(insertedAt, 0, { ...slot, extra:true });
+          }
+        }
+        return { record, ok:!!ok, insertedAt };
+      },
+      isDone(){ return idx >= q.length; },
+      progress(){ return { done:idx, total:q.length }; },
+      stats(){ return { ...st }; },
+      queue(){ return q.map(x => ({ ...x })); },
+    };
+  };
+
+  /* ── Kvittot efter ett övningspass (v63: utbrutet ur multiplication.js) ──
+     results = varvens resultat [{ type, asked, firstOk, wrongFirst }] */
+  MP.receiptFor = function (results, ms) {
+    const correct = results.reduce((s, x) => s + x.firstOk, 0);
+    const total   = results.reduce((s, x) => s + x.asked, 0);
+    const fixed   = results.reduce((s, x) => s + x.wrongFirst, 0);
+    return { correct, total, pct:total ? Math.round(100 * correct / total) : 0, fixed, secs:Math.max(0, Math.round((ms || 0) / 1000)), rounds:results.map(x => x.type) };
+  };
+  MP.durTxt = function (secs) {
+    if (secs < 60) return `${secs} s`;
+    const m = Math.floor(secs / 60), s = secs % 60;
+    return s ? `${m} min ${s} s` : `${m} min`;
+  };
+  /* Beröm som varierar med resultatet men aldrig är negativt */
+  MP.praiseFor = function (pct) {
+    if (pct >= 100) return 'Varje svar satt på första försöket.';
+    if (pct >= 85)  return 'Starkt jobbat! Nästan allt satt direkt.';
+    if (pct >= 60)  return 'Bra nött! Du rättade varje fel.';
+    return 'Du nötte dig igenom hela passet. Varje fel blev rätt till slut.';
+  };
+  /* Kvittots datum ("onsdag 23 september kl. 18:05") och stämpelns ("23 sep. 18:05") */
+  MP.fmtWhen = function (iso) { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
+  MP.fmtStamp = function (iso) { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { day:'numeric', month:'short' })} ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
+
+  /* ── Medaljen som SVG (band + medalj + stjärna; färgen skiljer) ──
+     kind: 'guld'|'silver'|'brons'|null (null = streckad ring: ingen medalj än).
+     band: bandets två färger (standard: Gångertabellens lila). */
+  const MEDAL_COL = {
+    guld:   { f:'#fcd34d', s:'#d97706', st:'#fffbeb' },
+    silver: { f:'#e2e8f0', s:'#64748b', st:'#ffffff' },
+    brons:  { f:'#c2733a', s:'#6b2f0c', st:'#f1c29a' },
+  };
+  MP.medalSVG = function (kind, band) {
+    const b = band || { l:'#a78bfa', r:'#7c3aed', ring:'rgba(76,29,149,.3)' };
+    if (!kind) return `<svg class="md" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14.3" r="7" fill="none" stroke="${b.ring}" stroke-width="1.6" stroke-dasharray="2.4 2.4"/></svg>`;
+    const c = MEDAL_COL[kind];
+    return `<svg class="md md-${kind}" viewBox="0 0 24 24" aria-hidden="true">` +
+      `<path d="M6 1h4.2l2.9 6.4H8.9z" fill="${b.l}"/><path d="M18 1h-4.2l-2.9 6.4h4.2z" fill="${b.r}"/>` +
+      `<circle cx="12" cy="14.3" r="7.6" fill="${c.f}" stroke="${c.s}" stroke-width="1.5"/>` +
+      `<circle cx="12" cy="14.3" r="5.4" fill="none" stroke="${c.s}" stroke-width=".8" opacity=".4"/>` +
+      `<path d="M12 10.4l1.15 2.35 2.6.38-1.88 1.83.44 2.58L12 16.32l-2.31 1.22.44-2.58-1.88-1.83 2.6-.38z" fill="${c.st}" stroke="${c.s}" stroke-width=".7" stroke-linejoin="round"/>` +
+      '</svg>';
+  };
+
+  /* ── Håll inne-knappen ("Sett av en vuxen") ──
+     el: knappen. opts: { ms, canStart():bool, onDone() }. Returnerar { reset, cancel }.
+     Håll inne i ms millisekunder (pekare eller mellanslag/Enter); släpps den före är inget gjort. */
+  MP.bindHold = function (el, opts) {
+    const ms = opts.ms || 1500;
+    let t = null;
+    function start(ev) {
+      if (el.disabled || (opts.canStart && !opts.canStart())) return;
+      if (ev && ev.cancelable) ev.preventDefault();
+      clearTimeout(t);
+      el.classList.remove('holding'); void el.offsetWidth; el.classList.add('holding');
+      t = setTimeout(() => { t = null; el.classList.remove('holding'); opts.onDone(); }, ms);
+    }
+    function end() {
+      if (!t) return;
+      clearTimeout(t); t = null;
+      el.classList.remove('holding');
+    }
+    el.addEventListener('pointerdown', start);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => el.addEventListener(ev, end));
+    el.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat){ e.preventDefault(); start(); } });
+    el.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') end(); });
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    return { cancel:end };
+  };
+
   if (typeof window !== 'undefined') window.MP = MP;
   if (typeof module !== 'undefined' && module.exports) module.exports = MP;
 

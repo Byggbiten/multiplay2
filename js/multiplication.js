@@ -21,6 +21,10 @@
 
 const MultGame = (() => {
 
+  /* Delad logik (js/shared.js): i appen den globala MP, i vitest via require */
+  const SH = (typeof MP !== 'undefined' && MP) || require('./shared.js');
+  const SP = SH.spaced;                                  // lådorna och påfyllningen (v63: delas med Klockan)
+
   /* ── Tillstånd ─────────────────────────────────────── */
   let profile      = null;
   let answerMode   = 'choice';   // 'choice' | 'free'  (inställningen "Svar": Val / Fri)
@@ -660,46 +664,17 @@ const MultGame = (() => {
   ═══════════════════════════════════════════════════════════ */
   const KEY = (a, b) => a <= b ? `${a}x${b}` : `${b}x${a}`;
   const PAIRS = []; for (let a = 1; a <= 12; a++) for (let b = a; b <= 12; b++) PAIRS.push([a, b]);   // 78 unika par
-  const BOXES = ['ny', 'ovar', 'kan'];
-  const INTERVALS = [1, 3, 7, 14, 30];                 // dagar per level; efter level 5 fortsatt 30
-  const intervalFor = level => INTERVALS[Math.min(Math.max(level, 1), INTERVALS.length) - 1];
+  /* Lådornas regler bor i js/shared.js (MP.spaced) sedan v63 och delas med Klockan:
+     tre olika dagar till Kan, intervallen 1, 3, 7, 14, 30 dagar, fel på Kan ger Övar. */
+  const { BOXES, INTERVALS, intervalFor, fmtDay, addDays, applyAnswer } = SP;
 
   let todayOverride = null;                            // testkrok: _test.setToday('2026-09-23')
-  const pad2 = n => String(n).padStart(2, '0');
-  const fmtDay = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const today = () => todayOverride || fmtDay(new Date());
-  function addDays(day, n) { const [y, m, d] = day.split('-').map(Number); return fmtDay(new Date(y, m - 1, d + n)); }
 
-  const freshPair = () => ({ box:'ny', okDays:0, level:0, due:null, lastOk:null, relearn:false });
-
-  /* Reglerna, tillämpade vid VARJE besvarad fråga (via recordAnswer):
-     - Rätt: okDays ökar bara om dagens datum inte redan räknats för paret.
-     - ny + rätt → övar.
-     - övar + rätt → kan när okDays ≥ 3 (≥ 2 efter att paret fallit från kan). level 1, due = idag + 1.
-     - kan + rätt när idag ≥ due → level + 1, due = idag + intervall (1, 3, 7, 14, 30, sedan 30). Före due: inget.
-     - kan + fel → övar, okDays 0 (sedan räcker 2 dagar för kan igen, med level 1).
-     - övar + fel → övar, okDays 0.   ny + fel → ny. */
-  function applyAnswer(st, correct, day) {
-    if (correct) {
-      if (st.lastOk !== day) { st.okDays++; st.lastOk = day; }
-      if (st.box === 'ny') st.box = 'ovar';
-      else if (st.box === 'ovar') {
-        if (st.okDays >= (st.relearn ? 2 : 3)) {
-          st.box = 'kan'; st.level = 1; st.due = addDays(day, intervalFor(1)); st.relearn = false;
-        }
-      } else if (st.box === 'kan' && (!st.due || day >= st.due)) {
-        st.level = (st.level || 1) + 1; st.due = addDays(day, intervalFor(st.level));
-      }
-    } else if (st.box === 'kan') {
-      st.box = 'ovar'; st.okDays = 0; st.lastOk = null; st.relearn = true; st.level = 0; st.due = null;
-    } else if (st.box === 'ovar') {
-      st.okDays = 0; st.lastOk = null;
-    }
-    return st;
-  }
+  const freshPair = SP.fresh;
 
   /* Hur paret ser ut på kartan: ett kan-tal vars due passerats är "Dags igen" (bleknat grönt). */
-  const vis = (st, day = today()) => (st.box === 'kan' && st.due && day >= st.due) ? 'due' : st.box;
+  const vis = (st, day = today()) => SP.vis(st, day);
   const pairsUpTo = n => PAIRS.filter(([a, b]) => a <= n && b <= n);
   /* n = hur långt tabellerna går (Gånger). Tal utanför syns inte och räknas inte. */
   function visMap(pairs, day = today(), n = 12) { const V = {}; for (const [a, b] of pairsUpTo(n)) V[KEY(a, b)] = vis(pairs[KEY(a, b)], day); return V; }
@@ -719,18 +694,11 @@ const MultGame = (() => {
        silver: minst hälften av talen är Kan
        guld:   alla tal är Kan
      due = minst ett av talen är "Dags igen" → medaljen får en blek prick (fyll på). Ren. */
-  const MEDALS = ['brons', 'silver', 'guld'];
+  const MEDALS = SP.MEDALS;
   function tableMedal(pairs, t, n, day = today()){
-    const total = n;
-    let kan = 0, ny = 0, due = 0;
-    for (let m = 1; m <= n; m++){
-      const st = pairs[KEY(t, m)], v = st ? vis(st, day) : 'ny';
-      if (v === 'kan' || v === 'due') kan++;
-      if (v === 'due') due++;
-      if (v === 'ny') ny++;
-    }
-    const medal = ny > 0 ? null : kan === total ? 'guld' : kan * 2 >= total ? 'silver' : 'brons';
-    return { t, medal, kan, total, due, share:total ? kan / total : 0 };
+    const views = [];
+    for (let m = 1; m <= n; m++){ const st = pairs[KEY(t, m)]; views.push(st ? vis(st, day) : 'ny'); }
+    return { t, ...SP.medal(views) };               // samma regel som klockans steg (MP.spaced.medal)
   }
   /* Snabbvalen: 1–10 alltid, 11 och 12 (Extra) bara när Gånger når dit */
   const quickTables = n => ({ main:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], extra:[11, 12].filter(t => t <= n) });
@@ -1188,45 +1156,9 @@ const MultGame = (() => {
   const hardWeakLabel = n => `Bara de du inte kan än (${n})`;
   const hardWhat = e => { const k = (e.pairs || []).length; return !k || k >= hardPairs().length ? 'De svåra talen' : `${k} av de svåra talen`; };
 
-  /* NÖTLOOPEN i ett varv.
-     - Varje fråga ställs en gång.
-     - Fel svar: samma fråga direkt igen (retry), om och om tills den blir rätt.
-     - Första felet på en fråga lägger in den EN gång till, på en slumpad plats
-       minst två frågor bort (två andra frågor emellan). Är varvet nästan slut
-       läggs den sist. Extratillfället får aldrig ett eget extratillfälle.
-     - answer() säger om svaret ska räknas (record): bara första försöket på
-       varje ställd fråga, inklusive extratillfället – aldrig upprepningarna. */
-  function createDrill(items, r = Math.random){
-    const q = items.map((it, i) => ({ a:it.a, b:it.b, id:i, extra:false }));
-    const hasExtra = new Set();
-    let idx = 0, retry = false;
-    const st = { asked:0, firstOk:0, wrongFirst:0, attempts:0 };
-    return {
-      current(){ return idx < q.length ? { ...q[idx], retry } : null; },
-      answer(ok){
-        if (idx >= q.length) return null;
-        const slot = q[idx], record = !retry;
-        let insertedAt = null;
-        st.attempts++;
-        if (record){ st.asked++; if (ok) st.firstOk++; else st.wrongFirst++; }
-        if (ok){ idx++; retry = false; }
-        else {
-          retry = true;
-          if (!slot.extra && !hasExtra.has(slot.id)){
-            hasExtra.add(slot.id);
-            const lo = idx + 3, hi = q.length;            // insättningsindex: två andra frågor emellan
-            insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
-            q.splice(insertedAt, 0, { a:slot.a, b:slot.b, id:slot.id, extra:true });
-          }
-        }
-        return { record, ok:!!ok, insertedAt };
-      },
-      isDone(){ return idx >= q.length; },
-      progress(){ return { done:idx, total:q.length }; },
-      stats(){ return { ...st }; },
-      queue(){ return q.map(x => ({ ...x })); },
-    };
-  }
+  /* NÖTLOOPEN i ett varv: MP.createDrill i js/shared.js (v63: delas med Klockan).
+     Fel ger samma fråga direkt igen och en gång till senare; bara första försöket räknas. */
+  const createDrill = SH.createDrill;
 
   /* "Så kan du tänka" i passet: har den andra faktorn en enklare väg (7 × 2 → 2 × 7,
      dubbelt)? Då ritas den som rader, som i Öva. */
@@ -1235,25 +1167,8 @@ const MultGame = (() => {
     return { ea, eb, text:swap ? `${a}${X}${b} är lika mycket som ${ea}${X}${eb}. ${introText(ea, eb)}` : introText(ea, eb) };
   }
 
-  /* Kvittots siffror ur varvens resultat ({type, asked, firstOk, wrongFirst}) */
-  function receiptFor(results, ms){
-    const correct = results.reduce((s, x) => s + x.firstOk, 0);
-    const total   = results.reduce((s, x) => s + x.asked, 0);
-    const fixed   = results.reduce((s, x) => s + x.wrongFirst, 0);
-    return { correct, total, pct:total ? Math.round(100 * correct / total) : 0, fixed, secs:Math.max(0, Math.round((ms || 0) / 1000)), rounds:results.map(x => x.type) };
-  }
-  function durTxt(secs){
-    if (secs < 60) return `${secs} s`;
-    const m = Math.floor(secs / 60), s = secs % 60;
-    return s ? `${m} min ${s} s` : `${m} min`;
-  }
-  /* Beröm som varierar med resultatet men aldrig är negativt */
-  function praiseFor(pct){
-    if (pct >= 100) return 'Varje svar satt på första försöket.';
-    if (pct >= 85)  return 'Starkt jobbat! Nästan allt satt direkt.';
-    if (pct >= 60)  return 'Bra nött! Du rättade varje fel.';
-    return 'Du nötte dig igenom hela passet. Varje fel blev rätt till slut.';
-  }
+  /* Kvittots siffror, tiden och berömmet: js/shared.js (v63: delas med Klockan) */
+  const { receiptFor, durTxt, praiseFor } = SH;
 
   /* ═══════════════════════════════════════════════════════════
      TRÄNARENS TILLSTÅND (per montering av hubben)
@@ -1438,22 +1353,8 @@ const MultGame = (() => {
   const refillHTML = m => m > 0 ? `<i></i>${m} att fylla på` : '';
 
   /* ── Medaljerna (SVG, samma form för alla tre: band + medalj + stjärna; färgen skiljer) ── */
-  const MEDAL_COL = {
-    guld:   { f:'#fcd34d', s:'#d97706', st:'#fffbeb' },
-    silver: { f:'#e2e8f0', s:'#64748b', st:'#ffffff' },
-    brons:  { f:'#c2733a', s:'#6b2f0c', st:'#f1c29a' },
-  };
   const MEDAL_NAME = { guld:'Guld', silver:'Silver', brons:'Brons' };
-  function medalSVG(kind){
-    if (!kind) return '<svg class="md" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14.3" r="7" fill="none" stroke="rgba(76,29,149,.3)" stroke-width="1.6" stroke-dasharray="2.4 2.4"/></svg>';
-    const c = MEDAL_COL[kind];
-    return `<svg class="md md-${kind}" viewBox="0 0 24 24" aria-hidden="true">` +
-      '<path d="M6 1h4.2l2.9 6.4H8.9z" fill="#a78bfa"/><path d="M18 1h-4.2l-2.9 6.4h4.2z" fill="#7c3aed"/>' +
-      `<circle cx="12" cy="14.3" r="7.6" fill="${c.f}" stroke="${c.s}" stroke-width="1.5"/>` +
-      `<circle cx="12" cy="14.3" r="5.4" fill="none" stroke="${c.s}" stroke-width=".8" opacity=".4"/>` +
-      `<path d="M12 10.4l1.15 2.35 2.6.38-1.88 1.83.44 2.58L12 16.32l-2.31 1.22.44-2.58-1.88-1.83 2.6-.38z" fill="${c.st}" stroke="${c.s}" stroke-width=".7" stroke-linejoin="round"/>` +
-      '</svg>';
-  }
+  const medalSVG = kind => SH.medalSVG(kind);          // js/shared.js, lila band (v63: delas med Klockan)
   const medalWrap = m => `${medalSVG(m.medal)}${m.due ? '<i class="mdue"></i>' : ''}`;
   function tableBtnHTML(m){
     const lbl = `${m.t}:ans tabell. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. ${kanTxt(m.kan, m.total, ' tal')}.${m.due ? ' Några tal behöver fyllas på.' : ''}`;
@@ -2439,8 +2340,7 @@ const MultGame = (() => {
   }
 
   /* ── Du är klar! – kvittot till en vuxen ── */
-  const fmtWhen = iso => { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
-  const fmtStamp = iso => { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { day:'numeric', month:'short' })} ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };
+  const { fmtWhen, fmtStamp } = SH;                    // js/shared.js (v63: delas med Klockan)
   function receiptHTML(e){
     return `
       <div class="rc-top"><span class="rc-k">${svg('repeat')}Övningspass</span><span class="rc-when">${cap(fmtWhen(e.date))}</span></div>
