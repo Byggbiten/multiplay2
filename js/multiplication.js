@@ -12,6 +12,9 @@
    medaljer på lådorna) → startskärm → passet; varvraden; tre ingångar.
    "Så krymper tabellen" är lektionen "Tabellen är mindre än du tror" i
    Lär dig strategin, på en egen neutral karta.
+   v62: De svåra talen – de 21 paren i {3, 4, 6, 7, 8, 9} som lektionen
+   lämnar kvar. Kort på hemvyn → startskärm (6 × 6-karta, Alla 21 eller
+   bara de som inte sitter än) → samma övningspass, med en parlista.
    Lila magi-temat sätts automatiskt via #mult-root i app.css.
    ============================================================ */
 'use strict';
@@ -323,6 +326,7 @@ const MultGame = (() => {
 
     /* ── Hubben v60: kompakt karta (bara framstegen), Träna en tabell, varvraden, tre ingångar ── */
     #mult-root .gt #mt-scr-hub{gap:8px}
+    #mult-root .gt #mt-scr-hub.tight{gap:6px}
     #mult-root .gt .mapcard.mini{flex-direction:row;align-items:center;gap:12px;padding:10px 12px}
     #mult-root .gt .map.mini .mh{font-size:9.5px}
     #mult-root .gt .map.mini .mc{border-radius:4px}
@@ -387,6 +391,7 @@ const MultGame = (() => {
     /* ── Ställ in ett övningspass ── */
     #mult-root .gt #mt-scr-setup{gap:8px}
     #mult-root .gt .sucard{padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+    #mult-root .gt #mt-scr-setup.varv-only > .sucard:nth-child(-n+2){display:none}
     #mult-root .gt .su-lab{display:flex;flex-direction:column;line-height:1.15}
     #mult-root .gt .su-lab b{font-family:var(--font-head);font-weight:800;font-size:18px;color:var(--deep)}
     #mult-root .gt .su-lab small{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
@@ -443,6 +448,30 @@ const MultGame = (() => {
     #mult-root .gt .ts-sum{font-size:13px;font-weight:800;color:var(--ink-soft)}
     #mult-root .gt .ts-go{min-height:60px;font-size:19px}
     #mult-root .gt .ts-edit{min-height:48px}
+
+    /* ── De svåra talen (v62): kortet på hemvyn och startskärmen ── */
+    #mult-root .gt .hardrow{display:flex;align-items:center;gap:12px;min-height:52px;padding:6px 10px 6px 12px;flex-shrink:0;width:100%;text-align:left;color:var(--deep);
+      transition:transform .2s var(--spring)}
+    #mult-root .gt .hardrow:active{transform:scale(.97)}
+    #mult-root .gt .hr-ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--accent);flex-shrink:0}
+    #mult-root .gt .hr-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;line-height:1.1}
+    #mult-root .gt .hr-t b{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep)}
+    #mult-root .gt .hr-k{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--ink-soft);white-space:nowrap}
+    #mult-root .gt .hr-k .tb-bar{flex:1;max-width:130px;height:5px}
+    #mult-root .gt .hr-go{display:grid;place-items:center;width:28px;color:var(--ink-soft)}
+    #mult-root .gt #mt-scr-hstart{gap:8px}
+    #mult-root .gt .hs-ic{display:grid;place-items:center;border-radius:18px;background:var(--tint);color:var(--accent)}
+    #mult-root .gt .hs-ic svg.i{width:32px;height:32px;stroke-width:2.2}
+    #mult-root .gt .hs-mapcard{padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    #mult-root .gt .hs-map{flex-shrink:0}
+    #mult-root .gt .hs-map .mh{font-size:11px}
+    #mult-root .gt .mc.mirror{background:transparent;box-shadow:none}
+    #mult-root .gt .hs-side{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+    #mult-root .gt .hs-why{margin:0;font-size:13.5px;font-weight:800;line-height:1.3;color:var(--ink)}
+    #mult-root .gt .hs-pick{grid-template-columns:auto 1fr;flex-shrink:0}
+    #mult-root .gt .hs-pick.one{grid-template-columns:1fr}
+    #mult-root .gt .hs-pick button{padding:0 16px;white-space:nowrap}
+    #mult-root .gt .hs-praise{margin:0;text-align:center;font-weight:800;font-size:14px;line-height:1.3;color:#15803d;flex-shrink:0}
 
     /* ── Lär dig strategin: kapitlet "Tabellen är mindre än du tror" ── */
     #mult-root .gt .chap{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;flex-shrink:0;border-radius:14px;background:var(--glass-strong);
@@ -812,6 +841,7 @@ const MultGame = (() => {
     minus:'<path d="M6 12h12"/>',
     plus:'<path d="M12 6v12M6 12h12"/>',
     shuffle:'<path d="M16 3.5h4.5V8"/><path d="M4 20L20.5 3.5"/><path d="M20.5 16v4.5H16"/><path d="M14.5 14.5l6 6"/><path d="M4 4l5 5"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".9" fill="currentColor"/>',
     hand:'<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4a1.5 1.5 0 0 1 3 0v6.5"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v8a6.5 6.5 0 0 1-6.5 6.5h-.8a6 6 0 0 1-4.6-2.2L3.6 15a1.6 1.6 0 0 1 2.4-2.1L9 15V8a1.5 1.5 0 0 1 3 0"/>',
   };
   const svg = (k, style = '') => `<svg class="i" viewBox="0 0 24 24"${style ? ` style="${style}"` : ''}>${ICON[k]}</svg>`;
@@ -1083,23 +1113,80 @@ const MultGame = (() => {
     for (const t of tables) for (let m = 1; m <= n; m++) items.push({ a:t, b:m });
     return type === 'show' ? items : shuffle(items, r);
   }
-  function buildRounds(cfg, n, r = Math.random){
-    const tables = cleanTables(cfg && cfg.tables);
-    return roundTypes(cfg && cfg.counts).map(type => ({ type, items:roundItems(type, tables, n, r) }));
+  /* Paren i ett pass med parlista (De svåra talen): a ≤ b, 1–12, utan dubbletter, ordnade efter a och b */
+  function cleanPairs(pairs){
+    const seen = new Set(), out = [];
+    for (const p of Array.isArray(pairs) ? pairs : []){
+      if (!Array.isArray(p)) continue;
+      const a = Math.min(Number(p[0]), Number(p[1])), b = Math.max(Number(p[0]), Number(p[1]));
+      if (!Number.isInteger(a) || !Number.isInteger(b) || a < 1 || b > 12 || seen.has(KEY(a, b))) continue;
+      seen.add(KEY(a, b)); out.push([a, b]);
+    }
+    return out.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
   }
+  /* Frågorna i ett varv med parlista: varje par en gång, ordningen a × b eller b × a lottas per fråga.
+     Se svaret först: ordnade efter a och sedan b (som frågorna står), så att de läses tabellvis.
+     Övriga varv: blandat. */
+  function pairItems(type, pairs, r = Math.random){
+    const items = cleanPairs(pairs).map(([a, b]) => r() < 0.5 ? { a, b } : { a:b, b:a });
+    return type === 'show' ? items.sort((p, q) => p.a - q.a || p.b - q.b) : shuffle(items, r);
+  }
+  function buildRounds(cfg, n, r = Math.random){
+    const types = roundTypes(cfg && cfg.counts);
+    if (cfg && cfg.pairs) return types.map(type => ({ type, items:pairItems(type, cfg.pairs, r) }));
+    const tables = cleanTables(cfg && cfg.tables);
+    return types.map(type => ({ type, items:roundItems(type, tables, n, r) }));
+  }
+  /* cfg = { tables, counts } (tabeller × gånger 1–n) eller { pairs, counts, hard } (en parlista, n gäller inte) */
   function passPlan(cfg, n){
-    const tables = cleanTables(cfg && cfg.tables), types = roundTypes(cfg && cfg.counts);
-    const perRound = tables.length * n;
+    const types = roundTypes(cfg && cfg.counts);
+    const pairs = cfg && cfg.pairs ? cleanPairs(cfg.pairs) : null;
+    const tables = pairs ? [] : cleanTables(cfg && cfg.tables);
+    const perRound = pairs ? pairs.length : tables.length * n;
     const secs = types.reduce((s, t) => s + EST_S[t] * perRound, 0);
-    return { tables, types, rounds:types.length, questions:perRound * types.length, minutes:secs ? Math.max(1, Math.round(secs / 60)) : 0 };
+    return { tables, pairs, types, rounds:types.length, perRound, questions:perRound * types.length, minutes:secs ? Math.max(1, Math.round(secs / 60)) : 0 };
   }
   const varvTxt = n => `${cap(talord(n))} varv`;
   const minTxt = m => m === 1 ? 'en minut' : `${m} minuter`;
   function planSummary(pl){
-    if (!pl.tables.length) return 'Välj minst en tabell.';
+    if (!pl.perRound) return pl.pairs ? 'Välj minst ett tal.' : 'Välj minst en tabell.';
     if (!pl.rounds) return 'Välj minst ett varv.';
-    return `${varvTxt(pl.rounds)} · ${pl.questions} frågor · ungefär ${minTxt(pl.minutes)}`;
+    return `${varvTxt(pl.rounds)} · ${pl.questions} ${pl.questions === 1 ? 'fråga' : 'frågor'} · ungefär ${minTxt(pl.minutes)}`;
   }
+
+  /* ═══════════════════════════════════════════════════════════
+     DE SVÅRA TALEN (v62): paren a × b med a ≤ b och a, b i {3, 4, 6, 7, 8, 9}.
+     Det är de 21 rutor som lektionen "Tabellen är mindre än du tror" lämnar kvar
+     (1, 2, 5, 10, 11 och 12 har en genväg, tvillingarna räknas en gång).
+     Mängden är densamma oavsett Gånger. Rena funktioner.
+  ═══════════════════════════════════════════════════════════ */
+  const HARD_T = [3, 4, 6, 7, 8, 9];
+  function hardPairs(){ const out = []; for (const a of HARD_T) for (const b of HARD_T) if (a <= b) out.push([a, b]); return out; }
+  /* Lådorna för de svåra talen. Dags igen räknas som Kan (som i medaljerna). weak = de som inte är Kan än. */
+  function hardInfo(pairs, day = today()){
+    const c = { kan:0, due:0, ovar:0, ny:0 }, weak = [], all = hardPairs();
+    for (const [a, b] of all){
+      const st = pairs && pairs[KEY(a, b)], v = st ? vis(st, day) : 'ny';
+      c[v]++;
+      if (v !== 'kan' && v !== 'due') weak.push([a, b]);
+    }
+    const kan = c.kan + c.due;
+    return { total:all.length, kan, counts:c, weak, share:kan / all.length };
+  }
+  /* Standardvalet: "Bara de du inte kan än" när minst fem återstår, annars "Alla 21" */
+  const hardDefault = weakN => weakN >= 5 ? 'weak' : 'all';
+  function hardSelection(pairs, mode, day = today()){
+    const w = hardInfo(pairs, day).weak;
+    return mode === 'weak' && w.length ? w : hardPairs();
+  }
+  /* Passet för De svåra talen: parlistan och de sparade varven (samma varv som snabbvalen) */
+  function hardCfg(pairs, mode, saved, day = today()){ return { pairs:hardSelection(pairs, mode, day), counts:countsFrom(saved), hard:true }; }
+  /* "Du kan N av M". Alla kan: "Du kan alla M" – samma tal får inte stå för två saker i en mening. */
+  const kanTxt = (k, total, unit = '') => k >= total ? `Du kan alla ${total}${unit}` : `Du kan ${k} av ${total}${unit}`;
+  const HARD_WHY = 'De här 21 talen har ingen enkel genväg. Här tränar du bara dem.';
+  const HARD_ALL_OK = 'Snyggt! Du kan alla de svåra talen. Öva dem ibland, så sitter de kvar.';
+  const hardWeakLabel = n => `Bara de du inte kan än (${n})`;
+  const hardWhat = e => { const k = (e.pairs || []).length; return !k || k >= hardPairs().length ? 'De svåra talen' : `${k} av de svåra talen`; };
 
   /* NÖTLOOPEN i ett varv.
      - Varje fråga ställs en gång.
@@ -1292,11 +1379,11 @@ const MultGame = (() => {
   }
   function refresh(){
     if (!$('app')) return;
-    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec, setup:refreshSetup, pass:refreshPass, done:() => {}, tstart:() => {} })[S.screen]();
+    ({ hub:refreshHub, learn:refreshLearn, prac:refreshPrac, end:refreshEnd, rec:refreshRec, setup:refreshSetup, pass:refreshPass, done:() => {}, tstart:() => {}, hstart:() => {} })[S.screen]();
   }
   function btn(el, label, icon, after = true){ el.innerHTML = after ? `${label} ${icon ? svg(icon) : ''}` : `${icon ? svg(icon) : ''} ${label}`; }
   const TITLES = { hub:'Gångertabellen', learn:'Lär dig strategin', prac:'Öva blandat', end:'Passet klart', rec:'Rekordrunda',
-                   setup:'Ställ in passet', pass:'Övningspass', done:'Övningspass', tstart:'Träna en tabell' };
+                   setup:'Ställ in passet', pass:'Övningspass', done:'Övningspass', tstart:'Träna en tabell', hstart:'De svåra talen' };
   function goto(name, arg){
     if (S.screen === 'rec') stopClock();
     if (S.screen === 'pass' && name !== 'pass' && PS) PS.token++;   // väntande steg i passet får inte köra vidare
@@ -1308,7 +1395,7 @@ const MultGame = (() => {
     $('cap').classList.toggle('on', name === 'prac');
     $('backBtn').textContent = name === 'pass' ? 'Avbryt' : 'Tillbaka';
     $('gear').style.visibility = (name === 'pass' || name === 'done') ? 'hidden' : '';
-    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec, setup:enterSetup, pass:enterPass, done:enterDone, tstart:enterTStart })[name](arg);
+    ({ hub:enterHub, learn:enterLearn, prac:enterPrac, end:enterEnd, rec:enterRec, setup:enterSetup, pass:enterPass, done:enterDone, tstart:enterTStart, hstart:enterHStart })[name](arg);
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -1369,7 +1456,7 @@ const MultGame = (() => {
   }
   const medalWrap = m => `${medalSVG(m.medal)}${m.due ? '<i class="mdue"></i>' : ''}`;
   function tableBtnHTML(m){
-    const lbl = `${m.t}:ans tabell. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. Du kan ${m.kan} av ${m.total} tal.${m.due ? ' Några tal behöver fyllas på.' : ''}`;
+    const lbl = `${m.t}:ans tabell. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. ${kanTxt(m.kan, m.total, ' tal')}.${m.due ? ' Några tal behöver fyllas på.' : ''}`;
     return `<button class="tb" data-t="${m.t}" aria-label="${lbl}"><span class="tb-top"><b>${m.t}</b><span class="tb-md">${medalWrap(m)}</span></span>` +
       `<span class="tb-bar"><i style="width:${Math.round(m.share * 100)}%"></i></span></button>`;
   }
@@ -1386,6 +1473,7 @@ const MultGame = (() => {
   function renderHub(){
     const n = UPTO(), V = curVis(), c = counts(V);
     hubMap.paint(V);
+    $('scr-hub').classList.toggle('tight', n > 10);        // 11–12: Extra-raden tar plats, inget får scrolla
     $('hubHead').innerHTML = countHTML(leftToLearn(V));
     $('hubLegend').innerHTML = legendHTML(c);
     $('hubRefill').innerHTML = refillHTML(c.due);
@@ -1395,6 +1483,11 @@ const MultGame = (() => {
     $('hubTables').innerHTML = q.main.map(t => tableBtnHTML(med(t))).join('');
     $('hubXTables').innerHTML = q.extra.map(t => tableBtnHTML(med(t))).join('');
     $('hubExtra').style.display = q.extra.length ? '' : 'none';
+    // De svåra talen: samma 21 par oavsett Gånger
+    const hi = hardInfo(S.T.pairs);
+    $('hubHardTxt').textContent = kanTxt(hi.kan, hi.total);
+    $('hubHardBar').style.width = `${Math.round(hi.share * 100)}%`;
+    $('hubHard').setAttribute('aria-label', `De svåra talen. ${kanTxt(hi.kan, hi.total)}.`);
     // Varvraden: varven som snabbvalen kör
     const types = roundTypes(countsFrom(loadOvp()));
     $('vrTxt').textContent = varvTxt(types.length);
@@ -1429,7 +1522,7 @@ const MultGame = (() => {
     TS.cfg = quickPassCfg(t, loadOvp());
     $('tsMd').innerHTML = medalWrap(m);
     $('tsTitle').textContent = `${t}:ans tabell`;
-    $('tsKan').textContent = `Du kan ${m.kan} av ${m.total} tal.`;
+    $('tsKan').textContent = `${kanTxt(m.kan, m.total, ' tal')}.`;
     $('tsBar').style.width = `${Math.round(m.share * 100)}%`;
     const rows = [
       ['guld', `<b>Guld:</b> du kan alla tal i ${t}:ans tabell`],
@@ -1452,6 +1545,69 @@ const MultGame = (() => {
     if (!cfg.tables.length || !roundTypes(cfg.counts).length) return;
     snd('click');
     goto('pass', cfg);                                   // samma pass som passinställningen startar
+  }
+
+  /* ── Startskärmen för De svåra talen (v62): samma delar som tabellens startskärm ── */
+  let HS = null;
+  /* Liten karta 6 × 6 över 3, 4, 6, 7, 8, 9. Varje par färgas efter Miras låda på en plats:
+     på och under diagonalen, samma triangel som lektionen lämnar kvar. Spegelrutan ovanför är tom. */
+  function makeHardMap(el, cell = 24){
+    el.innerHTML = '';
+    el.style.gridTemplateColumns = `repeat(${HARD_T.length + 1},${cell}px)`;
+    el.style.gridAutoRows = `${cell}px`;
+    const mk = (cls, txt = '') => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; el.append(d); return d; };
+    mk('mh x', '×');
+    HARD_T.forEach(t => mk('mh', t));
+    const cells = [];
+    for (const a of HARD_T){
+      mk('mh', a);
+      for (const b of HARD_T){ const d = mk('mc'); d.dataset.a = a; d.dataset.b = b; cells.push({ el:d, a, b }); }
+    }
+    return {
+      paint(pairs){
+        for (const { el:c, a, b } of cells){
+          const st = pairs[KEY(a, b)];
+          c.className = b > a ? 'mc mirror' : `mc ${st ? vis(st) : 'ny'}`;
+        }
+      },
+    };
+  }
+  let hardMap = null;
+  function enterHStart(){
+    reloadT();
+    HS = { mode:hardDefault(hardInfo(S.T.pairs).weak.length) };
+    if (!hardMap) hardMap = makeHardMap($('hsMap'));
+    renderHStart();
+  }
+  function renderHStart(){
+    if (!HS) return;
+    const info = hardInfo(S.T.pairs), weakN = info.weak.length;
+    if (!weakN) HS.mode = 'all';
+    const cfg = hardCfg(S.T.pairs, HS.mode, loadOvp());
+    $('hsKan').textContent = `${kanTxt(info.kan, info.total, ' tal')}.`;
+    $('hsBar').style.width = `${Math.round(info.share * 100)}%`;
+    hardMap.paint(S.T.pairs);
+    $('hsLegend').innerHTML = legendHTML(info.counts);
+    const pick = $('hsPick');
+    pick.querySelector('[data-v="weak"]').textContent = hardWeakLabel(weakN);
+    pick.querySelector('[data-v="weak"]').style.display = weakN ? '' : 'none';
+    pick.classList.toggle('one', !weakN);
+    pick.querySelectorAll('button').forEach(b => { const on = b.dataset.v === HS.mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    $('hsPraise').textContent = weakN ? '' : HARD_ALL_OK;
+    $('hsPraise').style.display = weakN ? 'none' : '';
+    const pl = passPlan(cfg, UPTO());
+    $('hsRounds').classList.toggle('two', pl.types.length > 1);
+    $('hsRounds').innerHTML = pl.types.map((ty, k) => `<span class="ts-r"><em>${k + 1}.</em><i class="ri ri-${ty}">${svg(RICON[ty])}</i>${RNAME[ty]}</span>`).join('');
+    $('hsSum').textContent = planSummary(pl);
+    btn($('hsGo'), 'Starta', 'play', false);
+    $('hsEdit').textContent = 'Ändra varv';
+  }
+  function startHStart(){
+    if (busy || !HS) return;
+    const cfg = hardCfg(S.T.pairs, HS.mode, loadOvp());
+    if (!cfg.pairs.length || !roundTypes(cfg.counts).length) return;
+    snd('click');
+    goto('pass', cfg);                                   // samma pass och nötloop, med en parlista
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -1477,15 +1633,18 @@ const MultGame = (() => {
   }
   /* Rutorna kvar efter varje steg (samma regler som animationen: strukna rader och
      kolumner försvinner, tvillingarna ovanför diagonalen flyger till sin spegelbild). */
-  function shrinkRemain(n = 12){
+  function shrinkTrace(n = 12){
     let live = [];
     for (let a = 1; a <= n; a++) for (let b = 1; b <= n; b++) live.push([a, b]);
     return shrinkSteps(n).map(st => {
       if (st.rm) live = live.filter(([a, b]) => !st.rm.includes(a) && !st.rm.includes(b));
       if (st.act === 'twins') live = live.filter(([a, b]) => b <= a);
-      return live.length;
+      return live;
     });
   }
+  const shrinkRemain = (n = 12) => shrinkTrace(n).map(l => l.length);
+  /* Rutorna som finns kvar i lektionens slutsteg – samma mängd som De svåra talen */
+  const shrinkLive = (n = 12) => shrinkTrace(n).slice(-1)[0];
   const LS = { on:false, i:-1, steps:shrinkSteps(10) };
   let lessonMap = null;
   const LESSON_CELL = { 10:26, 11:24, 12:22 };
@@ -1562,8 +1721,13 @@ const MultGame = (() => {
     $('learnTabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', !LS.on && +x.dataset.t === S.learn.a));
     if (LS.on){
       const last = LS.i >= LS.steps.length - 1;
-      btn($('lessonMain'), last ? 'Igen' : 'Nästa steg', last ? 'again' : 'next');
+      btn($('lessonMain'), 'Nästa steg', 'next');
       $('lessonMain').disabled = busy;
+      // Slutsteget: "Kvar blir 21 svåra rutor. Dem övar vi på." → Träna de svåra
+      $('lessonSlot').classList.toggle('duoing', last);
+      btn($('lessonAgain'), 'Igen', 'again', false);
+      btn($('lessonHard'), 'Träna de svåra', 'next');
+      $('lessonAgain').disabled = busy; $('lessonHard').disabled = busy;
       return;
     }
     const W = LW; if (!W) return;
@@ -2047,10 +2211,16 @@ const MultGame = (() => {
   function quickPassCfg(table, saved){ return { tables:cleanTables([table]), counts:countsFrom(saved) }; }
 
   /* ── Ställ in ett övningspass ── */
-  function enterSetup(table){
+  /* arg: ett tabellnummer (från tabellens startskärm), { from:'hstart' } (från De svåra talen)
+     eller inget (varvraden på hemvyn). Tillbaka leder dit man kom ifrån. Från De svåra talen
+     visas bara varven och knappen heter Klar — annars startade den ett tabellpass. */
+  function enterSetup(arg){
+    const table = typeof arg === 'number' ? arg : null;
+    const from = table ? 'tstart' : (arg && arg.from) || null;
     const saved = loadOvp();
     const tables = table ? [table] : saved ? cleanTables(saved.tables) : [];
-    SU = { tables, counts:countsFrom(saved) };
+    SU = { tables, counts:countsFrom(saved), from, fromT:table };
+    $('scr-setup').classList.toggle('varv-only', from === 'hstart');
     renderSetup();
   }
   function renderSetup(){
@@ -2073,15 +2243,17 @@ const MultGame = (() => {
     });
     const pl = passPlan(SU, n);
     $('suSum').textContent = planSummary(pl);
-    $('suGo').disabled = !pl.tables.length || !pl.rounds;
-    btn($('suGo'), 'Starta passet', 'play', false);
+    const varvOnly = SU.from === 'hstart';
+    $('suGo').disabled = !pl.rounds || (!varvOnly && !pl.tables.length);
+    if (varvOnly) btn($('suGo'), 'Klar', 'check', false); else btn($('suGo'), 'Starta passet', 'play', false);
     // Varven styr alla snabbval: spara direkt vid varje ändring, inte först vid start,
     // annars försvinner ändringen när barnet trycker Tillbaka.
-    if (pl.tables.length && pl.rounds) saveOvp({ tables:pl.tables, counts:SU.counts });
+    if (pl.rounds && (pl.tables.length || varvOnly)) saveOvp({ tables:SU.tables, counts:SU.counts });
   }
   function refreshSetup(){}
   function startFromSetup(){
     if (!SU) return;
+    if (SU.from === 'hstart'){ snd('click'); goto('hstart'); return; }   // varven är redan sparade
     const pl = passPlan(SU, UPTO());
     if (!pl.tables.length || !pl.rounds) return;
     saveOvp({ tables:pl.tables, counts:SU.counts });
@@ -2096,10 +2268,10 @@ const MultGame = (() => {
   function enterPass(cfg){
     cfg = cfg || usableOvp();
     if (!cfg){ goto('setup'); return; }
-    const n = UPTO();
-    PS = { cfg, upto:n, tables:cleanTables(cfg.tables), rounds:buildRounds(cfg, n), ri:0, drill:null, phase:'q', res:[],
+    const n = UPTO(), pairs = cfg.pairs ? cleanPairs(cfg.pairs) : null;
+    PS = { cfg, upto:n, pairs, hard:!!pairs, tables:pairs ? [] : cleanTables(cfg.tables), rounds:buildRounds(cfg, n), ri:0, drill:null, phase:'q', res:[],
            start:Date.now(), token:(PS ? PS.token : 0) + 1, W:null, justFixed:false };
-    if (!PS.rounds.length || !PS.tables.length){ goto('setup'); return; }
+    if (!PS.rounds.length || !(pairs ? pairs.length : PS.tables.length)){ goto(pairs ? 'hstart' : 'setup'); return; }
     startRound(0);
   }
   function startRound(i){
@@ -2254,6 +2426,7 @@ const MultGame = (() => {
   function finishOvp(){
     const R0 = receiptFor(PS.res, Date.now() - PS.start);
     const entry = { type:'ovningspass', tables:PS.tables, upto:PS.upto, rounds:R0.rounds, correct:R0.correct, total:R0.total, pct:R0.pct, fixed:R0.fixed, secs:R0.secs };
+    if (PS.hard){ entry.hard = true; entry.pairs = PS.pairs.map(([a, b]) => KEY(a, b)); }
     addSessionLog(entry);
     const saved = getLog()[0];
     PS.logId = saved && saved.type === 'ovningspass' ? saved.id : null;
@@ -2262,7 +2435,7 @@ const MultGame = (() => {
     snd('fanfare');
     confetti(R0.pct >= 90 ? 110 : 70);
     // Capybara-samlingen: ren sidoeffekt EFTER loggen – får aldrig kasta
-    try { if (window.Capy) Capy.award(profile, { type:'ovningspass', data:{ module:'mult', pct:R0.pct, tables:PS.tables, rounds:R0.rounds.length } }); } catch (_) {}
+    try { if (window.Capy) Capy.award(profile, { type:'ovningspass', data:{ module:'mult', pct:R0.pct, tables:PS.tables, rounds:R0.rounds.length, hard:PS.hard } }); } catch (_) {}
   }
 
   /* ── Du är klar! – kvittot till en vuxen ── */
@@ -2271,8 +2444,9 @@ const MultGame = (() => {
   function receiptHTML(e){
     return `
       <div class="rc-top"><span class="rc-k">${svg('repeat')}Övningspass</span><span class="rc-when">${cap(fmtWhen(e.date))}</span></div>
-      <div class="rc-row"><span>Tabeller</span><b>${e.tables.map(t => `${t}:an`).join(', ')}</b></div>
-      <div class="rc-row"><span>Gånger</span><b>1–${e.upto}</b></div>
+      ${e.hard ? `<div class="rc-row"><span>Tal</span><b>${hardWhat(e)}</b></div>`
+        : `<div class="rc-row"><span>Tabeller</span><b>${e.tables.map(t => `${t}:an`).join(', ')}</b></div>
+      <div class="rc-row"><span>Gånger</span><b>1–${e.upto}</b></div>`}
       <div class="rc-rounds">${e.rounds.map((t, k) => `<span class="rv">${svg('check')}<em>${k + 1}.</em> ${RNAME[t]}</span>`).join('')}</div>
       <div class="rc-row"><span>Rätt på första försöket</span><b>${e.correct} av ${e.total}</b></div>
       <div class="rc-row"><span>Fel som rättades</span><b>${e.fixed}</b></div>
@@ -2352,6 +2526,7 @@ const MultGame = (() => {
       if (S.screen === 'hub') renderHub();
       else if (S.screen === 'end') goto('hub');
       else if (S.screen === 'tstart') enterTStart(TS && TS.t);
+      else if (S.screen === 'hstart') renderHStart();
       else if (S.screen === 'setup') renderSetup();
       else if (S.screen === 'learn') startLearn();
       else if (S.screen === 'rec') enterRec();
@@ -2394,6 +2569,11 @@ const MultGame = (() => {
               <div class="tbtns" id="mt-hubTables"></div>
               <div class="tx" id="mt-hubExtra"><span class="xlab">Extra</span><div class="tbtns xchips" id="mt-hubXTables"></div></div>
             </div>
+            <button class="card hardrow" id="mt-hubHard">
+              <span class="hr-ic">${svg('target')}</span>
+              <span class="hr-t"><b>De svåra talen</b><span class="hr-k"><span id="mt-hubHardTxt"></span><span class="tb-bar"><i id="mt-hubHardBar"></i></span></span></span>
+              <span class="hr-go">${svg('fwd')}</span>
+            </button>
             <div class="card varvrow">
               <span class="vr-t"><small>Varje pass</small><b id="mt-vrTxt"></b></span>
               <span class="pc-rs" id="mt-vrIcons"></span>
@@ -2424,6 +2604,30 @@ const MultGame = (() => {
             <div class="grow"></div>
             <button class="btn btn-primary ts-go" id="mt-tsGo"></button>
             <button class="btn btn-sec ts-edit" id="mt-tsEdit"></button>
+          </section>
+
+          <section class="gscr" id="mt-scr-hstart">
+            <div class="card ts-head">
+              <span class="ts-md hs-ic">${svg('target')}</span>
+              <div class="ts-t"><b>De svåra talen</b><span id="mt-hsKan"></span><span class="tb-bar"><i id="mt-hsBar"></i></span></div>
+            </div>
+            <div class="card hs-mapcard">
+              <div class="map hs-map" id="mt-hsMap"></div>
+              <div class="hs-side">
+                <p class="hs-why">${HARD_WHY}</p>
+                <div class="mlegend" id="mt-hsLegend"></div>
+              </div>
+            </div>
+            <div class="gsh-tg hs-pick" id="mt-hsPick"><button data-v="all">Alla 21</button><button data-v="weak"></button></div>
+            <p class="hs-praise" id="mt-hsPraise"></p>
+            <div class="card ts-rounds">
+              <div class="su-lab"><b>Varv</b></div>
+              <div class="ts-rlist" id="mt-hsRounds"></div>
+              <div class="ts-sum" id="mt-hsSum"></div>
+            </div>
+            <div class="grow"></div>
+            <button class="btn btn-primary ts-go" id="mt-hsGo"></button>
+            <button class="btn btn-sec ts-edit" id="mt-hsEdit"></button>
           </section>
 
           <section class="gscr" id="mt-scr-setup">
@@ -2486,7 +2690,7 @@ const MultGame = (() => {
             <button class="btn btn-sec strat-only" id="mt-learnFlip" style="min-height:44px"></button>
             <div class="card lessoncard lesson-only"><div class="map" id="mt-lessonMap"></div><div class="legend" id="mt-lessonCount"></div></div>
             <div class="bubble b92 lesson-only"><div class="thought" id="mt-lessonBubble"></div></div>
-            <div class="slot lesson-only"><button class="btn btn-primary" id="mt-lessonMain"></button></div>
+            <div class="slot lesson-only" id="mt-lessonSlot"><button class="btn btn-primary" id="mt-lessonMain"></button><div class="duo"><button class="btn btn-sec" id="mt-lessonAgain"></button><button class="btn btn-primary" id="mt-lessonHard"></button></div></div>
           </section>
 
           <section class="gscr" id="mt-scr-prac">
@@ -2539,6 +2743,8 @@ const MultGame = (() => {
   function bindTrainer(){
     $('backBtn').onclick = () => {
       if (S.screen === 'pass'){ confirmCancelPass(); return; }
+      if (S.screen === 'setup' && SU && SU.from === 'hstart'){ goto('hstart'); return; }
+      if (S.screen === 'setup' && SU && SU.from === 'tstart' && SU.fromT){ goto('tstart', SU.fromT); return; }
       if (S.screen !== 'hub') goto('hub');
       else { stopClock(); App.goBackToGameSelect(); }
     };
@@ -2553,6 +2759,10 @@ const MultGame = (() => {
       snd('click'); goto('tstart', +b.dataset.t);
     };
     $('vrEdit').onclick = () => { if (!busy) goto('setup'); };
+    $('hubHard').onclick = () => { if (!busy){ snd('click'); goto('hstart'); } };
+    $('hsPick').querySelectorAll('button').forEach(b => b.onclick = () => { if (!HS || busy || HS.mode === b.dataset.v) return; HS.mode = b.dataset.v; snd('click'); renderHStart(); });
+    $('hsGo').onclick = startHStart;
+    $('hsEdit').onclick = () => { if (!busy) goto('setup', { from:'hstart' }); };
     $('tsGo').onclick = startTStart;
     $('tsEdit').onclick = () => { if (!busy && TS) goto('setup', TS.t); };
     $('goLearn').onclick = () => { if (!busy) goto('learn'); };
@@ -2588,6 +2798,8 @@ const MultGame = (() => {
     $('learnTabs').querySelectorAll('button').forEach(b => b.onclick = () => { if (busy) return; LS.on = false; S.learn.a = +b.dataset.t; startLearn(); });
     $('learnChap').onclick = () => { if (!busy){ snd('click'); startLesson(); } };
     $('lessonMain').onclick = onLessonMain;
+    $('lessonAgain').onclick = () => { if (!busy && LS.on) startLesson(); };
+    $('lessonHard').onclick = () => { if (!busy){ snd('click'); goto('hstart'); } };
     $('bPrev').onclick = () => { if (busy || S.learn.b <= 1) return; S.learn.b--; startLearn(); };
     $('bNext').onclick = () => { if (busy || S.learn.b >= UPTO()) return; S.learn.b++; startLearn(); };
     $('learnMain').onclick = onLearnMain;
@@ -2613,7 +2825,7 @@ const MultGame = (() => {
     const root = document.getElementById('mult-root');
     if (!root) return;
     root.innerHTML = trainerHTML();
-    busy = false; P = null; R = null; LW = null; PS = null; SU = null; TS = null; LS.on = false; LS.i = -1;
+    busy = false; P = null; R = null; LW = null; PS = null; SU = null; TS = null; HS = null; hardMap = null; LS.on = false; LS.i = -1;
     S.screen = 'hub';
     S.T = loadTrainer();
     S.record = loadRecord();
@@ -2628,11 +2840,11 @@ const MultGame = (() => {
     goto('hub');
   }
   function closeModalSafe(){ try { hideModal(); } catch (_) {} }
-  /* Kartornas storlek följer Gånger: hubbens kompakta rutor 18/16/15 px, slutbildens 28/26/24 px.
+  /* Kartornas storlek följer Gånger: hubbens kompakta rutor 18/14/13 px, slutbildens 28/26/24 px.
      Lektionens karta byggs när lektionen startar (LESSON_CELL). */
   function buildMaps(){
     const n = UPTO();
-    hubMap = makeMap($('hubMap'), n, { 10:18, 11:16, 12:15 }[n]);
+    hubMap = makeMap($('hubMap'), n, { 10:18, 11:14, 12:13 }[n]);   // v62: 11–12 mindre, så att De svåra talen får plats
     endMap = makeMap($('endMap'), n, { 10:28, 11:26, 12:24 }[n]);
   }
 
@@ -2854,6 +3066,7 @@ const MultGame = (() => {
   function logLabel(e, long) {
     if (e.type === 'pass') return 'Öva blandat';
     if (e.type === 'record') return 'Rekordrunda';
+    if (e.type === 'ovningspass' && e.hard) return 'De svåra talen';
     if (e.type === 'ovningspass') return `Övningspass (${(e.tables || []).map(t => `${t}:an`).join(long ? ', ' : ',')})`;
     if (e.type === 'focus') return 'Fokuserad träning';
     if (e.type === 'timer') return 'Timerträning';
@@ -3188,6 +3401,8 @@ const MultGame = (() => {
       applyAnswer, freshPair, vis, visMap, counts, leftToLearn, fullTables, pairsFromStats, addDays, intervalFor, INTERVALS,
       buildPass, schedulePass, easyFirst, orient, pairsUpTo, shrinkSteps, shrinkRemain,
       tableMedal, MEDALS, quickTables, quickPassCfg, countsFrom, medalSVG, trainerHTML,
+      hardPairs, hardInfo, hardDefault, hardSelection, hardCfg, kanTxt, cleanPairs, pairItems, shrinkLive,
+      HARD_WHY, HARD_ALL_OK, hardWeakLabel, hardWhat, receiptHTML, logLabel, logSub,
       RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary,
       createDrill, receiptFor, praiseFor, durTxt, passExplainFor, settingsFrom, UPTO_DEFAULT, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
       setToday: d => { todayOverride = d || null; },

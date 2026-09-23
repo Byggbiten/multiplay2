@@ -54,6 +54,13 @@ Gångertabellens huvudvy (v60) visar, uppifrån, allt utan att scrolla:
   **brons** när alla tal har övats, **silver** när minst hälften är Kan, **guld** när alla är Kan (Dags igen räknas som Kan).
   En blek prick vid medaljen betyder att något av tabellens tal är dags att fylla på.
   Ett tryck öppnar tabellens **startskärm** (medaljerna förklarade, en rad per varv) med **Starta** och **Ändra varv**: två tryck till första frågan.
+- **De svåra talen** (v62) – ett kort under Träna en tabell med "Du kan N av 21" och en tunn Kan-stapel (Dags igen räknas som Kan).
+  Det är de 21 par som lektionen *Tabellen är mindre än du tror* lämnar kvar: a × b med a och b bland 3, 4, 6, 7, 8 och 9
+  (samma 21 oavsett Gånger). Ett tryck öppnar startskärmen: en 6 × 6-karta i lådornas färger (varje par på en plats, spegelrutan tom),
+  valet **Alla 21** eller **Bara de du inte kan än (N)** (standard när N är 5 eller fler; när alla sitter visas bara Alla 21 och en rad beröm),
+  varven och **Starta**/**Ändra varv**. Passet är det vanliga övningspasset med nötloopen: varje valt par en gång per varv, a × b eller b × a
+  lottas per fråga, blandad ordning utom i Se svaret först (ordnat efter första och andra talet). Kvittot och loggen säger "De svåra talen".
+  På 11 och 12 är kartan något mindre, så att hela hemvyn fortfarande syns utan att scrolla.
 - **Varvraden** – "Varje pass: fyra varv" med varvens ikoner. **Ändra** öppnar passinställningen, där man också kan välja flera tabeller och starta ett blandat pass.
 - Tre mindre ingångar: **Öva blandat**, **Lär dig strategin** och **Rekordrunda**.
 - Längst ner: **Statistik** och **Logg**. Kugghjulet uppe till höger öppnar **inställningarna**.
@@ -72,11 +79,12 @@ Tanken är att nöta, inte att sätta prov: "kör den här tabellen fyra varv, s
 - Mellan varven visas en kort mellanskärm. **Avbryt** frågar först; ett avbrutet pass sparas inte.
 - **Du är klar!** visar ett kvitto för en vuxen: datum och tid, tabeller och gånger, varven, rätt på första försöket,
   fel som rättades och tid. En vuxen **håller inne** "Sett av en vuxen" i 1,5 sekund – då stämplas kvittot och stämpeln syns i loggen.
-- Första avklarade övningspasset per dag ger ett vanligt Capybara-kort.
+- Första avklarade övningspasset per dag ger ett vanligt Capybara-kort (skälet för De svåra talen: "Övningspass med de svåra talen, fyra varv").
 
 ### Lär dig strategin
 Första valet är lektionen **Tabellen är mindre än du tror** (förr *Så krymper tabellen* på huvudvyn): på en egen karta med neutrala rutor
-stryks 1:an, 10:an, 2:an och 5:an (och 11:an/12:an), sedan tvillingarna – kvar blir de svåra rutorna. Följer *Tabeller och gånger*.
+stryks 1:an, 10:an, 2:an och 5:an (och 11:an/12:an), sedan tvillingarna – kvar blir de 21 svåra rutorna. Följer *Tabeller och gånger*.
+I slutsteget leder **Träna de svåra** till startskärmen för De svåra talen (v62).
 Välj annars tabell (2:an, 4:an … 9:an) och tal med pilarna. En prickrektangel visar talet
 (a × b = a rader med b prickar i varje) och en strategi steg för steg, ett klick per steg.
 När strategin är klar kan rektangeln vändas ett kvarts varv: samma prickar, samma svar.
