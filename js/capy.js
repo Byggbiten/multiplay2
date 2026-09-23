@@ -466,6 +466,7 @@ const Capy = (() => {
       lastDaily: '',                  // dubblettskydd: 1 daily-event/dag
       lastOvningspass: '',            // första övningspasset per dag ger ett vanligt kort
       tables: {},                     // hela tabeller i Kan: { '7': 'YYYY-MM-DD' } (engångs per tabell)
+      clockSteps: {},                 // v63: klockans steg med guld: { halv: 'YYYY-MM-DD' } (engångs per steg)
       allDoneShown: false,            // (≤ v58: alla 24 vanliga) – läses inte längre
       allGoldShown: false,            // v59: varm grattis-text när alla 24 är guld
       pending: [],                    // kö av intjänade dragningar: [{ spec, reason }]
@@ -487,6 +488,7 @@ const Capy = (() => {
     // Robust mot äldre/trasig state – fyll i saknade fält
     Object.keys(def).forEach(k => { if (st[k] === undefined) st[k] = def[k]; });
     if (!st.tables || typeof st.tables !== 'object') st.tables = {};
+    if (!st.clockSteps || typeof st.clockSteps !== 'object') st.clockSteps = {};
     st.pending = (Array.isArray(st.pending) ? st.pending : []).map(normPending).filter(Boolean);
     return st;
   }
@@ -599,10 +601,18 @@ const Capy = (() => {
         const r = Number(d.rounds);
         const varv = r > 0 ? `${talord(r)} varv` : '';
         if (d.hard) return varv ? `Övningspass med de svåra talen, ${varv}` : 'Övningspass med de svåra talen';
+        // v63: Klockans trappa – "Övningspass på klockan: Halv, fyra varv". Namn med komma får varven inom parentes.
+        if (d.module === 'clock') {
+          const n = typeof d.stepName === 'string' && d.stepName ? d.stepName : '';
+          if (!n) return varv ? `Övningspass på klockan, ${varv}` : 'Övningspass på klockan';
+          if (!varv) return `Övningspass på klockan: ${n}`;
+          return n.includes(',') ? `Övningspass på klockan: ${n} (${varv})` : `Övningspass på klockan: ${n}, ${varv}`;
+        }
         if (!tp) return varv ? `Dagens första övningspass, ${varv}` : 'Dagens första övningspass';
         return varv ? `Övningspass i ${tp}, ${varv}` : `Övningspass i ${tp}`;
       }
       case 'tabell':  return `Du kan hela ${d.table}:ans tabell`;
+      case 'klocksteg': return `Du kan klockans steg ${d.name}`;
       default:        return null;
     }
   }
@@ -613,6 +623,7 @@ const Capy = (() => {
        ovningspass: { module, pct, tables:[7], rounds:4, hard? }   (Gångertabellens övningspass; hard = De svåra talen)
        daily:       { pct, streak }
        tabell:      { table }   (v59: alla t×1 … t×N i lådan Kan, en gång per tabell)
+       klocksteg:   { step, name }   (v63: ett av klockans steg har guld, en gång per steg)
      milestones() är ren: uppdaterar st (räknare + pending-kön) för
      dagen `day` (YYYY-MM-DD). Varje köpost bär sitt skäl: { spec, reason }.
      award() nedan drar kortet.
@@ -688,6 +699,13 @@ const Capy = (() => {
         st.tables[t] = day;
         q('vanlig', 'tabell', { type:'tabell', data:{ table:t } });
       }
+    } else if (event.type === 'klocksteg') {
+      // Guld på ett av klockans steg: ett vanligt kort (eller en uppgradering), en gång per steg
+      const id = typeof d.step === 'string' ? d.step : '';
+      if (id && !st.clockSteps[id]) {
+        st.clockSteps[id] = day;
+        q('vanlig', 'klocksteg', { type:'klocksteg', data:{ step:id, name:d.name || id } });
+      }
     }
     return st;
   }
@@ -698,7 +716,7 @@ const Capy = (() => {
      card/tier = det som delades ut (tier 1 = nytt kort, 2 = silver, 3 = guld).
      allDone = alla 24 guld och grattis-texten inte visad än.
 
-     'tabell' KÖAR BARA (ingen dragning, ingen overlay): händelsen kommer
+     'tabell' och 'klocksteg' (v63) KÖAR BARA (ingen dragning, ingen overlay): händelsen kommer
      mitt i en fråga (direkt efter att lådorna sparats), och resultatets
      egen award (övningspass, test …) följer strax. Resultatet drar då
      köns första post – max ETT kort per resultat gäller. Står passets
@@ -709,7 +727,7 @@ const Capy = (() => {
   function awardCore(st, cards, event, day, nowISO) {
     milestones(st, event, day);
     const out = { st, cards, entry:null, card:null, tier:0, allDone:false };
-    if (event.type === 'tabell' || st.pending.length === 0) return out;
+    if (event.type === 'tabell' || event.type === 'klocksteg' || st.pending.length === 0) return out;
     const entry = st.pending.shift();
     const card = resolveDraw(entry.spec, cards, st);
     if (card) {

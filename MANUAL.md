@@ -151,58 +151,83 @@ Klicka på **"📝 Sessionslogg"** för att se alla avslutade träningssessioner
 
 ## 🕐 Klockan
 
-### Översikt
-Klockspelet har två lägen: **Övning** och **Test**. Du börjar alltid i övningsläget.
+### Översikt: Klockans trappa (v63)
+Klockan öppnar i **Klockans trappa**: sju steg, ett i taget, alla synliga utan att scrolla.
+Varje steg har en **medalj**, sitt namn, ett exempel och en tunn stapel för andelen tider i Kan:
 
-### Övningsläge (Practice Mode)
-I övningsläget ser du:
+| Steg | Namn | Exempel |
+|------|------|---------|
+| 1 | Hela timmar | klockan tre |
+| 2 | Halv | halv tre |
+| 3 | Kvart | kvart över tre, kvart i tre |
+| 4 | Fem, tio, tjugo | tio över tre, tjugo i tre |
+| 5 | Runt halv | fem i halv tre, fem över halv tre |
+| 6 | Digital tid | 14:30 är halv tre på eftermiddagen |
+| 7 | Hur lång tid? | från kvart över tre till kvart i fem (hela femminuterssteg, högst 2 timmar) |
 
-- **Tidsperiod-visualisering** – En färgglad indikator som visar vilken tid på dygnet det är:
-  - 🌙 Natt (00:00–05:59)
-  - 🌅 Förmiddag (06:00–11:59)
-  - ☀️ Eftermiddag (12:00–17:59)
-  - 🌆 Kväll (18:00–23:59)
+Varje steg har **tolv tider** (en per timme 1–12; i Digital tid tolv 24-timmarstider, i Hur lång tid tolv tidsskillnader).
+Varje tid har en egen **låda**, med exakt samma regler som gångertabellen (reglerna ligger i `MP.spaced` och delas):
+tre olika dagar med rätt svar till **Kan**, sedan påfyllning efter 1, 3, 7, 14 och 30 dagar, fel på Kan ger **Övar**.
 
-- **Analog klocka** – Visar tiden med tim- och minutvisare
-- **Digital klocka** – Visar tiden i siffror
-- **Svensk tid i text** – T.ex. "kvart över tre", "halv sju", "fem i tolv"
-- **Kontroller:**
-  - **Timmar**: Pil upp/ner för att ändra timme (+1 / -1)
-  - **Minuter**: Pil upp/ner för att ändra minuter (+5 / -5)
-  - **Återställ**: Nollställer klockan till 00:00
-  - **Slumpa tid**: Sätter en slumpmässig tid
+**Medaljen** per steg: **brons** när alla tider har övats, **silver** när minst hälften är Kan, **guld** när alla är Kan
+(Dags igen räknas som Kan). En blek prick vid medaljen betyder att några tider är dags att fylla på.
 
-Du kan fritt experimentera med klockan för att lära dig hur analog, digital och svensk tidtext hänger ihop.
+Under trappan: **Lekklockan**, **Klocktest** (ett litet val) och **Statistik och logg**.
 
-### Testläge (Test Mode)
+### Stegets startskärm
+Ett tryck på ett steg öppnar startskärmen: medaljen och "Du kan N av 12 tider", ett exempel på en liten klocka,
+medaljerna förklarade och passets varv. Två knappar: **Lär dig** (lektionen) och **Öva** (passet).
+**Ändra varv** ställer in varven: **Läs klockan** (fyra svar att välja bland) och **Ställ klockan** (dra visarna),
+0–4 av varje, och snabbvalen **Kort** (1 + 1), **Vanligt** (2 + 2, standard) och **Långt** (3 + 3). Varven sparas direkt.
 
-#### Steg 1: Välj klocktyp
-- **🕐 Analog klocka** – Testa med urtavla och visare
-- **⏰ Digital klocka** – Testa med digitala siffror (24-timmars format)
+### Lär dig: lektionerna
+Klickstyrda på en stor klocka, en idé per steg: texten kommer först, sedan rörelsen, slutsatsen sist.
+- **Hela timmar:** minutvisaren rakt upp, den blå visaren visar timmen; sedan går det en timme.
+- **Halv:** minutvisaren går från 12 till 6 medan timvisaren glider halvvägs från 2 mot 3; timmens första halva färgas,
+  timvisarens väg mot 3 visas på kanten. "Halv tre betyder halvvägs till tre."
+- **Kvart:** urtavlan i fyra delar; kvart över när en del har gått, kvart i när en del är kvar.
+- **Fem, tio, tjugo:** minuttalen 5–55 tänds utanför urtavlan; högra halvan är över, vänstra halvan är i.
+- **Runt halv:** fältet runt 6:an (25–35); fem i halv och fem över halv, med nästa timme som vid halv.
+- **Digital tid:** 24-timmarsringen runt urtavlan; 13 är 1 på eftermiddagen; alltid kopplat till urtavlan och orden.
+- **Hur lång tid?:** klockan går fram från starttid till sluttid i klickade steg; först hela timmar, sedan minuterna,
+  som räknas i en rad under klockan.
 
-#### Del 1: Läsa klockan (5 frågor)
-- En klocka visas (analog eller digital)
-- Välj rätt svensk tidtext bland 4 alternativ
-- Svarsalternativen visas med färgkodad text
-- Direkt feedback: grönt = rätt, rött = fel (med ljudeffekter)
-- Fel-frågor återkommer tills de besvaras korrekt
+### Minutkartan (stödhjulet)
+Urtavlan kan visa minuttalen (röda, som minutvisaren) och färgade zoner för **över**, **i** och fältet **runt halv**.
+Kartan visas alltid i lektioner och förklaringar. I passets frågor är den tänd så länge steget saknar medalj,
+nedtonad med brons och släckt från silver. **Visa hjälp** tänder den alltid (och **Dölj hjälp** släcker den).
 
-#### Del 2: Ställa klockan (5 frågor)
-- En svensk tidtext visas (t.ex. "kvart i fem")
-- Du ska ställa klockan till rätt tid
-  - **Analog**: Dra visarna till rätt position
-  - **Digital**: Ställ in timmar och minuter
-- Klicka **"OK – Lås svar"** när du är klar
-- Direkt feedback med ljud
+### Öva: passet
+Samma upplägg som gångertabellens övningspass: varv efter varv, varje varv ställer stegets tolv tider i lottad ordning.
+- **Läs klockan:** fyra alternativ. Felalternativen bygger på fel barn gör: en timme fel runt halv ("halv två" när det är
+  "halv tre"), över och i förväxlade, fem i halv och fem över halv förväxlade, visarna lästa omvänt, 5 minuter fel;
+  i Digital tid också 14 läst som 4 och fel del av dygnet; i Hur lång tid timmar och minuter räknade var för sig.
+  Exakt ett alternativ är rätt, och ordningen lottas vid varje visning.
+- **Ställ klockan:** dra visarna. När minutvisaren dras följer timvisaren med, och förbi 12 stegar timmen upp eller ner.
+  Timvisaren kan också dras och snäpper till en timme. Minuterna snäpper till 5. **Klar** kontrollerar.
+  **Plus och minus** för timme och minut finns kvar under klockan.
+- **Vid fel:** en förklaring i fyra klickade steg (**Nästa steg**), där visaren texten talar om lyses upp, t.ex.
+  "Titta på den röda visaren. Den pekar på 5. Det är 25 minuter." → "Det heter fem i halv." → "Den blå visaren står
+  nästan mitt emellan 2 och 3. Halv betyder halvvägs till nästa timme: tre." → "Klockan är fem i halv tre."
+  I ställfrågor ställs klockan rätt i första steget. Sedan **Svara igen** (samma fråga direkt), och frågan kommer
+  tillbaka en gång till senare i varvet. Bara första försöket räknas i lådorna.
+- **Du är klar!** visar kvittot för en vuxen (steg, varv, rätt på första försöket, fel som rättades, tid) med
+  **Håll inne: Sett av en vuxen**. Stämpeln syns i loggen.
 
-#### Resultat
-- Total poäng (t.ex. "8 av 10 rätt")
-- Möjlighet att **se detaljer**, **spela igen** eller **gå tillbaka till övning**
+### Lekklockan
+Ställ klockan fritt: dra visarna (eller använd plus och minus), slumpa eller återställ. Digital tid, tiden i ord med
+dygnsdel ("halv tre på eftermiddagen") och dygnsperioden (Natt, Morgon, Förmiddag, Eftermiddag, Kväll).
+**Visa minutkartan** tänder minuttalen och zonerna.
 
-### 📜 Klockhistorik
-Klicka på klock-ikonen (🕐 History) i övre högra hörnet för att se alla tidigare test-sessioner:
-- Datum och poäng för varje test
-- Klicka på en session för att se detaljer per fråga
+### Klocktest
+Ett litet val under trappan: **Analog** eller **Digital**, 5 läsfrågor och 5 ställfrågor.
+Läsfrågorna har de riktade felalternativen och lottad ordning; den digitala varianten svarar med dygnsdel
+(och ställs då på exakt timme). Analoga ställfrågor ställs genom att dra visarna; plus och minus finns kvar.
+Resultatet sparas i loggen. Testet påverkar inte lådorna.
+
+### Statistik och logg
+En karta med trappans 84 tider (sju rader om tolv) i lådornas färger, räknarna för Kan, Dags igen, Övar och Ny,
+och loggen med pass (och stämpeln "Sett av en vuxen") och test.
 
 ---
 
@@ -250,12 +275,15 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 24 capybarakort (10 vanliga, 8 sällsynta, 6 legendariska) delas ut som belöning efter resultat: första testet,
 var tredje test eller pass, medaljnivåerna (75, 85 och 95 %), 100 % i en modul, Minnesmästare, dagar i rad med
-Dagens träning, dagens första övningspass och när en hel tabell kan. Max ett kort per resultat; resten väntar i en kö.
+Dagens träning, dagens första övningspass, när en hel tabell kan och när ett av klockans steg får guld.
+Max ett kort per resultat; resten väntar i en kö.
 - **Nivåer (v59):** varje kort finns som vanligt, **silver** och **guld** – 72 belöningar av samma bilder.
   När alla 24 kort finns blir varje ny belöning en uppgradering till silver, och när alla är silver en uppgradering till guld.
   Sällsyntheten gäller även uppgraderingar. Grattis-rutan för hela samlingen kommer när alla 24 är guld.
 - **Hel tabell:** när alla tal i en tabell (1 till Gånger, 10 som standard) ligger i **Kan** (Dags igen räknas) ger det ett
   vanligt kort eller en uppgradering, en gång per tabell. Kortet delas ut vid nästa resultat.
+- **Klockans steg (v63):** guld på ett steg ger "Du kan klockans steg Halv" – ett vanligt kort eller en uppgradering,
+  en gång per steg, vid nästa resultat. Klockans pass ger skälet "Övningspass på klockan: Halv, fyra varv".
 - **Samlingen** visar t.ex. "24 av 24 kort · 5 silver · 0 guld". Tryck på ett kort för att se det stort under
   **Så fick du den**: en rad per nivå med datum och skäl. Kort från före v59 visar "Du fick den innan appen sparade hur".
 
