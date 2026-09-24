@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v64';
+const APP_VERSION = 'v65';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -298,7 +298,7 @@ const App = (() => {
     Sound.play('click');
   }
 
-  /* ── Loggläsning (statuschips + Dagens träning-villkor) ── */
+  /* ── Loggläsning (statuschips, senast spelat, medaljer) ── */
   /* Loggnycklar per modul – samma nycklar som Store.deleteProfile rensar */
   const GAME_LOG_KEYS = {
     multiplication: id => [`mult_log_${id}`],
@@ -320,16 +320,12 @@ const App = (() => {
       .map(readLog);
   }
 
-  function countTotalTests(profileId) {
-    return allLogs(profileId).reduce((sum, log) => sum + log.length, 0);
-  }
-
-  /* Dagens träning visas först när profilen har ≥2 spelade test totalt.
-     Innehållet byggs av DailyTraining (js/daily.js). */
+  /* Dagens träning visas när dagens urval har något som är dags igen eller
+     som hon övar på, i Gångertabellen eller Klockan (js/daily.js, v65). */
   function shouldShowDailyTraining(profile) {
     const p = profile || currentProfile;
-    if (!p) return false;
-    return countTotalTests(p.id) >= 2;
+    if (!p || typeof DailyTraining === 'undefined') return false;
+    return DailyTraining.hasWork(p);
   }
 
   /* Procent ur en loggpost oavsett modulens fältnamn */
@@ -487,90 +483,97 @@ const App = (() => {
     renderHero();
     renderGameStatus();
     Router.show('screen-game-select');
+    fitHeroChips();
   }
 
-  /* Hero-slot i spelväljaren.
-     Villkor <2 test  → "kom igång"-kort som pekar mot spelen.
-     Villkor ≥2 test  → Dagens träning (DailyTraining.heroContent):
-       träna    → dagens 3 tal + Starta-knapp
-       klart    → "Klart för idag!" + diskret Kör igen
-       fallback → föreslå svagaste modulen (ingen mult-data än)
-       null     → kom igång-kortet (bör inte hända bakom gaten) */
+  /* Hero-slot i spelväljaren: Dagens träning (DailyTraining.heroContent, v65).
+       träna → vad som väntar och varför, några etiketter, Starta
+       klart → "Klart för idag!", dagar i rad, Kör igen
+       null  → Kom igång: Gångertabellen och Klockan (inget att träna än) */
+  const HERO_CHIPS = 5;
   function renderHero() {
     const hero = document.getElementById('daily-hero');
     if (!hero || !currentProfile) return;
 
-    const daily = (shouldShowDailyTraining(currentProfile) && typeof DailyTraining !== 'undefined')
-      ? DailyTraining.heroContent(currentProfile)
-      : null;
+    let daily = null;
+    try { daily = typeof DailyTraining !== 'undefined' ? DailyTraining.heroContent(currentProfile) : null; } catch (_) { daily = null; }
 
     if (daily && daily.läge === 'träna') {
+      // Etiketterna varvas mellan modulerna, så att både tal och klocktider syns
+      const m = daily.items.filter(i => i.module === 'mult'), c = daily.items.filter(i => i.module !== 'mult'), mixed = [];
+      for (let i = 0; i < Math.max(m.length, c.length); i++) { if (m[i]) mixed.push(m[i]); if (c[i]) mixed.push(c[i]); }
+      const shown = mixed.slice(0, HERO_CHIPS), more = daily.items.length - shown.length;
       hero.innerHTML = `
-        <div class="hero-inner">
+        <div class="hero-inner has-chips">
           <span class="hero-emoji">🎯</span>
-          <div>
-            <span class="hero-badge">✨ Smart träning</span>
+          <div class="hero-txt">
+            <span class="hero-badge">Smart träning</span>
             <h2>Dagens träning</h2>
-            <p>3 tal väntar på dig! ✨ <span class="num">${escapeHtml(daily.text)}</span></p>
-            <small>Precis de du övar på 💜</small>
+            <p>${escapeHtml(daily.text)}</p>
           </div>
-          <button class="btn btn-primary" onclick="App.startDailyTraining()">
+          <button class="btn btn-primary" id="hero-start" onclick="App.startDailyTraining()">
             Starta
             <svg class="icn"><use href="#i-play"/></svg>
           </button>
+          <div class="dly-chips hero-chips" data-total="${daily.items.length}">${shown.map(DailyTraining.chipHTML).join('')}${more > 0 ? `<span class="dly-chip more">och ${more} till</span>` : ''}</div>
         </div>`;
     } else if (daily && daily.läge === 'klart') {
       const streakTxt = daily.streak >= 2
-        ? `🔥 ${daily.streak} dagar i rad – wow!`
-        : 'Ett extra pass gör dig ännu vassare 💪';
+        ? `${daily.streak} dagar i rad. Snyggt!`
+        : 'Kom tillbaka i morgon, så blir det två dagar i rad.';
       hero.innerHTML = `
         <div class="hero-inner">
           <span class="hero-emoji">🌟</span>
-          <div>
-            <span class="hero-badge">✨ Smart träning</span>
-            <h2>Klart för idag! 🌟</h2>
-            <p>Kom tillbaka i morgon – då väntar nya tal</p>
-            <small>${escapeHtml(streakTxt)}</small>
+          <div class="hero-txt">
+            <span class="hero-badge">Smart träning</span>
+            <h2>Klart för idag!</h2>
+            <p>${escapeHtml(streakTxt)}</p>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="App.startDailyTraining()">Kör igen</button>
-        </div>`;
-    } else if (daily && daily.läge === 'fallback') {
-      hero.innerHTML = `
-        <div class="hero-inner">
-          <span class="hero-emoji">🎯</span>
-          <div>
-            <span class="hero-badge">✨ Smart träning</span>
-            <h2>Dagens träning</h2>
-            <p>Dags att träna ${escapeHtml(daily.namn)}?${daily.senast ? ` <span class="num">Senast ${escapeHtml(daily.senast)}</span>` : ''}</p>
-            <small>Spela Gångertabellen så lär jag mig dina tal 💜</small>
-          </div>
-          <button class="btn btn-primary" onclick="App.startGame('${daily.modul}')">
-            Kör!
-            <svg class="icn"><use href="#i-play"/></svg>
+          <button class="btn btn-ghost btn-sm" id="hero-again" onclick="App.startDailyTraining()">
+            <svg class="icn"><use href="#i-refresh"/></svg>
+            Kör igen
           </button>
         </div>`;
     } else {
       hero.innerHTML = `
-        <div class="hero-inner">
+        <div class="hero-inner has-chips">
           <span class="hero-emoji">🚀</span>
-          <div>
-            <span class="hero-badge">✨ Kom igång</span>
+          <div class="hero-txt">
+            <span class="hero-badge">Smart träning</span>
             <h2>Kom igång!</h2>
-            <p>Välj ett spel här nedanför och kör dina två första test 🌟</p>
-            <small>Sen låser du upp Dagens träning – smart träning på just dina tal</small>
+            <p>Spela Gångertabellen eller Klockan. Då lär sig Dagens träning vad du behöver öva.</p>
+          </div>
+          <div class="hero-duo">
+            <button class="btn btn-primary btn-sm" id="hero-mult" onclick="App.startGame('multiplication')">Gångertabellen</button>
+            <button class="btn btn-primary btn-sm" id="hero-clock" onclick="App.startGame('clock')">Klockan</button>
           </div>
         </div>`;
     }
   }
 
-  /* Starta Dagens träning-passet (körs i Gångertabellens skärm,
-     quiz-maskineriet återanvänds via DailyTraining → MultGame). */
+  /* Etiketterna på hjältekortet får en rad: de som inte ryms blir "och N till".
+     Mäts när spelväljaren syns (i en dold skärm har etiketterna ingen bredd). */
+  function fitHeroChips() {
+    const box = document.querySelector('#daily-hero .hero-chips');
+    if (!box || !box.offsetWidth) return;
+    const total = Number(box.dataset.total) || 0;
+    const chips = [...box.querySelectorAll('.dly-chip:not(.more)')];
+    const oneRow = () => { const k = [...box.children]; return k.every(el => el.offsetTop === k[0].offsetTop); };
+    while (!oneRow() && chips.length > 1) {
+      chips.pop().remove();
+      let more = box.querySelector('.dly-chip.more');
+      if (!more) { more = document.createElement('span'); more.className = 'dly-chip more'; box.appendChild(more); }
+      more.textContent = `och ${total - chips.length} till`;
+    }
+  }
+
+  /* Starta Dagens träning: DailyTraining kör gångertabellens och klockans
+     passmotorer i tur och ordning och visar själv sina skärmar. */
   function startDailyTraining() {
     if (!currentProfile) { showHome(); return; }
-    if (typeof DailyTraining === 'undefined' || typeof MultGame === 'undefined') return;
+    if (typeof DailyTraining === 'undefined') return;
     Sound.play('click');
-    if (MultGame.stopTimer) MultGame.stopTimer();
-    Router.show('screen-multiplication');
+    if (typeof MultGame !== 'undefined' && MultGame.stopTimer) MultGame.stopTimer();
     DailyTraining.startPass(currentProfile);
   }
 
@@ -715,6 +718,7 @@ const App = (() => {
     confirmDeleteProfile,
     hideConfirmDelete,
     getCurrentProfile,
+    showScreen: id => Router.show(id),
     shouldShowDailyTraining,
     gameStatusChip,
     // Hjälpfunktioner tillgängliga för moduler

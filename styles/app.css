@@ -1870,6 +1870,69 @@ svg.icn {
 .hero small { display: block; color: var(--ink-soft); font-size: 13px; font-weight: 700; margin-top: 3px; }
 .hero .btn { flex-shrink: 0; margin-left: auto; }
 
+/* Dagens träning (v65): etiketterna under texten, Kom igångs två knappar */
+.hero-inner.has-chips { flex-wrap: wrap; row-gap: 8px; }
+.hero-txt { flex: 1; min-width: 0; }
+.hero-chips { flex-basis: 100%; }
+.hero-chips .dly-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.hero-duo { flex-basis: 100%; display: flex; gap: 10px; }
+.hero-duo .btn { flex: 1; margin-left: 0; min-height: 44px; }
+
+/* Etiketterna: tal lila, klocktider i klocklagens färger (timord blå, minutord röda) */
+.dly-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dly-chip {
+  display: inline-block; white-space: nowrap; padding: 3px 10px;
+  border-radius: var(--radius-full); background: #f3e8ff; border: 1.5px solid rgba(147, 51, 234, 0.22);
+  color: #4c1d95; font-family: var(--font-head); font-weight: 800; font-size: 14px; line-height: 1.15;
+}
+.dly-chip.ck { background: #eff6ff; border-color: rgba(59, 130, 246, 0.28); }
+.dly-chip.more { background: transparent; border-style: dashed; color: var(--ink-soft); font-weight: 700; }
+.dly-chip .t-h { color: var(--time-h); font-weight: 900; }
+.dly-chip .t-m { color: var(--time-m); font-weight: 900; }
+.dly-chip .t-k { color: var(--time-k); font-weight: 700; }
+.dly-chip .t-p { color: var(--ink-soft); font-weight: 700; }
+
+/* Dagens träning: mellanskärmen och slutskärmen (#screen-daily) */
+.dly-spacer { width: 52px; flex-shrink: 0; display: inline-block; }
+.dly { gap: 12px; }
+.dly .grow { flex: 1; min-height: 8px; }
+.dly-i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.dly-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dly-step {
+  display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 0 12px;
+  border-radius: 14px; background: var(--glass-strong); border: 1.5px solid rgba(91, 33, 182, 0.14);
+  font-weight: 800; font-size: 14px; color: var(--ink-soft);
+}
+.dly-step.ok { background: #dcfce7; border-color: #86efac; color: #15803d; }
+.dly-step.cur { border-color: #3b82f6; color: #1e3a8a; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+.dly-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 22px 18px; background: #fff; }
+.dly-badge { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #4ade80, #16a34a); box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3); }
+.dly-badge .dly-i { width: 32px; height: 32px; stroke-width: 3; }
+.dly-kicker { font-weight: 800; font-size: 16px; color: #15803d; margin-top: 4px; }
+.dly-big { font-family: var(--font-head); font-weight: 800; font-size: 34px; line-height: 1.05; color: #1e3a8a; }
+.dly-sub { font-weight: 700; font-size: 15px; color: var(--ink-soft); }
+.dly-card .dly-chips { justify-content: center; margin-top: 6px; }
+.dly-card.fill { flex: 1; justify-content: center; gap: 10px; }
+.dly-card.fill .dly-badge { width: 76px; height: 76px; }
+.dly-card.fill .dly-badge .dly-i { width: 42px; height: 42px; }
+.dly-card.fill .dly-big { font-size: 42px; }
+.dly-card.fill .dly-chip { font-size: 17px; padding: 5px 13px; }
+.dly-go { width: 100%; }
+.dly-go .dly-i { margin-left: 4px; }
+.dly-head { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.dly-star { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); }
+.dly-star .dly-i { width: 32px; height: 32px; fill: #fff; stroke-width: 1.6; }
+.dly-head h2 { font-family: var(--font-head); font-weight: 800; font-size: 34px; color: var(--deep); line-height: 1.05; margin-top: 6px; }
+.dly-head p { font-weight: 800; font-size: 15px; color: var(--ink-soft); margin-top: 3px; }
+.dly-rc { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; background: #fff; }
+.dly-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 15px; font-weight: 700; color: var(--ink-soft); }
+.dly-row + .dly-row { padding-top: 10px; border-top: 1.5px dashed rgba(76, 29, 149, 0.18); }
+.dly-row b { font-family: var(--font-head); font-weight: 800; font-size: 19px; color: var(--deep); text-align: right; }
+.dly-row.col { flex-direction: column; align-items: stretch; gap: 6px; }
+.dly-rc .dly-chip { font-size: 15px; padding: 4px 11px; }
+.dly-modal-txt { color: var(--ink-soft); font-weight: 700; text-align: center; margin: 6px 0 16px; }
+.dly-modal-btns { display: flex; flex-direction: column; gap: 10px; }
+
 /* ============================================================
    34. QUIZ-MALLEN — yteffektivitet (FAS 3.2)
    Uppgiften äger skärmen: .q-hero (monumental fråga) +
@@ -2130,7 +2193,7 @@ svg.icn {
 /* Modulernas rotdivar ska kunna fylla skärmen */
 #mult-root, #clock-root, #friends-root, #nationella-root,
 #np-matte-select-root, #np-matte-muntligt-root, #np-matte-skriftlig-root,
-#addsub-root, #uppstallning-root {
+#addsub-root, #uppstallning-root, #daily-root {
   display: flex;
   flex-direction: column;
   flex: 1;
