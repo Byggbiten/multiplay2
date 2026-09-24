@@ -40,6 +40,20 @@ Efter att du valt en profil kommer du till spelväljaren. Här ser du din avatar
 
 Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till spelväljaren med **"Tillbaka"**-knappen.
 
+### Dagens träning (v65)
+Kortet överst i spelväljaren. Det gäller bara **Gångertabellen** och **Klockan** och bygger på deras lådor (kartorna).
+- **Urvalet:** först det som är **Dags igen** (äldst först), sedan det hon **Övar** på (färst rätta dagar först), sedan högst
+  **en ny** uppgift per modul (den lättaste). Högst 8 uppgifter. Fördelningen följer vad som väntar, men har båda modulerna
+  något att visa igen eller öva på får båda minst en plats. Urvalet gäller hela dagen.
+- **Kortet:** säger vad som väntar och varför ("4 tal och 2 klocktider är dags att visa igen") och visar några etiketter,
+  klocktiderna i klockans färger. När dagens pass är gjort: **Klart för idag!**, dagar i rad och **Kör igen**.
+  Finns inget att visa igen eller öva på visar kortet **Kom igång** med knappar till Gångertabellen och Klockan.
+- **Passet:** först talen (ett varv flerval), sedan en mellanskärm "Nu: Klockan", sedan klocktiderna (ett varv där Läs klockan
+  och Ställ klockan växlar). Ett avsnitt utan uppgifter hoppas över. Fel ger förklaringen som vanligt (rektangeln respektive
+  den animerade klockan) och frågan kommer tillbaka. Lådorna uppdateras på första försöket, som i modulerna.
+- **Slutskärmen:** rätt på första försöket, vilka tal och tider som **fylldes på** (var dags igen och satt direkt) och dagar i rad.
+  **Avbryt** frågar först; ett avbrutet pass sparas inte.
+
 ---
 
 ## ✖️ Gångertabellen
