@@ -189,8 +189,11 @@ const DailyTraining = (() => {
   /* ══════════════════════════════════════════════════════
      TEXTERNA (rena)
   ══════════════════════════════════════════════════════ */
-  const talTxt = n => n === 1 ? 'ett tal' : `${n} tal`;
-  const tidTxt = n => n === 1 ? 'en klocktid' : `${n} klocktider`;
+  // Antal med ord (högst 8 uppgifter), så att meningen inte blandar "ett tal och 7 klocktider"
+  const ORD = ['noll', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio'];
+  const ord = n => ORD[n] || String(n);
+  const talTxt = n => `${ord(n)} tal`;
+  const tidTxt = n => n === 1 ? 'en klocktid' : `${ord(n)} klocktider`;
   const whatTxt = (m, c) => [m ? talTxt(m) : '', c ? tidTxt(c) : ''].filter(Boolean).join(' och ');
   const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
   /* Vad som väntar och varför: dags igen / att öva / något nytt.

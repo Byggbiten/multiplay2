@@ -151,7 +151,7 @@ describe('modulernas kandidater', () => {
     expect(c).toHaveLength(55);                          // 1–10: 55 unika par
     expect(c.every(x => x.module === 'mult')).toBe(true);
     expect(c.some(x => x.key === '11x12')).toBe(false);
-    expect(c.find(x => x.key === '7x8')).toMatchObject({ state: 'ovar', okDays: 1, label: '7·8' });
+    expect(c.find(x => x.key === '7x8')).toMatchObject({ state: 'ovar', okDays: 1, label: '7 × 8' });
     store[`mult_settings_${P.id}`] = JSON.stringify({ upto: '12' });
     c = MG.dailyCandidates(P, DAY);
     expect(c).toHaveLength(78);
@@ -236,13 +236,13 @@ describe('hjältekortet', () => {
     const h = DT.heroContent(P);
     expect(h.läge).toBe('träna');
     expect(h.items.every(i => ['mult', 'clock'].includes(i.module))).toBe(true);
-    expect(h.text).toBe('2 tal och en klocktid är dags att visa igen. Sedan lite att öva på och något nytt.');
+    expect(h.text).toBe('Två tal och en klocktid är dags att visa igen. Sedan lite att öva på och något nytt.');
   });
   it('texterna: dags igen, att öva, något nytt', () => {
     const I = (module, state) => ({ module, state, key: 'k' });
     expect(T.heroText([I('mult', 'due'), I('mult', 'due'), I('mult', 'due'), I('mult', 'due'), I('clock', 'due'), I('clock', 'due')]))
-      .toBe('4 tal och 2 klocktider är dags att visa igen.');
-    expect(T.heroText([I('mult', 'ovar'), I('clock', 'ovar'), I('clock', 'ovar'), I('clock', 'ny')])).toBe('Du övar vidare på ett tal och 2 klocktider. Sedan något nytt.');
+      .toBe('Fyra tal och två klocktider är dags att visa igen.');
+    expect(T.heroText([I('mult', 'ovar'), I('clock', 'ovar'), I('clock', 'ovar'), I('clock', 'ny')])).toBe('Du övar vidare på ett tal och två klocktider. Sedan något nytt.');
     expect(T.heroText([I('clock', 'due')])).toBe('En klocktid är dags att visa igen.');
     expect(T.rightTxt(9, 11)).toBe('9 av 11');
     expect(T.rightTxt(11, 11)).toBe('Alla 11');

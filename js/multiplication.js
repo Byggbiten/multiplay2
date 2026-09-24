@@ -3052,7 +3052,7 @@ const MultGame = (() => {
   function dailyCandidatesFrom(pairs, n, day){
     return pairsUpTo(n).slice().sort(easyFirst).map(([a, b], i) => {
       const st = pairs[KEY(a, b)] || freshPair();
-      return { module:'mult', key:KEY(a, b), label:`${a}·${b}`, state:vis(st, day), due:st.due || null, okDays:Number(st.okDays) || 0, order:i };
+      return { module:'mult', key:KEY(a, b), label:`${a} × ${b}`, state:vis(st, day), due:st.due || null, okDays:Number(st.okDays) || 0, order:i };
     });
   }
   function dailyCandidates(p, day = today()){
