@@ -1,7 +1,7 @@
 /* MULTIPLAY – Service Worker (PWA offline-stöd) */
 
 // VIKTIGT: Öka versionsnumret vid varje push (v2 → v3 → v4 osv)
-const CACHE_VERSION = 'v62';
+const CACHE_VERSION = 'v64';
 const CACHE = `multiplay-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/daily.js',
   './js/capy.js',
   './js/multiplication.js',
+  './js/clock-logic.js',
   './js/clock.js',
   './js/tenfriends.js',
   './js/nationella.js',
