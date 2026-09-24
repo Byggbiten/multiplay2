@@ -1321,10 +1321,14 @@ const ClockGame = (() => {
     if (!rounds.length){ enterSetup(); return; }
     leave(); S.screen = 'pass';
     const medal0 = CL.stepMedal(loadBoxes(), stepId, today()).medal;
-    PS = { step:stepId, s, rounds, ri:0, drill:null, phase:'q', res:[], start:Date.now(), help:null, level:CL.mapLevel(medal0), V:null, V2:null, E:null, justFixed:false, opts:null, X:null, lead:null, pr:0 };
+    PS = { step:stepId, s, rounds, ri:0, drill:null, phase:'q', res:[], start:Date.now(), help:null, level:CL.mapLevel(medal0), V:null, V2:null, E:null, justFixed:false, opts:null, X:null, lead:null, pr:0, daily:null, first:{} };
+    renderPassShell(s.short);
+    startRound(0);
+  }
+  function renderPassShell(title){
     root().innerHTML = `
       ${styleTag()}
-      ${headerHtml(s.short, 'cancel', { backLabel:'Avbryt' })}
+      ${headerHtml(title, 'cancel', { backLabel:'Avbryt' })}
       <div class="wrap ck2" id="ck-pass">
         <div class="card track"><div class="trtop"><span id="ck-psL"></span><span class="rps" id="ck-psR"></span></div><div class="bar"><i class="fill" id="ck-psFill"></i></div></div>
         <div class="card ck-stage" id="ck-stage"></div>
@@ -1332,21 +1336,74 @@ const ClockGame = (() => {
         <div class="bubble b86"><div class="thought" id="ck-bubble"></div></div>
         <div class="slot" id="ck-slot"><button class="btn btn-primary" data-act="pmain" id="ck-main"></button></div>
       </div>`;
+  }
+  /* ── Dagens träning (js/daily.js, v65) ──
+     Ett avsnitt med klocktiderna: ett varv där Läs klockan och Ställ klockan växlar, med
+     nötloopen och den animerade förklaringen vid fel som vanligt. recordAnswer på första
+     försöket. Inget eget kvitto och ingen logg: opts.onDone({ correct, total, fixed, secs, first })
+     där first = { 'steg/tid': rätt på första försöket }. Avbryt frågar först, sedan opts.onCancel().
+     keys = kandidaternas nycklar ('halv/2:30'). */
+  const splitKey = k => { k = String(k); const i = k.indexOf('/'); return i > 0 ? { step:k.slice(0, i), key:k.slice(i + 1) } : null; };
+  function runDaily(p, keys, opts){
+    profile = p;
+    const R = root();
+    if (R && !R._ckBound){ R.addEventListener('click', onClick); R._ckBound = true; }
+    const items = SH.shuffle((keys || []).map(splitKey).filter(t => t && CL.stepById(t.step) && CL.taskByKey(t.step, t.key)))
+      .map((t, i) => ({ step:t.step, key:t.key, type:i % 2 ? 'set' : 'read' }));
+    if (!items.length){ opts.onDone({ correct:0, total:0, fixed:0, secs:0, first:{} }); return; }
+    leave(); S.screen = 'pass';
+    PS = { step:null, s:null, rounds:[{ type:'mix', items }], ri:0, drill:null, phase:'q', res:[], start:Date.now(), help:null, level:1, V:null, V2:null, E:null,
+           justFixed:false, opts:null, X:null, lead:null, pr:0, daily:opts, first:{} };
+    renderPassShell('Dagens träning');
     startRound(0);
   }
-  const curTask = () => { const c = PS.drill.current(); return c ? CL.taskByKey(PS.step, c.key) : null; };
-  const rtype = () => PS.rounds[PS.ri].type;
+  /* Kandidaterna: varje tid i trappan med sin låda, i trappans ordning (steg 1–7, tiderna i
+     stegets ordning = lätt först). key = 'steg/tid'. Läser lådorna, skriver inget. */
+  function dailyCandidatesFrom(boxes, day){
+    const out = [];
+    for (const s of CL.STEPS) for (const t of s.tasks){
+      const st = boxes && boxes[s.id] && boxes[s.id][t.key];
+      out.push({ module:'clock', key:`${s.id}/${t.key}`, label:taskLabel(t), html:taskLabelHTML(t),
+                 state:st ? SP.vis(st, day) : 'ny', due:(st && st.due) || null, okDays:st ? Number(st.okDays) || 0 : 0, order:out.length });
+    }
+    return out;
+  }
+  function dailyCandidates(p, day = today()){
+    if (!p) return [];
+    return dailyCandidatesFrom(CL.validBoxes(readJSON(BOX_KEY(p.id))), day);
+  }
+  /* Tidens etikett: "klockan tre", "halv tre", "14:30", "kvart över tre till kvart i fem".
+     HTML-varianten i klocklagens färger (timord blå, minutord röda). */
+  function taskLabel(t){
+    if (t.kind === 'digital') return CL.digi(t.h, t.m);
+    if (t.kind === 'dur') return `${CL.words(t.h1, t.m1)} till ${CL.words(t.h2, t.m2)}`;
+    return t.m === 0 ? `klockan ${CL.words(t.h, t.m)}` : CL.words(t.h, t.m);
+  }
+  function taskLabelHTML(t){
+    const k = s => `<span class="t-k">${s}</span>`;
+    if (t.kind === 'digital') return colorizeTimeText(CL.digi(t.h, t.m));
+    if (t.kind === 'dur') return `${colorizeTimeText(CL.words(t.h1, t.m1))}${k(' till ')}${colorizeTimeText(CL.words(t.h2, t.m2))}`;
+    return t.m === 0 ? `${k('klockan ')}${colorizeTimeText(CL.words(t.h, t.m))}` : colorizeTimeText(CL.words(t.h, t.m));
+  }
+  /* Etiketten ur en kandidatnyckel ('halv/2:30'), t.ex. för frysta urval och slutskärmen */
+  function dailyLabelHTML(key){
+    const sk = splitKey(key), t = sk && CL.stepById(sk.step) ? CL.taskByKey(sk.step, sk.key) : null;
+    return t ? taskLabelHTML(t) : '';
+  }
+  const curTask = () => { const c = PS.drill.current(); return c ? CL.taskByKey(c.step || PS.step, c.key) : null; };
+  /* Varvets sort. Dagens träning har ett blandat varv ('mix') där varje fråga bär sin sort (läs/ställ). */
+  const rtype = () => { const t = PS.rounds[PS.ri].type; return t === 'mix' ? ((PS.cur && PS.cur.type) || 'read') : t; };
   function startRound(i){
     PS.ri = i; PS.drill = SH.createDrill(PS.rounds[i].items); PS.justFixed = false;
     nextQ(true);
   }
   function renderTrack(){
     const p = PS.drill.progress(), done = PS.phase === 'between';
-    $('psL').innerHTML = `Varv <b>${PS.ri + 1}</b> av ${PS.rounds.length} · ${CL.RNAME[rtype()]}`;
+    $('psL').innerHTML = PS.daily ? '<b>Klockan</b> · Läs och ställ' : `Varv <b>${PS.ri + 1}</b> av ${PS.rounds.length} · ${CL.RNAME[rtype()]}`;
     $('psR').innerHTML = PS.rounds.map((r, k) => `<i class="rp${k < PS.ri || (k === PS.ri && done) ? ' ok' : k === PS.ri ? ' cur' : ''}"></i>`).join('');
     $('psFill').style.transform = `scaleX(${done ? 1 : p.total ? p.done / p.total : 0})`;
   }
-  const mapParts = () => CL.MAP_PARTS[PS.step];
+  const mapParts = () => CL.MAP_PARTS[(PS.task && PS.task.step) || PS.step];
   /* Minutkartan i frågorna: stegets nivå (full utan medalj, nedtonad med brons, borta från silver),
      eller barnets eget val (PS.help: true = tänd, false = släckt, null = stegets nivå). Förklaringen: full. */
   const helpLevel = () => PS.help === true ? 1 : PS.help === false ? 0 : PS.level;
@@ -1369,8 +1426,10 @@ const ClockGame = (() => {
   function nextQ(first = false){
     if (!PS || S.screen !== 'pass') return;
     if (PS.drill.isDone()){ roundDone(); return; }
-    const cur = PS.drill.current(), task = curTask(), type = rtype();
-    PS.phase = 'q'; PS.E = null; PS.task = task; PS.cur = cur; busy = false;
+    const cur = PS.drill.current(); PS.cur = cur;
+    const task = curTask(), type = rtype();
+    PS.phase = 'q'; PS.E = null; PS.task = task; busy = false;
+    if (PS.daily) PS.level = CL.mapLevel(CL.stepMedal(loadBoxes(), task.step, today()).medal);   // stödhjulet efter tidens eget steg
     renderTrack();
     const tag = tagFor(cur), hasMap = mapParts().length > 0 && !(type === 'read' && task.kind === 'digital');   // digital läsfråga: ingen urtavla att hjälpa
     const top = `<div class="ck-qtop"><span class="qtag${tag ? ' on' : ''}" id="ck-tag">${tag}</span>${hasMap ? `<button class="ck-help" data-act="help" id="ck-help"></button>` : ''}</div>`;
@@ -1448,7 +1507,11 @@ const ClockGame = (() => {
   function answered(ok, given){
     const cur = PS.cur, task = PS.task;
     const res = PS.drill.answer(ok);
-    if (res.record) recordAnswer(PS.step, task.key, ok);     // bara första försöket räknas
+    if (res.record){
+      recordAnswer(task.step, task.key, ok);                 // bara första försöket räknas
+      const fk = `${task.step}/${task.key}`;
+      if (!(fk in PS.first)) PS.first[fk] = ok;              // Dagens träning: första svaret per tid
+    }
     snd(ok ? 'correct' : 'wrong');
     if (PS.V) PS.V.disableDrag();
     if (ok){
@@ -1513,7 +1576,7 @@ const ClockGame = (() => {
   }
   function roundDone(){
     const st = PS.drill.stats();
-    PS.res.push({ type:rtype(), asked:st.asked, firstOk:st.firstOk, wrongFirst:st.wrongFirst });
+    PS.res.push({ type:PS.rounds[PS.ri].type, asked:st.asked, firstOk:st.firstOk, wrongFirst:st.wrongFirst });
     if (PS.ri >= PS.rounds.length - 1){ finishPass(); return; }
     PS.phase = 'between'; PS.V = PS.V2 = null;
     renderTrack();
@@ -1535,10 +1598,22 @@ const ClockGame = (() => {
     const close = () => el.remove();
     el.addEventListener('click', e => { if (e.target === el) close(); });
     el.querySelector('#ck-mStay').onclick = close;
-    el.querySelector('#ck-mQuit').onclick = () => { close(); PS = null; enterStart(S.step); };
+    el.querySelector('#ck-mQuit').onclick = () => {
+      close();
+      const d = PS && PS.daily;
+      PS = null;
+      if (d){ leave(); d.onCancel(); return; }             // Dagens träning: tillbaka dit den startades
+      enterStart(S.step);
+    };
   }
   function finishPass(){
     const R0 = SH.receiptFor(PS.res, Date.now() - PS.start);
+    if (PS.daily){                                         // Dagens träning: inget eget kvitto, ingen logg – statistiken går tillbaka
+      const d = PS.daily, first = { ...PS.first };
+      leave();
+      d.onDone({ correct:R0.correct, total:R0.total, fixed:R0.fixed, secs:R0.secs, first });
+      return;
+    }
     const entry = { type:'ovningspass', step:PS.step, rounds:R0.rounds, correct:R0.correct, total:R0.total, pct:R0.pct, fixed:R0.fixed, secs:R0.secs };
     addLog(entry);
     const saved = getLog()[0];
@@ -1890,10 +1965,11 @@ const ClockGame = (() => {
     adjustTime, resetTime, randomTime,
     showTestSetup, startTestWithType,
     showHistory:showStats,
+    dailyCandidates, runDaily, dailyLabelHTML,
     _handleReadChoice:null, _adjustSetting:null, _lockSetting:null,
     /* Endast för tester och verifiering */
     _test:{
-      colorizeTimeText, clockSVG, tint, fmtText,
+      colorizeTimeText, clockSVG, tint, fmtText, dailyCandidatesFrom, taskLabel,
       setToday:d => { todayOverride = d || null; }, today,
       peek:() => ({ screen:S.screen, step:S.step, busy, pass:PS, lesson:LS, token }),
     },

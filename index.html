@@ -158,8 +158,8 @@
 
       <h2 class="hello">Hej <em id="hello-name"></em>! Vad vill du träna på? 🌈</h2>
 
-      <!-- Hero-slot: "kom igång" (<2 test) eller Dagens träning
-           (js/daily.js). Innehållet renderas av App.renderHero(). -->
+      <!-- Hero-slot: Dagens träning eller "kom igång" (js/daily.js).
+           Innehållet renderas av App.renderHero(). -->
       <div class="hero" id="daily-hero"></div>
 
       <div class="grid-cards">
@@ -312,6 +312,11 @@
   <!-- ══════════════════════════════════════
        SKÄRM 17: CAPYBARA-SAMLINGEN (js/capy.js)
   ══════════════════════════════════════ -->
+  <!-- Dagens träning (js/daily.js): mellanskärmen och slutskärmen -->
+  <section id="screen-daily" class="screen screen-daily" role="main">
+    <div id="daily-root"></div>
+  </section>
+
   <section id="screen-collection" class="screen" role="main">
     <div id="capy-root"></div>
   </section>
