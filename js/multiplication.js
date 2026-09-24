@@ -49,7 +49,7 @@ const MultGame = (() => {
       #mult-root .tgrid{grid-template-columns:repeat(4,1fr);gap:8px}
     }
 
-    /* Quiz-vyer (Dagens träning, fokuserad träning) */
+    /* Quiz-vyer (fokuserad träning) */
     #mult-root .header-progress{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:64px;padding:8px 13px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel);font-family:var(--font-head);font-weight:800;font-size:15px;line-height:1;color:var(--deep);flex:0 0 auto}
     #mult-root .header-progress .hp-bar{width:100%;min-width:40px;height:4px;border-radius:999px;background:rgba(93,63,158,.15);overflow:hidden}
     #mult-root .header-progress .hp-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s var(--spring)}
@@ -2171,8 +2171,9 @@ const MultGame = (() => {
     if (!cfg){ goto('setup'); return; }
     const n = UPTO(), pairs = cfg.pairs ? cleanPairs(cfg.pairs) : null;
     PS = { cfg, upto:n, pairs, hard:!!pairs, tables:pairs ? [] : cleanTables(cfg.tables), rounds:buildRounds(cfg, n), ri:0, drill:null, phase:'q', res:[],
-           start:Date.now(), token:(PS ? PS.token : 0) + 1, W:null, justFixed:false };
+           start:Date.now(), token:(PS ? PS.token : 0) + 1, W:null, justFixed:false, daily:cfg.daily || null, first:{} };
     if (!PS.rounds.length || !(pairs ? pairs.length : PS.tables.length)){ goto(pairs ? 'hstart' : 'setup'); return; }
+    if (PS.daily) $('title').textContent = 'Dagens träning';
     startRound(0);
   }
   function startRound(i){
@@ -2185,7 +2186,7 @@ const MultGame = (() => {
   function renderPassTrack(){
     const R0 = PS.rounds[PS.ri], p = PS.drill ? PS.drill.progress() : { done:0, total:1 };
     const done = PS.phase === 'between';
-    $('psL').innerHTML = `Varv <b>${PS.ri + 1}</b> av ${PS.rounds.length} · ${RNAME[R0.type]}`;
+    $('psL').innerHTML = PS.daily ? `<b>Gångertabellen</b> · ${RNAME[R0.type]}` : `Varv <b>${PS.ri + 1}</b> av ${PS.rounds.length} · ${RNAME[R0.type]}`;
     $('psR').classList.toggle('many', PS.rounds.length > 6);
     $('psR').innerHTML = PS.rounds.map((r, k) => `<i class="rp${k < PS.ri || (k === PS.ri && done) ? ' ok' : k === PS.ri ? ' cur' : ''}"></i>`).join('');
     $('psFill').style.transform = `scaleX(${done ? 1 : p.total ? p.done / p.total : 0})`;
@@ -2217,7 +2218,7 @@ const MultGame = (() => {
     $('psOver').classList.remove('on'); PS.W = null;
     stageQ(eqHTML(cur.a, cur.b), cur.retry ? 'En gång till' : cur.extra ? 'Tillbaka igen' : '');
     ctrlS.set(options(cur.a, cur.b).map(v => ({ label:String(v), v })), false);
-    const intro = first ? (type === 'free' ? 'Nu skriver du svaret själv.' : type === 'choice' ? 'Nu blandas frågorna.' : '') : '';
+    const intro = first && !PS.daily ? (type === 'free' ? 'Nu skriver du svaret själv.' : type === 'choice' ? 'Nu blandas frågorna.' : '') : '';
     say('passBubble',
       cur.retry ? 'Samma fråga en gång till.'
       : cur.extra ? 'Den här frågan kommer tillbaka en gång till.'
@@ -2229,7 +2230,10 @@ const MultGame = (() => {
     if (!PS || PS.phase !== 'q') return;
     const cur = PS.drill.current(), ab = cur.a * cur.b, ok = o.v === ab;
     const res = PS.drill.answer(ok);
-    if (res.record) recordAnswer(cur.a, cur.b, ok);        // bara första försöket räknas
+    if (res.record){
+      recordAnswer(cur.a, cur.b, ok);                      // bara första försöket räknas
+      if (!(KEY(cur.a, cur.b) in PS.first)) PS.first[KEY(cur.a, cur.b)] = ok;   // Dagens träning: första svaret per tal
+    }
     ctrlS.done();
     snd(ok ? 'correct' : 'wrong');
     if (ok){
@@ -2326,6 +2330,12 @@ const MultGame = (() => {
   }
   function finishOvp(){
     const R0 = receiptFor(PS.res, Date.now() - PS.start);
+    if (PS.daily){                                       // Dagens träning: inget eget kvitto, ingen logg – statistiken går tillbaka
+      const d = PS.daily, first = { ...PS.first };
+      PS.token++;
+      d.onDone({ correct:R0.correct, total:R0.total, fixed:R0.fixed, secs:R0.secs, first });
+      return;
+    }
     const entry = { type:'ovningspass', tables:PS.tables, upto:PS.upto, rounds:R0.rounds, correct:R0.correct, total:R0.total, pct:R0.pct, fixed:R0.fixed, secs:R0.secs };
     if (PS.hard){ entry.hard = true; entry.pairs = PS.pairs.map(([a, b]) => KEY(a, b)); }
     addSessionLog(entry);
@@ -2752,7 +2762,7 @@ const MultGame = (() => {
   function stopTimer() { stopClock(); }
 
   /* ══════════════════════════════════════════════════════
-     FRÅGESESSION (Fokuserad träning i Statistik, Dagens träning)
+     FRÅGESESSION (Fokuserad träning i Statistik)
      Eget matteprov är borttaget ur hubben (v58): övningspasset med
      flera tabeller ersätter det.
   ══════════════════════════════════════════════════════ */
@@ -2762,7 +2772,7 @@ const MultGame = (() => {
        hint         – text ovanför frågan ('' döljer raden)
        onCancel     – Avbryt-knappens handling (default: Statistik)
        onDone(stats)– egen resultathantering (default: showFocusResult)
-     Återanvänds av Dagens träning (js/daily.js) via runFocusedSession. */
+     Används av Fokuserad träning i Statistik. */
   function runCustomSession(questions, tables, opts) {
     opts = opts || {};
     const quiz = MP.createRetryQuiz(questions);
@@ -3033,26 +3043,38 @@ const MultGame = (() => {
     runCustomSession(problems, tables);
   }
 
-  /* Parametriserad fokuserad träning för externa moduler
-     (Dagens träning, js/daily.js): exakt frågelista in
-     [{table, mult}, ...], callbacks ut. Sätter profil och kan
-     tillfälligt tvinga svarsläge ('choice') – användarens val
-     återställs när passet avslutas eller avbryts. */
-  function runFocusedSession(p, pairs, opts) {
-    opts = opts || {};
+  /* ══════════════════════════════════════════════════════
+     DAGENS TRÄNING (js/daily.js, v65)
+  ══════════════════════════════════════════════════════ */
+  /* Kandidaterna: varje par inom Gånger (upto) med sin låda, i lätt-först-ordning (easyFirst,
+     samma ordning som passet använder för nya tal). Läser lådorna utan att skriva: saknas de
+     byggs de ur statistiken i minnet, som loadTrainer skulle göra. Ren mot localStorage. */
+  function dailyCandidatesFrom(pairs, n, day){
+    return pairsUpTo(n).slice().sort(easyFirst).map(([a, b], i) => {
+      const st = pairs[KEY(a, b)] || freshPair();
+      return { module:'mult', key:KEY(a, b), label:`${a}·${b}`, state:vis(st, day), due:st.due || null, okDays:Number(st.okDays) || 0, order:i };
+    });
+  }
+  function dailyCandidates(p, day = today()){
+    if (!p) return [];
+    const raw = readJSON(BOX_KEY(p.id));
+    let pairs;
+    if (raw && raw.v === 2 && validPairs(raw.pairs)) pairs = raw.pairs;
+    else pairs = pairsFromStats(readJSON(STATS_KEY(p.id)) || {}, day);
+    return dailyCandidatesFrom(pairs, +settingsFrom(readJSON(SET_KEY(p.id))).upto, day);
+  }
+  /* Dagens avsnitt med gångertabellens tal: övningspasset med en parlista, ett varv flerval.
+     Nötloopen och rektangeln vid fel som vanligt; recordAnswer på första försöket.
+     keys = kandidaternas nycklar ('7x8'). Inget eget kvitto och ingen logg:
+     opts.onDone({ correct, total, fixed, secs, first }) där first = { '7x8': rätt på första
+     försöket }. Avbryt frågar först, sedan opts.onCancel(). */
+  function runDaily(p, keys, opts){
+    const pairs = cleanPairs((keys || []).map(k => String(k).split('x').map(Number)));
+    if (!pairs.length){ opts.onDone({ correct:0, total:0, fixed:0, secs:0, first:{} }); return; }
     profile = p;
     loadSettings();
-    stopTimer();
-    const prevMode = answerMode;
-    if (opts.answerMode) answerMode = opts.answerMode;
-    const restore = () => { answerMode = prevMode; };
-    const tables = [...new Set(pairs.map(q => q.table))];
-    runCustomSession(pairs.slice(), tables, {
-      headerTitle: opts.headerTitle,
-      hint:        opts.hint,
-      onCancel:    opts.onCancel && (() => { restore(); opts.onCancel(); }),
-      onDone:      opts.onDone && ((stats) => { restore(); opts.onDone(stats); }),
-    });
+    renderMain();                                         // skalet monteras (hubben), passet tar över direkt
+    goto('pass', { pairs, counts:{ show:0, choice:1, free:0 }, daily:opts });
   }
 
   function confirmReset() {
@@ -3131,7 +3153,7 @@ const MultGame = (() => {
   }
 
   /* ══════════════════════════════════════════════════════
-     SVARSGRÄNSSNITT (Fokuserad träning, Dagens träning)
+     SVARSGRÄNSSNITT (Fokuserad träning)
   ══════════════════════════════════════════════════════ */
   function buildAnswerUI(table, mult, correctAnswer, callback) {
     if (answerMode === 'choice') {
@@ -3227,7 +3249,8 @@ const MultGame = (() => {
     showStats,
     showLog,
     startFocusedTraining,
-    runFocusedSession,
+    dailyCandidates,
+    runDaily,
     confirmReset,
     stopTimer,
     showModal,
@@ -3236,7 +3259,12 @@ const MultGame = (() => {
     // Händelsehanterare (sätts dynamiskt av renderfunktioner)
     _sessionCancel: null,
     _doReset: null,
-    _cancelPass(){ hideModal(); if (S.screen === 'pass') goto('hub'); },
+    _cancelPass(){
+      hideModal();
+      if (S.screen !== 'pass') return;
+      if (PS && PS.daily){ const d = PS.daily; PS.token++; PS = null; d.onCancel(); return; }   // Dagens träning: tillbaka dit den startades
+      goto('hub');
+    },
 
     _handleChoice(selected, correct) {
       const wasCorrect = selected === correct;
@@ -3305,6 +3333,7 @@ const MultGame = (() => {
       HARD_WHY, HARD_ALL_OK, hardWeakLabel, hardWhat, receiptHTML, logLabel, logSub,
       RTYPES, PRESETS, normCounts, roundTypes, presetFor, cleanTables, roundItems, buildRounds, passPlan, planSummary,
       createDrill, receiptFor, praiseFor, durTxt, passExplainFor, settingsFrom, UPTO_DEFAULT, endSummaryFor: (moves, after) => { const keep = P; P = { moves, after }; try { return endSummary(); } finally { P = keep; } },
+      dailyCandidatesFrom,
       setToday: d => { todayOverride = d || null; },
       today,
       peek: () => ({ screen:S.screen, busy, pass:P, rec:R, ovp:PS, setup:SU, learn:LW && { walker:LW, flip:LF }, trainer:S.T, settings:{ ...SET, answer:answerMode } }),
