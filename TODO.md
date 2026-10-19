@@ -2,9 +2,9 @@
 
 ## Öppet
 
-- [ ] **Geografi: Sveriges landskap** (D22, P8). Tankepasset `brainstorm/07` och mockupen
-      `design-lab/geografi-mockup.html` är klara 19/10 (underlaget i `referens/`) → Mira provar → Dennis dömer de sex
-      valen i tankepassets Utfall → egen gren med `fore-geografi`.
+- [ ] **Geografi: Sveriges landskap** (D22, D24–D29). Mockupen `design-lab/geografi-mockup.html` omgjord 19/10 efter
+      samtalet (`brainstorm/08`) → Mira provar på telefonen → Dennis dömer valen i loggen 19/10 ("Geografi: mockupen
+      omgjord") → egen gren med `fore-geografi`.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på Miras eller Dennis telefon).

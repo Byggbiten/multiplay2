@@ -1,7 +1,7 @@
 # referens/sverige-landskap/ — faktaunderlag för Sveriges landskap
 
 Underlag för Geografi → Sverige → Sveriges landskap (D22, D24–D27; D27: djur och blommor visas som bild + text). Framtaget 2026-10-19. Ingen appkod använder
-filerna ännu. Städerna väntar på Dennis godkännande (D25).
+filerna ännu; mockupen `design-lab/geografi-mockup.html` läser dem. Städerna är godkända (D28).
 
 | Fil / mapp | Vad |
 |---|---|

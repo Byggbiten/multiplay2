@@ -66,5 +66,9 @@ folkminstast"): faktan visas (1) på landskapskortet i Utforska, (2) som en kort
 
 ## Utfall
 Dennis svar 19/10: städerna → D25, nedladdning från Wikimedia → D26, strukturen Geografi → Sverige → Sveriges
-landskap → D24; menyn i Geografi (Sverige, Europa, övriga världsdelar, Hela världen, Världens hav som egna moduler) → D24 ✎. Spellägen i första versionen: öppet (P10). Mockupen `design-lab/geografi-mockup.html` (från 07) står som förslag och görs om
-efter detta samtal.
+landskap → D24; menyn i Geografi (Sverige, Europa, övriga världsdelar, Hela världen, Världens hav som egna moduler) → D24 ✎. Spellägen i första versionen (P10): pusslet och samlarpärmen med, djur och blommor som bild + text, sköldarna med → D27; städerna godkända → D28; bildkällorna bakom en informationsknapp → D29.
+
+**Mockupen omgjord 19/10** efter samtalet: `design-lab/geografi-mockup.html` följer nu D24–D29 (menyn → Sverige → Sveriges
+landskap; Utforska, Träna med fyra lägen, Pussel, Samlarpärm, Test, bildkällorna). Förslag 6 och 7 (Resan genom Sverige,
+Vem är jag?) väntar enligt D27. Vad som verifierats och de val Dennis bör döma: loggen 19/10, avsnittet "Geografi:
+mockupen omgjord". Väntar på Dennis och Mira.
