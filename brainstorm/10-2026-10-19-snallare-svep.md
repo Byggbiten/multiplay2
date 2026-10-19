@@ -20,6 +20,8 @@ Minnessiffror och mellanrester, hundratalets platsvärdesfärg, klockans minutf�
 sant/falskt, ⌫-knappar och profilradering.
 
 ## Utfall
+- Resultatraden ändrad efter Dennis samma kväll (D39 ✎): "Du klarade 7 av 10 – Bra kämpat! 💪" från 60 %, under
+  60 % bara "Du fick 3 av 10 rätt".
 - D39 genomförd i övriga moduler; släpps med v69.
 - Öppna frågor till Dennis: P13 (Klar efter en enda siffra i fria lägen) och P14 (skakningar vid fel och röd puls i
   demon).

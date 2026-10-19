@@ -513,3 +513,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   (Vad kostar 5 bollar? [ ] · [ ] = [ ], sedan [ ] − [ ] = [ ]); prislistan går att trycka på; uttrycket visas sist
   som slutsats. Källa: Dennis: "Den här övningsdelen behöver lite pedagogisk kärlek i hur man skall skriva och hur
   man skall svara."
+- ✎ **2026-10-19, resultatraden:** från 60 % rätt: "Du klarade 7 av 10 – Bra kämpat! 💪"; alla rätt: "Du klarade alla
+  10!"; under 60 %: bara resultatet utan värdering, "Du fick 3 av 10 rätt". Gäller `MP.resultNote` och matteprovets
+  resultatrader. Källa: Dennis: "den formuleringen gillade jag inte. för vissa barn kanske 7 av 10 är helt
+  fantastiskt. då tycker jag: Resultat skrivs som 'Du klarade 7 av 10 – Bra kämpat! 💪' sen kommer man under 6 av 10
+  rätt så får man bara veta resultatet, utan någon värdering i det. Typ: Du fick 3 av 10 rätt" (emojin är hans val).

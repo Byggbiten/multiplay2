@@ -87,10 +87,14 @@ describe('D39: inga dömande ord i modulerna', () => {
 describe('D39: resultatraden', () => {
   it('säger vad barnet klarade, aldrig "rätt" som dom', () => {
     expect(MP.resultNote(5, 5)).toBe('Du klarade alla 5!');
-    expect(MP.resultNote(4, 5)).toBe('Du klarade 4 av 5 – nästan alla!');
-    expect(MP.resultNote(7, 10)).toBe('Du klarade 7 av 10 – de andra övar vi mer på');
-    expect(MP.resultNote(0, 10)).toBe('De här övar vi mer på');
-    expect(MP.resultNote(7, 10, ' på första försöket')).toBe('Du klarade 7 av 10 på första försöket – de andra övar vi mer på');
-    [0, 1, 3, 9, 10].forEach(c => expect(MP.resultNote(c, 10)).not.toMatch(/rätt|fel|tyvärr/i));
+    expect(MP.resultNote(4, 5)).toBe('Du klarade 4 av 5 – Bra kämpat! 💪');
+    expect(MP.resultNote(7, 10)).toBe('Du klarade 7 av 10 – Bra kämpat! 💪');
+    expect(MP.resultNote(6, 10)).toBe('Du klarade 6 av 10 – Bra kämpat! 💪');
+    expect(MP.resultNote(5, 10)).toBe('Du fick 5 av 10 rätt');
+    expect(MP.resultNote(0, 10)).toBe('Du fick 0 av 10 rätt');
+    expect(MP.resultNote(7, 10, ' på första försöket')).toBe('Du klarade 7 av 10 på första försöket – Bra kämpat! 💪');
+    expect(MP.resultNote(3, 10, ' på första försöket')).toBe('Du fick 3 av 10 rätt på första försöket');
+    /* under 60 %: bara resultatet, ingen värdering (D39 ✎) */
+    [0, 1, 3, 5].forEach(c => expect(MP.resultNote(c, 10)).not.toMatch(/kämpat|övar|tyvärr|fel/i));
   });
 });

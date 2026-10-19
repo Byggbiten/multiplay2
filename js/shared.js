@@ -320,14 +320,14 @@
     if (pct >= 60)  return 'Bra nött! Du kämpade dig hela vägen.';
     return 'Du nötte dig igenom hela passet. Allt blev rätt till slut.';
   };
-  /* Resultatraden efter ett test (D39): säger vad barnet klarade, aldrig "X av Y rätt" som dom.
+  /* Resultatraden efter ett test (D39 ✎): från 60 % "Du klarade 7 av 10 – Bra kämpat! 💪" (7 av 10 kan vara
+     fantastiskt för ett barn); under 60 % bara resultatet, utan värdering: "Du fick 3 av 10 rätt".
      tail (valfri) står efter talen, t.ex. ' på första försöket'. */
   MP.resultNote = function (correct, total, tail) {
     const t = tail || '';
     if (total > 0 && correct >= total) return `Du klarade alla ${total}${t}!`;
-    if (correct <= 0) return 'De här övar vi mer på';
-    if (total - correct === 1) return `Du klarade ${correct} av ${total}${t} – nästan alla!`;
-    return `Du klarade ${correct} av ${total}${t} – de andra övar vi mer på`;
+    if (total > 0 && correct / total >= 0.6) return `Du klarade ${correct} av ${total}${t} – Bra kämpat! 💪`;
+    return `Du fick ${correct} av ${total} rätt${t}`;
   };
   /* Kvittots datum ("onsdag 23 september kl. 18:05") och stämpelns ("23 sep. 18:05") */
   MP.fmtWhen = function (iso) { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };

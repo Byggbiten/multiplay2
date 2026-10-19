@@ -1259,18 +1259,24 @@ const MatteProv = (() => {
     if (S.mode === 'prov') {
       t.items.forEach((it, i) => S.results.push({ moment:'tabell', ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
       S.idx++;
-      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}Du klarade ${c.direkt} av ${t.items.length} direkt</h3>${sum}
+      html = `${resHead(c.direkt, t.items.length)}${sum}
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>`;
     } else {
       S.wrongItems = t.items.filter((_, i) => IN.out[i] !== 'direkt');
       S.done = true;
-      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}Du klarade ${c.direkt} av ${t.items.length} direkt</h3>${sum}
+      html = `${resHead(c.direkt, t.items.length)}${sum}
         <div class="mp-navrow">${S.wrongItems.length ? `<button class="mp-cta" data-act="sheetnot">${svg('again')}Nöt de ${S.wrongItems.length} som inte satt</button>` : ''}
         <button class="mp-cta sec" data-act="prov">Klar</button></div></div>`;
     }
     renderTask({ ok:true, sheetDone:true, html }, true, t);
   }
   /* De tre utfallen som små siffror: rätt direkt · med hjälp · fick svaret */
+  /* Resultatraden (D39 ✎): från 60 % "Du klarade 17 av 20 direkt – Bra kämpat! 💪" med grön ram; under 60 % bara
+     resultatet ("Du fick 3 av 20 rätt direkt"), neutral ram och ingen bock – ingen värdering. */
+  const resHead = (ok, total) => {
+    const high = total > 0 && ok / total >= 0.6;
+    return `<div class="mp-fb${high ? ' good' : ''}" style="padding:10px 12px"><h3>${high ? svg('check') : ''}${esc(MP.resultNote(ok, total, ' direkt'))}</h3>`;
+  };
   const k3 = (d, h, s) => `<span class="mp-k3"><i class="d" title="Klarade direkt">${d}</i><i class="h" title="Klarade med hjälp">${h}</i><i class="s" title="Övar vi mer på">${s}</i></span>`;
   const k3Legend = () => `<span class="mp-k3leg"><i class="d"></i>Klarade direkt<i class="h"></i>Med hjälp<i class="s"></i>Övar vi mer på</span>`;
 
@@ -1362,11 +1368,12 @@ const MatteProv = (() => {
     const hardNow = L.hardList(p.hard);
     S.rec = rec; S.weak = sum.weak; S.mode = 'kvitto';
     snd('fanfare');
-    const praise = sum.ok === sum.total ? 'Allt satt direkt!' : sum.weak.length ? 'Bra kämpat! Nu vet du vad du ska öva på.' : 'Starkt! Alla moment är gröna.';
+    /* D39 ✎: från 60 % beröm, under 60 % bara resultatet */
+    const praise = sum.ok === sum.total ? '' : MP.resultNote(sum.ok, sum.total, ' direkt') + (sum.total && sum.ok / sum.total >= 0.6 && !sum.weak.length ? ' Alla moment är gröna.' : '');
     const when = MP.fmtWhen(iso);
     const per = sum.per.filter(x => x.total);
     frame(S.mitt ? 'Mitt prov klart' : 'Provet klart', 'prov', 'Klar', '', `
-      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok === sum.total ? 'Allt satt direkt!' : 'Provet är klart!'}</h2><p>Du klarade ${sum.ok} av ${sum.total} direkt. ${esc(praise)}</p></div>
+      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok === sum.total ? 'Allt satt direkt!' : 'Provet är klart!'}</h2><p>${sum.ok === sum.total ? `Du klarade alla ${sum.total} direkt.` : esc(praise)}</p></div>
       <div class="mp-rc">
         <div class="mp-rc-top"><span class="mp-rc-k">${esc(S.mitt ? 'Mitt prov' : prov().title)} · ${esc(levelName(S.lv))}</span><span class="mp-rc-when">${esc(when.charAt(0).toUpperCase() + when.slice(1))}</span></div>
         <div class="mp-rc-row leg">${k3Legend()}</div>
