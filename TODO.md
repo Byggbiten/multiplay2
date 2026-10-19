@@ -2,7 +2,6 @@
 
 ## Öppet
 
-- [ ] Matteprov 1 (D37): Dennis provar på dev, sedan release v67 före provdagen.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på en riktig telefon).
@@ -14,6 +13,8 @@
 - [ ] (Senare) P5: avgör om varje timme ska övas i både "över"- och "i"-form i Klockans Kvart och Runt halv.
 
 ## Klart
+
+- [x] Matteprov 4:an med Matteprov 1 (D37, D38), live i v67 2026-10-19.
 
 - [x] 2026-10-19 ~~Geografi inbyggd i appen och livesatt~~ i v66 (D35, D36); integriteten rensad (D36).
 - [x] 2026-10-19 ~~P9: tio sammanslagna grenar på GitHub borttagna~~ (D23).
