@@ -509,3 +509,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   "Kan man inte bara göra så då att 'nästa ruta-knappen' är den enda knappen, och när allt ä ifyllt så ändras den
   till att heta klar. Och om man innan trycker på klar, ändrar eller suddar något, så går den tillbaka till att heta
   nästa ruta?"
+- ✎ **2026-10-19, problemlösningen i ledda steg:** i stället för ett tomt uttrycksfält fyller barnet en mall per steg
+  (Vad kostar 5 bollar? [ ] · [ ] = [ ], sedan [ ] − [ ] = [ ]); prislistan går att trycka på; uttrycket visas sist
+  som slutsats. Källa: Dennis: "Den här övningsdelen behöver lite pedagogisk kärlek i hur man skall skriva och hur
+  man skall svara."
