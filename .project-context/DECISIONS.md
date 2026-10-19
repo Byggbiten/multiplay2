@@ -61,6 +61,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
+- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör
 
 ---
 
@@ -493,3 +494,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - ✎ **2026-10-19, ångra och gör om i kladden:** kladden får Ångra och Gör om i flera steg (per penn- och suddrag;
   Rensa går att ångra). Källa: Dennis: "sen vill jag har en ångra-knapp på kladdytan. Så om de råkar rita tokigt, så
   kan de ångra i flera steg. även en återgå knapp som funkar precis som ångra, fast åt andra hållet i flera steg."
+
+## D39 · 2026-10-19 · Snällare app: ljud, färger och ord som inte säger misslyckande
+- **Beslut:** appen ska vara snällare mot barn som är känsliga för att misslyckas. Inget argt felljud, inga
+  signalfärger som säger "fel" (rött), och ord som "Inte riktigt" i stället för "fel". Felljudet byts i hela appen.
+  Gränssnittet ska vara så tydligt att barnet inte trycker på fel knapp: i tabelltestet var Klar den framträdande
+  knappen fast den rättar hela testet, och tomma rutor räknades som fel.
+- **Källa:** Dennis 2026-10-19: "Jag klickade på klar. och fick 1 av 20 rätt. jag trodde att det va knappen man skulle
+  trycka på. Och möttes då av ett ljud som arg signalerade att jag gjorde fel. Sånt är [barnet] väldigt känslig för.
+  Ljud och färger som på något sätt indikerar att hon har misslyckats eller gjort fel. Så appen måste bli snällare och
+  använda formuleringar såsom.. inte riktigt... Men just i detta fall så är det nog vårt UI som inte va tydligt nog."

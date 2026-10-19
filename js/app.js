@@ -36,13 +36,16 @@ const Sound = (() => {
         osc.start(ac.currentTime);
         osc.stop(ac.currentTime + 0.5);
       } else if (type === 'wrong') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, ac.currentTime);
-        osc.frequency.setValueAtTime(200, ac.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.2, ac.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.4);
+        /* D39: ett mjukt, lågt "hmm" (sinus, svag, glidande) i stället för den gamla surret –
+           ljudet ska säga "inte riktigt ännu", aldrig "fel". */
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(392, ac.currentTime);                  // G4
+        osc.frequency.linearRampToValueAtTime(349, ac.currentTime + 0.25);  // F4
+        gain.gain.setValueAtTime(0.0001, ac.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.07, ac.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
         osc.start(ac.currentTime);
-        osc.stop(ac.currentTime + 0.4);
+        osc.stop(ac.currentTime + 0.35);
       } else if (type === 'fanfare') {
         const notes = [523, 659, 784, 1047];
         notes.forEach((freq, i) => {
