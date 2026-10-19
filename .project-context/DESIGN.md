@@ -18,7 +18,7 @@ Spelväljaren i `index.html` har sex kort och ett hjältekort för Dagens träni
 | Nationella prov åk 3 | `js/nationella.js`, `js/np-matte-muntligt.js`, `js/np-matte-skriftlig.js`, `js/np-svenska.js`, `js/np-svenska-texts.js` | Hubb för matematik (muntlig och skriftlig del) och svenska. | `SPEC-NP-MATTE-MUNTLIGT.md` (historisk) |
 | Dagens träning | `js/daily.js` | Hjältekortet: plockar ur lådorna i Gångertabellen och Klockan, ett pass med båda, gemensam slutskärm (D20). | — |
 | Capybara-samlingen | `js/capy.js` | 24 samlarkort som komponerbara SVG:er, nivåerna Nytt kort, silver och guld med "Så fick du den" (D14). | — |
-| Geografi | — (planerad) | Sveriges landskap med läxbokens numrering 1–25 (D22, P8). | — |
+| Geografi | — (planerad) | Sveriges landskap med läxbokens numrering 1–25 (D22, P8). | Förslag: `design-lab/geografi-mockup.html`, `brainstorm/07` (väntar på Dennis) |
 
 `js/app.js` äger routing, profiler, `Store`, ljud, konfetti och `APP_VERSION`. `sw.js` cachar appen
 (`CACHE_VERSION`, network-first för HTML/JS/CSS).

@@ -34,4 +34,5 @@ Besvarad fråga stryks med `~~text~~ → Dn` och raderas aldrig. Nya frågor få
 
 - **P8 Geografimodulens upplägg och pedagogik.** Hur Sveriges landskap ska läras ut och övas (D22): lägen, frågetyper,
   kartans interaktion, hur läxbokens numrering 1–25 används, och om modulen delar lådorna och nötloopen i
-  `js/shared.js`.
+  `js/shared.js`. Förslag 19/10: `brainstorm/07-2026-10-19-geografi-landskap.md` och `design-lab/geografi-mockup.html`,
+  med sex val att döma i tankepassets Utfall.

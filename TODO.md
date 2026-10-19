@@ -2,9 +2,9 @@
 
 ## Öppet
 
-- [ ] **Geografi: Sveriges landskap** (D22, P8). Brainstorm om upplägg och pedagogik i `brainstorm/07-…`, sedan
-      klickbar mockup med färgkartan (`~/Downloads/Sveriges_landskap_farg.svg`) och läxbokens numrering 1–25 (fotot
-      `~/Downloads/IMG_8679.HEIC`) → Mira provar → Dennis dömer → egen gren med `fore-geografi`.
+- [ ] **Geografi: Sveriges landskap** (D22, P8). Tankepasset `brainstorm/07` och mockupen
+      `design-lab/geografi-mockup.html` är klara 19/10 (underlaget i `referens/`) → Mira provar → Dennis dömer de sex
+      valen i tankepassets Utfall → egen gren med `fore-geografi`.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på Miras eller Dennis telefon).
