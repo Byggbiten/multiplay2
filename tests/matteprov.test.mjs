@@ -173,79 +173,70 @@ describe('nivåvillkoren håller', () => {
   });
 });
 
-describe('felklassningen i uppställningen', () => {
-  it('lärarens exempel 17 · 32: 224 + 320 = 544, nollan i den grå rutan', () => {
-    const t = L.makeUpp(17, 32);
-    expect(t.top).toBe(32); expect(t.bot).toBe(17);
-    expect(t.p1).toBe(224); expect(t.p2).toBe(320); expect(t.answer).toBe(544);
-    const W = t.width;
-    expect(L.classifyUpp(t, { p1:cells(224, W), p2:cells(320, W), s:cells(544, W) })).toBe('ok');
-    /* rad 2 skriven som 32 (nollan glömd), summan 256 */
-    expect(L.classifyUpp(t, { p1:cells(224, W), p2:cells(32, W), s:cells(256, W) })).toBe('nolla');
-    /* bara summan, räknad utan nollan */
-    expect(L.classifyUpp(t, { s:cells(256, W) })).toBe('nolla');
-    /* rad 2 rätt placerad men den grå rutan tom: räknas som glömd nolla */
-    const grey = cells(320, W); grey[0] = null;
-    expect(L.classifyUpp(t, { p1:cells(224, W), p2:grey, s:cells(544, W) })).toBe('nolla');
-    /* rätt summa men en rad saknas: uträkningen ska synas */
-    expect(L.classifyUpp(t, { s:cells(544, W) })).toBe('rader');
-    expect(L.classifyUpp(t, { p1:cells(224, W), s:cells(544, W) })).toBe('rader');
-  });
-  it('hittar glömd nolla i många slumpade tvåsiffriga uppgifter', () => {
-    const r = seeded(31);
-    for (let i = 0; i < N; i++) for (const lv of LEVELS) {
-      const t = L.genUpp(lv, 'tva', r), W = t.width, noZero = t.top * t.tens;
-      expect(L.classifyUpp(t, { p1:cells(t.p1, W), p2:cells(noZero, W), s:cells(t.p1 + noZero, W) })).toBe('nolla');
-      expect(L.check(t, { s:cells(t.p1 + noZero, W) }).cls).toBe('nolla');
+describe('felklassningen i uppställningen (raderna bokförs av appen, bara summan rättas)', () => {
+  it('17 · 32 och 687 · 8: facit är rätt, summan utan minne ger "summinne", annat fel "addition", tom "fel"', () => {
+    for (const t of [L.makeUpp(17, 32), L.makeUpp(687, 8)]) {
+      const F = L.uppFacitRows(t), W = t.width;
+      expect(L.classifyUpp(t, F)).toBe('ok');
+      expect(L.classifyUpp(t, Object.assign({}, F, { s:Array(W).fill(null) }))).toBe('fel');
+      expect(L.classifyUpp(t, Object.assign({}, F, { s:cells(t.answer + 2, W) }))).toBe('addition');
     }
+    const e = L.makeUpp(687, 8);
+    expect(L.noCarrySumN(L.uppPlaces(e))).toBe(4496);                // 56 + 640 + 4800 utan minnet i hundratalet
+    expect(L.classifyUpp(e, { s:cells(4496, 4) })).toBe('summinne');
+    expect(L.uppFacitRows(e).r1).toEqual([null, 4, 6, null]);        // förskjuten, entalsrutan tom
   });
-  it('ensiffrig faktor: lärarens form 687 · 8 = 56 + 640 + 4800 = 5496 (raderna förskjutna, utan nolla)', () => {
-    const t = L.makeUpp(687, 8), F = L.uppFacitRows(t);
-    expect(t.parts.map(p => p.val)).toEqual([56, 64, 48]);
-    expect(F.r1).toEqual([null, 4, 6, null]);                        // entalsrutan tom
-    expect(F.r2).toEqual([null, null, 8, 4]);
-    expect(L.classifyUpp(t, F)).toBe('ok');
-    expect(L.classifyUpp(t, Object.assign({}, F, { r1:[4, 6, null, null] }))).toBe('plats');      // inte förskjuten
-    expect(L.classifyUpp(t, Object.assign({}, F, { r1:[0, 4, 6, null] }))).toBe('ok');            // en nolla där är inte fel
-    expect(L.classifyUpp(t, { s:F.s })).toBe('rader');                                              // bara summan
-  });
-  it('ensiffrig faktor: glömd minnessiffra kan bara gälla additionen', () => {
+  it('glömd minnessiffra i summan hittas för många slumpade uppgifter', () => {
     const r = seeded(32);
-    for (let i = 0; i < N; i++) for (const lv of LEVELS) {
-      const t = L.genUpp(lv, 'en', r), F = L.uppFacitRows(t), places = t.parts.map(p => p.place);
-      const nc = L.noCarrySumN(places);
-      expect(nc).not.toBe(t.answer);                 // generatorn ger alltid minne i additionen
-      const W = Math.max(t.width, L.digitsOf(nc).length);
-      const rows = {}; for (const k of Object.keys(F)) if (k !== 's') rows[k] = F[k];
-      expect(L.classifyUpp(t, Object.assign({}, rows, { s:cells(nc, W) }))).toBe('summinne');
-      expect(L.classifyUpp(t, Object.assign({}, rows, { s:cells(t.answer + 1, W) }))).not.toBe('ok');
+    let hits = 0;
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of L.genUppstallning(lv, 2, r)) {
+      const nc = L.noCarrySumN(L.uppPlaces(t));
+      if (nc === t.answer) continue;
+      hits++;
+      expect(L.classifyUpp(t, { s:cells(nc, Math.max(t.width, L.digitsOf(nc).length)) })).toBe('summinne');
+    }
+    expect(hits).toBeGreaterThan(N);
+  });
+  it('varje felklass har en egen återkoppling, och de borttagna klasserna finns inte kvar', () => {
+    expect(Object.keys(L.UPP_FEEDBACK).sort()).toEqual(['addition', 'fel', 'summinne']);
+    for (const k of Object.keys(L.UPP_FEEDBACK)) expect(L.UPP_FEEDBACK[k].length).toBeGreaterThan(10);
+  });
+});
+
+describe('radfrågan (D38 ✎): appen frågar, barnet svarar, appen bokför på rätt plats', () => {
+  it('4689 · 6: "Vad är 6 · 9?" = 54 bokförs med 4 i entalet och 5 i tiotalet', () => {
+    const t = L.makeUpp(4689, 6);
+    expect(L.rowQuestion(t, 'r0')).toEqual({ text:'Vad är 6 · 9?', answer:54 });
+    expect(L.rowBook(t, 'r0')).toEqual([{ row:'r0', col:0, val:4 }, { row:'r0', col:1, val:5 }]);
+    expect(L.rowBook(t, 'r1')).toEqual([{ row:'r1', col:1, val:8 }, { row:'r1', col:2, val:4 }]);   // 6 · 8 = 48, ett steg in
+  });
+  it('82 · 68: radsumman 656 bokförs i rad 1, 492 bokförs som 4920 efter barnets nolla', () => {
+    const t = L.makeUpp(82, 68);
+    expect(L.rowQuestion(t, 'p1').answer).toBe(656);
+    expect(L.rowQuestion(t, 'p2').answer).toBe(492);
+    expect(L.rowBook(t, 'p2')).toEqual([{ row:'p2', col:1, val:2 }, { row:'p2', col:2, val:9 }, { row:'p2', col:3, val:4 }]);   // grå rutan lämnas åt barnet
+  });
+  it('bokföringen ger facit för varje rad, för många slumpade uppgifter', () => {
+    const r = seeded(402);
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of L.genUppstallning(lv, 2, r)) {
+      const F = L.uppFacitRows(t), vals = {};
+      for (const row of L.uppRowsOrder(t)) {
+        vals[row] = Array(t.width).fill(null);
+        for (const c of L.rowBook(t, row)) vals[row][c.col] = c.val;
+        if (row === 'p2') vals.p2[0] = 0;                                    // barnets nolla
+        expect(vals[row]).toEqual(F[row]);
+      }
+      expect(L.uppOpenRows(t, vals).slice(-1)[0]).toBe('s');                 // summan låses upp
     }
   });
-  it('hittar glömd minnessiffra i raderna och i additionen (tvåsiffrig, Svårare)', () => {
-    const r = seeded(33);
-    let rowHits = 0, addHits = 0;
-    for (let i = 0; i < N; i++) {
-      const t = L.genUpp('svar', 'tva', r), W = t.width + 1;
-      const p1nc = L.noCarryPass(t.top, t.ones), p2nc = L.noCarryPass(t.top, t.tens) * 10;
-      if (p1nc !== t.p1) { rowHits++; expect(L.classifyUpp(t, { p1:cells(p1nc, W), p2:cells(t.p2, W), s:cells(p1nc + t.p2, W) })).toBe('minne'); }
-      else if (p2nc !== t.p2) { rowHits++; expect(L.classifyUpp(t, { p1:cells(t.p1, W), p2:cells(p2nc, W), s:cells(t.p1 + p2nc, W) })).toBe('minne'); }
-      const sn = L.noCarrySum(t.p1, t.p2);
-      if (sn !== t.answer) { addHits++; expect(L.classifyUpp(t, { p1:cells(t.p1, W), p2:cells(t.p2, W), s:cells(sn, W) })).toBe('minne'); }
-    }
-    expect(rowHits).toBeGreaterThan(N * 0.8);
-    expect(addHits).toBeGreaterThan(0);
+  it('trappan per rad: försök igen, ledtråd, svaret', () => {
+    expect([1, 2, 3, 4].map(L.rowHelpStep)).toEqual(['retry', 'hint', 'svar', 'svar']);
+    expect(L.rowHint(L.makeUpp(4689, 6), 'r0')).toBe('6 · 8 = 48. Lägg till en 6:a.');
+    expect(L.rowHint(L.makeUpp(82, 68), 'p1')).toBe('Uppdelningen: 8 · 80 = 640 och 8 · 2 = 16. Lägg ihop dem.');
   });
-  it('raderna rätt men summan fel ger "addition"; annat fel ger "fel"', () => {
-    const t = L.makeUpp(79, 84), W = t.width;
-    expect(L.classifyUpp(t, { p1:cells(t.p1, W), p2:cells(t.p2, W), s:cells(t.answer + 1, W) })).toBe('addition');
-    const e = L.makeUpp(3, 254), F = L.uppFacitRows(e);
-    expect(L.classifyUpp(e, Object.assign({}, F, { r0:cells(13, 4) }))).toBe('fel');
-    expect(L.classifyUpp(e, F)).toBe('ok');
-  });
-  it('varje felklass har en egen återkoppling', () => {
-    for (const k of ['nolla', 'minne', 'addition', 'fel', 'plats', 'summinne', 'rader']) expect(L.UPP_FEEDBACK[k].length).toBeGreaterThan(10);
-    expect(L.UPP_FEEDBACK.nolla).toMatch(/grå rutan/);
-    expect(L.UPP_FEEDBACK.minne).toMatch(/minnessiffran/);
+  it('ledtråden innehåller aldrig radens svar (ensiffrig), för många slumpade uppgifter', () => {
+    const r = seeded(403);
+    for (let i = 0; i < N; i++) { const t = L.genUpp('svar', 'en', r); for (const p of t.parts) expect((L.rowHint(t, 'r' + p.i).match(/\d+/g) || []).map(Number)).not.toContain(p.val); }
   });
 });
 
@@ -450,13 +441,8 @@ describe('hjälptrappan (D38)', () => {
     expect([1, 2, 3, 4, 5, 9].map(n => L.helpStep(n))).toEqual(['retry', 'bit1', 'bit2', 'svar', 'svar', 'svar']);
     expect(L.helpStep(0)).toBe(null);
   });
-  it('ensiffrig uppställning har en bit per rad: fyra rader ger hela svaret först vid sjätte felet', () => {
+  it('helpStep med fler bitar än två', () => {
     expect([1, 2, 3, 4, 5, 6].map(n => L.helpStep(n, 4))).toEqual(['retry', 'bit1', 'bit2', 'bit3', 'bit4', 'svar']);
-    const t = L.makeUpp(687, 8), b = L.helpBits(t, 'fel');
-    expect(b.length).toBe(3);
-    expect(b.map(x => new Set(x.fill.cells.map(c => c.row)).size)).toEqual([1, 2, 3]);    // rad 1, rad 1–2, rad 1–3
-    expect(b[1].fill.cells.filter(c => c.row === 'r1').map(c => c.col)).toEqual([1, 2]);   // förskjuten
-    for (const x of b) expect(x.fill.cells.some(c => c.row === 's')).toBe(false);
   });
   it('bitarna följer lösningsgången och ger aldrig bort slutsvaret', () => {
     const r = seeded(201);
@@ -468,13 +454,13 @@ describe('hjälptrappan (D38)', () => {
       expect(be[0].fill.boxes).toEqual({ 0:f[0], 1:f[1] });              // uppdelningen
       expect(be[1].fill.boxes).toEqual({ 2:f[2], 3:f[3] });              // delarna
       for (const b of be) expect(Object.keys(b.fill.boxes)).not.toContain('4');
-      const up = L.genUpp('svar', 'tva', r), bu = L.helpBits(up, 'fel');
-      expect(bu[0].fill.cells.every(c => c.row === 'p1')).toBe(true);    // rad 1
-      expect(bu[1].fill.cells.some(c => c.row === 'p2' && c.col === 0 && c.val === 0)).toBe(true);   // rad 2 med nollan
-      for (const b of bu) expect(b.fill.cells.some(c => c.row === 's')).toBe(false);                  // summan ges aldrig
-      const en = L.genUpp('svar', 'en', r), bn = L.helpBits(en, 'summinne');
-      expect(bn.length).toBe(en.parts.length);                           // en bit per rad
-      for (const b of bn) expect(b.fill.cells.some(c => c.row === 's')).toBe(false);
+      for (const up of [L.genUpp('svar', 'tva', r), L.genUpp('svar', 'en', r)]) {
+        const bu = L.helpBits(up, 'summinne');                         // summans bitar: minnet, sedan två siffror
+        expect(bu[0].fill.cells).toEqual([]);
+        expect(bu[0].fill.mem).toEqual(L.addCarries(L.uppPlaces(up)));
+        expect(bu[1].fill.cells.length).toBe(2);
+        expect(L.digitsOf(up.answer).length).toBeGreaterThan(2);       // summan ges aldrig helt
+      }
       for (const t of L.genProblem('svar', 4, r)) {
         const bp = L.helpBits(t, 'uttryck'), R = L.exprRows(L.parseExpr(t.expr));
         if (t.needExpr) { expect(bp[0].fill.expr).toBe(true); expect(bp[0].text).toContain(t.expr); }   // uttrycket först
@@ -482,13 +468,6 @@ describe('hjälptrappan (D38)', () => {
         expect(Object.values(bp[1].fill.boxes)).toContain(R.boxes[0]);                                  // första ledet
       }
     }
-  });
-  it('glömd nolla: första biten pekar på den grå rutan', () => {
-    const t = L.makeUpp(17, 32), b = L.helpBits(t, 'nolla');
-    expect(b[0].fill.cells).toEqual([{ row:'p2', col:0, val:0 }]);
-    expect(b[0].fill.pulse).toBe(true);
-    expect(b[0].text).toMatch(/grå rutan/);
-    expect(L.helpHint(t, 'nolla')).toMatch(/grå rutan/);
   });
   it('ledtråden vid första felet innehåller inte svaret', () => {
     const r = seeded(202);
@@ -500,11 +479,14 @@ describe('hjälptrappan (D38)', () => {
 describe('det som var svårt sparas och glöms (D38)', () => {
   it('hjälp och svar sparas per typ och felklass, inte som exakta tal', () => {
     const h = {};
-    L.recordOutcome(h, L.makeUpp(17, 32), 'svar', 'nolla', '2026-10-19');
+    L.recordOutcome(h, L.makeUpp(17, 32), 'svar', 'addition', '2026-10-19', { grey:true });
     L.recordOutcome(h, L.makeTiotal(5, 6, 1, 1), 'hjalp', 'nollfalla', '2026-10-19');
     L.recordOutcome(h, { moment:'tabell', type:'num', x:8, y:7, answer:56 }, 'hjalp', 'fel', '2026-10-19');
     L.recordOutcome(h, L.makeTillbaka('Leo', L.SHOP[0], 6, 100), 'hjalp', 'uttryck', '2026-10-19');
-    expect(Object.keys(h).sort()).toEqual(['prob:tillbaka', 'prob:uttryck', 'tab:7x8', 'tio:falla', 'tio:tvatiotal', 'upp:nolla', 'upp:tva'].sort());
+    expect(Object.keys(h).sort()).toEqual(['prob:tillbaka', 'prob:uttryck', 'tab:7x8', 'tio:falla', 'tio:tvatiotal', 'upp:minnesumma', 'upp:nolla', 'upp:tva'].sort());
+    /* ensiffrig: en radfråga som fick hjälp sparas som tabellfaktumet */
+    L.recordOutcome(h, L.makeUpp(4689, 6), 'hjalp', null, '2026-10-19', { rows:['r0'] });
+    expect(h['tab:6x9'].level).toBe('hjalp'); expect(h['upp:en']).toBeTruthy();
     expect(h['upp:nolla'].level).toBe('svar');
     expect(h['tio:falla'].level).toBe('hjalp');
     expect(L.tagLabel('tab:7x8')).toBe('Tabellen 7 · 8');
@@ -512,11 +494,11 @@ describe('det som var svårt sparas och glöms (D38)', () => {
   });
   it('glöms efter tre rätt direkt i rad, och ett nytt fel nollställer räkningen', () => {
     const h = {}, hard = L.makeUpp(17, 32);
-    L.recordOutcome(h, hard, 'hjalp', 'nolla');
+    L.recordOutcome(h, hard, 'hjalp', null, null, { grey:true });
     const other = L.makeUpp(79, 84);                                  // täcker samma typer
     L.recordOutcome(h, other, 'direkt'); L.recordOutcome(h, other, 'direkt');
     expect(h['upp:nolla'].ok).toBe(2);
-    L.recordOutcome(h, hard, 'hjalp', 'nolla');                       // fel igen
+    L.recordOutcome(h, hard, 'hjalp', null, null, { grey:true });    // fel igen
     expect(h['upp:nolla'].ok).toBe(0); expect(h['upp:nolla'].n).toBe(2);
     for (let i = 0; i < L.FORGET_AFTER; i++) L.recordOutcome(h, other, 'direkt');
     expect(h['upp:nolla']).toBeUndefined(); expect(h['upp:tva']).toBeUndefined();
@@ -532,7 +514,7 @@ describe('det som var svårt sparas och glöms (D38)', () => {
 
 describe('mitt prov: bara de svåra typerna, minst Svårare (D38)', () => {
   const allTags = ['tab:7x8', 'tab:6x9', 'tio:falla', 'tio:tvatiotal', 'tio:hundratal', 'tio:tiotal', 'tio:tusental', 'te', 'upp:en', 'upp:tva',
-    'upp:nolla', 'upp:rader', 'upp:minne', 'upp:minnesumma', 'prob:tillbaka', 'prob:omvand', 'prob:kop2', 'prob:ordning', 'prob:uttryck'];
+    'upp:nolla', 'upp:minnesumma', 'prob:tillbaka', 'prob:omvand', 'prob:kop2', 'prob:ordning', 'prob:uttryck'];
   it('tomt underlag ger inget prov', () => { expect(L.buildMittProv({})).toEqual([]); });
   it('varje uppgift hör till en svår typ och håller provets nivågolv', () => {
     const r = seeded(301);
@@ -548,7 +530,7 @@ describe('mitt prov: bara de svåra typerna, minst Svårare (D38)', () => {
           continue;
         }
         expect(tags).toContain(t.forTag);
-        if (t.forTag !== 'upp:minne' && t.forTag !== 'tio:tiotal') expect(L.tagsCovered(t)).toContain(t.forTag);
+        if (t.forTag !== 'tio:tiotal') expect(L.tagsCovered(t)).toContain(t.forTag);
         if (t.moment === 'tiotal') expect(t.zeros).toBeGreaterThanOrEqual(2);
         if (t.moment === 'talsorter') expect(t.a * t.b).toBeGreaterThanOrEqual(344);
         if (t.moment === 'uppstallning') {
@@ -603,60 +585,20 @@ describe('uppställningens ordning: raderna först, summan sist (D38)', () => {
       const F = L.uppFacitRows(t);
       for (const row of L.uppRowsOrder(t)) expect(L.uppRowFilled(t, row, F[row])).toBe(true);
       expect(L.uppOpenRows(t, F).slice(-1)[0]).toBe('s');
-      /* hjälpens bitar fyller hela rader, så summan låses upp när alla bitar getts */
-      const last = L.helpBits(t, 'fel').slice(-1)[0].fill, vals = {};
-      for (const c of last.cells) { vals[c.row] = vals[c.row] || Array(t.width).fill(null); vals[c.row][c.col] = c.val; }
-      if (t.two) { expect(L.uppRowFilled(t, 'p1', vals.p1)).toBe(true); expect(L.uppRowFilled(t, 'p2', vals.p2)).toBe(true); }
-      else expect(L.uppOpenRows(t, vals).slice(-1)[0]).toBe('s');
     }
   });
 });
 
-describe('tankeraden (D38, variant A)', () => {
-  const nums = s => (s.match(/\d+/g) || []).map(Number);
-  it('82 · 68 och 286 · 17: leden som Dennis beskrev', () => {
+describe('tankeraden i summan (D38)', () => {
+  it('en kolumn i taget; förskjutna tomrutor räknas inte; provet säger bara "kolumn för kolumn"', () => {
     const a = L.makeUpp(82, 68);
-    expect(L.thinkSteps(a, 'p1', 'ova')).toEqual(['Rad 1: 8 · 82 = 8 · 80 + 8 · 2', '= 640 + 16', '= 656. Skriv 656 på rad 1.']);
-    expect(L.thinkSteps(a, 'p2', 'ova')).toEqual(['Rad 2 är tiotalet: skriv nollan i den grå rutan.', '6 · 82 = 6 · 80 + 6 · 2', '= 480 + 12', '= 492. Med nollan blir rad 2 4920.']);
-    const b = L.makeUpp(286, 17);
-    expect(L.thinkSteps(b, 'p1', 'ova')).toEqual(['Rad 1: 7 · 286 = 7 · 200 + 7 · 80 + 7 · 6', '= 1400 + 560 + 42', '= 2002. Skriv 2002 på rad 1.']);
     expect(L.thinkSteps(a, 's', 'ova', 0)).toEqual(['Entalet: 6 + 0.']);
     expect(L.thinkSteps(a, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 2.']);
     const e8 = L.makeUpp(8288, 7);                                     // 56, 56·10, 14·100, 56·1000
-    expect(L.thinkSteps(e8, 's', 'ova', 0)).toEqual(['Entalet: 6.']);               // de förskjutna rutorna räknas inte
+    expect(L.thinkSteps(e8, 's', 'ova', 0)).toEqual(['Entalet: 6.']);
     expect(L.thinkSteps(e8, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 6.']);
-    const e = L.makeUpp(687, 8);
-    expect(L.thinkSteps(e, 'r0', 'ova')).toEqual(['Börja här: 8 · 7.', '8 · 7 = 56. Skriv det på rad 1.']);
-  });
-  it('leden stämmer för många slumpade uppgifter', () => {
-    const r = seeded(501);
-    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of L.genUppstallning(lv, 2, r)) {
-      if (t.two) for (const row of ['p1', 'p2']) {
-        const m = row === 'p1' ? t.ones : t.tens, st = L.thinkSteps(t, row, 'ova'), k = row === 'p1' ? 0 : 1;
-        const terms = L.placeTerms(t.top);
-        expect(terms.reduce((a, b) => a + b, 0)).toBe(t.top);                                   // uppdelningen
-        expect(nums(st[k + 1]).reduce((a, b) => a + b, 0)).toBe(m * t.top);                    // delarna summerar
-        expect(nums(st[k + 2])[0]).toBe(m * t.top);                                             // radens värde
-        if (row === 'p2') expect(nums(st[k + 2]).slice(-1)[0]).toBe(t.p2);                      // med nollan
-      } else for (const p of t.parts) expect(nums(L.thinkSteps(t, 'r' + p.i, 'ova')[1])).toContain(p.val);
-    }
-  });
-  it('provläget visar bara uppdelningen, aldrig radens värde', () => {
-    const r = seeded(502);
-    for (let i = 0; i < N; i++) for (const t of L.genUppstallning('svar', 2, r)) {
-      if (t.two) {
-        const p1 = L.thinkSteps(t, 'p1', 'prov'), p2 = L.thinkSteps(t, 'p2', 'prov');
-        expect(p1.length).toBe(1); expect(p2.length).toBe(2);
-        expect(nums(p1.join(' '))).not.toContain(t.p1);
-        expect(nums(p2.join(' '))).not.toContain(t.p2);
-        if (t.tens > 1) expect(nums(p2.join(' '))).not.toContain(t.p2 / 10);   // 1 · 671 = 671 står redan överst
-      } else for (const p of t.parts) {
-        const st = L.thinkSteps(t, 'r' + p.i, 'prov');
-        expect(st.length).toBe(1);
-        if (p.val !== t.bot && p.val !== p.d) expect(nums(st[0])).not.toContain(p.val);
-      }
-      expect(L.thinkSteps(t, 's', 'prov', 1)).toEqual(['Lägg ihop raderna, kolumn för kolumn.']);
-    }
+    expect(L.thinkSteps(a, 's', 'prov', 1)).toEqual(['Lägg ihop raderna, kolumn för kolumn.']);
+    expect(L.thinkSteps(a, 'p1', 'ova')).toEqual([]);                  // raderna har radfrågan i stället
   });
 });
 
@@ -692,5 +634,39 @@ describe('tankeradens anteckningsrutor (D38 ✎)', () => {
           expect(L.noteMark(t, row, j, v, 'prov')).toBe(null);
       }
     }
+  });
+});
+
+describe('kladdens historik: ångra och gör om (D38 ✎)', () => {
+  const st = n => ({ type:'stroke', n });
+  it('ångra och gör om i flera steg', () => {
+    const h = L.createHistory();
+    h.push(st(1)); h.push(st(2)); h.push(st(3));
+    expect(h.visible().map(o => o.n)).toEqual([1, 2, 3]);
+    expect(h.undo()).toBe(true); expect(h.undo()).toBe(true);
+    expect(h.visible().map(o => o.n)).toEqual([1]);
+    expect(h.canRedo()).toBe(true);
+    expect(h.redo()).toBe(true);
+    expect(h.visible().map(o => o.n)).toEqual([1, 2]);
+    h.undo(); h.undo(); expect(h.undo()).toBe(false);                 // inget mer att ångra
+    expect(h.visible()).toEqual([]);
+    h.redo(); h.redo(); h.redo(); expect(h.redo()).toBe(false);
+    expect(h.visible().map(o => o.n)).toEqual([1, 2, 3]);
+  });
+  it('ett nytt drag efter en ångring tömmer Gör om', () => {
+    const h = L.createHistory();
+    h.push(st(1)); h.push(st(2)); h.undo();
+    h.push(st(9));
+    expect(h.canRedo()).toBe(false);
+    expect(h.visible().map(o => o.n)).toEqual([1, 9]);
+  });
+  it('Rensa är ett drag som går att ångra och göra om', () => {
+    const h = L.createHistory();
+    h.push(st(1)); h.push(st(2)); h.push({ type:'clear' });
+    expect(h.visible()).toEqual([]);
+    h.undo(); expect(h.visible().map(o => o.n)).toEqual([1, 2]);
+    h.redo(); expect(h.visible()).toEqual([]);
+    h.push(st(3)); expect(h.visible().map(o => o.n)).toEqual([3]);
+    h.reset(); expect(h.canUndo()).toBe(false); expect(h.visible()).toEqual([]);
   });
 });
