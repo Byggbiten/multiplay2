@@ -481,3 +481,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   anteckningar. Knappsatsen i matteprovet blir tre rader (siffrorna 2 × 5) så att kladden växer. Källa: Dennis: "men
   [barnet] har ingenstans att anteckna 640 + 16 så hon kan summera det. kanske sifferinmatningen skall bli mindre? så
   hon får kladdyta? eller har du något tips?"
+- ✎ **2026-10-19, raderna fylls med en fråga, appen får vara lite lättare (ändrar D37 "minst lika svårt"):** varje
+  delproduktsrad fylls genom att appen frågar rakt ut (Vad är 9 · 6?) och barnet svarar med hela talet; svaret
+  bokförs automatiskt på sin rätta plats i rutnätet. Summan fylls som förut, ruta för ruta. Appen är till för att
+  träna inför provet och får därför vara något lättare än det skarpa provet. Källa: Dennis: "Där blir cellmatningen
+  inte intuitiv. 9 x 6 = 54 så man skriver 5. Men då matas 5:an in på entalsraden. Så svaret blir inverterat. 45. Jag
+  har inte problem med om appen är lite lättare än provet. Eftersom den egentligen är till för att barnen skall träna
+  på provet snarare än att göra ett skarpt prov. Så om appen frågar rakt ut: vad är 9 x 6? och man svarar 54, så
+  bokförs det in automatiskt på sin rätta plats. Men sedan när alla delsummor skall adderas, då får de helt enkelt
+  markera cell för cell eller som det är idag."
