@@ -237,3 +237,15 @@ slutsvaret"), kladden är 299 px. Beslut Dennis om raderna ska finnas som tomma 
 `/tmp/gransk-multiplikation/`: `00-lagesvy`, `05–06` nivå 1 demo, `10-demo-n2-step00…07`
 (hela nivå 2-sekvensen), `20-demo-n3-*`, `30–32-demo-n4-*` (inkl. `31-…-memplace-flyg`
 mitt i flygningen), `40–42-hjalp-n2-*`, `45–46-hjalp-n4-*`, `50–52-fritt-n4-*`.
+
+## Utfall
+
+Skrivet 2026-10-19 ur `git log`. Granskningen committades i `bcbdb57` (21/9).
+
+- **Åtgärdat samma kväll** på grenen `fix/multdiv`, sammanslagen i `2621199` (21/9):
+  `686fbbe` (A1, A2, B1, B3, B6: produkten föds som bricka i marginalen och delar sig), `fc515b1` (B2, B5, B7: hjälpläget),
+  `8d40e6f` (C1, C2, C4: träffytor 48 pt), `1fd10dd` (C3, C4: fria läget skriver i cellerna). Kommentaren
+  "MULTIPLIKATIONENS STEGKEDJA" i `js/multdiv.js` pekar hit. Live senast med v51 `dca34a0` (22/9).
+- **Efteråt:** minnesfrågan skriver ut uttrycket `9796bab` (Dennis 22/9), "handling utan mål" `548f124`,
+  och Räkna själv som divisionens enligt D7 (`ac66b13`, v56).
+- **Övriga fynd** (B4, C5, D1–D8): okänt om de åtgärdats, inget commit-meddelande nämner dem.

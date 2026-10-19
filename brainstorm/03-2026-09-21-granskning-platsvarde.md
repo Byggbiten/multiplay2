@@ -201,3 +201,15 @@ vänster→höger i talet. Regel 10 säger höger→vänster i fria lägen. Att 
 `q05-start/filled/wrong1/wrong2.png` (B2) · `q06-*`, `q08-*` (C1) · `q07-*` (C2) ·
 `q09-*` (D1) · `q10-start/filled/wrong1/wrong2.png` (D2) · `11-result.png` ·
 `s664-hub.png` `s664-q01.png` `s664-q05-b2.png` `s664-q10-d2.png` (stress 390×664).
+
+## Utfall
+
+Skrivet 2026-10-19 ur `git log`. Granskningen committades i `bcbdb57` (21/9).
+
+- **Åtgärdat samma kväll** direkt på `dev` (21/9 20:42–21:04): `d06ec92` (A1: frågan står kvar efter första felet),
+  `c284664` (B1: aldrig två knappar med rätt tal), `2df3c65` (distraktorerna är platsvärdesförväxlingar),
+  `2f7799f` (platsvärdesfärgerna betyder bara platsvärde), `790ae80`, `7e3fa75` (facit i frågans egna rutor),
+  `25f2af5` (träffytor ≥ 44 pt), `6acdc5b` och `afe389e` (ryms vid 390 × 664), `43219e5` (pilen och 100vh bort),
+  `ff45ac3` (D1, D3, D5–D7: SVG-ikoner m.m.), `a988920`, `c1b2edc`, `e6f4f9c`. Testerna `tests/platsvarde.test.mjs`.
+  Live senast med v51 `dca34a0` (22/9).
+- **Övriga fynd:** okänt fynd för fynd; commit-meddelandena nämner inte alla koder.

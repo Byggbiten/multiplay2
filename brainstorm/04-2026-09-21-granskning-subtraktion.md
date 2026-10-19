@@ -140,3 +140,15 @@ Fix: lägg 9:an bredvid i samma wrapper i stället för att ersätta. **Storlek:
 Anm. 305 − 187 kan inte genereras: nivå 4:s dubbellånsgren (680–686) ger ental 1–4 i övre talet och tiotal 1–5 i undre; 405 − 187 (via andra grenen) är samma struktur och kördes i stället. Diff = 0 uppstår aldrig i `sub_flip_borrow` (kräver `a < b`), bara i `sub_calc` (D4).
 
 Under mätningen visade sig Playwright-servern vara delad med en annan session (`__svep_i` i localStorage, skärm `screen-multdiv` aktiv i standardfliken); alla körningar gjordes därför i egna, engångs-kontexter som stängdes efter varje fall.
+
+## Utfall
+
+Skrivet 2026-10-19 ur `git log`. Granskningen committades i `bcbdb57` (21/9).
+
+- **Åtgärdat samma kväll** på grenen `fix/subtraktion`, sammanslagen i `7e35bd7` (21/9):
+  `b72e52f` (stegbyggaren `planSubtractionColumns` utbruten), `7581236` (lånekedjan ombyggd: en idé per steg, tian är en bricka),
+  `ed17965` (A4: ingen ledande nolla i svaret), `78bf881`.
+- **Dennis gjorde om lånekedjan 22/9** efter sin egen bild, "en strid mellan försvararna som är överst och
+  anfallarna som är nedan": `84ee898`, `7d63fa8` (uttrycket och anfallet), `a25882a` (tian hör till pappret,
+  striden till högerspalten), v39 (`a33b762`, `12e0801`), `8540a83`, `e4d723d`. Live senast med v51 `dca34a0` (22/9).
+- **Övriga fynd:** okänt fynd för fynd; commit-meddelandena nämner bara A4 med kod.

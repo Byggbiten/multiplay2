@@ -169,3 +169,15 @@ Strykningen följer minnessiffrans livscykel: eget steg (678, 962–965), penndr
 - `verify-n3-step4-zoom.png`, `verify-n3-step9-zoom.png` — resten på 28 % (A1)
 - `verify-help-slot-zoom.png` — den osynliga slotten (A2)
 - `verify-help-strike.png` — stryk-fasen
+
+## Utfall
+
+Skrivet 2026-10-19 ur `git log`. Granskningen committades i `bcbdb57` (21/9).
+
+- **Åtgärdat samma kväll** på grenen `fix/multdiv`, sammanslagen i `2621199` (21/9):
+  `d3f3a69` (A1, B1, B3–B6: resten föds som bricka och flyger till sin plats), `5ee57f1` (A2, B7: hjälpläget),
+  `d8c6f42` (A3, A4, C3: fria läget skriver kvoten i rutorna), `2ab9e30` (C1, C2: träffytor och läsbar rest).
+  Live senast med release v51 `dca34a0` (22/9).
+- **Övriga fynd** (B2, C4, C5, D1–D6): okänt om de åtgärdats, inget commit-meddelande nämner dem.
+- **Därefter:** livlinan blev ankarvandringen 22/9 (`1c1f580` … `e7a5d63`, v40–v53). Den revs och ersattes av
+  tabellfakta-kedjan i `.project-context/SPEC-KORT-DIVISION.md` (D5), byggd i `50a618d`, live i v54.

@@ -848,8 +848,8 @@ const MultDivGame = (() => {
   /* ══════════════════════════════════════════════════════════
      STEG-BYGGARE (demo) — bubbla FÖRE animation (v28-mönstret)
   ══════════════════════════════════════════════════════════ */
-  /* ── MULTIPLIKATIONENS STEGKEDJA (ombyggd 2026-09-21, GRANSKNING-
-     MULTIPLIKATION A1/A2/B1/B3/B6) ──────────────────────────────────
+  /* ── MULTIPLIKATIONENS STEGKEDJA (ombyggd 2026-09-21, granskningen
+     brainstorm/02-2026-09-21-granskning-multiplikation.md A1/A2/B1/B3/B6) ──
      Additionens grepp: produkten föds som BRICKA i högermarginalen
      (calc), minnet läggs SYNLIGT till brickan (memjoin), det använda
      minnet stryks direkt efter användningen (mem_strike — "använd →
