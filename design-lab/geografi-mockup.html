@@ -131,7 +131,6 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.3;stro
 .gm .disc{fill:rgba(147,51,234,.16);stroke:rgba(147,51,234,.7);stroke-width:1.5px;stroke-dasharray:4 3;pointer-events:none}
 .gm .lab{pointer-events:none}
 .gm .lab text{font-family:var(--font-head);font-weight:800;font-size:12.5px;fill:#1f2937;stroke:#fff;stroke-width:3px;paint-order:stroke;text-anchor:middle;dominant-baseline:central}
-.gm .lab.num text{font-family:var(--font-body);font-weight:900;font-size:11px;fill:#334155}
 .gm .lab.found text{fill:#14532d}
 .gm .chip{pointer-events:none}
 .gm .chip rect{fill:var(--deep)}
@@ -218,7 +217,7 @@ svg.md{display:block;width:100%;height:100%}
 .sh-grip{height:22px;flex-shrink:0;display:grid;place-items:center;cursor:grab}
 .sh-grip i{width:44px;height:5px;border-radius:999px;background:#cbd5e1}
 .sh-head{display:flex;align-items:center;gap:8px;min-height:46px;flex-shrink:0}
-.sh-nr{min-width:36px;height:36px;padding:0 6px;border-radius:12px;background:var(--deep);color:#fff;display:grid;place-items:center;font-weight:900;font-size:17px;flex-shrink:0}
+.sh-ld{width:14px;height:40px;border-radius:7px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 .sh-name{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.05}
 .sh-name b{font-family:var(--font-head);font-weight:800;font-size:25px;color:var(--deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sh-name small{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
@@ -291,7 +290,7 @@ div.pzarea:active{transform:none}
 .areas .ahead svg.i{width:15px;height:15px}
 .arow .ago{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
 .arow .ago svg.i{width:15px;height:15px;stroke-width:2.8}
-/* Snabbfaktan efter rätt svar: skölden alltid, faktan roterar (D30) */
+/* Faktarutan efter rätt svar (D31, D32) */
 .fcard{display:grid;grid-template-columns:62px 1fr;column-gap:10px;align-items:center;height:100%}
 .fcard .fsh{width:62px;height:74px;object-fit:contain;justify-self:center}
 .fcard .ftx{min-width:0;height:100%;display:flex;flex-direction:column;justify-content:space-evenly}
@@ -329,7 +328,6 @@ div.pzarea:active{transform:none}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .opt{min-height:54px;padding:4px 8px;border-radius:18px;font-family:var(--font-head);font-weight:800;font-size:18px;line-height:1.1;background:var(--glass-strong);color:var(--deep);
   border:2px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);transition:transform .2s var(--spring),background-color .25s,border-color .25s}
-.opts.nums .opt{font-size:26px}
 .opt:active{transform:scale(.96)}
 .opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
 .opt.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
@@ -403,10 +401,11 @@ div.pzarea:active{transform:none}
 .bcard img{width:46px;height:54px;object-fit:contain}
 .bcard .bn.long{font-size:8.2px}
 .bcard .bn{font-size:9px;letter-spacing:-.15px;font-weight:900;color:var(--deep);line-height:1.05;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bcard .bnr{position:absolute;top:2px;left:4px;font-size:10px;font-weight:900;color:var(--ink-soft)}
+.bcard .bq{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-head);font-weight:800;font-size:24px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);padding-bottom:4px}
 .bcard.lock{background:repeating-linear-gradient(135deg,#eef1f5 0 6px,#e6eaf0 6px 12px);border-color:#d5dbe3;box-shadow:none}
 .bcard.lock svg{width:40px;height:47px}
-.bcard.lock .bnr{position:static;font-family:var(--font-head);font-size:16px;color:#94a3b8}
+.bcard.lock{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ld) 35%,#eef1f5) 0 6px,color-mix(in srgb,var(--ld) 22%,#e6eaf0) 6px 12px)}
+.bcard.lock svg path:first-child{fill:color-mix(in srgb,var(--ld) 70%,#94a3b8)}
 .bcard.fresh{animation:pop .6s var(--spring)}
 .bcard.lvl-1{--bc:#c2733a}
 .bcard.lvl-2{--bc:#94a3b8;background:linear-gradient(160deg,#fff,#f1f5f9)}
@@ -432,6 +431,9 @@ div.pzarea:active{transform:none}
 .bigcard .bc-shield img{max-height:118px;max-width:110px}
 .bigcard .bc-lock{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;text-align:center;font-weight:800;color:var(--ink-soft);font-size:15px}
 .bigcard .bc-lock svg{width:80px;height:96px}
+.bigcard .bigq{position:relative;display:grid;place-items:center}
+.bigcard .bigq svg path:first-child{fill:color-mix(in srgb,var(--ld) 70%,#94a3b8)}
+.bigcard .bigq b{position:absolute;font-family:var(--font-head);font-size:40px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
 
 /* ── Bildkällorna ────────────────────── */
 .cred{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px;display:flex;flex-direction:column;gap:4px;-webkit-user-select:text;user-select:text}
@@ -636,7 +638,7 @@ const SAID = new Set();     // allt som sagts i bubblorna (för MOCK.allTexts)
 /* ═══════════════════════════════════════════════════════════
    UNDERLAGET — läses ur källorna i referens/ (inget skrivs av):
    kartan: referens/sveriges-landskap-farg.svg (25 path)
-   nummer/namn/landsdel/path: referens/landskap-laxbok.json
+   namn/landsdel/path och ordningen norr till söder: referens/landskap-laxbok.json (numren visas inte, D33)
    fakta: referens/sverige-landskap/landskap-fakta.json
    bildkällorna: referens/sverige-landskap/bilder.json
 ═══════════════════════════════════════════════════════════ */
@@ -654,7 +656,7 @@ const img = (nr, kind) => SL + F(nr).bilder[kind];
 const FLOWER_Y = { 1:3, 2:3, 5:2, 6:15, 9:8, 11:8, 13:2, 14:12, 16:6, 17:6, 18:8, 22:8, 25:3 };
 const flowerPos = nr => `object-position:50% ${FLOWER_Y[nr] ?? 22}%`;
 const TALORD = ['noll','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv','tretton','fjorton','femton','sexton','sjutton','arton','nitton','tjugo'];
-const antal = n => n <= 20 ? TALORD[n] : n === 25 ? 'tjugofem' : String(n);   // antal skrivs i ord, läxbokens nummer med siffror
+const antal = n => n <= 20 ? TALORD[n] : n === 25 ? 'tjugofem' : String(n);   // antal skrivs i ord
 const gen = n => /s$/.test(n) ? n : n + 's';                      // genitiv: Medelpads
 const lc = s => /^Kung /.test(s) ? s : s[0].toLowerCase() + s.slice(1);   // "Kung Karls spira" behåller versalen
 const cap = s => s[0].toUpperCase() + s.slice(1);
@@ -1042,7 +1044,6 @@ function GeoMap(host, o = {}){
       let text = null, num = false;
       if (spec.force) text = spec.text;
       else if (spec.name && size >= 18 && bw >= spec.name.length * 6.6 + 6) text = spec.name;
-      else if (spec.num && size >= 10){ text = String(nr); num = true; }
       const q = M.toScreen(m.label.x, m.label.y);
       if (nr === 7 && M.pinOn) q.y += 13;                      // namnet under nålens spets
       if (!text || q.x < -40 || q.y < -20 || q.x > M.W + 40 || q.y > visH() + 20){ if (g.style.display !== 'none') g.style.display = 'none'; continue; }
@@ -1199,7 +1200,10 @@ function createDrill(items, r = Math.random){
         if (!slot.extra && !hasExtra.has(slot.id)){
           hasExtra.add(slot.id);
           const lo = idx + 3, hi = q.length;
-          insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
+          /* D34: minst två frågor emellan, och inte bredvid samma landskap om det går */
+          const okPos = [];
+          for (let p = Math.min(lo, hi); p <= hi; p++) if ((p - 1 <= idx || q[p - 1].nr !== slot.nr) && (p >= q.length || q[p].nr !== slot.nr)) okPos.push(p);
+          insertedAt = okPos.length ? okPos[Math.floor(r() * okPos.length)] : (lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1)));
           q.splice(insertedAt, 0, { ...slot, extra:true });
         }
       }
@@ -1246,7 +1250,7 @@ function bindHold(el, opts){
 ═══════════════════════════════════════════════════════════ */
 const AREAS = ['Norrland', 'Svealand', 'Götaland', 'Sverige'];
 const S = { preset:'ny', halo:false, dayOff:0, boxes:{}, kinds:{}, screen:'geo', binderParty:false, pick:'puzzle',
-  train:{ mode:'upptack', area:'Norrland', order:'rak', svar:'namn', bild:'djur', bildSvar:'karta' }, pzArea:'Norrland' };
+  train:{ mode:'upptack', area:'Norrland', order:'blandad', bild:'djur', bildSvar:'karta' }, pzArea:'Norrland' };
 const today = () => { const d = new Date(); d.setDate(d.getDate() + S.dayOff); return SP.fmtDay(d); };
 const box = nr => S.boxes[nr];
 const isKan = nr => ['kan', 'due'].includes(SP.vis(box(nr), today()));
@@ -1413,7 +1417,7 @@ function enterExplore(){
   const M = MAPS.ex; M.reset();
   M.setHome(null); M.inset = 0;
   if (!M.ready) M.sync(); else { M.sync(); }
-  M.labelFor = nr => ({ name:NAME(nr), num:true });
+  M.labelFor = nr => ({ name:NAME(nr) });      // namn där de ryms (inga nummer, D33)
   M.pin(true); M.showHalo(S.halo);
   M.onTap = nr => { if (nr === null){ closeSheet(); return; } openSheet(nr); };
   EX.nr = null; $('sheet').classList.remove('on'); $('exHint').hidden = false;
@@ -1426,7 +1430,7 @@ function openSheet(nr){
   M.clearFx(); M.fx(nr, 'sel');
   const bc = LD_FILL(nr);
   $('sheet').innerHTML = `<div class="sh-grip" id="shGrip"><i></i></div>
-    <div class="sh-head"><span class="sh-nr" style="background:${nr === 7 ? '#b91c1c' : 'var(--deep)'}">${nr}</span>
+    <div class="sh-head"><span class="sh-ld" style="background:${LD_FILL(nr)}"></span>
       <span class="sh-name"><b>${NAME(nr)}</b><small>${BY[nr].landsdel}</small></span>
       ${nr === 7 ? `<span class="sh-home">${svg('pin')}Här bor du</span>` : ''}
       <button class="sh-x" id="shX" aria-label="Stäng">${svg('x')}</button></div>
@@ -1470,7 +1474,7 @@ function bindSheetDrag(){
 ═══════════════════════════════════════════════════════════ */
 const MODES = [
   { id:'upptack', name:'Upptäck Sverige', icon:'eye', desc:'Hitta landskapen. Kartan blir färg.' },
-  { id:'namn', name:'Vad heter det?', icon:'bulb', desc:'Ett landskap lyser. Svara med:' },
+  { id:'namn', name:'Vad heter det?', icon:'bulb', desc:'Ett landskap lyser. Välj namnet.' },
   { id:'stad', name:'Städerna', icon:'city', desc:'I vilket landskap ligger staden?' },
   { id:'bild', name:'Djur, blommor, sköldar', icon:'paw', desc:'Vems är det här? Välj vad du vill se:' },
 ];
@@ -1481,24 +1485,23 @@ function enterTrain(){
 }
 function renderTrain(){
   const T = S.train, nrs = areaNrs(T.area);
-  $('ordrow').innerHTML = `<span class="flabel">Ordning</span>${segHTML('order', [['rak', 'Rak 1, 2, 3', 'straight'], ['blandad', 'Blandad', 'shuffle']], T.order)}`;
+  $('ordrow').innerHTML = `<span class="flabel">Ordning</span>${segHTML('order', [['blandad', 'Blandad', 'shuffle'], ['rak', 'Norr till söder', 'straight']], T.order)}`;
   const head = (m, go) => `<span class="th"><span class="tic">${svg(m.icon)}</span><span class="tt"><b>${m.name}</b><small>${m.desc}</small></span>${go ? `<span class="go">${svg('play')}</span>` : ''}</span>`;
   const [U, N, C, B] = MODES;
   $('modes').innerHTML = `
     <button class="tmode main" data-start="upptack">${head({ ...U, desc:`Hitta ${antal(nrs.length)} landskap. Kartan blir färg.` }, true)}</button>
-    <div class="tmode">${head(N)}<div class="tbtns"><button data-start="namn" data-svar="namn">${svg('play')}Namn</button><button data-start="namn" data-svar="nummer">${svg('play')}Läxbokens nummer</button></div></div>
+    <button class="tmode" data-start="namn">${head(N, true)}</button>
     <button class="tmode" data-start="stad">${head(C, true)}</button>
     <div class="tmode">${head(B)}<div class="tbtns"><button data-start="bild" data-bild="djur">Djur</button><button data-start="bild" data-bild="blomma">Blommor</button><button data-start="bild" data-bild="skold">Sköldar</button><button data-start="bild" data-bild="blandat">Blandat</button></div></div>`;
-  say('trBubble', 'Tryck på det du vill träna.', T.order === 'rak' ? `Rak ordning: läxbokens nummer ${Math.min(...nrs)} först.` : 'Blandad ordning.');
+  say('trBubble', 'Tryck på det du vill träna.', T.order === 'rak' ? `Från norr till söder: ${NAME(Math.min(...nrs))} först.` : 'Blandad ordning.');
 }
 $('ordrow').addEventListener('click', e => { const b = e.target.closest('.seg button'); if (!b) return; S.train.order = b.dataset.v; renderTrain(); });
 $('modes').addEventListener('click', e => {
   const b = e.target.closest('[data-start]'); if (!b) return;
   const cfg = { ...S.train, mode:b.dataset.start };
-  if (b.dataset.svar) cfg.svar = b.dataset.svar;
   if (b.dataset.bild) cfg.bild = b.dataset.bild;
   cfg.bildSvar = 'blandat';                                   // djur/blommor/sköldar: varannan fråga på kartan, varannan med namn
-  S.train.mode = cfg.mode; S.train.svar = cfg.svar; S.train.bild = cfg.bild;
+  S.train.mode = cfg.mode; S.train.bild = cfg.bild;
   goto('play', { cfg });
 });
 
@@ -1510,10 +1513,21 @@ function buildItems(cfg){
   let items;
   if (cfg.mode === 'stad') items = nrs.flatMap(n => cities(n).map((c, i) => ({ nr:n, kind:'stad', stad:c, ci:i })));
   else if (cfg.mode === 'bild'){ const K = ['djur', 'blomma', 'skold'], off = Math.floor(Math.random() * 3); items = nrs.map((n, i) => ({ nr:n, kind:'bild', bild:cfg.bild === 'blandat' ? K[(i + off) % 3] : cfg.bild, svar:cfg.bildSvar === 'blandat' ? ((i + off) % 2 ? 'namn' : 'karta') : cfg.bildSvar })); }
-  else if (cfg.mode === 'namn') items = nrs.map(n => ({ nr:n, kind:'namn', sub:cfg.svar }));
+  else if (cfg.mode === 'namn') items = nrs.map(n => ({ nr:n, kind:'namn' }));
   else items = nrs.map(n => ({ nr:n, kind:'var' }));
   if (cfg.mode !== 'upptack' && cfg.area === 'Sverige') items = prioritize(items).slice(0, 12);
-  return cfg.order === 'rak' ? items.sort((a, b) => a.nr - b.nr || (a.ci || 0) - (b.ci || 0)) : shuffle(items);
+  return cfg.order === 'rak' ? items.sort((a, b) => a.nr - b.nr || (a.ci || 0) - (b.ci || 0)) : spreadShuffle(items, `${cfg.mode}|${cfg.area}|${cfg.bild || ''}`);
+}
+/* Blandad ordning (D34): ny lottning varje runda, aldrig samma ordning som förra rundan med samma val, och aldrig samma
+   landskap två gånger i rad (Städerna har två städer i vissa landskap). */
+const LAST_ORDER = {};
+const adjacentSame = o => o.some((x, i) => i && x.nr === o[i - 1].nr);
+function spreadShuffle(items, key){
+  const sig = o => o.map(x => x.nr + (x.stad || '') + (x.kind || '')).join(',');
+  let o = shuffle(items);
+  for (let t = 0; t < 300 && (adjacentSame(o) || (items.length > 2 && sig(o) === LAST_ORDER[key])); t++) o = shuffle(items);
+  LAST_ORDER[key] = sig(o);
+  return o;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1563,7 +1577,7 @@ function nextQ(first = false){
 const usesOptions = it => it.kind === 'namn' || (it.kind === 'bild' && it.svar === 'namn');
 function promptHTML(it){
   if (it.kind === 'var') return `Var ligger <em>${NAME(it.nr)}</em>?`;
-  if (it.kind === 'namn') return it.sub === 'nummer' ? 'Vilket nummer har det markerade landskapet?' : 'Vad heter det markerade landskapet?';
+  if (it.kind === 'namn') return 'Vad heter det markerade landskapet?';
   if (it.kind === 'stad') return `I vilket landskap ligger <em>${esc(it.stad)}</em>?`;
   return it.bild === 'djur' ? 'Vems landskapsdjur är det här?' : it.bild === 'blomma' ? 'Vems landskapsblomma är det här?' : 'Vems landskapssköld är det här?';
 }
@@ -1592,8 +1606,8 @@ function showQuestion(it, first = false){
   PL.opts = null;
   if (it.kind === 'namn') M.fx(it.nr, 'mark');
   if (usesOptions(it)){
-    PL.opts = it.kind === 'namn' && it.sub === 'nummer' ? numberOptions(it.nr) : nameOptions(it.nr);
-    $('pCtrl').innerHTML = `<div class="opts${it.kind === 'namn' && it.sub === 'nummer' ? ' nums' : ''}">${PL.opts.map((o, i) => `<button class="opt" data-i="${i}">${esc(o.text)}</button>`).join('')}</div>`;
+    PL.opts = nameOptions(it.nr);
+    $('pCtrl').innerHTML = `<div class="opts">${PL.opts.map((o, i) => `<button class="opt" data-i="${i}">${esc(o.text)}</button>`).join('')}</div>`;
     M.onTap = null;
     if (it.kind === 'namn') M.ensureVisible(it.nr);
   } else M.onTap = tapAnswer;
@@ -1609,25 +1623,17 @@ function showQuestion(it, first = false){
   else if (!usesOptions(it) && !it.retry) sm = 'Dra och nyp för att se kartan närmare.';
   say('pBubble', main, sm);
 }
-/* Felalternativen: grannar och samma landsdel (namn), grannarnas nummer och talen intill (nummer). Ordningen lottas (D17). */
+/* Felalternativen: grannar och samma landsdel. Ordningen lottas (D17). */
 function nameOptions(t){
   const near = shuffle(NEAR(t)), same = shuffle(NRS_OF(BY[t].landsdel).filter(n => n !== t && !near.includes(n)));
   const pick = [...near.slice(0, 2), ...same, ...near.slice(2), ...shuffle(ALL)].filter((n, i, a) => n !== t && a.indexOf(n) === i).slice(0, 3);
   return shuffle([t, ...pick]).map(n => ({ nr:n, ok:n === t, text:NAME(n) }));
 }
-function numberOptions(t){
-  const pool = [...shuffle(NEAR(t)), ...shuffle([t - 1, t + 1, t - 2, t + 2, t - 3, t + 3])].filter((n, i, a) => n >= 1 && n <= 25 && n !== t && a.indexOf(n) === i);
-  const lo = pool.filter(n => n < t), hi = pool.filter(n => n > t);
-  const nLo = Math.max(0, Math.min(lo.length, 3 - hi.length, Math.floor(Math.random() * 4))), nHi = 3 - Math.min(nLo, lo.length);
-  const pick = [...lo.slice(0, nLo), ...hi.slice(0, nHi)];
-  while (pick.length < 3){ const n = [...lo, ...hi].find(x => !pick.includes(x)); if (n === undefined) break; pick.push(n); }
-  return shuffle([t, ...pick]).map(n => ({ nr:n, ok:n === t, text:String(n) }));
-}
 /* Rätt-meningen per frågetyp */
 function rightMain(it){
   const N = NAME(it.nr);
   if (it.kind === 'var') return `Där ligger ${N}.`;
-  if (it.kind === 'namn') return it.sub === 'nummer' ? `${N} har nummer ${it.nr}.` : `Det markerade landskapet är ${N}.`;
+  if (it.kind === 'namn') return `Det markerade landskapet är ${N}.`;
   if (it.kind === 'stad') return `${it.stad} ligger ${inL(it.nr)}.`;
   const b = bildName(it.nr, it.bild);
   return b ? `${cap(lc(b))} är ${gen(N)} ${BILD_WORD[it.bild]}.` : `Det är ${gen(N)} landskapssköld.`;
@@ -1636,7 +1642,7 @@ function rightMain(it){
 function boxMain(it){
   const N = NAME(it.nr);
   if (it.kind === 'var') return `Där ligger ${N}.`;
-  if (it.kind === 'namn') return it.sub === 'nummer' ? `${N} har nummer ${it.nr}.` : `Det är ${N}.`;
+  if (it.kind === 'namn') return `Det är ${N}.`;
   if (it.kind === 'stad') return `${it.stad} ligger ${inL(it.nr)}.`;
   return `Det är ${gen(N)}.`;
 }
@@ -1726,8 +1732,8 @@ function optClick(i, el){
 function optSteps(it, g){
   const t = it.nr, G = NAME(g), T = NAME(t), steps = [];
   if (it.kind === 'namn'){
-    steps.push({ text:it.sub === 'nummer' ? `Du valde ${g}. Nummer ${g} är ${G}.` : (isNear(t, g) ? nearText(g, t) : `Du valde ${G}. ${G} ligger här.`), acts:[{ do:'bad', nr:g }] });
-    steps.push({ text:it.sub === 'nummer' ? `Det markerade landskapet är ${T}. Det har nummer ${t}.` : `Det markerade landskapet är ${T}.`, acts:[{ do:'here', nr:t }], done:true });
+    steps.push({ text:isNear(t, g) ? nearText(g, t) : `Du valde ${G}. ${G} ligger här.`, acts:[{ do:'bad', nr:g }] });
+    steps.push({ text:`Det markerade landskapet är ${T}.`, acts:[{ do:'here', nr:t }], done:true });
   } else {
     const gb = bildName(g, it.bild);
     steps.push({ text:gb ? `${gen(G)} ${BILD_WORD[it.bild]} är ${lc(gb)}.` : `Du valde ${G}. ${gen(G)} sköld ser annorlunda ut.`, acts:[{ do:'bad', nr:g }] });
@@ -1938,8 +1944,8 @@ function enterBinder(){
   $('bHead').innerHTML = `<b>${got} av 25</b><div class="bar"><i class="fill" style="transform:scaleX(${got / 25})"></i></div><small>${got} kort · ${sil} silver · ${gul} guld</small>`;
   $('bLegend').innerHTML = `<span><i>${medalSVG('brons')}</i>Brons: övat</span><span><i>${medalSVG('silver')}</i>Silver: kan</span><span><i>${medalSVG('guld')}</i>Guld: alla frågor</span>`;
   $('binder').innerHTML = ALL.map((n, i) => lv[i]
-    ? `<button class="bcard lvl-${lv[i]}" data-nr="${n}" aria-label="Kort ${n}, ${NAME(n)}, ${LEVEL_NAME[lv[i]]}"><span class="bnr">${n}</span><span class="bmd">${medalSVG(LEVEL[lv[i]])}</span><img src="${img(n, 'vapen')}" alt="" draggable="false"><span class="bn${NAME(n).length > 11 ? ' long' : ''}">${NAME(n)}</span></button>`
-    : `<button class="bcard lock" data-nr="${n}" aria-label="Kort ${n}, låst">${SHIELD_SIL}<span class="bnr">${n}</span></button>`).join('');
+    ? `<button class="bcard lvl-${lv[i]}" data-nr="${n}" aria-label="${NAME(n)}, ${LEVEL_NAME[lv[i]]}"><span class="bmd">${medalSVG(LEVEL[lv[i]])}</span><img src="${img(n, 'vapen')}" alt="" draggable="false"><span class="bn${NAME(n).length > 11 ? ' long' : ''}">${NAME(n)}</span></button>`
+    : `<button class="bcard lock" data-nr="${n}" style="--ld:${LD_FILL(n)}" aria-label="Låst kort i ${BY[n].landsdel}">${SHIELD_SIL}<span class="bq">?</span></button>`).join('');
   const full = got === 25, allGold = gul === 25;
   $('bFull').hidden = !full;
   $('bFull').innerHTML = `${svg('star')}${allGold ? 'Alla kort i guld!' : 'Hela pärmen är full!'}${svg('star')}`;
@@ -1961,16 +1967,16 @@ function bigCard(n){
   if (L){
     const nx = nextLevelText(n); SAID.add(nx.text);
     const chips = nx.chips ? `<div class="kchips">${GOLD_KINDS.map(([k, t]) => `<span class="${kindsOf(n).includes(k) ? 'ok' : ''}">${kindsOf(n).includes(k) ? svg('check') : ''}${t}</span>`).join('')}</div>` : '';
-    inner = `<div class="bc-top"><span class="sh-nr">${n}</span><span class="sh-name"><b>${NAME(n)}</b><small>${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+    inner = `<div class="bc-top"><span class="sh-ld" style="background:${LD_FILL(n)}"></span><span class="sh-name"><b>${NAME(n)}</b><small>${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
       <div class="bc-shield"><img src="${img(n, 'vapen')}" alt="${gen(NAME(n))} landskapssköld" draggable="false"></div>
       <div class="bc-lvl"><span class="lm">${medalSVG(LEVEL[L])}</span><span><b>${nx.head}</b><p>${esc(nx.text)}</p>${chips}</span></div>
       <div class="sh-row" style="padding:0 2px"><span class="sh-city"><span class="sh-k">${svg('city')}Stad</span><b>${esc(cities(n)[0])}</b>${cities(n)[1] ? `<span>också ${esc(cities(n)[1])}</span>` : ''}</span></div>
       <div class="sh-pics"><div class="pic"><div class="im"><img class="flower" style="${flowerPos(n)}" src="${img(n, 'blomma')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></div></div>
         <div class="pic"><div class="im"><img src="${img(n, 'djur')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></div></div></div>`;
   } else {
-    const t = `Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`; SAID.add(t);
-    inner = `<div class="bc-top"><span class="sh-nr" style="background:#94a3b8">${n}</span><span class="sh-name"><b>Kort ${n}</b><small>Låst</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
-      <div class="bc-lock">${SHIELD_SIL}<span>${t}</span></div>`;
+    const t = `Kortet låses upp i brons när du har övat på det här landskapet. Det ligger i ${BY[n].landsdel}.`; SAID.add(t);
+    inner = `<div class="bc-top"><span class="sh-ld" style="background:${LD_FILL(n)}"></span><span class="sh-name"><b>Ett okänt landskap</b><small>Låst · ${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+      <div class="bc-lock" style="--ld:${LD_FILL(n)}"><span class="bigq">${SHIELD_SIL}<b>?</b></span><span>${t}</span></div>`;
   }
   const bc = ['#cbd5e1', '#c2733a', '#94a3b8', '#f59e0b'][L];
   $('overlay').innerHTML = `<div class="modal" id="modal"><div class="bigcard" style="--bc:${bc}">${inner}</div></div>`;
@@ -1983,13 +1989,13 @@ function closeOverlay(){ $('overlay').innerHTML = ''; }
    frågetyperna blandade. Ett fel visar svaret och går vidare, utan nötloop.
 ═══════════════════════════════════════════════════════════ */
 function buildTest(area){
-  const nrs = shuffle(areaNrs(area)), K = ['var', 'namn', 'stad', 'djur', 'blomma', 'skold'];
+  const nrs = spreadShuffle(areaNrs(area).map(nr => ({ nr })), 'test|' + area).map(x => x.nr), K = ['var', 'namn', 'stad', 'djur', 'blomma', 'skold'];
   let kinds = [];
   while (kinds.length < nrs.length) kinds = kinds.concat(shuffle(K));
   return nrs.map((nr, i) => { const k = kinds[i];
     if (k === 'stad') return { nr, kind:'stad', stad:cities(nr)[Math.random() < 0.5 ? 0 : cities(nr).length - 1] };
     if (k === 'djur' || k === 'blomma' || k === 'skold') return { nr, kind:'bild', bild:k, svar:'namn' };
-    if (k === 'namn') return { nr, kind:'namn', sub:'namn' };
+    if (k === 'namn') return { nr, kind:'namn' };
     return { nr, kind:'var' }; });
 }
 function enterTestDone(){
@@ -2100,10 +2106,10 @@ function allTexts(){
   for (const n of ALL){
     t.add(CUE[n].text); t.add(ytaText(n)); t.add(invText(n)); F(n).visste_du.forEach(v => t.add(v.text));
     for (const g of NEAR(n)) t.add(nearText(g, n));
-    const its = [{ nr:n, kind:'var' }, { nr:n, kind:'namn', sub:'namn' }, { nr:n, kind:'namn', sub:'nummer' }, ...cities(n).map(c => ({ nr:n, kind:'stad', stad:c })), ...['djur', 'blomma', 'skold'].map(b => ({ nr:n, kind:'bild', bild:b, svar:'namn' }))];
+    const its = [{ nr:n, kind:'var' }, { nr:n, kind:'namn' }, ...cities(n).map(c => ({ nr:n, kind:'stad', stad:c })), ...['djur', 'blomma', 'skold'].map(b => ({ nr:n, kind:'bild', bild:b, svar:'namn' }))];
     for (const it of its){ t.add(promptHTML(it).replace(/<[^>]+>/g, '')); t.add(rightMain(it)); t.add(boxMain(it)); t.add(answerLine(it)); const g = NEAR(n)[0] || (n === 1 ? 2 : 1); optSteps(it, g).forEach(s => t.add(s.text)); optSteps(it, n === 25 ? 1 : 25).forEach(s => t.add(s.text)); }
     t.add(`Det där är ${NAME(n)}.`); t.add(`Det där är ${NAME(n)}. Det hör till ${BY[n].landsdel}.`); t.add(`${NAME(n)} blinkar nu. Tryck där.`); t.add(`${NAME(n)} kommer tillbaka. Var låg det?`);
-    t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`);
+    t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp i brons när du har övat på det här landskapet. Det ligger i ${BY[n].landsdel}.`);
     t.add(`Till silver: svara rätt om ${NAME(n)} på tre olika dagar. Klart hittills: en dag av tre.`); t.add(`Du kan allt om ${NAME(n)}!`);
     for (const k of FACT_KINDS) for (let v = 0; v < 2; v++) t.add(factOf(n, k, v).text);
     specialFacts(n).forEach(x => t.add(x));
@@ -2117,7 +2123,7 @@ function allTexts(){
 }
 window.MOCK = {
   S, MEAS, MAPS, get PL(){ return PL; }, get PZ(){ return PZ; }, get busy(){ return busy; }, get FAKTA(){ return FAKTA; }, get BILDER(){ return BILDER; }, get ALL(){ return ALL; },
-  goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, specialFacts, boxMain,
+  goto, applyPreset, spreadShuffle, createDrill, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, optSteps, ytaText, invText, specialFacts, boxMain,
   ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet, sayFact, factOf, level, kindsOf, GOLD_KINDS,
   /* Svara på frågan som visas: rätt, eller fel (en granne om möjligt, annars långt bort). Kartsvar går genom pekarhändelser. */
   async answer(ok, prefer = 'near'){

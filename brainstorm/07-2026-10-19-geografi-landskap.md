@@ -42,7 +42,7 @@ i `landskap-laxbok.json`.
    som i läxboken: "Vad heter nummer 12?" och "Vilket nummer har Närke?". Den tredje liknar läxförhöret mest.
 4. **Använd ankare och referenspunkter.** Barn bygger sin bild av ett område från kända punkter, sedan vägar och
    sist en överblick (Siegel & White 1975). Det man redan känner används som referens för det nya (Sadalla m.fl.
-   1980). Mira bor i Medelpad, nummer 7, mitt på kusten. Stödet är måttligt till starkt.
+   1980). Mira bor i Medelpad, mitt på kusten (numren visas inte i modulen, D33). Stödet är måttligt till starkt.
    *Här:* "Du bor i Medelpad! Sundsvall ligger här" med en nål på kartan. Sedan beskrivs grannarna utifrån
    Medelpad: Ångermanland ovanför och Hälsingland under.
 5. **Ge minnesstöd i grannar och form.** Ett ord tillsammans med en bild minns man bättre än bara ordet, enligt
@@ -95,7 +95,7 @@ ryms helt i dess träffyta. I fråga (a) är den minsta cirkeln 47 px, för När
 
 ## Språket
 
-Läxbokens nummer skrivs med siffror ("nummer 7"). Antal skrivs med ord ("Norrland har nio landskap"). Då kan samma
+Läxbokens nummer skrivs med siffror ("nummer 7"); numren visas inte längre, D33. Antal skrivs med ord ("Norrland har nio landskap"). Då kan samma
 tal inte få två roller i samma mening.
 
 Jämförelseord används bara när det finns något att jämföra med. "Lappland är störst av alla landskap" jämför med

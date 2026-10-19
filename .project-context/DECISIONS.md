@@ -44,17 +44,19 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 **Repot och nästa modul (19/10)**
 
 - D21 Ordning och reda införs i repot
-- D22 Ny modul Geografi, som börjar med Sveriges landskap
+- D22 Ny modul Geografi, som börjar med Sveriges landskap ◐ · *numren visas inte → D33*
 - D23 Sammanslagna grenar på GitHub tas bort
 - D24 Geografi → Sverige → Sveriges landskap (struktur) ✎ menyn i Geografi
 - D25 Städerna: största staden, plus en väsentligt stor stad där den finns
 - D26 Sköldar och blommor laddas ner från Wikimedia ✎ även djuren
-- D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
+- D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen ◐ · *Vad heter det? utan nummer → D33*
 - D28 Städerna godkända; skolans vana går före där den skiljer
 - D29 Bildkällorna bakom en liten informationsknapp
 - D30 Geografi efter första provet: Nästa, rikare snabbfakta, ett tryck per val, inget dubbeltryck, sköldar i nivåer, test per område ◐ · *snabbfaktan → D31*
 - D31 Faktarutan efter rätt svar är standardiserad ✎ uppställningen → D32
 - D32 Pusslet med namn, två svårighetsgrader och generös placering; faktarutan som prydligt rutnät
+- D33 Läxbokens nummer tas bort ur Geografi
+- D34 Blandad ordning är standard i Träna och Test
 
 ---
 
@@ -230,6 +232,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   delvis har skrivit in i /anthropic-skills:rutiner-och-verktyg Jag kallar det ordning och reda."
 
 ## D22 · 2026-10-19 · Ny modul Geografi, som börjar med Sveriges landskap
+- **Status:** ◐ siffrorna ur läxboken visas inte i modulen → **D33**. Ordningen och nyckeln i `landskap-laxbok.json` används
+  fortfarande internt.
 - **Beslut:** en ny modul Geografi. Första delen är Sveriges landskap: siffrorna 1–25 ur Miras läxbok förs in i en
   färgkarta (`Sveriges_landskap_farg.svg`, i Dennis Hämtade filer). Upplägget är öppet (P8).
 - **Källa:** Dennis 2026-10-19 kl. 07.26: "Jag vill ha en till modul. Geografi. Jag tänkte att vi börjar med
@@ -278,6 +282,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - ✎ **2026-10-19:** landskapsdjuren får också bilder, eftersom frågorna visar bild + text (D27).
 
 ## D27 · 2026-10-19 · Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
+- **Status:** ◐ Vad heter det? frågar bara efter namn, inte efter läxbokens nummer → **D33**.
 - **Beslut:** första versionen har Utforska (landskapskort), Träna med Upptäck Sverige, Vad heter det?, städerna,
   djur/blommor/sköldar, **pusslet** och **samlarpärmen**, samt Test. Resan genom Sverige och Vem är jag? väntar.
   Frågor om landskapsdjur och landskapsblommor visar **bild + text**, inte bara bild. **Landskapssköldarna** är med,
@@ -378,3 +383,22 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
     rutan med informationen kan struktureras snyggare så att man använder informationsrutan mer yt-effektivt."
   - Tillägget samma dag: "det där med pusslet förresten. Jag kom på att det kan ju vara som 2 st svårighetsgrader.
     En där man tydligt ser gränserna där man släpper landskapen. och en där man inte ser dem"
+
+## D33 · 2026-10-19 · Läxbokens nummer tas bort ur Geografi
+- **Beslut:** numren 1–25 ur Miras läxbok visas inte någonstans i modulen:
+  - Vad heter det? frågar bara efter namnet och startar med ett tryck.
+  - Kartan har inga nummer; namnen visas där de ryms.
+  - Landskapskortet, samlarpärmen, kvittot, testet och bildkällorna har inga nummerbrickor. Låsta kort i pärmen visar
+    en sköldsilhuett i landsdelens färg med "?".
+  - Ordningen "Rak" heter "Norr till söder" (samma ordning som numren hade).
+  `referens/landskap-laxbok.json` står kvar som underlag; dess ordning och nycklar används internt.
+- **Källa:** Dennis 2026-10-19 (om knappen "Läxbokens nummer" i Vad heter det?): "den där behövs inte. läxbokens
+  nummer kan vi strunta i. det va bara för att miras läxa va upplagd just så just denna gång"
+
+## D34 · 2026-10-19 · Blandad ordning är standard i Träna och Test
+- **Beslut:** blandad ordning är förvald i alla lägen i Träna och i Test. "Norr till söder" finns kvar som val. Varje
+  runda lottas på nytt och får inte samma ordning som förra rundan med samma val. Samma landskap kommer aldrig två
+  gånger i rad, inte heller Städernas två städer i samma landskap. Extratillfället efter ett fel kommer minst två
+  frågor senare och inte bredvid samma landskap, när rundan har plats för det.
+- **Källa:** Dennis 2026-10-19: "Jag märker att när man tränar och övar, så går det i ordning topp till botten, vilket
+  är väldigt repetitivt och förutsägbart. jag tänker att det borde vara lite mer 'randomiserat'"
