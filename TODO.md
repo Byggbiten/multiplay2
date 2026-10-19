@@ -2,6 +2,7 @@
 
 ## Öppet
 
+- [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
 - [ ] P12: ska Multiplikationens nivå 4 följa skolans metod med nollan i den grå rutan? Ta upp med Dennis efter provet.
 - [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
