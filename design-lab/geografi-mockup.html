@@ -108,8 +108,9 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.3;stro
 .gm path.ls{fill:var(--f);stroke:rgba(40,40,40,.55);stroke-width:.9px;vector-effect:non-scaling-stroke;stroke-linejoin:round;transition:fill .45s var(--smooth),opacity .45s var(--smooth)}
 .gm path.ls.out{opacity:.34}
 .gm path.ls.fog{fill:var(--fog);stroke:rgba(255,255,255,.75);stroke-width:1.2px}
-.gm path.ls.slot{fill:#f4f6fa;stroke:#94a3b8;stroke-dasharray:4 3}
-.gm path.ls.ctx{fill:#eef1f5;stroke:#dbe1e8;opacity:.8}
+.gm path.ls.slot{fill:#e9eef5;stroke:#e9eef5;stroke-width:1.8px}
+.gm path.ls.ctx{fill:none;stroke:#e2e8f0}
+.gm .outl{fill:none;stroke:#64748b;stroke-width:5px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .gm path.ls.placed{fill:var(--f);stroke:rgba(40,40,40,.55);stroke-dasharray:none}
 .gm path.ls.res-ok{fill:#86efac;stroke:#15803d}
 .gm path.ls.res-bad{fill:#fde68a;stroke:#b45309}
@@ -269,34 +270,40 @@ button.tmode:active{transform:scale(.98)}
 .tbtns button:active{transform:scale(.96)}
 .tbtns button svg.i{width:15px;height:15px}
 /* Pussel: välj område */
-.pzpick{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.pzpick{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
 .pzarea{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:22px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);transition:transform .2s var(--spring)}
 .pzarea:active{transform:scale(.97)}
 .pzarea .pv{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
-.pzarea .pv svg{height:100%;max-height:220px;width:auto;max-width:100%}
+.pzarea .pv svg{height:100%;max-height:220px;width:auto;max-width:100%;display:block}
+.pzarea{min-height:0;overflow:hidden}
 .pzarea b{font-family:var(--font-head);font-weight:800;font-size:19px}
 .pzarea small{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+div.pzarea:active{transform:none}
+.pzlv{display:flex;flex-direction:column;gap:5px;width:100%}
+.pzlv button{min-height:44px;border-radius:14px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);font-weight:900;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;box-shadow:0 2px 6px rgba(19,78,74,.08)}
+.pzlv button:active{transform:scale(.96)}
+.pzlv button svg.i{width:15px;height:15px}
+.pzlv button .done{color:#16a34a}
+.pzlv button .done svg.i{stroke-width:3.2}
+.gm path.ls.slotb{fill:#e9eef5;stroke:#7c8aa0;stroke-width:1.3px}
 /* Hemvyn: landsdelskorten är ingången till träning */
 .areas .ahead{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:5px;padding:0 4px}
 .areas .ahead svg.i{width:15px;height:15px}
 .arow .ago{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
 .arow .ago svg.i{width:15px;height:15px;stroke-width:2.8}
 /* Snabbfaktan efter rätt svar: skölden alltid, faktan roterar (D30) */
-.fcard{display:flex;align-items:center;gap:10px;height:100%}
-.fcard .fsh{width:46px;height:56px;flex-shrink:0;object-fit:contain;align-self:center}
-.fcard .ftx{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-start;gap:2px}
+.fcard{display:grid;grid-template-columns:62px 1fr;column-gap:10px;align-items:center;height:100%}
+.fcard .fsh{width:62px;height:74px;object-fit:contain;justify-self:center}
+.fcard .ftx{min-width:0;height:100%;display:flex;flex-direction:column;justify-content:space-evenly}
 .thought:has(.fcard){padding:4px 10px 3px 8px;justify-content:flex-start}
-.fcard .fmain{font-size:14px;line-height:1.13;font-weight:800;color:var(--ink)}
+.fcard .fmain{font-size:14px;line-height:1.1;font-weight:800;color:var(--ink)}
 .fcard .fmain .lead{font-size:14px}
-.fcard .frow{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:13.5px;line-height:1.2}
-.fcard .frow b{font-weight:900;color:var(--deep);min-width:0}
-.fcard .frow .f2{font-weight:800;color:var(--ink-soft)}
-.fcard .fl{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:9.5px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);width:50px}
-.fcard .fgrid .fl{width:auto}
+.fcard .ftab{display:grid;grid-template-columns:66px 1fr;column-gap:4px;row-gap:1px;align-items:baseline}
+.fcard .ftab b{font-weight:900;font-size:13.5px;line-height:1.1;color:var(--deep);min-width:0}
+.fcard .ftab .f2{font-weight:800;color:var(--ink-soft)}
+.fcard .fl{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
 .fcard .fl svg.i{width:13px;height:13px}
-.fcard .fgrid{display:grid;grid-template-columns:auto 1fr;column-gap:12px}
-.fcard .fgrid .frow{font-size:13px}
-.fcard .fspec{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:900;color:#92400e;line-height:1.1}
+.fcard .fspec{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:900;color:#92400e;line-height:1.05}
 .fcard .fspec svg.i{width:14px;height:14px;fill:#fbbf24;stroke:#b45309;stroke-width:1.5}
 
 /* ── Spela (träning och test) ─────────── */
@@ -370,8 +377,11 @@ button.tmode:active{transform:scale(.98)}
 .pzboard{flex:1;min-height:0;padding:6px;display:flex}
 .pzboard .mapbox{background:linear-gradient(180deg,#f6fbfd,#edf6fa)}
 .tray{flex-shrink:0;height:106px;display:flex;align-items:stretch;gap:8px;padding:8px}
-.tpiece{flex:1;min-width:0;border-radius:16px;background:#fff;border:1.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);display:grid;place-items:center;touch-action:none;cursor:grab;transition:opacity .15s,transform .2s var(--spring)}
-.tpiece svg{width:76px;height:76px;overflow:visible;pointer-events:none}
+.tpiece{flex:1;min-width:0;border-radius:16px;background:#fff;border:1.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;cursor:grab;transition:opacity .15s,transform .2s var(--spring)}
+.tpiece svg{width:62px;height:62px;overflow:visible;pointer-events:none}
+.tpiece .tn{font-family:var(--font-head);font-weight:800;font-size:13.5px;line-height:1;color:var(--deep);white-space:nowrap;pointer-events:none}
+.floatpiece .fltag rect{fill:var(--deep)}
+.floatpiece .fltag text{font-family:var(--font-body);font-weight:900;font-size:14px;fill:#fff;text-anchor:middle;dominant-baseline:central}
 .tpiece svg path{stroke:rgba(40,40,40,.6);stroke-width:1px;vector-effect:non-scaling-stroke}
 .tpiece.lift{opacity:.2}
 .tpiece.empty{border-style:solid;border-color:transparent;background:rgba(255,255,255,.4)}
@@ -817,9 +827,9 @@ const haloR = (n, k) => Math.max(0, (44 - 2 * MEAS[n].r * k) / 2) + 6;
 const MAPS = {};
 function GeoMap(host, o = {}){
   const opt = Object.assign({ interactive:true }, o);
-  host.insertAdjacentHTML('beforeend', `<svg class="gm${opt.interactive ? '' : ' static'}" xmlns="${NS}"><g class="cam"><g class="g-halo"></g><g class="g-base"></g><g class="g-fx"></g></g><g class="g-disc"></g><g class="g-lab"></g><g class="g-chip"></g><g class="g-tap"></g></svg>`);
+  host.insertAdjacentHTML('beforeend', `<svg class="gm${opt.interactive ? '' : ' static'}" xmlns="${NS}"><g class="cam"><g class="g-out"></g><g class="g-halo"></g><g class="g-base"></g><g class="g-fx"></g></g><g class="g-disc"></g><g class="g-lab"></g><g class="g-chip"></g><g class="g-tap"></g></svg>`);
   const el = host.querySelector('svg.gm'), cam = el.querySelector('.cam');
-  const gDisc = el.querySelector('.g-disc'), gBase = el.querySelector('.g-base'), gHalo = el.querySelector('.g-halo'), gFx = el.querySelector('.g-fx'), gLab = el.querySelector('.g-lab'), gChip = el.querySelector('.g-chip'), gTap = el.querySelector('.g-tap');
+  const gOut = el.querySelector('.g-out'), gDisc = el.querySelector('.g-disc'), gBase = el.querySelector('.g-base'), gHalo = el.querySelector('.g-halo'), gFx = el.querySelector('.g-fx'), gLab = el.querySelector('.g-lab'), gChip = el.querySelector('.g-chip'), gTap = el.querySelector('.g-tap');
   const P = {}, LB = {};
   for (const l of LANDSKAP){
     const [f, d] = PATHS[l.path];
@@ -1101,6 +1111,9 @@ function GeoMap(host, o = {}){
   }
   function placeDiscs(){ for (const c of gDisc.children){ const L = MEAS[+c.dataset.nr].label, q = M.toScreen(L.x, L.y); c.setAttribute('cx', q.x.toFixed(1)); c.setAttribute('cy', q.y.toFixed(1)); } }
   M.showHalo = on => { M.halo = !!on; drawHalo(); };
+  /* Områdets ytterkontur (pusslet, D32): en tjock linje under landskapen; deras fyllning (med kant i samma färg)
+     täcker de inre gränserna, så att bara kusten och områdets yttergräns syns. */
+  M.outline = nrs => { gOut.innerHTML = ''; for (const n of nrs || []){ const p = document.createElementNS(NS, 'path'); p.setAttribute('d', PATHS[BY[n].path][1]); p.setAttribute('class', 'outl'); gOut.appendChild(p); } };
   /* ── Kameran utifrån ── */
   M.size = () => { M.W = el.clientWidth || host.clientWidth; M.H = el.clientHeight || host.clientHeight; };
   M.setHome = nrs => { M.home = nrs ? ubox(nrs, 8) : WORLD; };
@@ -1124,7 +1137,7 @@ function GeoMap(host, o = {}){
   }).observe(host);
   M.reset = function(){
     M.labelFor = null; M.onTap = null;                 // först: den gamla vyns namnregel får inte köras mot ny data
-    M.clearFx(); M.clearChips(); M.pin(false); M.boxes(false);
+    M.clearFx(); M.clearChips(); M.pin(false); M.boxes(false); M.outline(null);
     for (const n of ALL) P[n].setAttribute('class', 'ls');
     layout(); drawHalo();
   };
@@ -1619,6 +1632,14 @@ function rightMain(it){
   const b = bildName(it.nr, it.bild);
   return b ? `${cap(lc(b))} är ${gen(N)} ${BILD_WORD[it.bild]}.` : `Det är ${gen(N)} landskapssköld.`;
 }
+/* Bekräftelsen i faktarutan (D32): kort, eftersom rutan själv visar stad, djur och blomma */
+function boxMain(it){
+  const N = NAME(it.nr);
+  if (it.kind === 'var') return `Där ligger ${N}.`;
+  if (it.kind === 'namn') return it.sub === 'nummer' ? `${N} har nummer ${it.nr}.` : `Det är ${N}.`;
+  if (it.kind === 'stad') return `${it.stad} ligger ${inL(it.nr)}.`;
+  return `Det är ${gen(N)}.`;
+}
 /* Det barnet ska veta efter ett fel (kort, en mening) */
 function answerLine(it){
   const N = NAME(it.nr);
@@ -1645,14 +1666,15 @@ function right(given){
   if (PL.opts){ const i = PL.opts.findIndex(o => o.ok); const b = $('pCtrl').querySelectorAll('.opt')[i]; if (b) b.classList.add('ok'); $('pCtrl').querySelectorAll('.opt').forEach(x => x.disabled = true); }
   const lead = retryOk ? 'Rätt! Bra att du försökte igen.' : PRAISE[PL.pr++ % PRAISE.length];
   const later = retryOk && PL.cur.retry && !PL.cur.extra ? 'Frågan kommer tillbaka en gång till senare.' : '';
-  sayFact('pBubble', it.nr, lead, rightMain(it));
+  sayFact('pBubble', it.nr, lead, boxMain(it));
   if (later){ SAID.add(later); const pr = $('pTop').querySelector('.prompt'); pr.innerHTML = `<span class="qtag">${esc(later)}</span><br>` + pr.innerHTML.replace(/^<span class="qtag">.*?<\/span><br>/, ''); }   // "kommer tillbaka" står vid frågan, så att faktarutan räcker
   if (lv1 > lv0) toast(lv1 === 1 ? `Nytt kort i samlarpärmen: ${NAME(it.nr)} i brons` : `${NAME(it.nr)} blev ${LEVEL[lv1]} i samlarpärmen`);
   renderTrack();
   const last = PL.isTest ? PL.i >= PL.items.length - 1 : PL.drill.isDone();
   setMain(last ? 'Klar' : 'Nästa', last ? 'check' : 'next', true, !last);
 }
-/* Rätt svar (D31): skölden till vänster; lovordet och meningen; sedan stad, djur och blomma på fasta platser;
+/* Rätt svar (D31, D32): skölden till vänster, centrerad; lovordet och meningen; sedan stad, djur och blomma i en tabell
+   med värdena på samma kant;
    sist den särskilda placeringen om landskapet har en. Rutan har fast höjd, så att Nästa står still. */
 function sayFact(id, nr, lead, main){
   const f = F(nr), c = cities(nr), sp = specialFacts(nr);
@@ -1660,8 +1682,8 @@ function sayFact(id, nr, lead, main){
   const th = $(id);
   th.innerHTML = `<div class="fcard"><img class="fsh" src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false">
     <div class="ftx"><span class="fmain"><b class="lead good">${esc(lead)}</b> ${esc(main)}</span>
-      <span class="frow"><span class="fl">${svg('city')}Stad</span><b>${esc(c[0])}${c[1] ? ` <span class="f2">och ${esc(c[1])}</span>` : ''}</b></span>
-      <span class="fgrid"><span class="frow"><span class="fl">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></span><span class="frow"><span class="fl">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></span></span>
+      <span class="ftab"><span class="fl">${svg('city')}Stad</span><b>${esc(c[0])}${c[1] ? ` <span class="f2">och ${esc(c[1])}</span>` : ''}</b>
+        <span class="fl">${svg('paw')}Djur</span><b>${esc(f.djur)}</b><span class="fl">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></span>
       ${sp.map(t => `<span class="fspec">${svg('star')}${esc(t)}</span>`).join('')}</div></div>`;
   th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
 }
@@ -1792,36 +1814,47 @@ function miniMapArea(nrs, byBox = false){
 /* ═══════════════════════════════════════════════════════════
    PUSSLET (D27): dra bitarna till konturen; nära rätt plats snäpper biten fast
 ═══════════════════════════════════════════════════════════ */
-const PZ = { area:'Norrland', left:[], placed:new Set(), miss:{}, drag:null };
+const PZ = { area:'Norrland', level:'med', left:[], placed:new Set(), miss:{}, drag:null };
+/* Två svårighetsgrader (D32): "Med gränser" visar landskapsgränserna i underlaget, "Utan gränser" bara områdets
+   ytterkontur. Namnen på bitarna och den generösa snäppningen gäller båda. Klara pussel får en bock (räknas inte). */
+const PZ_LEVEL = { med:'Med gränser', utan:'Utan gränser' };
+const PZ_DONE = new Set();
 /* Pussel och Test: ett tryck på dörren visar områdena, ett tryck på ett område startar (D30) */
 function enterPick(kind){
   S.pick = kind || S.pick;
   const test = S.pick === 'test';
   setHeader(test ? 'Test' : 'Pussel');
-  $('pick').innerHTML = AREAS.map(a => `<button class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><small>${cap(antal(areaNrs(a).length))} ${test ? 'frågor' : 'bitar'}</small></button>`).join('');
+  $('pick').innerHTML = AREAS.map(a => test
+    ? `<button class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><small>${cap(antal(areaNrs(a).length))} frågor</small></button>`
+    : `<div class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><span class="pzlv">${['med', 'utan'].map(l => `<button data-lvl="${l}" aria-label="${AREA_NAME[a]}, ${PZ_LEVEL[l]}">${PZ_DONE.has(a + ':' + l) ? `<span class="done">${svg('check')}</span>` : svg('puzzle')}${PZ_LEVEL[l]}</button>`).join('')}</span></div>`).join('');
   if (test) say('pickBubble', 'Vilket område vill du testa?', 'Ingen klocka. Alla landskap i området kommer med.');
-  else say('pickBubble', 'Vilket pussel vill du lägga?', 'Tryck på ett område så börjar det.');
+  else say('pickBubble', 'Välj område och om gränserna ska synas.', 'Med gränser är lättare. Utan gränser är svårare.');
 }
-$('pick').addEventListener('click', e => { const b = e.target.closest('.pzarea'); if (!b) return; if (S.pick === 'test') goto('play', { test:true, area:b.dataset.a, items:buildTest(b.dataset.a) }); else goto('puzzle', b.dataset.a); });
-function enterPuzzle(area){ startPuzzle(area || S.pzArea); }
-function startPuzzle(area){
+$('pick').addEventListener('click', e => {
+  const b = e.target.closest('.pzarea'); if (!b) return;
+  if (S.pick === 'test'){ goto('play', { test:true, area:b.dataset.a, items:buildTest(b.dataset.a) }); return; }
+  const lv = e.target.closest('[data-lvl]'); if (lv) goto('puzzle', { area:b.dataset.a, level:lv.dataset.lvl });
+});
+function enterPuzzle(arg){ startPuzzle(arg && arg.area ? arg.area : S.pzArea, arg && arg.level ? arg.level : PZ.level); }
+function startPuzzle(area, level = PZ.level){
   const M = MAPS.pz, nrs = areaNrs(area);
-  S.pzArea = area; PZ.area = area; PZ.left = shuffle(nrs); PZ.placed = new Set(); PZ.miss = {};
+  S.pzArea = area; PZ.area = area; PZ.level = level; PZ.left = shuffle(nrs); PZ.placed = new Set(); PZ.miss = {};
   setHeader(`Pussel ${area === 'Sverige' ? 'hela Sverige' : area}`);
   M.reset(); M.setHome(nrs); M.sync(); M.fitHome(0);
-  for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (nrs.includes(n) ? 'slot' : 'ctx'));
+  for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (nrs.includes(n) ? (level === 'med' ? 'slotb' : 'slot') : 'ctx'));
+  M.outline(nrs);                                   // bara områdets ytterkontur syns (D32)
   M.labelFor = n => PZ.placed.has(n) ? { force:true, text:NAME(n) } : null;
   M.relayout();
   renderTray();
-  say('pzBubble', `Dra bitarna till rätt plats i ${AREA_IN(area)}.`, 'Nära rätt plats snäpper biten fast.');
+  say('pzBubble', `${PZ_LEVEL[level]}: dra bitarna till rätt plats.`, 'Nära rätt plats snäpper biten fast.');
 }
-const TRAY_N = 4;
+const TRAY_N = 3;
 function renderTray(){
   const show = PZ.left.slice(0, TRAY_N);
   $('tray').innerHTML = `<span class="traycount"><b>${PZ.left.length}</b>${PZ.left.length === 1 ? 'bit kvar' : 'bitar kvar'}</span>` +
     Array.from({ length:TRAY_N }, (_, i) => { const n = show[i]; if (!n) return '<span class="tpiece empty"></span>';
       const b = MEAS[n].bbox, pad = Math.max(b.w, b.h) * 0.04;
-      return `<span class="tpiece" data-nr="${n}" role="button" aria-label="En pusselbit"><svg viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" preserveAspectRatio="xMidYMid meet"><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}"/></svg></span>`; }).join('');
+      return `<span class="tpiece" data-nr="${n}" role="button" aria-label="Pusselbiten ${NAME(n)}"><svg viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" preserveAspectRatio="xMidYMid meet"><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}"/></svg><span class="tn">${NAME(n)}</span></span>`; }).join('');
 }
 $('tray').addEventListener('pointerdown', e => {
   const tp = e.target.closest('.tpiece[data-nr]'); if (!tp || PZ.drag) return;
@@ -1833,11 +1866,16 @@ $('tray').addEventListener('pointerdown', e => {
   const px = e.clientX - app.left, py = e.clientY - app.top;
   const fx = clamp((px - ox) / (b.w * s0), 0, 1), fy = clamp((py - oy) / (b.h * s0), 0, 1);
   const fl = document.createElementNS(NS, 'svg'); fl.setAttribute('class', 'floatpiece');
-  fl.innerHTML = `<g><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}" transform="translate(${-b.x} ${-b.y})"/></g>`;
+  fl.innerHTML = `<g><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}" transform="translate(${-b.x} ${-b.y})"/></g><g class="fltag"><rect rx="13" height="26" y="-13"/><text>${esc(NAME(n))}</text></g>`;
   $('app').appendChild(fl);
+  const tag = fl.querySelector('.fltag'), tw = tag.querySelector('text').getComputedTextLength() + 22, tr = tag.querySelector('rect'); tr.setAttribute('width', tw); tr.setAttribute('x', -tw / 2);
   tp.classList.add('lift');
   const D = PZ.drag = { n, tp, fl, g:fl.firstChild, b, fx, fy, s:s0, s0, home:{ x:ox, y:oy }, px, py, k:M.k, t0:performance.now(), id:e.pointerId };
-  const draw = () => { const X = D.px - D.fx * b.w * D.s, Y = D.py - D.fy * b.h * D.s - (D.s > D.s0 ? 0 : 0); D.X = X; D.Y = Y; D.g.setAttribute('transform', `translate(${X.toFixed(1)} ${Y.toFixed(1)}) scale(${D.s.toFixed(4)})`); };
+  /* Namnet följer med ovanför fingret, så att fingret inte täcker det (D32) */
+  const appW = app.width, tagY = y => Math.max(16, y - 52);
+  const draw = () => { const X = D.px - D.fx * b.w * D.s, Y = D.py - D.fy * b.h * D.s; D.X = X; D.Y = Y; D.g.setAttribute('transform', `translate(${X.toFixed(1)} ${Y.toFixed(1)}) scale(${D.s.toFixed(4)})`);
+    D.tag.setAttribute('transform', `translate(${clamp(D.px, tw / 2 + 4, appW - tw / 2 - 4).toFixed(1)} ${tagY(D.py).toFixed(1)})`); };
+  D.tag = tag;
   D.draw = draw;
   const grow = now => { if (PZ.drag !== D || D.dropping) return; const u = Math.min(1, (now - D.t0) / 160); D.s = D.s0 + (D.k - D.s0) * (1 - Math.pow(1 - u, 3)); draw(); if (u < 1) requestAnimationFrame(grow); };
   draw(); requestAnimationFrame(grow);
@@ -1855,22 +1893,32 @@ function tween(D, to, ms){
     requestAnimationFrame(st); setTimeout(fin, ms + 200);
   });
 }
+/* Snäppradien (D32): generös – halva bitens minsta mått, minst 40 px – men alltid mindre än avståndet till närmaste
+   grannbit i området (70 %), så att en bit som släpps på grannens plats inte snäpper. Golv 24 px: ligger två
+   mittpunkter närmare än så (Dalsland/Bohuslän, Öland/Blekinge i hela Sverige) snäpper biten ändå bara till sin egen plats. */
+function snapRadius(n){
+  const M = MAPS.pz, L = MEAS[n].label, b = MEAS[n].bbox;
+  let dnb = Infinity;
+  for (const m of areaNrs(PZ.area)) if (m !== n){ const Q = MEAS[m].label; dnb = Math.min(dnb, Math.hypot(L.x - Q.x, L.y - Q.y) * M.k); }
+  return Math.max(24, Math.min(Math.max(40, 0.5 * Math.min(b.w, b.h) * M.k), 0.7 * dnb));
+}
 async function dropPiece(D){
-  D.dropping = true;
+  D.dropping = true; D.tag.style.display = 'none';
   const M = MAPS.pz, b = D.b, app = $('app').getBoundingClientRect(), mr = M.el.getBoundingClientRect();
   const tX = mr.left - app.left + M.tx + M.k * b.x, tY = mr.top - app.top + M.ty + M.k * b.y;
-  const dist = Math.hypot(D.X - tX, D.Y - tY), snapR = Math.max(28, 0.3 * Math.min(b.w, b.h) * M.k);
+  const dist = Math.hypot(D.X - tX, D.Y - tY), snapR = snapRadius(D.n);
   D.dist = dist; D.snapR = snapR;
   const n = D.n;
   if (dist <= snapR){
     await tween(D, { X:tX, Y:tY, s:M.k }, 140);
     D.fl.remove(); PZ.drag = null;
     PZ.placed.add(n); PZ.left = PZ.left.filter(x => x !== n);
-    M.P[n].setAttribute('class', 'ls placed'); M.unfx(n, 'mark'); M.fx(n, 'found'); M.relayout();
+    M.P[n].setAttribute('class', 'ls placed'); M.P[n].parentNode.appendChild(M.P[n]);   // lagd bit ritas överst, med sina gränser
+    M.unfx(n, 'mark'); M.fx(n, 'found'); M.relayout();
     renderTray();
     say('pzBubble', `Rätt! Det är ${NAME(n)}.`, '', { lead:null, fact:factOf(n, ['rank', 'stad', 'bild'][PZ.placed.size % 3], 0) });
-    if (!PZ.left.length) setTimeout(() => celebrate({ title:'Pusslet är klart!', sub:PZ.area === 'Sverige' ? 'Du har lagt hela Sverige.' : `Du har lagt hela ${PZ.area}.`,
-      buttons:[{ label:'Lägg igen', icon:'again', fn:() => { closeOverlay(); startPuzzle(PZ.area); } }, { label:'Till landskapen', icon:'next', primary:true, fn:() => goto('hub') }] }), 450);
+    if (!PZ.left.length){ PZ_DONE.add(PZ.area + ':' + PZ.level); setTimeout(() => celebrate({ title:'Pusslet är klart!', sub:`Du har lagt hela ${PZ.area === 'Sverige' ? 'Sverige' : PZ.area}. Nivå: ${PZ_LEVEL[PZ.level].toLowerCase()}.`,
+      buttons:[{ label:'Lägg igen', icon:'again', fn:() => { closeOverlay(); startPuzzle(PZ.area, PZ.level); } }, { label:'Välj ett annat pussel', icon:'puzzle', fn:() => goto('pick', 'puzzle') }, { label:'Till landskapen', icon:'next', primary:true, fn:() => goto('hub') }] }), 450); }
     return;
   }
   PZ.miss[n] = (PZ.miss[n] || 0) + 1;
@@ -2053,7 +2101,7 @@ function allTexts(){
     t.add(CUE[n].text); t.add(ytaText(n)); t.add(invText(n)); F(n).visste_du.forEach(v => t.add(v.text));
     for (const g of NEAR(n)) t.add(nearText(g, n));
     const its = [{ nr:n, kind:'var' }, { nr:n, kind:'namn', sub:'namn' }, { nr:n, kind:'namn', sub:'nummer' }, ...cities(n).map(c => ({ nr:n, kind:'stad', stad:c })), ...['djur', 'blomma', 'skold'].map(b => ({ nr:n, kind:'bild', bild:b, svar:'namn' }))];
-    for (const it of its){ t.add(promptHTML(it).replace(/<[^>]+>/g, '')); t.add(rightMain(it)); t.add(answerLine(it)); const g = NEAR(n)[0] || (n === 1 ? 2 : 1); optSteps(it, g).forEach(s => t.add(s.text)); optSteps(it, n === 25 ? 1 : 25).forEach(s => t.add(s.text)); }
+    for (const it of its){ t.add(promptHTML(it).replace(/<[^>]+>/g, '')); t.add(rightMain(it)); t.add(boxMain(it)); t.add(answerLine(it)); const g = NEAR(n)[0] || (n === 1 ? 2 : 1); optSteps(it, g).forEach(s => t.add(s.text)); optSteps(it, n === 25 ? 1 : 25).forEach(s => t.add(s.text)); }
     t.add(`Det där är ${NAME(n)}.`); t.add(`Det där är ${NAME(n)}. Det hör till ${BY[n].landsdel}.`); t.add(`${NAME(n)} blinkar nu. Tryck där.`); t.add(`${NAME(n)} kommer tillbaka. Var låg det?`);
     t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`);
     t.add(`Till silver: svara rätt om ${NAME(n)} på tre olika dagar. Klart hittills: en dag av tre.`); t.add(`Du kan allt om ${NAME(n)}!`);
@@ -2061,7 +2109,7 @@ function allTexts(){
     specialFacts(n).forEach(x => t.add(x));
   }
   t.add('Till guld: svara rätt i alla sex frågetyperna.'); t.add('Vilket område vill du testa?'); t.add('Ingen klocka. Alla landskap i området kommer med.'); t.add('Vilket pussel vill du lägga?'); t.add('Tryck på ett område så börjar det.'); t.add('Tryck på det du vill träna.');
-  for (const a of AREAS){ t.add(`Du har upptäckt ${AREA_IN(a)}!`); t.add(`Alla ${antal(areaNrs(a).length)} landskap har färg och namn.`); t.add(a === 'Sverige' ? 'Du har lagt hela Sverige.' : `Du har lagt hela ${a}.`); t.add(`Dra bitarna till rätt plats i ${AREA_IN(a)}.`); t.add(`${AREA_NAME[a]} är upptäckt!`); }
+  for (const a of AREAS){ t.add(`Du har upptäckt ${AREA_IN(a)}!`); t.add(`Alla ${antal(areaNrs(a).length)} landskap har färg och namn.`); for (const l of ['med gränser', 'utan gränser']) t.add(`Du har lagt hela ${a === 'Sverige' ? 'Sverige' : a}. Nivå: ${l}.`); t.add('Med gränser: dra bitarna till rätt plats.'); t.add('Utan gränser: dra bitarna till rätt plats.'); t.add('Välj område och om gränserna ska synas.'); t.add('Med gränser är lättare. Utan gränser är svårare.'); t.add(`Dra bitarna till rätt plats i ${AREA_IN(a)}.`); t.add(`${AREA_NAME[a]} är upptäckt!`); }
   [...PRAISE, 'Rätt! Bra att du försökte igen.', 'Nästan rätt!', 'Bra försök!', 'Frågan kommer tillbaka en gång till senare.', 'Samma fråga en gång till.', 'Den här frågan kommer tillbaka en gång till.',
    'Inte där. Biten glider tillbaka.', 'Titta: den rätta platsen blinkar.', 'Titta på formen och prova en annan plats.', 'Det övar du mer på i Träna.', 'Där finns inget landskap.', 'Tryck inne på ett landskap.',
    ...MODES.flatMap(m => [m.name, m.desc])].forEach(x => t.add(x));
@@ -2069,7 +2117,7 @@ function allTexts(){
 }
 window.MOCK = {
   S, MEAS, MAPS, get PL(){ return PL; }, get PZ(){ return PZ; }, get busy(){ return busy; }, get FAKTA(){ return FAKTA; }, get BILDER(){ return BILDER; }, get ALL(){ return ALL; },
-  goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, specialFacts,
+  goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, specialFacts, boxMain,
   ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet, sayFact, factOf, level, kindsOf, GOLD_KINDS,
   /* Svara på frågan som visas: rätt, eller fel (en granne om möjligt, annars långt bort). Kartsvar går genom pekarhändelser. */
   async answer(ok, prefer = 'near'){

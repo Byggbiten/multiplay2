@@ -53,7 +53,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D28 Städerna godkända; skolans vana går före där den skiljer
 - D29 Bildkällorna bakom en liten informationsknapp
 - D30 Geografi efter första provet: Nästa, rikare snabbfakta, ett tryck per val, inget dubbeltryck, sköldar i nivåer, test per område ◐ · *snabbfaktan → D31*
-- D31 Faktarutan efter rätt svar är standardiserad
+- D31 Faktarutan efter rätt svar är standardiserad ✎ uppställningen → D32
+- D32 Pusslet med namn, två svårighetsgrader och generös placering; faktarutan som prydligt rutnät
 
 ---
 
@@ -353,3 +354,27 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-10-19: "Men jag vill ändå att rutan ska vara standardiserad. Så den skall alltid visa
   största stad, landskapsdjur, landskapsblomma, landskapssköld och sen 'om det finns någon särskild fakta, t.ex.
   lappland är störst, jämtland är näst störst, eller folkrikaste eller minsta etc.' så skall det vara med."
+
+## D32 · 2026-10-19 · Pusslet med namn och två svårighetsgrader; faktarutan som rutnät
+- **Beslut:**
+  1. **Pusslets bitar har namn.** Namnet står under biten i brickan och följer med ovanför fingret medan biten dras.
+  2. **Två svårighetsgrader**, valda på samma skärm som området (ett tryck startar): "Med gränser" visar
+     landskapsgränserna i underlaget, och "Utan gränser" visar bara områdets yttre kontur (kusten och yttergränsen).
+     Lagda bitar visas med sina gränser och sin färg. Firandet säger vilken nivå som spelades, och en bock på valet
+     visar klara område och nivå. Det räknas inte in i lådorna (D30).
+  3. **Generös placering.** En bit som släpps nära nog snäpper på plats. Radien är halva bitens minsta mått, minst
+     40 px, men högst 70 % av avståndet till närmaste grannbits mitt, med ett golv på 24 px. En bit snäpper bara till
+     sin egen plats. En bit som släpps långt bort glider tillbaka med en vänlig text.
+  4. **Faktarutan som rutnät** (ändrar uppställningen i D31): skölden större och centrerad till vänster; till höger
+     lovordet och en kort bekräftelse, sedan Stad, Djur och Blomma i en tabell med värdena på samma kant, och sist
+     den särskilda raden. Innehållet fördelas jämnt i rutans fasta höjd. Bekräftelsen i rutan är kort ("Där ligger
+     Öland.", "Det är Ölands.", "Färjestaden ligger på Öland."), eftersom rutan visar resten; de längre meningarna
+     står kvar i förklaringarna.
+- **Källa:** Dennis 2026-10-19:
+  - "pusslet va kul. Men bitarna har inget namn. Så man vet inte riktid vad man drar. och det blir lite för lätt
+    etftersom underlagsbilden är streckad på ett sätt som lätt gör att man förstår vart den skall passa. Jag tänker
+    att man tar bort landskapsgränserna på 'pusselt' alltså där man skall drag and droppa bitarna, och så är appen
+    tillräckligt generös med placeringen av bitarna så att de landar rätt när man släpper dem nära nog. och den här
+    rutan med informationen kan struktureras snyggare så att man använder informationsrutan mer yt-effektivt."
+  - Tillägget samma dag: "det där med pusslet förresten. Jag kom på att det kan ju vara som 2 st svårighetsgrader.
+    En där man tydligt ser gränserna där man släpper landskapen. och en där man inte ser dem"
