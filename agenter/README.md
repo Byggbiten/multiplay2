@@ -6,3 +6,4 @@ En mapp per roll med `OVERLAMNING.md` (tillståndet nu, skrivs om) och `LOGG.md`
 | Mapp | Roll | Filer |
 |---|---|---|
 | `geografi/` | Geografi: mockupen (D24–D34) och bygget in i appen (D35) | `OVERLAMNING.md`, `LOGG.md` |
+| `matteprov/` | Matteprov: Matteprov 4:an med Matteprov 1 (D37, D38 med ✎), live i v68 | `OVERLAMNING.md`, `LOGG.md` |

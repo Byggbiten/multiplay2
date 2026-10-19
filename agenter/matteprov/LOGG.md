@@ -1,0 +1,45 @@
+# Lärdomslogg – Matteprov
+
+En post per runda: vad som byggdes, vad som rättades och varför, och vad rollen lärde sig.
+
+---
+
+## Runda 1 · 2026-10-19 · Matteprov 1 (D37), gren `matteprov`
+- **Byggt:** kortet i Multiplikationens lägesvy, provlistan ur `PROVS`, provsidan med fem moment, Så här gör du,
+  nötloopen, "Gör provet" med kvitto och "Sett av en vuxen", tabellsprinten. Under rundan kom tre tillägg: följ
+  bladens form (tabelltest 20 tal /20, "="-rader, TE med tre rader, uttrycket i problemlösningen), allt avvikande
+  bara i provet, och provet minst lika svårt som det svårare bladet (nya golv och 300-provstest).
+- **Rättat under verifieringen:** "Rätt!" visade nästa uppgifts text (nötloopen hade redan gått vidare); facit visades
+  helt i stället för rad för rad; tal med två roller i samma mening (4 · 5 = 20 bredvid tiotalet 20, "6 av dem ger
+  6 poäng"); speglade dubbletter (50 · 40 och 40 · 50); ett pris som råkade vara bladets.
+- **Lärdom:** rita återkopplingen på uppgiften som besvarades, inte på den aktuella. Språkregeln behöver en kontroll
+  i generatorn och ett test, inte bara läsning. Mät nivån mot underlaget i vitest i stället för att lita på
+  intervallen.
+
+## Runda 2 · 2026-10-19 · Kladd, hjälptrappa, mitt prov (D38), gren `matteprov-hjalp`
+- **Byggt:** appens kladd (multdiv:s ritkod kopierad in, kladd-lagen), hjälptrappan i Öva och prov, kvittot med rätt
+  direkt / med hjälp / fick svaret, det som var svårt per typ som glöms efter tre rätt, "Mitt prov". Under rundan:
+  ensiffrig faktor med delprodukter per rad, raderna i ordning med summan låst, vägvisning, tvåsiffrig med tankerad.
+- **Rättat:** `readResp` skickade bara p1/p2/s, så ensiffriga rader nådde aldrig rättningen; mitt prov tappade hela
+  moment när det fanns många svåra typer (taket); tomma rutor blev gröna i facit; en hjälptext gav 50 px overflow.
+- **Lärdom:** när en ny radtyp läggs till, kontrollera hela vägen från inmatning till rättning. Ett tak i ett urval
+  ska fördela, inte klippa. Mät höjden även i hjälpläget, inte bara i startläget.
+
+## Runda 3 · 2026-10-19 · Anteckningsrutor och kompakt knappsats, gren `matteprov-kladd`
+- **Byggt:** anteckningsrutor i tankeraden för tvåsiffrig faktor (rättas i Öva, aldrig i provet), knappsatsen 5 + 5
+  + ⌫/Nästa/Klar, regler för korta skärmar (kladdens verktyg i hörnet, lägre faktorsiffror, minnesraden först när
+  summan låses upp). Mätt i 390 × 844, 797 och 700.
+- **Rättat:** summans tankerad räknade förskjutna tomrutor som nollor ("6 + 0 + 0 + 0"); tre termer bröt raden;
+  CSS för korta skärmar förlorade på specificitet.
+- **Lärdom:** en tom ruta är inte en nolla; skilj dem i logiken. Mät tre höjder och hjälpläget innan rapport.
+
+## Runda 4 · 2026-10-19 · Frågan per rad, ångra och gör om, gren `matteprov-radfraga`
+- **Byggt:** appen frågar per delproduktsrad och bokför svaret på rätt plats (texten först, sedan en kort rörelse);
+  rad 2 börjar med barnets nolla; trappa per rad; bara summan rättas; felklasserna som inte längre kan hända är
+  borttagna. Kladden fick Ångra och Gör om i flera steg (`createHistory`, Rensa går att ångra). Efter rundan lade
+  samordnaren till "en knapp i taget" och släppte v68.
+- **Varför:** cellinmatning från höger gav inverterade tal när barnet skrev ett tvåsiffrigt svar i den ordning det
+  läses.
+- **Rättat:** en ledtråd som bröt raden i 390 × 700; kladdens golv på korta skärmar.
+- **Lärdom:** när inmatningen ställer till det för barnet, flytta platsvärdet till appen och låt barnet svara som det
+  tänker. Ta bort det som inte längre kan hända, både i koden och i testerna.
