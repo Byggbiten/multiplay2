@@ -1,6 +1,6 @@
 # NP_MATTE_MUNTLIGT.md – Kontextfil för framtida sessioner
 
-> **Historisk (2026-03-08).** Låg i roten som `NP_MATTE_MUNTLIGT.md`; flyttad hit 2026-10-19. Läs `CLAUDE.md` först — den här filen är inte längre ingången. Projektöversikten, filträdet och designsystemet nedan beskriver läget i mars ("9-årig flicka i åk 3", tre spel); Nationella prov-modulen själv finns kvar i appen.
+> **Historisk (2026-03-08).** Låg i roten som `NP_MATTE_MUNTLIGT.md`; flyttad hit 2026-10-19. Läs `CLAUDE.md` först — den här filen är inte längre ingången. Projektöversikten, filträdet och designsystemet nedan beskriver läget i mars ("barn i åk 3", tre spel); Nationella prov-modulen själv finns kvar i appen.
 
 > **Syfte:** Den här filen ger kontext åt Claude Code (eller annan AI-assistent) som återupptar utveckling av MULTIPLAY-appen. Läs den FÖRST.
 
@@ -8,7 +8,7 @@
 
 ## Projektöversikt
 
-**MULTIPLAY** är en pedagogisk PWA (Progressive Web App) riktad till en 9-årig flicka i åk 3 i Sverige. Appen är byggd med vanilla JavaScript (inga ramverk), HTML och CSS. Den körs som en PWA på iPad med Apple Pencil.
+**MULTIPLAY** är en pedagogisk PWA (Progressive Web App) riktad till barn i åk 3 i Sverige. Appen är byggd med vanilla JavaScript (inga ramverk), HTML och CSS. Den körs som en PWA på iPad med Apple Pencil.
 
 ### Tech stack
 - **Vanilla JS** – IIFE-moduler, inga bundlers, inga ramverk

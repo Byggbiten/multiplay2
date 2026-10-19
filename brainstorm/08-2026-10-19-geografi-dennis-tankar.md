@@ -59,7 +59,7 @@ folkminstast"): faktan visas (1) på landskapskortet i Utforska, (2) som en kort
 "Sett av en vuxen".
 
 ## Öppet till Dennis
-- Vilken stad per landskap – finns en lista i Miras skolmaterial? Annars förslag från Claude som Dennis godkänner.
+- Vilken stad per landskap – finns en lista i skolmaterialet? Annars förslag från Claude som Dennis godkänner.
 - Sköldar och blommor som bilder: hämtas som fria SVG (t.ex. Wikimedia Commons) – kräver Dennis ja för nedladdning.
 - Vilka av förslagen 5–7 och samlarpärmen han vill ha med i första versionen.
 

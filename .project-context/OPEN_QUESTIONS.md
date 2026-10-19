@@ -8,7 +8,7 @@ aldrig. Nya frågor får nästa P-nummer.
 ### Uppställning och division
 
 - **P1 Faktan före eller efter svaret i Räkna med hjälp.** I kort division visas tabellraden (`6 · 7 = 42`) innan
-  barnet svarar på kvotfrågan, som i mockupen. Mira invände två gånger: läget blir "läs av brickan", och hon vill se
+  barnet svarar på kvotfrågan, som i mockupen. Rollspelet invände två gånger: läget blir "läs av brickan", och barnet vill se
   faktan efter svaret eller när hon trycker Livlina (`SPEC-KORT-DIVISION.md` §8 punkt 6). Dennis valde involvering
   (D4), men ordningen är inte prövad igen.
 - **P2 "1 av 5 rätt".** Formuleringen mot antalet avklarade uppgifter: säger den vad barnet faktiskt gjort?
@@ -35,7 +35,7 @@ aldrig. Nya frågor får nästa P-nummer.
 
 ## Besvarade
 
-- ~~P11 Offentligt repo: barnets hemort i dokumenten och "Här bor du" för alla~~ → D36
+- ~~P11 Offentligt repo: personuppgifter i dokumenten och "Här bor du" för alla~~ → D36
 - ~~P8 Geografimodulens upplägg och pedagogik~~ → D24–D35 (samtalet i `brainstorm/08`, mockupen godkänd)
 - ~~P10 Geografi: första versionens spellägen~~ → D27
 - ~~P9 Grenarna på GitHub: ska de tio sammanslagna grenarna tas bort?~~ → D23

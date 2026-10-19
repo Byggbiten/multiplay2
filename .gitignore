@@ -2,5 +2,5 @@ node_modules/
 .claude/
 .DS_Store
 
-# Personuppgifter om barnen (D36) – lokalt och i OneDrive, aldrig i det offentliga repot
+# Personuppgifter (D36) – lokalt, aldrig i det offentliga repot
 _privat/

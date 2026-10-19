@@ -724,7 +724,7 @@ den ska stanna. **Ta inte bort den utan att fråga Dennis** — argumenten åt b
 håll:
 
 - *Behåll:* `ADD_OPTS` är en rad, så hela största-talet-regeln kan vändas
-  tillbaka om Mitt i Prick 4A visar sig lära ut det översta talet. Regeln är
+  tillbaka om skolboken (Mitt i Prick) visar sig lära ut det översta talet. Regeln är
   inte verifierad mot boken.
 - *Ta bort:* två aritmetikvägar i samma funktion är skuld, och
   karakteriseringstestet pinnar då fast ett beteende vi medvetet övergett.
@@ -763,7 +763,7 @@ Spec §10 listar sex. Dessa tre kan blockera en uppgift och ska ställas till De
 2. **Tankerutans tröskel** (uppgift 6): mockupen öppnar rutan även för `9 + 2` där bara 1 lånas. Om den ska hoppas över vid `behover === 1` är obestämt.
 3. **Reducerad rörelse** (uppgift 6): `prefers-reduced-motion` saknas i mockupens telefon-CSS. Vad som ska hända med brickornas rörelser är obestämt.
 
-Och en fråga till Dennis som inte är teknisk: **stämmer största-talet-regeln med Mitt i Prick 4A?** `SPEC-MINNESSIFFROR.md` namnger boken som källa men säger inget om vilken term som fylls till 10. Om boken alltid fyller den översta lär appen ut något annat än klassrummet. Regeln går att vända med en rad (`ADD_OPTS`), så det är inte blockerande — men det bör kontrolleras mot boken.
+Och en fråga till Dennis som inte är teknisk: **stämmer största-talet-regeln med skolboken (Mitt i Prick)?** `SPEC-MINNESSIFFROR.md` namnger boken som källa men säger inget om vilken term som fylls till 10. Om boken alltid fyller den översta lär appen ut något annat än klassrummet. Regeln går att vända med en rad (`ADD_OPTS`), så det är inte blockerande — men det bör kontrolleras mot boken.
 
 ---
 
@@ -784,7 +784,7 @@ Den korta vägen är den `SKIP_BOX_MAX_BORROW`/`SKIP_BOX_MIN_LEVEL` skapar, så
 felet finns bara på nivå 3–4 när `behover === 1`.
 
 **Vald lösning (Dennis: "B").** Skriv INTE om siffran i cellen. Pappret ska
-visa vad Mira faktiskt skriver, och hon skriver aldrig en 9:a där — hon stryker
+visa vad barnet skriver på papper, och barnet skriver aldrig en 9:a där — det stryker
 8:an och skriver 10. Sätter appen dit en 9:a och stryker sedan den, lär den ut
 ett papper som inte finns.
 

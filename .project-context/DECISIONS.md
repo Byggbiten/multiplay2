@@ -58,7 +58,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D33 Läxbokens nummer tas bort ur Geografi
 - D34 Blandad ordning är standard i Träna och Test
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
-- D36 Orten bort ur repot; "Här bor du" blir en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
+- D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 
 ---
 
@@ -75,7 +75,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 ## D2 · 2026-07-03 · Levande minnessiffror
 - **Beslut:** minnessiffran skrivs liten, vilar, används, stryks och står kvar som spår — som på papper. Se
   `.project-context/SPEC-MINNESSIFFROR.md`. Införd i v30.
-- **Varför:** Mira räknar rätt men saknar pappersvanan; appen ska nöta in strukturen.
+- **Varför:** Barnet räknar rätt men saknar pappersvanan; appen ska nöta in strukturen.
 - **Källa:** Dennis 2026-07-03: "bygg det" (enligt SPEC-MINNESSIFFROR).
 
 ## D3 · 2026-09-22 · Räkna med hjälp stegas med klick, ingen autouppspelning
@@ -196,7 +196,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 ## D17 · 2026-09-23 · Flervalets plats lottas
 - **Beslut:** alternativens ordning lottas vid varje visning, och likaså hur många som ligger under och över
   svaret, så att varken platsen på skärmen eller storleksordningen avslöjar rätt svar. Byggt i v61.
-- **Källa:** Dennis 2026-09-23 kl. 20.32, Miras fynd: "alla rätta svar på flersvarsinmatningen va nere till
+- **Källa:** Dennis 2026-09-23, fynd i barntestet: "alla rätta svar på flersvarsinmatningen va nere till
   vänster när hon körde 3:ans tabell. så hon pepprade bara den knappen då hon räknade ut det"
 
 ## D18 · 2026-09-23 · Klockans trappa
@@ -236,8 +236,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 ## D22 · 2026-10-19 · Ny modul Geografi, som börjar med Sveriges landskap
 - **Status:** ◐ siffrorna ur läxboken visas inte i modulen → **D33**. Ordningen och nyckeln i `landskap-laxbok.json` används
   fortfarande internt.
-- **Beslut:** en ny modul Geografi. Första delen är Sveriges landskap: siffrorna 1–25 ur Miras läxbok förs in i en
-  färgkarta (`Sveriges_landskap_farg.svg`, i Dennis Hämtade filer). Upplägget är öppet (P8).
+- **Beslut:** en ny modul Geografi. Första delen är Sveriges landskap: siffrorna 1–25 ur läxboken förs in i en
+  färgkarta (`Sveriges_landskap_farg.svg`). Upplägget är öppet (P8).
 - **Källa:** Dennis 2026-10-19 kl. 07.26: "Jag vill ha en till modul. Geografi. Jag tänkte att vi börjar med
   Sveriges landskap […] I den så har de angett i siffror. Så jag tänker att vi för in siffrorna i den där bilden jag
   hittade."
@@ -387,7 +387,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
     En där man tydligt ser gränserna där man släpper landskapen. och en där man inte ser dem"
 
 ## D33 · 2026-10-19 · Läxbokens nummer tas bort ur Geografi
-- **Beslut:** numren 1–25 ur Miras läxbok visas inte någonstans i modulen:
+- **Beslut:** numren 1–25 ur läxboken visas inte någonstans i modulen:
   - Vad heter det? frågar bara efter namnet och startar med ett tryck.
   - Kartan har inga nummer; namnen visas där de ryms.
   - Landskapskortet, samlarpärmen, kvittot, testet och bildkällorna har inga nummerbrickor. Låsta kort i pärmen visar
@@ -395,7 +395,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   - Ordningen "Rak" heter "Norr till söder" (samma ordning som numren hade).
   `referens/landskap-laxbok.json` står kvar som underlag; dess ordning och nycklar används internt.
 - **Källa:** Dennis 2026-10-19 (om knappen "Läxbokens nummer" i Vad heter det?): "den där behövs inte. läxbokens
-  nummer kan vi strunta i. det va bara för att miras läxa va upplagd just så just denna gång"
+  nummer kan vi strunta i. det va bara för att […] läxa va upplagd just så just denna gång"
 
 ## D34 · 2026-10-19 · Blandad ordning är standard i Träna och Test
 - **Beslut:** blandad ordning är förvald i alla lägen i Träna och i Test. "Norr till söder" finns kvar som val. Varje
@@ -412,22 +412,18 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   alla frågetyper) gäller som den står i mockupen.
 - **Källa:** Dennis 2026-10-19: "det ser jättebra ut. Kör en ordning och reda-rutin, sen livesätter vi detta"
 
-## D36 · 2026-10-19 · Orten bort ur repot; "Här bor du" blir en inställning
-- **Beslut:** repot och appen är offentliga. Barnets hemort skrivs inte i repots dokument eller kod. Nålen "Här bor
-  du" i Geografi visas bara om en vuxen väljer ett hemlandskap i appens inställningar; från början är inget valt. Det
-  valda landskapet sparas lokalt per profil, inte i repot. Äldre omnämnanden finns kvar i git-historiken; att skriva
-  om historiken (force-push) ingår inte.
-- **Källa:** Dennis 2026-10-19: "Alternativ 2, ta bort orten och kör bygget" (alternativ 2: ta bort orten ur
-  dokumenten och visa nålen bara som en inställning i appen).
-- ✎ **2026-10-19, vad som inte får stå:** förnamn som Mira, Zelda och Julian är generiska namn i appen och får stå.
-  Det som aldrig får stå i repot är en kombination som pekar ut ett verkligt barn: efternamn, ort, skola, klass eller
-  årskurs tillsammans med namnet. Rensat samma dag: orten, efternamnet i en sökväg, "dottern" och årskursen.
-  Källa: Dennis: "Jag har lagt in lite blandade namn som bara ska vara generiska. mira är ett av dem tror jag. Men det
-  ska inte vara så att Mira […] blir exakt utpekad" (efternamn, ort och årskurs utelämnade i citatet av samma skäl).
-- ✎ **2026-10-19, rimlig nivå:** namnen får stå i frågor och svar. Det som rensas är det som skyltar i onödan:
-  kodkommentarer, README och mockuper där barnet framstår som en verklig person bakom appen eller kopplas till
-  familjen. Repot ligger kvar under Byggbiten, kontot byts inte och git-historiken skrivs inte om. Källa: Dennis:
-  "Mira och Zelda får förekomma i appen som svar eller i en fråga. Men! det får som sagt inte bli att det är uppenbart
-  så att det är [barnet, orten, skolan, pappans företag och efternamnet]" och "Byggbiten får finnas kvar. det går för
-  en duktig nyfiken datateknisk person att lista ut detta. men jag vill som sagt inte skylta i onödan. Så vi håller
-  det på en rimlig nivå där vi inte måste byta konto eller riva upp appen från början".
+## D36 · 2026-10-19 · Offentligt repo: inga uppgifter om testare
+- **Beslut:** Repot är offentligt. Inga uppgifter om testare (efternamn, ort, skola, klass, ålder, familj) i spårade
+  filer. Namn i appen är generiska. "Här bor du" i Geografi är en inställning per profil, av från början. Repot
+  ligger kvar under Byggbiten, och historiken skrivs inte om.
+- **Källa:** Dennis 2026-10-19: "Alternativ 2, […] och kör bygget" (alternativ 2: nålen "Här bor du" visas bara som
+  en inställning i appen).
+- ✎ **2026-10-19, vad som inte får stå:** förnamn som Mira, Zelda och Julian är generiska namn i appen och får stå,
+  men aldrig i en kombination som pekar ut ett verkligt barn. Personuppgifter rensade enligt D36. Källa: Dennis: "Jag
+  har lagt in lite blandade namn som bara ska vara generiska. mira är ett av dem tror jag. Men det ska inte vara så
+  att Mira […] blir exakt utpekad".
+- ✎ **2026-10-19, rimlig nivå:** namnen får stå i frågor och svar. Det som rensas är det som skyltar i onödan, där
+  barnet framstår som en verklig person bakom appen. Mira är appens persona (CLAUDE.md). Källa: Dennis: "Mira och
+  Zelda får förekomma i appen som svar eller i en fråga. Men! det får som sagt inte bli att det är uppenbart så att
+  det är […]" och "Byggbiten får finnas kvar. […] jag vill som sagt inte skylta i onödan. Så vi håller det på en
+  rimlig nivå där vi inte måste byta konto eller riva upp appen från början".

@@ -1,6 +1,6 @@
 # Geografi: hur lär sig ett barn Sveriges landskap? (2026-10-19)
 
-Tankepass inför modulen Geografi (D22, P8). Dennis vill att läxbokens siffror 1–25 förs in i färgkartan, så att Mira
+Tankepass inför modulen Geografi (D22, P8). Dennis vill att läxbokens siffror 1–25 förs in i färgkartan, så att barnet
 kan lära sig landskapen. Det här är Claudes förslag och inga beslut. Facit för förslaget är
 `design-lab/geografi-mockup.html`.
 
@@ -9,8 +9,7 @@ Där stödet är svagt eller bara erfarenhet står det.
 
 ## Uppgiften
 
-Mira går på mellanstadiet. Läxboken visar en karta med siffrorna 1–25, och hon ska kunna
-namnet på varje siffra. Det är tre saker att lära sig:
+Läxboken visar en karta med siffrorna 1–25, och målgruppen ska kunna namnet på varje siffra. Det är tre saker att lära sig:
 
 - var landskapet ligger
 - vad det heter
@@ -104,7 +103,7 @@ visats än när Gotland tänds.
 
 ## Utfall
 
-**Förslag till Dennis, mockup `design-lab/geografi-mockup.html`.** Inget är byggt i appen. Mira bör prova mockupen
+**Förslag till Dennis, mockup `design-lab/geografi-mockup.html`.** Inget är byggt i appen. Ett barn bör prova mockupen
 innan Dennis dömer. Det här bör Dennis ta ställning till:
 
 1. Trappan har fyra steg: tre landsdelar och Hela Sverige, utan stegnummer så att de inte krockar med läxbokens
