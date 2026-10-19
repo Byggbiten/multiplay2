@@ -19,7 +19,7 @@ En PWA där Mira, 10 år, tränar skolmatte: gångertabellen, klockan, uppställ
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D34) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D35) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |
@@ -51,6 +51,14 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | Ny dag | ny loggfil; första avsnittet pekar på gårdagens "Nästa steg" |
 
 Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verktyg/snippets/stadkontroll.py .`
+
+## Agenter
+| Roll | Agent-id | Rapport | Överlämning + logg |
+|---|---|---|---|
+| Geografi (mockupen, bygget) | `acf985ddd0b12ab7f` | dagens logg | `agenter/geografi/OVERLAMNING.md`, `LOGG.md` |
+
+Väck en levande expert med SendMessage till id:t. Ny session: agenterna finns inte längre – starta rollen (samma
+agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in det nya id:t här.
 
 ## Absoluta regler
 

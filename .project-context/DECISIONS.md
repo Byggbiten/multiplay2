@@ -57,6 +57,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D32 Pusslet med namn, två svårighetsgrader och generös placering; faktarutan som prydligt rutnät
 - D33 Läxbokens nummer tas bort ur Geografi
 - D34 Blandad ordning är standard i Träna och Test
+- D35 Geografimockupen godkänd: byggs in i appen och livesätts
 
 ---
 
@@ -402,3 +403,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   frågor senare och inte bredvid samma landskap, när rundan har plats för det.
 - **Källa:** Dennis 2026-10-19: "Jag märker att när man tränar och övar, så går det i ordning topp till botten, vilket
   är väldigt repetitivt och förutsägbart. jag tänker att det borde vara lite mer 'randomiserat'"
+
+## D35 · 2026-10-19 · Geografimockupen godkänd: byggs in i appen och livesätts
+- **Beslut:** `design-lab/geografi-mockup.html` (commit `0728948`, D24–D34) är godkänd. Den byggs in i appen som
+  modulen Geografi → Sverige → Sveriges landskap, på en egen gren med taggen `fore-geografi`, och livesätts efter
+  granskning. Ordning och reda körs före bygget. Regeln för pärmens nivåer (brons = övat, silver = kan, guld = kan i
+  alla frågetyper) gäller som den står i mockupen.
+- **Källa:** Dennis 2026-10-19: "det ser jättebra ut. Kör en ordning och reda-rutin, sen livesätter vi detta"

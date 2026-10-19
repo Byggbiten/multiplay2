@@ -33,14 +33,15 @@ aldrig. Nya frågor får nästa P-nummer.
   hubben i v58. Kontrollerat 19/10: dess vyer finns inte kvar i `js/multiplication.js`. Kvar är loggens etikett
   "Eget prov" med ikonen 🎲 för gamla poster, och `runCustomSession`, som Fokuserad träning i Statistik använder.
 
-### Geografi
+### Integritet
 
-- **P8 Geografimodulens upplägg och pedagogik.** Hur Sveriges landskap ska läras ut och övas (D22): lägen, frågetyper,
-  kartans interaktion, hur läxbokens numrering 1–25 används, och om modulen delar lådorna och nötloopen i
-  `js/shared.js`. Förslag 19/10: `brainstorm/07-2026-10-19-geografi-landskap.md` och `design-lab/geografi-mockup.html`,
-  med sex val att döma i tankepassets Utfall.
+- **P11 Offentligt repo och "Här bor du".** Repot `Byggbiten/multiplay2` och appen på GitHub Pages är offentliga.
+  Dokumenten nämner Mira med namn, ålder, årskurs och Sundsvall, och Geografi visar "Här bor du" i Medelpad för alla
+  som öppnar appen. Ska det vara så, eller ska repot göras privat / orten tas bort ur dokumenten / nålen bli en
+  inställning? (Till: Dennis. Tas upp före livesättningen av Geografi.)
 
 ## Besvarade
 
+- ~~P8 Geografimodulens upplägg och pedagogik~~ → D24–D35 (samtalet i `brainstorm/08`, mockupen godkänd)
 - ~~P10 Geografi: första versionens spellägen~~ → D27
 - ~~P9 Grenarna på GitHub: ska de tio sammanslagna grenarna tas bort?~~ → D23

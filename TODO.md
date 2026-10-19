@@ -2,9 +2,10 @@
 
 ## Öppet
 
-- [ ] **Geografi: Sveriges landskap** (D22, D24–D29). Mockupen `design-lab/geografi-mockup.html` omgjord 19/10 efter
-      samtalet (`brainstorm/08`) → Mira provar på telefonen → Dennis dömer valen i loggen 19/10 ("Geografi: mockupen
-      omgjord") → egen gren med `fore-geografi`.
+- [ ] **Geografi: bygg in i appen och livesätt** (D35). Tagga `fore-geografi`, bygg på egen gren efter
+      `design-lab/geografi-mockup.html` och `agenter/geografi/OVERLAMNING.md` (bilder och data från `referens/` till
+      appens tillgångar, `createDrill` med D34-blandningen in i `js/shared.js` utan att Gångertabellen och Klockan
+      ändras, lådor/Capy/kvitto, tester, v66) → granskning → merge till `dev` → P11 avgjord → release.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på Miras eller Dennis telefon).
