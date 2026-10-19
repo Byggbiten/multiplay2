@@ -346,8 +346,10 @@ vidare. Bitarna följer lösningsgången: tabellfaktumet för tiotal, uppdelning
 uppställningens summa (först additionens minnessiffror, sedan summans två högra siffror; raderna har en egen trappa,
 se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
 
-1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Knappen Nästa hoppar till nästa ruta; Klar rättar
-   och ger antal rätt av 20. De tal som blev fel kan nötas efteråt.
+1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. **Nästa tal** är huvudknappen tills alla 20 är
+   ifyllda; då blir **Klar** huvudknappen. Trycker barnet Klar med tomma rutor rättas ingenting: en vänlig rad säger
+   hur många tal som är kvar och fokus hoppar till första tomma rutan, utan ljud och färg (D39). Tomma rutor räknas
+   aldrig som fel. Tal som inte satt direkt kan nötas efteråt.
 2. **Gånger tiotal och hundratal**: som på bladet, med "="-rader. `8 · 40 = 8 · 4 tiotal`, sedan `= [32] tiotal` och
    `= [320]`. Fällan `50 · 60 = 5 · 6 hundratal = 30 hundratal = 3000` (tabellsvaret har redan en nolla) får en egen
    förklaring.
@@ -368,7 +370,7 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
      Radsumman rättas i båda. Siffrorna som räknas lyser.
    - **Summan** skriver barnet själv, en ruta i taget från höger; siffran hamnar i rutan med fokus. Tankeraden visar
      en kolumn i taget ("Tiotalet: 5 + 2"), i provet bara "kolumn för kolumn".
-   - Additionens minnessiffror skrivs i de röda rutorna ovanför raderna; de visas när summan låses upp.
+   - Additionens minnessiffror skrivs i de lila rutorna ovanför raderna; de visas när summan låses upp.
    - Vid fel i summan säger appen om en minnessiffra glömdes eller om additionen blev fel.
    Allt detta finns bara i matteprovet; Multiplikationens nivå 1–4 skriver som förut.
 5. **Problemlösning i två steg**: en prislista med sex saker. Barnet **skriver först uttrycket** med knapparna · + och −
@@ -377,8 +379,14 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
 
 ### Provet och kvittot
 Provet går igenom momenten i ordning, utan klocka. Det säger rätt eller fel per uppgift och har hjälptrappan (D38).
-Tabelltestet rättas med Klar; de röda talen får rättas en gång till, sedan visas svaren. Kvittot visar per moment
-**rätt direkt**, **rätt med hjälp** och **fick svaret**; grönt (**Klart**, minst 75 %) räknar bara rätt direkt.
+Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange ("Du har 17 klara.
+Titta en gång till på de orange.") och får rättas en gång till, sedan visas svaren lugnt i grått. Kvittot visar per
+moment **Klarade direkt**, **Klarade med hjälp** och **Övar vi mer på**; grönt (**Klart**, minst 75 %) räknar bara
+klarade direkt.
+
+**Snällt (D39):** inget rött som betyder fel (milt orange för "inte riktigt ännu", grönt för rätt), ord som "Inte
+riktigt – försök igen" och "Nästan!", och första "försök igen" är tyst; felljudet (mjukt) kommer först vid andra
+försöket. Sprinten har inget felljud.
 Under kvittot: **Sett av en vuxen** (håll inne knappen), **Gör mitt prov** (när det finns något som var svårt) och
 **Öva på det som var svårt** (de gula momenten).
 
