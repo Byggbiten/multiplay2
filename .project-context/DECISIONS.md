@@ -443,3 +443,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ändras inte. Källa: Dennis: "Försök att följa testens struktur för att lösa problemen och ställa upp talen." och "det
   vi gör nu om det avviker från multiplays sätt att ställa upp och lösa tal i övrigt skall bara ske isolerat i detta
   matteprov. vi ändrar inte hela appen i övrigt".
+- ✎ **2026-10-19, minst lika svårt:** provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
+  bladets nivå eller strax över. Lättare/Svårare finns kvar som trappsteg i övningen. Källa: Dennis: "viktigt är att
+  vårt prov vi bygger nu inte är lättare än underlaget. Det skall vara 'lika svårt' och om det måste gå åt något håll,
+  så får det vara lite svårare. Bättre att hon får jobba lite extra i appen och sedan glänsa på provet".
