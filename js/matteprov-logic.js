@@ -416,7 +416,8 @@
     const prov = mode === 'prov';
     if (row === 's') {
       const nums = t.two ? [t.p1, t.p2] : t.parts.map(p => p.place);
-      const c = col || 0, ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => nums[k] >= Math.pow(10, c));
+      const c = col || 0, starts = t.two ? [0, 0] : t.parts.map(p => p.i);      // förskjutna rutor är tomma, inte nollor
+      const ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => c >= starts[k] && nums[k] >= Math.pow(10, c));
       const carry = addCarries(nums).some(x => x.col === c);
       if (prov) return [`Lägg ihop raderna, kolumn för kolumn.`];
       return [`${PLACE[c] || 'Kolumnen'}: ${ds.join(' + ')}${carry ? ' + minnessiffran' : ''}.`];
@@ -431,6 +432,21 @@
     if (row === 'p1') return prov ? [`Rad 1: ${split}`] : [`Rad 1: ${split}`].concat(chain);
     const zero = 'Rad 2 är tiotalet: skriv nollan i den grå rutan.';
     return prov ? [zero, split] : [zero, split].concat(chain);
+  }
+
+  /* TANKERADENS ANTECKNINGSRUTOR (Dennis 19/10: "hon har ingenstans att anteckna 640 + 16"), tvåsiffrig faktor:
+       8 · 80 = [ ]   8 · 2 = [ ]        (en ruta per term i överfaktorn)
+       640 + 16 = [ ]                    (barnets egna tal speglas; summan är radens värde)
+     Rutnätets rad fylls alltid i av barnet. noteMark: Öva rättar rutan direkt ('ok'/'bad');
+     provet rättar aldrig (null) och visar inga värden. Rutorna räknas inte i nötloop eller trappa. */
+  function thinkNotes(t, row) {
+    const m = row === 'p1' ? t.ones : t.tens, terms = placeTerms(t.top);
+    return { m, terms, labels:terms.map(x => `${m} · ${x}`), prods:terms.map(x => m * x), sum:m * t.top };
+  }
+  function noteMark(t, row, j, val, mode) {
+    if (mode === 'prov' || val === '' || val == null) return null;
+    const N = thinkNotes(t, row), want = j < N.terms.length ? N.prods[j] : N.sum;
+    return +val === want ? 'ok' : 'bad';
   }
 
   /* Facit per rad som siffror per kolumn (för att visa svaret på pappret) */
@@ -658,7 +674,7 @@
     if (t.type === 'te') return `Dela upp ${t.b} i tiotal och ental. Räkna sedan varje del för sig.`;
     if (t.type === 'upp' && !t.two) return { plats:'Varje ny rad flyttas ett steg åt vänster.', rader:'Skriv alla raderna, inte bara summan.',
       summinne:'Glöm inte minnessiffrorna när du lägger ihop raderna.', addition:'Raderna stämmer. Räkna additionen igen, kolumn för kolumn.' }[cls]
-      || `Räkna ${t.bot} gånger en siffra i taget, från höger. Varje svar får en egen rad.`;
+      || 'En siffra i taget från höger, en rad var.';
     if (t.type === 'upp') return { nolla:'Titta på den grå rutan. Vad ska stå där på tiotalets rad?', rader:'Skriv båda raderna, inte bara summan.',
       minne:'Glöm inte minnessiffrorna. Skriv dem små ovanför.', addition:'Raderna stämmer. Räkna additionen igen, kolumn för kolumn.' }[cls]
       || 'Räkna en kolumn i taget, från höger.';
@@ -873,7 +889,7 @@
     genProblem, makeKop2, makeTillbaka, makeOrdning, parseExpr, evalExpr, exprText, exprOk, exprRows, checkProblem,
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
-    uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms,
+    uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };
