@@ -40,6 +40,13 @@ aldrig. Nya frågor får nästa P-nummer.
   `js/shared.js`. Förslag 19/10: `brainstorm/07-2026-10-19-geografi-landskap.md` och `design-lab/geografi-mockup.html`,
   med sex val att döma i tankepassets Utfall.
 
+### Git
+
+- **P9 Grenarna på GitHub.** Tio grenar på `origin` finns redan i `dev`: capy-nivaer, dagens-v2, flerval-ordning,
+  gangertabell-pass, gangertabell-v2, klocka-v2, klocklektioner, master, svara-talen, tabellval. Ska de tas bort?
+  Radering på GitHub ingår inte i det stående godkännandet för push. `renovering` har 25 egna commits och står kvar.
+  (Till: Dennis.)
+
 ## Besvarade
 
 <!-- inga besvarade än -->
