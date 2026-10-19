@@ -59,6 +59,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D34 Blandad ordning är standard i Träna och Test
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
+- D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 
 ---
 
