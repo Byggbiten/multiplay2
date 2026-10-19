@@ -1,5 +1,7 @@
 # MINNESSIFFER-KONCEPT — "Levande minnessiffror" (v30)
 
+**Utfall (2026-10-19, ur git log):** införd i v30 `f9a6699` (3/7), justerad i v31 `f8b00ec` (sista-minnes-undantaget). Beslutet: D2.
+
 Beslutad av Dennis 2026-07-03 ("bygg det"). Bakgrund: appen ska träna
 PAPPERSVANAN — minnessiffrans livscykel: skrivs liten → vilar → används
 → STRYKS (aldrig suddas) → kvarstår som spår. Mira räknar rätt men

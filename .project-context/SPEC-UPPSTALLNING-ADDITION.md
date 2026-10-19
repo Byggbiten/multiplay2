@@ -3,6 +3,7 @@
 **Facit:** `design-lab/tiokompis-barnvy.html` (2 422 rader, gren `dev`).
 **Måltavla:** `js/uppstallning.js` (2 114 rader), additionsgrenen.
 **Status:** kontrakt. Allt nedan är läst ur de två filerna; inget är hämtat ur minnet.
+**Utfall (2026-10-19, ur git log):** införd på `dev` 21/9 (`700b2a2` … `0af6b26`, v38) och live samma dag när `main` spolades fram till `0af6b26`. Beslut: D-posterna i `DECISIONS.md` hänvisar hit.
 Radhänvisningar skrivs `fil:rad`. Mockupen refereras `mockup:rad`, appen `app:rad`.
 
 **Valda lägen (och bara dessa beskrivs).** Mockupen har elva växlar i verktygsraden;
@@ -1051,9 +1052,10 @@ och `freeMemTap` rörs inte alls — det läget visar ingen metod.
 3. **Tröskeln för när tankerutan är onödig.** Mockupen öppnar den för varje
    komplementkolumn, även `9 + 2`, där `behover = 1`. Om det finns en undre
    gräns (t.ex. `behover === 1` klaras utan ruta) är den inte bestämd.
-4. **`MINNESSIFFER-KONCEPT.md`.** Mockupen citerar dokumentet (mockup:317) som
+4. **`SPEC-MINNESSIFFROR.md`.** Mockupen citerar dokumentet (mockup:317) som
    källa för "appen ska nöta in strukturen". Filen finns inte i repot — varken i
-   roten eller i `docs/`. Om den finns någon annanstans bör den läsas innan
+   roten eller i `docs/`. *(Rättat 2026-10-19: den låg i `.project-context/` som
+   `MINNESSIFFER-KONCEPT.md` och heter nu `SPEC-MINNESSIFFROR.md`.)* Om den finns någon annanstans bör den läsas innan
    `add_return` ifrågasätts, eftersom det är den regeln som motiverar att
    strykningen alltid landar i kolumnen.
 5. **Nivå 1 och 2.** Alla frekvenssiffror i §7 gäller nivå 3 och 4. Nivå 1

@@ -2,9 +2,9 @@
 
 **Granskad kod:** `js/multdiv.js` (2 411 rader, gren `dev`, HEAD 0af6b26), multiplikationsgrenen
 (`gameKind === 'mult'`, `plan.kind === 'simple' | 'twostep'`). Divisionen ingår inte.
-**Måttstock:** reglerna i `.project-context/UPPSTALLNING-ADDITION-SPEC.md` kap 1 och
+**Måttstock:** reglerna i `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap 1 och
 "Globala villkor" i `docs/superpowers/plans/2026-09-21-uppstallning-addition.md`;
-minnessiffrans livscykel i `.project-context/MINNESSIFFER-KONCEPT.md`; modulspecen
+minnessiffrans livscykel i `.project-context/SPEC-MINNESSIFFROR.md`; modulspecen
 `MULTDIV-SPEC.md` (origin/renovering).
 **Mätning:** 390×844, ljust läge, `http://localhost:5312/`. Tal tvingade via stubbad
 `Math.random`: nivå 1 = 32·3, nivå 2 = 28·8 (8·8 = 64 ⇒ minne 6), nivå 3 = 789·9
@@ -211,7 +211,7 @@ slutsvaret"), kladden är 299 px. Beslut Dennis om raderna ska finnas som tomma 
 
 - **Minnessiffrans livscykel är rätt byggd:** placeras i eget steg (901), vilar, stryks i
   eget steg med penndrag (918–923, 747), suddas aldrig, röd `#dc2626` roterad −4°
-  (197–200), `.used` opacity 0,5 (201) — helt enligt MINNESSIFFER-KONCEPT. Strukna
+  (197–200), `.used` opacity 0,5 (201) — helt enligt SPEC-MINNESSIFFROR. Strukna
   siffror står kvar genom alla tre faserna på nivå 4 (uppmätt spalt "6̶ 5̶ 1̶ 1" vid
   slutet). Sista-minnes-undantaget är konsekvent i demo (632, 651) och hjälpkö (1490).
 - **Delprodukterna följer boken:** rad 2 förskjuten utan nolla, `+` framför, ghost-cell

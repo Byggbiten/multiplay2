@@ -1,5 +1,17 @@
 # RENOVERING — Multiplay 2026
 
+> **Historisk plan (D1).** Statusloggen nedan slutar 2026-07-03. Avbockat 2026-10-19 ur `git log origin/main`:
+>
+> - [x] Fas 0 projektkontext — `def6395` (2/7). RENOVERING + CLAUDE.md på grenen `origin/renovering`.
+> - [x] Fas 1 fundament (`shared.js`, vitest, buggfixarna) — porterat till main i v24 `f28e010` (3/7).
+> - [x] Fas 2 designlabbet låst — 3/7 enligt statusloggen. `DESIGN-LOCK-MULTIPLAY.md` och `design-lab/index.html` finns bara på `origin/renovering`.
+> - [x] Fas 3 designen över alla vyer — v25 `81a9620`, v26 `93ba292` (3/7).
+> - [x] Fas 4 adaptiv träning = Dagens träning v33 `bfafbae`; belöningar 2.0 = Capybara-samlingen v34 `5a23fe5`; v35 `d6a5329` säger "Fas 4 komplett" (5/7).
+> - [ ] Plus & Minus som eget spel: okänt. Ingen commit bär namnet; addition och subtraktion finns i kortet "Addition & Subtraktion" (Uppställning och Platsvärde).
+> - [ ] Fas 5 slutgranskning: okänt. Ingen commit säger att den gjorts.
+>
+> Det som gäller i dag står i `CLAUDE.md` och `.project-context/DESIGN.md`. Arbetet från september mäter i 390 × 844 (telefon), inte i iPad-viewport.
+
 Beslutad av Dennis 2026-07-02 efter fullständig granskning (3 parallella
 granskare + live-verifiering). Detta dokument är planens sanning; uppdatera
 statusloggen längst ner vid varje slice.

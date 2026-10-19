@@ -2,7 +2,7 @@
 
 Ren läsning + mätning vid 390×844 och stress 390×664 (Playwright, Chromium, egen
 browser-context mot `http://localhost:5312/?gransk=1`). Ingen kod ändrad.
-Måttstock: `.project-context/UPPSTALLNING-ADDITION-SPEC.md` kap 1 (P1–P6) och
+Måttstock: `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap 1 (P1–P6) och
 "Globala villkor" i `docs/superpowers/plans/2026-09-21-uppstallning-addition.md`,
 plus `docs/DESIGN-SYSTEM.md` (absoluta regler rad 8–13, kontrollista rad 205–211).
 Skärmbilder: `/tmp/gransk-platsvarde/`.

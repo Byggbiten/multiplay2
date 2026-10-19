@@ -1,7 +1,7 @@
 # GRANSKNING · KORT DIVISION — 2026-09-21
 
 **Modul:** divisionsgrenen av `js/multdiv.js` (2 411 rader, gren `dev`, senaste divisionscommit `f04af1c` v36).
-**Måttstock:** `.project-context/UPPSTALLNING-ADDITION-SPEC.md` kap. 1 (P1–P6) + planens "Globala villkor" + de 13 reglerna i uppdraget.
+**Måttstock:** `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap. 1 (P1–P6) + planens "Globala villkor" + de 13 reglerna i uppdraget.
 **Mätning:** egen headless Chromium (Playwright 1.59.1) vid 390×844, `Math.random` stubbad så att uppgifterna blev 84÷4 (n1), 96÷4 (n2), 738÷3 (n3), 336÷6 (n4, ledande hopp), 612÷6 (n4, nolla i kvoten). Alla tre lägen körda. Skärmbilder i `/tmp/gransk-division/` (`<tag>-demo-NN.png`, `<tag>-help-NN.png`, `n3-free-NN.png`, `verify-*.png`).
 Ingen kod ändrad. Varje fil:rad och mätvärde nedan är läst ur filen eller mätt i webbläsaren.
 
@@ -106,7 +106,7 @@ Mätt vid 390×844: `documentElement.scrollHeight` 844 = viewport i alla lägen;
 
 **D3. Klart-bubblan bär två likheter.** (769–770, 2062–2063): `"Klart! 🎉 96 ÷ 4 = 24 — kolla: 24 · 4 = 96!"`. Spec-beslutad verifiering; men två likheter i en mening. Överväg att lägga "kolla"-delen som egen rad.
 
-**D4. Sista siffran stryks i demon men inte av barnet.** `buildDivHelpQueue` 1473 `if (!s.last)`; demon stryker alltid (678 + kommentar 664). Dokumenterat beslut ("sista-minnes-principen", MINNESSIFFER-KONCEPT.md rad 56) — men barnets färdiga papper ser annorlunda ut än demons (`n2-help-end.png` vs `n2-demo-done.png`). Ingen fix föreslås; noteras för Dennis.
+**D4. Sista siffran stryks i demon men inte av barnet.** `buildDivHelpQueue` 1473 `if (!s.last)`; demon stryker alltid (678 + kommentar 664). Dokumenterat beslut ("sista-minnes-principen", SPEC-MINNESSIFFROR.md rad 56) — men barnets färdiga papper ser annorlunda ut än demons (`n2-help-end.png` vs `n2-demo-done.png`). Ingen fix föreslås; noteras för Dennis.
 
 **D5. Fältets `shake`-klass hänger kvar efter rätt svar.** Mätt `fieldCls: "md-field num shake has-digits correct"` efter rätt Klar (2166–2175 tar inte bort `shake`). Kosmetiskt.
 

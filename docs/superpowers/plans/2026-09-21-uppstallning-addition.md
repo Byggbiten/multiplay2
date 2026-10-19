@@ -10,13 +10,13 @@
 
 ## Globala villkor
 
-- **Facit:** `.project-context/UPPSTALLNING-ADDITION-SPEC.md`. Varje bubbeltext, stegkedja, animationslängd och CSS-klass hämtas därifrån verbatim. Skriv aldrig en text ur minnet.
+- **Facit:** `.project-context/SPEC-UPPSTALLNING-ADDITION.md`. Varje bubbeltext, stegkedja, animationslängd och CSS-klass hämtas därifrån verbatim. Skriv aldrig en text ur minnet.
 - **Mockupen är referensimplementation:** `design-lab/tiokompis-barnvy.html`. Vid tvekan om en rörelse — läs mockupens kod, härma inte på känsla.
 - **Gren:** `dev`. `main` rörs inte. Ingen push till `main` i någon uppgift.
 - **Två lager:** kolumnen är pappret (strukna siffror, små amber-siffror, minnessiffran) och står still när den skrivits. Brickorna är kvantiteterna och är det enda som rör sig.
 - **En idé per steg.** Max en kort mening i bubblan. Ingen aritmetik i texten som barnet måste räkna ut.
 - **Inget objekt får skapas och förstöras i samma steg.**
-- **Minnessiffrans livscykel är låst** (`.project-context/MINNESSIFFER-KONCEPT.md`): skrivs liten, vilar, används, STRYKS — aldrig suddas. Röd `#dc2626`, roterad −4°.
+- **Minnessiffrans livscykel är låst** (`.project-context/SPEC-MINNESSIFFROR.md`): skrivs liten, vilar, används, STRYKS — aldrig suddas. Röd `#dc2626`, roterad −4°.
 - **Platsvärdesfärger låsta:** ental `#22c55e`, tiotal `#3b82f6`, hundratal `#ef4444`.
 - **Rörs inte:** subtraktionsgrenen, `js/multdiv.js`, "en vy = en skärm".
 - **`sw.js` `CACHE_VERSION` höjs i sista uppgiften, inte före.**
@@ -763,7 +763,7 @@ Spec §10 listar sex. Dessa tre kan blockera en uppgift och ska ställas till De
 2. **Tankerutans tröskel** (uppgift 6): mockupen öppnar rutan även för `9 + 2` där bara 1 lånas. Om den ska hoppas över vid `behover === 1` är obestämt.
 3. **Reducerad rörelse** (uppgift 6): `prefers-reduced-motion` saknas i mockupens telefon-CSS. Vad som ska hända med brickornas rörelser är obestämt.
 
-Och en fråga till Dennis som inte är teknisk: **stämmer största-talet-regeln med Mitt i Prick 4A?** `MINNESSIFFER-KONCEPT.md` namnger boken som källa men säger inget om vilken term som fylls till 10. Om boken alltid fyller den översta lär appen ut något annat än klassrummet. Regeln går att vända med en rad (`ADD_OPTS`), så det är inte blockerande — men det bör kontrolleras mot boken.
+Och en fråga till Dennis som inte är teknisk: **stämmer största-talet-regeln med Mitt i Prick 4A?** `SPEC-MINNESSIFFROR.md` namnger boken som källa men säger inget om vilken term som fylls till 10. Om boken alltid fyller den översta lär appen ut något annat än klassrummet. Regeln går att vända med en rad (`ADD_OPTS`), så det är inte blockerande — men det bör kontrolleras mot boken.
 
 ---
 

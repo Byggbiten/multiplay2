@@ -3120,7 +3120,7 @@ const UppstallningGame = (() => {
      ett värde med ett enda utfall är bara friktion.
 
      De två första stegen ÄR minnessiffrans dokumenterade livscykel
-     (.project-context/MINNESSIFFER-KONCEPT.md): skrivs liten → vilar →
+     (.project-context/SPEC-MINNESSIFFROR.md): skrivs liten → vilar →
      används → STRYKS, aldrig suddas. Det tredje steget är ångra, och det
      hör hemma här: i fria läget skriver hon själv och måste kunna rätta en
      felplacerad etta. Minnesraden är hennes kladd och bedöms aldrig. */

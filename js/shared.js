@@ -9,7 +9,7 @@
 
   const MP = {};
 
-  /* ── Retry-quiz (låst semantik, se RENOVERING.md) ──────
+  /* ── Retry-quiz (låst semantik, se PLAN-RENOVERING.md) ──────
      Varje item ställs i ordning. FÖRSTA försöket avgör poängen.
      Fel svar → samma item igen tills rätt. Med opts.endReview
      läggs fel-items dessutom EN gång sist som repetition

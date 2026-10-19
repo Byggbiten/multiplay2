@@ -1,5 +1,6 @@
 # KORT DIVISION — pedagogisk modell och stegkedja
 
+**Utfall (2026-10-19, ur git log):** byggd i `50a618d` (v54), live med release `8492898` (v54). Räkna själv ändrades efteråt av D6 (ingen restinmatning, v55–v56 `a21adf3`). Godkännandet skrevs i Dennis meddelande 22/9 kl. 21:41 enligt sessionens tidsstämplar; "23/9" nedan är specens egen datering.
 **Status:** **GODKÄND av Dennis 23/9 2026** mot `design-lab/kort-division-mockup.html` — *"Det här va exakt hur bra som helst. Animationerna va perfekta, det va smooth och sömlöst och perfekt förklarat. EXAKT så där vill jag ha det i liveversionen."*
 **Avgjorda växlar:** 1 "för mycket"-brickan **På** · 2 faktatexten **Talord** · 3 fakta i demon **Eget klick** · 4 brickans form **Piller** `6 · 7 = 42`. Mockupens beteende är facit; §8 punkt 6–10 avgörs därmed åt mockupens håll (faktan visas före frågan i hjälpläget, inget `42 − 42 = 0` i fall C, Nästa efter kvittens / automatiskt efter tryck, restens plats som i dag). Utöver mockupen tas fyra Mira-fynd med som inte ändrar det Dennis såg: ord vid första felsvaret, `klart`-steget, 42-brickan står kvar till `rest`, fall B säger "hela 1:an blir rest".
 **Ersätter:** ankarvandringen (2/5/10-ankare, upp/ner-stegning, tyst-regeln) — riven i sin helhet.

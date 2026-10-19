@@ -8,7 +8,7 @@
    OBS: åk 4-boken använder · (mittpunkt) som gångertecken — multdiv
    följer boken. Nivå 4 skriver delprodukt 2 FÖRSKJUTEN ett steg åt
    vänster (ingen platshållar-nolla), med + framför, per boken.
-   v30: LEVANDE MINNESSIFFROR (MINNESSIFFER-KONCEPT.md) — minnes-
+   v30: LEVANDE MINNESSIFFROR (SPEC-MINNESSIFFROR.md) — minnes-
    SPALT till höger om faktorraden (per Dennis foto: "1̶ 2" bredvid
    ·43). Varje minne appendas efter föregående, stryks med penndrag
    när det använts och RADERAS ALDRIG under uppgiften. Demo: egna
@@ -911,7 +911,7 @@ const MultDivGame = (() => {
 
   /* ══════════════════════════════════════════════════════════
      KORT DIVISION — stegkedjan
-     Spec: .project-context/KORT-DIVISION-SPEC.md. Facit för beteende och
+     Spec: .project-context/SPEC-KORT-DIVISION.md. Facit för beteende och
      tajming: design-lab/kort-division-mockup.html (Dennis dom 23/9 —
      bricka På · talord · eget klick · piller).
 
