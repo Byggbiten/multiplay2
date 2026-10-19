@@ -460,7 +460,10 @@
       expr:`${q1} · ${i1.price} + ${q2} · ${i2.price}`,
       text:`${name} köper ${qtyName(i1, q1)} och ${qtyName(i2, q2)}. Hur mycket kostar det tillsammans?`,
       steps:[{ text:`Steg 1, gånger först: ${q1} · ${i1.price} = ${A} kr och ${q2} · ${i2.price} = ${B} kr.` },
-             { text:`Steg 2, lägg ihop: ${A} + ${B} = ${A + B} kr.`, last:true }] };
+             { text:`Steg 2, lägg ihop: ${A} + ${B} = ${A + B} kr.`, last:true }],
+      flow:[{ q:`Vad kostar ${qtyName(i1, q1)}?`, op:'·', ans:[q1, i1.price, A], unit:'kr' },
+            { q:`Vad kostar ${qtyName(i2, q2)}?`, op:'·', ans:[q2, i2.price, B], unit:'kr' },
+            { q:'Vad kostar det tillsammans?', op:'+', ans:[A, B, A + B], unit:'kr' }] };
   }
   function makeTillbaka(name, it, q, pay) {
     const A = q * it.price;
@@ -468,7 +471,9 @@
       expr:`${pay} − ${q} · ${it.price}`,
       text:`${name} köper ${qtyName(it, q)} och betalar med ${pay} kr. Hur mycket får ${name} tillbaka?`,
       steps:[{ text:`Steg 1, vad kostar det: ${q} · ${it.price} = ${A} kr.` },
-             { text:`Steg 2, ta bort det från ${pay} kr: ${pay} − ${A} = ${pay - A} kr.`, last:true }] };
+             { text:`Steg 2, ta bort det från ${pay} kr: ${pay} − ${A} = ${pay - A} kr.`, last:true }],
+      flow:[{ q:`Vad kostar ${qtyName(it, q)}?`, op:'·', ans:[q, it.price, A], unit:'kr' },
+            { q:`Hur mycket får ${name} tillbaka?`, op:'−', ans:[pay, A, pay - A], unit:'kr' }] };
   }
   /* Omvänd uppgift (bladets form: alla utom en är kända, summan är given) */
   function makeOmvand(k, p, x) {
@@ -477,9 +482,19 @@
       expr:`${total} − ${k} · ${p}`,
       text:`${k + 1} domare ger poäng i en hopptävling. ${k} av dem ger ${p} poäng var. Totalt får hopparen ${total} poäng. Hur många poäng gav den sista domaren?`,
       steps:[{ text:`Steg 1, gånger först: de ${k} domarna gav ${k} · ${p} = ${k * p} poäng.` },
-             { text:`Steg 2, ta bort det från ${total}: ${total} − ${k * p} = ${x} poäng.`, last:true }] };
+             { text:`Steg 2, ta bort det från ${total}: ${total} − ${k * p} = ${x} poäng.`, last:true }],
+      flow:[{ q:`Vad gav de ${k} domarna tillsammans?`, op:'·', ans:[k, p, k * p], unit:'poäng' },
+            { q:'Vad gav den sista domaren?', op:'−', ans:[total, k * p, x], unit:'poäng' }] };
   }
   function makeOrdning(op, a, b, c, d) {
+    const t = makeOrdning0(op, a, b, c, d);
+    t.flow = op === '+' ? [{ q:'Gånger först.', op:'·', ans:[a, b, a * b] }, { q:'Sedan plus.', op:'+', ans:[a * b, c, a * b + c] }]
+      : op === '-' ? [{ q:'Gånger först.', op:'·', ans:[a, b, a * b] }, { q:'Sedan minus.', op:'−', ans:[a * b, c, a * b - c] }]
+      : [{ q:'Gånger först, det första.', op:'·', ans:[a, b, a * b] }, { q:'Gånger först, det andra.', op:'·', ans:[c, d, c * d] },
+         { q:'Sedan plus.', op:'+', ans:[a * b, c * d, a * b + c * d] }];
+    return t;
+  }
+  function makeOrdning0(op, a, b, c, d) {
     if (op === '+') return { moment:'problem', type:'prob', kind:'ordning', needExpr:false, answer:a * b + c, key:`o${a}x${b}p${c}`, expr:`${a} · ${b} + ${c}`,
       text:'Räkna. Gånger först!', steps:[{ text:`Steg 1, gånger först: ${a} · ${b} = ${a * b}.` }, { text:`Steg 2, sedan plus: ${a * b} + ${c} = ${a * b + c}.`, last:true }] };
     if (op === '-') return { moment:'problem', type:'prob', kind:'ordning', needExpr:false, answer:a * b - c, key:`o${a}x${b}m${c}`, expr:`${a} · ${b} − ${c}`,
@@ -488,6 +503,40 @@
       text:'Räkna. Gånger först!', steps:[{ text:`Steg 1, båda gångertalen först: ${a} · ${b} = ${a * b} och ${c} · ${d} = ${c * d}.` },
                                           { text:`Steg 2, sedan plus: ${a * b} + ${c * d} = ${a * b + c * d}.`, last:true }] };
   }
+  /* PROBLEMLÖSNINGENS STEG (D39 ✎ "pedagogisk kärlek"): varje steg är en fråga med mallen [ ] op [ ] = [ ].
+     Barnet fyller rutorna (talen kan också tryckas fram ur prislistan och ur tidigare steg). Gånger och plus får
+     skrivas i valfri ordning; minus inte. Slutsatsen sist: uttrycket som läraren vill se. */
+  function checkProbStep(step, vals) {
+    const v = (vals || []).map(x => x === '' || x == null ? null : +x), [a, b, c] = step.ans;
+    let wrong;
+    if (step.op === '−') wrong = [v[0] !== a, v[1] !== b];
+    else {
+      const same = (v[0] === a && v[1] === b) || (v[0] === b && v[1] === a);
+      wrong = same ? [false, false] : [v[0] !== a && v[0] !== b, v[1] !== a && v[1] !== b || (v[0] === v[1] && a !== b)];
+    }
+    wrong.push(v[2] !== c);
+    return { ok:!wrong.some(Boolean), wrong };
+  }
+  function probStepHint(t, k) {
+    const st = t.flow[k];
+    if (st.op === '·') {
+      if (t.kind === 'omvand') return 'Hur många domare, och hur många poäng gav var och en?';
+      if (t.kind === 'ordning') return 'Gånger först: titta på gångertalet i uppgiften.';
+      return 'Hur många, och vad kostar en? Du kan trycka på priset i listan.';
+    }
+    if (t.kind === 'tillbaka') return 'Det du betalar minus det som det kostar.';
+    if (t.kind === 'omvand') return 'Det totala minus det de andra domarna gav.';
+    if (t.kind === 'kop2') return 'Lägg ihop svaren från de två första stegen.';
+    return st.op === '+' ? 'Ta svaret från gångertalet och räkna plus.' : 'Ta svaret från gångertalet och räkna minus.';
+  }
+  function probStepBit(t, k) {
+    const [a, b] = t.flow[k].ans;
+    return { text:`Talen står nu i rutorna. Räkna ut svaret.`, fill:{ 0:a, 1:b } };
+  }
+  function probConclusion(t) { return `Uttrycket blir ${t.expr} = ${t.answer}${t.unit ? ' ' + t.unit : ''}.`; }
+  const PROB_HELP = ['retry', 'bit', 'svar'];
+  function probHelpStep(n) { return n <= 0 ? null : PROB_HELP[Math.min(n, PROB_HELP.length) - 1]; }
+
   function genProblemOne(level, kind, r) {
     const name = pick(r, NAMES);
     if (kind === 'kop2') {
@@ -800,7 +849,7 @@
       if (!t.two) for (const r of d.rows || []) { const p = t.parts[+r.slice(1)]; out.push(factTag(t.bot, p.d)); }
       return out;
     }
-    if (t.type === 'prob') return [`prob:${t.kind}`].concat(cls === 'uttryck' ? ['prob:uttryck'] : []);
+    if (t.type === 'prob') return [`prob:${t.kind}`];
     return [];
   }
   /* outcome: 'direkt' | 'hjalp' | 'svar'. hard = { tag: { level, n, ok, last } } (muteras och returneras) */
@@ -904,6 +953,7 @@
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
     uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };

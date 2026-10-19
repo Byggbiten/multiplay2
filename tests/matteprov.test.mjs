@@ -484,7 +484,7 @@ describe('det som var svårt sparas och glöms (D38)', () => {
     L.recordOutcome(h, L.makeTiotal(5, 6, 1, 1), 'hjalp', 'nollfalla', '2026-10-19');
     L.recordOutcome(h, { moment:'tabell', type:'num', x:8, y:7, answer:56 }, 'hjalp', 'fel', '2026-10-19');
     L.recordOutcome(h, L.makeTillbaka('Leo', L.SHOP[0], 6, 100), 'hjalp', 'uttryck', '2026-10-19');
-    expect(Object.keys(h).sort()).toEqual(['prob:tillbaka', 'prob:uttryck', 'tab:7x8', 'tio:falla', 'tio:tvatiotal', 'upp:minnesumma', 'upp:nolla', 'upp:tva'].sort());
+    expect(Object.keys(h).sort()).toEqual(['prob:tillbaka', 'tab:7x8', 'tio:falla', 'tio:tvatiotal', 'upp:minnesumma', 'upp:nolla', 'upp:tva'].sort());
     /* ensiffrig: en radfråga som fick hjälp sparas som tabellfaktumet */
     L.recordOutcome(h, L.makeUpp(4689, 6), 'hjalp', null, '2026-10-19', { rows:['r0'] });
     expect(h['tab:6x9'].level).toBe('hjalp'); expect(h['upp:en']).toBeTruthy();
@@ -746,5 +746,59 @@ describe('en knapp: Nästa tills allt är ifyllt, sedan Klar (D39 ✎)', () => {
     const t = L.makeSheet('latt', seeded(5)), vals = t.items.map(x => String(x.answer));
     expect(L.oneButton(vals)).toBe('klar');
     vals[7] = ''; expect(L.oneButton(vals)).toBe('next'); expect(L.nextEmpty(vals, 0)).toBe(7);
+  });
+});
+
+describe('problemlösningens steg med mallar (D39 ✎)', () => {
+  it('växel: "Vad kostar 5 bollar?" [5]·[28]=[140], sedan [200]−[140]=[60], slutsatsen med uttrycket', () => {
+    const t = L.makeTillbaka('Saga', L.SHOP.find(x => x.id === 'boll'), 5, 200);
+    expect(t.flow.map(s => [s.q, s.op, s.ans])).toEqual([['Vad kostar 5 bollar?', '·', [5, 28, 140]], ['Hur mycket får Saga tillbaka?', '−', [200, 140, 60]]]);
+    expect(L.probConclusion(t)).toBe('Uttrycket blir 200 − 5 · 28 = 60 kr.');
+  });
+  it('två köp har tre steg; omvänd två; räkneordning med två gångertal tre', () => {
+    expect(L.makeKop2('Leo', L.SHOP[0], 3, L.SHOP[1], 2).flow.map(s => s.op)).toEqual(['·', '·', '+']);
+    const o = L.makeOmvand(6, 7, 5);
+    expect(o.flow.map(s => [s.q, s.op, s.ans])).toEqual([['Vad gav de 6 domarna tillsammans?', '·', [6, 7, 42]], ['Vad gav den sista domaren?', '−', [47, 42, 5]]]);
+    expect(L.makeOrdning('++', 5, 3, 6, 8).flow.map(s => s.op)).toEqual(['·', '·', '+']);
+    expect(L.makeOrdning('-', 7, 8, 23).flow.map(s => s.ans)).toEqual([[7, 8, 56], [56, 23, 33]]);
+  });
+  it('gånger och plus i valfri ordning, minus inte; tomma rutor är inte rätt', () => {
+    const t = L.makeTillbaka('Saga', L.SHOP.find(x => x.id === 'boll'), 5, 200);
+    expect(L.checkProbStep(t.flow[0], ['28', '5', '140']).ok).toBe(true);
+    expect(L.checkProbStep(t.flow[0], ['5', '28', '150']).wrong).toEqual([false, false, true]);
+    expect(L.checkProbStep(t.flow[1], ['140', '200', '60']).ok).toBe(false);
+    expect(L.checkProbStep(t.flow[1], ['200', '140', '60']).ok).toBe(true);
+    expect(L.checkProbStep(t.flow[0], ['5', '5', '140']).ok).toBe(false);
+  });
+  it('för många slumpade uppgifter: stegen räknar rätt, bygger på varandra och slutar i svaret; uttrycket stämmer', () => {
+    const r = seeded(801);
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of L.genProblem(lv, 4, r)) {
+      const prev = [];
+      for (const st of t.flow) {
+        const [a, b, c] = st.ans;
+        expect(st.op === '·' ? a * b : st.op === '+' ? a + b : a - b).toBe(c);
+        expect(L.checkProbStep(st, st.ans.map(String)).ok).toBe(true);
+        if (st.op !== '·') expect(prev.includes(a) || prev.includes(b)).toBe(true);    // använder ett tidigare svar
+        prev.push(c);
+      }
+      expect(t.flow[t.flow.length - 1].ans[2]).toBe(t.answer);
+      const v = Function('"use strict";return (' + t.expr.replace(/·/g, '*').replace(/−/g, '-') + ')')();
+      expect(v).toBe(t.answer);
+      expect(L.probConclusion(t)).toContain(`${t.expr} = ${t.answer}`);
+    }
+  });
+  it('språket: i stegens frågor har inget tal två roller', () => {
+    const r = seeded(802);
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of L.genProblem(lv, 4, r)) for (const st of t.flow) {
+      const ns = (st.q.match(/\d+/g) || []);
+      expect(new Set(ns).size).toBe(ns.length);
+      for (let k = 0; k < st.ans.length; k++) expect(L.probStepHint(t, 0).length).toBeGreaterThan(10);
+    }
+  });
+  it('trappan per steg: försök igen, talen i rutorna, svaret', () => {
+    expect([1, 2, 3, 4].map(L.probHelpStep)).toEqual(['retry', 'bit', 'svar', 'svar']);
+    const t = L.makeKop2('Leo', L.SHOP[0], 3, L.SHOP[1], 2);
+    expect(L.probStepBit(t, 0).fill).toEqual({ 0:3, 1:7 });
+    expect(L.probStepHint(t, 2)).toMatch(/Lägg ihop/);
   });
 });
