@@ -504,3 +504,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   trycka på. Och möttes då av ett ljud som arg signalerade att jag gjorde fel. Sånt är [barnet] väldigt känslig för.
   Ljud och färger som på något sätt indikerar att hon har misslyckats eller gjort fel. Så appen måste bli snällare och
   använda formuleringar såsom.. inte riktigt... Men just i detta fall så är det nog vårt UI som inte va tydligt nog."
+- ✎ **2026-10-19, en knapp som byter namn:** i lägen med flera rutor finns en enda knapp; den heter Nästa och går
+  till nästa tomma ruta, och blir Klar när allt är ifyllt; suddas en ruta tom heter den Nästa igen. Källa: Dennis:
+  "Kan man inte bara göra så då att 'nästa ruta-knappen' är den enda knappen, och när allt ä ifyllt så ändras den
+  till att heta klar. Och om man innan trycker på klar, ändrar eller suddar något, så går den tillbaka till att heta
+  nästa ruta?"
