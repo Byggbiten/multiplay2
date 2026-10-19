@@ -1,7 +1,7 @@
 # Multiplay designsystem v26 — klasskatalog
 
 För modul-agenter i Fas 3 slice 2. Källa: `design-lab/index.html` (målbild
-v2.1, LÅST) + `.project-context/DESIGN-LOCK-MULTIPLAY.md`. Allt nedan finns i
+v2.1, LÅST) + `.project-context/DESIGN-LOCK-MULTIPLAY.md` (båda på grenen `origin/renovering`). Allt nedan finns i
 `styles/app.css`. Modulspecifik CSS läggs i modulens egen style-injektion
 (uppstallning-mönstret) — rör ALDRIG app.css eller index.html.
 

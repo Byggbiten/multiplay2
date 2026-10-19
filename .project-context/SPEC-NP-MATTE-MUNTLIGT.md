@@ -1,5 +1,7 @@
 # NP_MATTE_MUNTLIGT.md – Kontextfil för framtida sessioner
 
+> **Historisk (2026-03-08).** Låg i roten som `NP_MATTE_MUNTLIGT.md`; flyttad hit 2026-10-19. Läs `CLAUDE.md` först — den här filen är inte längre ingången. Projektöversikten, filträdet och designsystemet nedan beskriver läget i mars ("9-årig flicka i åk 3", tre spel); Nationella prov-modulen själv finns kvar i appen.
+
 > **Syfte:** Den här filen ger kontext åt Claude Code (eller annan AI-assistent) som återupptar utveckling av MULTIPLAY-appen. Läs den FÖRST.
 
 ---
@@ -118,9 +120,9 @@ Multiplay/
 ├── index.html              ← Alla screens, inline CSS, script-taggar
 ├── manifest.json           ← PWA-manifest
 ├── sw.js                   ← Service worker
-├── DESIGN.md               ← Designsystem (färger, typsnitt, animationer)
+├── DESIGN.md               ← Designsystem (nu referens/_arkiv/DESIGN-2026-02.md)
 ├── MANUAL.md               ← Användarmanual
-├── NP_MATTE_MUNTLIGT.md    ← DENNA FIL – kontextfil
+├── NP_MATTE_MUNTLIGT.md    ← DENNA FIL (nu .project-context/SPEC-NP-MATTE-MUNTLIGT.md)
 ├── styles/
 │   └── app.css             ← Alla CSS custom properties och globala klasser
 └── js/
@@ -141,5 +143,5 @@ Multiplay/
 - **CSS-prefix:** `np-` för NP-modulens klasser
 - **localStorage-nycklar:** `np_matte_muntligt_stats_{profileId}`
 - **Touch first:** Alla interaktioner designade för touch/pencil
-- **Min knappstorlek:** 56px höjd (DESIGN.md)
+- **Min knappstorlek:** 56px höjd (DESIGN.md, nu referens/_arkiv/DESIGN-2026-02.md)
 - **Inga externa dependencies** – allt vanilla JS + Web Audio API + Canvas API

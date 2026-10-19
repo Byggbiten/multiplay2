@@ -1,7 +1,7 @@
 /* ============================================================
    MULTIPLAY – Designsystem v26 · "Barnmagi × Apple-polish"
    Källa: design-lab/index.html (målbild v2.1, LÅST 2026-07-03)
-   + DESIGN-LOCK-MULTIPLAY.md. Klasskatalog: docs/DESIGN-SYSTEM.md
+   + DESIGN-LOCK-MULTIPLAY.md (båda på grenen renovering). Klasskatalog: referens/DESIGN-SYSTEM.md
    Regler: ingen backdrop-filter · en vy = en skärm · SVG som
    UI-ikoner · spring-easing · prefers-reduced-motion respekteras.
    ============================================================ */
@@ -194,7 +194,7 @@
 
 /* ============================================================
    2. MODULTEMAN — modulroten (eller skärmen) sätter accentgruppen.
-   Samma komponenter, egen accent. Se docs/DESIGN-SYSTEM.md.
+   Samma komponenter, egen accent. Se referens/DESIGN-SYSTEM.md.
    ============================================================ */
 .theme-mult, .screen-multiplication, #mult-root {
   --accent: var(--mult-acc); --accent-light: var(--mult-acc-l);
@@ -1938,7 +1938,7 @@ svg.icn {
    Uppgiften äger skärmen: .q-hero (monumental fråga) +
    .q-answers-fill (svarsgrid som fyller ledig höjd) +
    .header-progress (progress-kapsel i headerns högersektion,
-   ersätter eget progressband). Se docs/DESIGN-SYSTEM.md.
+   ersätter eget progressband). Se referens/DESIGN-SYSTEM.md.
    ============================================================ */
 /* Frågekort som skalar med skärmhöjden. Frågetexten läggs direkt i
    .q-hero (ärver typografin); sekundär rad i <span class="q-sub">. */

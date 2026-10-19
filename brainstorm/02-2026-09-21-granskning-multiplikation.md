@@ -3,7 +3,7 @@
 **Granskad kod:** `js/multdiv.js` (2 411 rader, gren `dev`, HEAD 0af6b26), multiplikationsgrenen
 (`gameKind === 'mult'`, `plan.kind === 'simple' | 'twostep'`). Divisionen ingår inte.
 **Måttstock:** reglerna i `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap 1 och
-"Globala villkor" i `docs/superpowers/plans/2026-09-21-uppstallning-addition.md`;
+"Globala villkor" i `referens/_arkiv/plan-2026-09-21-uppstallning-addition.md`;
 minnessiffrans livscykel i `.project-context/SPEC-MINNESSIFFROR.md`; modulspecen
 `MULTDIV-SPEC.md` (origin/renovering).
 **Mätning:** 390×844, ljust läge, `http://localhost:5312/`. Tal tvingade via stubbad

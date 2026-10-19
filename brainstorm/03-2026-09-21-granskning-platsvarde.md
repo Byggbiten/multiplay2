@@ -3,8 +3,8 @@
 Ren läsning + mätning vid 390×844 och stress 390×664 (Playwright, Chromium, egen
 browser-context mot `http://localhost:5312/?gransk=1`). Ingen kod ändrad.
 Måttstock: `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap 1 (P1–P6) och
-"Globala villkor" i `docs/superpowers/plans/2026-09-21-uppstallning-addition.md`,
-plus `docs/DESIGN-SYSTEM.md` (absoluta regler rad 8–13, kontrollista rad 205–211).
+"Globala villkor" i `referens/_arkiv/plan-2026-09-21-uppstallning-addition.md`,
+plus `referens/DESIGN-SYSTEM.md` (absoluta regler rad 8–13, kontrollista rad 205–211).
 Skärmbilder: `/tmp/gransk-platsvarde/`.
 
 ## Vad modulen gör
@@ -106,7 +106,7 @@ Fix: lägg numpaden till höger om de tre fälten (grid 2 kolumner) så kortet b
 
 **C3. Dött tomrum vid 390×844.** Kortet slutar vid y = 200 (A1) / 301 (A2) / 440 (B2);
 Kladd börjar vid y = 498. 200–300 px rosa tomrum, ~35 % av skärmen på A1.
-`docs/DESIGN-SYSTEM.md` rad 207–208: "quiz-vyer ≥55 % täckning". Skärmbild `q01-start.png`.
+`referens/DESIGN-SYSTEM.md` rad 207–208: "quiz-vyer ≥55 % täckning". Skärmbild `q01-start.png`.
 Fix: låt siffror/knappar växa med `flex:1` i `#pv-left` (större A1-rutor, större
 valknappar) i stället för fasta padding-värden. Storlek: timme.
 

@@ -1,7 +1,7 @@
 # GRANSKNING · UPPSTÄLLD SUBTRAKTION — 2026-09-21
 
 **Granskat:** subtraktionsgrenen i `js/uppstallning.js` (gren `dev`, 3 317 rader). Ren läsning + mätning, ingen kod ändrad.
-**Måttstock:** `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap. 1 och "Globala villkor" i `docs/superpowers/plans/2026-09-21-uppstallning-addition.md`. Additionsgrenen är facit och har inte granskats.
+**Måttstock:** `.project-context/SPEC-UPPSTALLNING-ADDITION.md` kap. 1 och "Globala villkor" i `referens/_arkiv/plan-2026-09-21-uppstallning-addition.md`. Additionsgrenen är facit och har inte granskats.
 **Mätmiljö:** Playwright, egen kontext 390×844 (isMobile, DPR 2) mot `http://localhost:5312/`. Tal tvingade fram genom att stubba `Math.random` med en kö före `startDemo()`/`startExercise()`. Tider mätta med `MutationObserver` + `performance.now()` från trycket på "Nästa steg". Skärmbilder i `/tmp/gransk-subtraktion/`.
 Varje fil:rad och mätvärde nedan är läst eller mätt; inget ur minnet.
 
