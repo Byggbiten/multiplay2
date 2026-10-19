@@ -81,6 +81,9 @@
   /* Multiplikation & Division – turkos/teal + solgul accent (AA: deep på ljusa glas) */
   --mdv-acc: #0d9488; --mdv-acc-l: #2dd4bf; --mdv-acc2: #f59e0b;
   --mdv-deep: #0f5c54; --mdv-glow2: rgba(45,212,191,.5); --mdv-tint: #effbf8;
+  /* Geografi – havsgrön (design-lab/geografi-mockup.html) */
+  --geo-acc: #0f8b8d; --geo-acc-l: #4fc3c4; --geo-acc2: #f59e0b;
+  --geo-deep: #134e4a; --geo-glow2: rgba(79,195,196,.42); --geo-tint: #e8f8f7;
 
   /* --- Legacy per-modul-tokens (moduler använder dem inline – RÖR EJ värden
          som är lag-kritiska; modul-agenterna städar i Fas 3 slice 2) --- */
@@ -228,6 +231,11 @@
   --accent: var(--mdv-acc); --accent-light: var(--mdv-acc-l);
   --accent-2: var(--mdv-acc2); --deep: var(--mdv-deep);
   --glow: var(--mdv-glow2); --tint: var(--mdv-tint);
+}
+.theme-geo, .screen-geo, #geo-root {
+  --accent: var(--geo-acc); --accent-light: var(--geo-acc-l);
+  --accent-2: var(--geo-acc2); --deep: var(--geo-deep);
+  --glow: var(--geo-glow2); --tint: var(--geo-tint);
 }
 
 /* ============================================================
@@ -2193,13 +2201,16 @@ svg.icn {
 /* Modulernas rotdivar ska kunna fylla skärmen */
 #mult-root, #clock-root, #friends-root, #nationella-root,
 #np-matte-select-root, #np-matte-muntligt-root, #np-matte-skriftlig-root,
-#addsub-root, #uppstallning-root, #daily-root {
+#addsub-root, #uppstallning-root, #daily-root, #geo-root {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   width: 100%;
 }
+
+/* Geografi: mockupens mått (390 × 844 med 10 px kant), js/geografi.js */
+#screen-geografi { padding: 4px 10px 8px; }
 
 /* ============================================================
    39. RESPONSIVT

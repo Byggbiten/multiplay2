@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v65';
+const APP_VERSION = 'v66';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -169,6 +169,10 @@ const Store = {
       `daily_state_${id}`,              // daily.js (dagens frysta urval)
       `capy_cards_${id}`,               // capy.js (kortinnehav)
       `capy_state_${id}`,               // capy.js (milstolpe-räknare)
+      `geo_state_${id}`,                // geografi.js (lådorna och frågetyperna per landskap, v66)
+      `geo_settings_${id}`,             // geografi.js (hemlandskapet, D36)
+      `geo_puzzle_${id}`,               // geografi.js (pusslets bockar)
+      `geo_log_${id}`,                  // geografi.js
     ].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) { /* ignorera */ }
     });
@@ -307,6 +311,7 @@ const App = (() => {
     nationella:     id => [`np_svenska_log_${id}`],
     addsub:         id => [`uppstallning_log_${id}`, `platsvarde_log_${id}`],
     multdiv:        id => [`multdiv_log_${id}`],
+    geografi:       id => [`geo_log_${id}`],
   };
 
   function readLog(key) {
@@ -598,6 +603,7 @@ const App = (() => {
       nationella:     'screen-nationella-select',
       addsub:         'screen-addsub',
       multdiv:        'screen-multdiv',
+      geografi:       'screen-geografi',
     };
 
     const screen = screenMap[game];
@@ -617,6 +623,8 @@ const App = (() => {
       PlatsvardeGame.init(currentProfile);
     } else if (game === 'multdiv' && typeof MultDivGame !== 'undefined') {
       MultDivGame.init(currentProfile);
+    } else if (game === 'geografi' && typeof GeoGame !== 'undefined') {
+      GeoGame.init(currentProfile);
     }
   }
 

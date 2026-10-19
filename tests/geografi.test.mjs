@@ -242,9 +242,30 @@ describe('hemlandskapet', () => {
     expect(GL.validSettings({ home:'7' })).toEqual({ home:null });
     expect(GL.validSettings({ home:7 })).toEqual({ home:7 });
   });
-  it.skipIf(!fs.existsSync(path.join(ROOT, 'js/geografi.js')))('inget landskap är hårdkodat som hem i modulen', () => {
+  it('inget landskap är hårdkodat som hem i modulen', () => {
     const src = fs.readFileSync(path.join(ROOT, 'js/geografi.js'), 'utf8');
-    expect(/===\s*7\b|MEAS\[7\]|pin\(true\)\s*;/.test(src)).toBe(false);
+    expect(/===\s*7\b|MEAS\[7\]|pin\(true\)\s*;|Medelpad/.test(src)).toBe(false);
+  });
+});
+
+/* ── Inkopplingen i appen (D35) ─────────────────────────── */
+describe('inkopplingen', () => {
+  const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
+  it('profilens nycklar rensas och loggen ger statuschippet', () => {
+    const app = read('js/app.js');
+    for (const k of ['geo_state_', 'geo_settings_', 'geo_puzzle_', 'geo_log_']) expect(app).toContain('`' + k + '${id}`');
+    expect(app).toMatch(/geografi:\s*id => \[`geo_log_\$\{id\}`\]/);
+  });
+  it('Dagens träning tar inte med Geografi (D20)', () => {
+    const m = read('js/daily.js').match(/const MODULES = \[([^\]]*)\]/);
+    expect(m).not.toBeNull();
+    expect(m[1]).not.toMatch(/geo/);
+  });
+  it('service workern förcachar kartan men inte de 75 bilderna', () => {
+    const sw = read('sw.js'), assets = sw.slice(sw.indexOf('const ASSETS'), sw.indexOf('];', sw.indexOf('const ASSETS')));
+    expect(assets).toContain('./assets/geografi/sverige/karta.svg');
+    expect(assets).not.toMatch(/geografi\/sverige\/(vapen|blommor|djur)\//);
+    expect(sw.match(/CACHE_VERSION = '(v\d+)'/)[1]).toBe(read('js/app.js').match(/APP_VERSION = '(v\d+)'/)[1]);
   });
 });
 
