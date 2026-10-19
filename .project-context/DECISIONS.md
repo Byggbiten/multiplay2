@@ -427,3 +427,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   Zelda får förekomma i appen som svar eller i en fråga. Men! det får som sagt inte bli att det är uppenbart så att
   det är […]" och "Byggbiten får finnas kvar. […] jag vill som sagt inte skylta i onödan. Så vi håller det på en
   rimlig nivå där vi inte måste byta konto eller riva upp appen från början".
+
+## D37 · 2026-10-19 · Matteprov 4:an i Multiplikation, första provet är Matteprov 1
+- **Beslut:** lägesvyn i Multiplikation (under Svårighetsgrad) får knappen "Matteprov 4:an". Den leder till en lista
+  med prov som läggs ut löpande, alla om multiplikation. Det första heter "Matteprov 1" och bygger på lärobokens
+  kapitel 2 i åk 4: tabellerna 1–10, gånger tiotal och hundratal, talsorter (T och E), uppställning med en- och
+  tvåsiffrig faktor (nollan i den grå rutan) och problemlösning i två steg, i en lättare och en svårare nivå som
+  övningsbladen. Uppgifterna är egna och liknar övningsbladen; inget skrivs av ordagrant (bladen är upphovsrättsskyddade).
+- **Källa:** Dennis 2026-10-19: "Skulle vi kunna läsa övningsbladen och göra dem till ett matteprov som ligger där
+  jag markerat i bilden? Knappen kan heta matteprov 4:an. klickar man där så kommer vi löpande lägga ut matteprov som
+  har med multiplikation att göra. och detta vi gör nu döps till matteprov 1" och "provet måste som sagt anpassas
+  efter appen. Så jag räknar inte med att provet blir 'rakt av'. men att vi kommer nära".
