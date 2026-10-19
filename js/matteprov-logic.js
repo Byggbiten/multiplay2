@@ -587,10 +587,19 @@
   function makeSheet(level, r) {
     return { moment:'tabell', type:'sheet', items:genTabell(level, TABELLTEST_COUNT, r || Math.random), key:'sheet' };
   }
-  function checkSheet(t, vals) {
-    const per = t.items.map((it, i) => (vals || [])[i] === it.answer);
-    return { ok:per.every(Boolean), cls:'sheet', per, okCount:per.filter(Boolean).length };
+  /* D39: en tom ruta rättas aldrig (per[i] = null) och räknas inte som fel. Klar rättar bara när inga rutor
+     är tomma (sheetEmpty === 0); annars visar appen hur många som är kvar. */
+  const isEmpty = v => v === null || v === undefined || v === '';
+  function sheetEmpty(vals, idxs) {
+    const I = idxs || (vals || []).map((_, i) => i);
+    return I.filter(i => isEmpty((vals || [])[i])).length;
   }
+  function checkSheet(t, vals) {
+    const per = t.items.map((it, i) => isEmpty((vals || [])[i]) ? null : +(vals[i]) === it.answer);
+    const empty = per.filter(x => x === null).length;
+    return { ok:per.every(x => x === true), cls:'sheet', per, okCount:per.filter(x => x === true).length, empty, canGrade:empty === 0 };
+  }
+  function sheetLeftText(n) { return n === 1 ? 'Du har 1 tal kvar. Fyll i det, sedan trycker du Klar.' : `Du har ${n} tal kvar. Fyll i alla, sedan trycker du Klar.`; }
   /* Övningspassets storlek: tabellerna = tabelltestet (20 tal), annars 8 */
   function ovaCount(moment) { return moment === 'tabell' ? TABELLTEST_COUNT : OVA_COUNT; }
   /* Provet: momenten i bladens ordning. Tabellerna är tabelltestet (ett blad med 20 tal).
@@ -883,7 +892,7 @@
     genUpp, genUppstallning, makeUpp, noCarryPass, noCarrySum, rowValue, classifyUpp, UPP_FEEDBACK, uppFacitRows, hasCarry, carryCount,
     genProblem, makeKop2, makeTillbaka, makeOrdning, parseExpr, evalExpr, exprText, exprOk, exprRows, checkProblem,
     makeOmvand, PROV_LEVEL, TE_MIN,
-    makeSheet, checkSheet, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
+    makeSheet, checkSheet, sheetEmpty, sheetLeftText, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
     uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,

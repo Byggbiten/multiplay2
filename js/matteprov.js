@@ -121,7 +121,7 @@ const MatteProv = (() => {
 #mp-root .mp-ans{min-width:2.6em;height:1.35em;padding:0 .2em;border-radius:14px;border:3px dashed color-mix(in srgb,var(--accent) 45%,transparent);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:var(--deep)}
 #mp-root .mp-ans.focus{border-style:solid;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
 #mp-root .mp-ans.ok{border:3px solid #22c55e;background:#dcfce7;color:#15803d}
-#mp-root .mp-ans.bad{border:3px solid #ef4444;background:#fee2e2;color:#b91c1c}
+#mp-root .mp-ans.bad{border:3px solid #fdba74;background:#fff7ed;color:#9a3412}
 #mp-root .mp-ans.sm{font-size:.62em;min-width:2.4em;border-radius:11px;cursor:pointer}
 #mp-root .mp-unit{font-size:.6em;color:var(--ink-soft)}
 #mp-root .mp-text{font-weight:800;font-size:17px;color:var(--ink);text-align:center;line-height:1.35;margin:0}
@@ -150,10 +150,10 @@ const MatteProv = (() => {
 #mp-root .mp-c.in.grey.ok{background:#bbf7d0}
 #mp-root .mp-c.in.pulse{animation:mp-pulse 1s ease-in-out 3}
 #mp-root .mp-c.ghost{visibility:hidden}
-#mp-root .mp-m{position:relative;width:46px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:18px;color:#dc2626;transform:rotate(-4deg)}
-#mp-root .mp-m.in{border:2px dashed rgba(220,38,38,.4);cursor:pointer;transform:none}
+#mp-root .mp-m{position:relative;width:46px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:18px;color:#7c3aed;transform:rotate(-4deg)}
+#mp-root .mp-m.in{border:2px dashed rgba(124,58,237,.4);cursor:pointer;transform:none}
 #mp-root .mp-m.in::after{content:'';position:absolute;left:50%;top:50%;width:46px;height:44px;transform:translate(-50%,-50%)}
-#mp-root .mp-m.in.focus{border:2.5px solid #dc2626;background:#fff1f2}
+#mp-root .mp-m.in.focus{border:2.5px solid #7c3aed;background:#f5f3ff}
 #mp-root .mp-sign{font-family:var(--font-head);font-weight:900;font-size:26px;color:#475569;width:22px}
 #mp-root .mp-line td{height:3px;border-radius:2px}
 #mp-root .mp-line td + td{background:#374151}
@@ -175,7 +175,8 @@ const MatteProv = (() => {
 #mp-root .mp-sr.focus{border-color:var(--accent);background:#fff}
 #mp-root .mp-sr.focus .mp-ans{border-style:solid;border-color:var(--accent)}
 #mp-root .mp-sr.ok .mp-ans{border:2px solid #22c55e;background:#dcfce7;color:#15803d}
-#mp-root .mp-sr.bad .mp-ans{border:2px solid #ef4444;background:#fee2e2;color:#b91c1c;text-decoration:line-through}
+#mp-root .mp-sr.bad .mp-ans{border:2px solid #fdba74;background:#fff7ed;color:#9a3412}
+#mp-root .mp-sr.shown .mp-ans{border:2px solid #cbd5e1;background:#f8fafc;color:#64748b}
 #mp-root .mp-sr .fix{color:#15803d;font-size:16px;min-width:26px;text-align:left}
 #mp-root .mp-sheet.demo .mp-sr{min-height:36px;font-size:17px}
 #mp-root .mp-sheet.demo .mp-ans.sm{font-size:16px;min-width:44px;height:30px}
@@ -235,6 +236,9 @@ const MatteProv = (() => {
   transition:left .5s cubic-bezier(.3,.8,.3,1),top .5s cubic-bezier(.3,.8,.3,1),width .5s,height .5s,letter-spacing .5s}
 #mp-root .mp-sc-b{padding:0;width:44px;justify-content:center}
 #mp-root .mp-sc-b.off{opacity:.35}
+#mp-root .mp-k.nx.pri{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 6px 16px var(--glow)}
+#mp-root .mp-pad5 .mp-klar.sec{color:var(--deep);background:linear-gradient(180deg,#fff,var(--tint));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+#mp-root .mp-help.info{background:#f8fafc;border-color:#cbd5e1;color:var(--deep)}
 #mp-root .mp-c.in.lk{opacity:.32;border-style:dashed;cursor:default}
 #mp-root .mp-c.in.sh{border:2px dotted rgba(100,116,139,.25);background:transparent}
 #mp-root .mp-help{display:none;flex-shrink:0;border-radius:16px;padding:7px 12px;background:#fff7ed;border:2px solid #fdba74;color:#7c2d12;font-weight:800;font-size:14px;line-height:1.3}
@@ -250,7 +254,7 @@ const MatteProv = (() => {
 #mp-root .mp-k3 i{font-style:normal;min-width:26px;height:24px;padding:0 5px;border-radius:8px;display:grid;place-items:center;font-family:var(--font-head);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
 #mp-root .mp-k3 i.d,#mp-root .mp-k3leg i.d{background:#dcfce7;color:#15803d}
 #mp-root .mp-k3 i.h,#mp-root .mp-k3leg i.h{background:#dbeafe;color:#1d4ed8}
-#mp-root .mp-k3 i.s,#mp-root .mp-k3leg i.s{background:#fee2e2;color:#b91c1c}
+#mp-root .mp-k3 i.s,#mp-root .mp-k3leg i.s{background:#ede9fe;color:#6d28d9}
 #mp-root .mp-k3leg{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink-soft);flex-wrap:wrap}
 #mp-root .mp-k3leg i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-left:6px}
 #mp-root .mp-k3leg i:first-child{margin-left:0}
@@ -277,9 +281,9 @@ const MatteProv = (() => {
 #mp-root .mp-klar:disabled{color:var(--deep);background:linear-gradient(180deg,#fff,var(--tint));box-shadow:inset 0 0 0 2.5px color-mix(in srgb,var(--accent) 40%,transparent)}
 
 /* Återkopplingen vid fel (ersätter knappsatsen) */
-#mp-root .mp-fb{flex-shrink:0;display:flex;flex-direction:column;gap:8px;background:#fff;border-radius:20px;padding:12px 14px;border:2px solid #fca5a5;box-shadow:var(--shadow-panel)}
+#mp-root .mp-fb{flex-shrink:0;display:flex;flex-direction:column;gap:8px;background:#fff;border-radius:20px;padding:12px 14px;border:2px solid #c7d2fe;box-shadow:var(--shadow-panel)}
 #mp-root .mp-fb.good{border-color:#86efac}
-#mp-root .mp-fb h3{margin:0;font-family:var(--font-head);font-weight:800;font-size:19px;color:#b91c1c;display:flex;align-items:center;gap:8px}
+#mp-root .mp-fb h3{margin:0;font-family:var(--font-head);font-weight:800;font-size:19px;color:var(--deep);display:flex;align-items:center;gap:8px}
 #mp-root .mp-fb.good h3{color:#15803d}
 #mp-root .mp-fb p{margin:0;font-weight:800;font-size:15.5px;color:var(--ink);line-height:1.35}
 #mp-root .mp-fb .mp-step{min-height:44px}
@@ -329,7 +333,7 @@ const MatteProv = (() => {
 
 /* Sprinten */
 #mp-root .mp-timer{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:6px 12px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);font-variant-numeric:tabular-nums}
-#mp-root .mp-timer.low{color:#b91c1c}
+#mp-root .mp-timer.low{color:#c2410c}
 #mp-root .mp-bands{display:flex;flex-direction:column;gap:6px;width:100%}
 #mp-root .mp-band{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.7);font-weight:800;color:var(--ink-soft);border:2px solid transparent}
 #mp-root .mp-band b{font-family:var(--font-head);color:var(--deep);min-width:58px;font-variant-numeric:tabular-nums}
@@ -376,7 +380,7 @@ const MatteProv = (() => {
   function lastTestTxt(pid) {
     const s = readSt(), p = s.provs && s.provs[pid];
     const t = p && p.tests && p.tests.find(x => x.kind !== 'mitt');
-    return t ? `Senast ${t.ok} av ${t.total} rätt direkt` : 'Inte gjort än';
+    return t ? `Senast klarade du ${t.ok} av ${t.total} direkt` : 'Inte gjort än';
   }
 
   function showList() {
@@ -451,7 +455,7 @@ const MatteProv = (() => {
       { v:sheetDemo(), t:'Det här är ett tabelltest: 20 gångertal i två kolumner. Du skriver svaret i rutan efter varje tal.' },
       { v:big('6 · 7 = ' + box(42, 'focus')), t:'Skriv svaret med knapparna. Knappen Nästa hoppar till nästa ruta.' },
       { v:big('5 · 7 = 35') + big('35 + 7 = 42'), t:'Kommer du inte ihåg? Ta ett gångertal du kan, 5 · 7 = 35, och lägg till en 7:a till.' },
-      { v:big('<span class="mp-score">17<small>/20</small></span>'), t:'Tryck Klar när du är färdig. Du får veta hur många av 20 som blev rätt.' },
+      { v:big('<span class="mp-score">17<small>/20</small></span>'), t:'När alla 20 är ifyllda trycker du Klar. Då ser du vilka du klarade.' },
       { v:`<div style="color:var(--accent)">${svg('again')}</div>`, t:'De tal som blev fel kan du sedan nöta: samma tal direkt igen, och en gång till lite senare.' },
     ];
     if (moment === 'tiotal') return [
@@ -487,7 +491,7 @@ const MatteProv = (() => {
         { v:E({ r0 }, { top:[0], bot:[0] }), t:'Svaret flyttas till rad 1, med 6:an i entalet.' },
         { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Nästa fråga: 8 · 8 = 64. Raden hamnar ett steg åt vänster, så entalsrutan står tom.' },
         { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sist 8 · 6 = 48, ett steg till åt vänster. Raden börjar i hundratalet.' },
-        { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Summan skriver du själv, en ruta i taget från höger. Minnessiffrorna står i de röda rutorna. Svaret är 5496.' },
+        { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Summan skriver du själv, en ruta i taget från höger. Minnessiffrorna står i de lila rutorna. Svaret är 5496.' },
         { v:P({}), t:'Med en tvåsiffrig faktor, som 17 · 32, blir det två rader och sedan summan. Det större talet står överst.' },
         { v:gl('7 · 30 = 210   7 · 2 = 14   210 + 14 = 224') + P({}, { lit:{ top:[0, 1], bot:[0] } }), t:'Rad 1 räknar du i rutorna ovanför: 7 · 30 och 7 · 2, sedan summan 224.' },
         { v:P({ p1:row(224) }), t:'När summan är rätt flyttas 224 till rad 1.' },
@@ -651,7 +655,7 @@ const MatteProv = (() => {
     const el = document.getElementById('mp-help');
     if (!el) return;
     const m = IN && IN.H && IN.H.msg && IN.kind !== 'upp' ? IN.H.msg : null;
-    el.innerHTML = m ? `<b>${svg(m.kind === 'retry' ? 'again' : 'bulb')}${esc(m.title)}</b><span>${esc(m.text)}</span>` : '';
+    el.innerHTML = m ? (m.title ? `<b>${svg(m.kind === 'retry' ? 'again' : m.kind === 'info' ? 'next' : 'bulb')}${esc(m.title)}</b>` : '') + `<span>${esc(m.text)}</span>` : '';
     el.className = 'mp-help' + (m ? ' on ' + m.kind : '');
   }
 
@@ -817,7 +821,7 @@ const MatteProv = (() => {
     return h;
   }
 
-  /* Tabelltestet: 20 tal i två kolumner. Runda 2: de röda rättas. */
+  /* Tabelltestet: 20 tal i två kolumner. Runda 2: de orange rättas. */
   function sheetHTML(t, fb) {
     const out = IN.out;
     const cell = (it, i) => {
@@ -825,7 +829,7 @@ const MatteProv = (() => {
       const o = out[i];
       if (o === 'direkt') cls += ' ok';
       else if (o === 'hjalp') cls += ' fixed';
-      else if (o === 'svar') cls += ' bad';
+      else if (o === 'svar') cls += ' shown';
       else if (IN.bad.has(i)) cls += ' bad';
       if (!fb && IN.f === i && !o) cls += ' focus';
       const fix = o === 'svar' ? `<span class="fix">${it.answer}</span>` : '';
@@ -936,7 +940,12 @@ const MatteProv = (() => {
         <button class="mp-k op" data-act="key" data-k="+" aria-label="plus">+</button>
         <button class="mp-k op" data-act="key" data-k="−" aria-label="minus">−</button>${klar(1)}</div>`;
     const multi = IN.kind === 'boxes' || IN.kind === 'sheet' || (IN.kind === 'prob' && IN.v.length > 1);
-    let nx = IN.kind === 'sheet' ? `Nästa ${svg('down')}` : multi ? `Nästa ruta ${svg('right')}` : '';
+    let nx = IN.kind === 'sheet' ? `Nästa tal ${svg('down')}` : multi ? `Nästa ruta ${svg('right')}` : '';
+    if (IN.kind === 'sheet') {                            // D39: Nästa tal är huvudknappen tills alla 20 är ifyllda
+      const left = IN.v.filter((x, i) => x === '' && !IN.out[i]).length;
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-k nx${left ? ' pri' : ''}" data-act="key" data-k="next">${nx}</button>
+        <button class="mp-klar w2${left ? ' sec' : ''}" id="mp-klar" data-act="klar">${svg('check')}<span>Klar</span></button></div>`;
+    }
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'grey')   // nollan rättas när den skrivs
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" disabled>${svg('check')}<span>Svara</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase !== 'grey') {
@@ -951,7 +960,7 @@ const MatteProv = (() => {
     if (!IN) return false;
     if (IN.kind === 'num') return IN.v.length > 0;
     if (IN.kind === 'boxes') return IN.v.every(x => x.length > 0);
-    if (IN.kind === 'sheet') return IN.v.some(x => x.length > 0);
+    if (IN.kind === 'sheet') return true;               // Klar säger vänligt hur många som är kvar (D39)
     if (IN.kind === 'prob') return IN.phase === 'expr' ? IN.toks.length > 0 && /\d$/.test(IN.toks[IN.toks.length - 1]) : IN.v.every(x => x.length > 0);
     const t = curTask();
     return !!t && IN.rq.k >= L.uppRowsOrder(t).length && !IN.rq.busy && IN.vals.s.some(d => d != null);
@@ -1006,7 +1015,7 @@ const MatteProv = (() => {
         if (k === '0') { IN.vals.p2[0] = 0; IN.booked.add('p2:0'); rq.phase = 'ask'; rq.msg = null; IN.f = { row, col:0, note:0 }; return; }
         rq.greyWrong++;
         if (rq.greyWrong >= 3) { IN.vals.p2[0] = 0; IN.given.add('p2:0'); rq.phase = 'ask'; IN.f = { row, col:0, note:0 }; rq.msg = { kind:'bit', text:'Nollan står nu i den grå rutan. Rad 2 är tiotalet.' }; return; }
-        rq.msg = { kind:'retry', text:rq.greyWrong === 1 ? 'Inte riktigt. Rad 2 är tiotalet, så den grå rutan får en nolla.' : 'Skriv 0, nollan, i den grå rutan.' };
+        rq.msg = { kind:'retry', text:rq.greyWrong === 1 ? 'Nästan! Rad 2 är tiotalet, så den grå rutan får en nolla.' : 'Skriv 0, nollan, i den grå rutan.' };
         return;
       }
       if (!t.two) {                                          // ensiffrig: ett svarsfält, vänster till höger
@@ -1041,11 +1050,11 @@ const MatteProv = (() => {
     const rq = IN.rq, q = L.rowQuestion(t, row);
     if (val === '' || val == null) return;
     if (+val === q.answer) { snd('correct'); return rowBookAnim(t, row, rq.wrong ? 'hjalp' : 'direkt'); }
-    snd('wrong');
+    if (rq.wrong >= 1) snd('wrong');                     // D39: första "försök igen" är tyst
     rq.wrong++;
     const step = L.rowHelpStep(rq.wrong);
     if (!t.two) rq.ans = ''; else IN.notes[row][IN.notes[row].length - 1] = '';
-    if (step === 'retry') rq.msg = { kind:'retry', text:'Inte riktigt. Försök igen.' };
+    if (step === 'retry') rq.msg = { kind:'retry', text:'Inte riktigt – försök igen.' };
     else if (step === 'hint') rq.msg = { kind:'bit', text:L.rowHint(t, row) };
     else { if (!t.two) rq.ans = String(q.answer); else IN.notes[row][IN.notes[row].length - 1] = String(q.answer); return rowBookAnim(t, row, 'svar'); }
   }
@@ -1091,7 +1100,7 @@ const MatteProv = (() => {
     if (IN && IN.kind === 'upp') uppFixFocus(t);
     const q = document.getElementById('mp-q');
     if (q) q.innerHTML = questionHTML(t);
-    if (IN && IN.kind === 'upp') { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
+    if (IN && (IN.kind === 'upp' || IN.kind === 'sheet')) { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
     updKlar();
   }
 
@@ -1136,13 +1145,13 @@ const MatteProv = (() => {
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>` }, true, t);
       return;
     }
-    snd('wrong');
+    if (H.wrong >= 1) snd('wrong');                       // D39: första "försök igen" är tyst
     H.wrong++;
     if (H.wrong === 1) { H.cls0 = res.cls; H.bits = L.helpBits(t, res.cls); if (isDrill()) S.drill.answer(false); }
     const step = L.helpStep(H.wrong, H.bits.length);
     if (step === 'svar') { taskDone(t, 'svar', H.cls0); return showWrong(t, res); }
     markBad(t, res);
-    if (step === 'retry') H.msg = { kind:'retry', title:'Inte riktigt. Försök igen.', text:L.helpHint(t, res.cls) };
+    if (step === 'retry') H.msg = { kind:'retry', title:'Inte riktigt – försök igen.', text:L.helpHint(t, res.cls) };
     else {
       const k = +step.slice(3), bit = H.bits[k - 1];
       applyFill(t, bit.fill);
@@ -1150,7 +1159,7 @@ const MatteProv = (() => {
     }
     renderTask(null, true, t);
   }
-  /* Rutorna som var fel blir röda tills barnet ändrar dem */
+  /* Rutorna som inte var rätt blir milt orange tills barnet ändrar dem */
   function markBad(t, res) {
     if (IN.kind === 'num') { IN.v = ''; return; }
     if (!IN.bad || !res.wrong) return;
@@ -1194,14 +1203,22 @@ const MatteProv = (() => {
   }
 
   /* Tabelltestet: Klar rättar; de röda får rättas en gång (rätt då = med hjälp), sedan visas svaren */
+  /* Tabelltestet (D39): Klar rättar först när alla rutor är ifyllda; annars en vänlig rad, fokus till första tomma,
+     inget ljud och ingen färg. Runda 2: de orange får rättas en gång (rätt då = med hjälp), sedan visas svaren. */
   function sheetSubmit(t) {
-    const res = L.check(t, readResp(t));
+    const vals = readResp(t), open = IN.v.map((_, i) => i).filter(i => !IN.out[i]);
+    const left = L.sheetEmpty(vals, open);
+    if (left) {
+      IN.f = open.find(i => IN.v[i] === '');
+      IN.H.msg = { kind:'info', title:'', text:L.sheetLeftText(left) };
+      return renderTask(null, true, t);
+    }
+    const res = L.check(t, vals);
     if (IN.round === 1) {
       res.per.forEach((ok, i) => { if (ok) IN.out[i] = 'direkt'; });
-      if (res.per.every(Boolean)) return sheetDone(t);
+      if (res.ok) return sheetDone(t);
       IN.round = 2; IN.bad = new Set(res.per.map((ok, i) => ok ? -1 : i).filter(i => i >= 0)); IN.f = [...IN.bad][0];
-      snd('wrong');
-      IN.H.msg = { kind:'retry', title:`${res.okCount} av ${t.items.length} rätt.`, text:'Rätta de röda talen och tryck Klar igen.' };
+      IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:'Titta en gång till på de orange.' };
       return renderTask(null, true, t);
     }
     res.per.forEach((ok, i) => { if (!IN.out[i]) IN.out[i] = ok ? 'hjalp' : 'svar'; });
@@ -1221,20 +1238,20 @@ const MatteProv = (() => {
     if (S.mode === 'prov') {
       t.items.forEach((it, i) => S.results.push({ moment:'tabell', ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
       S.idx++;
-      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}${c.direkt} av ${t.items.length} rätt direkt</h3>${sum}
+      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}Du klarade ${c.direkt} av ${t.items.length} direkt</h3>${sum}
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>`;
     } else {
       S.wrongItems = t.items.filter((_, i) => IN.out[i] !== 'direkt');
       S.done = true;
-      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}${c.direkt} av ${t.items.length} rätt direkt</h3>${sum}
+      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}Du klarade ${c.direkt} av ${t.items.length} direkt</h3>${sum}
         <div class="mp-navrow">${S.wrongItems.length ? `<button class="mp-cta" data-act="sheetnot">${svg('again')}Nöt de ${S.wrongItems.length} som inte satt</button>` : ''}
         <button class="mp-cta sec" data-act="prov">Klar</button></div></div>`;
     }
     renderTask({ ok:true, sheetDone:true, html }, true, t);
   }
   /* De tre utfallen som små siffror: rätt direkt · med hjälp · fick svaret */
-  const k3 = (d, h, s) => `<span class="mp-k3"><i class="d" title="Rätt direkt">${d}</i><i class="h" title="Rätt med hjälp">${h}</i><i class="s" title="Fick svaret">${s}</i></span>`;
-  const k3Legend = () => `<span class="mp-k3leg"><i class="d"></i>Rätt direkt<i class="h"></i>Med hjälp<i class="s"></i>Fick svaret</span>`;
+  const k3 = (d, h, s) => `<span class="mp-k3"><i class="d" title="Klarade direkt">${d}</i><i class="h" title="Klarade med hjälp">${h}</i><i class="s" title="Övar vi mer på">${s}</i></span>`;
+  const k3Legend = () => `<span class="mp-k3leg"><i class="d"></i>Klarade direkt<i class="h"></i>Med hjälp<i class="s"></i>Övar vi mer på</span>`;
 
   /* Hela svaret (trappans sista steg): förklaringen i steg, sedan Nästa */
   function explainSteps(t, res) {
@@ -1301,9 +1318,9 @@ const MatteProv = (() => {
     frame('Bra nött!', 'prov', 'Tillbaka', '', `
       <div class="mp-head" style="margin-top:auto"><span class="mp-starb">${svg('star')}</span><h2>${esc(title)}</h2><p>${esc(levelName(S.lv))}</p></div>
       <div class="mp-rc">
-        <div class="mp-rc-row"><span class="nm">Rätt på första försöket</span><b>${R.correct} av ${R.total}</b></div>
+        <div class="mp-rc-row"><span class="nm">Klarade direkt</span><b>${R.correct} av ${R.total}</b></div>
         <div class="mp-rc-row"><span class="nm">Rätt med hjälp</span><b>${o.hjalp}</b></div>
-        <div class="mp-rc-row"><span class="nm">Fick svaret</span><b>${o.svar}</b></div>
+        <div class="mp-rc-row"><span class="nm">Övar vi mer på</span><b>${o.svar}</b></div>
         <div class="mp-rc-row"><span class="nm">Tid</span><b>${esc(MP.durTxt(R.secs))}</b></div>
       </div>
       <p class="mp-note" style="font-size:15px">${esc(MP.praiseFor(R.pct))}</p>
@@ -1328,7 +1345,7 @@ const MatteProv = (() => {
     const when = MP.fmtWhen(iso);
     const per = sum.per.filter(x => x.total);
     frame(S.mitt ? 'Mitt prov klart' : 'Provet klart', 'prov', 'Klar', '', `
-      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok} av ${sum.total} rätt direkt</h2><p>${esc(praise)}</p></div>
+      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok === sum.total ? 'Allt satt direkt!' : 'Provet är klart!'}</h2><p>Du klarade ${sum.ok} av ${sum.total} direkt. ${esc(praise)}</p></div>
       <div class="mp-rc">
         <div class="mp-rc-top"><span class="mp-rc-k">${esc(S.mitt ? 'Mitt prov' : prov().title)} · ${esc(levelName(S.lv))}</span><span class="mp-rc-when">${esc(when.charAt(0).toUpperCase() + when.slice(1))}</span></div>
         <div class="mp-rc-row leg">${k3Legend()}</div>
@@ -1366,8 +1383,8 @@ const MatteProv = (() => {
     const ps = provSt(readSt());
     frame('Tabellsprint', 'prov', 'Tillbaka', '', `
       <div class="mp-vis">${big(svg('timer').replace('class="mi"', 'class="mi" style="width:64px;height:64px;color:var(--accent)"'))}
-        <p class="mp-text">Så många gångertal du hinner på 4 minuter, högst 48. Fel svar hoppas över.</p>
-        <p class="mp-note">Sprinten ingår inte i provet.${ps.sprint.best ? ' Ditt bästa: ' + ps.sprint.best + ' rätt.' : ''}</p></div>
+        <p class="mp-text">Så många gångertal du hinner på 4 minuter, högst 48. Blir ett tal inte rätt går du vidare till nästa.</p>
+        <p class="mp-note">Sprinten ingår inte i provet.${ps.sprint.best ? ' Ditt bästa: ' + ps.sprint.best + ' tal.' : ''}</p></div>
       <button class="mp-cta" data-act="sprintgo">${svg('next')}Starta</button>`);
   }
   function startSprint() {
@@ -1385,7 +1402,7 @@ const MatteProv = (() => {
   }
   function stopSprint() { if (sprintTimer) { clearInterval(sprintTimer); sprintTimer = null; } }
   function sprintAnswer(t, ok) {
-    if (ok) { S.ok++; snd('correct'); } else snd('wrong');
+    if (ok) { S.ok++; snd('correct'); }                  // D39: inget felljud i sprinten, svaret visas lugnt
     S.idx++;
     if (S.idx >= S.items.length) return sprintDone();
     if (ok) return renderTask();
@@ -1406,7 +1423,7 @@ const MatteProv = (() => {
     S = { mode:'sprintdone' };
     snd('fanfare');
     frame('Tabellsprint', 'prov', 'Tillbaka', '', `
-      <div class="mp-head" style="margin-top:auto"><div class="mp-bignum">${n}</div><h2>rätt av 48</h2><p>${newBest ? 'Nytt rekord!' : 'Ditt bästa: ' + p.sprint.best}</p></div>
+      <div class="mp-head" style="margin-top:auto"><div class="mp-bignum">${n}</div><h2>tal klarade du av 48</h2><p>${newBest ? 'Nytt rekord!' : 'Ditt bästa: ' + p.sprint.best}</p></div>
       <div class="mp-bands">${L.SPRINT_BANDS.slice().reverse().map(b => `<div class="mp-band${b === band ? ' on' : ''}"><b>${b.lo}–${b.hi}</b>${esc(b.name)}</div>`).join('')}</div>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
         <button class="mp-cta" data-act="sprintgo">${svg('again')}Kör igen</button>

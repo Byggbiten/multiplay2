@@ -1,6 +1,7 @@
 /* tests/matteprov.test.mjs — Matteprov 4:an (D37), den rena logiken i js/matteprov-logic.js */
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 const require = createRequire(import.meta.url);
 const L = require('../js/matteprov-logic.js');
 
@@ -668,5 +669,54 @@ describe('kladdens historik: ångra och gör om (D38 ✎)', () => {
     h.redo(); expect(h.visible()).toEqual([]);
     h.push(st(3)); expect(h.visible().map(o => o.n)).toEqual([3]);
     h.reset(); expect(h.canUndo()).toBe(false); expect(h.visible()).toEqual([]);
+  });
+});
+
+/* ══ D39: snällare – tomma rutor rättas inte, och inga dömande ord ══ */
+describe('tabelltestet: tomma rutor rättas aldrig (D39)', () => {
+  it('Klar med tomma rutor rättar ingenting och säger hur många som är kvar', () => {
+    const t = L.makeSheet('svar', seeded(11));
+    const vals = Array(20).fill(null); vals[0] = t.items[0].answer;          // som Dennis: ett svar, sedan Klar
+    const c = L.check(t, vals);
+    expect(c.canGrade).toBe(false);
+    expect(c.empty).toBe(19);
+    expect(c.per.filter(x => x === false).length).toBe(0);                // inget räknas som fel
+    expect(c.per.filter(x => x === null).length).toBe(19);
+    expect(L.sheetEmpty(vals)).toBe(19);
+    expect(L.sheetLeftText(19)).toBe('Du har 19 tal kvar. Fyll i alla, sedan trycker du Klar.');
+    expect(L.sheetLeftText(1)).toBe('Du har 1 tal kvar. Fyll i det, sedan trycker du Klar.');
+  });
+  it('runda 2: bara de öppna rutorna räknas som kvar', () => {
+    const vals = ['56', '', '12', '', '9'];
+    expect(L.sheetEmpty(vals, [1, 2])).toBe(1);
+    expect(L.sheetEmpty(vals, [0, 2, 4])).toBe(0);
+  });
+  it('alla ifyllda: Klar rättar, och bara ifyllda fel är "inte riktigt ännu"', () => {
+    const t = L.makeSheet('svar', seeded(12)), vals = t.items.map((it, i) => i < 3 ? it.answer + 1 : it.answer);
+    const c = L.check(t, vals);
+    expect(c.canGrade).toBe(true); expect(c.okCount).toBe(17); expect(c.per.filter(x => x === false).length).toBe(3);
+  });
+});
+
+describe('synlig text i matteprovet är snäll (D39)', () => {
+  /* svep över källkoden utan kommentarer: inga "Fel", "fel!" eller "Du glömde" som barnet kan se */
+  const strip = src => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s\/\/ .*$/gm, '');
+  for (const f of ['js/matteprov.js', 'js/matteprov-logic.js']) it(f, () => {
+    const code = strip(readFileSync(new URL('../' + f, import.meta.url), 'utf8'));
+    for (const re of [/\bFel\b/, /fel!/i, /Du glömde/, /rätt av 48/, /av \$\{[^}]+\} rätt/]) expect(code).not.toMatch(re);
+  });
+  it('alla genererade texter i Öva och prov (ledtrådar, förklaringar, frågor)', () => {
+    const r = seeded(701), texts = [];
+    for (let i = 0; i < 200; i++) for (const lv of LEVELS) {
+      for (const t of [...L.genTiotal(lv, 2, r), ...L.genTalsorter(lv, 1, r), ...L.genUppstallning(lv, 2, r), ...L.genProblem(lv, 4, r)]) {
+        for (const cls of ['fel', 'nollfalla', 'nollor', 'tabell', 'uttryck', 'summinne', 'addition']) texts.push(L.helpHint(t, cls));
+        texts.push(...L.helpBits(t, 'fel').map(b => b.text));
+        if (t.type === 'tio') texts.push(...L.explainTiotal(t).map(s => s.text));
+        if (t.type === 'upp') for (const row of L.uppRowsOrder(t)) { texts.push(L.rowQuestion(t, row).text || '', L.rowHint(t, row)); }
+        if (t.text) texts.push(t.text);
+      }
+    }
+    texts.push(...Object.values(L.UPP_FEEDBACK));
+    for (const s of texts) { expect(s).not.toMatch(/\bFel\b/); expect(s).not.toMatch(/fel!/i); expect(s).not.toMatch(/Du glömde/); }
   });
 });
