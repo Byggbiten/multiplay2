@@ -51,6 +51,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D26 Sköldar och blommor laddas ner från Wikimedia ✎ även djuren
 - D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
 - D28 Städerna godkända; skolans vana går före där den skiljer
+- D29 Bildkällorna bakom en liten informationsknapp
 
 ---
 
@@ -290,3 +291,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   landskapets 'huvudstad' eller liknande så kör vi på ditt. … falun är historiskt sett mer utav en huvudstad, men
   borlänge är ju större. Så du har rätt i din lista och vi kör på den om det inte finns någon 'officiel lista' …
   Så som du själv pekade ut med eskilstuna. skolboken får gå före"
+
+## D29 · 2026-10-19 · Bildkällorna bakom en liten informationsknapp
+- **Beslut:** upphovspersoner och licenser för bilderna (krav för CC BY/CC BY-SA, `referens/sverige-landskap/bilder.json`)
+  visas bakom en liten informationsknapp i Geografi, så att de inte stör.
+- **Källa:** Dennis 2026-10-19: "och gällande att upphovspersonerna nämns. Lägg det som nån liten informationsknapp
+  nånstans i appen. så att det inte är något som störs."
