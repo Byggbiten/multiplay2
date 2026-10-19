@@ -346,10 +346,10 @@ vidare. Bitarna följer lösningsgången: tabellfaktumet för tiotal, uppdelning
 uppställningens summa (först additionens minnessiffror, sedan summans två högra siffror; raderna har en egen trappa,
 se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
 
-1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. **Nästa tal** är huvudknappen tills alla 20 är
-   ifyllda; då blir **Klar** huvudknappen. Trycker barnet Klar med tomma rutor rättas ingenting: en vänlig rad säger
-   hur många tal som är kvar och fokus hoppar till första tomma rutan, utan ljud och färg (D39). Tomma rutor räknas
-   aldrig som fel. Tal som inte satt direkt kan nötas efteråt.
+1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Bredvid sudda finns **en enda knapp**: den heter
+   **Nästa tal** och hoppar till nästa tomma ruta, och när alla 20 är ifyllda byter den till **Klar** och rättar.
+   Suddas en ruta tom heter den Nästa tal igen (D39 ✎). Tomma rutor rättas aldrig. Tal som inte satt direkt kan
+   nötas efteråt. Samma enda knapp ("Nästa ruta" / "Klar") finns i alla lägen med flera rutor.
 2. **Gånger tiotal och hundratal**: som på bladet, med "="-rader. `8 · 40 = 8 · 4 tiotal`, sedan `= [32] tiotal` och
    `= [320]`. Fällan `50 · 60 = 5 · 6 hundratal = 30 hundratal = 3000` (tabellsvaret har redan en nolla) får en egen
    förklaring.
@@ -379,8 +379,9 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
 
 ### Provet och kvittot
 Provet går igenom momenten i ordning, utan klocka. Det säger rätt eller fel per uppgift och har hjälptrappan (D38).
-Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange ("Du har 17 klara.
-Titta en gång till på de orange.") och får rättas en gång till, sedan visas svaren lugnt i grått. Kvittot visar per
+Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange och tomma, med det
+gamla svaret svagt överstruket bredvid ("Du har 17 klara. Titta en gång till på de orange."). De fylls i igen med
+samma knapp, och sedan visas svaren lugnt i grått. Kvittot visar per
 moment **Klarade direkt**, **Klarade med hjälp** och **Övar vi mer på**; grönt (**Klart**, minst 75 %) räknar bara
 klarade direkt.
 

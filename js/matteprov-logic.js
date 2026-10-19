@@ -588,7 +588,7 @@
     return { moment:'tabell', type:'sheet', items:genTabell(level, TABELLTEST_COUNT, r || Math.random), key:'sheet' };
   }
   /* D39: en tom ruta rättas aldrig (per[i] = null) och räknas inte som fel. Klar rättar bara när inga rutor
-     är tomma (sheetEmpty === 0); annars visar appen hur många som är kvar. */
+     är tomma (sheetEmpty === 0); knappen heter Klar först då (oneButton). */
   const isEmpty = v => v === null || v === undefined || v === '';
   function sheetEmpty(vals, idxs) {
     const I = idxs || (vals || []).map((_, i) => i);
@@ -599,7 +599,16 @@
     const empty = per.filter(x => x === null).length;
     return { ok:per.every(x => x === true), cls:'sheet', per, okCount:per.filter(x => x === true).length, empty, canGrade:empty === 0 };
   }
-  function sheetLeftText(n) { return n === 1 ? 'Du har 1 tal kvar. Fyll i det, sedan trycker du Klar.' : `Du har ${n} tal kvar. Fyll i alla, sedan trycker du Klar.`; }
+  /* EN KNAPP (D39 ✎, Dennis: "nästa ruta-knappen är den enda knappen, och när allt är ifyllt så ändras den till att
+     heta klar"): 'next' så länge någon öppen ruta är tom, annars 'klar'. Suddas en ruta tom blir den 'next' igen.
+     open = index för rutorna som går att skriva i (utan dem: alla). */
+  function oneButton(vals, open) { return sheetEmpty(vals, open) > 0 ? 'next' : 'klar'; }
+  /* Nästa TOMMA öppna ruta efter from (runt om), eller -1 om inga är tomma */
+  function nextEmpty(vals, from, open) {
+    const I = open || (vals || []).map((_, i) => i), n = (vals || []).length;
+    for (let k = 1; k <= n; k++) { const j = ((from == null ? -1 : from) + k + n) % n; if (I.includes(j) && isEmpty(vals[j])) return j; }
+    return -1;
+  }
   /* Övningspassets storlek: tabellerna = tabelltestet (20 tal), annars 8 */
   function ovaCount(moment) { return moment === 'tabell' ? TABELLTEST_COUNT : OVA_COUNT; }
   /* Provet: momenten i bladens ordning. Tabellerna är tabelltestet (ett blad med 20 tal).
@@ -892,7 +901,7 @@
     genUpp, genUppstallning, makeUpp, noCarryPass, noCarrySum, rowValue, classifyUpp, UPP_FEEDBACK, uppFacitRows, hasCarry, carryCount,
     genProblem, makeKop2, makeTillbaka, makeOrdning, parseExpr, evalExpr, exprText, exprOk, exprRows, checkProblem,
     makeOmvand, PROV_LEVEL, TE_MIN,
-    makeSheet, checkSheet, sheetEmpty, sheetLeftText, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
+    makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
     uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,

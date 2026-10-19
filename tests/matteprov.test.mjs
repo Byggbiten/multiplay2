@@ -674,7 +674,7 @@ describe('kladdens historik: ångra och gör om (D38 ✎)', () => {
 
 /* ══ D39: snällare – tomma rutor rättas inte, och inga dömande ord ══ */
 describe('tabelltestet: tomma rutor rättas aldrig (D39)', () => {
-  it('Klar med tomma rutor rättar ingenting och säger hur många som är kvar', () => {
+  it('med tomma rutor rättas ingenting, och knappen är Nästa', () => {
     const t = L.makeSheet('svar', seeded(11));
     const vals = Array(20).fill(null); vals[0] = t.items[0].answer;          // som Dennis: ett svar, sedan Klar
     const c = L.check(t, vals);
@@ -683,8 +683,7 @@ describe('tabelltestet: tomma rutor rättas aldrig (D39)', () => {
     expect(c.per.filter(x => x === false).length).toBe(0);                // inget räknas som fel
     expect(c.per.filter(x => x === null).length).toBe(19);
     expect(L.sheetEmpty(vals)).toBe(19);
-    expect(L.sheetLeftText(19)).toBe('Du har 19 tal kvar. Fyll i alla, sedan trycker du Klar.');
-    expect(L.sheetLeftText(1)).toBe('Du har 1 tal kvar. Fyll i det, sedan trycker du Klar.');
+    expect(L.oneButton(vals)).toBe('next');                              // knappen heter Nästa, Klar finns inte
   });
   it('runda 2: bara de öppna rutorna räknas som kvar', () => {
     const vals = ['56', '', '12', '', '9'];
@@ -718,5 +717,34 @@ describe('synlig text i matteprovet är snäll (D39)', () => {
     }
     texts.push(...Object.values(L.UPP_FEEDBACK));
     for (const s of texts) { expect(s).not.toMatch(/\bFel\b/); expect(s).not.toMatch(/fel!/i); expect(s).not.toMatch(/Du glömde/); }
+  });
+});
+
+describe('en knapp: Nästa tills allt är ifyllt, sedan Klar (D39 ✎)', () => {
+  it('tom ruta ger Nästa, alla ifyllda ger Klar, suddning ger Nästa igen', () => {
+    const v = ['640', '', ''];
+    expect(L.oneButton(v)).toBe('next');
+    v[1] = '16'; expect(L.oneButton(v)).toBe('next');
+    v[2] = '656'; expect(L.oneButton(v)).toBe('klar');
+    v[1] = '1'; expect(L.oneButton(v)).toBe('klar');                   // ändrad men inte tom: fortfarande Klar
+    v[1] = ''; expect(L.oneButton(v)).toBe('next');                    // suddad tom: Nästa igen
+  });
+  it('bara öppna rutor räknas (klara rader i tabelltestet, rutor som hjälpen fyllt)', () => {
+    const v = ['56', '', '12', ''];
+    expect(L.oneButton(v, [0, 2])).toBe('klar');
+    expect(L.oneButton(v, [0, 1, 2])).toBe('next');
+  });
+  it('Nästa hoppar till nästa TOMMA ruta, runt om; -1 när inga är tomma', () => {
+    const v = ['1', '', '3', '', '5'];
+    expect(L.nextEmpty(v, 0)).toBe(1);
+    expect(L.nextEmpty(v, 1)).toBe(3);
+    expect(L.nextEmpty(v, 3)).toBe(1);                                  // runt om
+    expect(L.nextEmpty(v, 0, [0, 2, 3, 4])).toBe(3);                    // ruta 1 är inte öppen
+    expect(L.nextEmpty(['1', '2'], 0)).toBe(-1);
+  });
+  it('tabelltestet: 20 ifyllda ger Klar, en tom ger Nästa', () => {
+    const t = L.makeSheet('latt', seeded(5)), vals = t.items.map(x => String(x.answer));
+    expect(L.oneButton(vals)).toBe('klar');
+    vals[7] = ''; expect(L.oneButton(vals)).toBe('next'); expect(L.nextEmpty(vals, 0)).toBe(7);
   });
 });

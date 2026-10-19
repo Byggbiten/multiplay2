@@ -236,8 +236,9 @@ const MatteProv = (() => {
   transition:left .5s cubic-bezier(.3,.8,.3,1),top .5s cubic-bezier(.3,.8,.3,1),width .5s,height .5s,letter-spacing .5s}
 #mp-root .mp-sc-b{padding:0;width:44px;justify-content:center}
 #mp-root .mp-sc-b.off{opacity:.35}
+#mp-root .mp-pad5 .mp-k.nx.w4{grid-column:span 4;font-size:17px;font-family:var(--font-head)}
+#mp-root .mp-sr .old{color:#94a3b8;font-size:14px;text-decoration:line-through;min-width:22px;text-align:left}
 #mp-root .mp-k.nx.pri{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 6px 16px var(--glow)}
-#mp-root .mp-pad5 .mp-klar.sec{color:var(--deep);background:linear-gradient(180deg,#fff,var(--tint));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
 #mp-root .mp-help.info{background:#f8fafc;border-color:#cbd5e1;color:var(--deep)}
 #mp-root .mp-c.in.lk{opacity:.32;border-style:dashed;cursor:default}
 #mp-root .mp-c.in.sh{border:2px dotted rgba(100,116,139,.25);background:transparent}
@@ -832,7 +833,8 @@ const MatteProv = (() => {
       else if (o === 'svar') cls += ' shown';
       else if (IN.bad.has(i)) cls += ' bad';
       if (!fb && IN.f === i && !o) cls += ' focus';
-      const fix = o === 'svar' ? `<span class="fix">${it.answer}</span>` : '';
+      const old = !o && IN.old && IN.old[i] != null && IN.v[i] === '' ? `<span class="old">${esc(IN.old[i])}</span>` : '';
+      const fix = o === 'svar' ? `<span class="fix">${it.answer}</span>` : old;
       const act = !fb && !o ? `data-act="bx" data-i="${i}"` : '';
       return `<button class="${cls}" ${act}><span class="ex">${esc(it.text)} =</span><span class="mp-ans xs">${esc(IN.v[i] || '')}</span>${fix}</button>`;
     };
@@ -939,12 +941,11 @@ const MatteProv = (() => {
         <button class="mp-k op" data-act="key" data-k="·" aria-label="gånger">·</button>
         <button class="mp-k op" data-act="key" data-k="+" aria-label="plus">+</button>
         <button class="mp-k op" data-act="key" data-k="−" aria-label="minus">−</button>${klar(1)}</div>`;
-    const multi = IN.kind === 'boxes' || IN.kind === 'sheet' || (IN.kind === 'prob' && IN.v.length > 1);
-    let nx = IN.kind === 'sheet' ? `Nästa tal ${svg('down')}` : multi ? `Nästa ruta ${svg('right')}` : '';
-    if (IN.kind === 'sheet') {                            // D39: Nästa tal är huvudknappen tills alla 20 är ifyllda
-      const left = IN.v.filter((x, i) => x === '' && !IN.out[i]).length;
-      return `<div class="mp-pad5">${digits}${erase}<button class="mp-k nx${left ? ' pri' : ''}" data-act="key" data-k="next">${nx}</button>
-        <button class="mp-klar w2${left ? ' sec' : ''}" id="mp-klar" data-act="klar">${svg('check')}<span>Klar</span></button></div>`;
+    /* EN knapp bredvid ⌫ (D39 ✎): "Nästa tal"/"Nästa ruta" tills varje ruta är ifylld, sedan "Klar" */
+    if (IN.kind === 'boxes' || IN.kind === 'sheet' || IN.kind === 'prob') {
+      if (L.oneButton(IN.v, openIdx()) === 'klar') return `<div class="mp-pad5">${digits}${erase}${klar(4).replace(' disabled', '')}</div>`;
+      const nx = IN.kind === 'sheet' ? `Nästa tal ${svg('down')}` : `Nästa ruta ${svg('right')}`;
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-k nx w4 pri" data-act="key" data-k="next">${nx}</button></div>`;
     }
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'grey')   // nollan rättas när den skrivs
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" disabled>${svg('check')}<span>Svara</span></button></div>`;
@@ -954,13 +955,13 @@ const MatteProv = (() => {
       const lbl = IN.notes && (IN.f.note == null ? 0 : IN.f.note) < last ? `${svg('right')}<span>Nästa</span>` : `${svg('check')}<span>Svara</span>`;
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" data-act="key" data-k="next">${lbl}</button></div>`;
     }
-    return `<div class="mp-pad5">${digits}${erase}${nx ? `<button class="mp-k nx" data-act="key" data-k="next">${nx}</button>${klar(2)}` : klar(4)}</div>`;
+    return `<div class="mp-pad5">${digits}${erase}${klar(4)}</div>`;
   }
   function canSubmit() {
     if (!IN) return false;
     if (IN.kind === 'num') return IN.v.length > 0;
     if (IN.kind === 'boxes') return IN.v.every(x => x.length > 0);
-    if (IN.kind === 'sheet') return true;               // Klar säger vänligt hur många som är kvar (D39)
+    if (IN.kind === 'sheet') return L.oneButton(IN.v, openIdx()) === 'klar';
     if (IN.kind === 'prob') return IN.phase === 'expr' ? IN.toks.length > 0 && /\d$/.test(IN.toks[IN.toks.length - 1]) : IN.v.every(x => x.length > 0);
     const t = curTask();
     return !!t && IN.rq.k >= L.uppRowsOrder(t).length && !IN.rq.busy && IN.vals.s.some(d => d != null);
@@ -970,6 +971,7 @@ const MatteProv = (() => {
   /* Rutor som går att skriva i (inte ifyllda av hjälpen, inte klara i bladet) */
   function openBox(i) { return !(IN.given && IN.given.has(i)) && !(IN.kind === 'sheet' && IN.out[i]); }
   function nextOpen(from) { const n = IN.v.length; for (let k = 1; k <= n; k++) { const j = (from + k) % n; if (openBox(j)) return j; } return from; }
+  const openIdx = () => IN.v.map((_, i) => i).filter(openBox);
   function press(k) {
     const t = curTask();
     if (!t || locked || !IN) return;
@@ -984,7 +986,7 @@ const MatteProv = (() => {
       else if (['·', '+', '−'].includes(k)) { if (last && /^\d+$/.test(last)) T.push(k); else if (last) T[T.length - 1] = k; }
     } else if (IN.kind === 'boxes' || IN.kind === 'sheet' || IN.kind === 'prob') {
       if (!openBox(IN.f)) IN.f = nextOpen(IN.f);
-      if (k === 'next') IN.f = nextOpen(IN.f);
+      if (k === 'next') { const j = L.nextEmpty(IN.v, IN.f, openIdx()); IN.f = j >= 0 ? j : nextOpen(IN.f); }
       else if (k === 'erase') { if (IN.v[IN.f]) IN.v[IN.f] = IN.v[IN.f].slice(0, -1); }
       else if (/^\d$/.test(k) && IN.v[IN.f].length < 5) { IN.v[IN.f] = (IN.v[IN.f] === '0' ? '' : IN.v[IN.f]) + k; IN.bad.delete(IN.f); }
     } else uppPress(t, k);
@@ -1100,7 +1102,7 @@ const MatteProv = (() => {
     if (IN && IN.kind === 'upp') uppFixFocus(t);
     const q = document.getElementById('mp-q');
     if (q) q.innerHTML = questionHTML(t);
-    if (IN && (IN.kind === 'upp' || IN.kind === 'sheet')) { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
+    if (IN && IN.kind !== 'num') { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
     updKlar();
   }
 
@@ -1206,18 +1208,14 @@ const MatteProv = (() => {
   /* Tabelltestet (D39): Klar rättar först när alla rutor är ifyllda; annars en vänlig rad, fokus till första tomma,
      inget ljud och ingen färg. Runda 2: de orange får rättas en gång (rätt då = med hjälp), sedan visas svaren. */
   function sheetSubmit(t) {
-    const vals = readResp(t), open = IN.v.map((_, i) => i).filter(i => !IN.out[i]);
-    const left = L.sheetEmpty(vals, open);
-    if (left) {
-      IN.f = open.find(i => IN.v[i] === '');
-      IN.H.msg = { kind:'info', title:'', text:L.sheetLeftText(left) };
-      return renderTask(null, true, t);
-    }
+    const vals = readResp(t);
+    if (L.oneButton(IN.v, openIdx()) !== 'klar') return;   // Klar finns bara när alla rutor är ifyllda
     const res = L.check(t, vals);
     if (IN.round === 1) {
       res.per.forEach((ok, i) => { if (ok) IN.out[i] = 'direkt'; });
       if (res.ok) return sheetDone(t);
       IN.round = 2; IN.bad = new Set(res.per.map((ok, i) => ok ? -1 : i).filter(i => i >= 0)); IN.f = [...IN.bad][0];
+      IN.old = {}; for (const i of IN.bad) { IN.old[i] = IN.v[i]; IN.v[i] = ''; }   // de orange töms; det gamla svaret syns svagt
       IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:'Titta en gång till på de orange.' };
       return renderTask(null, true, t);
     }
@@ -1495,7 +1493,7 @@ const MatteProv = (() => {
     if (/^\d$/.test(e.key)) press(e.key);
     else if (e.key === 'Backspace') press('erase');
     else if (['·', '*', '+', '-', '−'].includes(e.key) && IN.kind === 'prob') press(e.key === '*' ? '·' : e.key === '-' ? '−' : e.key);
-    else if (e.key === 'Enter') { if (IN.kind === 'sheet' && IN.f < IN.v.length - 1) press('next'); else submit(); }
+    else if (e.key === 'Enter') { if (canSubmit()) submit(); else press('next'); }
     else if (e.key === 'Tab' && IN.kind !== 'num') { e.preventDefault(); press('next'); }
   }
 
