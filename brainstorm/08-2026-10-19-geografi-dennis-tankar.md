@@ -49,6 +49,13 @@ största stad, blomma, djur, sköld, "Visste du?" (rang i yta och invånare, en 
 **Samlarpärmen** (förslag): varje landskap blir ett kort med sköld, djur och blomma som låses upp när landskapet
 sitter (lådan "kan"). Hela Sverige = full pärm. Kopplas till capybarakorten som i övriga appen.
 
+**Snabbfakta i själva landskapsträningen** (Dennis 19/10: "du minns att jag ändå ville ha med detta i själva
+landskapsträningen? Så att de får med sig de lärdommarna gratis? … landskapsblomma, djur, största stad, intressant
+fakta om det är t.ex. ett av de större landskapen eller ett av de minsta till ytan, folkrikaste eller kanske
+folkminstast"): faktan visas (1) på landskapskortet i Utforska, (2) som en kort rad efter varje rätt svar i träningen
+(stad · blomma · djur, eller en "Visste du?" om rang i yta/invånare), (3) som egna frågor i de svårare stegen.
+"Sjöar och städer senare" gäller egna delar i Sverige (t.ex. Sveriges sjöar), inte faktan per landskap.
+
 **Test.** Utan klocka. Blandat ur det man tränat; resultatet visas på kartan (grönt/gult) och som kvitto med
 "Sett av en vuxen".
 
