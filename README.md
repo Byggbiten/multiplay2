@@ -22,8 +22,8 @@ python3 ~/multiplay-dev-server.py          # om den inte redan är igång
 **Mockuper** i `design-lab/`:
 
 ```bash
-python3 -m http.server 5420                # i repots rot
-# dator: http://127.0.0.1:5420/design-lab/<fil>.html   telefon: https://macbook-pro.tail3c8e5a.ts.net:8446/design-lab/<fil>.html
+python3 -m http.server 5420                # i design-lab/
+# dator: http://127.0.0.1:5420/<fil>.html   telefon: https://macbook-pro.tail3c8e5a.ts.net:8446/<fil>.html
 ```
 
 **Större ändring** — tagg före, egen gren, merge utan snabbspolning:

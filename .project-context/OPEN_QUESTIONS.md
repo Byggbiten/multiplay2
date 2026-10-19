@@ -42,4 +42,4 @@ aldrig. Nya frågor får nästa P-nummer.
 
 ## Besvarade
 
-- Inga än.
+<!-- inga besvarade än -->

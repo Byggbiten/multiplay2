@@ -67,7 +67,7 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 - Dev-spegeln synkas med
   `rsync -a --delete --exclude '.git' --exclude 'node_modules' --exclude '.claude' --exclude 'design-lab' ./ ~/multiplay-dev/`
   och serveras på `:5312` (`~/multiplay-dev-server.py`), på telefon via `https://macbook-pro.tail3c8e5a.ts.net:8445`.
-- Mockuper i `design-lab/` serveras på `:5420` (`python3 -m http.server 5420` i repots rot), på telefon `:8446`.
+- Mockuper i `design-lab/` serveras på `:5420` (`python3 -m http.server 5420` i `design-lab/`), på telefon `:8446`.
 - Tester: `npx vitest run`. Hela sviten ska vara grön före varje commit som rör kod.
 - Webbläsarpanelens koordinatklick hamnar fel under emulering — driv den med `element.click()`. UI-test i
   iOS-simulatorn sker som PWA på iPhone 17e.
