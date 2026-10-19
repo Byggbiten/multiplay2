@@ -257,7 +257,7 @@ const ClockGame = (() => {
     #clock-root .ck-opts.one .ck-opt{min-height:46px;font-size:16px}
     #clock-root .ck-opt:active{transform:scale(.96)}
     #clock-root .ck-opt.ok{background:#dcfce7;border-color:#22c55e}
-    #clock-root .ck-opt.bad{background:#fee2e2;border-color:#ef4444}
+    #clock-root .ck-opt.bad{background:#fff3e6;border-color:#fdba74}
     #clock-root .ck-opt:disabled{cursor:default}
     #clock-root .ck-setrow{display:flex;justify-content:space-between;gap:8px}
     #clock-root .ck-setrow .grp{flex:1;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:3px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)}
@@ -354,7 +354,7 @@ const ClockGame = (() => {
     #clock-root .ck-logcard .history-icon svg{width:22px;height:22px;color:var(--accent)}
     #clock-root .ck-stampmini{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:2px 9px 2px 6px;border:2px solid #16a34a;border-radius:8px;color:#15803d;font-size:11.5px;font-weight:900;white-space:nowrap;transform:rotate(-2deg);background:rgba(220,252,231,.6)}
     #clock-root .ck-stampmini svg{width:14px;height:14px}
-    #clock-root .c-ok{color:#16a34a}#clock-root .c-mid{color:#d97706}#clock-root .c-err{color:#dc2626}
+    #clock-root .c-ok{color:#16a34a}#clock-root .c-mid{color:#d97706}#clock-root .c-err{color:#c2410c}
 
     /* v64: de tre representationerna, summan i marginalen och betoningen */
     #clock-root .ck2{position:relative}
@@ -1634,7 +1634,7 @@ const ClockGame = (() => {
       <div class="rc-row"><span>Steg</span><b>${s ? `${s.n}. ${s.name}` : ''}</b></div>
       <div class="rc-rounds">${e.rounds.map((t, k) => `<span class="rv">${svg('check')}<em>${k + 1}.</em> ${CL.RNAME[t]}</span>`).join('')}</div>
       <div class="rc-row"><span>Rätt på första försöket</span><b>${e.correct} av ${e.total}</b></div>
-      <div class="rc-row"><span>Fel som rättades</span><b>${e.fixed}</b></div>
+      <div class="rc-row"><span>Blev rätt på nytt försök</span><b>${e.fixed}</b></div>
       <div class="rc-row"><span>Tid</span><b>${SH.durTxt(e.secs)}</b></div>`;
   }
   const stampHTML = iso => `<span class="st-in">${svg('check')}<span class="st-tx"><b>Sett av en vuxen</b><small>${SH.fmtStamp(iso)}</small></span></span>`;
@@ -1938,7 +1938,7 @@ const ClockGame = (() => {
             <div class="result-pct num">${pct}%</div>
             <div class="result-medal">${emoji}</div>
             <div class="result-msg">${msg}</div>
-            <div class="result-note">${totalCorrect} av ${total} rätt · ${type === 'analog' ? 'Analog' : 'Digital'} klocka</div>
+            <div class="result-note">${SH.resultNote(totalCorrect, total)} · ${type === 'analog' ? 'Analog' : 'Digital'} klocka</div>
             <div class="result-actions">
               <button class="btn btn-primary" onclick="ClockGame.startTestWithType('${type}')">Spela igen ${icn('reset')}</button>
               <button class="btn btn-ghost" data-act="hub">Till trappan</button>
@@ -1947,9 +1947,9 @@ const ClockGame = (() => {
           <div class="card ck-detail">
             <div class="card-title">${icn('stats')} Detaljresultat</div>
             <div class="ck-sec">Del 1 · Läsa klockan</div>
-            ${part1.slice(0, 5).map(r => `<div class="stat-row"><span class="num">${colorizeTimeText(`${p2(r.h)}:${p2(r.m)}`)}</span><span class="${r.correct ? 'c-ok' : 'c-err'}">${r.correct ? '✓' : '✗'} ${colorizeTimeText(testText(type, r))}</span></div>`).join('')}
+            ${part1.slice(0, 5).map(r => `<div class="stat-row"><span class="num">${colorizeTimeText(`${p2(r.h)}:${p2(r.m)}`)}</span><span class="${r.correct ? 'c-ok' : 'c-err'}">${r.correct ? '✓' : '○'} ${colorizeTimeText(testText(type, r))}</span></div>`).join('')}
             <div class="ck-sec">Del 2 · Ställa klockan</div>
-            ${part2.slice(0, 5).map(r => `<div class="stat-row"><span>${colorizeTimeText(testText(type, r))}</span><span class="${r.correct ? 'c-ok' : 'c-err'}">${r.correct ? '✓ Rätt' : `✗ ${colorizeTimeText(`${p2(r.setH)}:${p2(r.setM)}`)}`}</span></div>`).join('')}
+            ${part2.slice(0, 5).map(r => `<div class="stat-row"><span>${colorizeTimeText(testText(type, r))}</span><span class="${r.correct ? 'c-ok' : 'c-err'}">${r.correct ? '✓ Rätt' : `Du ställde ${colorizeTimeText(`${p2(r.setH)}:${p2(r.setM)}`)}`}</span></div>`).join('')}
           </div>
         </div>
       </div>`;

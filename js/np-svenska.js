@@ -13,6 +13,7 @@ const NpSvenska = (() => {
   let score     = 0;
   let answers   = [];     // [{category, correct, givenAnswer, correctAnswer}]
   let attempts  = 0;      // Försök för aktuell fråga
+  let hmmQ      = false;  // D39: felljudet har spelats för aktuell fråga
   let orderSelected = []; // Ordna-händelser: vald ordning
   let multiSelected = new Set(); // Multi-choice: valda index
   let isReadMode = false; // Visar texten i fullskärm
@@ -91,7 +92,7 @@ const NpSvenska = (() => {
       }
       .svk-choice:hover { background:var(--tint); border-color:var(--accent); }
       .svk-choice.correct { background:#d1fae5; border-color:#059669; color:#065f46; }
-      .svk-choice.wrong   { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
+      .svk-choice.wrong   { background:#fff3e6; border-color:#fdba74; color:#9a3412; }  /* D39: persika, inte rött */
       .svk-choice.disabled { pointer-events:none; opacity:0.6; }
 
       /* Sammanfattningskort */
@@ -103,7 +104,7 @@ const NpSvenska = (() => {
       }
       .svk-summary-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px var(--glow); }
       .svk-summary-card.correct { border-color:#059669; background:#d1fae5; }
-      .svk-summary-card.wrong   { border-color:#ef4444; background:#fee2e2; }
+      .svk-summary-card.wrong   { border-color:#fdba74; background:#fff3e6; }
       .svk-card-label {
         font-size:11px; font-weight:900; color:var(--accent);
         letter-spacing:0.08em; margin-bottom:4px;
@@ -121,7 +122,7 @@ const NpSvenska = (() => {
       .svk-order-event:hover:not(.placed) { background:var(--tint); }
       .svk-order-event.placed { background:var(--tint); border-color:var(--accent-light); opacity:0.7; cursor:default; }
       .svk-order-event.correct { background:#d1fae5; border-color:#059669; }
-      .svk-order-event.wrong   { background:#fee2e2; border-color:#ef4444; }
+      .svk-order-event.wrong   { background:#fff3e6; border-color:#fdba74; }
       .svk-order-slot {
         background:rgba(255,255,255,0.7); border:2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
         border-radius:10px; padding:9px 12px; min-height:40px;
@@ -144,7 +145,7 @@ const NpSvenska = (() => {
       }
       .svk-multi-item.selected { background:var(--tint); border-color:var(--accent); }
       .svk-multi-item.correct  { background:#d1fae5; border-color:#059669; color:#065f46; }
-      .svk-multi-item.wrong    { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
+      .svk-multi-item.wrong    { background:#fff3e6; border-color:#fdba74; color:#9a3412; }
 
       /* Canvas */
       .svk-canvas-strip {
@@ -168,7 +169,7 @@ const NpSvenska = (() => {
         border-radius:0; flex-shrink:0;
       }
       .svk-feedback.correct { background:#d1fae5; color:#065f46; }
-      .svk-feedback.wrong   { background:#fee2e2; color:#991b1b; }
+      .svk-feedback.wrong   { background:#fff3e6; color:#9a3412; }
 
       /* Read mode */
       .svk-read-screen {
@@ -250,7 +251,7 @@ const NpSvenska = (() => {
         font-size:13px; font-weight:700;
       }
       .svk-result-row.ok  { background:#d1fae5; color:#065f46; }
-      .svk-result-row.bad { background:#fee2e2; color:#991b1b; }
+      .svk-result-row.bad { background:#fff3e6; color:#9a3412; }
 
       /* Knapp – följer .btn-familjen visuellt */
       .svk-btn {
@@ -415,7 +416,7 @@ const NpSvenska = (() => {
 
   function renderQuestion() {
     inputLocked = false;
-    attempts = 0;
+    attempts = 0; hmmQ = false;
     orderSelected = [];
     multiSelected = new Set();
 
@@ -539,7 +540,7 @@ const NpSvenska = (() => {
         scheduleNext();
       } else {
         btn.classList.add('disabled');
-        showFeedback(false, 'Försök igen!');
+        showFeedback(false, 'Inte riktigt – försök igen');
         inputLocked = false;
       }
     }
@@ -585,7 +586,7 @@ const NpSvenska = (() => {
         if (c.querySelector('.svk-card-text').textContent === goodText) c.classList.add('correct');
       });
       recordAnswer(false);
-      showFeedback(false, 'Nja! En bra sammanfattning har det viktigaste OCH hur personerna känner sig.');
+      showFeedback(false, 'Inte riktigt. En bra sammanfattning har det viktigaste OCH hur personerna känner sig.');
       scheduleNext(2500);
     }
   }
@@ -689,9 +690,9 @@ const NpSvenska = (() => {
       showFeedback(true);
       scheduleNext();
     } else {
-      slots.forEach(s => s.style.background = '#fee2e2');
+      slots.forEach(s => s.style.background = '#fff3e6');
       recordAnswer(false);
-      showFeedback(false, 'Inte rätt ordning. Rätt ordning: ' + correctOrder.map(i => eventTexts[i]).map((t,n) => `${n+1}. ${t}`).join(' → '));
+      showFeedback(false, 'Inte riktigt – så här är ordningen: ' + correctOrder.map(i => eventTexts[i]).map((t,n) => `${n+1}. ${t}`).join(' → '));
       scheduleNext(3000);
     }
   }
@@ -831,13 +832,13 @@ const NpSvenska = (() => {
       fb.textContent = msg;
     } else {
       fb.className = 'svk-feedback ' + (correct ? 'correct' : 'wrong');
-      fb.textContent = correct ? '✅ Rätt!' : '❌ Fel!';
+      fb.textContent = correct ? '✅ Rätt!' : 'Inte riktigt – titta på det gröna';
     }
     if (correct) {
       App.Sound.play('correct');
       if (typeof App.Confetti !== 'undefined') App.Confetti.burst({ count: 45 });
-    } else {
-      App.Sound.play('wrong');
+    } else if (!hmmQ) {
+      hmmQ = true; App.Sound.play('wrong');   // D39: felljudet en gång per fråga
     }
   }
 
@@ -875,12 +876,12 @@ const NpSvenska = (() => {
           <div class="result-medal" style="font-size:3rem">${stars}</div>
           <div class="result-pct num" style="font-size:clamp(40px,8vw,64px)">${score} av 17</div>
           <div class="result-note">
-            ${score === 17 ? 'Perfekt! Du är en stjärna! 🎉' : score >= 13 ? 'Bra jobbat! 💪' : 'Fortsätt öva! 📚'}
+            ${score === 17 ? 'Perfekt! Du är en stjärna! 🎉' : score >= 13 ? 'Bra jobbat! 💪' : 'Bra kämpat! 📚'}
           </div>
         </div>
         ${answers.map(a => `
           <div class="svk-result-row ${a.correct ? 'ok' : 'bad'}">
-            <span>${a.correct ? '✅' : '❌'}</span>
+            <span>${a.correct ? '✅' : '○'}</span>
             <span style="flex:1">${esc(a.category)}</span>
           </div>
         `).join('')}
@@ -1234,7 +1235,7 @@ const NpSvenska = (() => {
           <div style="display:flex;flex-direction:column;gap:6px">
             ${(entry.answers || []).map(a => `
               <div class="svk-result-row ${a.correct ? 'ok' : 'bad'}">
-                <span>${a.correct ? '✅' : '❌'}</span>
+                <span>${a.correct ? '✅' : '○'}</span>
                 <span>${esc(a.category)}</span>
               </div>`).join('')}
           </div>

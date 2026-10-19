@@ -60,7 +60,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
-- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt
+- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
+- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör
 
 ---
 
@@ -445,7 +446,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ändras inte. Källa: Dennis: "Försök att följa testens struktur för att lösa problemen och ställa upp talen." och "det
   vi gör nu om det avviker från multiplays sätt att ställa upp och lösa tal i övrigt skall bara ske isolerat i detta
   matteprov. vi ändrar inte hela appen i övrigt".
-- ✎ **2026-10-19, minst lika svårt:** provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
+- ✎ **2026-10-19, minst lika svårt** (*ändrat av D38 ✎ "frågan per rad": appen får vara något lättare än provet; talens storlek och typer ligger kvar på Svårare-nivå*): provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
   bladets nivå eller strax över. Lättare/Svårare finns kvar som trappsteg i övningen. Källa: Dennis: "viktigt är att
   vårt prov vi bygger nu inte är lättare än underlaget. Det skall vara 'lika svårt' och om det måste gå åt något håll,
   så får det vara lite svårare. Bättre att hon får jobba lite extra i appen och sedan glänsa på provet".
@@ -493,3 +494,27 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - ✎ **2026-10-19, ångra och gör om i kladden:** kladden får Ångra och Gör om i flera steg (per penn- och suddrag;
   Rensa går att ångra). Källa: Dennis: "sen vill jag har en ångra-knapp på kladdytan. Så om de råkar rita tokigt, så
   kan de ångra i flera steg. även en återgå knapp som funkar precis som ångra, fast åt andra hållet i flera steg."
+
+## D39 · 2026-10-19 · Snällare app: ljud, färger och ord som inte säger misslyckande
+- **Beslut:** appen ska vara snällare mot barn som är känsliga för att misslyckas. Inget argt felljud, inga
+  signalfärger som säger "fel" (rött), och ord som "Inte riktigt" i stället för "fel". Felljudet byts i hela appen.
+  Gränssnittet ska vara så tydligt att barnet inte trycker på fel knapp: i tabelltestet var Klar den framträdande
+  knappen fast den rättar hela testet, och tomma rutor räknades som fel.
+- **Källa:** Dennis 2026-10-19: "Jag klickade på klar. och fick 1 av 20 rätt. jag trodde att det va knappen man skulle
+  trycka på. Och möttes då av ett ljud som arg signalerade att jag gjorde fel. Sånt är [barnet] väldigt känslig för.
+  Ljud och färger som på något sätt indikerar att hon har misslyckats eller gjort fel. Så appen måste bli snällare och
+  använda formuleringar såsom.. inte riktigt... Men just i detta fall så är det nog vårt UI som inte va tydligt nog."
+- ✎ **2026-10-19, en knapp som byter namn:** i lägen med flera rutor finns en enda knapp; den heter Nästa och går
+  till nästa tomma ruta, och blir Klar när allt är ifyllt; suddas en ruta tom heter den Nästa igen. Källa: Dennis:
+  "Kan man inte bara göra så då att 'nästa ruta-knappen' är den enda knappen, och när allt ä ifyllt så ändras den
+  till att heta klar. Och om man innan trycker på klar, ändrar eller suddar något, så går den tillbaka till att heta
+  nästa ruta?"
+- ✎ **2026-10-19, problemlösningen i ledda steg:** i stället för ett tomt uttrycksfält fyller barnet en mall per steg
+  (Vad kostar 5 bollar? [ ] · [ ] = [ ], sedan [ ] − [ ] = [ ]); prislistan går att trycka på; uttrycket visas sist
+  som slutsats. Källa: Dennis: "Den här övningsdelen behöver lite pedagogisk kärlek i hur man skall skriva och hur
+  man skall svara."
+- ✎ **2026-10-19, resultatraden:** från 60 % rätt: "Du klarade 7 av 10 – Bra kämpat! 💪"; alla rätt: "Du klarade alla
+  10!"; under 60 %: bara resultatet utan värdering, "Du fick 3 av 10 rätt". Gäller `MP.resultNote` och matteprovets
+  resultatrader. Källa: Dennis: "den formuleringen gillade jag inte. för vissa barn kanske 7 av 10 är helt
+  fantastiskt. då tycker jag: Resultat skrivs som 'Du klarade 7 av 10 – Bra kämpat! 💪' sen kommer man under 6 av 10
+  rätt så får man bara veta resultatet, utan någon värdering i det. Typ: Du fick 3 av 10 rätt" (emojin är hans val).

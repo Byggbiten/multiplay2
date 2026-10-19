@@ -315,7 +315,7 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
-## Matteprov 4:an (D37, ännu inte släppt)
+## Matteprov 4:an (v67–v68, D37, D38)
 
 Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet
 **Matteprov 4:an**. Det öppnar en lista med prov om multiplikation; nya prov läggs till efter hand. Första provet är
@@ -323,7 +323,8 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 
 ### Provsidan
 - **Lättare / Svårare** överst. Nivån gäller bara när barnet övar. **Provet är alltid på Svårare**, som det svårare
-  övningsbladet eller strax över, så att provet i skolan inte blir svårare än det som övats här.
+  övningsbladet eller strax över. Appen får ändå vara något lättare än skolans prov, eftersom den frågar efter
+  raderna i uppställningen och placerar svaren (D38 ✎).
 - **Öva på ett moment**: de fem momenten med senaste övningens resultat (grönt eller gult märke).
 - **Tabellsprint**: så många gångertal som barnet hinner på 4 minuter, högst 48. Ingår inte i provet. Tiden syns bara
   här. Resultatet visas på en skala (0–12, 13–24, 25–36, 37–48) och bästa resultatet sparas.
@@ -334,7 +335,8 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 ### Öva
 Varje moment börjar med **Så här gör du**: korta steg som barnet klickar fram (ett steg är en idé), eller hoppar över.
 Sedan kommer uppgifterna, med **kladden** under knappsatsen (rita, sudda, rensa; den töms vid ny uppgift). Knappsatsen
-är kompakt: siffrorna i två rader om fem och en rad med sudda, Nästa/Svara och Klar. Kladdens verktyg är ikoner:
+är kompakt: siffrorna i två rader om fem och en rad med sudda och en knapp i full bredd – Svara/Nästa medan
+raderna frågas, Klar först när summan ska skrivas (aldrig två svarsknappar samtidigt). Kladdens verktyg är ikoner:
 rita, sudda, **ångra**, **gör om** och rensa. Ångra och Gör om fungerar i flera steg, Rensa går att ångra, och ett nytt
 drag efter en ångring tömmer Gör om. På korta skärmar ligger verktygen i kladdens hörn.
 
@@ -344,8 +346,10 @@ vidare. Bitarna följer lösningsgången: tabellfaktumet för tiotal, uppdelning
 uppställningens summa (först additionens minnessiffror, sedan summans två högra siffror; raderna har en egen trappa,
 se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
 
-1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Knappen Nästa hoppar till nästa ruta; Klar rättar
-   och ger antal rätt av 20. De tal som blev fel kan nötas efteråt.
+1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Bredvid sudda finns **en enda knapp**: den heter
+   **Nästa tal** och hoppar till nästa tomma ruta, och när alla 20 är ifyllda byter den till **Klar** och rättar.
+   Suddas en ruta tom heter den Nästa tal igen (D39 ✎). Tomma rutor rättas aldrig. Tal som inte satt direkt kan
+   nötas efteråt. Samma enda knapp ("Nästa ruta" / "Klar") finns i alla lägen med flera rutor.
 2. **Gånger tiotal och hundratal**: som på bladet, med "="-rader. `8 · 40 = 8 · 4 tiotal`, sedan `= [32] tiotal` och
    `= [320]`. Fällan `50 · 60 = 5 · 6 hundratal = 30 hundratal = 3000` (tabellsvaret har redan en nolla) får en egen
    förklaring.
@@ -366,17 +370,28 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
      Radsumman rättas i båda. Siffrorna som räknas lyser.
    - **Summan** skriver barnet själv, en ruta i taget från höger; siffran hamnar i rutan med fokus. Tankeraden visar
      en kolumn i taget ("Tiotalet: 5 + 2"), i provet bara "kolumn för kolumn".
-   - Additionens minnessiffror skrivs i de röda rutorna ovanför raderna; de visas när summan låses upp.
+   - Additionens minnessiffror skrivs i de lila rutorna ovanför raderna; de visas när summan låses upp.
    - Vid fel i summan säger appen om en minnessiffra glömdes eller om additionen blev fel.
    Allt detta finns bara i matteprovet; Multiplikationens nivå 1–4 skriver som förut.
-5. **Problemlösning i två steg**: en prislista med sex saker. Barnet **skriver först uttrycket** med knapparna · + och −
-   (till exempel `200 − 6 · 28`), och räknar det sedan rad för rad, gånger först. Svårare har växel och omvända
-   uppgifter ("hur många poäng gav den sista domaren?"). Räkneordningsuppgifterna har uttrycket givet.
+5. **Problemlösning i steg** (D39 ✎): appen delar upp frågan i steg, och varje steg är en fråga med rutor:
+   "Steg 1: Vad kostar 5 bollar?" `[ ] · [ ] = [ ]`, "Steg 2: Hur mycket får … tillbaka?" `[ ] − [ ] = [ ]`. Två köp har
+   tre steg (varje sak, sedan tillsammans), den omvända domaruppgiften två, och räkneordningen "Gånger först" och sedan
+   plus eller minus. Prislistan går att trycka på (priset skrivs i rutan med fokus), och svaret från ett tidigare steg
+   också. Nästa steg visas först när det förra stämmer. Varje steg rättas när barnet trycker **Svara**, i Öva och i
+   provet: försök igen (tyst), sedan står talen i rutorna, sedan svaret. Sist visas slutsatsen med uttrycket, till
+   exempel "Uttrycket blir 200 − 5 · 28 = 60 kr". Knappsatsen har inga räknetecken; tecknen står i mallen.
 
 ### Provet och kvittot
 Provet går igenom momenten i ordning, utan klocka. Det säger rätt eller fel per uppgift och har hjälptrappan (D38).
-Tabelltestet rättas med Klar; de röda talen får rättas en gång till, sedan visas svaren. Kvittot visar per moment
-**rätt direkt**, **rätt med hjälp** och **fick svaret**; grönt (**Klart**, minst 75 %) räknar bara rätt direkt.
+Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange och tomma, med det
+gamla svaret svagt överstruket bredvid ("Du har 17 klara. Titta en gång till på de orange."). De fylls i igen med
+samma knapp, och sedan visas svaren lugnt i grått. Kvittot visar per
+moment **Klarade direkt**, **Klarade med hjälp** och **Övar vi mer på**; grönt (**Klart**, minst 75 %) räknar bara
+klarade direkt.
+
+**Snällt (D39):** inget rött som betyder fel (milt orange för "inte riktigt ännu", grönt för rätt), ord som "Inte
+riktigt – försök igen" och "Nästan!", och första "försök igen" är tyst; felljudet (mjukt) kommer först vid andra
+försöket. Sprinten har inget felljud.
 Under kvittot: **Sett av en vuxen** (håll inne knappen), **Gör mitt prov** (när det finns något som var svårt) och
 **Öva på det som var svårt** (de gula momenten).
 

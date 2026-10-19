@@ -108,7 +108,7 @@ const GeoGame = (() => {
 #geo-root .gm[data-boxes] path.ls[data-b="kan"]{fill:var(--kan)}
 #geo-root .gm[data-boxes] path.ls[data-b="due"]{fill:var(--due)}
 #geo-root .gm .fx{pointer-events:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-#geo-root .gm .fx-bad{fill:rgba(239,68,68,.45);stroke:#dc2626;stroke-width:2.5px}
+#geo-root .gm .fx-bad{fill:rgba(148,163,184,.22);stroke:#64748b;stroke-width:3px;stroke-dasharray:1 5;stroke-linecap:round}  /* D39: neutral prickad grå – inte rött, inte bärnstenen (rätt plats), inte turkosa markeringen eller de streckade grannarna */
 #geo-root .gm .fx-ok{fill:rgba(34,197,94,.42);stroke:#15803d;stroke-width:2.5px}
 #geo-root .gm .fx-found{fill:none;stroke:#15803d;stroke-width:3px;animation:geo-foundring 1s ease-out both}
 #geo-root .gm .fx-blink{fill:rgba(245,158,11,.6);stroke:#b45309;stroke-width:3px;animation:geo-blink .42s ease-in-out 6 alternate}
@@ -124,7 +124,7 @@ const GeoGame = (() => {
 #geo-root .gm .mchip rect{fill:var(--deep)}
 #geo-root .gm .mchip text{font-family:var(--font-body);font-weight:900;font-size:13px;fill:#fff;text-anchor:middle;dominant-baseline:central}
 #geo-root .gm .mchip.k-ok rect{fill:#15803d}
-#geo-root .gm .mchip.k-bad rect{fill:#dc2626}
+#geo-root .gm .mchip.k-bad rect{fill:#475569}
 #geo-root .gm .mchip.k-ref rect{fill:#fff;stroke:var(--accent);stroke-width:1.5px}
 #geo-root .gm .mchip.k-ref text{fill:var(--deep)}
 #geo-root .gm .mchip.k-home rect{fill:#dc2626}
@@ -303,7 +303,7 @@ const GeoGame = (() => {
   border:2px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);transition:transform .2s var(--spring),background-color .25s,border-color .25s}
 #geo-root .opt:active{transform:scale(.96)}
 #geo-root .opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
-#geo-root .opt.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+#geo-root .opt.bad{background:#fff3e6;border-color:#fdba74;color:#9a3412}
 #geo-root .shake{animation:geo-shake .4s ease-in-out}
 #geo-root .dn-head{display:flex;flex-direction:column;align-items:center;text-align:center;flex-shrink:0}
 #geo-root .dn-star{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 8px 20px rgba(245,158,11,.35);animation:geo-pop .6s var(--spring)}
@@ -1376,7 +1376,8 @@ const GeoGame = (() => {
       const it = PL.cur, M = MAPS.play, t = it.nr, tok = token;
       if (PL.isTest){ testWrong(g); return; }
       const r = PL.drill.answer(false); if (r.record) recordAnswer(t, false);
-      PL.wrongs++; snd('wrong');
+      if (!PL.wrongs) snd('wrong');   // D39: felljudet en gång per uppgift
+      PL.wrongs++;
       M.clearChips(); M.unfx(null, 'bad'); M.unfx(null, 'ref');
       const outside = !PL.area.includes(g);
       const lead = isNear(t, g) ? 'Nästan rätt!' : 'Bra försök!';
@@ -1465,17 +1466,17 @@ const GeoGame = (() => {
     function enterTrainEnd(){
       setHeader('Bra tränat!');
       const s = PL.done.stats, nc = PL.newCards;
-      $('scr-trainend').innerHTML = `<div class="dn-head"><span class="dn-star">${svg('star')}</span><h2>${PL.upptack ? `${AREA_NAME[PL.cfg.area]} är upptäckt!` : 'Bra tränat!'}</h2><p>${s.wrongFirst ? 'Varje fel blev rätt till slut.' : 'Varje svar satt på första försöket.'}</p></div>
+      $('scr-trainend').innerHTML = `<div class="dn-head"><span class="dn-star">${svg('star')}</span><h2>${PL.upptack ? `${AREA_NAME[PL.cfg.area]} är upptäckt!` : 'Bra tränat!'}</h2><p>${s.wrongFirst ? 'Allt blev rätt till slut.' : 'Varje svar satt på första försöket.'}</p></div>
         <div class="gc sumcard">
           <div class="rc-row"><span>Läge</span><b>${MODE_NAME[PL.cfg.mode]}</b></div>
           <div class="rc-row"><span>Område</span><b>${AREA_NAME[PL.cfg.area]}</b></div>
           <div class="rc-row"><span>Rätt på första försöket</span><b>${s.firstOk} av ${s.asked}</b></div>
-          <div class="rc-row"><span>Fel som rättades</span><b>${s.wrongFirst}</b></div>
+          <div class="rc-row"><span>Blev rätt på nytt försök</span><b>${s.wrongFirst}</b></div>
           <div class="rc-row"><span>Pärmen</span><b class="${nc.length ? 'long' : ''}">${nc.length ? nc.map(x => `${NAME(x.nr)} ${LEVEL[x.lv]}`).join(', ') : 'Inga nya nivåer den här gången'}</b></div>
         </div>
         <div class="gc" style="flex:1;min-height:0;padding:10px;display:flex;align-items:center;justify-content:center;gap:12px">${miniMapArea(PL.area, true)}<div class="hublegend" style="grid-template-columns:1fr"><span><i style="background:var(--ovar)"></i>Övar</span><span><i style="background:var(--kan)"></i>Kan</span><span><i style="background:var(--due)"></i>Igen</span><span><i style="background:#fff"></i>Ny</span></div></div>
         <div class="duo"><button class="gb gb-s" id="g-teAgain">${svg('again')} Igen</button><button class="gb gb-p" id="g-teHub">Till landskapen ${svg('next')}</button></div>`;
-      ['Varje fel blev rätt till slut.', 'Varje svar satt på första försöket.', 'Inga nya nivåer den här gången'].forEach(t => SAID.add(t));
+      ['Allt blev rätt till slut.', 'Varje svar satt på första försöket.', 'Inga nya nivåer den här gången'].forEach(t => SAID.add(t));
       if (PL.capyEvent){ const ev = PL.capyEvent; PL.capyEvent = null; capy(ev); }
       $('teAgain').addEventListener('click', () => goto('play', { cfg:PL.cfg }));
       $('teHub').addEventListener('click', () => goto('hub'));

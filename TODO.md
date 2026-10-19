@@ -2,6 +2,9 @@
 
 ## Öppet
 
+- [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
+- [ ] P12: ska Multiplikationens nivå 4 följa skolans metod med nollan i den grå rutan? Ta upp med Dennis efter provet.
+- [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på en riktig telefon).
@@ -14,7 +17,8 @@
 
 ## Klart
 
-- [x] Matteprov 4:an med Matteprov 1 (D37, D38), live i v67 2026-10-19.
+- [x] Matteprov 4:an med Matteprov 1 (D37), live i v67 2026-10-19.
+- [x] Matteprovet runda 2–4 (D38: kladd, hjälptrappa, mitt prov, frågan per rad, ångra/gör om, en svarsknapp), live i v68 2026-10-19.
 
 - [x] 2026-10-19 ~~Geografi inbyggd i appen och livesatt~~ i v66 (D35, D36); integriteten rensad (D36).
 - [x] 2026-10-19 ~~P9: tio sammanslagna grenar på GitHub borttagna~~ (D23).

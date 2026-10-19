@@ -33,6 +33,20 @@ aldrig. Nya frågor får nästa P-nummer.
   hubben i v58. Kontrollerat 19/10: dess vyer finns inte kvar i `js/multiplication.js`. Kvar är loggens etikett
   "Eget prov" med ikonen 🎲 för gamla poster, och `runCustomSession`, som Fokuserad träning i Statistik använder.
 
+### Matteprovet
+
+- **P12 Skolans metod i resten av appen?** Matteprovet ställer upp tvåsiffrig faktor med nollan i den grå rutan
+  (läroboken i åk 4); Multiplikationens nivå 4 skriver rad 2 förskjuten utan nolla (en äldre bok). Dennis 19/10:
+  ändra bara i provet (D37 ✎). Öppet: ska nivå 4 senare följa skolans metod?
+
+### Snällare app (D39)
+
+- **P13 Klar efter en enda siffra i fria lägen.** I Räkna själv i multdiv och uppställningen räknas en siffra följd
+  av Klar som ett försök. En spärr (Klar först när alla rutor är ifyllda) skulle avslöja svarets längd. Öppet: spärr,
+  bekräftelse eller som nu?
+- **P14 Skakningar och röd puls.** Skak-animationerna vid fel svar finns kvar i flera moduler, och demon pulserar rött
+  vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
+
 ## Besvarade
 
 - ~~P11 Offentligt repo: personuppgifter i dokumenten och "Här bor du" för alla~~ → D36
