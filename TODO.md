@@ -8,8 +8,8 @@
       ändras, lådor/Capy/kvitto, tester, v66) → granskning → merge till `dev` → P11 avgjord → release.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
-- [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på Miras eller Dennis telefon).
-- [ ] P1: bygg en växel i kort-divisionsmockupen där faktan visas efter svaret i Räkna med hjälp, och låt Mira
+- [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på en riktig telefon).
+- [ ] P1: bygg en växel i kort-divisionsmockupen där faktan visas efter svaret i Räkna med hjälp, och låt ett barn
       pröva båda; Dennis dömer.
 - [ ] P4: förslag på hur prickraden i Öva förklarar romb och ring, och spärr mot två genomgångar i följd — som mockup.
 - [ ] P2, P3: ta upp med Dennis ("1 av 5 rätt"; Klart automatiskt efter ~3 s i hjälpläget, ingen "Klart"-text i

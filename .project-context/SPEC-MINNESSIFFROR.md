@@ -4,9 +4,9 @@
 
 Beslutad av Dennis 2026-07-03 ("bygg det"). Bakgrund: appen ska träna
 PAPPERSVANAN — minnessiffrans livscykel: skrivs liten → vilar → används
-→ STRYKS (aldrig suddas) → kvarstår som spår. Mira räknar rätt men
+→ STRYKS (aldrig suddas) → kvarstår som spår. Barnet räknar rätt men
 saknar strukturen; appen ska nöta in den. Källa: svensk standardmetodik
-(Mitt i Prick 4A, Matteboken, Eddler) + Dennis foto ur Miras bok.
+(Mitt i Prick, Matteboken, Eddler) + foto ur skolboken.
 
 ## Omfattning v30
 
@@ -19,8 +19,8 @@ saknar strukturen; appen ska nöta in den. Källa: svensk standardmetodik
 ## Visuell standard (BÅDA modulerna — identisk)
 
 - Klass `.mem-digit`: liten (~60 % av talstorlek), lätt roterad (−4°),
-  RÖD pennfärg (#dc2626-familj, AA-säkrad mot bakgrunden) — som i Miras
-  bok. Ersätter amber i minnes-sammanhang (amber kvar i bubbeltext-
+  RÖD pennfärg (#dc2626-familj, AA-säkrad mot bakgrunden) — som på
+  pappret. Ersätter amber i minnes-sammanhang (amber kvar i bubbeltext-
   färgning är ok, men själva siffrorna på "papperet" är röda).
 - `.mem-digit.used`: struken med animerat snett penndrag (SVG-linje med
   lätt vobbel, ritas på ~250 ms) + opacity 0.5. STÅR KVAR hela uppgiften.

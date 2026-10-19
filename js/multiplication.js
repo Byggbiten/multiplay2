@@ -840,7 +840,7 @@ const MultGame = (() => {
     for (let v = c + 1; cand.length < 3; v++) if (!cand.includes(v)) cand.push(v);   // bara 1 × 1 behöver detta
     // Båda sidor om svaret (annars räcker "välj minsta/största"), och fördelningen lottas:
     // ibland två under och ett över, ibland tvärtom. En fast fördelning gav svaret samma
-    // storleksplats varje gång (3:ans tabell: alltid näst störst) — Mira tryckte bara där.
+    // storleksplats varje gång (3:ans tabell: alltid näst störst) — testbarnet tryckte bara där.
     const lo = cand.filter(v => v < c), hi = cand.filter(v => v > c);
     const splits = [1, 2].filter(k => lo.length >= k && hi.length >= 3 - k);
     let pick;
@@ -1450,7 +1450,7 @@ const MultGame = (() => {
 
   /* ── Startskärmen för De svåra talen (v62): samma delar som tabellens startskärm ── */
   let HS = null;
-  /* Liten karta 6 × 6 över 3, 4, 6, 7, 8, 9. Varje par färgas efter Miras låda på en plats:
+  /* Liten karta 6 × 6 över 3, 4, 6, 7, 8, 9. Varje par färgas efter barnets låda på en plats:
      på och under diagonalen, samma triangel som lektionen lämnar kvar. Spegelrutan ovanför är tom. */
   function makeHardMap(el, cell = 24){
     el.innerHTML = '';
@@ -1556,7 +1556,7 @@ const MultGame = (() => {
     LS.on = true; LS.i = -1; LS.steps = shrinkSteps(n);
     $('scr-learn').classList.add('lesson');
     lessonMap = makeMap($('lessonMap'), n, LESSON_CELL[n]);
-    lessonMap.el.classList.add('neutral');              // neutrala rutor från start – inte Miras färger
+    lessonMap.el.classList.add('neutral');              // neutrala rutor från start – inte barnets färger
     lessonCount(n * n);
     refreshLearn();
     run(() => lessonStep(0));

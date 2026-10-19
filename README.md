@@ -1,6 +1,6 @@
-# Multiplay (miraskola)
+# Multiplay
 
-PWA där Mira tränar skolmatte. Vanilla JS utan byggsteg, live på https://byggbiten.github.io/multiplay2/ från
+PWA där barn tränar skolmatte. Vanilla JS utan byggsteg, live på https://byggbiten.github.io/multiplay2/ från
 grenen `main`; arbete sker på `dev`. Börja i `CLAUDE.md`. Användarmanual: `MANUAL.md`.
 
 ## Kommandon

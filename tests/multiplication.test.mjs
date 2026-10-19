@@ -822,7 +822,7 @@ describe('hemvyn (v60)', () => {
   });
 });
 
-/* Mira 23/9: rätt svar låg alltid nere till vänster i 3:ans tabell (sorterat + fast fördelning).
+/* Barntestet 23/9: rätt svar låg alltid nere till vänster i 3:ans tabell (sorterat + fast fördelning).
    Platsen på skärmen och storleksplatsen får aldrig avslöja svaret. */
 describe('flerval: platsen avslöjar inte svaret', () => {
   it('rätt svar hamnar på alla fyra platser, ingen plats över 40 % inom en tabell', () => {

@@ -2,15 +2,15 @@
 
 ## Vem och varför
 
-- Multiplay byggs av Dennis för ett barn, i dokumenten kallat Mira. Mira är också ett av appens generiska namn; efternamn, ort och skola skrivs aldrig i repot (D36). Appen är en PWA; mars-dokumentet nämner iPad
-  med Apple Pencil, och arbetet sedan september mäts i telefonformat 390 × 844. Capybara-samlingen kom från Mira och
-  Zeldas önskemål (juli 2026).
+- Multiplay byggs av Dennis. Mira är appens persona, ett påhittat barn i målgruppen 7–10 år, och ett av appens
+  generiska namn (CLAUDE.md, D36). Appen är en PWA; mars-dokumentet nämner iPad med Apple Pencil, och arbetet sedan
+  september mäts i telefonformat 390 × 844. Capybara-samlingen kom från barnens önskemål (juli 2026).
 - Dennis måttstock för all pedagogik (22/9, citerad i `SPEC-KORT-DIVISION.md`): barnen ska i minsta möjliga mån
   känna "vad hände nu och varför?". Appen är inte till för att sätta barnen på prov, utan för att genom repetition
   och visuell, logisk följd göra det självklart varför ett tal räknas ut på ett visst sätt.
-- Metoderna kommer ur Miras mattebok (Mitt i Prick 4A m.fl.) och Dennis egna bilder, till exempel subtraktionen som
+- Metoderna kommer ur skolboken (Mitt i Prick m.fl.) och Dennis egna bilder, till exempel subtraktionen som
   "en strid mellan försvararna som är överst och anfallarna som är nedan" (22/9).
-- Dennis dömer mot konkreta, klickbara mockuper, helst prövade av Mira på telefonen.
+- Dennis dömer mot konkreta, klickbara mockuper, helst prövade av ett barn på telefonen.
 
 ## Projekthistorik
 
@@ -37,9 +37,9 @@
 
 ## Arbetsvanor som fungerat
 
-- **Kedjan:** spec → klickbar mockup → Mira-test, gärna en agent som spelar barn → Dennis dömer → bygge på egen gren →
+- **Kedjan:** spec → klickbar mockup → barntest, gärna en agent som spelar barn → Dennis dömer → bygge på egen gren →
   verifiering i panelen → release. Kort division (D5) och gångertabellen (D9) gick hela vägen så.
-- **Barnrollspel hittar språkfel som kodgranskning missar.** En agent som spelar Mira (ett barn på mellanstadiet) och klickar igenom
+- **Barnrollspel hittar språkfel som kodgranskning missar.** En agent som spelar personan Mira (målgruppen 7–10 år) och klickar igenom
   alla lägen hittade "läs av brickan", den försvunna 42:an och knappar som svalde tryck.
 - **Textsvep som vakt.** Alla bubbeltexter genereras ur mallar och svepas i testerna mot språkreglerna
   (`tests/multdiv.test.mjs`, `tests/clock.test.mjs`).

@@ -31,7 +31,7 @@
    med multiplikationen (2/runda). Fritt läge: kvoten i miniräknar-
    fältet + glömd-rest-detektor (kvotsiffra = floor(siffra/divisor)
    utan rest-medföljning). Multiplikationens kedjor är ORÖRDA.
-   v36: DIVISIONENS LAYOUT = BRÅKSTRECKS-NOTATION per Miras mattebok
+   v36: DIVISIONENS LAYOUT = BRÅKSTRECKS-NOTATION per skolboken
    (Dennis bokfoto #2, 2026-07-05 — ersätter lodstrecks-varianten):
    täljaren överst (rest-prefix + strykbar), horisontellt bråkstreck,
    divisorn centrerad UNDER strecket, kvoten efter "=" till HÖGER
@@ -90,7 +90,7 @@ const MultDivGame = (() => {
   let exGen = 0; // session-token: ogiltigförklarar schemalagda uppgiftsbyten vid Avsluta
   let helpQueue = [], helpIdx = 0, helpSub = 0; // helpSub: alltid 0 sedan v30 (carry-knappen ersattes av PLACERA-fasen)
   let helpInput = '', exInputLocked = false;
-  /* Mira svarade fel sex ganger och fick "100 % — Perfekt! 🎉 — 5 av 5
+  /* Rollspelet svarade fel sex ganger och fick "100 % — Perfekt! 🎉 — 5 av 5
      ratt". helpTaskDone raknade poang villkorslost. Fria laget gjorde
      redan ratt (exFreeFirstAttempt); hjalplaget far samma sanning. */
   let helpTaskClean = true;
@@ -262,7 +262,7 @@ const MultDivGame = (() => {
 
     /* DIVISIONENS BRICKOR (spec §7, Dennis dom 23/9): faktabrickan är
        pillret 6 · 7 = 42; den strukna "för mycket"-raden är LÄSBAR —
-       full textkontrast med strecket, bara ramen tonad (Mira kunde inte
+       full textkontrast med strecket, bara ramen tonad (rollspelet kunde inte
        läsa mockupens). Kvotsiffran som flugit står kvar tonad i pillret. */
     .md-chip.md-fakta { gap:3px; min-width:0; padding:4px 9px; font-size:0.95rem; }
     .md-chip .md-cd.spent { opacity:0.35; }
@@ -387,7 +387,7 @@ const MultDivGame = (() => {
     @keyframes md-mem-blink { 0%,100% { transform:rotate(-4deg) scale(1); }
       50% { transform:rotate(-4deg) scale(1.45); } }
 
-    /* Kort division (v36): BRÅKSTRECKS-NOTATION per Miras mattebok —
+    /* Kort division (v36): BRÅKSTRECKS-NOTATION per skolboken —
        täljaren överst, horisontellt bråkstreck, divisorn centrerad
        UNDER strecket, kvoten efter "=" till HÖGER. flex-wrap ⇒
        "= kvoten" radbryter UNDER bråket på smala skärmar (390 px)
@@ -434,7 +434,7 @@ const MultDivGame = (() => {
       font-size:clamp(1rem,2.4vw,1.45rem); padding:0 3px; border-radius:6px;
       background:rgba(255,255,255,0.92); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
     .md-cell .md-divrem.on { display:inline-flex; }
-    /* Mira: "malet ar ungefar en halv siffra stort". Slotten i hjalplaget
+    /* Rollspelet: "malet ar ungefar en halv siffra stort". Slotten i hjalplaget
        ar det barnet ska TRAFFA, sa den ar storre an den fria lagets
        statiska ruta och har tjockare ram. Traffytan var redan >= 44. */
     .md-cell .md-divslot { position:absolute; top:-15px; left:-13px; z-index:4;
@@ -1065,7 +1065,7 @@ const MultDivGame = (() => {
     rows.push(`<strong>${rad(q)}</strong>`);
     rows.push(`<s>${rad(q + 1)}</s>`);
     const not = r > 0 ? `${q * N} får plats i ${cur}. ${(q + 1) * N} är för mycket.`
-                      : `${cur} går jämnt ut. ${(q + 1) * N} är för mycket.`;   // Mira: "Precis 6." laste hon om tre ganger
+                      : `${cur} går jämnt ut. ${(q + 1) * N} är för mycket.`;   // genomspelet: "Precis 6." lastes om tre ganger
     return `<span class="md-tr">${rows.join('<span class="md-trs"> · </span>')}</span><span class="md-trn">${not}</span>`;
   }
 
@@ -1803,7 +1803,7 @@ const MultDivGame = (() => {
      landar i högermarginalen i höjd med täljarraden. I fall D står den
      strukna `6 · 8 = 48` under den — läsbar (full textkontrast, bara
      ramen tonad) — tills kvotsiffran flyger; då tonar den, för valet är
-     gjort. Faktabrickan står kvar tills rest-steget är gjort (Mira:
+     gjort. Faktabrickan står kvar tills rest-steget är gjort (rollspelet:
      "42:an är borta — jag fick komma ihåg 42 i huvudet"); i fall C
      förbrukas den när siffran står. Restbrickan är röd — den blir den
      röda resten på pappret. Varje bricka bär ett serienummer så en
@@ -1941,7 +1941,7 @@ const MultDivGame = (() => {
      Nivå 4: p1-rad + p2-rad (förskjuten, + framför, position 0 TOM)
      + slutstreck + svarsrad. Fritt läge: inga delrader.
   ══════════════════════════════════════════════════════════ */
-  /* Kort division (v36): BRÅKSTRECKS-NOTATION per Miras mattebok —
+  /* Kort division (v36): BRÅKSTRECKS-NOTATION per skolboken —
      täljarsiffrorna i rad överst (platsvärdes-etikett ovanför, plats
      för rest-prefix + penndrags-strykning), horisontellt bråkstreck,
      divisorn centrerad UNDER strecket, " = " + kvotens rutor till
@@ -2349,7 +2349,7 @@ const MultDivGame = (() => {
       memAwait = { type: 'place', val: item.val, srcG: item.srcG };
       renderMemCol(); // nästa slot pulserar
       // B5: värdet sägs INTE — barnet väljer själv vilken siffra som åker upp
-      /* Samma klass som Miras "stryk den!" utan knapp: handlingen fanns
+      /* Samma klass som rollspelets "stryk den!" utan knapp: handlingen fanns
          men malet namndes aldrig. Sager nu VAR rutan ar. */
       helpBubble(`En siffra åker upp som minne — tryck på den streckade rutan ` +
                  `i minnesspalten till höger! 👉`);
@@ -2359,7 +2359,7 @@ const MultDivGame = (() => {
       memAwait = { type: 'strike', val: item.val, idx };
       renderMemCol(); // siffran pulserar
       /* "Stryk minnessiffran 1" sade inte att BARNET ska trycka — exakt
-         det ordvalet fick Mira att sitta och vanta i divisionen. */
+         det ordvalet fick rollspelet att sitta och vanta i divisionen. */
       helpBubble(`Minnessiffran <strong style="color:#dc2626">${item.val}</strong> är använd. ` +
                  `Tryck på den i spalten till höger för att stryka den! ✏️`);
     }
@@ -2538,8 +2538,8 @@ const MultDivGame = (() => {
     const ui = document.getElementById('md-ui');
     if (ui) ui.innerHTML = '';
     divStrikeAwait = { gs: [...item.gs], cur: item.cur };
-    /* Mira 23/9: "Tiotalet ar klart — tryck pa det" medan ENTALET lyste
-       (gloden fran flytten lag kvar). Hon tryckte pa den som lyste och
+    /* Genomspelet 23/9: "Tiotalet ar klart — tryck pa det" medan ENTALET lyste
+       (gloden fran flytten lag kvar). Barnet tryckte pa den som lyste och
        fick "Inte den". Prompten maste tanda det den pekar pa. */
     divLight(item.gs, null, null);
     helpBubble(divHelpAsk(item));
@@ -2807,7 +2807,7 @@ const MultDivGame = (() => {
   /* Vagen visas pa ETT stalle. Livlinan kostar en pollett; efter tredje
      felsvaret pa samma fraga visas samma sak GRATIS.
 
-     Mira, 90 ÷ 5: "Jag hade 0 kvar. Jag svarade fel, tryckte Livlina —
+     Rollspelet, 90 ÷ 5: "Jag hade 0 kvar. Jag svarade fel, tryckte Livlina —
      ingenting hande. Da finns det ingen vag framat alls. Man maste trycka
      Avsluta och forlora allt." Ett procedurlage far aldrig sakna utgang. */
   function visaVagen() {
@@ -2866,7 +2866,7 @@ const MultDivGame = (() => {
   function helpKey(k) {
     if (exInputLocked || helpSub !== 0) return;
     helpClearWrong();
-    /* Mira skrev 5, fick rott, tryckte 3 — och faltet visade 53. Ett
+    /* Rollspelet skrev 5, fick rott, tryckte 3 — och faltet visade 53. Ett
        underkant svar ar forbrukat: nasta siffra borjar om. */
     if (helpInputStale) { helpInputStale = false; helpInput = k; App.Sound.play('click'); helpRenderField(); return; }
     if (helpInput === '0') helpInput = k;
@@ -2951,7 +2951,7 @@ const MultDivGame = (() => {
     const field = document.getElementById('md-help-field');
     if (field) field.classList.add('wrong');
     helpShake();
-    /* Mira fick ordagrant samma mening fyra ganger i rad: "Hmm, prova
+    /* Rollspelet fick ordagrant samma mening fyra ganger i rad: "Hmm, prova
        igen!" — den sade aldrig VAD som var fel. Fran andra forsoket ger
        vi en riktning; fran tredje visas vagen, gratis. */
     const givet = parseInt(helpInput, 10);
@@ -3030,7 +3030,7 @@ const MultDivGame = (() => {
 
   function showFreeUI() {
     exFreeInit();
-    /* Mira, niva 2, 72 ÷ 3: "ingen text alls. Bara talet och en
+    /* Rollspelet, niva 2, 72 ÷ 3: "ingen text alls. Bara talet och en
        knappsats." Bubblan stod tom i hela fria laget, och de sma roda
        rest-rutorna mellan siffrorna sag ut som dekoration. EN rad: vad
        som ska skrivas, och att rest-rutorna finns om man vill anvanda
@@ -3488,13 +3488,13 @@ const MultDivGame = (() => {
     setTimeout(() => { c.querySelectorAll('.confetti-piece').forEach(p => p.remove()); }, 2500);
   }
 
-  /* Mira: "Uppgift 5 av 5, ett tryck, allt borta." En pabörjad runda ar
+  /* Rollspelet: "Uppgift 5 av 5, ett tryck, allt borta." En pabörjad runda ar
      upp till 20 minuters arbete; den far inte forsvinna pa ett felklick. */
   function avslutaOvning() {
     /* "Pabörjad" maste betyda ATT BARNET HAR GJORT NAGOT, inte bara att
        kon gatt framat. Uppmatt: med tre felsvar pa forsta fragan stod
        exerciseIdx, exScore och helpIdx alla pa 0, och Avsluta gick rakt
-       igenom — mitt i det lage Mira klagade pa. */
+       igenom — mitt i det lage rollspelet klagade pa. */
     const pabörjad = exerciseIdx > 0 || exScore > 0 || helpIdx > 0 ||
                      helpTries > 0 || exWrongAnswers > 0 || !helpTaskClean ||
                      (!helpMode && exFreeHasDigits()) ||

@@ -1,7 +1,12 @@
 # Multiplay
 
-En PWA där ett barn (i dokumenten Mira) tränar skolmatte: gångertabellen, klockan, uppställning, division, platsvärde,
-10-kompisar och nationella prov. Dennis bygger den åt henne; pedagogiken är det viktiga.
+En PWA där barn tränar skolmatte: gångertabellen, klockan, uppställning, division, platsvärde, 10-kompisar och
+nationella prov. Dennis bygger den; pedagogiken är det viktiga.
+
+**Personan (D36).** Mira är appens persona: ett påhittat barn i målgruppen (7–10 år). Fynd från riktiga barntester
+skrivs "barntestet" eller "testbarnet", utan namn, ålder, skola eller familj; fynd från en agent som spelar personan
+skrivs "rollspelet" ("genomspelet" när det inte går att se vilket). Mira och Zelda används annars bara som generiska
+namn i uppgifterna.
 
 - **Stack / drift / git:** vanilla JS (IIFE-moduler, inget byggsteg), `localStorage` per profil, service worker.
   Live på https://byggbiten.github.io/multiplay2/ (GitHub Pages) från grenen `main` i `Byggbiten/multiplay2`.

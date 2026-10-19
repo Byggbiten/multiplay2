@@ -72,7 +72,7 @@ filerna ännu; mockupen `design-lab/geografi-mockup.html` läser dem. Städerna 
   densamma med vilken som helst av siffrorna. Södermanland (8 388) och Västmanland (8 363) skiljer bara 25 km².
 - **SCB-filerna** (landskapens folkmängd, tätorterna) är inte öppnade direkt; värdena är lästa ur Wikipedia som
   återger dem.
-- **Vad skolböcker anger** för Stockholm, Södermanland och Öland är inte kontrollerat. Mira får lära sig det
+- **Vad skolböcker anger** för Stockholm, Södermanland och Öland är inte kontrollerat. Barnet får lära sig det
   skolan säger; jämför med läxboken.
 - **Blommor med två namn:** Dalarna (ängsklocka eller blåklocka), Härjedalen (mosippa eller fjällviol), Blekinge
   (ek, ibland kungsljus), Medelpad (gran, enstaka gånger smörboll). Filen följer NRM; alternativen står i

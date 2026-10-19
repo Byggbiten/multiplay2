@@ -2,7 +2,7 @@
    MULTIPLAY – Capybara-samlingen (window.Capy)  · FAS 4 steg 2, v34
 
    Belöningssystemet barnen önskat: 24 samlarkort med kawaii-
-   capybaror i utstyrslar (Mira & Zeldas direktiv 2026-07-03).
+   capybaror i utstyrslar (barnens önskemål 2026-07-03).
 
    Tre delar:
    1) KORTPOOLEN  – komponerbar SVG: EN gemensam bas-capybara
