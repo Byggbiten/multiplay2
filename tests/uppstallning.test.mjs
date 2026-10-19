@@ -7,7 +7,7 @@ const { planAdditionColumns } = require('../js/uppstallning.js').__test;
 /* Karakteriseringstestet mot den gamla stegkedjan (add_over9/add_explain/
    add_cross med compTo/memTo 'oversta') ar borttaget 21/9 tillsammans med
    legacy-grenen i planAdditionColumns. Det fanns for att kunna vanda
-   storsta-talet-regeln om Miras mattebok sa emot; Dennis slappte den fragan. */
+   storsta-talet-regeln om skolboken sa emot; Dennis slappte den fragan. */
 
 describe('storsta-talet-regeln', () => {
   const OPTS = { compTo: 'storsta', memTo: 'storsta' };
@@ -162,7 +162,7 @@ describe('hal A: termen ar redan 10 efter minnet', () => {
    Med memTo:'storsta' kan fallet inte uppstå: minnet gar alltid till den
    storsta siffran, sa memDigit blir aldrig 0 i en kolumn som gar over 9.
    Kravet byggs anda, for ADD_OPTS kan vandas tillbaka till 'oversta' om
-   Mitt i Prick 4A visar sig lara ut det oversta talet. Spec kap 7.2.       */
+   skolboken (Mitt i Prick) visar sig lara ut det oversta talet. Spec kap 7.2.       */
 describe('hal B: siffran minnet laggs pa ar 0', () => {
   const OPTS = { compTo: 'storsta', memTo: 'oversta' };
 

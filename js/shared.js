@@ -9,7 +9,7 @@
 
   const MP = {};
 
-  /* ── Retry-quiz (låst semantik, se RENOVERING.md) ──────
+  /* ── Retry-quiz (låst semantik, se PLAN-RENOVERING.md) ──────
      Varje item ställs i ordning. FÖRSTA försöket avgör poängen.
      Fel svar → samma item igen tills rätt. Med opts.endReview
      läggs fel-items dessutom EN gång sist som repetition
@@ -236,9 +236,13 @@
        läggs den sist. Extratillfället får aldrig ett eget extratillfälle.
      - answer() säger om svaret ska räknas (record): bara första försöket på
        varje ställd fråga, inklusive extratillfället – aldrig upprepningarna.
-     items: valfria objekt; varje post i kön är en kopia med id och extra. */
-  MP.createDrill = function (items, r) {
+     items: valfria objekt; varje post i kön är en kopia med id och extra.
+     opts.sameKey (v66, Geografi D34): en funktion item → nyckel. Med den hamnar extratillfället,
+     när det går, inte bredvid en fråga med samma nyckel (t.ex. samma landskap). Utan opts är
+     beteendet exakt som förut (Gångertabellen och Klockan skickar inget). */
+  MP.createDrill = function (items, r, opts) {
     r = r || Math.random;
+    const sameKey = opts && typeof opts.sameKey === 'function' ? opts.sameKey : null;
     const q = items.map((it, i) => ({ ...it, id:i, extra:false }));
     const hasExtra = new Set();
     let idx = 0, retry = false;
@@ -257,7 +261,15 @@
           if (!slot.extra && !hasExtra.has(slot.id)){
             hasExtra.add(slot.id);
             const lo = idx + 3, hi = q.length;            // insättningsindex: två andra frågor emellan
-            insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
+            if (sameKey) {
+              const k = sameKey(slot), okPos = [];
+              for (let p = Math.min(lo, hi); p <= hi; p++) {
+                if ((p - 1 <= idx || sameKey(q[p - 1]) !== k) && (p >= q.length || sameKey(q[p]) !== k)) okPos.push(p);
+              }
+              insertedAt = okPos.length ? okPos[Math.floor(r() * okPos.length)] : (lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1)));
+            } else {
+              insertedAt = lo >= hi ? hi : lo + Math.floor(r() * (hi - lo + 1));
+            }
             q.splice(insertedAt, 0, { ...slot, extra:true });
           }
         }
@@ -268,6 +280,24 @@
       stats(){ return { ...st }; },
       queue(){ return q.map(x => ({ ...x })); },
     };
+  };
+
+  /* ── Blandad ordning utan klumpar (v66, Geografi D34) ──
+     Lottar om items tills (a) ingen post står bredvid en post med samma nyckel och (b) ordningen
+     skiljer sig från förra gången med samma memoKey. Returnerar en NY array; items rörs inte.
+     opts: { key(item) → nyckel, sig(item) → id för jämförelsen, memo:{} (minnet), memoKey, r, tries }.
+     Går villkoren inte att uppfylla efter tries försök används sista lottningen. */
+  MP.spreadShuffle = function (items, opts) {
+    opts = opts || {};
+    const r = opts.r || Math.random, key = opts.key || (x => x), sig = opts.sig || key;
+    const memo = opts.memo || null, memoKey = opts.memoKey || '', tries = opts.tries || 300;
+    const shuf = arr => { const o = arr.slice(); for (let i = o.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
+    const adj = o => o.some((x, i) => i > 0 && key(x) === key(o[i - 1]));
+    const sigOf = o => o.map(x => String(sig(x))).join('|');
+    let o = shuf(items);
+    for (let t = 0; t < tries && (adj(o) || (memo && items.length > 2 && sigOf(o) === memo[memoKey])); t++) o = shuf(items);
+    if (memo) memo[memoKey] = sigOf(o);
+    return o;
   };
 
   /* ── Kvittot efter ett övningspass (v63: utbrutet ur multiplication.js) ──

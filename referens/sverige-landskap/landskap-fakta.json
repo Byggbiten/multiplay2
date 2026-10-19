@@ -1,0 +1,2954 @@
+{
+  "_om": {
+    "vad": "Faktaunderlag för Sveriges landskap i Multiplay (Geografi → Sverige → Sveriges landskap). Nyckel = läxbokens nummer 1–25.",
+    "framtaget": "2026-10-19",
+    "regler": "Se referens/sverige-landskap/README.md: källor, tumregeln för städerna, licenser och det som inte gick att belägga.",
+    "bilder_ligger": "Bilderna ligger sedan v66 i assets/geografi/sverige/; sökvägarna i bilder är relativa den mappen. Appens data: js/geografi-data.js (genererad med gen-geografi-data.py)."
+  },
+  "landskap": {
+    "1": {
+      "nr": 1,
+      "namn": "Lappland",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Kiruna",
+        "tatort_scb": null,
+        "folkmangd": 17284,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Gällivare",
+        "tatort_scb": null,
+        "folkmangd": 12385,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Kiruna. Gällivare är 72 % av Kirunas storlek och kommer med enligt halvregeln. Övriga: Lycksele 8 580. (Kiruna 17 284, Gällivare 12 385)",
+      "blomma": "Fjällsippa",
+      "blomma_not": null,
+      "djur": "Fjällräv",
+      "djur_not": null,
+      "yta_km2": 109702,
+      "yta_rang": 1,
+      "invanare": {
+        "antal": 87279,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 21,
+      "visste_du": [
+        {
+          "text": "Lappland är Sveriges största landskap. Det är ungefär en fjärdedel av hela Sverige.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Lappland%2C_Sverige",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Sveriges högsta fjäll, Kebnekaise, ligger i Lappland.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Lappland%2C_Sverige",
+            "datum": "2026-10-19",
+            "avser": "avsnittet om geografi: \"Den högsta punkten är Kebnekaises sydtopp, vilken också är Sveriges högsta fjälltopp\""
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/1-Lappland.svg",
+        "blomma": "blommor/1-Lappland.jpg",
+        "djur": "djur/1-Lappland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Kiruna",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/G%C3%A4llivare",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "2": {
+      "nr": 2,
+      "namn": "Norrbotten",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Luleå",
+        "tatort_scb": null,
+        "folkmangd": 49646,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Luleå. Piteå är 48 % av Luleå, strax under halvregeln och under 50 000; därför ingen andra stad. (Luleå 49 646, Piteå 23 824)",
+      "blomma": "Åkerbär",
+      "blomma_not": null,
+      "djur": "Lavskrika",
+      "djur_not": null,
+      "yta_km2": 26671,
+      "yta_rang": 5,
+      "invanare": {
+        "antal": 195572,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 14,
+      "visste_du": [
+        {
+          "text": "Norrbotten fick sitt landskapsvapen 1995 – sist av alla Sveriges landskap.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Norrbotten",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Norrbotten är det femte största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/2-Norrbotten.svg",
+        "blomma": "blommor/2-Norrbotten.jpg",
+        "djur": "djur/2-Norrbotten.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Lule%C3%A5",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "3": {
+      "nr": 3,
+      "namn": "Västerbotten",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Umeå",
+        "tatort_scb": null,
+        "folkmangd": 94243,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Umeå. Skellefteå är 42 % av Umeå och under 50 000. (Umeå 94 243, Skellefteå 39 146)",
+      "blomma": "Kung Karls spira",
+      "blomma_not": "Wittrock skrev kungsspira.",
+      "djur": "Storspov",
+      "djur_not": null,
+      "yta_km2": 15093,
+      "yta_rang": 9,
+      "invanare": {
+        "antal": 237606,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 12,
+      "visste_du": [
+        {
+          "text": "Umeå i Västerbotten är den största staden i hela Norrland.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Ume%C3%A5",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur tätorternas folkmängd 2023 (SCB via faktarutorna); Umeå 94 243 före Gävle 86 533 och Sundsvall och Timrå 70 918"
+          }
+        },
+        {
+          "text": "Vid Norrforsen väster om Umeå finns hällristningar från stenåldern.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4sterbotten",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Historia"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/3-Västerbotten.svg",
+        "blomma": "blommor/3-Västerbotten.jpg",
+        "djur": "djur/3-Västerbotten.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Ume%C3%A5",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "4": {
+      "nr": 4,
+      "namn": "Ångermanland",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Örnsköldsvik",
+        "tatort_scb": null,
+        "folkmangd": 33399,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Härnösand",
+        "tatort_scb": null,
+        "folkmangd": 18236,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Örnsköldsvik. Härnösand är 55 % av Örnsköldsvik och kommer med enligt halvregeln; Härnösand är också residensstad i Västernorrlands län. (Örnsköldsvik 33 399, Härnösand 18 236)",
+      "blomma": "Styvmorsviol",
+      "blomma_not": null,
+      "djur": "Bäver",
+      "djur_not": null,
+      "yta_km2": 19800,
+      "yta_rang": 6,
+      "invanare": {
+        "antal": 127761,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 18,
+      "visste_du": [
+        {
+          "text": "Ångermanlands vapen har tre laxar.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/%C3%85ngermanland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Vapen, blasoneringen"
+          }
+        },
+        {
+          "text": "Ångermanland är det sjätte största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/4-Ångermanland.svg",
+        "blomma": "blommor/4-Ångermanland.jpg",
+        "djur": "djur/4-Ångermanland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96rnsk%C3%B6ldsvik",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/H%C3%A4rn%C3%B6sand",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "5": {
+      "nr": 5,
+      "namn": "Jämtland",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Östersund",
+        "tatort_scb": null,
+        "folkmangd": 53992,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Östersund är den enda tätorten över 9 000 invånare i Jämtland i SCB:s lista. (Östersund 53 992)",
+      "blomma": "Brunkulla",
+      "blomma_not": null,
+      "djur": "Älg",
+      "djur_not": null,
+      "yta_km2": 34009,
+      "yta_rang": 2,
+      "invanare": {
+        "antal": 119768,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 20,
+      "visste_du": [
+        {
+          "text": "Jämtland är Sveriges näst största landskap till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/J%C3%A4mtland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "De flesta jämtar bor i trakten runt sjön Storsjön.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/J%C3%A4mtland",
+            "datum": "2026-10-19",
+            "avser": "inledningen: \"majoriteten av befolkningen i den tätbefolkade Storsjöbygden\""
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/5-Jämtland.svg",
+        "blomma": "blommor/5-Jämtland.jpg",
+        "djur": "djur/5-Jämtland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96stersund",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "6": {
+      "nr": 6,
+      "namn": "Härjedalen",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Sveg",
+        "tatort_scb": null,
+        "folkmangd": 2448,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Sveg är störst och centralort i Härjedalens kommun. Funäsdalen är 43 % av Sveg. (Sveg 2 448, Funäsdalen 1 064)",
+      "blomma": "Mosippa",
+      "blomma_not": "Två förekommer: mosippa (NRM) och fjällviol (Wittrocks förslag 1908).",
+      "djur": "Brunbjörn",
+      "djur_not": null,
+      "yta_km2": 11954,
+      "yta_rang": 12,
+      "invanare": {
+        "antal": 9721,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 25,
+      "visste_du": [
+        {
+          "text": "Härjedalen har minst invånare av alla landskap – färre än 10 000.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "SCB 2024: 9 721 invånare, lägst av de 25"
+          }
+        },
+        {
+          "text": "Härjedalen hörde förr till Norge. Det blev svenskt 1645.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/H%C3%A4rjedalen",
+            "datum": "2026-10-19",
+            "avser": "inledningen: \"Härjedalen tillföll Sverige genom Freden i Brömsebro 1645\""
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/6-Härjedalen.svg",
+        "blomma": "blommor/6-Härjedalen.jpg",
+        "djur": "djur/6-Härjedalen.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Sveg",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "7": {
+      "nr": 7,
+      "namn": "Medelpad",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Sundsvall",
+        "tatort_scb": "Sundsvall och Timrå",
+        "folkmangd": 70918,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Sundsvall är störst. SCB räknar sedan 2023 Sundsvall och Timrå som en tätort, \"Sundsvall och Timrå\"; folkmängden gäller hela den tätorten. Ingen annan tätort i Medelpad är nära.",
+      "blomma": "Gran",
+      "blomma_not": "Enstaka källor anger smörboll (Landskapsblommor, sv.wikipedia).",
+      "djur": "Skogshare",
+      "djur_not": null,
+      "yta_km2": 7058,
+      "yta_rang": 17,
+      "invanare": {
+        "antal": 125613,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 19,
+      "visste_du": [
+        {
+          "text": "De två silvervita vågorna i Medelpads vapen är älvarna Indalsälven och Ljungan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Medelpads_landskapsvapen",
+            "datum": "2026-10-19",
+            "avser": "beskrivningen av vapnet"
+          }
+        },
+        {
+          "text": "Namnet Medelpad tros komma av gamla ord för \"i mitten\" och \"stig\" eller \"vattenväg\".",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Medelpad",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Etymologi"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/7-Medelpad.svg",
+        "blomma": "blommor/7-Medelpad.jpg",
+        "djur": "djur/7-Medelpad.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Sundsvall",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "8": {
+      "nr": 8,
+      "namn": "Hälsingland",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Hudiksvall",
+        "tatort_scb": null,
+        "folkmangd": 16792,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Bollnäs",
+        "tatort_scb": null,
+        "folkmangd": 13918,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Hudiksvall. Bollnäs är 83 % av Hudiksvall och kommer med enligt halvregeln; Wikipedia kallar Bollnäs Hälsinglands näst största tätort. Söderhamn (72 %) klarar också halvregeln men är mindre än Bollnäs. (Hudiksvall 16 792, Bollnäs 13 918, Söderhamn 12 038)",
+      "blomma": "Lin",
+      "blomma_not": null,
+      "djur": "Lodjur",
+      "djur_not": null,
+      "yta_km2": 14264,
+      "yta_rang": 10,
+      "invanare": {
+        "antal": 128205,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 17,
+      "visste_du": [
+        {
+          "text": "Hälsingland fick först tall som landskapsblomma 1908 men ville hellre ha lin – och fick lin 1909.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Historik"
+          }
+        },
+        {
+          "text": "Hälsingland är det tionde största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/8-Hälsingland.svg",
+        "blomma": "blommor/8-Hälsingland.jpg",
+        "djur": "djur/8-Hälsingland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Hudiksvall",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Bolln%C3%A4s",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Bolln%C3%A4s",
+            "datum": "2026-10-19",
+            "avser": "faktarutan saknar landskap; brödtexten: \"Bollnäs är en tätort i Hälsingland\""
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "9": {
+      "nr": 9,
+      "namn": "Dalarna",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Borlänge",
+        "tatort_scb": null,
+        "folkmangd": 44299,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Falun",
+        "tatort_scb": null,
+        "folkmangd": 39939,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Borlänge. Falun är 90 % av Borlänge och är residensstad i Dalarnas län; skolböcker nämner ofta Falun. (Borlänge 44 299, Falun 39 939)",
+      "blomma": "Ängsklocka",
+      "blomma_not": "Två förekommer: ängsklocka (NRM) och blåklocka (Wittrocks förslag 1908). Många i Dalarna ville ha ängsklocka.",
+      "djur": "Berguv",
+      "djur_not": null,
+      "yta_km2": 29086,
+      "yta_rang": 4,
+      "invanare": {
+        "antal": 283174,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 11,
+      "visste_du": [
+        {
+          "text": "Dalarna är det fjärde största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        },
+        {
+          "text": "Dalarnas största stad är Borlänge, men Falun är nästan lika stor.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Dalarna",
+            "datum": "2026-10-19",
+            "avser": "inledningen: \"Dalarnas största tätort är Borlänge\"; folkmängden ur SCB 2023 via faktarutorna"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/9-Dalarna.svg",
+        "blomma": "blommor/9-Dalarna.jpg",
+        "djur": "djur/9-Dalarna.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Borl%C3%A4nge",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Falun",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "10": {
+      "nr": 10,
+      "namn": "Gästrikland",
+      "landsdel": "Norrland",
+      "storsta_stad": {
+        "namn": "Gävle",
+        "tatort_scb": null,
+        "folkmangd": 86533,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Gävle. Sandviken är 29 % av Gävle. (Gävle 86 533, Sandviken 24 827)",
+      "blomma": "Liljekonvalj",
+      "blomma_not": null,
+      "djur": "Tjäder",
+      "djur_not": null,
+      "yta_km2": 4181,
+      "yta_rang": 20,
+      "invanare": {
+        "antal": 156782,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 16,
+      "visste_du": [
+        {
+          "text": "Prinsessan Madeleine är hertiginna av Gästrikland – och av Hälsingland.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/G%C3%A4strikland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Gävle i Gästrikland är den näst största staden i Norrland, efter Umeå.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/G%C3%A4vle",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur tätorternas folkmängd 2023 (SCB via faktarutorna)"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/10-Gästrikland.svg",
+        "blomma": "blommor/10-Gästrikland.jpg",
+        "djur": "djur/10-Gästrikland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/G%C3%A4vle",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "11": {
+      "nr": 11,
+      "namn": "Uppland",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Stockholm",
+        "tatort_scb": null,
+        "folkmangd": 1652895,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Uppsala",
+        "tatort_scb": null,
+        "folkmangd": 174982,
+        "ar": 2023
+      },
+      "motivering_stad": "Stockholms tätort ligger i både Uppland och Södermanland. Den räknas här till Uppland: Dennis exempel i D25 sätter Stockholm och Uppsala i samma landskap, och artikeln Uppland kallar Stockholm \"Upplands största stad\". Hur skolböcker gör är inte kontrollerat. Uppsala är över 50 000. Upplands Väsby och Sollentuna (156 517) är en egen tätort enligt SCB men en del av Stockholmsområdet och tas inte med. (Stockholm (tätort) 1 652 895, Uppsala 174 982)",
+      "blomma": "Kungsängslilja",
+      "blomma_not": null,
+      "djur": "Havsörn",
+      "djur_not": null,
+      "yta_km2": 12676,
+      "yta_rang": 11,
+      "invanare": {
+        "antal": 1771632,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 1,
+      "visste_du": [
+        {
+          "text": "Uppland har flest invånare av alla Sveriges landskap.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "SCB 2024: 1 771 632, högst av de 25"
+          }
+        },
+        {
+          "text": "Sveriges huvudstad Stockholm är Upplands största stad.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Uppland",
+            "datum": "2026-10-19",
+            "avser": "bildtexten: \"Stockholm är Sveriges huvudstad och Upplands största stad\""
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/11-Uppland.svg",
+        "blomma": "blommor/11-Uppland.jpg",
+        "djur": "djur/11-Uppland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Stockholm_%28t%C3%A4tort%29",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Uppland",
+            "datum": "2026-10-19",
+            "avser": "\"Stockholm är Sveriges huvudstad och Upplands största stad\""
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Uppsala",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "12": {
+      "nr": 12,
+      "namn": "Västmanland",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Västerås",
+        "tatort_scb": null,
+        "folkmangd": 131643,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Västerås. Köping är 14 %. (Västerås 131 643, Köping 18 605)",
+      "blomma": "Mistel",
+      "blomma_not": null,
+      "djur": "Rådjur",
+      "djur_not": null,
+      "yta_km2": 8363,
+      "yta_rang": 16,
+      "invanare": {
+        "antal": 320378,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 9,
+      "visste_du": [
+        {
+          "text": "Namnet Västmanland betyder \"västmännens land\". Det jämförs med Uppland, som ligger österut.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4stmanland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Namnet"
+          }
+        },
+        {
+          "text": "Västmanland är det nionde folkrikaste landskapet.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur SCB 2024"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/12-Västmanland.svg",
+        "blomma": "blommor/12-Västmanland.jpg",
+        "djur": "djur/12-Västmanland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4ster%C3%A5s",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "13": {
+      "nr": 13,
+      "namn": "Värmland",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Karlstad",
+        "tatort_scb": null,
+        "folkmangd": 69615,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Karlstad. Karlskoga är 39 % av Karlstad. (Karlstad 69 615, Karlskoga 27 261)",
+      "blomma": "Skogsstjärna",
+      "blomma_not": "Wittrocks förslag 1908 var duvkulla/skogsstjärna (samma växt, Trientalis europaea).",
+      "djur": "Varg",
+      "djur_not": null,
+      "yta_km2": 18204,
+      "yta_rang": 7,
+      "invanare": {
+        "antal": 321707,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 8,
+      "visste_du": [
+        {
+          "text": "Värmland räknades förr till Götaland. Sedan 1815 hör det till Svealand.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4rmland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Värmland är det sjunde största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/13-Värmland.svg",
+        "blomma": "blommor/13-Värmland.jpg",
+        "djur": "djur/13-Värmland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Karlstad",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "14": {
+      "nr": 14,
+      "namn": "Närke",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Örebro",
+        "tatort_scb": null,
+        "folkmangd": 128658,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Största tätort: Örebro. Kumla är 14 %. (Örebro 128 658, Kumla 17 889)",
+      "blomma": "Gullviva",
+      "blomma_not": null,
+      "djur": "Hasselmus",
+      "djur_not": null,
+      "yta_km2": 4126,
+      "yta_rang": 21,
+      "invanare": {
+        "antal": 224357,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 13,
+      "visste_du": [
+        {
+          "text": "Närke är det minsta landskapet i Svealand till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/N%C3%A4rke",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Förr stavades Närke \"Nerike\". Det gamla namnet finns kvar i tidningen Nerikes Allehanda.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/N%C3%A4rke",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/14-Närke.svg",
+        "blomma": "blommor/14-Närke.jpg",
+        "djur": "djur/14-Närke.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96rebro",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "15": {
+      "nr": 15,
+      "namn": "Södermanland",
+      "landsdel": "Svealand",
+      "storsta_stad": {
+        "namn": "Eskilstuna",
+        "tatort_scb": null,
+        "folkmangd": 70646,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Södertälje",
+        "tatort_scb": null,
+        "folkmangd": 78377,
+        "ar": 2023
+      },
+      "motivering_stad": "Skolans vana går före (Dennis 19/10, D28): Eskilstuna antas vara det skolböcker anger för Södermanland (ej kontrollerat mot skolboken). Södertälje är större som tätort (SCB 2023) och står som andra stad. Stockholm räknas till Uppland (se Uppland). Då är Södertälje störst i Södermanland, och Eskilstuna (över 50 000) kommer med. Nyköping (39 770) är residensstad men mindre. Tumba (46 893) är en förort i Stockholmsområdet. OBS: räknar man Stockholm till Södermanland blir Stockholm största stad här. (Södertälje 78 377, Eskilstuna 70 646)",
+      "blomma": "Vit näckros",
+      "blomma_not": null,
+      "djur": "Fiskgjuse",
+      "djur_not": null,
+      "yta_km2": 8388,
+      "yta_rang": 15,
+      "invanare": {
+        "antal": 1415491,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 4,
+      "visste_du": [
+        {
+          "text": "Södermanland betyder \"landet söder om Mälaren\".",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/S%C3%B6dermanland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Etymologi"
+          }
+        },
+        {
+          "text": "Södermanland kallas också Sörmland.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/S%C3%B6dermanland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/15-Södermanland.svg",
+        "blomma": "blommor/15-Södermanland.jpg",
+        "djur": "djur/15-Södermanland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/S%C3%B6dert%C3%A4lje",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Eskilstuna",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "16": {
+      "nr": 16,
+      "namn": "Östergötland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Linköping",
+        "tatort_scb": null,
+        "folkmangd": 116851,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Norrköping",
+        "tatort_scb": null,
+        "folkmangd": 98229,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Linköping. Norrköping är över 50 000. Norrköpings faktaruta saknar landskap; artikeln Norrköping säger \"i Östergötland\". (Linköping 116 851, Norrköping 98 229)",
+      "blomma": "Blåklint",
+      "blomma_not": null,
+      "djur": "Knölsvan",
+      "djur_not": null,
+      "yta_km2": 9979,
+      "yta_rang": 14,
+      "invanare": {
+        "antal": 470050,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 6,
+      "visste_du": [
+        {
+          "text": "Vid Motala har man hittat spår av människor från mer än 8 000 år sedan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96sterg%C3%B6tland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Förhistorisk tid"
+          }
+        },
+        {
+          "text": "Östergötland är det sjätte folkrikaste landskapet.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur SCB 2024"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/16-Östergötland.svg",
+        "blomma": "blommor/16-Östergötland.jpg",
+        "djur": "djur/16-Östergötland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Link%C3%B6ping",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Norrk%C3%B6ping",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Norrk%C3%B6ping",
+            "datum": "2026-10-19",
+            "avser": "faktarutan saknar landskap; brödtexten: \"en tätort i Norrköpings kommun i Östergötland\""
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "17": {
+      "nr": 17,
+      "namn": "Dalsland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Åmål",
+        "tatort_scb": null,
+        "folkmangd": 8954,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Åmål är den största tätorten som bara ligger i Dalsland. Vänersborgs tätort (24 731) når in i Dalsland med stadsdelen Katrinedal (artikeln Dalsland), men staden räknas till Västergötland. Mellerud är 44 % av Åmål. (Åmål 8 954, Mellerud 3 974)",
+      "blomma": "Förgätmigej",
+      "blomma_not": "NRM skriver \"äkta förgätmigej\"; barnböcker och Wikipedia skriver förgätmigej.",
+      "djur": "Korp",
+      "djur_not": null,
+      "yta_km2": 3708,
+      "yta_rang": 22,
+      "invanare": {
+        "antal": 48203,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 23,
+      "visste_du": [
+        {
+          "text": "Dalsland kallas ibland \"ett Sverige i miniatyr\".",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Dalsland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Dalsland har näst minst invånare av fastlandets landskap, efter Härjedalen.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur SCB 2024: Härjedalen 9 721, Öland 26 890, Dalsland 48 203, Gotland 60 971; Öland och Gotland är öar"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/17-Dalsland.svg",
+        "blomma": "blommor/17-Dalsland.jpg",
+        "djur": "djur/17-Dalsland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/%C3%85m%C3%A5l",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "18": {
+      "nr": 18,
+      "namn": "Bohuslän",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Uddevalla",
+        "tatort_scb": null,
+        "folkmangd": 35639,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Kungälv",
+        "tatort_scb": null,
+        "folkmangd": 28912,
+        "ar": 2023
+      },
+      "motivering_stad": "Göteborgs tätort når in i Bohuslän (största delen av Hisingen) men räknas till Västergötland (se där). Då är Uddevalla störst. Kungälv är 81 % av Uddevalla och kommer med enligt halvregeln. (Uddevalla 35 639, Kungälv 28 912)",
+      "blomma": "Vildkaprifol",
+      "blomma_not": null,
+      "djur": "Knubbsäl",
+      "djur_not": null,
+      "yta_km2": 4473,
+      "yta_rang": 19,
+      "invanare": {
+        "antal": 316002,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 10,
+      "visste_du": [
+        {
+          "text": "Bohuslän är Sveriges västligaste landskap.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Bohuslän har fått sitt namn efter Bohus fästning vid Kungälv.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
+            "datum": "2026-10-19",
+            "avser": "avsnittet Namnet"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/18-Bohuslän.svg",
+        "blomma": "blommor/18-Bohuslän.jpg",
+        "djur": "djur/18-Bohuslän.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Uddevalla",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Kung%C3%A4lv",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "19": {
+      "nr": 19,
+      "namn": "Västergötland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Göteborg",
+        "tatort_scb": null,
+        "folkmangd": 674529,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Borås",
+        "tatort_scb": null,
+        "folkmangd": 75565,
+        "ar": 2023
+      },
+      "motivering_stad": "Göteborgs tätort ligger i Västergötland, Bohuslän och Halland; artikeln Göteborg säger att Göteborg utom större delen av Hisingen ligger i Västergötland, så den räknas hit. Borås är över 50 000. Trollhättan (50 069) är också över 50 000 men mindre än Borås; Nordöstra Göteborg (48 217) är en del av Göteborgsområdet. (Göteborg 674 529, Borås 75 565, Trollhättan 50 069)",
+      "blomma": "Ljung",
+      "blomma_not": null,
+      "djur": "Trana",
+      "djur_not": null,
+      "yta_km2": 16676,
+      "yta_rang": 8,
+      "invanare": {
+        "antal": 1416614,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 3,
+      "visste_du": [
+        {
+          "text": "Västergötland har tredje flest invånare av alla landskap.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur SCB 2024"
+          }
+        },
+        {
+          "text": "Göta älv är Västergötlands största vattendrag.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4sterg%C3%B6tland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet om geografi: \"landskapets största vattendrag, Göta älv\""
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/19-Västergötland.svg",
+        "blomma": "blommor/19-Västergötland.jpg",
+        "djur": "djur/19-Västergötland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/G%C3%B6teborg",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Bor%C3%A5s",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "20": {
+      "nr": 20,
+      "namn": "Halland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Halmstad",
+        "tatort_scb": null,
+        "folkmangd": 72979,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Varberg",
+        "tatort_scb": null,
+        "folkmangd": 38575,
+        "ar": 2023
+      },
+      "motivering_stad": "Göteborgs tätort når in i Halland (Kungsbacka kommun) men räknas till Västergötland. Största tätort: Halmstad. Varberg är 53 % av Halmstad och kommer med enligt halvregeln. (Halmstad 72 979, Varberg 38 575)",
+      "blomma": "Hårginst",
+      "blomma_not": "Wittrocks förslag 1908 var ginst.",
+      "djur": "Lax",
+      "djur_not": null,
+      "yta_km2": 4786,
+      "yta_rang": 18,
+      "invanare": {
+        "antal": 352933,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 7,
+      "visste_du": [
+        {
+          "text": "I Halland finns bara fyra runstenar, alla nära Halmstad.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Halland",
+            "datum": "2026-10-19",
+            "avser": "avsnittet om fornlämningar"
+          }
+        },
+        {
+          "text": "Halland är det sjunde folkrikaste landskapet.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur SCB 2024"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/20-Halland.svg",
+        "blomma": "blommor/20-Halland.jpg",
+        "djur": "djur/20-Halland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Halmstad",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Varberg",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "21": {
+      "nr": 21,
+      "namn": "Småland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Jönköping",
+        "tatort_scb": null,
+        "folkmangd": 103032,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Växjö",
+        "tatort_scb": null,
+        "folkmangd": 74052,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Jönköping. Växjö är över 50 000. Kalmar (42 622) är 41 % och under 50 000; artikeln Småland nämner Jönköping, Växjö och Kalmar som de största. (Jönköping 103 032, Växjö 74 052, Kalmar 42 622)",
+      "blomma": "Linnea",
+      "blomma_not": null,
+      "djur": "Utter",
+      "djur_not": null,
+      "yta_km2": 29330,
+      "yta_rang": 3,
+      "invanare": {
+        "antal": 780704,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 5,
+      "visste_du": [
+        {
+          "text": "Författaren Astrid Lindgren kom från Vimmerby i Småland.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Sm%C3%A5land",
+            "datum": "2026-10-19",
+            "avser": "\"Den världskända författarinnan Astrid Lindgren var från Vimmerby.\""
+          }
+        },
+        {
+          "text": "Småland är det tredje största landskapet till ytan.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+            "datum": "2026-10-19",
+            "avser": "rang räknad ur arean i tabellen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/21-Småland.svg",
+        "blomma": "blommor/21-Småland.jpg",
+        "djur": "djur/21-Småland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/J%C3%B6nk%C3%B6ping",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/V%C3%A4xj%C3%B6",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "22": {
+      "nr": 22,
+      "namn": "Gotland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Visby",
+        "tatort_scb": null,
+        "folkmangd": 26305,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": null,
+      "motivering_stad": "Visby är störst och den enda stora tätorten på Gotland. (Visby 26 305)",
+      "blomma": "Murgröna",
+      "blomma_not": null,
+      "djur": "Igelkott",
+      "djur_not": null,
+      "yta_km2": 3140,
+      "yta_rang": 23,
+      "invanare": {
+        "antal": 60971,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 22,
+      "visste_du": [
+        {
+          "text": "Gotland är Sveriges största ö.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Gotland",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Gotlands högsta punkt, Lojsta hed, är bara 82 meter över havet.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Gotland",
+            "datum": "2026-10-19",
+            "avser": "faktarutan, högsta punkt"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/22-Gotland.svg",
+        "blomma": "blommor/22-Gotland.jpg",
+        "djur": "djur/22-Gotland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Visby",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": null,
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "23": {
+      "nr": 23,
+      "namn": "Öland",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Borgholm",
+        "tatort_scb": null,
+        "folkmangd": 4280,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Färjestaden",
+        "tatort_scb": null,
+        "folkmangd": 6674,
+        "ar": 2023
+      },
+      "motivering_stad": "Skolans vana går före (Dennis 19/10, D28): Borgholm antas vara Ölands stad i skolböckerna (ej kontrollerat mot skolboken). Färjestaden är större som tätort och står som andra stad. Största tätort: Färjestaden. Borgholm är 64 % av Färjestaden och kommer med enligt halvregeln. Borgholm har gamla stadsprivilegier och kan vara det skolböcker kallar Ölands stad; inte kontrollerat. (Färjestaden 6 674, Borgholm 4 280)",
+      "blomma": "Ölandssolvända",
+      "blomma_not": "Wittrocks förslag 1908 var storsippa/tovsippa.",
+      "djur": "Näktergal",
+      "djur_not": null,
+      "yta_km2": 1342,
+      "yta_rang": 25,
+      "invanare": {
+        "antal": 26890,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 24,
+      "visste_du": [
+        {
+          "text": "Öland är Sveriges minsta landskap och näst största ö.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96land",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Sedan 1972 går Ölandsbron mellan Öland och fastlandet.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/%C3%96land",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/23-Öland.svg",
+        "blomma": "blommor/23-Öland.jpg",
+        "djur": "djur/23-Öland.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/F%C3%A4rjestaden",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Borgholm",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "24": {
+      "nr": 24,
+      "namn": "Blekinge",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Karlskrona",
+        "tatort_scb": null,
+        "folkmangd": 36423,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Karlshamn",
+        "tatort_scb": null,
+        "folkmangd": 19966,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Karlskrona (artikeln Blekinge: \"Karlskrona är Blekinges största stad\"). Karlshamn är 55 % av Karlskrona och kommer med enligt halvregeln. (Karlskrona 36 423, Karlshamn 19 966)",
+      "blomma": "Ek",
+      "blomma_not": "Wittrocks förslag 1908 var ek; ibland anges ek eller kungsljus (Landskapsblommor, sv.wikipedia).",
+      "djur": "Ekoxe",
+      "djur_not": null,
+      "yta_km2": 2941,
+      "yta_rang": 24,
+      "invanare": {
+        "antal": 157223,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 15,
+      "visste_du": [
+        {
+          "text": "Blekinge kallas ofta \"Sveriges trädgård\".",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Blekinge",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Blekinge är det minsta landskapet på fastlandet. Bara Öland är mindre.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Blekinge",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/24-Blekinge.svg",
+        "blomma": "blommor/24-Blekinge.jpg",
+        "djur": "djur/24-Blekinge.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Karlskrona",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Karlshamn",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    },
+    "25": {
+      "nr": 25,
+      "namn": "Skåne",
+      "landsdel": "Götaland",
+      "storsta_stad": {
+        "namn": "Malmö",
+        "tatort_scb": null,
+        "folkmangd": 339316,
+        "ar": 2023
+      },
+      "ocksa_stor_stad": {
+        "namn": "Helsingborg",
+        "tatort_scb": null,
+        "folkmangd": 116029,
+        "ar": 2023
+      },
+      "motivering_stad": "Största tätort: Malmö. Helsingborg är över 50 000. Lund (98 308) är också över 50 000 men mindre än Helsingborg. Helsingborgs och Lunds faktarutor saknar landskap; båda ligger i Skåne län. (Malmö 339 316, Helsingborg 116 029, Lund 98 308)",
+      "blomma": "Prästkrage",
+      "blomma_not": "Wittrocks förslag 1908 var bok; Skåne protesterade och fick prästkrage 1909.",
+      "djur": "Kronhjort",
+      "djur_not": null,
+      "yta_km2": 11027,
+      "yta_rang": 13,
+      "invanare": {
+        "antal": 1425308,
+        "datum": "2024-12-31"
+      },
+      "invanare_rang": 2,
+      "visste_du": [
+        {
+          "text": "Skåne är Sveriges sydligaste landskap.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Sk%C3%A5ne",
+            "datum": "2026-10-19",
+            "avser": "inledningen"
+          }
+        },
+        {
+          "text": "Malmö i Skåne är Sveriges tredje största stad.",
+          "kalla": {
+            "url": "https://sv.wikipedia.org/wiki/Sk%C3%A5ne",
+            "datum": "2026-10-19",
+            "avser": "bildtexten: \"Malmö är Sveriges tredje, och Skånes största, stad\"; stämmer med SCB:s tätorter 2023 (Stockholm, Göteborg, Malmö)"
+          }
+        }
+      ],
+      "bilder": {
+        "vapen": "vapen/25-Skåne.svg",
+        "blomma": "blommor/25-Skåne.jpg",
+        "djur": "djur/25-Skåne.jpg"
+      },
+      "kallor": {
+        "nr_namn_landsdel": {
+          "url": "referens/landskap-laxbok.json",
+          "datum": "2026-10-19",
+          "avser": "läxbokens numrering, kontrollerad mot bilden av läxboken"
+        },
+        "storsta_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Malm%C3%B6",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          }
+        ],
+        "ocksa_stor_stad": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Helsingborg",
+            "datum": "2026-10-19",
+            "avser": "tätortens landskap och folkmängd (faktarutan)"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/miljo/markanvandning/tatorter-och-smaorter/pong/tabell-och-diagram/tatorter/statistiska-tatorter-2023-befolkning-landareal-befolkningstathet-per-tatort/",
+            "datum": "2026-10-19",
+            "avser": "folkmängdens ursprung enligt Wikipedia: SCB, Statistiska tätorter 2023 (publicerad 2024-11-28); sidan inte öppnad direkt"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Sk%C3%A5ne",
+            "datum": "2026-10-19",
+            "avser": "Helsingborgs faktaruta saknar landskap; artikeln Skåne nämner Helsingborgs län som ett av Skånes fyra län 1658 och motorvägen Malmö–Helsingborg"
+          }
+        ],
+        "blomma": [
+          {
+            "url": "https://web.archive.org/web/20191221222529/http://linnaeus.nrm.se/flora/landskap.html",
+            "datum": "2026-10-19",
+            "avser": "Naturhistoriska riksmuseet, Den virtuella floran: Landskapsblommor (arkiverad 2019-12-21; urvalet följer Nationalencyklopedin)"
+          },
+          {
+            "url": "https://sv.wikipedia.org/wiki/Landskapsblommor",
+            "datum": "2026-10-19",
+            "avser": "alternativa blommor och historik"
+          }
+        ],
+        "djur": {
+          "url": "https://web.archive.org/web/20130426004919/http://www.nrm.se/besokmuseet/handerpamuseet/kalendarium2013/landskapsdjur.18628.html",
+          "datum": "2026-10-19",
+          "avser": "Naturhistoriska riksmuseet: \"Vilket djur hör till vilket landskap?\" (arkiverad 2013-04-26)"
+        },
+        "yta": {
+          "url": "https://sv.wikipedia.org/wiki/Landskap_i_Sverige",
+          "datum": "2026-10-19",
+          "avser": "tabellen \"Sveriges landskap\", kolumnen Area (km²); \"Vatten är ej medräknat i arean\". Tabellen anger ingen källa för arean."
+        },
+        "invanare": [
+          {
+            "url": "https://sv.wikipedia.org/wiki/Mall%3AStat/Sverige/Landskap/Befolkning",
+            "datum": "2026-10-19",
+            "avser": "värdet, läst ur Wikipedias mall som återger SCB"
+          },
+          {
+            "url": "https://www.scb.se/contentassets/ef676b89b44d4bcbacce5b2d399065cd/be0101_landskap2024.xlsx",
+            "datum": "2026-10-19",
+            "avser": "SCB, Folkmängd i landskapen den 31 december 2024 (publicerad 2025-03-21 enligt mallen); filen inte öppnad"
+          },
+          {
+            "url": "https://www.scb.se/hitta-statistik/statistik-efter-amne/befolkning-och-levnadsforhallanden/befolkningens-sammansattning-och-utveckling/befolkningsstatistik/pong/tabell-och-diagram/aldre-excelfiler-och-tabeller/tabeller-som-inte-langre-uppdateras/",
+            "datum": "2026-10-19",
+            "avser": "SCB listar tabellen under \"Tabeller som inte längre uppdateras\": 2024 är senaste året"
+          }
+        ],
+        "visste_du": "se kalla i varje post",
+        "bilder": "bilder.json"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 /* ============================================================
    MULTIPLAY – Designsystem v26 · "Barnmagi × Apple-polish"
    Källa: design-lab/index.html (målbild v2.1, LÅST 2026-07-03)
-   + DESIGN-LOCK-MULTIPLAY.md. Klasskatalog: docs/DESIGN-SYSTEM.md
+   + DESIGN-LOCK-MULTIPLAY.md (båda på grenen renovering). Klasskatalog: referens/DESIGN-SYSTEM.md
    Regler: ingen backdrop-filter · en vy = en skärm · SVG som
    UI-ikoner · spring-easing · prefers-reduced-motion respekteras.
    ============================================================ */
@@ -81,6 +81,9 @@
   /* Multiplikation & Division – turkos/teal + solgul accent (AA: deep på ljusa glas) */
   --mdv-acc: #0d9488; --mdv-acc-l: #2dd4bf; --mdv-acc2: #f59e0b;
   --mdv-deep: #0f5c54; --mdv-glow2: rgba(45,212,191,.5); --mdv-tint: #effbf8;
+  /* Geografi – havsgrön (design-lab/geografi-mockup.html) */
+  --geo-acc: #0f8b8d; --geo-acc-l: #4fc3c4; --geo-acc2: #f59e0b;
+  --geo-deep: #134e4a; --geo-glow2: rgba(79,195,196,.42); --geo-tint: #e8f8f7;
 
   /* --- Legacy per-modul-tokens (moduler använder dem inline – RÖR EJ värden
          som är lag-kritiska; modul-agenterna städar i Fas 3 slice 2) --- */
@@ -194,7 +197,7 @@
 
 /* ============================================================
    2. MODULTEMAN — modulroten (eller skärmen) sätter accentgruppen.
-   Samma komponenter, egen accent. Se docs/DESIGN-SYSTEM.md.
+   Samma komponenter, egen accent. Se referens/DESIGN-SYSTEM.md.
    ============================================================ */
 .theme-mult, .screen-multiplication, #mult-root {
   --accent: var(--mult-acc); --accent-light: var(--mult-acc-l);
@@ -228,6 +231,11 @@
   --accent: var(--mdv-acc); --accent-light: var(--mdv-acc-l);
   --accent-2: var(--mdv-acc2); --deep: var(--mdv-deep);
   --glow: var(--mdv-glow2); --tint: var(--mdv-tint);
+}
+.theme-geo, .screen-geo, #geo-root {
+  --accent: var(--geo-acc); --accent-light: var(--geo-acc-l);
+  --accent-2: var(--geo-acc2); --deep: var(--geo-deep);
+  --glow: var(--geo-glow2); --tint: var(--geo-tint);
 }
 
 /* ============================================================
@@ -722,6 +730,7 @@ svg.icn {
 /* Brett spelkort (liggande rad) */
 .game-card-wide {
   grid-column: 1 / -1;
+  min-height: 44px;                 /* träffytan, även när spelväljaren är trång (v66) */
   flex-direction: row;
   align-items: center;
   gap: 14px;
@@ -1938,7 +1947,7 @@ svg.icn {
    Uppgiften äger skärmen: .q-hero (monumental fråga) +
    .q-answers-fill (svarsgrid som fyller ledig höjd) +
    .header-progress (progress-kapsel i headerns högersektion,
-   ersätter eget progressband). Se docs/DESIGN-SYSTEM.md.
+   ersätter eget progressband). Se referens/DESIGN-SYSTEM.md.
    ============================================================ */
 /* Frågekort som skalar med skärmhöjden. Frågetexten läggs direkt i
    .q-hero (ärver typografin); sekundär rad i <span class="q-sub">. */
@@ -2193,13 +2202,16 @@ svg.icn {
 /* Modulernas rotdivar ska kunna fylla skärmen */
 #mult-root, #clock-root, #friends-root, #nationella-root,
 #np-matte-select-root, #np-matte-muntligt-root, #np-matte-skriftlig-root,
-#addsub-root, #uppstallning-root, #daily-root {
+#addsub-root, #uppstallning-root, #daily-root, #geo-root {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   width: 100%;
 }
+
+/* Geografi: mockupens mått (390 × 844 med 10 px kant), js/geografi.js */
+#screen-geografi { padding: 4px 10px 8px; }
 
 /* ============================================================
    39. RESPONSIVT
@@ -2231,7 +2243,8 @@ svg.icn {
 
   /* Kompakta 2-kolumnskort utan beskrivningar (målbilden) */
   .grid-cards { gap: 9px; }
-  .game-card:not(.game-card-wide) { min-height: 156px; }
+  /* v66: 132 (förut 156) – sju kort (Geografi som brett kort) ryms utan scroll även som PWA (390 × 797) */
+  .game-card:not(.game-card-wide) { min-height: 132px; }
   .game-card { padding: 12px 13px 12px 17px; }
   .game-card .game-emoji { font-size: 27px; margin-bottom: 5px; }
   .game-card h3 { font-size: 15.5px; }
@@ -2259,7 +2272,7 @@ svg.icn {
    så spelväljaren fortsatt ryms utan scroll (designlag: en vy = en skärm) */
 @media (max-width: 430px) and (max-height: 700px) {
   .grid-cards { gap: 8px; }
-  .game-card:not(.game-card-wide) { min-height: 104px; }
+  .game-card:not(.game-card-wide) { min-height: 90px; }   /* v66: 90 (förut 104) – plats för Geografis breda kort */
   .game-card { padding: 9px 11px 9px 15px; }
   .game-card .game-emoji { font-size: 21px; margin-bottom: 3px; }
   .game-card h3 { font-size: 13.5px; line-height: 1.15; }

@@ -477,7 +477,7 @@ const UppstallningGame = (() => {
        Korta vägen (SKIP_BOX_MAX_BORROW) har ingen tankeruta, så minnets
        kvantitet hade ingenstans att synas: bubblan sa "Minnet gör 8:an
        till 9" medan kolumnen stod kvar på 8 ända tills siffran plötsligt
-       blev 10. Pappret får inte ljuga — Mira skriver aldrig en 9:a där —
+       blev 10. Pappret får inte ljuga — barnet skriver aldrig en 9:a där —
        så 9:an blir en BRICKA i marginalen, där allt lösräknande bor.
        Ytan håller sina barn INLINE (bricka, sedan spöket), precis som
        tankerutans rad; annars hamnar två absolutpositionerade element på
@@ -1145,7 +1145,7 @@ const UppstallningGame = (() => {
         return;
       }
       /* KORTA VÄGEN (uppgift 7b). Siffran i cellen ändras INTE — den står
-         kvar tills den stryks och skrivs om, precis som på Miras papper.
+         kvar tills den stryks och skrivs om, precis som på pappret.
          I stället läses 8:an och minnesettan av, och kvantiteten 9 ställer
          sig som en bricka i marginalen. Då pekar nästa steg ("9 behöver 1")
          på något som faktiskt syns. */
@@ -3120,7 +3120,7 @@ const UppstallningGame = (() => {
      ett värde med ett enda utfall är bara friktion.
 
      De två första stegen ÄR minnessiffrans dokumenterade livscykel
-     (.project-context/MINNESSIFFER-KONCEPT.md): skrivs liten → vilar →
+     (.project-context/SPEC-MINNESSIFFROR.md): skrivs liten → vilar →
      används → STRYKS, aldrig suddas. Det tredje steget är ångra, och det
      hör hemma här: i fria läget skriver hon själv och måste kunna rätta en
      felplacerad etta. Minnesraden är hennes kladd och bedöms aldrig. */
