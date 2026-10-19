@@ -2,9 +2,6 @@
 
 ## Öppet
 
-- [ ] **Geografi: livesätt** (D35). Bygget är klart på grenen `geografi` (v66, se loggen 19/10 och
-      `agenter/geografi/OVERLAMNING.md`) → granskning (två granskare, särskilt startsidans kortmått) → merge `--no-ff`
-      till `dev` → release. Öppet hos Dennis: nivåregeln i pärmen (brons = övat) och startsidans lägre spelkort.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på en riktig telefon).
@@ -17,6 +14,7 @@
 
 ## Klart
 
+- [x] 2026-10-19 ~~Geografi inbyggd i appen och livesatt~~ i v66 (D35, D36); integriteten rensad (D36).
 - [x] 2026-10-19 ~~P9: tio sammanslagna grenar på GitHub borttagna~~ (D23).
 - [x] 2026-10-19 ~~De två gamla agent-worktrees borttagna~~; 18 sammanslagna lokala grenar raderade (kvar: `dev`, `main`).
 - [x] 2026-10-19 Ordning och reda införd i repot (D21): CLAUDE.md, logg/, TODO, `.project-context/`,
