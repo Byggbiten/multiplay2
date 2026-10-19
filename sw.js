@@ -1,7 +1,7 @@
 /* MULTIPLAY – Service Worker (PWA offline-stöd) */
 
 // VIKTIGT: Öka versionsnumret vid varje push (v2 → v3 → v4 osv)
-const CACHE_VERSION = 'v65';
+const CACHE_VERSION = 'v66';
 const CACHE = `multiplay-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -24,6 +24,10 @@ const ASSETS = [
   './js/platsvarde.js',
   './js/uppstallning.js',
   './js/multdiv.js',
+  './js/geografi-data.js',
+  './js/geografi-logic.js',
+  './js/geografi.js',
+  './assets/geografi/sverige/karta.svg',   // kartan; bilderna (75 st) cachas vid första användningen, se fetch nedan
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

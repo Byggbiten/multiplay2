@@ -1,0 +1,1831 @@
+/* ============================================================
+   GEOGRAFI — Sverige, Sveriges landskap (v66, D24–D36)
+   Facit: design-lab/geografi-mockup.html (införd efter granskning).
+   Delar: js/geografi-data.js (genererad ur referens/sverige-landskap/),
+   js/geografi-logic.js (ren logik, tests/geografi.test.mjs), den här filen (vyerna,
+   kartmotorn, pusslet). Kartan och bilderna: assets/geografi/sverige/.
+   Lagring per profil: geo_state_, geo_settings_, geo_puzzle_, geo_log_ (+ id).
+   Geografi ingår inte i Dagens träning (D20).
+   ============================================================ */
+const GeoGame = (() => {
+  'use strict';
+  let api = null;
+
+  function init(profile){
+    if (!api) api = build();
+    api.enter(profile);
+  }
+
+  function build(){
+    const GL = window.GeoLogic, GD = window.GEO_DATA, MP = window.MP;
+    const ROOT = document.getElementById('geo-root');
+    ROOT.innerHTML = `<style>
+#geo-root{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;width:100%;max-width:560px;margin:0 auto;position:relative;
+  font-family:var(--font-body);color:var(--ink);touch-action:pan-x pan-y;-webkit-user-select:none;user-select:none}
+#geo-root :where(.gscreens, #g-overlay) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+#geo-root :where(.gscreens, #g-overlay, .hdr-r) button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-user-select:none;user-select:none}
+#geo-root :where(.gscreens, #g-overlay) button:disabled{cursor:default}
+#geo-root img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}
+#geo-root a{color:var(--accent)}
+#geo-root [hidden]{display:none !important}
+#geo-root .app-header{flex-shrink:0;margin-bottom:0}
+#geo-root .app-header .btn-back{min-height:44px}
+#geo-root .app-header .header-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+#geo-root .gscreens{flex:1;min-height:0;position:relative}
+#geo-root .setcard{padding:16px 16px 18px;display:flex;flex-direction:column;gap:10px}
+#geo-root #g-scr-settings .bubble{margin-top:auto}
+#geo-root .set-k{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+#geo-root .set-k svg.i{width:17px;height:17px}
+#geo-root .setcard>b{font-family:var(--font-head);font-weight:800;font-size:23px;line-height:1.1;color:var(--deep)}
+#geo-root .setcard p{font-size:15px;font-weight:700;line-height:1.38;color:var(--ink-soft)}
+#geo-root .set-sel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:900;color:var(--ink-soft)}
+#geo-root .set-sel select{min-height:50px;border-radius:14px;border:2px solid var(--accent-light);padding:0 12px;font-family:inherit;font-size:17px;font-weight:800;color:var(--ink);background:#fff}
+
+#geo-root{
+  --font-head:'Baloo 2',cursive; --font-body:'Nunito',sans-serif;
+  --ink:#3b1d6e; --ink-soft:#6d5a96;
+  --accent:#0f8b8d; --accent-light:#4fc3c4; --deep:#134e4a; --glow:rgba(79,195,196,.42); --tint:#e8f8f7;
+  --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.88); --glass-line:rgba(255,255,255,.9);
+  --shadow-panel:0 10px 34px rgba(93,63,158,.10),0 2px 6px rgba(93,63,158,.06);
+  --radius-md:18px; --radius-lg:24px;
+  --spring:cubic-bezier(.34,1.3,.4,1); --smooth:cubic-bezier(.4,0,.2,1); --sheet:cubic-bezier(.2,.9,.25,1);
+  --kan:#2fbf68; --due:#bfead0; --ovar:#fbbf24;          /* lådorna (samma som Gångertabellen och Klockan) */
+  --fog:#c9d1dd;
+}
+#geo-root svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#geo-root .hdr-r{width:52px;display:flex;justify-content:flex-end;flex-shrink:0}
+#geo-root .ibtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink-soft);background:transparent}
+#geo-root .ibtn svg.i{width:21px;height:21px;stroke-width:2}
+#geo-root .ibtn:active{background:rgba(19,78,74,.08)}
+#geo-root .screens{flex:1;min-height:0;position:relative}
+#geo-root .gs{position:absolute;inset:0;display:none;flex-direction:column;gap:6px}
+#geo-root .gs.on{display:flex;animation:geo-scrin .3s var(--smooth) both}
+#geo-root .gc{background:var(--glass-strong);border-radius:var(--radius-lg);border:1px solid var(--glass-line);box-shadow:var(--shadow-panel)}
+#geo-root .grow{flex:1;min-height:0}
+#geo-root .gb{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 20px;border-radius:999px;
+  font-size:16px;font-weight:800;line-height:1;white-space:nowrap;width:100%;
+  transition:transform .25s var(--spring),box-shadow .25s var(--smooth),opacity .15s}
+#geo-root .gb-p{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 8px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,.35)}
+#geo-root .gb-s{background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 28%,transparent);color:var(--deep);box-shadow:var(--shadow-panel)}
+#geo-root .gb:active:not(:disabled){transform:scale(.96)}
+#geo-root .gb:disabled{opacity:.42;box-shadow:none}
+#geo-root .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0}
+#geo-root .slot{height:52px;flex-shrink:0;display:flex;gap:8px}
+#geo-root .bubble{flex-shrink:0;display:flex}
+#geo-root .b60{height:60px}
+#geo-root .b92{height:92px}
+#geo-root .b122{height:128px}
+#geo-root .thought{flex:1;background:#fff;border-radius:var(--radius-md);padding:7px 14px;box-shadow:var(--shadow-panel);font-weight:800;color:var(--ink);
+  font-size:15px;line-height:1.3;border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden}
+#geo-root .thought.pop{animation:geo-bubblein .3s var(--spring)}
+#geo-root .thought .sm{font-size:13px;color:#64748b;font-weight:800}
+#geo-root .thought .lead{font-size:15px;font-weight:900;color:#b45309}
+#geo-root .thought .lead.good{color:#15803d}
+#geo-root .thought .fact{font-size:12.5px;color:var(--deep);font-weight:800;display:flex;gap:4px;align-items:flex-start}
+#geo-root .thought .fact svg.i{width:14px;height:14px;margin-top:2px;color:var(--accent)}
+#geo-root .seg{display:flex;gap:2px;background:rgba(19,78,74,.07);border-radius:999px;padding:3px}
+#geo-root .seg button{flex:1;min-height:44px;padding:0 8px;border-radius:999px;font-weight:800;font-size:13.5px;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+#geo-root .seg button svg{width:16px;height:16px}
+#geo-root .seg button.on{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(19,78,74,.16)}
+#geo-root .flabel{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);padding:0 6px}
+#geo-root .mapbox{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:18px;background:linear-gradient(180deg,#eaf6fb,#dff1f7)}
+#geo-root .gm{position:absolute;inset:0;width:100%;height:100%;display:block;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;cursor:grab}
+#geo-root .gm:active{cursor:grabbing}
+#geo-root .gm.static{cursor:default}
+#geo-root .gm path.ls{fill:var(--f);stroke:rgba(40,40,40,.55);stroke-width:.9px;vector-effect:non-scaling-stroke;stroke-linejoin:round;transition:fill .45s var(--smooth),opacity .45s var(--smooth)}
+#geo-root .gm path.ls.out{opacity:.34}
+#geo-root .gm path.ls.fog{fill:var(--fog);stroke:rgba(255,255,255,.75);stroke-width:1.2px}
+#geo-root .gm path.ls.slot{fill:#e9eef5;stroke:#e9eef5;stroke-width:1.8px}
+#geo-root .gm path.ls.ctx{fill:none;stroke:#e2e8f0}
+#geo-root .gm .outl{fill:none;stroke:#64748b;stroke-width:5px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+#geo-root .gm path.ls.placed{fill:var(--f);stroke:rgba(40,40,40,.55);stroke-dasharray:none}
+#geo-root .gm path.ls.res-ok{fill:#86efac;stroke:#15803d}
+#geo-root .gm path.ls.res-bad{fill:#fde68a;stroke:#b45309}
+#geo-root .gm path.ls.dim{fill:#f1f5f9;stroke:#cbd5e1}
+#geo-root .gm[data-boxes] path.ls[data-b="ny"]{fill:#fff}
+#geo-root .gm[data-boxes] path.ls[data-b="ovar"]{fill:var(--ovar)}
+#geo-root .gm[data-boxes] path.ls[data-b="kan"]{fill:var(--kan)}
+#geo-root .gm[data-boxes] path.ls[data-b="due"]{fill:var(--due)}
+#geo-root .gm .fx{pointer-events:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+#geo-root .gm .fx-bad{fill:rgba(239,68,68,.45);stroke:#dc2626;stroke-width:2.5px}
+#geo-root .gm .fx-ok{fill:rgba(34,197,94,.42);stroke:#15803d;stroke-width:2.5px}
+#geo-root .gm .fx-found{fill:none;stroke:#15803d;stroke-width:3px;animation:geo-foundring 1s ease-out both}
+#geo-root .gm .fx-blink{fill:rgba(245,158,11,.6);stroke:#b45309;stroke-width:3px;animation:geo-blink .42s ease-in-out 6 alternate}
+#geo-root .gm .fx-mark{fill:rgba(15,139,141,.34);stroke:var(--deep);stroke-width:3px;animation:geo-markpulse 1.4s ease-in-out infinite}
+#geo-root .gm .fx-ref{fill:rgba(15,139,141,.14);stroke:var(--accent);stroke-width:2.2px;stroke-dasharray:6 4}
+#geo-root .gm .fx-sel{fill:rgba(255,255,255,.18);stroke:var(--deep);stroke-width:3px}
+#geo-root .gm .fx-halo{fill:rgba(147,51,234,.14);stroke:rgba(147,51,234,.22);stroke-linejoin:round}
+#geo-root .gm .disc{fill:rgba(147,51,234,.16);stroke:rgba(147,51,234,.7);stroke-width:1.5px;stroke-dasharray:4 3;pointer-events:none}
+#geo-root .gm .lab{pointer-events:none}
+#geo-root .gm .lab text{font-family:var(--font-head);font-weight:800;font-size:12.5px;fill:#1f2937;stroke:#fff;stroke-width:3px;paint-order:stroke;text-anchor:middle;dominant-baseline:central}
+#geo-root .gm .lab.found text{fill:#14532d}
+#geo-root .gm .mchip{pointer-events:none}
+#geo-root .gm .mchip rect{fill:var(--deep)}
+#geo-root .gm .mchip text{font-family:var(--font-body);font-weight:900;font-size:13px;fill:#fff;text-anchor:middle;dominant-baseline:central}
+#geo-root .gm .mchip.k-ok rect{fill:#15803d}
+#geo-root .gm .mchip.k-bad rect{fill:#dc2626}
+#geo-root .gm .mchip.k-ref rect{fill:#fff;stroke:var(--accent);stroke-width:1.5px}
+#geo-root .gm .mchip.k-ref text{fill:var(--deep)}
+#geo-root .gm .mchip.k-home rect{fill:#dc2626}
+#geo-root .gm .mchip.k-lake rect{fill:none}
+#geo-root .gm .mchip.k-lake text{fill:#0369a1;font-style:italic;font-size:11.5px}
+#geo-root .gm .mchip .in{transform-box:fill-box;transform-origin:center;animation:geo-chipin .4s var(--spring) both}
+#geo-root .gm .pin .in{animation:geo-pindrop .5s var(--spring) both}
+#geo-root .gm .ripple{fill:rgba(15,139,141,.22);stroke:rgba(15,139,141,.5);stroke-width:1.5px;pointer-events:none;animation:geo-ripple .38s ease-out both;transform-box:fill-box;transform-origin:center}
+#geo-root .mapbtn{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.92);box-shadow:0 3px 10px rgba(19,78,74,.18);display:grid;place-items:center;color:var(--deep);z-index:2}
+#geo-root .mapbtn svg.i{width:20px;height:20px}
+#geo-root .maphint{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:2;pointer-events:none;background:rgba(255,255,255,.92);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;color:var(--deep);white-space:nowrap;box-shadow:0 2px 8px rgba(19,78,74,.12)}
+#geo-root .toast{position:absolute;left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 16px);top:8px;z-index:3;pointer-events:none;background:#fff7ed;border:2px solid #fbbf24;border-radius:16px;padding:5px 12px 5px 8px;font-size:13px;font-weight:900;color:#92400e;display:flex;align-items:center;gap:6px;animation:geo-chipin .45s var(--spring) both}
+#geo-root .toast svg.i{width:18px;height:18px;color:#d97706}
+#geo-root .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-height:0;grid-auto-rows:1fr}
+#geo-root .gtile{position:relative;border-radius:20px;background:var(--glass-strong);border:1.5px solid rgba(255,255,255,.95);box-shadow:var(--shadow-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 6px;color:var(--ink-soft);transition:transform .2s var(--spring)}
+#geo-root .gtile:active{transform:scale(.96)}
+#geo-root .gtile .gic{width:58px;height:58px;display:grid;place-items:center;color:#94a3b8}
+#geo-root .gtile .gic svg{width:54px;height:54px}
+#geo-root .gtile b{font-family:var(--font-head);font-weight:800;font-size:15.5px;line-height:1.05;text-align:center;color:#64748b}
+#geo-root .gtile .soon{font-size:10.5px;font-weight:900;letter-spacing:.03em;padding:2px 7px;border-radius:999px;background:rgba(100,116,139,.12);color:#64748b;white-space:nowrap}
+#geo-root .gtile.open{background:linear-gradient(160deg,#fff,var(--tint));border-color:color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep)}
+#geo-root .gtile.open b{color:var(--deep)}
+#geo-root .gtile.open .gic{width:80px;height:120px}
+#geo-root .gtile.open .gic svg{width:auto;height:118px}
+#geo-root .gtile.open .soon{background:var(--accent);color:#fff}
+#geo-root .sv-main{flex:1;min-height:0;display:flex;gap:12px;padding:14px;text-align:left;align-items:stretch;transition:transform .2s var(--spring)}
+#geo-root .sv-main:active{transform:scale(.98)}
+#geo-root .sv-main .mm{flex:0 0 150px;display:flex;align-items:center;justify-content:center}
+#geo-root .sv-main .mm svg{height:100%;max-height:330px;width:auto}
+#geo-root .sv-txt{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px}
+#geo-root .sv-txt b{font-family:var(--font-head);font-weight:800;font-size:26px;line-height:1.05;color:var(--deep)}
+#geo-root .sv-txt span{font-weight:800;font-size:14px;color:var(--ink-soft)}
+#geo-root .sv-txt .sv-go{color:#fff}
+#geo-root .sv-go{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;min-height:44px;padding:0 16px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;font-weight:900;font-size:15px;box-shadow:0 6px 16px var(--glow)}
+#geo-root .sv-soon{display:flex;align-items:center;gap:12px;min-height:74px;padding:10px 14px;flex-shrink:0;color:#64748b;text-align:left}
+#geo-root .sv-soon .ic{width:44px;height:44px;border-radius:14px;background:rgba(100,116,139,.1);display:grid;place-items:center;flex-shrink:0}
+#geo-root .sv-soon b{font-family:var(--font-head);font-weight:800;font-size:18px;flex:1}
+#geo-root .sv-soon .soon{font-size:11px;font-weight:900;padding:3px 9px;border-radius:999px;background:rgba(100,116,139,.12)}
+#geo-root .hubtop{flex:1;min-height:0;display:flex;gap:8px;padding:10px}
+#geo-root .hubmm{flex:0 0 146px;display:flex;flex-direction:column;align-items:center;gap:6px}
+#geo-root .hubmm .mmw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%}
+#geo-root .hubmm svg{height:100%;width:auto;max-width:146px}
+#geo-root .hubtop{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(232,248,247,.9)) !important}
+#geo-root .hublegend{display:grid;grid-template-columns:1fr 1fr;gap:2px 6px;font-size:11px;font-weight:800;color:var(--ink-soft)}
+#geo-root .hublegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:3px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+#geo-root .areas{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center}
+#geo-root .arow{display:flex;align-items:center;gap:8px;min-height:62px;padding:6px 10px;border-radius:16px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 18%,transparent);text-align:left;color:var(--deep);transition:transform .2s var(--spring)}
+#geo-root .arow:active{transform:scale(.97)}
+#geo-root .arow.all{background:linear-gradient(135deg,#fff,var(--tint))}
+#geo-root .arow .amd{position:relative;width:32px;height:32px;flex-shrink:0}
+#geo-root .arow .att{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#geo-root .arow b{font-family:var(--font-head);font-weight:800;font-size:16.5px;line-height:1.05;white-space:nowrap}
+#geo-root .arow small{font-size:12px;font-weight:800;color:var(--ink-soft);line-height:1.15}
+#geo-root .tb-bar{display:block;height:5px;border-radius:999px;background:rgba(19,78,74,.1);overflow:hidden}
+#geo-root .tb-bar i{display:block;height:100%;border-radius:inherit;background:var(--kan)}
+#geo-root svg.md{display:block;width:100%;height:100%}
+#geo-root .mdue{position:absolute;top:-3px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--due);box-shadow:0 0 0 1.5px #fff,inset 0 0 0 1.5px rgba(47,191,104,.5)}
+#geo-root .doors{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;flex-shrink:0}
+#geo-root .door{grid-column:span 3;display:flex;align-items:center;gap:10px;min-height:66px;padding:8px 12px;border-radius:20px;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:left;transition:transform .2s var(--spring)}
+#geo-root .door:active{transform:scale(.96)}
+#geo-root .door .dic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--accent);flex-shrink:0}
+#geo-root .door .dic svg.i{width:22px;height:22px}
+#geo-root .door b{font-family:var(--font-head);font-weight:800;font-size:17px;line-height:1.05}
+#geo-root .door small{display:block;font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.15}
+#geo-root .sheet{position:absolute;left:0;right:0;bottom:0;height:446px;z-index:5;background:#fff;border-radius:26px 26px 20px 20px;box-shadow:0 -8px 30px rgba(19,78,74,.18);
+  transform:translateY(calc(100% + 20px));transition:transform .42s var(--sheet);display:flex;flex-direction:column;padding:0 12px 10px;touch-action:none}
+#geo-root .sheet.on{transform:none}
+#geo-root #g-scr-explore{overflow:hidden}
+#geo-root .sheet.drag{transition:none}
+#geo-root .sh-grip{height:22px;flex-shrink:0;display:grid;place-items:center;cursor:grab}
+#geo-root .sh-grip i{width:44px;height:5px;border-radius:999px;background:#cbd5e1}
+#geo-root .sh-head{display:flex;align-items:center;gap:8px;min-height:46px;flex-shrink:0}
+#geo-root .sh-ld{width:14px;height:40px;border-radius:7px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+#geo-root .sh-name{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.05}
+#geo-root .sh-name b{font-family:var(--font-head);font-weight:800;font-size:25px;color:var(--deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#geo-root .sh-name small{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+#geo-root .sh-home{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:900;color:#b91c1c;background:#fee2e2;border-radius:999px;padding:3px 9px;white-space:nowrap}
+#geo-root .sh-home svg.i{width:14px;height:14px}
+#geo-root .sh-x{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#f1f5f9;color:#475569;flex-shrink:0}
+#geo-root .sh-row{display:flex;gap:10px;align-items:center;flex-shrink:0;padding:4px 2px 8px}
+#geo-root .sh-shield{width:62px;height:72px;flex-shrink:0;display:grid;place-items:center}
+#geo-root .sh-shield img{max-width:62px;max-height:72px}
+#geo-root .sh-city{flex:1;display:flex;flex-direction:column;gap:2px}
+#geo-root .sh-k{font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:4px}
+#geo-root .sh-k svg.i{width:14px;height:14px}
+#geo-root .sh-city b{font-family:var(--font-head);font-weight:800;font-size:23px;color:var(--deep);line-height:1.05}
+#geo-root .sh-city span{font-size:13.5px;font-weight:800;color:var(--ink-soft)}
+#geo-root .sh-pics{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0}
+#geo-root .pic{border-radius:16px;overflow:hidden;background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-direction:column}
+#geo-root .pic .im{height:96px;overflow:hidden;background:#eef2f6}
+#geo-root .pic img{width:100%;height:100%;object-fit:cover;display:block}
+#geo-root .pic img.flower{object-position:50% 22%}
+#geo-root .pic .cap{padding:4px 8px 6px;display:flex;flex-direction:column;line-height:1.1}
+#geo-root .pic .cap b{font-family:var(--font-head);font-weight:800;font-size:16.5px;color:var(--deep)}
+#geo-root .sh-know{margin-top:8px;flex:1;min-height:0;border-radius:16px;background:var(--tint);padding:8px 10px;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+#geo-root .sh-know .kl{display:flex;gap:6px;align-items:flex-start;font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.25}
+#geo-root .sh-know .kl svg.i{width:16px;height:16px;color:var(--accent);margin-top:1px}
+#geo-root .sh-fact{display:flex;align-items:center;gap:6px;margin-top:auto;border-top:1.5px dashed rgba(19,78,74,.18);padding-top:5px}
+#geo-root .sh-fact p{flex:1;font-size:13.5px;font-weight:800;color:var(--deep);line-height:1.25}
+#geo-root .sh-more{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--accent);flex-shrink:0;box-shadow:0 2px 6px rgba(19,78,74,.12);position:relative}
+#geo-root .sh-more small{position:absolute;bottom:-1px;right:-2px;font-size:10px;font-weight:900;color:var(--ink-soft);background:#fff;border-radius:6px;padding:0 3px}
+#geo-root .ordrow{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;flex-shrink:0}
+#geo-root .ordrow .flabel{padding:0;flex-shrink:0}
+#geo-root .ordrow .seg{flex:1}
+#geo-root .tmodes{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+#geo-root .tmode{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:10px 14px;border-radius:20px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:left;transition:transform .2s var(--spring)}
+#geo-root button.tmode:active{transform:scale(.98)}
+#geo-root .tmode.main{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 8px 22px var(--glow)}
+#geo-root .tmode .th{display:flex;align-items:center;gap:12px;width:100%}
+#geo-root .tmode .tic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--tint);color:var(--accent);flex-shrink:0}
+#geo-root .tmode.main .tic{background:rgba(255,255,255,.22);color:#fff}
+#geo-root .tmode .tic svg.i{width:24px;height:24px}
+#geo-root .tmode .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#geo-root .tmode b{font-family:var(--font-head);font-weight:800;font-size:19px;line-height:1.05}
+#geo-root .tmode small{font-size:12.5px;font-weight:800;color:var(--ink-soft);line-height:1.2}
+#geo-root .tmode.main small{color:rgba(255,255,255,.9)}
+#geo-root .tmode .go{width:30px;height:30px;flex-shrink:0;display:grid;place-items:center}
+#geo-root .tbtns{display:flex;gap:6px}
+#geo-root .tbtns button{flex:1;min-height:44px;padding:0 6px;border-radius:14px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);font-weight:900;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(19,78,74,.08)}
+#geo-root .tbtns button:active{transform:scale(.96)}
+#geo-root .tbtns button svg.i{width:15px;height:15px}
+#geo-root .pzpick{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
+#geo-root .pzarea{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:22px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);transition:transform .2s var(--spring)}
+#geo-root .pzarea:active{transform:scale(.97)}
+#geo-root .pzarea .pv{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+#geo-root .pzarea .pv svg{height:100%;max-height:220px;width:auto;max-width:100%;display:block}
+#geo-root .pzarea{min-height:0;overflow:hidden}
+#geo-root .pzarea b{font-family:var(--font-head);font-weight:800;font-size:19px}
+#geo-root .pzarea small{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+#geo-root div.pzarea:active{transform:none}
+#geo-root .pzlv{display:flex;flex-direction:column;gap:5px;width:100%}
+#geo-root .pzlv button{min-height:44px;border-radius:14px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);font-weight:900;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;box-shadow:0 2px 6px rgba(19,78,74,.08)}
+#geo-root .pzlv button:active{transform:scale(.96)}
+#geo-root .pzlv button svg.i{width:15px;height:15px}
+#geo-root .pzlv button .done{color:#16a34a}
+#geo-root .pzlv button .done svg.i{stroke-width:3.2}
+#geo-root .gm path.ls.slotb{fill:#e9eef5;stroke:#7c8aa0;stroke-width:1.3px}
+#geo-root .areas .ahead{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:5px;padding:0 4px}
+#geo-root .areas .ahead svg.i{width:15px;height:15px}
+#geo-root .arow .ago{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
+#geo-root .arow .ago svg.i{width:15px;height:15px;stroke-width:2.8}
+#geo-root .fcard{display:grid;grid-template-columns:62px 1fr;column-gap:10px;align-items:center;height:100%}
+#geo-root .fcard .fsh{width:62px;height:74px;object-fit:contain;justify-self:center}
+#geo-root .fcard .ftx{min-width:0;height:100%;display:flex;flex-direction:column;justify-content:space-evenly}
+#geo-root .thought:has(.fcard){padding:4px 10px 3px 8px;justify-content:flex-start}
+#geo-root .fcard .fmain{font-size:14px;line-height:1.1;font-weight:800;color:var(--ink)}
+#geo-root .fcard .fmain .lead{font-size:14px}
+#geo-root .fcard .ftab{display:grid;grid-template-columns:66px 1fr;column-gap:4px;row-gap:1px;align-items:baseline}
+#geo-root .fcard .ftab b{font-weight:900;font-size:13.5px;line-height:1.1;color:var(--deep);min-width:0}
+#geo-root .fcard .ftab .f2{font-weight:800;color:var(--ink-soft)}
+#geo-root .fcard .fl{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+#geo-root .fcard .fl svg.i{width:13px;height:13px}
+#geo-root .fcard .fspec{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:900;color:#92400e;line-height:1.05}
+#geo-root .fcard .fspec svg.i{width:14px;height:14px;fill:#fbbf24;stroke:#b45309;stroke-width:1.5}
+#geo-root .track{min-height:44px;flex-shrink:0;padding:6px 14px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+#geo-root .trtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:800;font-size:13px;color:var(--ink-soft);white-space:nowrap}
+#geo-root .trtop b{font-family:var(--font-head);font-size:16px;color:var(--deep)}
+#geo-root .bar{position:relative;height:8px;flex-shrink:0;border-radius:999px;background:rgba(19,78,74,.12);overflow:hidden}
+#geo-root .bar .fill{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent-light));transform-origin:left center;transform:scaleX(0);transition:transform .45s var(--smooth)}
+#geo-root .stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;padding:8px;position:relative}
+#geo-root .stage.ok{box-shadow:0 0 0 3px #86efac,var(--shadow-panel)}
+#geo-root .ptop{display:flex;align-items:center;gap:8px;min-height:36px;flex-shrink:0;padding:0 4px}
+#geo-root .prompt{flex:1;min-width:0;font-family:var(--font-head);font-weight:800;color:var(--deep);font-size:20px;line-height:1.12}
+#geo-root .prompt em{font-style:normal;color:var(--accent)}
+#geo-root .qtag{height:22px;padding:0 9px;border-radius:999px;background:var(--tint);color:var(--accent);font-size:11.5px;font-weight:900;display:inline-flex;align-items:center;white-space:nowrap;align-self:flex-start;margin-bottom:2px}
+#geo-root .qfig{flex-shrink:0;width:118px;border-radius:14px;overflow:hidden;background:#fff;border:1.5px solid #e2e8f0;display:flex;flex-direction:column}
+#geo-root .qfig .im{height:78px;overflow:hidden;background:#eef2f6;display:grid;place-items:center}
+#geo-root .qfig img{width:100%;height:100%;object-fit:cover;display:block}
+#geo-root .qfig img.flower{object-position:50% 22%}
+#geo-root .qfig img.shield{object-fit:contain;padding:4px}
+#geo-root .qfig figcaption{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--deep);text-align:center;padding:1px 4px 3px;line-height:1.15}
+#geo-root .ctrl{flex-shrink:0}
+#geo-root .ctrl:empty{display:none}
+#geo-root .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#geo-root .opt{min-height:54px;padding:4px 8px;border-radius:18px;font-family:var(--font-head);font-weight:800;font-size:18px;line-height:1.1;background:var(--glass-strong);color:var(--deep);
+  border:2px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);transition:transform .2s var(--spring),background-color .25s,border-color .25s}
+#geo-root .opt:active{transform:scale(.96)}
+#geo-root .opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
+#geo-root .opt.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+#geo-root .shake{animation:geo-shake .4s ease-in-out}
+#geo-root .dn-head{display:flex;flex-direction:column;align-items:center;text-align:center;flex-shrink:0}
+#geo-root .dn-star{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 8px 20px rgba(245,158,11,.35);animation:geo-pop .6s var(--spring)}
+#geo-root .dn-star svg.i{width:30px;height:30px;fill:#fff;stroke-width:1.6}
+#geo-root .dn-head h2{font-family:var(--font-head);font-weight:800;font-size:28px;color:var(--deep);line-height:1.05;margin:6px 0 0}
+#geo-root .dn-head p{font-weight:800;font-size:14.5px;color:var(--ink-soft);margin:3px 0 0;min-height:20px}
+#geo-root .receipt{display:flex;flex-direction:column;gap:5px;flex-shrink:0;background:#fff !important;padding:10px 12px}
+#geo-root .rc-top{display:flex;flex-direction:column;gap:1px;padding-bottom:6px;border-bottom:1.5px dashed rgba(19,78,74,.2)}
+#geo-root .rc-k{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+#geo-root .rc-k svg.i{width:16px;height:16px}
+#geo-root .rc-when{font-weight:800;font-size:14.5px;color:var(--deep)}
+#geo-root .rc-row span{white-space:nowrap}
+#geo-root .rc-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;font-weight:700;color:var(--ink-soft)}
+#geo-root .rc-row b{font-family:var(--font-head);font-weight:800;font-size:16.5px;color:var(--deep);text-align:right}
+#geo-root .rc-row b.long{font-size:14px;font-family:var(--font-body);font-weight:900;line-height:1.2}
+#geo-root .rc-foot{position:relative;height:56px;display:grid;place-items:center;border:2px dashed rgba(22,163,74,.35);border-radius:14px;margin-top:2px}
+#geo-root .slot-ph{font-size:13px;font-weight:800;color:rgba(21,128,61,.6);transition:opacity .2s}
+#geo-root .slot-ph.off{opacity:0}
+#geo-root .stamp{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;opacity:0}
+#geo-root .stamp.on{animation:geo-stamp .55s cubic-bezier(.2,1.4,.4,1) both}
+#geo-root .st-in{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 10px;border:3px solid #16a34a;border-radius:12px;color:#15803d;transform:rotate(-5deg);background:rgba(240,253,244,.9)}
+#geo-root .st-in svg.i{width:24px;height:24px;stroke-width:3.2}
+#geo-root .st-tx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+#geo-root .st-in b{font-size:14.5px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+#geo-root .st-in small{font-size:12px;font-weight:800}
+#geo-root .dn-ask{text-align:center;font-weight:900;font-size:15px;color:var(--deep);margin:0;flex-shrink:0;min-height:20px}
+#geo-root .hold{position:relative;overflow:hidden;min-height:56px;flex-shrink:0;border-radius:999px;border:2px solid #16a34a;background:#fff;color:#15803d;
+  font-weight:900;font-size:16px;touch-action:none}
+#geo-root .hold-fill{position:absolute;inset:0;background:linear-gradient(90deg,#bbf7d0,#4ade80);transform:scaleX(0);transform-origin:left center}
+#geo-root .hold.holding .hold-fill{transform:scaleX(1);transition:transform 1.5s linear}
+#geo-root .hold-t{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+#geo-root .hold.done{background:#dcfce7}
+#geo-root .hold:disabled{opacity:1}
+#geo-root .tdmap{flex:1;min-height:0;padding:6px;display:flex;flex-direction:column;gap:4px}
+#geo-root .tdleg{display:flex;justify-content:center;gap:14px;font-size:12px;font-weight:800;color:var(--ink-soft);flex-shrink:0}
+#geo-root .tdleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+#geo-root .sumcard{flex-shrink:0;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+#geo-root .pzboard{flex:1;min-height:0;padding:6px;display:flex}
+#geo-root .pzboard .mapbox{background:linear-gradient(180deg,#f6fbfd,#edf6fa)}
+#geo-root .tray{flex-shrink:0;height:106px;display:flex;align-items:stretch;gap:8px;padding:8px}
+#geo-root .tpiece{flex:1;min-width:0;border-radius:16px;background:#fff;border:1.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;cursor:grab;transition:opacity .15s,transform .2s var(--spring)}
+#geo-root .tpiece svg{width:62px;height:62px;overflow:visible;pointer-events:none}
+#geo-root .tpiece .tn{font-family:var(--font-head);font-weight:800;font-size:13.5px;line-height:1;color:var(--deep);white-space:nowrap;pointer-events:none}
+#geo-root .floatpiece .fltag rect{fill:var(--deep)}
+#geo-root .floatpiece .fltag text{font-family:var(--font-body);font-weight:900;font-size:14px;fill:#fff;text-anchor:middle;dominant-baseline:central}
+#geo-root .tpiece svg path{stroke:rgba(40,40,40,.6);stroke-width:1px;vector-effect:non-scaling-stroke}
+#geo-root .tpiece.lift{opacity:.2}
+#geo-root .tpiece.empty{border-style:solid;border-color:transparent;background:rgba(255,255,255,.4)}
+#geo-root .traycount{display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;flex-shrink:0;font-weight:800;font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.1}
+#geo-root .traycount b{font-family:var(--font-head);font-size:24px;color:var(--deep)}
+#geo-root .floatpiece{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible}
+#geo-root .floatpiece path{stroke:rgba(30,30,30,.7);stroke-width:1.2px;vector-effect:non-scaling-stroke;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
+#geo-root .bhead{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:8px 14px;min-height:56px}
+#geo-root .bhead b{font-family:var(--font-head);font-weight:800;font-size:22px;color:var(--deep)}
+#geo-root .bhead .bar{flex:1}
+#geo-root .bhead span{font-weight:900;font-size:14px;color:var(--ink-soft);white-space:nowrap}
+#geo-root .bfull{flex-shrink:0;display:flex;align-items:center;gap:8px;justify-content:center;min-height:40px;border-radius:14px;background:linear-gradient(90deg,#fef3c7,#fde68a);color:#92400e;font-weight:900;font-size:14px}
+#geo-root .bfull svg.i{width:18px;height:18px;fill:#f59e0b;stroke:#b45309;stroke-width:1.4}
+#geo-root .binder{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,minmax(88px,1fr));gap:6px;padding:2px}
+#geo-root .bcard{position:relative;border-radius:12px;background:#fff;border:2px solid var(--bc,#e2e8f0);box-shadow:0 3px 8px rgba(19,78,74,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;overflow:hidden;transition:transform .2s var(--spring)}
+#geo-root .bcard:active{transform:scale(.94)}
+#geo-root .bcard img{width:46px;height:54px;object-fit:contain}
+#geo-root .bcard .bn.long{font-size:8.2px}
+#geo-root .bcard .bn{font-size:9px;letter-spacing:-.15px;font-weight:900;color:var(--deep);line-height:1.05;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#geo-root .bcard .bq{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-head);font-weight:800;font-size:24px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);padding-bottom:4px}
+#geo-root .bcard.lock{background:repeating-linear-gradient(135deg,#eef1f5 0 6px,#e6eaf0 6px 12px);border-color:#d5dbe3;box-shadow:none}
+#geo-root .bcard.lock svg{width:40px;height:47px}
+#geo-root .bcard.lock{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ld) 35%,#eef1f5) 0 6px,color-mix(in srgb,var(--ld) 22%,#e6eaf0) 6px 12px)}
+#geo-root .bcard.lock svg path:first-child{fill:color-mix(in srgb,var(--ld) 70%,#94a3b8)}
+#geo-root .bcard.fresh{animation:geo-pop .6s var(--spring)}
+#geo-root .bcard.lvl-1{--bc:#c2733a}
+#geo-root .bcard.lvl-2{--bc:#94a3b8;background:linear-gradient(160deg,#fff,#f1f5f9)}
+#geo-root .bcard.lvl-3{--bc:#f59e0b;background:linear-gradient(160deg,#fffbeb,#fef3c7);box-shadow:0 0 0 1px #fcd34d,0 4px 12px rgba(245,158,11,.25)}
+#geo-root .bcard .bmd{position:absolute;top:2px;right:2px;width:20px;height:20px}
+#geo-root .bhead small{font-weight:900;font-size:13px;color:var(--ink-soft);white-space:nowrap}
+#geo-root .blegend{flex-shrink:0;display:flex;justify-content:space-between;gap:4px;padding:0 4px}
+#geo-root .blegend span{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.1}
+#geo-root .blegend i{width:20px;height:20px;flex-shrink:0;display:block}
+#geo-root .bc-lvl{display:flex;gap:10px;align-items:flex-start;border-radius:16px;background:#f8fafc;border:1.5px solid #e2e8f0;padding:8px 10px}
+#geo-root .bc-lvl .lm{width:38px;height:38px;flex-shrink:0}
+#geo-root .bc-lvl b{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);display:block;line-height:1.1}
+#geo-root .bc-lvl p{font-size:13px;font-weight:800;color:var(--ink-soft);line-height:1.25}
+#geo-root .kchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+#geo-root .kchips span{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:900;padding:2px 8px;border-radius:999px;background:#eef2f6;color:#64748b}
+#geo-root .kchips span.ok{background:#dcfce7;color:#15803d}
+#geo-root .kchips svg.i{width:12px;height:12px;stroke-width:3}
+#geo-root .gmodal{position:absolute;inset:0;z-index:30;background:rgba(19,30,50,.42);display:flex;align-items:center;justify-content:center;padding:16px;animation:geo-fadein .2s both}
+#geo-root .bigcard{width:100%;max-width:350px;border-radius:26px;background:#fff;border:4px solid var(--bc,#e2e8f0);box-shadow:0 20px 50px rgba(0,0,0,.25);padding:12px;display:flex;flex-direction:column;gap:8px;animation:geo-cardin .45s var(--spring) both}
+#geo-root .bigcard .bc-top{display:flex;align-items:center;gap:8px}
+#geo-root .bigcard .bc-top .sh-name b{font-size:24px}
+#geo-root .bigcard .bc-shield{display:flex;justify-content:center;align-items:center;height:118px}
+#geo-root .bigcard .bc-shield img{max-height:118px;max-width:110px}
+#geo-root .bigcard .bc-lock{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;text-align:center;font-weight:800;color:var(--ink-soft);font-size:15px}
+#geo-root .bigcard .bc-lock svg{width:80px;height:96px}
+#geo-root .bigcard .bigq{position:relative;display:grid;place-items:center}
+#geo-root .bigcard .bigq svg path:first-child{fill:color-mix(in srgb,var(--ld) 70%,#94a3b8)}
+#geo-root .bigcard .bigq b{position:absolute;font-family:var(--font-head);font-size:40px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+#geo-root .cred{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px;display:flex;flex-direction:column;gap:4px;-webkit-user-select:text;user-select:text}
+#geo-root .cred h3{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);margin:8px 2px 2px}
+#geo-root .cred .intro{font-size:13.5px;font-weight:700;color:var(--ink-soft);line-height:1.35;padding:2px}
+#geo-root .crow{display:flex;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid #eef2f6}
+#geo-root .crow .ct{width:40px;height:40px;border-radius:10px;overflow:hidden;background:#f1f5f9;flex-shrink:0;display:grid;place-items:center}
+#geo-root .crow .ct img{width:100%;height:100%;object-fit:cover}
+#geo-root .crow .ct img.shield{object-fit:contain;padding:2px}
+#geo-root .crow .cx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.2}
+#geo-root .crow .cx b{font-size:13.5px;font-weight:900;color:var(--deep)}
+#geo-root .crow .cx span{font-size:12px;font-weight:700;color:var(--ink-soft);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#geo-root .crow a{font-size:12px;font-weight:900;min-height:44px;min-width:44px;display:grid;place-items:center;flex-shrink:0;text-decoration:none}
+#geo-root .celebrate{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
+  background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.96),rgba(255,255,255,.84) 60%,rgba(240,253,250,.8));animation:geo-fadein .3s both;overflow:hidden}
+#geo-root .celebrate .gburst{width:150px;height:150px;animation:geo-pop .7s var(--spring) both}
+#geo-root .celebrate h2{font-family:var(--font-head);font-weight:800;font-size:30px;line-height:1.05;color:var(--deep)}
+#geo-root .celebrate p{font-weight:800;font-size:15.5px;color:var(--ink-soft);max-width:300px}
+#geo-root .celebrate .cbtns{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;margin-top:6px}
+#geo-root .confetti{position:absolute;top:-20px;width:9px;height:14px;border-radius:2px;animation:geo-fall linear both;pointer-events:none}
+@keyframes geo-scrin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes geo-fadein{from{opacity:0}to{opacity:1}}
+@keyframes geo-cardin{0%{transform:scale(.6) rotateY(70deg);opacity:0}100%{transform:none;opacity:1}}
+@keyframes geo-bubblein{from{transform:scale(.92) translateY(4px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes geo-chipin{0%{transform:scale(.4);opacity:0}65%{transform:scale(1.1);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes geo-pop{0%{transform:scale(.5);opacity:.2}65%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes geo-blink{from{opacity:1}to{opacity:.12}}
+@keyframes geo-markpulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes geo-foundring{0%{stroke-width:9px;opacity:.9}100%{stroke-width:2px;opacity:0}}
+@keyframes geo-pindrop{0%{transform:translateY(-14px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes geo-ripple{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.4);opacity:0}}
+@keyframes geo-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+@keyframes geo-stamp{0%{opacity:0;transform:scale(2.4)}60%{opacity:1;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+@keyframes geo-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(900px) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){#geo-root *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}}
+</style>
+<div class="app-header">
+  <button class="btn-back" id="g-backBtn">Tillbaka</button>
+  <span class="header-title" id="g-title">Geografi</span>
+  <div class="hdr-r" id="g-hdrR"></div>
+</div>
+<div class="gscreens">
+    <!-- ═════ GEOGRAFI-MENYN (D24 ✎) ═════ -->
+    <section class="gs" id="g-scr-geo">
+      <div class="gtiles" id="g-gtiles"></div>
+      <div class="bubble b60"><div class="thought" id="g-geoBubble"></div></div>
+    </section>
+
+    <!-- ═════ SVERIGE ═════ -->
+    <section class="gs" id="g-scr-sverige">
+      <button class="gc sv-main" id="g-svMain"></button>
+      <div class="gc sv-soon" id="g-svSjo"></div>
+      <div class="gc sv-soon" id="g-svStad"></div>
+      <div class="bubble b60"><div class="thought" id="g-svBubble"></div></div>
+    </section>
+
+    <!-- ═════ SVERIGES LANDSKAP: HEMVYN ═════ -->
+    <section class="gs" id="g-scr-hub">
+      <div class="gc hubtop">
+        <div class="hubmm"><div class="mmw" id="g-hubMm"></div><div class="hublegend" id="g-hubLegend"></div></div>
+        <div class="areas" id="g-areas"></div>
+      </div>
+      <div class="doors" id="g-doors"></div>
+      <div class="bubble b60"><div class="thought" id="g-hubBubble"></div></div>
+    </section>
+
+    <!-- ═════ UTFORSKA ═════ -->
+    <section class="gs" id="g-scr-explore">
+      <div class="mapbox" id="g-exMap"><span class="maphint" id="g-exHint">Tryck på ett landskap. Nyp för att zooma.</span></div>
+      <div class="sheet" id="g-sheet"></div>
+    </section>
+
+    <!-- ═════ TRÄNA: VAL ═════ -->
+    <section class="gs" id="g-scr-train">
+      <div class="gc ordrow" id="g-ordrow"></div>
+      <div class="tmodes" id="g-modes"></div>
+      <div class="bubble b60"><div class="thought" id="g-trBubble"></div></div>
+    </section>
+
+    <!-- ═════ SPELA (träning och test) ═════ -->
+    <section class="gs" id="g-scr-play">
+      <div class="gc track"><div class="trtop"><span id="g-psL"></span><span id="g-psR"></span></div><div class="bar"><i class="fill" id="g-psFill"></i></div></div>
+      <div class="gc stage" id="g-pStage">
+        <div class="ptop" id="g-pTop"></div>
+        <div class="mapbox" id="g-playMap"></div>
+      </div>
+      <div class="ctrl" id="g-pCtrl"></div>
+      <div class="bubble b122"><div class="thought" id="g-pBubble"></div></div>
+      <div class="slot"><button class="gb gb-p" id="g-pMain"></button></div>
+    </section>
+
+    <!-- ═════ TRÄNINGEN KLAR ═════ -->
+    <section class="gs" id="g-scr-trainend"></section>
+
+    <!-- ═════ PUSSLET ═════ -->
+    <!-- ═════ PUSSEL ELLER TEST: VÄLJ OMRÅDE (ett tryck startar, D30) ═════ -->
+    <section class="gs" id="g-scr-pick">
+      <div class="pzpick" id="g-pick"></div>
+      <div class="bubble b60"><div class="thought" id="g-pickBubble"></div></div>
+    </section>
+
+    <section class="gs" id="g-scr-puzzle">
+      <div class="gc pzboard"><div class="mapbox" id="g-pzMap"></div></div>
+      <div class="gc tray" id="g-tray"></div>
+      <div class="bubble b60"><div class="thought" id="g-pzBubble"></div></div>
+    </section>
+
+    <!-- ═════ SAMLARPÄRMEN ═════ -->
+    <section class="gs" id="g-scr-binder">
+      <div class="gc bhead" id="g-bHead"></div>
+      <div class="blegend" id="g-bLegend"></div>
+      <div class="bfull" id="g-bFull" hidden></div>
+      <div class="binder" id="g-binder"></div>
+      <div class="bubble b60"><div class="thought" id="g-bBubble"></div></div>
+    </section>
+
+    <!-- ═════ TEST: RESULTATET ═════ -->
+    <section class="gs" id="g-scr-testdone">
+      <div class="dn-head"><h2>Testet är klart!</h2><p id="g-tdPraise"></p></div>
+      <div class="gc tdmap"><div class="mapbox" id="g-tdMap"></div><div class="tdleg"><span><i style="background:#86efac"></i>Rätt</span><span><i style="background:#fde68a"></i>Öva mer</span></div></div>
+      <div class="gc receipt" id="g-rc"></div>
+      <p class="dn-ask" id="g-dnAsk"></p>
+      <button class="hold" id="g-hold" aria-label="Sett av en vuxen. Håll inne en och en halv sekund."></button>
+      <button class="gb gb-s" id="g-tdHub" style="min-height:48px;flex-shrink:0"></button>
+    </section>
+
+    <!-- ═════ BILDKÄLLORNA (D29) ═════ -->
+    <section class="gs" id="g-scr-credits">
+      <div class="gc cred" id="g-cred"></div>
+    </section>
+  
+    <!-- ═════ INSTÄLLNINGAR (D36): hemlandskapet, för en vuxen ═════ -->
+    <section class="gs" id="g-scr-settings">
+      <div class="gc setcard" id="g-setCard"></div>
+      <div class="bubble b60"><div class="thought" id="g-setBubble"></div></div>
+    </section>
+  </div>
+<div id="g-overlay"></div>`;
+
+    /* ═══════════════════════════════════════════════════════════
+       GRUNDER
+    ═══════════════════════════════════════════════════════════ */
+    const $ = id => document.getElementById('g-' + id);   // modulens id:n har prefixet g-
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const LEAD = 280;                                    // texten först, rörelsen sen
+    const RM = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
+    const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+    const ICON = {
+      back:'<path d="M15 5l-7 7 7 7"/>',
+      next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+      again:'<path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3M4.5 17.5V12H10"/>',
+      check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+      x:'<path d="M6 6l12 12M18 6L6 18"/>',
+      play:'<path d="M8 5.5l11 6.5-11 6.5z"/>',
+      hand:'<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4a1.5 1.5 0 0 1 3 0v6.5"/><path d="M15 10.5V6a1.5 1.5 0 0 1 3 0v8a6.5 6.5 0 0 1-6.5 6.5h-.8a6 6 0 0 1-4.6-2.2L3.6 15a1.6 1.6 0 0 1 2.4-2.1L9 15V8a1.5 1.5 0 0 1 3 0"/>',
+      star:'<path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17.2l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+      info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.6v.2"/>',
+      compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+      target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/>',
+      puzzle:'<path d="M5 8.5h3.2a2.3 2.3 0 1 1 4.4 0H16V12a2.3 2.3 0 1 1 0 4.4V20H5v-3.6a2.3 2.3 0 1 0 0-4.4z"/>',
+      cards:'<rect x="3.5" y="6" width="11" height="14" rx="2"/><path d="M8 4h10.5a2 2 0 0 1 2 2v12"/>',
+      test:'<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 3h6v3H9z"/><path d="M8.5 12.5l2 2 4-4"/>',
+      fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+      lock:'<rect x="5.5" y="10.5" width="13" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+      gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+      pin:'<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+      city:'<path d="M4 20V10l5-3v13M9 20V5l6 3v12M15 20v-8h5v8M3 20h18"/>',
+      flower:'<circle cx="12" cy="9" r="2.2"/><path d="M12 6.8c0-2.5 3-3.3 3-1 0 1.4-1.4 2.3-3 3.2M12 6.8c0-2.5-3-3.3-3-1 0 1.4 1.4 2.3 3 3.2M14.2 9c2.4 0 3.2 3 1 3-1.4 0-2.3-1.4-3.2-3M9.8 9c-2.4 0-3.2 3-1 3 1.4 0 2.3-1.4 3.2-3M12 11.2V21M12 17c-2.5 0-4-1.5-4.5-3.5 2.2 0 3.8.9 4.5 3.5"/>',
+      paw:'<circle cx="8" cy="9" r="1.7"/><circle cx="16" cy="9" r="1.7"/><circle cx="5.5" cy="13.2" r="1.5"/><circle cx="18.5" cy="13.2" r="1.5"/><path d="M12 12.5c-2.6 0-5 3.4-5 5.3 0 1.4 1.3 2.2 2.6 1.8 1-.3 1.6-.6 2.4-.6s1.4.3 2.4.6c1.3.4 2.6-.4 2.6-1.8 0-1.9-2.4-5.3-5-5.3z"/>',
+      shield:'<path d="M12 3l7 2.5v6c0 4.5-3 7.8-7 9.5-4-1.7-7-5-7-9.5v-6z"/>',
+      ruler:'<rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>',
+      people:'<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.5 14.2a4.5 4.5 0 0 1 5.5 4.3"/>',
+      bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+      shuffle:'<path d="M3.5 7h3.5c4 0 6 10 10 10h3.5M17.5 14l3 3-3 3M3.5 17h3.5c1.5 0 2.7-1.4 3.7-3.2M13.3 10.2C14.3 8.4 15.5 7 17 7h3.5M17.5 4l3 3-3 3"/>',
+      straight:'<path d="M4 12h15M14 7l5 5-5 5"/>',
+      water:'<path d="M3 10c2 0 2-1.5 4.5-1.5S9.5 10 12 10s2.5-1.5 4.5-1.5S19 10 21 10M3 15c2 0 2-1.5 4.5-1.5S9.5 15 12 15s2.5-1.5 4.5-1.5S19 15 21 15"/>',
+      eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+      repeat:'<path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11.5V10a4 4 0 0 1 4-4h13"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 12.5V14a4 4 0 0 1-4 4h-13"/>',
+      clock0:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/><path d="M5 5l14 14"/>',
+    };
+    const svg = (k, style = '') => `<svg class="i" viewBox="0 0 24 24"${style ? ` style="${style}"` : ''}>${ICON[k]}</svg>`;
+    const shuffle = a => { const o = a.slice(); for (let i = o.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    let token = 0, busy = false;
+    const SAID = new Set();     // allt som sagts i bubblorna (för MOCK.allTexts)
+
+    /* ═══════════════════════════════════════════════════════════
+       UNDERLAGET — appens egna data (D35):
+       js/geografi-data.js (genererad ur referens/), js/geografi-logic.js (ren logik, testad),
+       kartan och bilderna i assets/geografi/sverige/. Numren används bara internt (D33).
+    ═══════════════════════════════════════════════════════════ */
+    const ASSET = 'assets/geografi/sverige/';
+    const { LANDSKAP, BY, ALL, NAME, F, LANDSDELAR, NRS_OF, AREAS, areaNrs, AREA_NAME, AREA_IN,
+      antal, gen, cap, kanTxt, NB, NEAR, isNear, CUE, ytaText, invText, cities, specialFacts, factOf,
+      MODES, PRAISE, MODE_NAME, BILD_TITLE, bildName, usesOptions, promptHTML, boxMain, answerLine, optSteps,
+      nameOptions, GOLD_KINDS, LEVEL, LEVEL_NAME, kindKey } = GL;
+    const BILDER = GD.bilder;
+    let PATHS = [];
+    const img = (nr, kind) => ASSET + F(nr).bilder[kind];
+    async function loadMap(){
+      const svgTxt = await fetch(ASSET + 'karta.svg').then(r => { if (!r.ok) throw new Error('kartan'); return r.text(); });
+      const doc = new DOMParser().parseFromString(svgTxt, 'image/svg+xml');
+      PATHS = [...doc.querySelectorAll('path')].map(p => [((p.getAttribute('style') || '').match(/fill:\s*(#[0-9a-fA-F]{3,6})/) || [])[1] || p.getAttribute('fill') || '#ddd', p.getAttribute('d')]);
+    }
+    /* Beskärningen av blomplanscherna: texten längst ner ska aldrig synas (bilder.json, obs), blomman ska synas.
+       Lodrät position i procent per plansch, satt för hand efter en kontaktbild av alla 25 (19/10); annars 22 %. */
+    const FLOWER_Y = { 1:3, 2:3, 5:2, 6:15, 9:8, 11:8, 13:2, 14:12, 16:6, 17:6, 18:8, 22:8, 25:3 };
+    const flowerPos = nr => `object-position:50% ${FLOWER_Y[nr] ?? 22}%`;
+    const LAKES = [{ text:'Vänern', x:88, y:885 }, { text:'Vättern', x:156, y:930 }];   // punkter utan land, kontrollerade i förra mockupen
+
+    /* ═══════════════════════════════════════════════════════════
+       MÄTNINGEN (en gång, i en dold SVG): bbox per landskap, kantpunkter
+       och en inre punkt (punkten i rutnätet längst från kanten) för namnet.
+    ═══════════════════════════════════════════════════════════ */
+    const NS = 'http://www.w3.org/2000/svg';
+    const MEAS = {};
+    let MS = null, WORLD = null;
+    function measure(){
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:absolute;left:-10000px;top:0;width:512px;height:1179px;visibility:hidden;pointer-events:none';
+      holder.innerHTML = `<svg xmlns="${NS}" width="512" height="1179" viewBox="0 0 512 1179">${PATHS.map(([f, d]) => `<path d="${d}"/>`).join('')}</svg>`;
+      document.body.appendChild(holder);
+      MS = holder.firstChild;
+      const ps = MS.querySelectorAll('path'), pt = MS.createSVGPoint();
+      for (const l of LANDSKAP){
+        const p = ps[l.path], b = p.getBBox(), len = p.getTotalLength();
+        const n = Math.ceil(len / 2), s = new Float32Array(n * 2);
+        for (let i = 0; i < n; i++){ const q = p.getPointAtLength(i * len / n); s[2 * i] = q.x; s[2 * i + 1] = q.y; }
+        const edge = (x, y) => { let m = Infinity; for (let i = 0; i < s.length; i += 2){ const dx = s[i] - x, dy = s[i + 1] - y, d = dx * dx + dy * dy; if (d < m) m = d; } return Math.sqrt(m); };
+        let best = null; const st = Math.max(1, Math.min(b.width, b.height) / 30);
+        for (let x = b.x + st / 2; x < b.x + b.width; x += st) for (let y = b.y + st / 2; y < b.y + b.height; y += st){
+          pt.x = x; pt.y = y; if (!p.isPointInFill(pt)) continue;
+          const d = edge(x, y); if (!best || d > best.r) best = { x, y, r:d };
+        }
+        const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+        pt.x = cx; pt.y = cy;
+        const cIn = p.isPointInFill(pt), cEdge = cIn ? edge(cx, cy) : 0;
+        const useCenter = cIn && cEdge >= 0.6 * best.r;
+        MEAS[l.nr] = { bbox:{ x:b.x, y:b.y, w:b.width, h:b.height }, s, r:best.r, el:p, label:useCenter ? { x:cx, y:cy } : { x:best.x, y:best.y } };
+      }
+      WORLD = ubox(ALL, 0);
+    }
+    const insideNr = (nr, x, y) => { const pt = MS.createSVGPoint(); pt.x = x; pt.y = y; return MEAS[nr].el.isPointInFill(pt); };
+    const edgeDist = (nr, x, y) => { const s = MEAS[nr].s; let m = Infinity; for (let i = 0; i < s.length; i += 2){ const dx = s[i] - x, dy = s[i + 1] - y, d = dx * dx + dy * dy; if (d < m) m = d; } return Math.sqrt(m); };
+    function ubox(nrs, pad = 10){
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const n of nrs){ const b = MEAS[n].bbox; x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h); }
+      return { x:x0 - pad, y:y0 - pad, w:x1 - x0 + 2 * pad, h:y1 - y0 + 2 * pad };
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       KARTMOTORN ("som Apples kartor")
+       - En kamera: skärm = k · karta + t. Linjerna har fast tjocklek (non-scaling-stroke);
+         namn, lappar och nålen ritas i skärmens koordinater och har alltid samma storlek.
+       - Ett finger drar, två nyper (zoomen kring mittpunkten), mushjulet zoomar kring pekaren. Dubbeltryck zoomar
+         inte (D30). Släpp i fart: kartan glider vidare och bromsar mjukt.
+       - Gränser: zoomen mellan hela Sverige och ~12 gånger det; kartan kan inte dras bort
+         (kanten fjädrar och studsar tillbaka).
+       - Tryck = en pekare, rörelse under 10 px (mus 5 px), kortare än 400 ms, och kartan stod still när fingret
+         kom ner (ett tryck som stoppar en glidande karta är inget val). Trycket räknas direkt.
+       - Träffen, i tre steg:
+         1. Ett litet landskap (inre bredd under 44 px på skärmen) äger en skiva med diametern 44 px runt sin
+            mittpunkt (där namnet står); ligger flera skivor under fingret vinner den närmaste mittpunkten.
+         2. Annars landskapet under fingret.
+         3. Annars, ute i havet: det närmaste landskapet inom 12 px, eller inom en kant som gör ett litet
+            landskap 44 px brett (Öland, Gotland, Bohuslän går att träffa från vattnet).
+         Skivan tar bara det som ligger nära det lilla landskapets mitt, så grannarna behåller sina ytor.
+    ═══════════════════════════════════════════════════════════ */
+    const MISS_R = 12, DISC_R = 22;
+    const haloR = (n, k) => Math.max(0, (44 - 2 * MEAS[n].r * k) / 2) + 6;
+    const MAPS = {};
+    function GeoMap(host, o = {}){
+      const opt = Object.assign({ interactive:true }, o);
+      host.insertAdjacentHTML('beforeend', `<svg class="gm${opt.interactive ? '' : ' static'}" xmlns="${NS}"><g class="cam"><g class="g-out"></g><g class="g-halo"></g><g class="g-base"></g><g class="g-fx"></g></g><g class="g-disc"></g><g class="g-lab"></g><g class="g-chip"></g><g class="g-tap"></g></svg>`);
+      const el = host.querySelector('svg.gm'), cam = el.querySelector('.cam');
+      const gOut = el.querySelector('.g-out'), gDisc = el.querySelector('.g-disc'), gBase = el.querySelector('.g-base'), gHalo = el.querySelector('.g-halo'), gFx = el.querySelector('.g-fx'), gLab = el.querySelector('.g-lab'), gChip = el.querySelector('.g-chip'), gTap = el.querySelector('.g-tap');
+      const P = {}, LB = {};
+      for (const l of LANDSKAP){
+        const [f, d] = PATHS[l.path];
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('d', d); p.setAttribute('class', 'ls'); p.dataset.nr = l.nr; p.style.setProperty('--f', f);
+        gBase.appendChild(p); P[l.nr] = p;
+        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'lab'); g.style.display = 'none';
+        g.innerHTML = '<text></text>'; gLab.appendChild(g); LB[l.nr] = g;
+      }
+      const M = { el, P, k:1, tx:0, ty:0, W:0, H:0, inset:0, home:null, onTap:null, onCam:null, labelFor:null, chips:[], hideLab:new Set(), halo:false, ready:false, taps:0, ignored:0 };
+      const visH = () => Math.max(60, M.H - M.inset);
+      const kMin = () => Math.min((M.W - 16) / WORLD.w, (visH() - 16) / WORLD.h) * 0.9;
+      const kMax = () => Math.max(kMin() * 12, 4);
+      M.kMin = kMin; M.kMax = kMax;
+      function lim(k){
+        const pad = 10;
+        const a = pad - k * WORLD.x, b = M.W - pad - k * (WORLD.x + WORLD.w);
+        const c = pad - k * WORLD.y, d = visH() - pad - k * (WORLD.y + WORLD.h);
+        return { x0:Math.min(a, b), x1:Math.max(a, b), y0:Math.min(c, d), y1:Math.max(c, d) };
+      }
+      const rub = (v, lo, hi) => v < lo ? lo - (lo - v) * 0.33 : v > hi ? hi + (v - hi) * 0.33 : v;
+      const kSoft = k => { const a = kMin(), b = kMax(); return k > b ? b * Math.pow(k / b, 0.3) : k < a ? a * Math.pow(k / a, 0.3) : k; };
+      M.toMap = (sx, sy) => ({ x:(sx - M.tx) / M.k, y:(sy - M.ty) / M.k });
+      M.toScreen = (x, y) => ({ x:M.k * x + M.tx, y:M.k * y + M.ty });
+      function fitCam(b, pad = 14, kCap){
+        const k = clamp(Math.min((M.W - 2 * pad) / b.w, (visH() - 2 * pad) / b.h), kMin(), kCap || kMax());
+        return { k, tx:M.W / 2 - k * (b.x + b.w / 2), ty:visH() / 2 - k * (b.y + b.h / 2) };
+      }
+      function apply(){
+        cam.setAttribute('transform', `matrix(${M.k.toFixed(5)} 0 0 ${M.k.toFixed(5)} ${M.tx.toFixed(2)} ${M.ty.toFixed(2)})`);
+        layout();
+        if (M.onCam) M.onCam();
+      }
+      M.apply = apply;
+      /* ── Rörelse: animering, glid ── */
+      let anim = 0, animEnd = null, gl = 0, glV = 0;
+      function stopMotion(){
+        let gliding = false;
+        if (gl){ cancelAnimationFrame(gl); gl = 0; gliding = glV > 0.06; }
+        if (anim){ cancelAnimationFrame(anim); anim = 0; if (animEnd) animEnd(); animEnd = null; }
+        glV = 0;
+        return gliding;
+      }
+      function animTo(t, ms = 320){
+        stopMotion();
+        if (!ms || RM() || !M.W){ M.k = t.k; M.tx = t.tx; M.ty = t.ty; apply(); return Promise.resolve(); }
+        const f = { k:M.k, tx:M.tx, ty:M.ty }, t0 = performance.now();
+        return new Promise(res => {
+          let done = false; const fin = () => { if (done) return; done = true; res(); };
+          animEnd = fin;
+          const tick = now => {
+            const u = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - u, 3);
+            M.k = f.k * Math.pow(t.k / f.k, e); M.tx = f.tx + (t.tx - f.tx) * e; M.ty = f.ty + (t.ty - f.ty) * e;
+            apply();
+            if (u < 1) anim = requestAnimationFrame(tick); else { anim = 0; animEnd = null; fin(); }
+          };
+          anim = requestAnimationFrame(tick);
+          setTimeout(() => { if (!done){ if (anim) cancelAnimationFrame(anim); anim = 0; animEnd = null; M.k = t.k; M.tx = t.tx; M.ty = t.ty; apply(); fin(); } }, ms + 400);   // rAF står still i dolda flikar
+        });
+      }
+      function clampCam(k, tx, ty){ const L = lim(k); return { k, tx:clamp(tx, L.x0, L.x1), ty:clamp(ty, L.y0, L.y1) }; }
+      function settle(fx, fy){
+        const k2 = clamp(M.k, kMin(), kMax());
+        const px = fx ?? M.W / 2, py = fy ?? visH() / 2;
+        const t = clampCam(k2, px - k2 * (px - M.tx) / M.k, py - k2 * (py - M.ty) / M.k);
+        if (Math.abs(t.k - M.k) > 1e-4 || Math.abs(t.tx - M.tx) > 0.5 || Math.abs(t.ty - M.ty) > 0.5) animTo(t, 260);
+      }
+      M.zoomAt = (f, px, py, ms = 300) => { const k2 = clamp(M.k * f, kMin(), kMax()); return animTo(clampCam(k2, px - k2 * (px - M.tx) / M.k, py - k2 * (py - M.ty) / M.k), ms); };
+      function glide(vx, vy){
+        if (Math.hypot(vx, vy) < 0.05){ settle(); return; }
+        let prev = performance.now();
+        const step = now => {
+          const dt = Math.min(34, now - prev); prev = now;
+          M.tx += vx * dt; M.ty += vy * dt;
+          const fr = Math.pow(0.9965, dt); vx *= fr; vy *= fr;
+          const L = lim(M.k);
+          if (M.tx < L.x0 || M.tx > L.x1){ vx *= 0.55; M.tx += (clamp(M.tx, L.x0, L.x1) - M.tx) * 0.2; }
+          if (M.ty < L.y0 || M.ty > L.y1){ vy *= 0.55; M.ty += (clamp(M.ty, L.y0, L.y1) - M.ty) * 0.2; }
+          glV = Math.hypot(vx, vy);
+          apply();
+          if (glV < 0.012){ gl = 0; glV = 0; settle(); return; }
+          gl = requestAnimationFrame(step);
+        };
+        gl = requestAnimationFrame(step);
+      }
+      /* ── Pekarna ── */
+      const ptrs = new Map();
+      let g = null, hist = [], tap = null, lastUp = null;
+      const loc = e => { const r = el.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; };
+      function down(e){
+        if (!opt.interactive) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.cancelable) e.preventDefault();
+        try { el.setPointerCapture(e.pointerId); } catch (_){ }
+        const wasGliding = stopMotion();
+        const p = loc(e), now = performance.now();
+        ptrs.set(e.pointerId, { x:p.x, y:p.y });
+        if (ptrs.size === 1){
+          tap = { id:e.pointerId, x:p.x, y:p.y, t:now, valid:!wasGliding, slop:e.pointerType === 'mouse' ? 5 : 10 };
+          g = { type:'pan', id:e.pointerId, sx:p.x, sy:p.y, tx:M.tx, ty:M.ty };
+          hist = [{ x:p.x, y:p.y, t:now }];
+        } else if (ptrs.size === 2){
+          tap = null;
+          const [a, b] = [...ptrs.values()];
+          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          g = { type:'pinch', d0:Math.max(12, Math.hypot(a.x - b.x, a.y - b.y)), k0:M.k, px:(mx - M.tx) / M.k, py:(my - M.ty) / M.k, mx, my };
+        } else { tap = null; }
+      }
+      function move(e){
+        const q = ptrs.get(e.pointerId); if (!q || !g) return;
+        if (e.cancelable) e.preventDefault();
+        const p = loc(e), now = performance.now(); q.x = p.x; q.y = p.y;
+        if (g.type === 'pan' && e.pointerId === g.id){
+          const dx = p.x - g.sx, dy = p.y - g.sy;
+          if (tap && tap.valid && Math.hypot(dx, dy) <= tap.slop) return;     // inom trycket: kartan står still
+          if (tap) tap.valid = false;
+          const L = lim(M.k);
+          M.tx = rub(g.tx + dx, L.x0, L.x1); M.ty = rub(g.ty + dy, L.y0, L.y1);
+          hist.push({ x:p.x, y:p.y, t:now }); while (hist.length > 2 && now - hist[0].t > 100) hist.shift();
+          apply();
+        } else if (g.type === 'pinch' && ptrs.size >= 2){
+          const [a, b] = [...ptrs.values()];
+          const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          const k = kSoft(g.k0 * d / g.d0), L = lim(k);
+          M.k = k; M.tx = rub(mx - k * g.px, L.x0, L.x1); M.ty = rub(my - k * g.py, L.y0, L.y1); g.mx = mx; g.my = my;
+          apply();
+        }
+      }
+      function up(e){
+        if (!ptrs.has(e.pointerId)) return;
+        const p = loc(e), now = performance.now(), cancel = e.type === 'pointercancel';
+        ptrs.delete(e.pointerId);
+        if (cancel) tap = null;
+        if (g && g.type === 'pinch'){
+          if (ptrs.size === 1){                                    // ett finger kvar: fortsätt som panorering
+            const [id, r] = [...ptrs.entries()][0];
+            const fx = g.mx, fy = g.my;
+            g = { type:'pan', id, sx:r.x, sy:r.y, tx:M.tx, ty:M.ty, fx, fy };
+            hist = [{ x:r.x, y:r.y, t:now }];
+            return;
+          }
+          if (ptrs.size === 0){ const fx = g.mx, fy = g.my; g = null; settle(fx, fy); return; }
+          return;
+        }
+        if (ptrs.size > 0) return;
+        const wasPan = g; g = null;
+        if (tap && tap.valid && tap.id === e.pointerId && now - tap.t < 400 && !cancel){ tap = null; onTapUp(p, now); settle(); return; }
+        tap = null;
+        if (cancel){ settle(); return; }
+        let vx = 0, vy = 0;
+        if (hist.length >= 2 && now - hist[hist.length - 1].t < 60){
+          const a = hist[0], b = hist[hist.length - 1], dt = Math.max(16, b.t - a.t);
+          vx = (b.x - a.x) / dt; vy = (b.y - a.y) / dt;
+          const sp = Math.hypot(vx, vy); if (sp > 3){ vx *= 3 / sp; vy *= 3 / sp; }
+        }
+        glide(vx, vy);
+      }
+      /* Trycket räknas direkt (D30: dubbeltryck zoomar inte). Ett andra tryck på samma ställe inom 350 ms är
+         ett dubbeltryck av misstag och räknas inte, så att samma landskap inte väljs två gånger. */
+      function onTapUp(p, now){
+        if (lastUp && now - lastUp.t < 350 && Math.hypot(p.x - lastUp.x, p.y - lastUp.y) < 30){ lastUp.t = now; M.ignored++; return; }
+        lastUp = { x:p.x, y:p.y, t:now };
+        ripple(p);
+        const nr = M.hit(p.x, p.y);
+        M.taps++; if (M.onTap) M.onTap(nr, p);
+      }
+      function ripple(p){
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('class', 'ripple'); c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 20);
+        gTap.appendChild(c); setTimeout(() => c.remove(), 420);
+      }
+      if (opt.interactive){
+        el.addEventListener('pointerdown', down);
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+        el.addEventListener('lostpointercapture', e => { if (ptrs.has(e.pointerId)) up(e); });
+        el.addEventListener('wheel', e => {
+          e.preventDefault(); stopMotion();
+          const p = loc(e), dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+          const k2 = clamp(M.k * Math.exp(-dy * (e.ctrlKey ? 0.012 : 0.002)), kMin(), kMax());
+          const t = clampCam(k2, p.x - k2 * (p.x - M.tx) / M.k, p.y - k2 * (p.y - M.ty) / M.k);
+          M.k = t.k; M.tx = t.tx; M.ty = t.ty; apply();
+        }, { passive:false });
+      }
+      ['contextmenu', 'dblclick', 'selectstart', 'dragstart'].forEach(ev => el.addEventListener(ev, e => e.preventDefault()));
+
+      /* ── Träffen ── */
+      M.visibleNrs = () => { const a = M.toMap(0, 0), b = M.toMap(M.W, visH()); return ALL.filter(n => { const q = MEAS[n].bbox; return q.x < b.x && q.x + q.w > a.x && q.y < b.y && q.y + q.h > a.y; }); };
+      M.smallNrs = () => M.visibleNrs().filter(n => 2 * MEAS[n].r * M.k < 44);
+      M.hit = function(sx, sy){
+        if (sx < 0 || sy < 0 || sx > M.W || sy > visH()) return null;
+        const { x, y } = M.toMap(sx, sy), k = M.k, vis = M.visibleNrs();
+        let disc = null;
+        for (const n of vis){ if (2 * MEAS[n].r * k >= 44) continue; const L = MEAS[n].label, d = Math.hypot(L.x - x, L.y - y) * k; if (d <= DISC_R && (!disc || d < disc.d)) disc = { n, d }; }
+        if (disc) return disc.n;
+        for (const n of vis) if (insideNr(n, x, y)) return n;
+        let near = null;
+        for (const n of vis){ const small = 2 * MEAS[n].r * k < 44, d = edgeDist(n, x, y) * k; if (d <= (small ? Math.max(MISS_R, haloR(n, k)) : MISS_R) && (!near || d < near.d)) near = { n, d }; }
+        return near ? near.n : null;
+      };
+
+      /* ── Namn, lappar, nål, träffytor: i skärmens koordinater ── */
+      let haloK = 0;
+      function layout(){
+        for (const nr of ALL){
+          const g = LB[nr], spec = M.labelFor && !M.hideLab.has(nr) ? M.labelFor(nr) : null;
+          if (!spec){ if (g.style.display !== 'none') g.style.display = 'none'; continue; }
+          const m = MEAS[nr], size = 2 * m.r * M.k, bw = m.bbox.w * M.k;
+          let text = null, num = false;
+          if (spec.force) text = spec.text;
+          else if (spec.name && size >= 18 && bw >= spec.name.length * 6.6 + 6) text = spec.name;
+          const q = M.toScreen(m.label.x, m.label.y);
+          if (nr === M.pinNr && M.pinOn) q.y += 13;                      // namnet under nålens spets
+          if (!text || q.x < -40 || q.y < -20 || q.x > M.W + 40 || q.y > visH() + 20){ if (g.style.display !== 'none') g.style.display = 'none'; continue; }
+          g.style.display = '';
+          g.setAttribute('transform', `translate(${q.x.toFixed(1)} ${q.y.toFixed(1)})`);
+          const cls = 'lab' + (num ? ' num' : '') + (spec.cls ? ' ' + spec.cls : '');
+          if (g._c !== cls){ g.setAttribute('class', cls); g._c = cls; }
+          if (g._t !== text){ g.firstChild.textContent = text; g._t = text; }
+        }
+        for (const c of M.chips) placeChip(c);
+        if (M.halo){ if (Math.abs(M.k - haloK) / (haloK || 1) > 0.01) drawHalo(); else placeDiscs(); }
+      }
+      M.relayout = layout;
+      function placeChip(c){
+        if (!c.w){ const t = c.g.querySelector('text'); const tw = t ? t.getComputedTextLength() : 0; if (tw){ c.w = tw + (c.kind === 'lake' ? 4 : 18); const r = c.g.querySelector('rect'); r.setAttribute('x', -c.w / 2); r.setAttribute('y', -12); r.setAttribute('width', c.w); r.setAttribute('height', 24); r.setAttribute('rx', 12); } }
+        let x, y;
+        if (c.pin){ const L = MEAS[M.pinNr].label; ({ x, y } = M.toScreen(L.x, L.y)); c.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`); return; }
+        if (typeof c.where === 'number'){
+          const m = MEAS[c.where]; ({ x, y } = M.toScreen(m.label.x, m.label.y));
+          const R = m.r * M.k;
+          if (c.below || 2 * R < 44) y += Math.max(R, 4) + 15;
+        } else { ({ x, y } = M.toScreen(c.where.x, c.where.y)); y += c.dy || 0; }
+        const w = c.w || 60;
+        x = clamp(x, w / 2 + 4, M.W - w / 2 - 4); y = clamp(y, 16, visH() - 16);
+        c.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      }
+      M.chip = function(where, text, kind = 'def', o = {}){
+        if (typeof where === 'number') M.unchip(where);
+        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', `mchip k-${kind}`);
+        g.innerHTML = `<g class="in"><rect/><text>${esc(text)}</text></g>`;
+        gChip.appendChild(g);
+        const c = { g, where, kind, below:!!o.below, dy:o.dy || 0, w:0 };
+        M.chips.push(c);
+        if (typeof where === 'number'){ M.hideLab.add(where); layout(); } else placeChip(c);
+        return c;
+      };
+      M.unchip = nr => { M.chips = M.chips.filter(c => { if (c.where === nr && !c.pin){ c.g.remove(); return false; } return true; }); M.hideLab.delete(nr); };
+      M.clearChips = () => { for (const c of M.chips) c.g.remove(); M.chips = []; M.hideLab.clear(); layout(); };
+      M.pin = function(on, nr){
+        M.pinNr = nr || M.pinNr;
+        M.chips = M.chips.filter(c => { if (c.pin){ c.g.remove(); return false; } return true; });
+        M.pinOn = !!on && !!M.pinNr;
+        if (!M.pinOn){ layout(); return; }
+        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'pin');
+        g.innerHTML = `<g class="in"><path d="M0 0c-5-6-9-10-9-15a9 9 0 0 1 18 0c0 5-4 9-9 15z" fill="#dc2626" stroke="#fff" stroke-width="2"/><circle cy="-15" r="3.4" fill="#fff"/>
+          <g transform="translate(50 -16)"><rect x="-38" y="-11" width="76" height="22" rx="11" fill="#dc2626"/><text text-anchor="middle" dominant-baseline="central" style="font:900 12px var(--font-body);fill:#fff">Här bor du</text></g></g>`;
+        gChip.appendChild(g);
+        const c = { g, pin:true, where:null }; M.chips.push(c); placeChip(c);
+      };
+      M.cls = (nr, c, on = true) => P[nr].classList.toggle(c, !!on);
+      M.fx = (nr, kind) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', PATHS[BY[nr].path][1]); p.setAttribute('class', `fx fx-${kind}`); p.dataset.fxnr = nr; gFx.appendChild(p); return p; };
+      M.unfx = (nr, kind) => gFx.querySelectorAll(`.fx-${kind}${nr ? `[data-fxnr="${nr}"]` : ''}`).forEach(x => x.remove());
+      M.clearFx = () => { gFx.innerHTML = ''; };
+      M.boxes = on => { if (on){ el.dataset.boxes = '1'; for (const n of ALL) P[n].dataset.b = SP.vis(box(n), today()); } else delete el.dataset.boxes; };
+      /* Träffytorna synliga (labbreglaget): skivan runt varje litet landskaps mitt, och kanten ut i havet (bakom landet) */
+      function drawHalo(){
+        gHalo.innerHTML = ''; gDisc.innerHTML = ''; haloK = M.k;
+        if (!M.halo || !opt.interactive) return;
+        for (const n of M.smallNrs()){
+          const p = document.createElementNS(NS, 'path');
+          p.setAttribute('d', PATHS[BY[n].path][1]); p.setAttribute('class', 'fx fx-halo');
+          p.style.strokeWidth = (2 * Math.max(MISS_R, haloR(n, M.k))) + 'px';
+          gHalo.appendChild(p);
+          const c = document.createElementNS(NS, 'circle'); c.setAttribute('class', 'disc'); c.setAttribute('r', DISC_R); c.dataset.nr = n; gDisc.appendChild(c);
+        }
+        placeDiscs();
+      }
+      function placeDiscs(){ for (const c of gDisc.children){ const L = MEAS[+c.dataset.nr].label, q = M.toScreen(L.x, L.y); c.setAttribute('cx', q.x.toFixed(1)); c.setAttribute('cy', q.y.toFixed(1)); } }
+      M.showHalo = on => { M.halo = !!on; drawHalo(); };
+      /* Områdets ytterkontur (pusslet, D32): en tjock linje under landskapen; deras fyllning (med kant i samma färg)
+         täcker de inre gränserna, så att bara kusten och områdets yttergräns syns. */
+      M.outline = nrs => { gOut.innerHTML = ''; for (const n of nrs || []){ const p = document.createElementNS(NS, 'path'); p.setAttribute('d', PATHS[BY[n].path][1]); p.setAttribute('class', 'outl'); gOut.appendChild(p); } };
+      /* ── Kameran utifrån ── */
+      M.size = () => { M.W = el.clientWidth || host.clientWidth; M.H = el.clientHeight || host.clientHeight; };
+      M.setHome = nrs => { M.home = nrs ? ubox(nrs, 8) : WORLD; };
+      M.fit = (b, ms = 0, pad = 14, kCap) => { const t = fitCam(b, pad, kCap); return animTo(clampCam(t.k, t.tx, t.ty), ms); };
+      M.fitHome = (ms = 0) => M.fit(M.home || WORLD, ms);
+      M.sync = () => { M.size(); if (!M.ready && M.W){ M.ready = true; M.fitHome(0); } else apply(); };
+      M.ensureVisible = (nr, ms = 380) => {
+        const b = MEAS[nr].bbox, a = M.toScreen(b.x, b.y), c = M.toScreen(b.x + b.w, b.y + b.h);
+        const small = 2 * MEAS[nr].r * M.k < 16, inside = a.x >= 4 && a.y >= 4 && c.x <= M.W - 4 && c.y <= visH() - 4;
+        if (inside && !small) return Promise.resolve();
+        return M.fit(ubox([nr, ...NB[nr]], 6), ms, 18, kMin() * 5);
+      };
+      M.stop = stopMotion;
+      M.state = () => ({ k:M.k, tx:M.tx, ty:M.ty, kMin:kMin(), kMax:kMax(), lim:lim(M.k), W:M.W, H:M.H, visH:visH(), gliding:!!gl });
+      new ResizeObserver(() => {
+        const W0 = M.W, H0 = M.H; M.size();
+        if (!M.W || !M.H) return;
+        if (!M.ready){ M.ready = true; M.fitHome(0); return; }
+        if (W0 && (W0 !== M.W || H0 !== M.H)){ const c = M.toMap(W0 / 2, (H0 - M.inset) / 2); const t = clampCam(M.k, M.W / 2 - M.k * c.x, visH() / 2 - M.k * c.y); M.tx = t.tx; M.ty = t.ty; }
+        apply();
+      }).observe(host);
+      M.reset = function(){
+        M.labelFor = null; M.onTap = null;                 // först: den gamla vyns namnregel får inte köras mot ny data
+        M.clearFx(); M.clearChips(); M.pin(false); M.boxes(false); M.outline(null);
+        for (const n of ALL) P[n].setAttribute('class', 'ls');
+        layout(); drawHalo();
+      };
+      return M;
+    }
+    /* Liten, stillastående karta (menyn, hemvyn) */
+    function miniMap(fill, pad = 6){
+      const b = WORLD;
+      return `<svg viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" xmlns="${NS}" aria-hidden="true">${LANDSKAP.map(l => `<path d="${PATHS[l.path][1]}" fill="${fill(l.nr)}" stroke="rgba(40,40,40,.55)" stroke-width=".8" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`).join('')}</svg>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LÅDORNA, NÖTLOOPEN, KVITTOT OCH MEDALJERNA — delade (js/shared.js)
+    ═══════════════════════════════════════════════════════════ */
+    const SP = MP.spaced;
+    const fmtWhen = MP.fmtWhen, fmtStamp = MP.fmtStamp, bindHold = MP.bindHold;
+    const MEDAL_BAND = { l:'#5eead4', r:'#0f8b8d', ring:'rgba(19,78,74,.3)' };   // geografins havsgröna band
+    const medalSVG = kind => MP.medalSVG(kind, MEDAL_BAND);
+    const MEDAL_NAME = { guld:'Guld', silver:'Silver', brons:'Brons' };
+
+    /* ═══════════════════════════════════════════════════════════
+       TILLSTÅND per profil (localStorage). En låda per landskap, delad av alla frågetyper;
+       frågetyperna per landskap (för guld); inställningarna (hemlandskapet, D36); pusslets bockar; loggen.
+       Nycklarna rensas i Store.deleteProfile (js/app.js).
+    ═══════════════════════════════════════════════════════════ */
+    const KEY = { state:id => `geo_state_${id}`, settings:id => `geo_settings_${id}`, puzzle:id => `geo_puzzle_${id}`, log:id => `geo_log_${id}` };
+    let profile = null, todayOverride = null;                                   // datumkrok: _test.setToday('2026-10-21')
+    const readJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } };
+    const writeJSON = (k, v) => MP.safeSetItem(k, JSON.stringify(v));
+    const S = { halo:false, home:null, boxes:{}, kinds:{}, screen:'geo', binderParty:false, pick:'puzzle',
+      train:{ mode:'upptack', area:'Norrland', order:'blandad', bild:'djur', bildSvar:'blandat' }, pzArea:'Norrland' };
+    const MEMO = {};                                                          // D34: förra rundans ordning per val
+    const today = () => todayOverride || SP.fmtDay(new Date());
+    const box = nr => S.boxes[nr];
+    const isKan = nr => ['kan', 'due'].includes(SP.vis(box(nr), today()));
+    function loadProfile(p){
+      profile = p;
+      const raw = p ? readJSON(KEY.state(p.id)) : null, st = GL.validState(raw);
+      S.boxes = st.boxes; S.kinds = st.kinds; S.binderParty = !!(raw && raw.party);
+      S.home = GL.validSettings(p ? readJSON(KEY.settings(p.id)) : null).home;
+      PZ_DONE.clear(); const pz = p ? readJSON(KEY.puzzle(p.id)) : null;
+      if (pz && Array.isArray(pz.done)) pz.done.forEach(x => typeof x === 'string' && PZ_DONE.add(x));
+    }
+    function saveState(){ if (profile) writeJSON(KEY.state(profile.id), { v:1, boxes:S.boxes, kinds:S.kinds, party:S.binderParty }); }
+    function saveSettings(){ if (profile) writeJSON(KEY.settings(profile.id), { home:S.home }); }
+    function savePuzzle(){ if (profile) writeJSON(KEY.puzzle(profile.id), { done:[...PZ_DONE] }); }
+    const areaMedal = a => SP.medal(areaNrs(a).map(n => SP.vis(box(n), today())));
+    function recordAnswer(nr, ok){ try { SP.applyAnswer(box(nr), ok, today()); saveState(); } catch (_) { /* lådorna får aldrig stoppa ett svar */ } }
+    const kindsOf = nr => S.kinds[nr] || (S.kinds[nr] = []);
+    function recordKind(nr, it){ const k = kindKey(it), a = kindsOf(nr); if (!a.includes(k)){ a.push(k); saveState(); } }
+    const level = nr => GL.levelOf(box(nr), kindsOf(nr), today());
+    /* Loggen (statuschippet på spelkortet, GAME_LOG_KEYS i js/app.js) */
+    function logAdd(entry){
+      if (!profile) return null;
+      try { const L = MP.createLog(KEY.log(profile.id), 60); L.add(entry); const e = L.get()[0]; return e ? e.id : null; } catch (_) { return null; }
+    }
+    function logPatch(id, patch){
+      if (!profile || id == null) return;
+      try { const k = KEY.log(profile.id), log = readJSON(k) || [], e = log.find(x => x.id === id); if (e){ Object.assign(e, patch); writeJSON(k, log); } } catch (_) {}
+    }
+    const snd = t => { try { App.Sound.play(t); } catch (_) {} };
+    const capy = ev => { try { if (window.Capy && profile) Capy.award(profile, ev); } catch (_) { /* samlingen får aldrig stoppa spelet */ } };
+
+    /* ═══════════════════════════════════════════════════════════
+       NAVIGERING
+    ═══════════════════════════════════════════════════════════ */
+    const BACK = { settings:'geo', sverige:'geo', hub:'sverige', explore:'hub', train:'hub', pick:'hub', puzzle:'pick', binder:'hub', credits:'hub', trainend:'hub', testdone:'hub' };
+    function goto(screen, arg){
+      token++; busy = false;
+      closeOverlay();
+      S.screen = screen;
+      ROOT.querySelectorAll('.gs').forEach(s => s.classList.toggle('on', s.id === `g-scr-${screen}`));
+      ({ settings:enterSettings, geo:enterGeo, sverige:enterSverige, hub:enterHub, explore:enterExplore, train:enterTrain, play:enterPlay, trainend:enterTrainEnd,
+         puzzle:enterPuzzle, pick:enterPick, binder:enterBinder, testdone:enterTestDone, credits:enterCredits })[screen](arg);
+    }
+    $('backBtn').addEventListener('click', () => {
+      if (S.screen === 'geo'){ token++; busy = false; App.goBackToGameSelect(); return; }
+      if (S.screen === 'play') goto(PL && PL.isTest ? 'pick' : 'train', PL && PL.isTest ? 'test' : undefined);
+      else if (BACK[S.screen]) goto(BACK[S.screen]);
+    });
+    function setHeader(title, back = 'Tillbaka', right = ''){
+      $('title').textContent = title; $('backBtn').textContent = back;
+      $('hdrR').innerHTML = right;
+    }
+    function say(id, t1, t2 = '', o = {}){
+      const th = $(id); if (!th) return;
+      for (const t of [o.lead, t1, t2, o.fact && o.fact.text]) if (t) SAID.add(String(t).replace(/<[^>]+>/g, ''));
+      const lead = o.lead ? `<span class="lead${o.good ? ' good' : ''}">${esc(o.lead)}</span>` : '';
+      const fact = o.fact ? `<span class="fact">${svg(o.fact.icon)}<span>${esc(o.fact.text)}</span></span>` : '';
+      th.innerHTML = `${lead}<span>${t1}</span>${t2 ? `<span class="sm">${t2}</span>` : ''}${fact}`;
+      th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       GEOGRAFI-MENYN (D24 ✎): nio egna moduler, bara Sverige öppen
+    ═══════════════════════════════════════════════════════════ */
+    /* Ikon: en jordglob med en prick ungefär där världsdelen ligger (bara en symbol, ingen karta) */
+    function globe(dx, dy, kind){
+      const dot = kind === 'world' ? '<circle cx="12" cy="12" r="9" fill="currentColor" opacity=".12"/>' : kind === 'sea' ? '' : `<circle cx="${12 + dx}" cy="${12 + dy}" r="2.6" fill="currentColor" stroke="none"/>`;
+      const sea = kind === 'sea' ? '<path d="M5 10.5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 2-1M5 14c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 2-1" />' : '<ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3.3 9h17.4M3.3 15h17.4"/>';
+      return `<svg class="i" viewBox="0 0 24 24" style="stroke-width:1.5"><circle cx="12" cy="12" r="9"/>${sea}${dot}</svg>`;
+    }
+    const GEO = [
+      { id:'sverige', name:'Sverige', open:true },
+      { id:'europa', name:'Europa', ic:globe(0, -4) },
+      { id:'asien', name:'Asien', ic:globe(4.5, -3) },
+      { id:'afrika', name:'Afrika', ic:globe(0, 1.5) },
+      { id:'nordamerika', name:'Nord­amerika', ic:globe(-5, -3.5) },
+      { id:'sydamerika', name:'Syd­amerika', ic:globe(-3.5, 4) },
+      { id:'oceanien', name:'Oceanien', ic:globe(5, 4.5) },
+      { id:'varlden', name:'Hela världen', ic:globe(0, 0, 'world') },
+      { id:'hav', name:'Världens hav', ic:globe(0, 0, 'sea') },
+    ];
+    const LD_FILL = nr => PATHS[BY[nr].path][0];
+    function enterGeo(){
+      setHeader('Geografi', 'Tillbaka', `<button class="ibtn" id="g-gearBtn" aria-label="Inställningar för en vuxen">${svg('gear')}</button>`);
+      $('gearBtn').addEventListener('click', () => goto('settings'));
+      $('gtiles').innerHTML = GEO.map(g => g.open
+        ? `<button class="gtile open" data-g="${g.id}"><span class="gic">${miniMap(LD_FILL)}</span><b>${g.name}</b><span class="soon">Öppen</span></button>`
+        : `<button class="gtile" data-g="${g.id}" aria-label="${g.name.replace(/­/g, '')}, kommer snart"><span class="gic">${g.ic}</span><b>${g.name}</b><span class="soon">Kommer snart</span></button>`).join('');
+      say('geoBubble', 'Välj en del av världen.', 'Sverige är öppen. De andra kommer snart.');
+    }
+    $('gtiles').addEventListener('click', e => {
+      const b = e.target.closest('.gtile'); if (!b) return;
+      const g = GEO.find(x => x.id === b.dataset.g);
+      if (g.open) goto('sverige');
+      else say('geoBubble', `${g.name.replace(/­/g, '')} kommer snart.`, 'Börja med Sverige!');
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       SVERIGE: Sveriges landskap först; sjöar och städer kommer senare
+    ═══════════════════════════════════════════════════════════ */
+    function enterSverige(){
+      setHeader('Sverige');
+      const m = areaMedal('Sverige');
+      $('svMain').innerHTML = `<span class="mm">${miniMap(LD_FILL)}</span><span class="sv-txt"><b>Sveriges landskap</b>
+        <span>Tjugofem landskap i tre landsdelar.</span><span>${kanTxt(m.kan, 25)}.</span><span class="sv-go">${svg('play')}Öppna</span></span>`;
+      $('svSjo').innerHTML = `<span class="ic">${svg('water')}</span><b>Sveriges sjöar</b><span class="soon">Kommer snart</span>`;
+      $('svStad').innerHTML = `<span class="ic">${svg('city')}</span><b>Sveriges städer</b><span class="soon">Kommer snart</span>`;
+      say('svBubble', 'Börja med landskapen.', 'Fler delar om Sverige kommer senare.');
+    }
+    $('svMain').addEventListener('click', () => goto('hub'));
+    $('svSjo').addEventListener('click', () => say('svBubble', 'Sveriges sjöar kommer snart.', 'Börja med landskapen.'));
+    $('svStad').addEventListener('click', () => say('svBubble', 'Sveriges städer kommer snart.', 'Börja med landskapen.'));
+
+    /* ═══════════════════════════════════════════════════════════
+       SVERIGES LANDSKAP: hemvyn. Framsteg per område ur lådorna (medaljerna som i Gångertabellen).
+    ═══════════════════════════════════════════════════════════ */
+    const BOX_COL = { ny:'#ffffff', ovar:'#fbbf24', kan:'#2fbf68', due:'#bfead0' };
+    function enterHub(){
+      setHeader('Sveriges landskap', 'Tillbaka', `<button class="ibtn" id="g-infoBtn" aria-label="Bildkällor">${svg('info')}</button>`);
+      $('infoBtn').addEventListener('click', () => goto('credits'));
+      $('hubMm').innerHTML = miniMap(n => BOX_COL[SP.vis(box(n), today())]);
+      $('hubLegend').innerHTML = `<span><i style="background:#fff"></i>Ny</span><span><i style="background:var(--ovar)"></i>Övar</span><span><i style="background:var(--kan)"></i>Kan</span><span><i style="background:var(--due)"></i>Igen</span>`;
+      $('areas').innerHTML = `<span class="ahead">${svg('target')}Träna</span>` + AREAS.map(a => {
+        const m = areaMedal(a), n = areaNrs(a).length;
+        return `<button class="arow${a === 'Sverige' ? ' all' : ''}" data-a="${a}" aria-label="Träna ${AREA_NAME[a]}. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. ${kanTxt(m.kan, n)}.">
+          <span class="amd">${medalSVG(m.medal)}${m.due ? '<i class="mdue"></i>' : ''}</span>
+          <span class="att"><b>${AREA_NAME[a]}</b><small>${kanTxt(m.kan, n)}</small><span class="tb-bar"><i style="width:${Math.round(m.share * 100)}%"></i></span></span><span class="ago">${svg('play')}</span></button>`;
+      }).join('');
+      const kort = ALL.filter(n => level(n) > 0).length;
+      $('doors').innerHTML = `
+        <button class="door" data-d="explore"><span class="dic">${svg('compass')}</span><span><b>Utforska</b><small>Tryck och läs</small></span></button>
+        <button class="door" data-d="pick" data-k="puzzle"><span class="dic">${svg('puzzle')}</span><span><b>Pussel</b><small>Lägg landskapen</small></span></button>
+        <button class="door" data-d="binder"><span class="dic">${svg('cards')}</span><span><b>Samlarpärm</b><small>${kort} av 25 kort</small></span></button>
+        <button class="door" data-d="pick" data-k="test"><span class="dic">${svg('test')}</span><span><b>Test</b><small>Utan klocka</small></span></button>`;
+      say('hubBubble', 'Tryck på ett område för att träna.', 'Börja gärna med Utforska.');
+    }
+    $('areas').addEventListener('click', e => { const b = e.target.closest('.arow'); if (b){ S.train.area = b.dataset.a; goto('train'); } });   // ett tryck: Träna <område>
+    $('doors').addEventListener('click', e => { const b = e.target.closest('.door'); if (b) goto(b.dataset.d, b.dataset.k); });
+
+    /* ═══════════════════════════════════════════════════════════
+       UTFORSKA: fri karta, tryck → landskapskortet glider upp
+    ═══════════════════════════════════════════════════════════ */
+    const EX = { nr:null, fi:0 };
+    const SHEET_H = 446;
+    function enterExplore(){
+      setHeader('Utforska');
+      const M = MAPS.ex; M.reset();
+      M.setHome(null); M.inset = 0;
+      if (!M.ready) M.sync(); else { M.sync(); }
+      M.labelFor = nr => ({ name:NAME(nr) });      // namn där de ryms (inga nummer, D33)
+      if (S.home) M.pin(true, S.home); M.showHalo(S.halo);      // D36: nålen bara om ett hemlandskap är valt
+      M.onTap = nr => { if (nr === null){ closeSheet(); return; } openSheet(nr); };
+      EX.nr = null; $('sheet').classList.remove('on'); $('exHint').hidden = false;
+      M.fitHome(0);
+    }
+    function openSheet(nr){
+      const M = MAPS.ex, f = F(nr), first = EX.nr === null;
+      EX.nr = nr; EX.fi = 0;
+      $('exHint').hidden = true;
+      M.clearFx(); M.fx(nr, 'sel');
+      const bc = LD_FILL(nr);
+      $('sheet').innerHTML = `<div class="sh-grip" id="g-shGrip"><i></i></div>
+        <div class="sh-head"><span class="sh-ld" style="background:${LD_FILL(nr)}"></span>
+          <span class="sh-name"><b>${NAME(nr)}</b><small>${BY[nr].landsdel}</small></span>
+          ${nr === S.home ? `<span class="sh-home">${svg('pin')}Här bor du</span>` : ''}
+          <button class="sh-x" id="g-shX" aria-label="Stäng">${svg('x')}</button></div>
+        <div class="sh-row"><span class="sh-shield"><img src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false"></span>
+          <span class="sh-city"><span class="sh-k">${svg('city')}Stad</span><b>${esc(cities(nr)[0])}</b>${cities(nr)[1] ? `<span>också ${esc(cities(nr)[1])}</span>` : ''}</span></div>
+        <div class="sh-pics">
+          <div class="pic"><div class="im"><img class="flower" style="${flowerPos(nr)}" src="${img(nr, 'blomma')}" alt="${esc(f.blomma)}" draggable="false"></div><div class="cap"><span class="sh-k">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></div></div>
+          <div class="pic"><div class="im"><img src="${img(nr, 'djur')}" alt="${esc(f.djur)}" draggable="false"></div><div class="cap"><span class="sh-k">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></div></div>
+        </div>
+        <div class="sh-know"><span class="sh-k">${svg('bulb')}Visste du?</span>
+          <span class="kl">${svg('ruler')}<span>${esc(ytaText(nr))}</span></span>
+          <span class="kl">${svg('people')}<span>${esc(invText(nr))}</span></span>
+          <div class="sh-fact"><p id="g-shFact">${esc(f.visste_du[0].text)}</p><button class="sh-more" id="g-shMore" aria-label="Nästa fakta">${svg('next')}<small id="g-shFi">1/${f.visste_du.length}</small></button></div></div>`;
+      [ytaText(nr), invText(nr), ...f.visste_du.map(v => v.text)].forEach(t => SAID.add(t));
+      $('sheet').style.setProperty('--bc', bc);
+      $('sheet').classList.add('on');
+      $('shX').addEventListener('click', closeSheet);
+      $('shMore').addEventListener('click', () => { EX.fi = (EX.fi + 1) % f.visste_du.length; $('shFact').textContent = f.visste_du[EX.fi].text; $('shFi').textContent = `${EX.fi + 1}/${f.visste_du.length}`; });
+      bindSheetDrag();
+      /* kameran: landskapet syns ovanför kortet (som när man väljer en plats i Apples kartor) */
+      M.inset = SHEET_H - 6;
+      const b = MEAS[nr].bbox, a = M.toScreen(b.x, b.y), c = M.toScreen(b.x + b.w, b.y + b.h);
+      const fits = a.x >= 8 && a.y >= 8 && c.x <= M.W - 8 && c.y <= M.H - M.inset - 8 && 2 * MEAS[nr].r * M.k >= 20;
+      if (!fits || first) M.fit(ubox([nr], 30), 420, 10, M.kMin() * 6);
+      M.relayout();
+    }
+    function closeSheet(){
+      const M = MAPS.ex; if (EX.nr === null) return;
+      EX.nr = null; $('sheet').classList.remove('on'); M.clearFx(); M.inset = 0; M.relayout();
+    }
+    function bindSheetDrag(){
+      const sh = $('sheet'), grip = $('shGrip'); let y0 = null, dy = 0;
+      const mv = e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); sh.style.transform = `translateY(${dy}px)`; };
+      const end = () => { if (y0 === null) return; y0 = null; sh.classList.remove('drag'); sh.style.transform = ''; window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', end); if (dy > 90) closeSheet(); };
+      grip.addEventListener('pointerdown', e => { y0 = e.clientY; dy = 0; sh.classList.add('drag'); window.addEventListener('pointermove', mv); window.addEventListener('pointerup', end); });
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TRÄNA <OMRÅDE> (D30): området valdes på hemvyns kort. Här finns bara ordningen och de fyra lägena;
+       ett tryck på en ruta (eller på en knapp i rutan) startar direkt. Två tryck från hemvyn till första frågan.
+    ═══════════════════════════════════════════════════════════ */
+    const segHTML = (key, opts, cur) => `<div class="seg" data-key="${key}">${opts.map(([v, t, ic]) => `<button data-v="${v}" class="${v === cur ? 'on' : ''}">${ic ? svg(ic) : ''}${t}</button>`).join('')}</div>`;
+    function enterTrain(){
+      setHeader(`Träna ${S.train.area === 'Sverige' ? 'hela Sverige' : S.train.area}`);
+      renderTrain();
+    }
+    function renderTrain(){
+      const T = S.train, nrs = areaNrs(T.area);
+      $('ordrow').innerHTML = `<span class="flabel">Ordning</span>${segHTML('order', [['blandad', 'Blandad', 'shuffle'], ['rak', 'Norr till söder', 'straight']], T.order)}`;
+      const head = (m, go) => `<span class="th"><span class="tic">${svg(m.icon)}</span><span class="tt"><b>${m.name}</b><small>${m.desc}</small></span>${go ? `<span class="go">${svg('play')}</span>` : ''}</span>`;
+      const [U, N, C, B] = MODES;
+      $('modes').innerHTML = `
+        <button class="tmode main" data-start="upptack">${head({ ...U, desc:`Hitta ${antal(nrs.length)} landskap. Kartan blir färg.` }, true)}</button>
+        <button class="tmode" data-start="namn">${head(N, true)}</button>
+        <button class="tmode" data-start="stad">${head(C, true)}</button>
+        <div class="tmode">${head(B)}<div class="tbtns"><button data-start="bild" data-bild="djur">Djur</button><button data-start="bild" data-bild="blomma">Blommor</button><button data-start="bild" data-bild="skold">Sköldar</button><button data-start="bild" data-bild="blandat">Blandat</button></div></div>`;
+      say('trBubble', 'Tryck på det du vill träna.', T.order === 'rak' ? `Från norr till söder: ${NAME(Math.min(...nrs))} först.` : 'Blandad ordning.');
+    }
+    $('ordrow').addEventListener('click', e => { const b = e.target.closest('.seg button'); if (!b) return; S.train.order = b.dataset.v; renderTrain(); });
+    $('modes').addEventListener('click', e => {
+      const b = e.target.closest('[data-start]'); if (!b) return;
+      const cfg = { ...S.train, mode:b.dataset.start };
+      if (b.dataset.bild) cfg.bild = b.dataset.bild;
+      cfg.bildSvar = 'blandat';                                   // djur/blommor/sköldar: varannan fråga på kartan, varannan med namn
+      S.train.mode = cfg.mode; S.train.bild = cfg.bild;
+      goto('play', { cfg });
+    });
+
+
+    /* ═══════════════════════════════════════════════════════════
+       SPELA: träningens lägen (nötloop) och testet (ingen nötloop, ingen klocka)
+       PL.phase: 'q' (väntar på svar) · 'right' (Nästa) · 'exp' (förklaringen, Nästa steg) · 'expdone' (Svara igen) · 'testwrong' (Nästa)
+    ═══════════════════════════════════════════════════════════ */
+    let PL = null;
+    function enterPlay(arg){
+      const M = MAPS.play;
+      if (arg && arg.test){
+        PL = { isTest:true, cfg:{ mode:'test', area:arg.area }, items:arg.items, i:0, results:[], phase:'q', start:Date.now(), pr:0, newCards:[] };
+        setHeader(`Test ${arg.area === 'Sverige' ? 'hela Sverige' : arg.area}`, 'Avbryt');
+      } else {
+        const cfg = arg.cfg;
+        PL = { isTest:false, cfg, upptack:cfg.mode === 'upptack', drill:GL.createDrill(GL.buildItems(cfg, nr => SP.vis(box(nr), today()), MEMO)), phase:'q', found:new Set(), start:Date.now(), pr:0, newCards:[], area:areaNrs(cfg.area) };
+        setHeader(cfg.mode === 'bild' ? BILD_TITLE[cfg.bild] : MODE_NAME[cfg.mode], 'Avbryt');
+      }
+      M.reset(); M.inset = 0;
+      M.setHome(PL.isTest ? null : areaNrs(PL.cfg.area));
+      M.sync(); M.fitHome(0);
+      M.showHalo(S.halo);
+      nextQ(true);
+    }
+    function curItem(){ return PL.isTest ? PL.items[PL.i] : PL.drill.current(); }
+    function renderTrack(){
+      let L, R, frac;
+      if (PL.isTest){ L = `Test · fråga <b>${Math.min(PL.i + 1, PL.items.length)}</b> av ${PL.items.length}`; R = 'Ingen klocka'; frac = PL.i / PL.items.length; }
+      else if (PL.upptack){ L = `Upptäckt <b>${PL.found.size}</b> av ${PL.area.length}`; R = AREA_NAME[PL.cfg.area]; frac = PL.found.size / PL.area.length; }
+      else { const p = PL.drill.progress(); L = `Fråga <b>${Math.min(p.done + 1, p.total)}</b> av ${p.total}`; R = AREA_NAME[PL.cfg.area]; frac = p.done / p.total; }
+      $('psL').innerHTML = L; $('psR').textContent = R; $('psFill').style.transform = `scaleX(${frac})`;
+    }
+    function setMain(lab, icon, show = true, after = true){
+      const m = $('pMain'); m.style.visibility = show ? '' : 'hidden';
+      m.innerHTML = after ? `${lab} ${icon ? svg(icon) : ''}` : `${icon ? svg(icon) : ''} ${lab}`;
+      m.disabled = !show;
+    }
+    function nextQ(first = false){
+      if (!PL || S.screen !== 'play') return;
+      if (PL.isTest ? PL.i >= PL.items.length : PL.drill.isDone()){ finishPlay(); return; }
+      showQuestion(curItem(), first);
+    }
+    function showQuestion(it, first = false){
+      const M = MAPS.play;
+      token++; busy = false;
+      PL.cur = it; PL.phase = 'q'; PL.E = null; PL.lastInserted = false;
+      if (!it.retry) PL.wrongs = 0;
+      M.clearFx(); M.clearChips();
+      $('pStage').classList.remove('ok');
+      $('playMap').querySelectorAll('.toast').forEach(t => t.remove());
+      /* Kartans utseende */
+      const area = PL.isTest ? ALL : PL.area;
+      if (PL.upptack && it.extra && !it.retry && PL.found.has(it.nr)) PL.found.delete(it.nr);    // tillbaka igen: landskapet går in i dimman
+      for (const n of ALL){
+        const out = !area.includes(n);
+        M.P[n].setAttribute('class', 'ls' + (out ? ' out' : '') + (PL.upptack && !out && !PL.found.has(n) ? ' fog' : ''));
+      }
+      M.labelFor = PL.upptack ? (n => PL.found.has(n) ? { force:true, text:NAME(n), cls:'found' } : null) : null;
+      M.relayout();
+      /* Frågan */
+      const tag = PL.isTest ? '' : it.retry ? 'En gång till' : it.extra ? 'Tillbaka igen' : '';
+      const fig = it.kind === 'bild' ? `<figure class="qfig"><div class="im"><img class="${it.bild === 'blomma' ? 'flower' : it.bild === 'skold' ? 'shield' : ''}" style="${it.bild === 'blomma' ? flowerPos(it.nr) : ''}" src="${img(it.nr, it.bild === 'skold' ? 'vapen' : it.bild)}" alt="" draggable="false"></div>${bildName(it.nr, it.bild) ? `<figcaption>${esc(bildName(it.nr, it.bild))}</figcaption>` : ''}</figure>` : '';
+      $('pTop').innerHTML = `<span class="prompt">${tag ? `<span class="qtag">${tag}</span><br>` : ''}${promptHTML(it)}</span>${fig}`;
+      $('pCtrl').innerHTML = '';
+      PL.opts = null;
+      if (it.kind === 'namn') M.fx(it.nr, 'mark');
+      if (usesOptions(it)){
+        PL.opts = nameOptions(it.nr);
+        $('pCtrl').innerHTML = `<div class="opts">${PL.opts.map((o, i) => `<button class="opt" data-i="${i}">${esc(o.text)}</button>`).join('')}</div>`;
+        M.onTap = null;
+        if (it.kind === 'namn') M.ensureVisible(it.nr);
+      } else M.onTap = tapAnswer;
+      renderTrack();
+      setMain('', null, false);
+      /* Bubblan */
+      let main, sm = '';
+      if (usesOptions(it)) main = 'Vilket svar stämmer?';
+      else main = it.extra && !it.retry && PL.upptack ? `${NAME(it.nr)} kommer tillbaka. Var låg det?` : 'Tryck på landskapet på kartan.';
+      if (it.retry) main = 'Samma fråga en gång till.';
+      else if (it.extra && !PL.upptack) main = 'Den här frågan kommer tillbaka en gång till.';
+      if (first) sm = PL.isTest ? 'Ta den tid du behöver.' : PL.upptack ? 'Varje landskap du hittar får färg och namn.' : usesOptions(it) ? '' : 'Dra och nyp för att se kartan närmare.';
+      else if (!usesOptions(it) && !it.retry) sm = 'Dra och nyp för att se kartan närmare.';
+      say('pBubble', main, sm);
+    }
+    async function tapAnswer(nr){
+      if (!PL || PL.phase !== 'q' || busy) return;
+      if (nr === null){ say('pBubble', 'Där finns inget landskap.', 'Tryck inne på ett landskap.'); return; }
+      if (nr === PL.cur.nr) right(nr); else wrongTap(nr);
+    }
+    function right(given){
+      const it = PL.cur, M = MAPS.play, lv0 = level(it.nr);
+      let retryOk = false;
+      if (PL.isTest){ PL.results.push({ nr:it.nr, ok:true, kind:it.kind }); recordAnswer(it.nr, true); recordKind(it.nr, it); }
+      else { const r = PL.drill.answer(true); if (r.record){ recordAnswer(it.nr, true); recordKind(it.nr, it); } retryOk = !r.record; }
+      const lv1 = level(it.nr);
+      if (lv1 > lv0) PL.newCards.push({ nr:it.nr, lv:lv1 });
+      if (lv1 === 3 && lv0 < 3) capy({ type:'landskap', data:{ nr:it.nr, name:NAME(it.nr) } });   // guld: köas till resultatet
+      snd('correct');
+      PL.phase = 'right';
+      M.unfx(null, 'bad'); M.unfx(null, 'mark'); M.unfx(null, 'ref'); M.clearChips();
+      if (PL.upptack){ PL.found.add(it.nr); M.cls(it.nr, 'fog', false); M.fx(it.nr, 'found'); M.relayout(); }
+      else { M.fx(it.nr, 'ok'); M.chip(it.nr, NAME(it.nr), 'ok'); }
+      $('pStage').classList.add('ok');
+      if (PL.opts){ const i = PL.opts.findIndex(o => o.ok); const b = $('pCtrl').querySelectorAll('.opt')[i]; if (b) b.classList.add('ok'); $('pCtrl').querySelectorAll('.opt').forEach(x => x.disabled = true); }
+      const lead = retryOk ? 'Rätt! Bra att du försökte igen.' : PRAISE[PL.pr++ % PRAISE.length];
+      const later = retryOk && PL.cur.retry && !PL.cur.extra ? 'Frågan kommer tillbaka en gång till senare.' : '';
+      sayFact('pBubble', it.nr, lead, boxMain(it));
+      if (later){ SAID.add(later); const pr = $('pTop').querySelector('.prompt'); pr.innerHTML = `<span class="qtag">${esc(later)}</span><br>` + pr.innerHTML.replace(/^<span class="qtag">.*?<\/span><br>/, ''); }   // "kommer tillbaka" står vid frågan, så att faktarutan räcker
+      if (lv1 > lv0) toast(lv1 === 1 ? `Nytt kort i samlarpärmen: ${NAME(it.nr)} i brons` : `${NAME(it.nr)} blev ${LEVEL[lv1]} i samlarpärmen`);
+      renderTrack();
+      const last = PL.isTest ? PL.i >= PL.items.length - 1 : PL.drill.isDone();
+      setMain(last ? 'Klar' : 'Nästa', last ? 'check' : 'next', true, !last);
+    }
+    /* Rätt svar (D31, D32): skölden till vänster, centrerad; lovordet och meningen; sedan stad, djur och blomma i en tabell
+       med värdena på samma kant;
+       sist den särskilda placeringen om landskapet har en. Rutan har fast höjd, så att Nästa står still. */
+    function sayFact(id, nr, lead, main){
+      const f = F(nr), c = cities(nr), sp = specialFacts(nr);
+      [lead, main, ...sp].forEach(t => t && SAID.add(t));
+      const th = $(id);
+      th.innerHTML = `<div class="fcard"><img class="fsh" src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false">
+        <div class="ftx"><span class="fmain"><b class="lead good">${esc(lead)}</b> ${esc(main)}</span>
+          <span class="ftab"><span class="fl">${svg('city')}Stad</span><b>${esc(c[0])}${c[1] ? ` <span class="f2">och ${esc(c[1])}</span>` : ''}</b>
+            <span class="fl">${svg('paw')}Djur</span><b>${esc(f.djur)}</b><span class="fl">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></span>
+          ${sp.map(t => `<span class="fspec">${svg('star')}${esc(t)}</span>`).join('')}</div></div>`;
+      th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
+    }
+    function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = `${svg('cards')}${esc(t)}`; $('playMap').appendChild(d); SAID.add(t); }
+    async function wrongTap(g){
+      const it = PL.cur, M = MAPS.play, t = it.nr, tok = token;
+      if (PL.isTest){ testWrong(g); return; }
+      const r = PL.drill.answer(false); if (r.record) recordAnswer(t, false);
+      PL.wrongs++; snd('wrong');
+      M.clearChips(); M.unfx(null, 'bad'); M.unfx(null, 'ref');
+      const outside = !PL.area.includes(g);
+      const lead = isNear(t, g) ? 'Nästan rätt!' : 'Bra försök!';
+      let main = `Det där är ${NAME(g)}.`;
+      if (outside) main += ` Det hör till ${BY[g].landsdel}.`;
+      else if (PL.upptack && PL.found.has(g)) main += ' Det har du redan hittat.';
+      const sm = PL.wrongs >= 2 ? `${NAME(t)} blinkar nu. Tryck där.` : answerLine(it);
+      say('pBubble', esc(main), esc(sm), { lead });
+      busy = true; await wait(LEAD); busy = false; if (tok !== token) return;
+      M.fx(g, 'bad'); M.chip(g, NAME(g), 'bad');
+      if (PL.wrongs >= 2){ M.unfx(null, 'mark'); M.fx(t, 'mark'); M.ensureVisible(t); }
+      else if (it.kind === 'var'){ for (const n of CUE[t].ref){ if (n === g || (PL.upptack && !PL.found.has(n))) continue; M.fx(n, 'ref'); M.chip(n, NAME(n), 'ref'); }   /* i Upptäck lyses bara grannar som redan är hittade: annars avslöjas ett svar */ if (CUE[t].lakes) for (const l of LAKES) M.chip({ x:l.x, y:l.y }, l.text, 'lake'); }
+      renderTrack();
+    }
+    /* Flervalet */
+    function optClick(i, el){
+      if (!PL || PL.phase !== 'q' || !PL.opts) return;
+      const o = PL.opts[i]; if (!o) return;
+      $('pCtrl').querySelectorAll('.opt').forEach(b => b.disabled = true);
+      el.classList.add(o.ok ? 'ok' : 'bad');
+      if (o.ok){ right(o.nr); return; }
+      el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+      if (PL.isTest){ testWrong(o.nr); return; }
+      const it = PL.cur, r = PL.drill.answer(false); if (r.record) recordAnswer(it.nr, false);
+      PL.wrongs++;
+      PL.phase = 'exp';
+      PL.E = { steps:optSteps(it, o.nr), i:-1, lead:isNear(it.nr, o.nr) ? 'Nästan rätt!' : 'Bra försök!' };
+      explainStep(0);
+    }
+    async function explainStep(k){
+      const M = MAPS.play, tok = token, E = PL.E, st = E.steps[k];
+      E.i = k; busy = true; setMain('Nästa steg', 'next'); $('pMain').disabled = true;
+      say('pBubble', esc(st.text), '', { lead:k === 0 ? E.lead : null });
+      await wait(LEAD); if (tok !== token) return;
+      for (const a of st.acts){
+        if (a.do === 'bad'){ M.ensureVisible(a.nr, 300); M.fx(a.nr, 'bad'); M.chip(a.nr, NAME(a.nr), 'bad'); }
+        if (a.do === 'here'){ M.unfx(null, 'mark'); await M.ensureVisible(a.nr, 300); M.fx(a.nr, 'blink'); M.chip(a.nr, NAME(a.nr), 'ok'); }
+        if (a.do === 'ref'){ M.fx(a.nr, 'ref'); M.chip(a.nr, NAME(a.nr), 'ref'); }
+        await wait(RM() ? 0 : 250); if (tok !== token) return;
+      }
+      if (st.done && PL.opts){ const b = $('pCtrl').querySelectorAll('.opt')[PL.opts.findIndex(o => o.ok)]; if (b) b.classList.add('ok'); }
+      busy = false;
+      if (k >= E.steps.length - 1){ PL.phase = 'expdone'; setMain('Svara igen', 'again', true, false); }
+      else setMain('Nästa steg', 'next');
+    }
+    /* Testet: lugnt; ett fel visar svaret och går vidare (ingen nötloop) */
+    async function testWrong(g){
+      const it = PL.cur, M = MAPS.play, tok = token;
+      PL.results.push({ nr:it.nr, ok:false, kind:it.kind }); recordAnswer(it.nr, false);
+      PL.phase = 'testwrong';
+      const main = it.kind === 'var' ? `Det där är ${NAME(g)}. ${NAME(it.nr)} ligger här.` : it.kind === 'namn' ? `Det markerade landskapet är ${NAME(it.nr)}.` : answerLine(it);
+      say('pBubble', esc(main), 'Det övar du mer på i Träna.');
+      M.clearChips(); M.unfx(null, 'mark');
+      busy = true;
+      await wait(LEAD); if (tok !== token) return;
+      if (it.kind !== 'namn' && !(it.kind === 'bild' && it.svar === 'namn')){ M.fx(g, 'bad'); M.chip(g, NAME(g), 'bad'); }
+      await M.ensureVisible(it.nr, 300); if (tok !== token) return;
+      busy = false;
+      M.fx(it.nr, 'blink'); M.chip(it.nr, NAME(it.nr), 'ok');
+      if (PL.opts){ const b = $('pCtrl').querySelectorAll('.opt')[PL.opts.findIndex(o => o.ok)]; if (b) b.classList.add('ok'); }
+      const last = PL.i >= PL.items.length - 1;
+      setMain(last ? 'Klar' : 'Nästa', last ? 'check' : 'next', true, !last);
+    }
+    function playMain(){
+      if (!PL || busy) return;
+      if (PL.phase === 'right' || PL.phase === 'testwrong'){ if (PL.isTest) PL.i++; nextQ(); return; }
+      if (PL.phase === 'exp'){ if (PL.E.i < PL.E.steps.length - 1) explainStep(PL.E.i + 1); return; }
+      if (PL.phase === 'expdone'){ showQuestion(PL.drill.current()); return; }
+    }
+    $('pMain').addEventListener('click', playMain);
+    $('pCtrl').addEventListener('click', e => { const b = e.target.closest('.opt'); if (b) optClick(+b.dataset.i, b); });
+    function finishPlay(){
+      const M = MAPS.play;
+      if (PL.isTest){ goto('testdone'); return; }
+      PL.done = { stats:PL.drill.stats(), secs:Math.round((Date.now() - PL.start) / 1000) };
+      { const s = PL.done.stats, pct = s.asked ? Math.round(100 * s.firstOk / s.asked) : 0;
+        logAdd({ type:'ovningspass', module:'geo', mode:PL.cfg.mode, bild:PL.cfg.mode === 'bild' ? PL.cfg.bild : undefined, area:PL.cfg.area, correct:s.firstOk, total:s.asked, pct, fixed:s.wrongFirst, secs:PL.done.secs });
+        PL.capyEvent = { type:'ovningspass', data:{ module:'geo', pct, modeName:PL.cfg.mode === 'bild' ? BILD_TITLE[PL.cfg.bild] : MODE_NAME[PL.cfg.mode], areaName:AREA_NAME[PL.cfg.area] } }; }
+      snd('fanfare');
+      if (PL.upptack){
+        M.clearFx(); M.clearChips(); M.fitHome(500);
+        celebrate({ title:`Du har upptäckt ${AREA_IN(PL.cfg.area)}!`, sub:`Alla ${antal(PL.area.length)} landskap har färg och namn.`,
+          buttons:[{ label:'Vidare', icon:'next', primary:true, fn:() => goto('trainend') }] });
+      } else goto('trainend');
+    }
+    function enterTrainEnd(){
+      setHeader('Bra tränat!');
+      const s = PL.done.stats, nc = PL.newCards;
+      $('scr-trainend').innerHTML = `<div class="dn-head"><span class="dn-star">${svg('star')}</span><h2>${PL.upptack ? `${AREA_NAME[PL.cfg.area]} är upptäckt!` : 'Bra tränat!'}</h2><p>${s.wrongFirst ? 'Varje fel blev rätt till slut.' : 'Varje svar satt på första försöket.'}</p></div>
+        <div class="gc sumcard">
+          <div class="rc-row"><span>Läge</span><b>${MODE_NAME[PL.cfg.mode]}</b></div>
+          <div class="rc-row"><span>Område</span><b>${AREA_NAME[PL.cfg.area]}</b></div>
+          <div class="rc-row"><span>Rätt på första försöket</span><b>${s.firstOk} av ${s.asked}</b></div>
+          <div class="rc-row"><span>Fel som rättades</span><b>${s.wrongFirst}</b></div>
+          <div class="rc-row"><span>Pärmen</span><b class="${nc.length ? 'long' : ''}">${nc.length ? nc.map(x => `${NAME(x.nr)} ${LEVEL[x.lv]}`).join(', ') : 'Inga nya nivåer den här gången'}</b></div>
+        </div>
+        <div class="gc" style="flex:1;min-height:0;padding:10px;display:flex;align-items:center;justify-content:center;gap:12px">${miniMapArea(PL.area, true)}<div class="hublegend" style="grid-template-columns:1fr"><span><i style="background:var(--ovar)"></i>Övar</span><span><i style="background:var(--kan)"></i>Kan</span><span><i style="background:var(--due)"></i>Igen</span><span><i style="background:#fff"></i>Ny</span></div></div>
+        <div class="duo"><button class="gb gb-s" id="g-teAgain">${svg('again')} Igen</button><button class="gb gb-p" id="g-teHub">Till landskapen ${svg('next')}</button></div>`;
+      ['Varje fel blev rätt till slut.', 'Varje svar satt på första försöket.', 'Inga nya nivåer den här gången'].forEach(t => SAID.add(t));
+      if (PL.capyEvent){ const ev = PL.capyEvent; PL.capyEvent = null; capy(ev); }
+      $('teAgain').addEventListener('click', () => goto('play', { cfg:PL.cfg }));
+      $('teHub').addEventListener('click', () => goto('hub'));
+    }
+    /* Liten karta över ett område: områdets landskap i sina färger (eller lådornas), resten blekt */
+    function miniMapArea(nrs, byBox = false){
+      const b = ubox(nrs, 8), st = n => !nrs.includes(n) ? '#eef1f5' : byBox ? BOX_COL[SP.vis(box(n), today())] : LD_FILL(n);
+      return `<svg viewBox="${b.x} ${b.y} ${b.w} ${b.h}" style="height:100%;max-height:220px;width:auto">${LANDSKAP.map(l => `<path d="${PATHS[l.path][1]}" fill="${st(l.nr)}" stroke="rgba(40,40,40,.5)" stroke-width=".8" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`).join('')}</svg>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PUSSLET (D27): dra bitarna till konturen; nära rätt plats snäpper biten fast
+    ═══════════════════════════════════════════════════════════ */
+    const PZ = { area:'Norrland', level:'med', left:[], placed:new Set(), miss:{}, drag:null };
+    /* Två svårighetsgrader (D32): "Med gränser" visar landskapsgränserna i underlaget, "Utan gränser" bara områdets
+       ytterkontur. Namnen på bitarna och den generösa snäppningen gäller båda. Klara pussel får en bock (räknas inte). */
+    const PZ_LEVEL = { med:'Med gränser', utan:'Utan gränser' };
+    const PZ_DONE = new Set();
+    /* Pussel och Test: ett tryck på dörren visar områdena, ett tryck på ett område startar (D30) */
+    function enterPick(kind){
+      S.pick = kind || S.pick;
+      const test = S.pick === 'test';
+      setHeader(test ? 'Test' : 'Pussel');
+      $('pick').innerHTML = AREAS.map(a => test
+        ? `<button class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><small>${cap(antal(areaNrs(a).length))} frågor</small></button>`
+        : `<div class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><span class="pzlv">${['med', 'utan'].map(l => `<button data-lvl="${l}" aria-label="${AREA_NAME[a]}, ${PZ_LEVEL[l]}">${PZ_DONE.has(a + ':' + l) ? `<span class="done">${svg('check')}</span>` : svg('puzzle')}${PZ_LEVEL[l]}</button>`).join('')}</span></div>`).join('');
+      if (test) say('pickBubble', 'Vilket område vill du testa?', 'Ingen klocka. Alla landskap i området kommer med.');
+      else say('pickBubble', 'Välj område och om gränserna ska synas.', 'Med gränser är lättare. Utan gränser är svårare.');
+    }
+    $('pick').addEventListener('click', e => {
+      const b = e.target.closest('.pzarea'); if (!b) return;
+      if (S.pick === 'test'){ goto('play', { test:true, area:b.dataset.a, items:GL.buildTest(b.dataset.a, MEMO) }); return; }
+      const lv = e.target.closest('[data-lvl]'); if (lv) goto('puzzle', { area:b.dataset.a, level:lv.dataset.lvl });
+    });
+    function enterPuzzle(arg){ startPuzzle(arg && arg.area ? arg.area : S.pzArea, arg && arg.level ? arg.level : PZ.level); }
+    function startPuzzle(area, level = PZ.level){
+      const M = MAPS.pz, nrs = areaNrs(area);
+      S.pzArea = area; PZ.area = area; PZ.level = level; PZ.left = shuffle(nrs); PZ.placed = new Set(); PZ.miss = {};
+      setHeader(`Pussel ${area === 'Sverige' ? 'hela Sverige' : area}`);
+      M.reset(); M.setHome(nrs); M.sync(); M.fitHome(0);
+      for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (nrs.includes(n) ? (level === 'med' ? 'slotb' : 'slot') : 'ctx'));
+      M.outline(nrs);                                   // bara områdets ytterkontur syns (D32)
+      M.labelFor = n => PZ.placed.has(n) ? { force:true, text:NAME(n) } : null;
+      M.relayout();
+      renderTray();
+      say('pzBubble', `${PZ_LEVEL[level]}: dra bitarna till rätt plats.`, 'Nära rätt plats snäpper biten fast.');
+    }
+    const TRAY_N = 3;
+    function renderTray(){
+      const show = PZ.left.slice(0, TRAY_N);
+      $('tray').innerHTML = `<span class="traycount"><b>${PZ.left.length}</b>${PZ.left.length === 1 ? 'bit kvar' : 'bitar kvar'}</span>` +
+        Array.from({ length:TRAY_N }, (_, i) => { const n = show[i]; if (!n) return '<span class="tpiece empty"></span>';
+          const b = MEAS[n].bbox, pad = Math.max(b.w, b.h) * 0.04;
+          return `<span class="tpiece" data-nr="${n}" role="button" aria-label="Pusselbiten ${NAME(n)}"><svg viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" preserveAspectRatio="xMidYMid meet"><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}"/></svg><span class="tn">${NAME(n)}</span></span>`; }).join('');
+    }
+    $('tray').addEventListener('pointerdown', e => {
+      const tp = e.target.closest('.tpiece[data-nr]'); if (!tp || PZ.drag) return;
+      e.preventDefault();
+      const n = +tp.dataset.nr, M = MAPS.pz, b = MEAS[n].bbox, app = ROOT.getBoundingClientRect();
+      const sv = tp.querySelector('svg').getBoundingClientRect(), pad = Math.max(b.w, b.h) * 0.04;
+      const s0 = Math.min(sv.width / (b.w + 2 * pad), sv.height / (b.h + 2 * pad));
+      const ox = sv.left - app.left + (sv.width - (b.w + 2 * pad) * s0) / 2 + pad * s0, oy = sv.top - app.top + (sv.height - (b.h + 2 * pad) * s0) / 2 + pad * s0;
+      const px = e.clientX - app.left, py = e.clientY - app.top;
+      const fx = clamp((px - ox) / (b.w * s0), 0, 1), fy = clamp((py - oy) / (b.h * s0), 0, 1);
+      const fl = document.createElementNS(NS, 'svg'); fl.setAttribute('class', 'floatpiece');
+      fl.innerHTML = `<g><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}" transform="translate(${-b.x} ${-b.y})"/></g><g class="fltag"><rect rx="13" height="26" y="-13"/><text>${esc(NAME(n))}</text></g>`;
+      ROOT.appendChild(fl);
+      const tag = fl.querySelector('.fltag'), tw = tag.querySelector('text').getComputedTextLength() + 22, tr = tag.querySelector('rect'); tr.setAttribute('width', tw); tr.setAttribute('x', -tw / 2);
+      tp.classList.add('lift');
+      const D = PZ.drag = { n, tp, fl, g:fl.firstChild, b, fx, fy, s:s0, s0, home:{ x:ox, y:oy }, px, py, k:M.k, t0:performance.now(), id:e.pointerId };
+      /* Namnet följer med ovanför fingret, så att fingret inte täcker det (D32) */
+      const appW = app.width, tagY = y => Math.max(16, y - 52);
+      const draw = () => { const X = D.px - D.fx * b.w * D.s, Y = D.py - D.fy * b.h * D.s; D.X = X; D.Y = Y; D.g.setAttribute('transform', `translate(${X.toFixed(1)} ${Y.toFixed(1)}) scale(${D.s.toFixed(4)})`);
+        D.tag.setAttribute('transform', `translate(${clamp(D.px, tw / 2 + 4, appW - tw / 2 - 4).toFixed(1)} ${tagY(D.py).toFixed(1)})`); };
+      D.tag = tag;
+      D.draw = draw;
+      const grow = now => { if (PZ.drag !== D || D.dropping) return; const u = Math.min(1, (now - D.t0) / 160); D.s = D.s0 + (D.k - D.s0) * (1 - Math.pow(1 - u, 3)); draw(); if (u < 1) requestAnimationFrame(grow); };
+      draw(); requestAnimationFrame(grow);
+      setTimeout(() => { if (PZ.drag === D && !D.dropping){ D.s = D.k; draw(); } }, 200);
+      const mv = ev => { if (ev.pointerId !== D.id) return; ev.preventDefault(); D.px = ev.clientX - app.left; D.py = ev.clientY - app.top; draw(); };
+      const upf = ev => { if (ev.pointerId !== D.id) return; window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', upf); window.removeEventListener('pointercancel', upf); D.s = D.k; draw(); dropPiece(D); };
+      window.addEventListener('pointermove', mv, { passive:false }); window.addEventListener('pointerup', upf); window.addEventListener('pointercancel', upf);
+    });
+    function tween(D, to, ms){
+      const from = { X:D.X, Y:D.Y, s:D.s }, t0 = performance.now();
+      return new Promise(res => {
+        let done = false; const fin = () => { if (done) return; done = true; D.g.setAttribute('transform', `translate(${to.X} ${to.Y}) scale(${to.s})`); res(); };
+        const st = now => { if (done) return; const u = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - u, 3);
+          D.g.setAttribute('transform', `translate(${from.X + (to.X - from.X) * e} ${from.Y + (to.Y - from.Y) * e}) scale(${from.s + (to.s - from.s) * e})`); if (u < 1) requestAnimationFrame(st); else fin(); };
+        requestAnimationFrame(st); setTimeout(fin, ms + 200);
+      });
+    }
+    /* Snäppradien (D32): generös – halva bitens minsta mått, minst 40 px – men alltid mindre än avståndet till närmaste
+       grannbit i området (70 %), så att en bit som släpps på grannens plats inte snäpper. Golv 24 px: ligger två
+       mittpunkter närmare än så (Dalsland/Bohuslän, Öland/Blekinge i hela Sverige) snäpper biten ändå bara till sin egen plats. */
+    function snapRadius(n){
+      const M = MAPS.pz, L = MEAS[n].label, b = MEAS[n].bbox;
+      let dnb = Infinity;
+      for (const m of areaNrs(PZ.area)) if (m !== n){ const Q = MEAS[m].label; dnb = Math.min(dnb, Math.hypot(L.x - Q.x, L.y - Q.y) * M.k); }
+      return GL.snapRadiusPx(Math.min(b.w, b.h) * M.k, dnb);
+    }
+    async function dropPiece(D){
+      D.dropping = true; D.tag.style.display = 'none';
+      const M = MAPS.pz, b = D.b, app = ROOT.getBoundingClientRect(), mr = M.el.getBoundingClientRect();
+      const tX = mr.left - app.left + M.tx + M.k * b.x, tY = mr.top - app.top + M.ty + M.k * b.y;
+      const dist = Math.hypot(D.X - tX, D.Y - tY), snapR = snapRadius(D.n);
+      D.dist = dist; D.snapR = snapR;
+      const n = D.n;
+      if (dist <= snapR){
+        await tween(D, { X:tX, Y:tY, s:M.k }, 140);
+        D.fl.remove(); PZ.drag = null;
+        PZ.placed.add(n); PZ.left = PZ.left.filter(x => x !== n);
+        M.P[n].setAttribute('class', 'ls placed'); M.P[n].parentNode.appendChild(M.P[n]);   // lagd bit ritas överst, med sina gränser
+        M.unfx(n, 'mark'); M.fx(n, 'found'); M.relayout();
+        renderTray();
+        say('pzBubble', `Rätt! Det är ${NAME(n)}.`, '', { lead:null, fact:factOf(n, ['rank', 'stad', 'bild'][PZ.placed.size % 3], 0) });
+        if (!PZ.left.length){ PZ_DONE.add(PZ.area + ':' + PZ.level); savePuzzle(); setTimeout(() => celebrate({ title:'Pusslet är klart!', sub:`Du har lagt hela ${PZ.area === 'Sverige' ? 'Sverige' : PZ.area}. Nivå: ${PZ_LEVEL[PZ.level].toLowerCase()}.`,
+          buttons:[{ label:'Lägg igen', icon:'again', fn:() => { closeOverlay(); startPuzzle(PZ.area, PZ.level); } }, { label:'Välj ett annat pussel', icon:'puzzle', fn:() => goto('pick', 'puzzle') }, { label:'Till landskapen', icon:'next', primary:true, fn:() => goto('hub') }] }), 450); }
+        return;
+      }
+      PZ.miss[n] = (PZ.miss[n] || 0) + 1;
+      say('pzBubble', 'Inte där. Biten glider tillbaka.', PZ.miss[n] >= 2 ? 'Titta: den rätta platsen blinkar.' : 'Titta på formen och prova en annan plats.');
+      if (PZ.miss[n] >= 2){ M.unfx(null, 'mark'); M.fx(n, 'mark'); }
+      await tween(D, { X:D.home.x, Y:D.home.y, s:D.s0 }, 260);
+      D.fl.remove(); D.tp.classList.remove('lift'); PZ.drag = null;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SAMLARPÄRMEN (D27): ett kort per landskap, upplåst när landskapet "kan" i lådorna
+    ═══════════════════════════════════════════════════════════ */
+    const SHIELD_SIL = `<svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 2l9 3v8c0 6-4 10.5-9 13-5-2.5-9-7-9-13V5z" fill="#cfd6df"/><path d="M9 13.5h6M12 10.5v6" stroke="#b8c1cc" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+    function enterBinder(){
+      setHeader('Samlarpärmen');
+      const lv = ALL.map(level), got = lv.filter(x => x > 0).length, sil = lv.filter(x => x === 2).length, gul = lv.filter(x => x === 3).length;
+      $('bHead').innerHTML = `<b>${got} av 25</b><div class="bar"><i class="fill" style="transform:scaleX(${got / 25})"></i></div><small>${got} kort · ${sil} silver · ${gul} guld</small>`;
+      $('bLegend').innerHTML = `<span><i>${medalSVG('brons')}</i>Brons: övat</span><span><i>${medalSVG('silver')}</i>Silver: kan</span><span><i>${medalSVG('guld')}</i>Guld: alla frågor</span>`;
+      $('binder').innerHTML = ALL.map((n, i) => lv[i]
+        ? `<button class="bcard lvl-${lv[i]}" data-nr="${n}" aria-label="${NAME(n)}, ${LEVEL_NAME[lv[i]]}"><span class="bmd">${medalSVG(LEVEL[lv[i]])}</span><img src="${img(n, 'vapen')}" alt="" draggable="false"><span class="bn${NAME(n).length > 11 ? ' long' : ''}">${NAME(n)}</span></button>`
+        : `<button class="bcard lock" data-nr="${n}" style="--ld:${LD_FILL(n)}" aria-label="Låst kort i ${BY[n].landsdel}">${SHIELD_SIL}<span class="bq">?</span></button>`).join('');
+      const full = got === 25, allGold = gul === 25;
+      $('bFull').hidden = !full;
+      $('bFull').innerHTML = `${svg('star')}${allGold ? 'Alla kort i guld!' : 'Hela pärmen är full!'}${svg('star')}`;
+      const main = allGold ? 'Alla tjugofem kort är i guld.' : full ? 'Alla tjugofem kort är dina.' : got === 1 ? 'Ett kort är upplåst.' : got ? `${cap(antal(got))} kort är upplåsta.` : 'Pärmen väntar på sitt första kort.';
+      say('bBubble', main, 'Tryck på ett kort så ser du nästa nivå.');
+      if (full && !S.binderParty){ S.binderParty = true; saveState(); setTimeout(() => celebrate({ title:'Hela pärmen är full!', sub:'Du har samlat alla tjugofem landskap.', buttons:[{ label:'Titta i pärmen', icon:'cards', primary:true, fn:closeOverlay }] }), 350); }
+    }
+    $('binder').addEventListener('click', e => { const b = e.target.closest('.bcard'); if (b) bigCard(+b.dataset.nr); });
+    function bigCard(n){
+      const f = F(n), L = level(n);
+      let inner;
+      if (L){
+        const nx = GL.nextLevelText(n, L, box(n).okDays); SAID.add(nx.text);
+        const chips = nx.chips ? `<div class="kchips">${GOLD_KINDS.map(([k, t]) => `<span class="${kindsOf(n).includes(k) ? 'ok' : ''}">${kindsOf(n).includes(k) ? svg('check') : ''}${t}</span>`).join('')}</div>` : '';
+        inner = `<div class="bc-top"><span class="sh-ld" style="background:${LD_FILL(n)}"></span><span class="sh-name"><b>${NAME(n)}</b><small>${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+          <div class="bc-shield"><img src="${img(n, 'vapen')}" alt="${gen(NAME(n))} landskapssköld" draggable="false"></div>
+          <div class="bc-lvl"><span class="lm">${medalSVG(LEVEL[L])}</span><span><b>${nx.head}</b><p>${esc(nx.text)}</p>${chips}</span></div>
+          <div class="sh-row" style="padding:0 2px"><span class="sh-city"><span class="sh-k">${svg('city')}Stad</span><b>${esc(cities(n)[0])}</b>${cities(n)[1] ? `<span>också ${esc(cities(n)[1])}</span>` : ''}</span></div>
+          <div class="sh-pics"><div class="pic"><div class="im"><img class="flower" style="${flowerPos(n)}" src="${img(n, 'blomma')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></div></div>
+            <div class="pic"><div class="im"><img src="${img(n, 'djur')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></div></div></div>`;
+      } else {
+        const t = GL.lockedText(n); SAID.add(t);
+        inner = `<div class="bc-top"><span class="sh-ld" style="background:${LD_FILL(n)}"></span><span class="sh-name"><b>Ett okänt landskap</b><small>Låst · ${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+          <div class="bc-lock" style="--ld:${LD_FILL(n)}"><span class="bigq">${SHIELD_SIL}<b>?</b></span><span>${t}</span></div>`;
+      }
+      const bc = ['#cbd5e1', '#c2733a', '#94a3b8', '#f59e0b'][L];
+      $('overlay').innerHTML = `<div class="gmodal" id="g-modal"><div class="bigcard" style="--bc:${bc}">${inner}</div></div>`;
+      $('modal').addEventListener('click', e => { if (e.target.id === 'g-modal' || e.target.closest('[data-close]')) closeOverlay(); });
+    }
+    function closeOverlay(){ $('overlay').innerHTML = ''; }
+
+    /* ═══════════════════════════════════════════════════════════
+       TEST (D24: "test", inte prov; D30): ingen klocka, alla landskap i det valda området (hela Sverige = alla 25),
+       frågetyperna blandade. Ett fel visar svaret och går vidare, utan nötloop.
+    ═══════════════════════════════════════════════════════════ */
+    function enterTestDone(){
+      setHeader('Testet', 'Klar');
+      const R = PL.results, ok = R.filter(r => r.ok).length, miss = R.filter(r => !r.ok).map(r => NAME(r.nr));
+      const iso = new Date().toISOString(); PL.receipt = { date:iso, ok, total:R.length, seen:null };
+      const pctTest = R.length ? Math.round(100 * ok / R.length) : 0;
+      PL.receipt.logId = logAdd({ type:'test', module:'geo', area:PL.cfg.area, correct:ok, total:R.length, pct:pctTest, miss:R.filter(r => !r.ok).map(r => r.nr) });
+      const pct = R.length ? ok / R.length : 0;
+      $('tdPraise').textContent = pct === 1 ? 'Allt satt!' : pct >= 0.7 ? 'Bra jobbat! Det mesta satt.' : 'Bra jobbat! Nu vet du vad du ska träna på.';
+      SAID.add($('tdPraise').textContent);
+      const M = MAPS.td; M.reset(); M.setHome(areaNrs(PL.cfg.area)); M.sync(); M.fitHome(0);
+      const res = {}; R.forEach(r => res[r.nr] = r.ok);
+      for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (n in res ? (res[n] ? 'res-ok' : 'res-bad') : 'dim'));
+      M.labelFor = n => n in res ? { force:true, text:NAME(n) } : null; M.relayout(); M.showHalo(false);
+      $('rc').innerHTML = `
+        <div class="rc-top"><span class="rc-k">${svg('test')}Test · Geografi · Sveriges landskap</span><span class="rc-when">${cap(fmtWhen(iso))}</span></div>
+        <div class="rc-row"><span>Område</span><b>${AREA_NAME[PL.cfg.area]}</b></div>
+        <div class="rc-row"><span>Rätt</span><b>${ok} av ${R.length}</b></div>
+        <div class="rc-row"><span>Öva mer på</span><b class="long">${miss.length ? miss.join(', ') : 'Inget, allt satt!'}</b></div>
+        <div class="rc-foot"><span class="slot-ph" id="g-rcPh">Plats för en vuxens stämpel</span><div class="stamp" id="g-rcStamp"></div></div>`;
+      $('dnAsk').textContent = 'Visa kvittot för en vuxen.';
+      const h = $('hold'); h.disabled = false; h.className = 'hold';
+      h.innerHTML = `<i class="hold-fill"></i><span class="hold-t">${svg('hand')}Håll inne: Sett av en vuxen</span>`;
+      $('tdHub').innerHTML = `Till landskapen ${svg('next')}`;
+      snd('fanfare'); capy({ type:'test', data:{ module:'geo', pct:pctTest } });
+    }
+    function stampReceipt(){
+      if (!PL || !PL.receipt || PL.receipt.seen) return;
+      const iso = new Date().toISOString(); PL.receipt.seen = iso; logPatch(PL.receipt.logId, { seen:iso });
+      $('rcStamp').innerHTML = `<span class="st-in">${svg('check')}<span class="st-tx"><b>Sett av en vuxen</b><small>${fmtStamp(iso)}</small></span></span>`;
+      $('rcStamp').classList.add('on'); $('rcPh').classList.add('off');
+      const h = $('hold'); h.classList.add('done'); h.disabled = true; h.innerHTML = `<span class="hold-t">${svg('check')}Kvittot är stämplat</span>`;
+      $('dnAsk').textContent = 'Snyggt! Nu finns kvittot i loggen.';
+    }
+    $('tdHub').addEventListener('click', () => goto('hub'));
+
+    /* ═══════════════════════════════════════════════════════════
+       BILDKÄLLORNA (D29): upphovsperson och licens per bild, ur bilder.json
+    ═══════════════════════════════════════════════════════════ */
+    function enterCredits(){
+      setHeader('Bildkällor');
+      const groups = [['vapen', 'Sköldar'], ['blomma', 'Blommor'], ['djur', 'Djur']];
+      const typ = f => f.typ === 'vapen' ? 'vapen' : f.typ.startsWith('blom') ? 'blomma' : 'djur';
+      $('cred').innerHTML = `<p class="intro">Bilderna kommer från Wikimedia Commons. Här står vem som har gjort varje bild och under vilken licens den får användas.</p>` +
+        groups.map(([t, h]) => `<h3>${h}</h3>` + BILDER.filter(f => typ(f) === t).sort((a, b) => a.nr - b.nr).map(f => `<div class="crow"><span class="ct"><img class="${t === 'vapen' ? 'shield' : ''}" src="${ASSET + f.fil}" alt="" loading="lazy" draggable="false"></span>
+          <span class="cx"><b>${esc(f.landskap)}</b><span>${esc(f.upphov)} · ${esc(f.licens)}</span></span><a href="${esc(f.kallsida)}" target="_blank" rel="noopener" aria-label="Källa för bilden">Källa</a></div>`).join('')).join('');
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       FIRANDET
+    ═══════════════════════════════════════════════════════════ */
+    function celebrate({ title, sub, buttons }){
+      SAID.add(title); SAID.add(sub);
+      const cols = ['#0f8b8d', '#4fc3c4', '#fbbf24', '#f472b6', '#22c55e', '#60a5fa', '#f97316'];
+      const conf = RM() ? '' : Array.from({ length:34 }, (_, i) => `<i class="confetti" style="left:${Math.round(Math.random() * 100)}%;background:${cols[i % cols.length]};animation-duration:${(1.8 + Math.random() * 1.6).toFixed(2)}s;animation-delay:${(Math.random() * .6).toFixed(2)}s"></i>`).join('');
+      const burst = `<svg class="gburst" viewBox="0 0 120 120"><g fill="#fde68a">${Array.from({ length:12 }, (_, i) => `<path d="M60 60 L${60 + 58 * Math.cos(i * Math.PI / 6 - .13)} ${60 + 58 * Math.sin(i * Math.PI / 6 - .13)} L${60 + 58 * Math.cos(i * Math.PI / 6 + .13)} ${60 + 58 * Math.sin(i * Math.PI / 6 + .13)}z"/>`).join('')}</g><circle cx="60" cy="60" r="30" fill="url(#g-cg)"/><defs><linearGradient id="g-cg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><path d="M60 43l5.3 10.8 11.9 1.7-8.6 8.4 2 11.8L60 70.1l-10.6 5.6 2-11.8-8.6-8.4 11.9-1.7z" fill="#fff"/></svg>`;
+      $('overlay').innerHTML = `<div class="celebrate" id="g-celebrate">${conf}${burst}<h2>${esc(title)}</h2><p>${esc(sub)}</p><div class="cbtns">${buttons.map((b, i) => `<button class="gb ${b.primary ? 'gb-p' : 'gb-s'}" data-i="${i}">${b.label} ${svg(b.icon)}</button>`).join('')}</div></div>`;
+      $('celebrate').querySelectorAll('.cbtns .gb').forEach(el => el.addEventListener('click', () => buttons[+el.dataset.i].fn()));
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       INSTÄLLNINGAR (D36): hemlandskapet väljs av en vuxen. Från början inget; då visas ingen nål och ingen text.
+    ═══════════════════════════════════════════════════════════ */
+    function enterSettings(){
+      setHeader('Inställningar');
+      $('setCard').innerHTML = `<span class="set-k">${svg('pin')}För en vuxen</span><b>Hemlandskap</b>
+        <p>Välj landskapet där ni bor. Då visar kartan i Utforska en nål med texten ”Här bor du”. Från början är inget valt. Valet sparas bara i den här profilen, på den här enheten.</p>
+        <label class="set-sel"><span>Hemlandskap</span><select id="g-homeSel" aria-label="Hemlandskap">
+          <option value="">Inget valt</option>${LANDSDELAR.map(ld => `<optgroup label="${ld}">${NRS_OF(ld).slice().sort((a, b) => NAME(a).localeCompare(NAME(b), 'sv')).map(n => `<option value="${n}"${S.home === n ? ' selected' : ''}>${NAME(n)}</option>`).join('')}</optgroup>`).join('')}
+        </select></label>`;
+      $('homeSel').addEventListener('change', e => { S.home = e.target.value ? +e.target.value : null; saveSettings(); sayHome(); });
+      sayHome();
+    }
+    function sayHome(){ say('setBubble', S.home ? `Hemlandskap: ${NAME(S.home)}.` : 'Inget hemlandskap är valt.', S.home ? 'Nålen syns i Utforska.' : 'Kartan visar ingen nål.'); }
+
+    /* ═══════════════════════════════════════════════════════════
+       START: kartan läses, mäts och kartorna byggs en gång
+    ═══════════════════════════════════════════════════════════ */
+    const onGesture = e => { if (ROOT.isConnected && document.getElementById('screen-geografi') && document.getElementById('screen-geografi').classList.contains('active')) e.preventDefault(); };
+    document.addEventListener('gesturestart', onGesture);                  // Safari: ingen sidzoom med två fingrar i Geografi
+    document.addEventListener('gesturechange', onGesture);
+    const ready = (async () => {
+      await loadMap();
+      measure();
+      MAPS.ex = GeoMap($('exMap'));
+      MAPS.play = GeoMap($('playMap'));
+      MAPS.td = GeoMap($('tdMap'));
+      MAPS.pz = GeoMap($('pzMap'), { interactive:false });
+      for (const id of ['exMap', 'playMap', 'tdMap']) $(id).insertAdjacentHTML('beforeend', `<button class="mapbtn" data-map="${id}" aria-label="Visa hela kartan">${svg('fit')}</button>`);
+      ROOT.querySelectorAll('.mapbtn').forEach(b => b.addEventListener('click', () => ({ exMap:MAPS.ex, playMap:MAPS.play, tdMap:MAPS.td })[b.dataset.map].fitHome(420)));
+      bindHold($('hold'), { ms:1500, canStart:() => !!(PL && PL.receipt && !PL.receipt.seen), onDone:stampReceipt });
+    })();
+    async function enter(p){
+      loadProfile(p);
+      S.screen = 'geo';
+      ROOT.querySelectorAll('.gs').forEach(s => s.classList.remove('on'));
+      setHeader('Geografi');
+      try { await ready; }
+      catch (err){ say('geoBubble', 'Kartan kunde inte läsas.', 'Kontrollera nätet och försök igen.'); $('scr-geo').classList.add('on'); return; }
+      goto('geo');
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       _test — tillstånd och hjälpare för test (Playwright, verifieringen)
+    ═══════════════════════════════════════════════════════════ */
+    /* Tryck med riktiga pekarhändelser (genom hela kedjan: tryck/drag-skillnaden, 250 ms-väntan, träffen) */
+    function ptr(el, type, x, y, id = 1, kind = 'touch'){ el.dispatchEvent(new PointerEvent(type, { bubbles:true, cancelable:true, composed:true, clientX:x, clientY:y, pointerId:id, pointerType:kind, isPrimary:id === 1, button:0, buttons:type === 'pointerup' ? 0 : 1 })); }
+    function screenOf(mapKey, nr){ const M = MAPS[mapKey], L = MEAS[nr].label, q = M.toScreen(L.x, L.y), r = M.el.getBoundingClientRect(); return { x:r.left + q.x, y:r.top + q.y }; }
+    async function tapNr(mapKey, nr){ const M = MAPS[mapKey], p = screenOf(mapKey, nr); ptr(M.el, 'pointerdown', p.x, p.y); ptr(M.el, 'pointerup', p.x, p.y); await wait(380); return p; }
+    /* Träffytan i px för varje synligt landskap, mätt med samma träffberäkning som trycken (rutnät, steg 2 px) */
+    function hitReport(mapKey, step = 2){
+      const M = MAPS[mapKey], W = Math.floor(M.W / step), H = Math.floor((M.H - M.inset) / step), grid = new Int16Array(W * H);
+      for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) grid[j * W + i] = M.hit(i * step + step / 2, j * step + step / 2) || 0;
+      const disc = {};
+      for (const n of M.visibleNrs()){
+        const edge = [];
+        for (let j = 0; j < H; j++) for (let i = 0; i < W; i++){ if (grid[j * W + i] !== n) continue;
+          const out = (a, b) => a < 0 || b < 0 || a >= W || b >= H || grid[b * W + a] !== n;
+          if (out(i - 1, j) || out(i + 1, j) || out(i, j - 1) || out(i, j + 1)) edge.push(i, j); }
+        let best = 0;
+        for (let j = 0; j < H; j++) for (let i = 0; i < W; i++){ if (grid[j * W + i] !== n) continue;
+          let m = Infinity; for (let e = 0; e < edge.length; e += 2){ const dx = edge[e] - i, dy = edge[e + 1] - j, d = dx * dx + dy * dy; if (d < m) m = d; }
+          if (m > best) best = m; }
+        disc[n] = (2 * Math.sqrt(best) + 1) * step;
+      }
+      const out = {};
+      for (const n of M.visibleNrs()) out[n] = { name:NAME(n), disc:Math.round(disc[n] || 0), small:M.smallNrs().includes(n), widthPx:+(2 * MEAS[n].r * M.k).toFixed(1) };
+      return { k:+M.k.toFixed(3), out };
+    }
+    /* Alla texter som modulen kan visa: logikens (GL.allTexts) och det som sagts i bubblorna */
+    function allTexts(){
+      const t = new Set([...GL.allTexts(), ...SAID]);
+      for (const n of ALL){ t.add(`Det där är ${NAME(n)}.`); t.add(`Det där är ${NAME(n)}. Det hör till ${BY[n].landsdel}.`); t.add(`${NAME(n)} blinkar nu. Tryck där.`); t.add(`${NAME(n)} kommer tillbaka. Var låg det?`);
+        t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Hemlandskap: ${NAME(n)}.`); }
+      return [...t].filter(Boolean);
+    }
+    const _test = {
+      S, MEAS, MAPS, GL, get PL(){ return PL; }, get PZ(){ return PZ; }, get busy(){ return busy; }, get profile(){ return profile; }, ready,
+      goto, areaMedal, isKan, box, today, level, recordAnswer, recordKind, saveState, setToday:d => { todayOverride = d || null; },
+      preset(p){ for (const n of ALL){ const green = p === 'kan' || (p === 'norr' && BY[n].landsdel === 'Norrland'); const t = today(); S.boxes[n] = green ? { box:'kan', okDays:3, level:1, due:SP.addDays(t, 1), lastOk:SP.addDays(t, -1), relearn:false } : SP.fresh(); S.kinds[n] = p === 'kan' ? GOLD_KINDS.map(k => k[0]) : green ? ['karta'] : []; } S.binderParty = false; saveState(); },
+      ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet, sayFact, kindsOf,
+      /* Svara på frågan som visas: rätt, eller fel (en granne om möjligt, annars långt bort). Kartsvar går genom pekarhändelser. */
+      async answer(ok, prefer = 'near'){
+        if (!PL || PL.phase !== 'q') return null;
+        const it = PL.cur, t = it.nr;
+        if (PL.opts){
+          const os = PL.opts.map(o => o.nr), near = os.filter(n => isNear(t, n)), far = os.filter(n => n !== t && !isNear(t, n));
+          const want = ok ? t : (prefer === 'near' && near.length ? near[0] : far[0] ?? near[0]);
+          $('pCtrl').querySelectorAll('.opt')[PL.opts.findIndex(o => o.nr === want)].click(); return want;
+        }
+        const M = MAPS.play;
+        const pick = list => list.filter(n => M.visibleNrs().includes(n));
+        let want = t;
+        if (!ok){ const near = pick(NEAR(t)), far = pick(ALL.filter(n => n !== t && !isNear(t, n))); want = prefer === 'near' && near.length ? near[0] : far[0] ?? near[0]; }
+        await M.ensureVisible(want, 0);
+        await tapNr('play', want);
+        return want;
+      },
+      /* Släpp en pusselbit (pekarhändelser): rätt plats eller förskjuten dx, dy px */
+      async drop(nr, dx = 0, dy = 0){
+        const tp = document.querySelector(`.tpiece[data-nr="${nr}"]`); if (!tp) return null;
+        const r = tp.getBoundingClientRect(), x0 = r.left + r.width / 2, y0 = r.top + r.height / 2;
+        ptr(tp, 'pointerdown', x0, y0, 7);
+        await wait(240);
+        const D = PZ.drag, M = MAPS.pz, b = MEAS[nr].bbox, mr = M.el.getBoundingClientRect();
+        /* pekaren dit biten hamnar rätt: bitens hörn + greppunkten */
+        const tx = mr.left + M.tx + M.k * b.x + D.fx * b.w * M.k + dx, ty = mr.top + M.ty + M.k * b.y + D.fy * b.h * M.k + dy;
+        for (let i = 1; i <= 6; i++){ ptr(window, 'pointermove', x0 + (tx - x0) * i / 6, y0 + (ty - y0) * i / 6, 7); await wait(16); }
+        ptr(window, 'pointerup', tx, ty, 7);
+        await wait(500);
+        return { placed:PZ.placed.has(nr), dist:D.dist, snapR:D.snapR };
+      },
+    };
+
+    return { enter, _test };
+  }
+
+  return { init, get _test(){ return api && api._test; } };
+})();
+if (typeof window !== 'undefined') window.GeoGame = GeoGame;

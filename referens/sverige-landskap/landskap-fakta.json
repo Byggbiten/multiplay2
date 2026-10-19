@@ -2,7 +2,8 @@
   "_om": {
     "vad": "Faktaunderlag för Sveriges landskap i Multiplay (Geografi → Sverige → Sveriges landskap). Nyckel = läxbokens nummer 1–25.",
     "framtaget": "2026-10-19",
-    "regler": "Se referens/sverige-landskap/README.md: källor, tumregeln för städerna, licenser och det som inte gick att belägga."
+    "regler": "Se referens/sverige-landskap/README.md: källor, tumregeln för städerna, licenser och det som inte gick att belägga.",
+    "bilder_ligger": "Bilderna ligger sedan v66 i assets/geografi/sverige/; sökvägarna i bilder är relativa den mappen. Appens data: js/geografi-data.js (genererad med gen-geografi-data.py)."
   },
   "landskap": {
     "1": {

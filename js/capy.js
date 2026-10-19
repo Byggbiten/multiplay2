@@ -467,6 +467,7 @@ const Capy = (() => {
       lastOvningspass: '',            // första övningspasset per dag ger ett vanligt kort
       tables: {},                     // hela tabeller i Kan: { '7': 'YYYY-MM-DD' } (engångs per tabell)
       clockSteps: {},                 // v63: klockans steg med guld: { halv: 'YYYY-MM-DD' } (engångs per steg)
+      geoLand: {},                    // v66: landskap med guld i Geografis pärm: { '7': 'YYYY-MM-DD' } (engångs)
       allDoneShown: false,            // (≤ v58: alla 24 vanliga) – läses inte längre
       allGoldShown: false,            // v59: varm grattis-text när alla 24 är guld
       pending: [],                    // kö av intjänade dragningar: [{ spec, reason }]
@@ -489,6 +490,7 @@ const Capy = (() => {
     Object.keys(def).forEach(k => { if (st[k] === undefined) st[k] = def[k]; });
     if (!st.tables || typeof st.tables !== 'object') st.tables = {};
     if (!st.clockSteps || typeof st.clockSteps !== 'object') st.clockSteps = {};
+    if (!st.geoLand || typeof st.geoLand !== 'object') st.geoLand = {};
     st.pending = (Array.isArray(st.pending) ? st.pending : []).map(normPending).filter(Boolean);
     return st;
   }
@@ -567,7 +569,7 @@ const Capy = (() => {
   /* ── Skälen: kort svensk mening om vad hon gjorde ─────── */
   const MODULE_NAME = {
     mult:'Gångertabellen', clock:'Klockan', friends:'10-Kompisar',
-    multdiv:'Multiplikation & Division', uppstallning:'Addition & Subtraktion',
+    multdiv:'Multiplikation & Division', uppstallning:'Addition & Subtraktion', geo:'Geografi',
   };
   const TALORD = ['noll', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio', 'elva', 'tolv'];
   const talord = n => (n >= 0 && n <= 12 ? TALORD[n] : String(n));
@@ -608,11 +610,17 @@ const Capy = (() => {
           if (!varv) return `Övningspass på klockan: ${n}`;
           return n.includes(',') ? `Övningspass på klockan: ${n} (${varv})` : `Övningspass på klockan: ${n}, ${varv}`;
         }
+        // v66: Geografi – "Övningspass i Geografi: Upptäck Sverige, Norrland"
+        if (d.module === 'geo') {
+          const what = [d.modeName, d.areaName].filter(x => typeof x === 'string' && x).join(', ');
+          return what ? `Övningspass i Geografi: ${what}` : 'Övningspass i Geografi';
+        }
         if (!tp) return varv ? `Dagens första övningspass, ${varv}` : 'Dagens första övningspass';
         return varv ? `Övningspass i ${tp}, ${varv}` : `Övningspass i ${tp}`;
       }
       case 'tabell':  return `Du kan hela ${d.table}:ans tabell`;
       case 'klocksteg': return `Du kan klockans steg ${d.name}`;
+      case 'landskap':  return `Guld i samlarpärmen: ${d.name}`;
       default:        return null;
     }
   }
@@ -624,6 +632,7 @@ const Capy = (() => {
        daily:       { pct, streak }
        tabell:      { table }   (v59: alla t×1 … t×N i lådan Kan, en gång per tabell)
        klocksteg:   { step, name }   (v63: ett av klockans steg har guld, en gång per steg)
+       landskap:    { nr, name }     (v66: ett landskap i Geografis samlarpärm når guld, en gång per landskap)
      milestones() är ren: uppdaterar st (räknare + pending-kön) för
      dagen `day` (YYYY-MM-DD). Varje köpost bär sitt skäl: { spec, reason }.
      award() nedan drar kortet.
@@ -699,6 +708,13 @@ const Capy = (() => {
         st.tables[t] = day;
         q('vanlig', 'tabell', { type:'tabell', data:{ table:t } });
       }
+    } else if (event.type === 'landskap') {
+      // Guld på ett landskap i Geografis samlarpärm: ett vanligt kort (eller en uppgradering), en gång per landskap
+      const nr = Number(d.nr);
+      if (Number.isInteger(nr) && nr > 0 && !st.geoLand[nr]) {
+        st.geoLand[nr] = day;
+        q('vanlig', 'landskap', { type:'landskap', data:{ nr, name:d.name || String(nr) } });
+      }
     } else if (event.type === 'klocksteg') {
       // Guld på ett av klockans steg: ett vanligt kort (eller en uppgradering), en gång per steg
       const id = typeof d.step === 'string' ? d.step : '';
@@ -727,7 +743,7 @@ const Capy = (() => {
   function awardCore(st, cards, event, day, nowISO) {
     milestones(st, event, day);
     const out = { st, cards, entry:null, card:null, tier:0, allDone:false };
-    if (event.type === 'tabell' || event.type === 'klocksteg' || st.pending.length === 0) return out;
+    if (event.type === 'tabell' || event.type === 'klocksteg' || event.type === 'landskap' || st.pending.length === 0) return out;
     const entry = st.pending.shift();
     const card = resolveDraw(entry.spec, cards, st);
     if (card) {

@@ -18,7 +18,7 @@ Spelväljaren i `index.html` har sex kort och ett hjältekort för Dagens träni
 | Nationella prov åk 3 | `js/nationella.js`, `js/np-matte-muntligt.js`, `js/np-matte-skriftlig.js`, `js/np-svenska.js`, `js/np-svenska-texts.js` | Hubb för matematik (muntlig och skriftlig del) och svenska. | `SPEC-NP-MATTE-MUNTLIGT.md` (historisk) |
 | Dagens träning | `js/daily.js` | Hjältekortet: plockar ur lådorna i Gångertabellen och Klockan, ett pass med båda, gemensam slutskärm (D20). | — |
 | Capybara-samlingen | `js/capy.js` | 24 samlarkort som komponerbara SVG:er, nivåerna Nytt kort, silver och guld med "Så fick du den" (D14). | — |
-| Geografi | — (planerad) | Geografi → Sverige → Sveriges landskap med läxbokens numrering 1–25 (D22, D24–D29). | Förslag: `design-lab/geografi-mockup.html` (omgjord efter `brainstorm/08`, väntar på Dennis och Mira) |
+| Geografi | `js/geografi.js`, `js/geografi-logic.js`, `js/geografi-data.js` (genererad ur `referens/sverige-landskap/`), `assets/geografi/sverige/` | Geografi → Sverige → Sveriges landskap (v66): Utforska, Träna i fyra lägen med nötloop och blandad ordning (D34), Pussel i två nivåer, Samlarpärmen brons/silver/guld, Test per område med kvitto, bildkällorna, hemlandskap per profil (D36). Numren bara internt (D33). Ingår inte i Dagens träning (D20). (D22, D24–D36) | `design-lab/geografi-mockup.html` (införd i v66) |
 
 `js/app.js` äger routing, profiler, `Store`, ljud, konfetti och `APP_VERSION`. `sw.js` cachar appen
 (`CACHE_VERSION`, network-first för HTML/JS/CSS).
@@ -26,13 +26,15 @@ Spelväljaren i `index.html` har sex kort och ett hjältekort för Dagens träni
 ## Delade delar i `js/shared.js` (`window.MP`, även CJS för vitest)
 
 - `MP.spaced` — lådorna och påfyllningen (ny, övar, kan; intervall 1/3/7/14/30 dagar; medaljen ur lådorna), D11.
-- `MP.createDrill` — nötloopen i ett varv: fel ger samma fråga direkt igen och en gång till senare, D12.
+- `MP.createDrill` — nötloopen i ett varv: fel ger samma fråga direkt igen och en gång till senare, D12. Med
+  `opts.sameKey` (bara Geografi) hamnar extratillfället inte bredvid samma nyckel (D34).
+- `MP.spreadShuffle` — blandad ordning utan samma nyckel två gånger i rad och med en ny lottning jämfört med förra gången (D34, Geografi).
 - Kvittot efter ett pass: `MP.receiptFor`, `MP.durTxt`, `MP.praiseFor`, `MP.fmtWhen`, `MP.fmtStamp`, och
   `MP.bindHold` för "Sett av en vuxen".
 - Äldre delar: `MP.createRetryQuiz` (retry-kön, `PLAN-RENOVERING.md`), `MP.createLog`, `MP.getMedal`,
   `MP.medalSVG`, `MP.timeToSwedish`, `MP.shuffle`, `MP.escapeHtml`, `MP.safeSetItem`.
 
-Gångertabellen och Klockan använder samma lådor, nötloop och kvitto; Dagens träning bygger på dem.
+Gångertabellen, Klockan och Geografi använder samma lådor, nötloop och kvitto; Dagens träning bygger på Gångertabellen och Klockan.
 
 ## Lagringsnycklar
 
@@ -50,6 +52,7 @@ profil tas bort (`Store.deleteProfile` i `js/app.js`):
 | Nationella prov | `np_svenska_log_`, `np_matte_muntligt_stats_`, `np_matte_skriftlig_stats_` |
 | Dagens träning | `daily_log_`, `daily_state_` |
 | Capybara-samlingen | `capy_cards_`, `capy_state_` |
+| Geografi | `geo_state_` (lådan och frågetyperna per landskap, pärmens firande), `geo_settings_` (hemlandskapet, D36), `geo_puzzle_` (pusslets bockar), `geo_log_` (pass och test) |
 
 En ny modul som sparar per profil lägger sina nycklar i `Store.deleteProfile`.
 

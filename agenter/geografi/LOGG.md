@@ -130,7 +130,32 @@ En post per runda: vad som inte fungerade och varför, vad lösningen blev, och 
   - Förvalet ska tjäna barnet, inte testet.
   - Lita aldrig på en utdatafil från en körning som kraschat.
 
-## Genomgående lärdom (fem rundor)
+## Runda 6 · 2026-10-19 · Bygget in i appen (D35, D36), grenen `geografi` (`d1785ce`–`e18ec96`)
+- **Vad som inte fungerade:**
+  - **Firandets knappar** gjorde ingenting: mallarnas klassnamn hade döpts om (`btn` → `gb`), men selektorn
+    `.cbtns .btn` i samma funktion hade inte det.
+  - **Pusslet kraschade** på mockupens `$('app')`, som inte finns i appen.
+  - **Startsidan scrollade som PWA.** Med sju kort mätte Chromium i 390 × 844 utan scroll, men i simulatorn
+    (390 × 797, statusraden tar 47 px) scrollade sidan 24 px och det breda kortet trycktes ihop till 22 px.
+  - **Capy-överlägget** låg över resultatet och tog de riktiga trycken i testet; det är appens vanliga beteende,
+    inte ett fel i modulen.
+  - Första dubbeltrycket i simulatorn mätte fel: två separata action-anrop med kontextbyte emellan blev två tryck
+    med för lång paus, och kartans zoom hade ändrats av kortet som öppnades före.
+- **Varför:** omdöpningen gjordes med textersättning på kända mallar, inte på alla selektorer. Startsidan mättes bara
+  i webbläsarens höjd, inte i PWA:ns.
+- **Lösning:**
+  - Selektorn rättad och `$('app')` → `ROOT`; ett test söker nu efter mockupens gamla klassnamn i selektorer och
+    `$('app')`, och det fångar båda felen i den obearbetade versionen.
+  - Geografi som brett kort; mobilens spelkort 132 px (förut 156), den korta höjden 90 (förut 104), det breda minst
+    44. Mätt i tio storlekar med och utan Dagens träning.
+  - Mockupens tester gick mot appen genom en `window.MOCK`-yta över `GeoGame._test`: 88 + 35 + 38 kontroller, plus
+    30 för appens egna delar.
+- **Lärdom:**
+  - Vid inbyggnad av en mockup: döp om klasser i ALLA strängar som är selektorer, och låt ett test leta kvarlevor.
+  - Mät startsidan och varje vy i PWA-höjden (390 × 797) innan "ingen scroll" påstås.
+  - Mockupens tester är värda att återanvända: en tunn kompatibilitetsyta gav full täckning direkt.
+
+## Genomgående lärdom (sex rundor)
 Flera rundor gav nya önskemål som en tidigare fråga hade kunnat fånga:
 - Ska ett rätt svar gå vidare själv?
 - Ska rutan vara fast eller rotera?

@@ -214,6 +214,20 @@
           <span class="game-meta" data-game-status="multdiv">Ny! ✨</span>
         </button>
 
+        <button class="game-card game-card-wide theme-geo" onclick="App.startGame('geografi')">
+          <span class="game-emoji" aria-hidden="true" style="color:var(--accent)">
+            <svg viewBox="0 0 24 24" style="width:1em;height:1em;display:block"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M3 12h18"/>
+              <path d="M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/>
+            </svg>
+          </span>
+          <h3>Geografi</h3>
+          <p>Sveriges landskap på kartan</p>
+          <span class="game-meta" data-game-status="geografi">Ny! ✨</span>
+        </button>
+
       </div>
     </div>
   </section>
@@ -310,6 +324,13 @@
   </section>
 
   <!-- ══════════════════════════════════════
+       GEOGRAFI (v66, D35)
+  ══════════════════════════════════════ -->
+  <section id="screen-geografi" class="screen screen-geo" role="main">
+    <div id="geo-root"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
        SKÄRM 17: CAPYBARA-SAMLINGEN (js/capy.js)
   ══════════════════════════════════════ -->
   <!-- Dagens träning (js/daily.js): mellanskärmen och slutskärmen -->
@@ -375,6 +396,9 @@
 <script src="js/platsvarde.js"></script>
 <script src="js/uppstallning.js"></script>
 <script src="js/multdiv.js"></script>
+<script src="js/geografi-data.js"></script>
+<script src="js/geografi-logic.js"></script>
+<script src="js/geografi.js"></script>
 
 </body>
 </html>

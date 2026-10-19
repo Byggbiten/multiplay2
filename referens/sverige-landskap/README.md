@@ -1,14 +1,21 @@
 # referens/sverige-landskap/ — faktaunderlag för Sveriges landskap
 
-Underlag för Geografi → Sverige → Sveriges landskap (D22, D24–D27; D27: djur och blommor visas som bild + text). Framtaget 2026-10-19. Ingen appkod använder
-filerna ännu; mockupen `design-lab/geografi-mockup.html` läser dem. Städerna är godkända (D28).
+Underlag för Geografi → Sverige → Sveriges landskap (D22, D24–D27; D27: djur och blommor visas som bild + text). Framtaget 2026-10-19. Städerna är godkända (D28).
+
+**Källan och appens kopior (v66, D35).** JSON-filerna här är källan, med källa per fält. Appen läser dem inte
+direkt. `gen-geografi-data.py` genererar `js/geografi-data.js` (bara de fält appen visar), och
+`tests/geografi.test.mjs` kontrollerar att den filen stämmer med källan. Bilderna (`vapen/`, `blommor/`,
+`djur/`) och kartan ligger bara i appens tillgångar, `assets/geografi/sverige/`. Sökvägarna i `bilder` och `fil`
+nedan är relativa den mappen. Mockupen `design-lab/geografi-mockup.html` läser JSON-filerna här och bilderna och
+kartan i `assets/`.
 
 | Fil / mapp | Vad |
 |---|---|
 | `landskap-fakta.json` | En post per landskap, nyckel = läxbokens nummer 1–25 (`../landskap-laxbok.json`). Fält: `nr`, `namn`, `landsdel`, `storsta_stad`, `ocksa_stor_stad`, `motivering_stad`, `blomma` (+ `blomma_not`), `djur`, `yta_km2`, `yta_rang`, `invanare` (antal + datum), `invanare_rang`, `visste_du` (2 fakta med egen källa var), `bilder` (sökvägar), `kallor` (URL + hämtdatum per fält). |
-| `vapen/<nr>-<namn>.svg` | De 25 landskapsvapnen (sköldarna, utan hertigkrona) som SVG. |
-| `blommor/<nr>-<namn>.jpg` | En bild per landskapsblomma, botaniska planscher. |
-| `djur/<nr>-<namn>.jpg` | En bild per landskapsdjur, foton (laxen är en illustration). 25 olika djur, inget delas mellan landskap. |
+| `gen-geografi-data.py` | Genererar `js/geografi-data.js` ur filerna här och `../landskap-laxbok.json`. Kör från repots rot: `python3 -I referens/sverige-landskap/gen-geografi-data.py "$PWD"`. |
+| `assets/geografi/sverige/vapen/<nr>-<namn>.svg` | De 25 landskapsvapnen (sköldarna, utan hertigkrona) som SVG. Flyttade hit från `vapen/` i v66. |
+| `assets/geografi/sverige/blommor/<nr>-<namn>.jpg` | En bild per landskapsblomma, botaniska planscher (flyttade i v66). |
+| `assets/geografi/sverige/djur/<nr>-<namn>.jpg` | En bild per landskapsdjur (flyttade i v66), foton (laxen är en illustration). 25 olika djur, inget delas mellan landskap. |
 | `bilder.json` | En post per bildfil (75 st): källsida på Commons, nedladdnings-URL, licens, upphovsperson, vad appen måste visa, och kontrollen av filen. |
 
 ## Källor

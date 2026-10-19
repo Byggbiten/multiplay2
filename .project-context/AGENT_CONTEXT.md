@@ -2,7 +2,7 @@
 
 ## Vem och varför
 
-- Multiplay byggs av Dennis för ett barn, i dokumenten kallat Mira (10 år). Mira är också ett av appens generiska namn; efternamn, ort och skola skrivs aldrig i repot (D36). Appen är en PWA; mars-dokumentet nämner iPad
+- Multiplay byggs av Dennis för ett barn, i dokumenten kallat Mira. Mira är också ett av appens generiska namn; efternamn, ort och skola skrivs aldrig i repot (D36). Appen är en PWA; mars-dokumentet nämner iPad
   med Apple Pencil, och arbetet sedan september mäts i telefonformat 390 × 844. Capybara-samlingen kom från Mira och
   Zeldas önskemål (juli 2026).
 - Dennis måttstock för all pedagogik (22/9, citerad i `SPEC-KORT-DIVISION.md`): barnen ska i minsta möjliga mån
@@ -39,7 +39,7 @@
 
 - **Kedjan:** spec → klickbar mockup → Mira-test, gärna en agent som spelar barn → Dennis dömer → bygge på egen gren →
   verifiering i panelen → release. Kort division (D5) och gångertabellen (D9) gick hela vägen så.
-- **Barnrollspel hittar språkfel som kodgranskning missar.** En agent som spelar Mira (10 år) och klickar igenom
+- **Barnrollspel hittar språkfel som kodgranskning missar.** En agent som spelar Mira (ett barn på mellanstadiet) och klickar igenom
   alla lägen hittade "läs av brickan", den försvunna 42:an och knappar som svalde tryck.
 - **Textsvep som vakt.** Alla bubbeltexter genereras ur mallar och svepas i testerna mot språkreglerna
   (`tests/multdiv.test.mjs`, `tests/clock.test.mjs`).
