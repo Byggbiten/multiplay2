@@ -208,8 +208,8 @@ Förväntat: PASS. `tests/shared.test.mjs` ska vara opåverkad.
 
 - [ ] **Steg 6: Verifiera i webbläsaren att demon fortfarande beter sig som förut**
 
-Servern kör på port 5312 och läser `/Users/dennissendelbach/multiplay-dev`. Synka först:
-`rsync -a --delete --exclude='.git' --exclude='node_modules' --exclude='.claude' "<repo>/" /Users/dennissendelbach/multiplay-dev/`
+Servern kör på port 5312 och läser `~/multiplay-dev`. Synka först:
+`rsync -a --delete --exclude='.git' --exclude='node_modules' --exclude='.claude' "<repo>/" ~/multiplay-dev/`
 Öppna `http://localhost:5312/`, skapa en profil, gå till Uppställning → Addition → Demo och stega igenom en uppgift. Läs konsolen med `read_console_messages` — den ska vara tom.
 
 - [ ] **Steg 7: Commit**

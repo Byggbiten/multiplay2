@@ -22,7 +22,7 @@ efter ett ordning och reda-pass.
 | Menyn Geografi: nio moduler, bara Sverige öppen → Sverige (landskapen; sjöar och städer "Kommer snart") → Sveriges landskap | D24 | Flödet |
 | Kartmotorn: dra, nyp, tröghet, gränser som fjädrar, mushjul. Dubbeltryck zoomar inte. Ett tryck räknas direkt; ett andra tryck på samma ställe inom 350 ms ignoreras | D24, D30 | 35 gestkontroller med riktig touch via CDP |
 | Träffregeln: en skiva på 44 px runt mittpunkten för små landskap, annars landskapet under fingret, i havet det närmaste inom 12 px eller kanten | – | Varje landskaps mitt träffar rätt, 25 av 25, i helbild och inzoomat |
-| Utforska med landskapskort: sköld, stad (och "också"), blomma och djur som bild och text, rang i ord, "Visste du?", "Här bor du" | D24, D27, D28 | Flödet; bilderna laddas |
+| Utforska med landskapskort: sköld, stad (och "också"), blomma och djur som bild och text, rang i ord, "Visste du?", "Här bor du" (blir en inställning, D36) | D24, D27, D28 | Flödet; bilderna laddas |
 | Hemvyn: områdeskorten (medaljer ur lådorna) är ingången till Träna; dörrarna Utforska, Pussel, Samlarpärm och Test; informationsknapp till bildkällorna (75 rader) | D29, D30 | Flödet; två tryck till första frågan |
 | Träna <område>: ordningen (Blandad förvald, Norr till söder) och fyra lägen där ett tryck startar | D30, D33, D34 | Flödet; inget val förekommer två gånger |
 | Nötloop som i gångertabellen; Nästa efter rätt svar; standardiserad faktaruta (sköld, Stad/Djur/Blomma i tabell, särskild rad vid rang 1, 2, 24 eller 25) | D30–D32 | 25 landskap × alla bekräftelser: inget klipps; det högsta är 103 av 117 px; Nästa står på y 778 |
@@ -41,7 +41,7 @@ efter ett ordning och reda-pass.
   Dalsland 29 px.
 - **Ingenting är provat på en riktig iPhone.** Skydden mot sidzoom och textmeny i Safari (`gesturestart`,
   `-webkit-touch-callout`, `touch-action`) är bara verifierade i Chromium.
-- **Nålen "Här bor du"** står i Medelpads mitt, eftersom det inte finns någon källa för Sundsvalls läge i kartan.
+- **Nålen "Här bor du"** är hårdkodad i mockupen. D36: i appen blir den en inställning (av från början), och orten står inte i repot.
 - **Färgkartans licens** är inte kontrollerad (`referens/README.md`). Det går för en privat app, men den måste
   kontrolleras om appen blir offentlig.
 - **Blomplanschernas beskärning** (`FLOWER_Y`) är satt för hand efter en kontaktbild av alla 25. Kontrollera den

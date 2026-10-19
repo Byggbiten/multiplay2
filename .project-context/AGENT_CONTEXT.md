@@ -2,7 +2,7 @@
 
 ## Vem och varför
 
-- Multiplay byggs av Dennis för dottern Mira, 10 år, i årskurs 4. Appen är en PWA; mars-dokumentet nämner iPad
+- Multiplay byggs av Dennis för ett barn, i dokumenten kallat Mira (10 år). Mira är också ett av appens generiska namn; efternamn, ort och skola skrivs aldrig i repot (D36). Appen är en PWA; mars-dokumentet nämner iPad
   med Apple Pencil, och arbetet sedan september mäts i telefonformat 390 × 844. Capybara-samlingen kom från Mira och
   Zeldas önskemål (juli 2026).
 - Dennis måttstock för all pedagogik (22/9, citerad i `SPEC-KORT-DIVISION.md`): barnen ska i minsta möjliga mån

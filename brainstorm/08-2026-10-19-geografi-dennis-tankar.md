@@ -29,8 +29,7 @@ dörrar – **Utforska** (läroläget), **Träna** (spellägen med nivåer), **T
 färgläggning) byggs generell så att Europa och de andra bara blir nya data (områden + fakta + flaggor).
 
 **Utforska.** Fri karta med dra/nyp. Tryck på ett landskap → ett landskapskort glider upp: nummer och namn, landsdel,
-största stad, blomma, djur, sköld, "Visste du?" (rang i yta och invånare, en kuriositet). Medelpad har nålen
-"Här bor du". Faktan läses ur en datafil med källa per uppgift (15 § 7) – inget skrivs ur minnet.
+största stad, blomma, djur, sköld, "Visste du?" (rang i yta och invånare, en kuriositet). Hemlandskapet kan få nålen "Här bor du" (en inställning, D36). Faktan läses ur en datafil med källa per uppgift (15 § 7) – inget skrivs ur minnet.
 
 **Spellägen i Träna** (alla med nötloop och lådor som i gångertabellen):
 1. **Upptäck Sverige** (Dennis memory-idé, huvudläget): kartan börjar i dimma. "Var ligger Medelpad?" → rätt tryck

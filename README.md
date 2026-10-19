@@ -81,3 +81,5 @@ git revert -m 1 <merge-commit>             # ångrar hela grenen; taggen fore-<n
 | `js/multdiv.js` | Uppställd multiplikation och kort division: demo, hjälpläge och Räkna själv |
 | `tests/` | En testfil per modul med ren logik; textsvep för språkreglerna |
 | `design-lab/` | Klickbara mockuper som är facit (register: `design-lab/README.md`) |
+
+**Levande experter:** `agenter/` – en mapp per roll med överlämning och lärdomslogg (register: `agenter/README.md`).

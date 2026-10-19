@@ -19,7 +19,7 @@ En PWA där Mira, 10 år, tränar skolmatte: gångertabellen, klockan, uppställ
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D35) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D36) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |

@@ -5,7 +5,7 @@
    är aktiverat.
    Mönster: uppstallning.js — demo-motor v28 (bubbla FÖRE animation,
    Klart-bubbla med 1,8 s lästid), exFree-miniräknaren, kladd-lagen.
-   OBS: åk 4-boken använder · (mittpunkt) som gångertecken — multdiv
+   OBS: skolboken använder · (mittpunkt) som gångertecken — multdiv
    följer boken. Nivå 4 skriver delprodukt 2 FÖRSKJUTEN ett steg åt
    vänster (ingen platshållar-nolla), med + framför, per boken.
    v30: LEVANDE MINNESSIFFROR (SPEC-MINNESSIFFROR.md) — minnes-

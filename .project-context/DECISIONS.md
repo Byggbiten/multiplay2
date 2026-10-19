@@ -58,6 +58,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D33 Läxbokens nummer tas bort ur Geografi
 - D34 Blandad ordning är standard i Träna och Test
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
+- D36 Orten bort ur repot; "Här bor du" blir en inställning ✎ inga utpekande kombinationer
 
 ---
 
@@ -410,3 +411,16 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   granskning. Ordning och reda körs före bygget. Regeln för pärmens nivåer (brons = övat, silver = kan, guld = kan i
   alla frågetyper) gäller som den står i mockupen.
 - **Källa:** Dennis 2026-10-19: "det ser jättebra ut. Kör en ordning och reda-rutin, sen livesätter vi detta"
+
+## D36 · 2026-10-19 · Orten bort ur repot; "Här bor du" blir en inställning
+- **Beslut:** repot och appen är offentliga. Barnets hemort skrivs inte i repots dokument eller kod. Nålen "Här bor
+  du" i Geografi visas bara om en vuxen väljer ett hemlandskap i appens inställningar; från början är inget valt. Det
+  valda landskapet sparas lokalt per profil, inte i repot. Äldre omnämnanden finns kvar i git-historiken; att skriva
+  om historiken (force-push) ingår inte.
+- **Källa:** Dennis 2026-10-19: "Alternativ 2, ta bort orten och kör bygget" (alternativ 2: ta bort orten ur
+  dokumenten och visa nålen bara som en inställning i appen).
+- ✎ **2026-10-19, vad som inte får stå:** förnamn som Mira, Zelda och Julian är generiska namn i appen och får stå.
+  Det som aldrig får stå i repot är en kombination som pekar ut ett verkligt barn: efternamn, ort, skola, klass eller
+  årskurs tillsammans med namnet. Rensat samma dag: orten, efternamnet i en sökväg, "dottern" och årskursen.
+  Källa: Dennis: "Jag har lagt in lite blandade namn som bara ska vara generiska. mira är ett av dem tror jag. Men det
+  ska inte vara så att Mira […] blir exakt utpekad" (efternamn, ort och årskurs utelämnade i citatet av samma skäl).

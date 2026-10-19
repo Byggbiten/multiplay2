@@ -9,7 +9,7 @@ Där stödet är svagt eller bara erfarenhet står det.
 
 ## Uppgiften
 
-Mira går i årskurs 4 och bor i Sundsvall, i Medelpad. Läxboken visar en karta med siffrorna 1–25, och hon ska kunna
+Mira går på mellanstadiet. Läxboken visar en karta med siffrorna 1–25, och hon ska kunna
 namnet på varje siffra. Det är tre saker att lära sig:
 
 - var landskapet ligger
@@ -42,9 +42,9 @@ i `landskap-laxbok.json`.
    som i läxboken: "Vad heter nummer 12?" och "Vilket nummer har Närke?". Den tredje liknar läxförhöret mest.
 4. **Använd ankare och referenspunkter.** Barn bygger sin bild av ett område från kända punkter, sedan vägar och
    sist en överblick (Siegel & White 1975). Det man redan känner används som referens för det nya (Sadalla m.fl.
-   1980). Mira bor i Medelpad, mitt på kusten (numren visas inte i modulen, D33). Stödet är måttligt till starkt.
-   *Här:* "Du bor i Medelpad! Sundsvall ligger här" med en nål på kartan. Sedan beskrivs grannarna utifrån
-   Medelpad: Ångermanland ovanför och Hälsingland under.
+   1980). Barnets hemlandskap är en sådan referenspunkt (numren visas inte i modulen, D33; orten står inte i repot, D36). Stödet är måttligt till starkt.
+   *Här:* "Här bor du" med en nål i hemlandskapet, om en vuxen har valt det i inställningarna (D36). Sedan beskrivs
+   grannarna utifrån det landskapet.
 5. **Ge minnesstöd i grannar och form.** Ett ord tillsammans med en bild minns man bättre än bara ordet, enligt
    Paivios teori om dubbel kodning (1971). Formminnen som "Skåne längst ner" och "Gotland och Öland är öarna" är
    beprövad skolpraxis. Studier om just landskapsformer känner jag inte till, så den delen är erfarenhet.
@@ -84,7 +84,7 @@ ryms helt i dess träffyta. I fråga (a) är den minsta cirkeln 47 px, för När
   Götaland och Hela Sverige, med medaljer enligt samma regler som i Gångertabellen och Klockan.
 - **Lär dig:** en klickstyrd lektion per landsdel. Hela Sverige visas först med de tre landsdelarna. Sedan zoomar
   kartan in, och landskapen tänds ett i taget i läxbokens ordning med nummer, namn och minnesstöd. Därefter kommer
-  undantagen (9 och 10), ankaret Medelpad och slutsatsen ("Norrland har nio landskap"). Lektionen avslutas med
+  undantagen (9 och 10), ankaret hemlandskapet och slutsatsen ("Norrland har nio landskap"). Lektionen avslutas med
   "Nu får du försöka!" och tre försök, ett av varje frågetyp, och de bemöts som i Klockan. Rätt svar ger beröm och en
   bekräftande mening. Fel svar ger "Nästan rätt!" om svaret var en granne och annars "Bra försök! Låt mig visa."
   Sedan blinkar det rätta landskapet, grannen nämns och hon får samma uppgift igen.
