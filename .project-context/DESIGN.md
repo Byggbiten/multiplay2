@@ -12,7 +12,8 @@ Spelväljaren i `index.html` har sex kort och ett hjältekort för Dagens träni
 |---|---|---|---|
 | Gångertabellen | `js/multiplication.js` | Hubb med kompakt tabellkarta, Träna en tabell (1–10 med medaljer), övningspass med nötloop och kvitto, Lär dig strategin (rektangeln, Så krymper tabellen), Öva blandat, De svåra talen, Rekordrunda, Statistik och logg. Lådor med påfyllning (D9–D17). | `design-lab/gangertabell-mockup.html`, `brainstorm/05` |
 | Klockan | `js/clock.js`, `js/clock-logic.js` | Klockans trappa med sju steg och medaljer, lektioner med "Nu får du försöka", minutkartan, pass med dragbara visare och förklaring vid fel, kvitto; Lekklockan och Klocktest (D18, D19). Logiken och texterna är DOM-fri data i `clock-logic.js`. | `brainstorm/06` |
-| Multiplikation och division | `js/multdiv.js` | Uppställd multiplikation och kort division, nivå 1–4, i tre lägen: Titta och lär, Räkna med hjälp, Räkna själv (D3–D7). | `SPEC-KORT-DIVISION.md`, `design-lab/kort-division-mockup.html`, `SPEC-MINNESSIFFROR.md` |
+| Multiplikation och division | `js/multdiv.js` | Uppställd multiplikation och kort division, nivå 1–4, i tre lägen: Titta och lär, Räkna med hjälp, Räkna själv (D3–D7). Lägesvyn för multiplikation har kortet Matteprov 4:an (D37). | `SPEC-KORT-DIVISION.md`, `design-lab/kort-division-mockup.html`, `SPEC-MINNESSIFFROR.md` |
+| Matteprov 4:an | `js/matteprov.js` (UI), `js/matteprov-logic.js` (ren logik, vitest) | Nås från Multiplikationens lägesvy. Datadriven provlista (`PROVS`); Matteprov 1 har fem moment i övningsbladens form: tabelltestet (20 tal, /20), tiotal/hundratal med "="-rader, TE med tre rader, uppställning med den grå nollan och minnessiffror, problemlösning där barnet skriver uttrycket och räknar gånger först. Öva = "Så här gör du" + nötloop (`MP.createDrill`); Gör provet = alltid Svårare-nivå, kvitto per moment (grönt/gult), "Sett av en vuxen" (`MP.bindHold`), "Öva på det som var svårt"; Tabellsprint 4 min / 48 tal. Allt som avviker från appens sätt att ställa upp (grå nollan, bladens rutnät, =-raderna, uttrycket) bor bara här; multdiv:s nivå 1–4 är orörda. Ej släppt (gren `matteprov`). (D37) | `tests/matteprov.test.mjs` |
 | Addition och subtraktion | `js/uppstallning.js`, `js/platsvarde.js` | Kortet "Addition & Subtraktion": uppställd addition och subtraktion i samma tre lägen, med minnessiffror och lånekedjan; Platsvärde som eget quiz. | `SPEC-UPPSTALLNING-ADDITION.md`, `design-lab/tiokompis-*.html`, `design-lab/inmatning-barnvy.html` |
 | 10-kompisar | `js/tenfriends.js` | Talpar som blir 10: övning och test. | — |
 | Nationella prov åk 3 | `js/nationella.js`, `js/np-matte-muntligt.js`, `js/np-matte-skriftlig.js`, `js/np-svenska.js`, `js/np-svenska-texts.js` | Hubb för matematik (muntlig och skriftlig del) och svenska. | `SPEC-NP-MATTE-MUNTLIGT.md` (historisk) |
@@ -49,6 +50,7 @@ profil tas bort (`Store.deleteProfile` i `js/app.js`):
 | Uppställning | `uppstallning_log_` |
 | Platsvärde | `platsvarde_log_` |
 | Multiplikation och division | `multdiv_log_` |
+| Matteprov 4:an | `matteprov_` (vald nivå, och per prov: senaste övning per moment, provens kvitton med "Sett av en vuxen", sprintens bästa) |
 | Nationella prov | `np_svenska_log_`, `np_matte_muntligt_stats_`, `np_matte_skriftlig_stats_` |
 | Dagens träning | `daily_log_`, `daily_state_` |
 | Capybara-samlingen | `capy_cards_`, `capy_state_` |
