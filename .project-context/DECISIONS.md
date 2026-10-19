@@ -50,6 +50,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D25 Städerna: största staden, plus en väsentligt stor stad där den finns
 - D26 Sköldar och blommor laddas ner från Wikimedia ✎ även djuren
 - D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
+- D28 Städerna godkända; skolans vana går före där den skiljer
 
 ---
 
@@ -279,3 +280,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   både på korten och som frågor.
 - **Källa:** Dennis 2026-10-19: "Ta med pusslet och samlarpärmen i första versionen. och gällande 'vems landskapsdjur
   är det här?' Inte bara visa bild, utan visa bild + text. och glöm inte landskapssköldarna"
+
+## D28 · 2026-10-19 · Städerna godkända; skolans vana går före där den skiljer
+- **Beslut:** listan i `referens/sverige-landskap/landskap-fakta.json` (största tätorten + en väsentligt stor stad,
+  D25) gäller. Det finns ingen officiell lista över landskapens "huvudstäder". Där skolans vana skiljer sig från
+  storleken går skolan före: Södermanland → Eskilstuna (Södertälje andra), Öland → Borgholm (Färjestaden andra).
+  Dalarna står kvar som Borlänge med Falun som andra stad. Båda städerna visas på landskapskortet.
+- **Källa:** Dennis 2026-10-19: "Städerna ser bra ut. Om det inte finns nån slags lista på vad som räknas som
+  landskapets 'huvudstad' eller liknande så kör vi på ditt. … falun är historiskt sett mer utav en huvudstad, men
+  borlänge är ju större. Så du har rätt i din lista och vi kör på den om det inte finns någon 'officiel lista' …
+  Så som du själv pekade ut med eskilstuna. skolboken får gå före"

@@ -26,7 +26,7 @@ filerna ännu. Städerna väntar på Dennis godkännande (D25).
 
 ## Tumregeln för städerna (D25)
 
-- `storsta_stad` = den största tätorten (SCB 2023) som ligger i landskapet.
+- `storsta_stad` = den största tätorten (SCB 2023) som ligger i landskapet – utom där skolans vana går före (D28): Södermanland (Eskilstuna före Södertälje) och Öland (Borgholm före Färjestaden). Där står den största tätorten i `ocksa_stor_stad`. Fältnamnet behålls; i appen heter raden "Stad". Det finns ingen officiell lista över landskapens "huvudstäder" – landskapen har ingen förvaltande roll.
 - `ocksa_stor_stad` = nästa tätort om den har **minst cirka 50 000 invånare eller minst hälften av den största
   stadens folkmängd**. Högst en andra stad; övriga kandidater står i `motivering_stad`.
 - Tätorter som är delar av Stockholms- eller Göteborgsområdet (Upplands Väsby och Sollentuna, Tumba, Nordöstra
