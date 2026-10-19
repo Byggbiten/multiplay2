@@ -3,7 +3,7 @@
 **Facit:** `design-lab/tiokompis-barnvy.html` (2 422 rader, gren `dev`).
 **Måltavla:** `js/uppstallning.js` (2 114 rader), additionsgrenen.
 **Status:** kontrakt. Allt nedan är läst ur de två filerna; inget är hämtat ur minnet.
-**Utfall (2026-10-19, ur git log):** införd på `dev` 21/9 (`700b2a2` … `0af6b26`, v38) och live samma dag när `main` spolades fram till `0af6b26`. Beslut: D-posterna i `DECISIONS.md` hänvisar hit.
+**Utfall (2026-10-19, ur git log):** införd på `dev` 21/9 (`700b2a2` … `0af6b26`, v38) och live i v38 när `main` spolades fram till `0af6b26`. Beslut: D-posterna i `DECISIONS.md` hänvisar hit.
 Radhänvisningar skrivs `fil:rad`. Mockupen refereras `mockup:rad`, appen `app:rad`.
 
 **Valda lägen (och bara dessa beskrivs).** Mockupen har elva växlar i verktygsraden;
