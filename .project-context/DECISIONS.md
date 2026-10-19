@@ -460,3 +460,19 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   fel många gånger, så kanske appen kliver in och hjälper dem. Kanske att de inte ger bort hela svaret, men bitar, men
   går det ändå inte så får de hela svaret och får gå vidare. så får appen i slutet komma ihåg vad som va extra svårt
   så att den samlar ihop ett skräddarsytt prov där man får öva på det som va svårt".
+- ✎ **2026-10-19, ensiffrig faktor med delprodukter:** uppställning med ensiffrig faktor räknas med en delprodukt per
+  siffra på egen rad (687 · 8: 56, sedan 64 förskjutet ett steg, sedan 48 förskjutet två steg) och adderas till en
+  slutsumma. Tvåsiffrig faktor behåller rad 1, rad 2 med den grå nollan och summan. Gäller bara matteprovet (D37).
+  Källa: Dennis: "Här hade jag önskat att man först räknade ut 8x7= 56 och sedan när man räknar 8x8 så sker det raden
+  under förskjutet 1 steg åt vänster så att man bygger på alla uträkningar och sedan får dem i celler efter deras
+  värde (ental, tiotal, hundratal etc) och sedan adderar ihop det till en slutsumma."
+- ✎ **2026-10-19, appen leder uppställningen:** appen ber om delproduktsmetoden och visar var barnet ska börja och vad
+  som räknas (aktiv ruta, siffrorna som lyser, en kort rad). Vägvisningen räknas inte som hjälp i kvittot. Källa:
+  Dennis: "i våran app så är det tyvärr begränsat med utrymme. Så då är det inte mer än rätt att appen visar detta och
+  ber om det sättet. och att appen guider barnen vart de skall börja. Det är som sagt till för att träna på prov."
+- ✎ **2026-10-19, tvåsiffrig faktor med tankerad:** skolans två rader (rad 1, rad 2 med den grå nollan, summan) står
+  kvar; en tankerad ovanför räknar varje rad med talsorter (8 · 82 = 8 · 80 + 8 · 2 = 640 + 16 = 656). I Öva visas
+  alla led; i provet bara uppdelningen, resten kommer som bitar i hjälptrappan. Valt framför en rad per sifferpar,
+  som blir för lång vid tresiffrigt · tvåsiffrigt och avviker från provets uppställning. Källa: Dennis: "denna vy
+  behöver lite kärlek. för hur de skall på ett pedagogiskt sätt kunna räkna ut detta och summera ihop delsummor när de
+  har så lite yta att jobba med" och, om alternativen, "enligt din rekomendation".

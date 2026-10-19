@@ -38,6 +38,10 @@ const MatteProv = (() => {
     again:'<path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3M4.5 17.5V12H10"/>',
     dot:'<circle cx="12" cy="12" r="5"/>',
     target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/>',
+    bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>',
+    pen:'<path d="M4 20l1.2-4.4L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M13.8 7l3.2 3.2"/>',
+    eraser:'<path d="M8.5 19.5h11"/><path d="M4.6 14.6l8.8-8.8a2 2 0 0 1 2.8 0l2.4 2.4a2 2 0 0 1 0 2.8L12 17.6a2 2 0 0 1-2.8 0z"/><path d="M8.8 10.4l5.2 5.2"/>',
+    trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   };
   const svg = (k, cls) => `<svg class="mi${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
@@ -68,6 +72,7 @@ const MatteProv = (() => {
     s.provs = s.provs || {};
     const p = s.provs[provId] = s.provs[provId] || {};
     p.ova = p.ova || {}; p.tests = p.tests || []; p.sprint = p.sprint || { best:0, last:null };
+    p.hard = p.hard || {};               // D38: det som var svårt (typ/felklass → { level, n, ok, last })
     return p;
   }
   function level() { return readSt().level === 'svar' ? 'svar' : 'latt'; }
@@ -81,7 +86,7 @@ const MatteProv = (() => {
 #mp-root{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;max-width:560px;margin:0 auto}
 #mp-root .app-header{margin-bottom:6px;flex-shrink:0}
 #mp-root svg.mi{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-#mp-root .mp-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+#mp-root .mp-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
 #mp-root .mp-spacer{width:52px;flex-shrink:0}
 #mp-root .mp-skip{min-height:44px;padding:0 12px;border-radius:999px;font-weight:800;font-size:13px;color:var(--accent);background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 30%,transparent)}
 #mp-root .mp-row{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:9px 12px;text-align:left;border-radius:20px;
@@ -173,10 +178,56 @@ const MatteProv = (() => {
 #mp-root .mp-sheet.demo .mp-sr{min-height:36px;font-size:17px}
 #mp-root .mp-sheet.demo .mp-ans.sm{font-size:16px;min-width:44px;height:30px}
 #mp-root .mp-pad.r5{grid-template-rows:repeat(5,clamp(42px,6vh,52px));grid-auto-rows:auto}
+#mp-root .mp-pad.kl{grid-auto-rows:48px;gap:6px}
+#mp-root .mp-pad.r5.kl{grid-template-rows:repeat(5,44px)}
+#mp-root .mp-pad.k44{grid-auto-rows:44px}
+#mp-root .mp-q.fit .mp-c{width:44px;height:44px;font-size:26px}
+#mp-root .mp-q.fit .mp-m{height:22px;font-size:16px}
+#mp-root .mp-q.fit .mp-paper{border-spacing:5px 3px}
+#mp-root .mp-help{font-size:13.5px;padding:5px 10px}
 #mp-root .mp-pad.r5 .mp-klar{grid-row:1 / span 5}
 #mp-root .mp-pad.low{grid-auto-rows:clamp(44px,5.6vh,50px)}
 #mp-root .mp-k.op{font-size:28px;color:var(--accent)}
 #mp-root .mp-k.op.z2{grid-column:2 / span 2}
+#mp-root .mp-q.fit{flex:0 0 auto;gap:6px;padding:8px 10px}
+#mp-root .mp-guide{margin:0;display:flex;align-items:center;gap:6px;font-weight:900;font-size:14px;color:var(--accent);line-height:1.25;align-self:stretch}
+#mp-root .mp-guide svg.mi{width:18px;height:18px}
+#mp-root .mp-guide.hm{font-size:13px;font-weight:800;color:#7c2d12;background:#fff7ed;border:2px solid #fdba74;border-radius:12px;padding:4px 8px;align-items:flex-start}
+#mp-root .mp-guide.hm.bit{color:#1e3a8a;background:#eff6ff;border-color:#93c5fd}
+#mp-root .mp-guide.hm b{font-weight:900}
+#mp-root .mp-c.fix.lit{box-shadow:0 0 0 3px #fb923c,0 0 12px rgba(251,146,60,.65);background:#fff7ed}
+#mp-root .mp-guide .tx{flex:1;min-width:0}
+#mp-root .mp-led{flex-shrink:0;width:44px;height:44px;margin:-8px -4px -8px 0;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 4px 10px var(--glow)}
+#mp-root .mp-led svg.mi{width:20px;height:20px}
+#mp-root .mp-c.in.lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.6)}
+#mp-root .mp-c.in.lk{opacity:.32;border-style:dashed;cursor:default}
+#mp-root .mp-c.in.sh{border:2px dotted rgba(100,116,139,.25);background:transparent}
+#mp-root .mp-help{display:none;flex-shrink:0;border-radius:16px;padding:7px 12px;background:#fff7ed;border:2px solid #fdba74;color:#7c2d12;font-weight:800;font-size:14px;line-height:1.3}
+#mp-root .mp-help.on{display:flex;flex-direction:column;gap:2px}
+#mp-root .mp-help.bit{background:#eff6ff;border-color:#93c5fd;color:#1e3a8a}
+#mp-root .mp-help b{display:flex;align-items:center;gap:6px;font-size:14.5px}
+#mp-root .mp-help b svg.mi{width:18px;height:18px}
+#mp-root .mp-ans.given,#mp-root .mp-c.in.given{border:2.5px solid #93c5fd;background:#dbeafe;color:#1e3a8a;border-style:solid}
+#mp-root .mp-c.in.grey.given{background:#bfdbfe}
+#mp-root .mp-sr.fixed .mp-ans{border:2px solid #93c5fd;background:#dbeafe;color:#1e3a8a}
+#mp-root .mp-fb h3 small{font-family:var(--font-body);font-size:13px;font-weight:900;color:#1d4ed8;background:#dbeafe;border-radius:999px;padding:2px 8px;margin-left:4px}
+#mp-root .mp-k3{display:inline-flex;gap:4px;flex-shrink:0}
+#mp-root .mp-k3 i{font-style:normal;min-width:26px;height:24px;padding:0 5px;border-radius:8px;display:grid;place-items:center;font-family:var(--font-head);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+#mp-root .mp-k3 i.d,#mp-root .mp-k3leg i.d{background:#dcfce7;color:#15803d}
+#mp-root .mp-k3 i.h,#mp-root .mp-k3leg i.h{background:#dbeafe;color:#1d4ed8}
+#mp-root .mp-k3 i.s,#mp-root .mp-k3leg i.s{background:#fee2e2;color:#b91c1c}
+#mp-root .mp-k3leg{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink-soft);flex-wrap:wrap}
+#mp-root .mp-k3leg i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-left:6px}
+#mp-root .mp-k3leg i:first-child{margin-left:0}
+#mp-root .mp-rc-row.leg{min-height:20px}
+#mp-root .mp-k3l{margin:0;display:flex;justify-content:center}
+#mp-root .mp-scratch{flex:1 1 0;min-height:88px;display:flex;flex-direction:column;gap:4px;background:var(--glass);border:1px solid var(--glass-line);border-radius:18px;box-shadow:var(--shadow-panel);padding:6px}
+#mp-root .mp-sc-bar{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#mp-root .mp-sc-l{flex:1;font-size:11px;font-weight:900;color:var(--deep);text-transform:uppercase;letter-spacing:.06em;padding-left:4px}
+#mp-root .mp-sc-b{min-height:44px;min-width:44px;padding:0 10px;border-radius:12px;display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:12.5px;color:var(--deep);background:var(--tint);border:1.5px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+#mp-root .mp-sc-b svg.mi{width:18px;height:18px}
+#mp-root .mp-sc-b.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+#mp-root .mp-canvas{flex:1;min-height:40px;width:100%;display:block;touch-action:none;cursor:crosshair;border-radius:12px;border:2px dashed color-mix(in srgb,var(--accent) 30%,transparent);background:rgba(255,255,255,.8)}
 @keyframes mp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}50%{box-shadow:0 0 0 6px rgba(234,88,12,.45)}}
 
 /* Knappsatsen (som multdiv:s fria läge: hög Klar till höger) */
@@ -291,8 +342,8 @@ const MatteProv = (() => {
 
   function lastTestTxt(pid) {
     const s = readSt(), p = s.provs && s.provs[pid];
-    const t = p && p.tests && p.tests[0];
-    return t ? `Senast ${t.ok} av ${t.total} · ${levelName(t.level)}` : 'Inte gjort än';
+    const t = p && p.tests && p.tests.find(x => x.kind !== 'mitt');
+    return t ? `Senast ${t.ok} av ${t.total} rätt direkt` : 'Inte gjort än';
   }
 
   function showList() {
@@ -334,9 +385,20 @@ const MatteProv = (() => {
           ${svg('chev', 'chev')}</button>
       </div>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
+        ${mittCard(ps)}
         <button class="mp-cta" data-act="startprov">${svg('paper')}Gör provet</button>
         <p class="mp-note">Tabelltestet och ${total - P.provCount.tabell} uppgifter till, utan klocka och utan hjälp. ${esc(lastTestTxt(provId))}.</p>
       </div>`);
+  }
+
+  /* "Mitt prov – det som var svårt": syns när det finns underlag och säger vad det tar upp */
+  function mittCard(ps) {
+    const tags = L.hardList(ps.hard);
+    if (!tags.length) return '';
+    const names = tags.slice(0, 3).map(L.tagLabel).join(', ') + (tags.length > 3 ? ` och ${tags.length - 3} till` : '');
+    return `<button class="mp-row" data-act="mitt" style="min-height:58px">
+      <span class="mp-nr alt">${svg('target')}</span>
+      <span class="mp-tx"><b>Mitt prov – det som var svårt</b><small>${esc(names)}</small></span>${svg('chev', 'chev')}</button>`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -379,16 +441,26 @@ const MatteProv = (() => {
       const t = L.makeUpp(17, 32), W = t.width;
       const row = (v, n) => { const d = L.digitsOf(v), out = Array(W).fill(null); for (let i = 0; i < Math.min(n == null ? d.length : n, d.length); i++) out[i] = d[i]; return out; };
       const P = (vals, opts) => paperHTML(t, Object.assign({ vals, readonly:true }, opts || {}));
-      const mem = (c, d) => { const m = Array(W).fill(null); m[c] = d; return m; };
+      const gl = txt => `<p class="mp-guide" style="max-width:340px">${svg('next')}<span class="tx">${esc(txt)}</span></p>`;
+      /* Ensiffrig faktor (Dennis 19/10): en delprodukt per siffra, varje rad ett steg åt vänster */
+      const e = L.makeUpp(687, 8), We = e.width;
+      const sh = (v, i) => { const d = L.digitsOf(v), out = Array(We).fill(null); d.forEach((x, k) => { out[i + k] = x; }); return out; };
+      const E = (vals, lit) => paperHTML(e, { vals, readonly:true, lit });
+      const em = Array(We).fill(null); L.addCarries(e.parts.map(q => q.place)).forEach(c => { em[c.col] = c.val; });
+      const r0 = sh(56, 0), r1 = sh(64, 1), r2 = sh(48, 2);
       return [
-        { v:P({}), t:'Här ställer du upp gångertal. Det större talet står överst, och du räknar från höger.' },
-        { v:P({ p1:row(224, 1), m:mem(1, 1) }), t:'Börja med entalet 7 i 17: 7 · 2 = 14. Skriv 4 och lägg 1 i minnet ovanför.' },
-        { v:P({ p1:row(224), m:mem(1, 1) }), t:'Sedan 7 · 3 = 21, och minnessiffran 1 gör det till 22. Första raden blir 224.' },
-        { v:P({ p1:row(224), p2:row(0, 1) }, { pulse:true }), t:'Nu tiotalet 1 i 17. Det betyder 10. Skriv därför en nolla i den grå rutan först.' },
-        { v:P({ p1:row(224), p2:row(320) }), t:'Sedan 1 · 32 = 32, till vänster om nollan. Andra raden blir 320.' },
-        { v:P({ p1:row(224), p2:row(320), s:row(544) }), t:'Lägg ihop raderna: 224 + 320 = 544.' },
-        { v:P({ p1:row(224), p2:row(320), s:row(544) }, { pulse:true }), t:'Kom ihåg nollan i den grå rutan och minnessiffrorna. Med en ensiffrig faktor räcker svarsraden.' },
-        { v:`<div style="color:var(--accent)">${svg('target')}</div>`, t:'I uppgifterna trycker du på en ruta och skriver. Knappen Nästa rad hoppar ner till nästa rad.' },
+        { v:E({}), t:'Med en ensiffrig faktor räknar du en siffra i taget. Varje svar får en egen rad.' },
+        { v:E({ r0 }, { top:[0], bot:[0] }), t:'Börja här: 8 · 7 = 56. Skriv det på första raden, med 6:an i entalet.' },
+        { v:E({ r0, r1 }, { top:[1], bot:[0] }), t:'Nu 8 · 8 = 64: en rad ner och ett steg åt vänster. Raden börjar i tiotalet, och entalsrutan står tom.' },
+        { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sist 8 · 6 = 48, ett steg till åt vänster. Raden börjar i hundratalet.' },
+        { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Lägg ihop raderna. Minnessiffrorna skriver du i de röda rutorna ovanför raderna. Svaret är 5496.' },
+        { v:P({}), t:'Med en tvåsiffrig faktor, som 17 · 32, blir det två rader och sedan summan. Det större talet står överst.' },
+        { v:gl('Rad 1: 7 · 32 = 7 · 30 + 7 · 2') + P({}, { lit:{ top:[0, 1], bot:[0] } }), t:'Tankeraden ovanför visar hur rad 1 räknas: 7 · 32 delas upp i 7 · 30 och 7 · 2.' },
+        { v:gl('Rad 1: 7 · 32 = 7 · 30 + 7 · 2 = 210 + 14 = 224') + P({ p1:row(224) }, { lit:{ top:[0, 1], bot:[0] } }), t:'7 · 30 = 210 och 7 · 2 = 14. Tillsammans blir det 224, som skrivs på rad 1.' },
+        { v:gl('Rad 2 är tiotalet: skriv nollan i den grå rutan.') + P({ p1:row(224), p2:row(0, 1) }, { pulse:true }), t:'Rad 2 är tiotalet 1 i 17, alltså 10. Skriv därför först nollan i den grå rutan.' },
+        { v:gl('1 · 32 = 1 · 30 + 1 · 2 = 30 + 2 = 32') + P({ p1:row(224), p2:row(320) }, { lit:{ top:[0, 1], bot:[1] } }), t:'Sedan 1 · 32 = 32, till vänster om nollan. Rad 2 blir 320.' },
+        { v:gl('Lägg ihop raderna, en kolumn i taget.') + P({ p1:row(224), p2:row(320), s:row(544) }), t:'Lägg ihop raderna, en kolumn i taget: 224 + 320 = 544.' },
+        { v:`<div style="color:var(--accent)">${svg('target')}</div>`, t:'I uppgifterna står tankeraden ovanför rutnätet. Pilen visar nästa led. Knappen Nästa rad hoppar ner när raden är klar.' },
       ];
     }
     /* problem: skriv uttrycket och räkna */
@@ -425,8 +497,11 @@ const MatteProv = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════
-     PASSEN: öva (nötloop), blad (tabelltestet), svag, prov
+     PASSEN: öva (nötloop), blad (tabelltestet), svag, prov, mitt prov
+     D38: alla har hjälptrappan (fel → ledtråd → bit 1 → bit 2 → hela svaret och Nästa),
+     kladden under knappsatsen och utfallen "rätt direkt", "rätt med hjälp", "fick svaret".
   ══════════════════════════════════════════════════════════ */
+  const today = () => MP.spaced.fmtDay(new Date());
   function startOva(moment) {
     const lv = level();
     if (moment === 'tabell') return startSheet();
@@ -434,7 +509,7 @@ const MatteProv = (() => {
   }
   function startDrill(mode, items, moment) {
     stopSprint();
-    S = { mode, moment, lv:level(), drill:MP.createDrill(items), start:Date.now(), touched:false };
+    S = { mode, moment, lv:level(), drill:MP.createDrill(items), start:Date.now(), touched:false, outc:{ direkt:0, hjalp:0, svar:0 } };
     renderTask();
   }
   function startSheet() {
@@ -442,60 +517,144 @@ const MatteProv = (() => {
     S = { mode:'sheet', moment:'tabell', lv:level(), task:L.makeSheet(level()), start:Date.now(), touched:false };
     renderTask();
   }
-  function startProv() {
-    const lv = level();
-    S = { mode:'prov', lv:L.PROV_LEVEL, items:L.buildProv(provId, lv), idx:0, results:[], start:Date.now(), touched:false };
+  function startProv(mitt) {
+    const items = mitt ? L.buildMittProv(provSt(readSt()).hard) : L.buildProv(provId, level());
+    if (!items.length) return showProv();
+    S = { mode:'prov', mitt:!!mitt, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false };
     renderTask();
   }
   function curTask() {
     if (!S) return null;
     if (S.mode === 'prov' || S.mode === 'sprint') return S.items[S.idx] || null;
-    if (S.mode === 'sheet') return S.task;
+    if (S.mode === 'sheet') return S.done ? null : S.task;
     return S.drill ? S.drill.current() : null;
   }
+  const isDrill = () => S && (S.mode === 'ova' || S.mode === 'svag' || S.mode === 'not');
 
-  function header(t, fb) {
+  function header(t) {
     let right;
     if (S.mode === 'sprint') right = `<span class="mp-timer" id="mp-timer">${svg('timer')}<span id="mp-tt">${clock(S.left)}</span></span>`;
-    else if (S.mode === 'sheet') right = `<span class="mp-timer mp-score">${fb ? fb.okCount : '&nbsp;&nbsp;'}<small>/20</small></span>`;
+    else if (S.mode === 'sheet') right = `<span class="mp-timer mp-score" id="mp-score">&nbsp;&nbsp;<small>/${t.items.length}</small></span>`;
     else {
       const done = S.mode === 'prov' ? S.idx : S.drill.progress().done;
       const tot  = S.mode === 'prov' ? S.items.length : S.drill.progress().total;
       right = `<span class="header-progress"><span class="progress-bar"><i style="width:${Math.round(100 * done / tot)}%"></i></span><span class="hp-label num">${Math.min(done + 1, tot)}/${tot}</span></span>`;
     }
-    const title = S.mode === 'prov' ? 'Provet' : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? 'Tabelltest' : 'Öva';
+    let title = S.mode === 'prov' ? (S.mitt ? 'Mitt prov' : 'Provet') : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? 'Tabelltest' : 'Öva';
+    if (t.type === 'upp') title = esc(t.text);          // uppställningen: uppgiften i rubriken, så att kladden får plats
     return { title, right };
   }
 
-  /* Inmatningen per typ. "Rutor" (v[] + fokus f) delas av tio, te, prob-raderna och bladet. */
+  /* Inmatningen per typ. "Rutor" (v[] + fokus f) delas av tio, te, prob-raderna och bladet.
+     given = rutor som hjälpen har fyllt (låsta), bad = rutor som var fel vid senaste Klar. */
   function freshInput(t) {
     const blanks = n => Array(n).fill('');
-    if (t.type === 'num') return { kind:'num', v:'' };
-    if (t.type === 'tio' || t.type === 'te') return { kind:'boxes', v:blanks(t.fields.length), f:0 };
-    if (t.type === 'sheet') return { kind:'sheet', v:blanks(t.items.length), f:0 };
+    const H = { wrong:0, cls0:null, bits:null, msg:null };
+    if (t.type === 'num') return { kind:'num', v:'', H };
+    if (t.type === 'tio' || t.type === 'te') return { kind:'boxes', v:blanks(t.fields.length), f:0, given:new Set(), bad:new Set(), H };
+    if (t.type === 'sheet') return { kind:'sheet', v:blanks(t.items.length), f:0, round:1, out:Array(t.items.length).fill(null), bad:new Set(), H };
     if (t.type === 'prob') {
-      if (t.needExpr) return { kind:'prob', phase:'expr', toks:[], v:[], f:0 };
+      if (t.needExpr) return { kind:'prob', phase:'expr', toks:[], v:[], f:0, given:new Set(), bad:new Set(), H };
       const terms = L.parseExpr(t.expr);
-      return { kind:'prob', phase:'rows', toks:null, exprStr:t.expr, terms, v:blanks(L.exprRows(terms).boxes.length), f:0 };
+      return { kind:'prob', phase:'rows', toks:null, exprStr:t.expr, terms, v:blanks(L.exprRows(terms).boxes.length), f:0, given:new Set(), bad:new Set(), H };
     }
     const W = t.width, blank = () => Array(W).fill(null);
-    const rws = t.two ? ['p1', 'p2', 's'] : ['s'];
+    const rws = t.two ? ['p1', 'p2', 's'] : t.parts.map(p => 'r' + p.i).concat(['s']);   // ensiffrig: en rad per delprodukt
     const vals = { m:blank() }; rws.forEach(r => vals[r] = blank());
-    return { kind:'upp', rows:rws, vals, f:{ row:rws[0], col:0 }, back:null };
+    return { kind:'upp', rows:rws, vals, f:{ row:rws[0], col:0 }, back:null, given:new Set(), pulse:false, H };
   }
+  const needsScratch = t => t.type !== 'sheet' && S.mode !== 'sprint';
 
-  /* fb + task: återkopplingen ritas på uppgiften som just besvarades (nötloopen har redan gått vidare) */
+  /* Ritar uppgiften. Ny uppgift ⇒ hela ramen (och en tom kladd). keep ⇒ bara frågekortet,
+     hjälpraden och kontrollerna ritas om, så att kladden står kvar under hela uppgiften. */
   function renderTask(fb, keep, task) {
     const t = task || curTask();
     if (!t) return finish();
     if (!fb && !keep) { IN = freshInput(t); locked = false; }
-    const H = header(t, fb);
+    const q = document.getElementById('mp-q');
+    if (keep && q) {
+      q.innerHTML = questionHTML(t, fb);
+      paintHelp();
+      document.getElementById('mp-ctrl').innerHTML = fb ? fb.html : padHTML(t);
+      updKlar();
+      return;
+    }
+    const H = header(t);
     const leftAct = S.mode === 'sprint' ? 'sprintstop' : 'avsluta';
     frame(H.title, leftAct, 'Avsluta', H.right, `
-      <div class="mp-q${t.type === 'sheet' ? ' top' : ''}" id="mp-q">${questionHTML(t, fb)}</div>
-      <div id="mp-ctrl" style="flex-shrink:0">${fb ? fb.html : padHTML(t)}</div>`);
+      <div class="mp-q${t.type === 'sheet' ? ' top' : ''}${needsScratch(t) ? ' fit' : ''}" id="mp-q">${questionHTML(t, fb)}</div>
+      <div class="mp-help" id="mp-help"></div>
+      <div id="mp-ctrl" style="flex-shrink:0">${fb ? fb.html : padHTML(t)}</div>
+      ${needsScratch(t) ? scratchHTML() : ''}`);
+    paintHelp();
+    if (needsScratch(t)) scSetup();
     updKlar();
   }
+  function paintHelp() {
+    const el = document.getElementById('mp-help');
+    if (!el) return;
+    const m = IN && IN.H && IN.H.msg && IN.kind !== 'upp' ? IN.H.msg : null;
+    el.innerHTML = m ? `<b>${svg(m.kind === 'retry' ? 'again' : 'bulb')}${esc(m.title)}</b><span>${esc(m.text)}</span>` : '';
+    el.className = 'mp-help' + (m ? ' on ' + m.kind : '');
+  }
+
+  /* ── Kladden: appens kladdyta (samma ritkod som multdiv:s setupCanvas/mdSyncBitmap/mdPD/mdPM,
+     kladd-lagen: den fyller all yta som blir över under knappsatsen). Töms vid ny uppgift. ── */
+  let scCanvas = null, scCtx = null, scDrawing = false, scErasing = false, scX = 0, scY = 0, scObs = null;
+  function scratchHTML() {
+    return `<div class="mp-scratch">
+      <div class="mp-sc-bar"><span class="mp-sc-l">Kladd</span>
+        <button class="mp-sc-b on" id="mp-sc-pen" data-act="scpen" aria-label="Rita">${svg('pen')}Rita</button>
+        <button class="mp-sc-b" id="mp-sc-erase" data-act="scerase" aria-label="Sudda">${svg('eraser')}Sudd</button>
+        <button class="mp-sc-b" data-act="scclear" aria-label="Rensa kladden">${svg('trash')}Rensa</button></div>
+      <canvas id="mp-canvas" class="mp-canvas"></canvas>
+    </div>`;
+  }
+  function scSetup() {
+    if (scObs) { scObs.disconnect(); scObs = null; }
+    scCanvas = document.getElementById('mp-canvas'); scCtx = null; scErasing = false;
+    if (!scCanvas) return;
+    requestAnimationFrame(() => {
+      if (!scCanvas || !scCanvas.isConnected) return;
+      const r = scCanvas.getBoundingClientRect();
+      scCanvas.width = Math.max(Math.round(r.width) || 300, 60);
+      scCanvas.height = Math.max(Math.round(r.height) || 120, 40);
+      scCtx = scCanvas.getContext('2d');
+      scCanvas.addEventListener('pointerdown', scPD);
+      scCanvas.addEventListener('pointermove', scPM);
+      scCanvas.addEventListener('pointerup', scPU);
+      scCanvas.addEventListener('pointercancel', scPU);
+      if (typeof ResizeObserver !== 'undefined') { scObs = new ResizeObserver(scSync); scObs.observe(scCanvas); }
+    });
+  }
+  function scSync() {
+    if (!scCanvas || !scCtx || !scCanvas.isConnected) return;
+    const w = Math.round(scCanvas.clientWidth), h = Math.round(scCanvas.clientHeight);
+    if (!w || !h || (Math.abs(w - scCanvas.width) < 2 && Math.abs(h - scCanvas.height) < 2)) return;
+    const tmp = document.createElement('canvas'); tmp.width = scCanvas.width; tmp.height = scCanvas.height;
+    tmp.getContext('2d').drawImage(scCanvas, 0, 0);
+    scCanvas.width = w; scCanvas.height = h; scCtx.drawImage(tmp, 0, 0);
+  }
+  function scPos(e) { const r = scCanvas.getBoundingClientRect(); return [(e.clientX - r.left) * (scCanvas.width / r.width), (e.clientY - r.top) * (scCanvas.height / r.height)]; }
+  function scPD(e) { e.preventDefault(); scDrawing = true; [scX, scY] = scPos(e); try { scCanvas.setPointerCapture(e.pointerId); } catch (_) {} }
+  function scPM(e) {
+    if (!scDrawing || !scCtx) return;
+    e.preventDefault();
+    const [x, y] = scPos(e);
+    scCtx.globalCompositeOperation = scErasing ? 'destination-out' : 'source-over';
+    scCtx.lineWidth = scErasing ? 20 : 2 + (e.pressure || 0.5) * 3;
+    scCtx.strokeStyle = '#0d9488'; scCtx.lineCap = 'round'; scCtx.lineJoin = 'round';
+    scCtx.beginPath(); scCtx.moveTo(scX, scY); scCtx.lineTo(x, y); scCtx.stroke();
+    scX = x; scY = y;
+  }
+  function scPU() { scDrawing = false; }
+  function scTool(erase) {
+    scErasing = erase;
+    const p = document.getElementById('mp-sc-pen'), e = document.getElementById('mp-sc-erase');
+    if (p) p.classList.toggle('on', !erase);
+    if (e) e.classList.toggle('on', erase);
+  }
+  function scClear() { if (scCtx && scCanvas) scCtx.clearRect(0, 0, scCanvas.width, scCanvas.height); }
 
   /* ── Frågekortet ── */
   function shopHTML() {
@@ -507,7 +666,8 @@ const MatteProv = (() => {
     if (fb && fb.showAns) return row != null && fb.reveal != null && row > fb.reveal
       ? '<span class="mp-ans sm"></span>'                       // raden visas när förklaringen kommer dit
       : `<span class="mp-ans sm ok">${esc(L.fmt(facit))}</span>`;
-    const cls = !fb && IN.f === i ? ' focus' : '';
+    if (IN.given && IN.given.has(i)) return `<span class="mp-ans sm given">${esc(IN.v[i])}</span>`;
+    const cls = (!fb && IN.f === i ? ' focus' : '') + (IN.bad && IN.bad.has(i) ? ' bad' : '') + (fb && fb.ok ? ' ok' : '');
     return `<span class="mp-ans sm${cls}" data-act="bx" data-i="${i}">${esc(IN.v[i] || '')}</span>`;
   }
   function questionHTML(t, fb) {
@@ -533,10 +693,18 @@ const MatteProv = (() => {
     if (t.type === 'prob') return probHTML(t, fb);
     if (t.type === 'sheet') return sheetHTML(t, fb);
     /* upp */
-    const vals = show ? Object.assign({ m:fb.mem || Array(t.width).fill(null) }, L.uppFacitRows(t)) : IN.vals;
-    return `<p class="mp-text sm">Ställ upp och räkna: <b class="mp-expr">${esc(t.text)}</b></p>
-      ${paperHTML(t, { vals, readonly:!!fb, focus:fb ? null : IN.f, ok:show, pulse:show && fb.cls === 'nolla' })}
-      ${t.two && !fb ? '<p class="mp-greyhint">Den grå rutan: nollan på tiotalsraden</p>' : ''}`;
+    let vals = show ? Object.assign({ m:fb.mem || Array(t.width).fill(null) }, L.uppFacitRows(t)) : IN.vals;
+    if (show && fb.reveal != null) {                     // förklaringen visar en rad i taget
+      const order = t.two ? ['p1', 'p2', 's'] : t.parts.map(p => 'r' + p.i).concat(['s']);
+      vals = Object.assign({}, vals);
+      order.forEach((r, k) => { if (k >= fb.reveal) vals[r] = Array(t.width).fill(null); });
+      if (fb.reveal < order.length) vals.m = Array(t.width).fill(null);
+    }
+    const G = fb ? null : uppGuide(t), M = !fb && IN.H.msg, open = fb ? null : L.uppOpenRows(t, IN.vals);
+    /* uppställningen: hjälpens rad tar vägvisningens plats i kortet (annars får kladden ingen plats) */
+    const top = !fb && IN.note ? `<p class="mp-guide hm retry">${svg('next')}<span>${esc(IN.note)}</span></p>` : M ? `<p class="mp-guide hm ${M.kind}">${svg(M.kind === 'retry' ? 'again' : 'bulb')}<span><b>${esc(M.title)}</b> ${esc(M.text)}</span></p>`
+      : G ? `<p class="mp-guide">${svg('next')}<span class="tx">${esc(G.text)}</span>${G.more ? `<button class="mp-led" data-act="led" aria-label="Nästa led">${svg('right')}</button>` : ''}</p>` : '';
+    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus:fb ? null : IN.f, ok:show || (fb && fb.ok), pulse:(show && fb.cls === 'nolla') || (!fb && (IN.pulse || (G && G.grey))), given:show ? null : IN.given, lit:G ? G.lit : null, open })}`;
   }
 
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
@@ -544,14 +712,13 @@ const MatteProv = (() => {
     const show = fb && fb.showAns;
     let h = t.shop ? shopHTML() + `<p class="mp-text">${esc(t.text)}</p>` : `<p class="mp-text">${esc(t.text)}</p>`;
     const lines = [];
-    /* uttrycket: barnets (fas 1) eller det givna */
     let exprShown, terms;
     if (show) { terms = IN.terms || L.parseExpr(t.expr); exprShown = L.exprText(terms); }
     else if (IN.phase === 'expr') exprShown = IN.toks.join(' ');
     else { terms = IN.terms; exprShown = IN.exprStr; }
     if (t.needExpr) {
       if (IN.phase === 'expr' && !fb) lines.push(`<span class="mp-ans sm wide focus" id="mp-a">${esc(exprShown)}</span>`);
-      else lines.push(`<span class="mp-ans sm wide ok">${esc(exprShown)}</span>`);
+      else lines.push(`<span class="mp-ans sm wide ${IN.exprGiven && !show ? 'given' : 'ok'}">${esc(exprShown)}</span>`);
     } else lines.push(esc(t.expr));
     if (terms && (IN.phase === 'rows' || show)) {
       const R = L.exprRows(terms);
@@ -563,48 +730,83 @@ const MatteProv = (() => {
     return h;
   }
 
-  /* Tabelltestet: 20 tal i två kolumner */
+  /* Tabelltestet: 20 tal i två kolumner. Runda 2: de röda rättas. */
   function sheetHTML(t, fb) {
-    const per = fb && fb.per;
+    const out = IN.out;
     const cell = (it, i) => {
       let cls = 'mp-sr';
-      if (per) cls += per[i] ? ' ok' : ' bad';
-      else if (IN.f === i) cls += ' focus';
-      const fix = per && !per[i] ? `<span class="fix">${it.answer}</span>` : '';
-      return `<button class="${cls}" ${per ? '' : `data-act="bx" data-i="${i}"`}><span class="ex">${esc(it.text)} =</span><span class="mp-ans xs">${esc(IN.v[i] || '')}</span>${fix}</button>`;
+      const o = out[i];
+      if (o === 'direkt') cls += ' ok';
+      else if (o === 'hjalp') cls += ' fixed';
+      else if (o === 'svar') cls += ' bad';
+      else if (IN.bad.has(i)) cls += ' bad';
+      if (!fb && IN.f === i && !o) cls += ' focus';
+      const fix = o === 'svar' ? `<span class="fix">${it.answer}</span>` : '';
+      const act = !fb && !o ? `data-act="bx" data-i="${i}"` : '';
+      return `<button class="${cls}" ${act}><span class="ex">${esc(it.text)} =</span><span class="mp-ans xs">${esc(IN.v[i] || '')}</span>${fix}</button>`;
     };
     const half = Math.ceil(t.items.length / 2);
     return `<div class="mp-sheet"><div class="col">${t.items.slice(0, half).map((it, i) => cell(it, i)).join('')}</div>
       <div class="col">${t.items.slice(half).map((it, i) => cell(it, i + half)).join('')}</div></div>`;
   }
 
+  /* Vägvisningen (Dennis 19/10: "att appen guidar barnen vart de skall börja"): en kort rad om vad
+     som ska göras på raden med fokus, och siffrorna som ska multipliceras lyser. Den är vägvisning,
+     inte hjälp, och räknas inte som "med hjälp". */
+  function uppGuide(t) {
+    /* Tankeraden (L.thinkSteps): ett led i taget, barnet klickar fram nästa led. Provet: bara uppdelningen. */
+    const row = IN.f.row === 'm' ? ((IN.back || {}).row || IN.rows[0]) : IN.f.row;
+    const col = row === 's' ? IN.f.col : null, mode = S && S.mode === 'prov' ? 'prov' : 'ova';
+    const st = L.thinkSteps(t, row, mode, col);
+    if (!IN.think || IN.think.row !== row || IN.think.col !== col) IN.think = { row, col, i:0 };
+    const i = Math.min(IN.think.i, st.length - 1);
+    const text = row === 'p2' && i >= 1 ? st.slice(1, i + 1).join(' ') : st.slice(0, i + 1).join(' ');
+    const allTop = L.digitsOf(t.top).map((_, k) => k);
+    let lit = null;
+    if (row === 's') lit = { col };
+    else if (t.two) lit = { top:allTop, bot:[row === 'p1' ? 0 : 1] };
+    else lit = { top:[rowStart(row)], bot:[0] };
+    return { text, lit, more:i < st.length - 1, grey:row === 'p2' && IN.vals.p2[0] == null };
+  }
+
   /* Pappret: kolumner från vänster W-1 … 0 (0 = entalet) */
   function paperHTML(t, o) {
     const W = t.width, idx = [];
     for (let i = W - 1; i >= 0; i--) idx.push(i);
-    const vals = o.vals || {};
-    const fix = (n, i) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
+    const vals = o.vals || {}, given = o.given || new Set();
+    const lit = o.lit || {};
+    const fix = (n, i, which) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix${(lit[which] || []).includes(i) ? ' lit' : ''}" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
     const inCell = (row, i) => {
       const v = vals[row] ? vals[row][i] : null;
-      const grey = row === 'p2' && i === 0;
+      const grey = row === 'p2' && i === 0, gv = given.has(row + ':' + i);
       const foc = o.focus && o.focus.row === row && o.focus.col === i;
-      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', foc ? 'focus' : '', o.ok ? 'ok' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
-      return `<div class="${cls}" ${o.readonly ? '' : `data-act="cell" data-row="${row}" data-col="${i}"`}>${v != null ? v : ''}</div>`;
+      const sh = i < rowStart(row) && v == null;                  // förskjutningens tomma ruta
+      const lk = o.open && !o.open.includes(row);                 // låst tills raderna ovanför är ifyllda
+      const colLit = lit.col != null && lit.col === i && row !== 's' && v != null;   // summans kolumn lyser
+      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', sh ? 'sh' : '', lk ? 'lk' : '', colLit ? 'lit' : '', foc ? 'focus' : '', o.ok && v != null ? 'ok' : '', gv ? 'given' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
+      return `<div class="${cls}" ${o.readonly || gv || lk ? '' : `data-act="cell" data-row="${row}" data-col="${i}"`}${lk ? ' aria-disabled="true"' : ''}>${v != null ? v : ''}</div>`;
     };
     const memCell = i => {
       if (i === 0) return '<div class="mp-m"></div>';
       const v = vals.m ? vals.m[i] : null;
       const foc = o.focus && o.focus.row === 'm' && o.focus.col === i;
-      if (o.readonly) return `<div class="mp-m">${v != null ? v : ''}</div>`;
+      if (o.readonly || given.has('m:' + i)) return `<div class="mp-m">${v != null ? v : ''}</div>`;
       return `<div class="mp-m in${foc ? ' focus' : ''}" data-act="cell" data-row="m" data-col="${i}" aria-label="Minnessiffra">${v != null ? v : ''}</div>`;
     };
     const line = `<tr class="mp-line"><td></td><td colspan="${W}"></td></tr>`;
+    const memRow = `<tr><td></td>${idx.map(memCell).map(x => `<td>${x}</td>`).join('')}</tr>`;
+    /* additionens minnesrad ovanför raderna (som i appens addition); den visas först när summan är upplåst */
+    const memShown = !o.open || o.open.includes('s');
+    const memLine = memShown ? memRow : `<tr><td></td>${idx.map(() => '<td><div class="mp-m"></div></td>').join('')}</tr>`;
     let h = `<table class="mp-paper"><tbody>
-      <tr><td></td>${idx.map(memCell).map(x => `<td>${x}</td>`).join('')}</tr>
-      <tr><td></td>${idx.map(i => `<td>${fix(t.top, i)}</td>`).join('')}</tr>
-      <tr><td class="mp-sign">·</td>${idx.map(i => `<td>${fix(t.bot, i)}</td>`).join('')}</tr>${line}`;
-    if (t.two) h += `<tr><td></td>${idx.map(i => `<td>${inCell('p1', i)}</td>`).join('')}</tr>
+      <tr><td></td>${idx.map(i => `<td>${fix(t.top, i, 'top')}</td>`).join('')}</tr>
+      <tr><td class="mp-sign">·</td>${idx.map(i => `<td>${fix(t.bot, i, 'bot')}</td>`).join('')}</tr>${line}`;
+    if (t.two) h += memLine + `<tr><td></td>${idx.map(i => `<td>${inCell('p1', i)}</td>`).join('')}</tr>
       <tr><td class="mp-sign">+</td>${idx.map(i => `<td>${inCell('p2', i)}</td>`).join('')}</tr>${line}`;
+    else {
+      /* ensiffrig: additionens minnessiffror ovanför raderna (som i appens addition), sedan en rad per delprodukt */
+      h += memLine + t.parts.map((p, k) => `<tr><td class="mp-sign">${k === t.parts.length - 1 ? '+' : ''}</td>${idx.map(i => `<td>${inCell('r' + p.i, i)}</td>`).join('')}</tr>`).join('') + line;
+    }
     h += `<tr><td></td>${idx.map(i => `<td>${inCell('s', i)}</td>`).join('')}</tr></tbody></table>`;
     return h;
   }
@@ -615,15 +817,15 @@ const MatteProv = (() => {
     const erase = `<button class="mp-k er" data-act="key" data-k="erase" aria-label="Sudda">${svg('erase')}</button>`;
     const klar = `<button class="mp-klar" id="mp-klar" data-act="klar" disabled>${svg('check')}<span>Klar</span></button>`;
     if (t.type === 'prob' && IN.phase === 'expr')
-      return `<div class="mp-pad r5">${digits}${erase}<button class="mp-k" data-act="key" data-k="0">0</button>
+      return `<div class="mp-pad r5 kl">${digits}${erase}<button class="mp-k" data-act="key" data-k="0">0</button>
         <button class="mp-k op" data-act="key" data-k="·" aria-label="gånger">·</button>
         <button class="mp-k op" data-act="key" data-k="+" aria-label="plus">+</button>
         <button class="mp-k op z2" data-act="key" data-k="−" aria-label="minus">−</button>${klar}</div>`;
     const multi = IN.kind === 'boxes' || IN.kind === 'sheet' || (IN.kind === 'prob' && IN.v.length > 1);
     const nx = IN.kind === 'sheet' ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa ${svg('down')}</button>`
              : multi ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa ruta ${svg('right')}</button>`
-             : t.type === 'upp' && t.two ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa rad ${svg('down')}</button>` : '';
-    return `<div class="mp-pad${IN.kind === 'sheet' ? ' low' : ''}">${digits}${erase}
+             : t.type === 'upp' && IN.rows.length > 1 ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa rad ${svg('down')}</button>` : '';
+    return `<div class="mp-pad${IN.kind === 'sheet' ? ' low' : needsScratch(t) ? ' kl' : ''}${t.type === 'upp' ? ' k44' : ''}">${digits}${erase}
       <button class="mp-k${nx ? '' : ' z2'}" data-act="key" data-k="0">0</button>${nx}${klar}</div>`;
   }
   function canSubmit() {
@@ -636,6 +838,9 @@ const MatteProv = (() => {
   }
   function updKlar() { const k = document.getElementById('mp-klar'); if (k) k.disabled = !canSubmit() || locked; }
 
+  /* Rutor som går att skriva i (inte ifyllda av hjälpen, inte klara i bladet) */
+  function openBox(i) { return !(IN.given && IN.given.has(i)) && !(IN.kind === 'sheet' && IN.out[i]); }
+  function nextOpen(from) { const n = IN.v.length; for (let k = 1; k <= n; k++) { const j = (from + k) % n; if (openBox(j)) return j; } return from; }
   function press(k) {
     const t = curTask();
     if (!t || locked || !IN) return;
@@ -649,34 +854,59 @@ const MatteProv = (() => {
       else if (/^\d$/.test(k)) { if (last && /^\d+$/.test(last)) { if (last.length < 4) T[T.length - 1] = (last === '0' ? '' : last) + k; } else if (T.length < 9) T.push(k); }
       else if (['·', '+', '−'].includes(k)) { if (last && /^\d+$/.test(last)) T.push(k); else if (last) T[T.length - 1] = k; }
     } else if (IN.kind === 'boxes' || IN.kind === 'sheet' || IN.kind === 'prob') {
-      const n = IN.v.length;
-      if (k === 'next') IN.f = (IN.f + 1) % n;
-      else if (k === 'erase') { if (IN.v[IN.f]) IN.v[IN.f] = IN.v[IN.f].slice(0, -1); else if (IN.f > 0) IN.f--; }
-      else if (/^\d$/.test(k) && IN.v[IN.f].length < 5) IN.v[IN.f] = (IN.v[IN.f] === '0' ? '' : IN.v[IN.f]) + k;
+      if (!openBox(IN.f)) IN.f = nextOpen(IN.f);
+      if (k === 'next') IN.f = nextOpen(IN.f);
+      else if (k === 'erase') { if (IN.v[IN.f]) IN.v[IN.f] = IN.v[IN.f].slice(0, -1); }
+      else if (/^\d$/.test(k) && IN.v[IN.f].length < 5) { IN.v[IN.f] = (IN.v[IN.f] === '0' ? '' : IN.v[IN.f]) + k; IN.bad.delete(IN.f); }
     } else uppPress(t, k);
     snd('click');
     refreshQ(t);
   }
   /* Uppställningen: siffran skrivs i rutan med fokus och fokus flyttar ett steg åt vänster.
-     En minnessiffra (den röda raden) är frivillig; efter den går fokus tillbaka. */
+     En minnessiffra (den röda raden) är frivillig; efter den går fokus tillbaka.
+     Rutor som hjälpen fyllt hoppas över. */
+  function uppFree(row, col) { return !IN.given.has(row + ':' + col); }
+  /* rad r{i} (ensiffrig faktor) börjar i kolumn i: förskjuten, entalsrutan tom */
+  const rowStart = row => /^r\d$/.test(row) ? +row.slice(1) : 0;
+  function uppFirstFree(row) { const W = curTask().width; for (let c = rowStart(row); c < W; c++) if (uppFree(row, c) && IN.vals[row][c] == null) return c; return rowStart(row); }
+  /* Raderna fylls i ordning och summan låses upp sist (L.uppOpenRows). Fokus på en låst rad
+     flyttas till den första raden som inte är ifylld. */
+  const uppOpen = t => L.uppOpenRows(t, IN.vals);
+  function uppFixFocus(t) {
+    const open = uppOpen(t), cur = IN.f.row === 'm' ? (IN.back || {}).row : IN.f.row;
+    if (!open.includes(cur)) { const row = open[open.length - 1]; IN.f = { row, col:uppFirstFree(row) }; IN.back = null; }
+  }
   function uppPress(t, k) {
+    IN.note = null;
     const f = IN.f, W = t.width, rowVals = IN.vals[f.row];
     if (k === 'next') {
-      const i = IN.rows.indexOf(f.row === 'm' ? (IN.back || {}).row : f.row);
-      IN.f = { row:IN.rows[Math.min(i + 1, IN.rows.length - 1)], col:0 }; IN.back = null;
+      const cur = f.row === 'm' ? (IN.back || {}).row || IN.rows[0] : f.row;
+      if (cur === 's') return;
+      if (!L.uppRowFilled(t, cur, IN.vals[cur])) {
+        const n = IN.rows.indexOf(cur) + 1;
+        IN.note = cur === 'p2' && IN.vals.p2[0] == null ? 'Rad 2 börjar med nollan i den grå rutan.' : `Rad ${n} är inte klar. Skriv hela svaret på raden först.`;
+        return;
+      }
+      const row = IN.rows[IN.rows.indexOf(cur) + 1];
+      IN.f = { row, col:uppFirstFree(row) }; IN.back = null;
       return;
     }
     if (k === 'erase') {
-      if (rowVals[f.col] != null) rowVals[f.col] = null;
-      else if (f.row !== 'm' && f.col > 0) { IN.f = { row:f.row, col:f.col - 1 }; IN.vals[f.row][f.col - 1] = null; }
+      if (rowVals[f.col] != null && uppFree(f.row, f.col)) rowVals[f.col] = null;
+      else if (f.row !== 'm' && f.col > 0 && uppFree(f.row, f.col - 1)) { IN.f = { row:f.row, col:f.col - 1 }; IN.vals[f.row][f.col - 1] = null; }
       return;
     }
     if (!/^\d$/.test(k)) return;
+    if (!uppFree(f.row, f.col)) return;
+    if (f.row !== 'm' && !uppOpen(t).includes(f.row)) return;
     rowVals[f.col] = +k;
     if (f.row === 'm') { IN.f = IN.back || { row:IN.rows[0], col:0 }; IN.back = null; return; }
-    if (f.col < W - 1) IN.f = { row:f.row, col:f.col + 1 };
+    let c = f.col + 1;
+    while (c < W - 1 && !uppFree(f.row, c)) c++;
+    if (c < W && uppFree(f.row, c)) IN.f = { row:f.row, col:c };
   }
   function refreshQ(t) {
+    if (IN && IN.kind === 'upp') uppFixFocus(t);
     const q = document.getElementById('mp-q');
     if (q) q.innerHTML = questionHTML(t);
     updKlar();
@@ -687,13 +917,14 @@ const MatteProv = (() => {
     if (t.type === 'num') return num(IN.v);
     if (t.type === 'tio' || t.type === 'te' || t.type === 'sheet') return IN.v.map(num);
     if (t.type === 'prob') return { expr:IN.exprStr, rows:IN.v.map(num) };
-    return { p1:IN.vals.p1, p2:IN.vals.p2, s:IN.vals.s };
+    return Object.assign({}, IN.vals);                 // alla rader: p1/p2 eller r0 … r{k-1}, och s
   }
 
   function submit() {
     const t = curTask();
     if (!t || locked || !canSubmit()) return;
     S.touched = true;
+    if (t.type === 'sheet') return sheetSubmit(t);
     /* Problemlösningens första fas: uttrycket */
     if (t.type === 'prob' && IN.phase === 'expr') {
       const str = IN.toks.join(' ');
@@ -707,87 +938,163 @@ const MatteProv = (() => {
     }
     answered(t, L.check(t, readResp(t)));
   }
+
+  /* Ett svar: rätt ⇒ "rätt direkt" eller "rätt med hjälp"; fel ⇒ nästa steg i trappan */
   function answered(t, res) {
     if (S.mode === 'sprint') return sprintAnswer(t, res.ok);
-    if (S.mode === 'prov') {
-      if (t.type === 'sheet') res.per.forEach(ok => S.results.push({ moment:'tabell', ok }));
-      else S.results.push({ moment:t.moment, ok:res.ok, cls:res.cls });
-      S.idx++;
-      snd('click');
-      return renderTask();
-    }
-    if (S.mode === 'sheet') return sheetResult(t, res);
-    S.drill.answer(res.ok);
+    const H = IN.H;
     if (res.ok) {
       locked = true; snd('correct');
-      renderTask({ ok:true, showAns:false, html:`<div class="mp-fb good"><h3>${svg('check')}Rätt!</h3>
+      const outcome = H.wrong ? 'hjalp' : 'direkt';
+      taskDone(t, outcome, H.cls0);
+      const tag = outcome === 'hjalp' ? '<small>med hjälp</small>' : '';
+      IN.H.msg = null;
+      renderTask({ ok:true, showAns:false, html:`<div class="mp-fb good"><h3>${svg('check')}Rätt!${tag}</h3>
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>` }, true, t);
       return;
     }
     snd('wrong');
-    showWrong(t, res);
-  }
-
-  /* Tabelltestet i övningen: /20, de fel talen med rätt svar, sedan nötning av dem */
-  function sheetResult(t, res) {
-    locked = true;
-    const wrongItems = t.items.filter((_, i) => !res.per[i]);
-    S.wrongItems = wrongItems;
-    const s = readSt(), p = provSt(s);
-    p.ova.tabell = { date:new Date().toISOString(), ok:res.okCount, total:t.items.length, level:S.lv };
-    writeSt(s);
-    snd(res.okCount === t.items.length ? 'fanfare' : 'correct');
-    const html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}${res.okCount} av ${t.items.length} rätt</h3>
-      <div class="mp-navrow">${wrongItems.length ? `<button class="mp-cta" data-act="sheetnot">${svg('again')}Nöt de ${wrongItems.length} som blev fel</button>` : ''}
-      <button class="mp-cta sec" data-act="prov">Klar</button></div></div>`;
-    renderTask({ ok:res.ok, per:res.per, okCount:res.okCount, html }, true, t);
-  }
-
-  /* Fel i övningen: svaret visas; förklaringen i steg; samma uppgift direkt igen */
-  function explainSteps(t, res) {
-    if (t.moment === 'tiotal') {
-      const lead = { nollfalla:'Se upp med nollan i tabellsvaret!', nollor:'Räkna nollorna en gång till.', tabell:'Kolla tabellsvaret på första raden.' }[res.cls];
-      const st = L.explainTiotal(t).map(s => s.text);
-      return lead ? [lead].concat(st) : st;
+    H.wrong++;
+    if (H.wrong === 1) { H.cls0 = res.cls; H.bits = L.helpBits(t, res.cls); if (isDrill()) S.drill.answer(false); }
+    const step = L.helpStep(H.wrong, H.bits.length);
+    if (step === 'svar') { taskDone(t, 'svar', H.cls0); return showWrong(t, res); }
+    markBad(t, res);
+    if (step === 'retry') H.msg = { kind:'retry', title:'Inte riktigt. Försök igen.', text:L.helpHint(t, res.cls) };
+    else {
+      const k = +step.slice(3), bit = H.bits[k - 1];
+      applyFill(t, bit.fill);
+      H.msg = { kind:'bit', title:`Hjälp ${k} av ${H.bits.length}`, text:bit.text };
     }
+    renderTask(null, true, t);
+  }
+  /* Rutorna som var fel blir röda tills barnet ändrar dem */
+  function markBad(t, res) {
+    if (IN.kind === 'num') { IN.v = ''; return; }
+    if (!IN.bad || !res.wrong) return;
+    IN.bad = new Set(res.wrong.map((w, i) => w ? i : -1).filter(i => i >= 0 && openBox(i)));
+    if (IN.bad.size) IN.f = [...IN.bad][0];
+  }
+  /* Hjälpens bit skrivs in åt barnet och låses */
+  function applyFill(t, fill) {
+    if (!fill) return;
+    if (IN.kind === 'prob') {
+      if (fill.expr && (IN.phase === 'expr' || IN.exprStr !== t.expr)) {
+        IN.exprStr = t.expr; IN.terms = L.parseExpr(t.expr); IN.phase = 'rows'; IN.exprGiven = true;
+        IN.v = Array(L.exprRows(IN.terms).boxes.length).fill(''); IN.given = new Set(); IN.bad = new Set();
+      }
+    }
+    if (fill.boxes && IN.v) {
+      for (const [i, v] of Object.entries(fill.boxes)) { IN.v[+i] = String(v); IN.given.add(+i); IN.bad.delete(+i); }
+      IN.f = nextOpen(-1);
+    }
+    if (IN.kind === 'upp') {
+      for (const c of fill.cells || []) { IN.vals[c.row][c.col] = c.val; IN.given.add(c.row + ':' + c.col); }
+      for (const m of fill.mem || []) { IN.vals.m[m.col] = m.val; IN.given.add('m:' + m.col); }
+      IN.pulse = !!fill.pulse;
+      const open = L.uppOpenRows(t, IN.vals), row = open[open.length - 1];
+      IN.f = { row, col:uppFirstFree(row) };
+    }
+  }
+  /* Utfallet sparas: i provets resultat, i passets räkning och i "det som var svårt" */
+  function taskDone(t, outcome, cls) {
+    const s = readSt(), p = provSt(s);
+    p.hard = L.recordOutcome(p.hard, t, outcome, cls, today());
+    writeSt(s);
+    if (S.mode === 'prov') { S.results.push({ moment:t.moment, ok:outcome === 'direkt', outcome, mitt:S.mitt }); S.idx++; }
+    else if (isDrill()) { S.outc[outcome]++; if (outcome !== 'svar') S.drill.answer(true); }
+  }
+
+  /* Tabelltestet: Klar rättar; de röda får rättas en gång (rätt då = med hjälp), sedan visas svaren */
+  function sheetSubmit(t) {
+    const res = L.check(t, readResp(t));
+    if (IN.round === 1) {
+      res.per.forEach((ok, i) => { if (ok) IN.out[i] = 'direkt'; });
+      if (res.per.every(Boolean)) return sheetDone(t);
+      IN.round = 2; IN.bad = new Set(res.per.map((ok, i) => ok ? -1 : i).filter(i => i >= 0)); IN.f = [...IN.bad][0];
+      snd('wrong');
+      IN.H.msg = { kind:'retry', title:`${res.okCount} av ${t.items.length} rätt.`, text:'Rätta de röda talen och tryck Klar igen.' };
+      return renderTask(null, true, t);
+    }
+    res.per.forEach((ok, i) => { if (!IN.out[i]) IN.out[i] = ok ? 'hjalp' : 'svar'; });
+    sheetDone(t);
+  }
+  function sheetDone(t) {
+    locked = true; IN.H.msg = null;
+    const s = readSt(), p = provSt(s), day = today();
+    t.items.forEach((it, i) => { p.hard = L.recordOutcome(p.hard, it, IN.out[i], 'tabell', day); });
+    const c = { direkt:0, hjalp:0, svar:0 }; IN.out.forEach(o => c[o]++);
+    if (S.mode === 'sheet') p.ova.tabell = { date:new Date().toISOString(), ok:c.direkt, total:t.items.length, level:S.lv };
+    writeSt(s);
+    snd(c.direkt === t.items.length ? 'fanfare' : 'correct');
+    const sc = document.getElementById('mp-score'); if (sc) sc.innerHTML = `${c.direkt}<small>/${t.items.length}</small>`;
+    const sum = `<p class="mp-k3l">${k3(c.direkt, c.hjalp, c.svar)}</p>`;
+    let html;
+    if (S.mode === 'prov') {
+      t.items.forEach((it, i) => S.results.push({ moment:'tabell', ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
+      S.idx++;
+      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}${c.direkt} av ${t.items.length} rätt direkt</h3>${sum}
+        <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>`;
+    } else {
+      S.wrongItems = t.items.filter((_, i) => IN.out[i] !== 'direkt');
+      S.done = true;
+      html = `<div class="mp-fb good" style="padding:10px 12px"><h3>${svg('check')}${c.direkt} av ${t.items.length} rätt direkt</h3>${sum}
+        <div class="mp-navrow">${S.wrongItems.length ? `<button class="mp-cta" data-act="sheetnot">${svg('again')}Nöt de ${S.wrongItems.length} som inte satt</button>` : ''}
+        <button class="mp-cta sec" data-act="prov">Klar</button></div></div>`;
+    }
+    renderTask({ ok:true, sheetDone:true, html }, true, t);
+  }
+  /* De tre utfallen som små siffror: rätt direkt · med hjälp · fick svaret */
+  const k3 = (d, h, s) => `<span class="mp-k3"><i class="d" title="Rätt direkt">${d}</i><i class="h" title="Rätt med hjälp">${h}</i><i class="s" title="Fick svaret">${s}</i></span>`;
+  const k3Legend = () => `<span class="mp-k3leg"><i class="d"></i>Rätt direkt<i class="h"></i>Med hjälp<i class="s"></i>Fick svaret</span>`;
+
+  /* Hela svaret (trappans sista steg): förklaringen i steg, sedan Nästa */
+  function explainSteps(t, res) {
+    if (t.moment === 'tiotal') return L.explainTiotal(t).map(s => s.text);
     if (t.moment === 'problem') {
       const st = t.steps.map(s => s.text);
-      return res.cls === 'uttryck' ? [`Uttrycket kan vara ${t.expr}.`].concat(st) : st;
+      return t.needExpr ? [`Uttrycket: ${t.expr}.`].concat(st) : st;
     }
     if (t.moment === 'talsorter') { const f = t.fields.map(x => x.ans); return [`Första raden: ${t.b} delas upp i ${f[0]} och ${f[1]}.`, `Andra raden: ${t.a} · ${f[0]} = ${f[2]} och ${t.a} · ${f[1]} = ${f[3]}.`, `Tredje raden: ${f[2]} + ${f[3]} = ${f[4]}.`]; }
-    if (t.moment === 'uppstallning') return [L.UPP_FEEDBACK[res.cls] || L.UPP_FEEDBACK.fel];
+    if (t.moment === 'uppstallning') return t.two
+      ? [`Rad 1: ${t.top} · ${t.ones} = ${t.p1}.`, `Rad 2: ${t.top} · ${t.tens * 10} = ${t.p2}, med nollan i den grå rutan.`, `Lägg ihop raderna: ${t.p1} + ${t.p2} = ${t.answer}.`]
+      : t.parts.map(p => `Rad ${p.i + 1}: ${t.bot} · ${p.d} = ${p.val}` + (p.i ? `, ${['', 'ett steg', 'två steg', 'tre steg'][p.i]} åt vänster.` : '.'))
+          .concat([`Lägg ihop raderna, med minnessiffrorna ovanför: svaret är ${t.answer}.`]);
     return [`${t.text} = ${t.answer}.`];
   }
-  function memFacit(t) {
-    /* minnessiffrorna för första raden (entalets rad), i röd text över kolumnen de går till */
-    const m = Array(t.width).fill(null), mult = t.two ? t.ones : t.bot, ds = L.digitsOf(t.top);
-    let c = 0;
-    ds.forEach((d, i) => { const p = d * mult + c; c = Math.floor(p / 10); if (i < ds.length - 1 && c > 0) m[i + 1] = c; });
+  function memFacit(t) {          // additionens minnessiffror
+    const m = Array(t.width).fill(null);
+    L.addCarries(t.two ? [t.p1, t.p2] : t.parts.map(p => p.place)).forEach(c => { m[c.col] = c.val; });
     return m;
   }
   function showWrong(t, res) {
-    locked = true;
-    if (t.type === 'prob' && res.cls === 'uttryck') IN.terms = null;   // visa det rätta uttrycket
+    locked = true; IN.H.msg = null;
     S.fb = { t, res, steps:explainSteps(t, res), i:0 };
     renderWrong();
   }
   function renderWrong() {
     const { t, res, steps, i } = S.fb, last = i >= steps.length - 1;
-    const html = `<div class="mp-fb"><h3>Inte riktigt. Så här blir det:</h3>
+    const html = `<div class="mp-fb"><h3>Så här blir det:</h3>
       <p class="mp-step">${esc(steps[i])}</p>
       ${steps.length > 1 ? `<div class="mp-dots">${steps.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div>` : ''}
-      <button class="mp-cta${last ? '' : ' sec'}" data-act="${last ? 'retry' : 'fbnext'}">${last ? `${svg('again')}Försök igen` : `Nästa ${svg('next')}`}</button></div>`;
+      <button class="mp-cta${last ? '' : ' sec'}" data-act="${last ? 'svarnext' : 'fbnext'}">Nästa ${svg('next')}</button></div>`;
     renderTask({ ok:false, showAns:true, cls:res.cls, reveal:revealFor(t, res, steps, i), mem:t.type === 'upp' ? memFacit(t) : null, html }, true, t);
   }
-
   /* Hur många "="-rader som syns i facit vid förklaringens steg i (ett steg = en rad) */
   function revealFor(t, res, steps, i) {
     const last = i >= steps.length - 1;
-    if (t.type === 'prob') return res.cls === 'uttryck' ? i : i + 1;
+    if (t.type === 'prob') return t.needExpr ? i : i + 1;
     if (t.type === 'te') return i + 1;
     if (t.type === 'tio') { const tab = steps.findIndex(x => x.startsWith('Räkna tabellen')); return last ? 2 : i >= tab ? 1 : 0; }
+    if (t.type === 'upp') return i + 1;
     return null;
   }
+  /* Efter hela svaret: öva ⇒ nötloopen går vidare (uppgiften kommer igen senare); prov ⇒ nästa uppgift */
+  function afterSvar() {
+    if (isDrill()) S.drill.answer(true);
+    S.fb = null;
+    renderTask();
+  }
+
   function finish() {
     if (S.mode === 'prov') return showKvitto();
     return showDrillDone();
@@ -795,7 +1102,7 @@ const MatteProv = (() => {
 
   /* ── Slutet på ett övningspass ── */
   function showDrillDone() {
-    const st = S.drill.stats();
+    const st = S.drill.stats(), o = S.outc;
     const R = MP.receiptFor([{ type:S.mode, asked:st.asked, firstOk:st.firstOk, wrongFirst:st.wrongFirst }], Date.now() - S.start);
     if (S.mode === 'ova') {
       const s = readSt(), p = provSt(s);
@@ -809,7 +1116,8 @@ const MatteProv = (() => {
       <div class="mp-head" style="margin-top:auto"><span class="mp-starb">${svg('star')}</span><h2>${esc(title)}</h2><p>${esc(levelName(S.lv))}</p></div>
       <div class="mp-rc">
         <div class="mp-rc-row"><span class="nm">Rätt på första försöket</span><b>${R.correct} av ${R.total}</b></div>
-        <div class="mp-rc-row"><span class="nm">Rättade fel</span><b>${R.fixed}</b></div>
+        <div class="mp-rc-row"><span class="nm">Rätt med hjälp</span><b>${o.hjalp}</b></div>
+        <div class="mp-rc-row"><span class="nm">Fick svaret</span><b>${o.svar}</b></div>
         <div class="mp-rc-row"><span class="nm">Tid</span><b>${esc(MP.durTxt(R.secs))}</b></div>
       </div>
       <p class="mp-note" style="font-size:15px">${esc(MP.praiseFor(R.pct))}</p>
@@ -818,28 +1126,34 @@ const MatteProv = (() => {
     S = null;
   }
 
-  /* ── Kvittot efter provet ── */
+  /* ── Kvittot efter provet (och mitt prov) ── */
   function showKvitto() {
     const sum = L.provSummary(provId, S.results), iso = new Date().toISOString();
+    const hj = S.results.filter(x => x.outcome === 'hjalp').length, sv = S.results.filter(x => x.outcome === 'svar').length;
     const s = readSt(), p = provSt(s);
-    const rec = { id:Date.now(), date:iso, level:S.lv, ok:sum.ok, total:sum.total, per:sum.per.map(x => ({ id:x.id, ok:x.ok, total:x.total })), seen:null };
+    const rec = { id:Date.now(), date:iso, kind:S.mitt ? 'mitt' : 'prov', level:S.lv, ok:sum.ok, hjalp:hj, svar:sv, total:sum.total,
+                  per:sum.per.map(x => ({ id:x.id, ok:x.ok, hjalp:x.hjalp, svar:x.svar, total:x.total })), seen:null };
     p.tests.unshift(rec); if (p.tests.length > 30) p.tests.length = 30;
     writeSt(s);
+    const hardNow = L.hardList(p.hard);
     S.rec = rec; S.weak = sum.weak; S.mode = 'kvitto';
     snd('fanfare');
-    const praise = sum.ok === sum.total ? 'Allt satt!' : sum.weak.length ? 'Bra kämpat! Nu vet du vad du ska öva på.' : 'Starkt! Alla moment är gröna.';
+    const praise = sum.ok === sum.total ? 'Allt satt direkt!' : sum.weak.length ? 'Bra kämpat! Nu vet du vad du ska öva på.' : 'Starkt! Alla moment är gröna.';
     const when = MP.fmtWhen(iso);
-    frame('Provet klart', 'prov', 'Klar', '', `
-      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok} av ${sum.total} rätt</h2><p>${esc(praise)}</p></div>
+    const per = sum.per.filter(x => x.total);
+    frame(S.mitt ? 'Mitt prov klart' : 'Provet klart', 'prov', 'Klar', '', `
+      <div class="mp-head"><span class="mp-starb">${svg('star')}</span><h2>${sum.ok} av ${sum.total} rätt direkt</h2><p>${esc(praise)}</p></div>
       <div class="mp-rc">
-        <div class="mp-rc-top"><span class="mp-rc-k">${esc(prov().title)} · ${esc(levelName(S.lv))}</span><span class="mp-rc-when">${esc(when.charAt(0).toUpperCase() + when.slice(1))}</span></div>
-        ${sum.per.map(x => { const m = momentOf(x.id); return `<div class="mp-rc-row"><span class="nm">${m.nr}. ${esc(m.title)}</span><b>${x.ok} av ${x.total}</b>
+        <div class="mp-rc-top"><span class="mp-rc-k">${esc(S.mitt ? 'Mitt prov' : prov().title)} · ${esc(levelName(S.lv))}</span><span class="mp-rc-when">${esc(when.charAt(0).toUpperCase() + when.slice(1))}</span></div>
+        <div class="mp-rc-row leg">${k3Legend()}</div>
+        ${per.map(x => { const m = momentOf(x.id); return `<div class="mp-rc-row"><span class="nm">${m.nr}. ${esc(m.short)}</span>${k3(x.ok, x.hjalp, x.svar)}
           <span class="mp-badge ${x.green ? 'g' : 'y'}">${x.green ? 'Klart' : 'Öva'}</span></div>`; }).join('')}
         <div class="mp-rc-foot"><span class="mp-ph" id="mp-ph">Plats för en vuxens stämpel</span><div class="mp-stamp" id="mp-stamp"></div></div>
       </div>
       <button class="hold" id="mp-hold" aria-label="Sett av en vuxen. Håll inne en och en halv sekund."><i class="hold-fill"></i><span class="hold-t">${svg('hand')}Håll inne: Sett av en vuxen</span></button>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
-        ${sum.weak.length ? `<button class="mp-cta" data-act="weak">${svg('target')}Öva på det som var svårt</button>` : ''}
+        ${hardNow.length ? `<button class="mp-cta" data-act="mitt">${svg('target')}Gör mitt prov</button>` : ''}
+        ${sum.weak.length ? `<button class="mp-cta sec" data-act="weak">${svg('again')}Öva på det som var svårt</button>` : ''}
         <button class="mp-cta sec" data-act="prov">Till provet</button></div>`);
     MP.bindHold(document.getElementById('mp-hold'), { onDone:stampKvitto });
   }
@@ -942,7 +1256,13 @@ const MatteProv = (() => {
       case 'intronext': snd('click'); showIntro(S.moment, S.i + 1); break;
       case 'introprev': snd('click'); showIntro(S.moment, Math.max(0, S.i - 1)); break;
       case 'introskip': snd('click'); startOva(S.moment); break;
-      case 'startprov': snd('click'); startProv(); break;
+      case 'startprov': snd('click'); startProv(false); break;
+      case 'mitt':      snd('click'); startProv(true); break;
+      case 'led':       if (IN && IN.think) { IN.think.i++; snd('click'); refreshQ(curTask()); } break;
+      case 'svarnext':  snd('click'); afterSvar(); break;
+      case 'scpen':     scTool(false); break;
+      case 'scerase':   scTool(true); break;
+      case 'scclear':   scClear(); break;
       case 'weak':      snd('click'); startDrill('svag', L.buildWeakPass(S.weak, S.rec.level)); break;
       case 'sprint':    snd('click'); showSprintIntro(); break;
       case 'sprintgo':  snd('click'); startSprint(); break;
@@ -951,7 +1271,6 @@ const MatteProv = (() => {
       case 'klar':      submit(); break;
       case 'next':      snd('click'); renderTask(); break;
       case 'fbnext':    snd('click'); S.fb.i++; renderWrong(); break;
-      case 'retry':     snd('click'); S.fb = null; renderTask(); break;
       case 'avsluta':   avsluta(); break;
       case 'ovno':      { const o = document.getElementById('mp-ov'); if (o) o.remove(); break; }
       case 'bx':        if (!locked && IN && IN.v && el.dataset.i != null) { IN.f = +el.dataset.i; refreshQ(curTask()); } break;
@@ -975,7 +1294,8 @@ const MatteProv = (() => {
 
   return { open, showList, showProv,
            /* bara för test i webbläsaren */
-           _peek:() => ({ S, IN, task:curTask() }) };
+           _peek:() => ({ S, IN, task:curTask() }),
+           _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };
 })();
 
 if (typeof window !== 'undefined') window.MatteProv = MatteProv;
