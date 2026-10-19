@@ -43,3 +43,13 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Rättat:** en ledtråd som bröt raden i 390 × 700; kladdens golv på korta skärmar.
 - **Lärdom:** när inmatningen ställer till det för barnet, flytta platsvärdet till appen och låt barnet svara som det
   tänker. Ta bort det som inte längre kan hända, både i koden och i testerna.
+
+## Runda 5 · 2026-10-19 · Snällare (D39), gren `matteprov-snall`
+- **Vad som inte fungerade:** i tabelltestet var Klar den framträdande knappen fast den rättar hela bladet, och tomma
+  rutor räknades som fel. Ett svar och Klar gav "1 av 20 rätt", 19 röda rutor och ett argt ljud.
+- **Varför:** två knappar var aktiva samtidigt med samma tyngd, och rättningen skilde inte på tomt och fel.
+- **Byggt:** "Nästa tal" är huvudknappen tills bladet är fyllt; Klar med tomma rutor rättar inget och säger hur många
+  som är kvar; tomma rutor ger `null`, aldrig fel. Inget rött för fel, vänliga ord, tyst första försök. Vitest för
+  tomma rutor och ett svep efter dömande ord i koden och i alla genererade texter.
+- **Lärdom:** gå igenom varje läge och fråga vilka två knappar som kan förväxlas; den som avslutar ska inte vara
+  framträdande förrän det går att avsluta. Tomt är inte fel.
