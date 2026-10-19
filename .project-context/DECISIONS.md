@@ -52,6 +52,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
 - D28 Städerna godkända; skolans vana går före där den skiljer
 - D29 Bildkällorna bakom en liten informationsknapp
+- D30 Geografi efter första provet: Nästa, rikare snabbfakta, ett tryck per val, inget dubbeltryck, sköldar i nivåer, test per område
 
 ---
 
@@ -297,3 +298,39 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   visas bakom en liten informationsknapp i Geografi, så att de inte stör.
 - **Källa:** Dennis 2026-10-19: "och gällande att upphovspersonerna nämns. Lägg det som nån liten informationsknapp
   nånstans i appen. så att det inte är något som störs."
+
+## D30 · 2026-10-19 · Geografi efter första provet av mockupen
+- **Beslut:**
+  1. **Nästa efter rätt svar.** Ett rätt svar i Träna går inte vidare av sig självt; barnet trycker "Nästa" och
+     hinner läsa snabbfaktan.
+  2. **Rikare snabbfakta.** Efter varje rätt svar visas landskapets sköld, och en fakta som roterar mellan
+     placeringen i yta eller invånare (etta och sista sägs rakt ut: "Sveriges största landskap till ytan",
+     "Sveriges folkrikaste landskap"), staden, blomman eller djuret med bild och text, och "Visste du?".
+  3. **Ett tryck per val, inget val två gånger.** Hemvyns områdeskort (Norrland, Svealand, Götaland, Hela Sverige)
+     är ingången till träning, och knappen "Träna" på hemvyn tas bort. "Träna <område>" har ordningen överst och
+     de fyra lägena som rutor där ett tryck startar; namn eller läxbokens nummer, och djur, blommor, sköldar eller
+     blandat, är knappar i sina rutor. Det blir två tryck från hemvyn till första frågan. Pussel och Test: ett tryck
+     visar områdena, och ett tryck på ett område startar.
+  4. **Dubbeltryck zoomar inte.** Kartan zoomas bara med nyp (och med mushjulet). Ett tryck räknas direkt. Ett
+     snabbt dubbeltryck zoomar varken kartan eller sidan och väljer inte samma landskap två gånger.
+  5. **Upptäck för hela Sverige börjar med hela landet i bild.**
+  6. **Samlarpärmen i nivåer.** Sköldarna låses upp i brons, silver och guld. Förslaget i mockupen:
+     - brons: landskapet är övat
+     - silver: landskapet "kan" i lådorna (rätt tre olika dagar)
+     - guld: "kan" och rätt på första försöket i alla sex frågetyper (kartan, namnet, staden, djuret, blomman och
+       skölden)
+     Kortet visar nivån. Det stora kortet säger vad som krävs till nästa nivå. Räknaren visar "N kort · x silver ·
+     y guld".
+  7. **Testet tar alla landskap i det valda området** (Hela Sverige = alla 25). Ett fel visar svaret och testet
+     går vidare, utan nötloop.
+  8. **Pusslet räknas inte in i framstegen.**
+- **Källa:** Dennis 2026-10-19:
+  - Om snabbfaktan och Träna: "Klickar nästa, så hon hinner läsa snabbfaktan. men nu fick man då inte se saker som
+    'om det är det största landskapet sett till ytan? landskapssköld?' i övrigt gillar jag dina förslag. … Det
+    upplevs lite dubbeljobbat. Att man klickar på nånting och väljer ett läge, sen så får man samma val än gång
+    till. Försök om du kan konsolidera dessa steg."
+  - Rättelsen samma dag: "Dubbeltryck zoomar. <- dubbeltryck ska inte ooma. bara 2 fingara med nyp eller liknande
+    för zooma ut. Upptäck börjar med hela landet i bild. Ja. Ett kort i pärmen låses upp när hon kan landskapet.
+    Ja, man kan väl låsa upp landskapens landskapssköldar, med brons, silver och guld beroende på hur mycket man
+    tränat på dem. Testet har tio frågor utan nötning. Testet borde ha samtliga landskap för valt område. Väljer
+    man hela sverige så är det alla landskap som skall tränas. Pusslet räknas inte in i framstegen."

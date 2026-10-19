@@ -71,4 +71,8 @@ landskap → D24; menyn i Geografi (Sverige, Europa, övriga världsdelar, Hela 
 **Mockupen omgjord 19/10** efter samtalet: `design-lab/geografi-mockup.html` följer nu D24–D29 (menyn → Sverige → Sveriges
 landskap; Utforska, Träna med fyra lägen, Pussel, Samlarpärm, Test, bildkällorna). Förslag 6 och 7 (Resan genom Sverige,
 Vem är jag?) väntar enligt D27. Vad som verifierats och de val Dennis bör döma: loggen 19/10, avsnittet "Geografi:
-mockupen omgjord". Väntar på Dennis och Mira.
+mockupen omgjord".
+
+**Efter Dennis prov 19/10 → D30:** Nästa efter rätt svar; snabbfaktan med sköld och roterande fakta;
+ett tryck per val (områdeskorten är ingången till Träna; Pussel och Test väljer område med ett tryck); dubbeltryck
+zoomar inte; samlarpärmen i brons, silver och guld; testet tar alla landskap i området. Inarbetat i mockupen samma dag.

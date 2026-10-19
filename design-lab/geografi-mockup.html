@@ -82,7 +82,7 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.3;stro
 
 /* Bubblan — fast höjd */
 .bubble{flex-shrink:0;display:flex}
-.b60{height:60px}.b92{height:92px}
+.b60{height:60px}.b92{height:92px}.b122{height:128px}
 .thought{flex:1;background:#fff;border-radius:var(--radius-md);padding:7px 14px;box-shadow:var(--shadow-panel);font-weight:800;color:var(--ink);
   font-size:15px;line-height:1.3;border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden}
 .thought.pop{animation:bubblein .3s var(--spring)}
@@ -203,14 +203,10 @@ svg.md{display:block;width:100%;height:100%}
 .doors{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;flex-shrink:0}
 .door{grid-column:span 3;display:flex;align-items:center;gap:10px;min-height:66px;padding:8px 12px;border-radius:20px;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:left;transition:transform .2s var(--spring)}
 .door:active{transform:scale(.96)}
-.door.sm{grid-column:span 2;flex-direction:column;justify-content:center;gap:3px;min-height:78px;padding:6px 4px;text-align:center}
 .door .dic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--accent);flex-shrink:0}
 .door .dic svg.i{width:22px;height:22px}
 .door b{font-family:var(--font-head);font-weight:800;font-size:17px;line-height:1.05}
 .door small{display:block;font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.15}
-.door.prim{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 8px 22px var(--glow)}
-.door.prim .dic{background:rgba(255,255,255,.22);color:#fff}
-.door.prim small{color:rgba(255,255,255,.88)}
 
 /* ── Utforska + landskapskortet ─────────── */
 .sheet{position:absolute;left:0;right:0;bottom:0;height:446px;z-index:5;background:#fff;border-radius:26px 26px 20px 20px;box-shadow:0 -8px 30px rgba(19,78,74,.18);
@@ -251,24 +247,50 @@ svg.md{display:block;width:100%;height:100%}
 .sh-more{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--accent);flex-shrink:0;box-shadow:0 2px 6px rgba(19,78,74,.12);position:relative}
 .sh-more small{position:absolute;bottom:-1px;right:-2px;font-size:10px;font-weight:900;color:var(--ink-soft);background:#fff;border-radius:6px;padding:0 3px}
 
-/* ── Träna: inställningar ────────────────── */
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0}
-.mode{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:84px;padding:9px 11px;border-radius:18px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:left;transition:transform .2s var(--spring)}
-.mode:active{transform:scale(.97)}
-.mode .mh{display:flex;align-items:center;gap:7px}
-.mode .mh svg.i{width:20px;height:20px;color:var(--accent)}
-.mode b{font-family:var(--font-head);font-weight:800;font-size:16px;line-height:1.05}
-.mode small{font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.2}
-.mode.on{border-color:var(--accent);background:linear-gradient(160deg,#fff,var(--tint));box-shadow:0 0 0 3px rgba(79,195,196,.25),var(--shadow-panel)}
-.mode .star{font-size:10px;font-weight:900;color:#fff;background:#f59e0b;border-radius:999px;padding:1px 6px;margin-left:auto}
-.topt{flex-shrink:0;display:flex;flex-direction:column;gap:6px;min-height:104px;justify-content:flex-start}
-.topt .orow{display:flex;align-items:center;gap:8px}
-.topt .orow .flabel{width:62px;flex-shrink:0;padding:0;font-size:11px}
-.topt .orow .seg{flex:1}
-.tsum{flex:1;min-height:0;display:flex;align-items:center;gap:12px;font-weight:800;font-size:14.5px;color:var(--ink-soft);padding:10px 14px;line-height:1.35}
-.tsum .tpv{flex:0 0 120px;height:100%;display:flex;align-items:center;justify-content:center}
-.tsum .tpv svg{height:100%;max-height:230px;width:auto;max-width:120px}
-.tsum b{font-family:var(--font-head);font-size:18px;color:var(--deep);display:block;line-height:1.1;margin-bottom:4px}
+/* ── Träna <område>: ordningen överst, lägena som stora rutor (ett tryck startar, D30) ── */
+.ordrow{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;flex-shrink:0}
+.ordrow .flabel{padding:0;flex-shrink:0}
+.ordrow .seg{flex:1}
+.tmodes{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.tmode{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:10px 14px;border-radius:20px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);text-align:left;transition:transform .2s var(--spring)}
+button.tmode:active{transform:scale(.98)}
+.tmode.main{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 8px 22px var(--glow)}
+.tmode .th{display:flex;align-items:center;gap:12px;width:100%}
+.tmode .tic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--tint);color:var(--accent);flex-shrink:0}
+.tmode.main .tic{background:rgba(255,255,255,.22);color:#fff}
+.tmode .tic svg.i{width:24px;height:24px}
+.tmode .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tmode b{font-family:var(--font-head);font-weight:800;font-size:19px;line-height:1.05}
+.tmode small{font-size:12.5px;font-weight:800;color:var(--ink-soft);line-height:1.2}
+.tmode.main small{color:rgba(255,255,255,.9)}
+.tmode .go{width:30px;height:30px;flex-shrink:0;display:grid;place-items:center}
+.tbtns{display:flex;gap:6px}
+.tbtns button{flex:1;min-height:44px;padding:0 6px;border-radius:14px;background:#fff;border:1.5px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);font-weight:900;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(19,78,74,.08)}
+.tbtns button:active{transform:scale(.96)}
+.tbtns button svg.i{width:15px;height:15px}
+/* Pussel: välj område */
+.pzpick{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.pzarea{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:22px;background:var(--glass-strong);border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:var(--shadow-panel);color:var(--deep);transition:transform .2s var(--spring)}
+.pzarea:active{transform:scale(.97)}
+.pzarea .pv{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.pzarea .pv svg{height:100%;max-height:220px;width:auto;max-width:100%}
+.pzarea b{font-family:var(--font-head);font-weight:800;font-size:19px}
+.pzarea small{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+/* Hemvyn: landsdelskorten är ingången till träning */
+.areas .ahead{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:5px;padding:0 4px}
+.areas .ahead svg.i{width:15px;height:15px}
+.arow .ago{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.arow .ago svg.i{width:15px;height:15px;stroke-width:2.8}
+/* Snabbfaktan efter rätt svar: skölden alltid, faktan roterar (D30) */
+.fcard{display:flex;align-items:center;gap:10px;height:100%}
+.fcard .fsh{width:46px;height:56px;flex-shrink:0;object-fit:contain}
+.fcard .ftx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.fcard .fpic{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;border:1.5px solid #e2e8f0}
+.fcard .fpic.flower{object-fit:cover}
+.fcard .fact{font-size:12.5px;line-height:1.22}
+.thought:has(.fcard){padding:6px 10px 6px 8px}
+.fcard .lead{font-size:14px;line-height:1.2}
+.fcard .ftx > span:nth-child(2){font-size:14.5px;line-height:1.22}
 
 /* ── Spela (träning och test) ─────────── */
 .track{min-height:44px;flex-shrink:0;padding:6px 14px;display:flex;flex-direction:column;justify-content:center;gap:5px}
@@ -337,16 +359,6 @@ svg.md{display:block;width:100%;height:100%}
 .tdleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .sumcard{flex-shrink:0;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 
-/* Test: startsidan */
-.tstart{flex:1;min-height:0;padding:20px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
-.tstart .big{width:84px;height:84px;border-radius:26px;background:var(--tint);color:var(--accent);display:grid;place-items:center}
-.tstart .big svg.i{width:46px;height:46px;stroke-width:2}
-.tstart h2{font-family:var(--font-head);font-weight:800;font-size:28px;color:var(--deep);line-height:1.05}
-.tstart p{font-weight:800;font-size:15px;color:var(--ink-soft);line-height:1.35;max-width:300px}
-.tpills{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
-.tpills span{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:900;color:var(--deep);background:#fff;border-radius:999px;padding:6px 11px;box-shadow:0 2px 6px rgba(19,78,74,.1)}
-.tpills svg.i{width:16px;height:16px;color:var(--accent)}
-
 /* ── Pusslet ─────────────────────────── */
 .pzboard{flex:1;min-height:0;padding:6px;display:flex}
 .pzboard .mapbox{background:linear-gradient(180deg,#f6fbfd,#edf6fa)}
@@ -368,7 +380,7 @@ svg.md{display:block;width:100%;height:100%}
 .bhead span{font-weight:900;font-size:14px;color:var(--ink-soft);white-space:nowrap}
 .bfull{flex-shrink:0;display:flex;align-items:center;gap:8px;justify-content:center;min-height:40px;border-radius:14px;background:linear-gradient(90deg,#fef3c7,#fde68a);color:#92400e;font-weight:900;font-size:14px}
 .bfull svg.i{width:18px;height:18px;fill:#f59e0b;stroke:#b45309;stroke-width:1.4}
-.binder{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,minmax(96px,1fr));gap:6px;padding:2px}
+.binder{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,minmax(88px,1fr));gap:6px;padding:2px}
 .bcard{position:relative;border-radius:12px;background:#fff;border:2px solid var(--bc,#e2e8f0);box-shadow:0 3px 8px rgba(19,78,74,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;overflow:hidden;transition:transform .2s var(--spring)}
 .bcard:active{transform:scale(.94)}
 .bcard img{width:46px;height:54px;object-fit:contain}
@@ -379,6 +391,22 @@ svg.md{display:block;width:100%;height:100%}
 .bcard.lock svg{width:40px;height:47px}
 .bcard.lock .bnr{position:static;font-family:var(--font-head);font-size:16px;color:#94a3b8}
 .bcard.fresh{animation:pop .6s var(--spring)}
+.bcard.lvl-1{--bc:#c2733a}
+.bcard.lvl-2{--bc:#94a3b8;background:linear-gradient(160deg,#fff,#f1f5f9)}
+.bcard.lvl-3{--bc:#f59e0b;background:linear-gradient(160deg,#fffbeb,#fef3c7);box-shadow:0 0 0 1px #fcd34d,0 4px 12px rgba(245,158,11,.25)}
+.bcard .bmd{position:absolute;top:2px;right:2px;width:20px;height:20px}
+.bhead small{font-weight:900;font-size:13px;color:var(--ink-soft);white-space:nowrap}
+.blegend{flex-shrink:0;display:flex;justify-content:space-between;gap:4px;padding:0 4px}
+.blegend span{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.1}
+.blegend i{width:20px;height:20px;flex-shrink:0;display:block}
+.bc-lvl{display:flex;gap:10px;align-items:flex-start;border-radius:16px;background:#f8fafc;border:1.5px solid #e2e8f0;padding:8px 10px}
+.bc-lvl .lm{width:38px;height:38px;flex-shrink:0}
+.bc-lvl b{font-family:var(--font-head);font-weight:800;font-size:17px;color:var(--deep);display:block;line-height:1.1}
+.bc-lvl p{font-size:13px;font-weight:800;color:var(--ink-soft);line-height:1.25}
+.kchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.kchips span{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:900;padding:2px 8px;border-radius:999px;background:#eef2f6;color:#64748b}
+.kchips span.ok{background:#dcfce7;color:#15803d}
+.kchips svg.i{width:12px;height:12px;stroke-width:3}
 .modal{position:absolute;inset:0;z-index:30;background:rgba(19,30,50,.42);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadein .2s both}
 .bigcard{width:100%;max-width:350px;border-radius:26px;background:#fff;border:4px solid var(--bc,#e2e8f0);box-shadow:0 20px 50px rgba(0,0,0,.25);padding:12px;display:flex;flex-direction:column;gap:8px;animation:cardin .45s var(--spring) both}
 .bigcard .bc-top{display:flex;align-items:center;gap:8px}
@@ -480,11 +508,9 @@ svg.md{display:block;width:100%;height:100%}
 
     <!-- ═════ TRÄNA: VAL ═════ -->
     <section class="screen" id="scr-train">
-      <span class="flabel">Välj läge</span>
-      <div class="modes" id="modes"></div>
-      <div class="topt" id="topt"></div>
-      <div class="card tsum" id="tsum"></div>
-      <button class="btn btn-primary" id="tStart" style="min-height:58px;font-size:17px;flex-shrink:0"></button>
+      <div class="card ordrow" id="ordrow"></div>
+      <div class="tmodes" id="modes"></div>
+      <div class="bubble b60"><div class="thought" id="trBubble"></div></div>
     </section>
 
     <!-- ═════ SPELA (träning och test) ═════ -->
@@ -495,7 +521,7 @@ svg.md{display:block;width:100%;height:100%}
         <div class="mapbox" id="playMap"></div>
       </div>
       <div class="ctrl" id="pCtrl"></div>
-      <div class="bubble b92"><div class="thought" id="pBubble"></div></div>
+      <div class="bubble b122"><div class="thought" id="pBubble"></div></div>
       <div class="slot"><button class="btn btn-primary" id="pMain"></button></div>
     </section>
 
@@ -503,8 +529,13 @@ svg.md{display:block;width:100%;height:100%}
     <section class="screen" id="scr-trainend"></section>
 
     <!-- ═════ PUSSLET ═════ -->
+    <!-- ═════ PUSSEL ELLER TEST: VÄLJ OMRÅDE (ett tryck startar, D30) ═════ -->
+    <section class="screen" id="scr-pick">
+      <div class="pzpick" id="pick"></div>
+      <div class="bubble b60"><div class="thought" id="pickBubble"></div></div>
+    </section>
+
     <section class="screen" id="scr-puzzle">
-      <div class="seg" id="pzSeg"></div>
       <div class="card pzboard"><div class="mapbox" id="pzMap"></div></div>
       <div class="card tray" id="tray"></div>
       <div class="bubble b60"><div class="thought" id="pzBubble"></div></div>
@@ -513,15 +544,10 @@ svg.md{display:block;width:100%;height:100%}
     <!-- ═════ SAMLARPÄRMEN ═════ -->
     <section class="screen" id="scr-binder">
       <div class="card bhead" id="bHead"></div>
+      <div class="blegend" id="bLegend"></div>
       <div class="bfull" id="bFull" hidden></div>
       <div class="binder" id="binder"></div>
       <div class="bubble b60"><div class="thought" id="bBubble"></div></div>
-    </section>
-
-    <!-- ═════ TEST: START ═════ -->
-    <section class="screen" id="scr-teststart">
-      <div class="card tstart" id="tsCard"></div>
-      <button class="btn btn-primary" id="tsGo" style="min-height:58px;font-size:17px;flex-shrink:0"></button>
     </section>
 
     <!-- ═════ TEST: RESULTATET ═════ -->
@@ -676,7 +702,7 @@ const LAKES = [{ text:'Vänern', x:88, y:885 }, { text:'Vättern', x:156, y:930 
 /* ── Faktan formulerad för barn: rangen i yta och invånare ur landskap-fakta.json (yta_rang, invanare_rang, 1 = störst) ── */
 function ytaText(nr){
   const N = NAME(nr), r = F(nr).yta_rang;
-  if (r === 1) return `${N} är störst av alla landskap till ytan.`;
+  if (r === 1) return `${N} är Sveriges största landskap till ytan.`;
   if (r === 2) return `${N} är näst störst till ytan.`;
   if (r === 3) return `${N} är tredje störst till ytan.`;
   if (r <= 8) return `${N} är ett av de största landskapen till ytan.`;
@@ -684,11 +710,11 @@ function ytaText(nr){
   if (r <= 22) return `${N} är ett av de minsta landskapen till ytan.`;
   if (r === 23) return `${N} är tredje minst till ytan.`;
   if (r === 24) return `${N} är näst minst till ytan.`;
-  return `${N} är minst av alla landskap till ytan.`;
+  return `${N} är Sveriges minsta landskap till ytan.`;
 }
 function invText(nr){
   const N = NAME(nr), r = F(nr).invanare_rang;
-  if (r === 1) return `${N} har flest invånare av alla landskap.`;
+  if (r === 1) return `${N} är Sveriges folkrikaste landskap.`;
   if (r === 2) return `${N} har näst flest invånare.`;
   if (r === 3) return `${N} har tredje flest invånare.`;
   if (r <= 8) return `${N} är ett av de folkrikaste landskapen.`;
@@ -696,17 +722,28 @@ function invText(nr){
   if (r <= 22) return `${N} har ganska få invånare.`;
   if (r === 23) return `${N} har tredje färst invånare.`;
   if (r === 24) return `${N} har näst färst invånare.`;
-  return `${N} har färst invånare av alla landskap.`;
+  return `${N} har minst invånare av alla Sveriges landskap.`;
 }
 const cities = nr => [F(nr).storsta_stad.namn, ...(F(nr).ocksa_stor_stad ? [F(nr).ocksa_stor_stad.namn] : [])];
 const cityLine = nr => { const c = cities(nr); return c.length > 1 ? `${c[0]}, också ${c[1]}` : c[0]; };
-/* Snabbfaktan efter ett rätt svar (D27, brainstorm/08): varannan gång stad · blomma · djur, varannan en "Visste du?" */
-const FACTS_SEEN = {};
-function quickFact(nr){
-  const n = FACTS_SEEN[nr] = (FACTS_SEEN[nr] || 0) + 1, f = F(nr);
-  if (n % 2 === 1) return { icon:'bulb', text:`Stad: ${cityLine(nr)} · Blomma: ${lc(f.blomma)} · Djur: ${lc(f.djur)}` };
-  const pool = [ytaText(nr), invText(nr), ...f.visste_du.map(v => v.text)];
-  return { icon:'star', text:`Visste du? ${pool[(Math.floor(n / 2) - 1) % pool.length]}` };
+/* Snabbfaktan efter ett rätt svar (D27, D30): skölden visas alltid; faktan roterar mellan placeringen (yta eller
+   invånare), staden, blomman eller djuret (med bild) och "Visste du?". skip = det frågan redan handlade om. */
+const FACT_KINDS = ['rank', 'stad', 'bild', 'visste'];
+let FACT_I = 0; const FACTS_SEEN = {};
+function cityFact(nr){ const c = cities(nr); return c.length > 1 ? `Städerna ${inL(nr)} är ${c[0]} och ${c[1]}.` : `Staden ${inL(nr)} är ${c[0]}.`; }
+function factOf(nr, kind, v){
+  const f = F(nr), N = NAME(nr);
+  if (kind === 'rank') return v % 2 ? { icon:'people', text:invText(nr) } : { icon:'ruler', text:ytaText(nr) };
+  if (kind === 'stad') return { icon:'city', text:cityFact(nr) };
+  if (kind === 'bild'){ const b = v % 2 ? 'djur' : 'blomma'; return { icon:b === 'djur' ? 'paw' : 'flower', text:`${gen(N)} ${BILD_WORD[b]} är ${lc(f[b])}.`, pic:{ src:img(nr, b), flower:b === 'blomma', nr } }; }
+  return { icon:'bulb', text:`Visste du? ${f.visste_du[v % f.visste_du.length].text}` };
+}
+function quickFact(nr, skip = null){
+  const kinds = FACT_KINDS.filter(k => k !== skip), kind = kinds[FACT_I++ % kinds.length];
+  const key = nr + kind, v = FACTS_SEEN[key] = (FACTS_SEEN[key] ?? -1) + 1;
+  const fc = factOf(nr, kind, v);
+  if (kind === 'bild' && skip && skip.startsWith('bild-')){ const other = skip === 'bild-djur' ? 0 : 1; return factOf(nr, 'bild', other); }
+  return fc;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -756,13 +793,12 @@ const AREA_IN = a => a === 'Sverige' ? 'hela Sverige' : a;
    KARTMOTORN ("som Apples kartor")
    - En kamera: skärm = k · karta + t. Linjerna har fast tjocklek (non-scaling-stroke);
      namn, lappar och nålen ritas i skärmens koordinater och har alltid samma storlek.
-   - Ett finger drar, två nyper (zoomen kring mittpunkten), dubbeltryck zoomar in, tryck med två fingrar zoomar ut,
-     mushjulet zoomar kring pekaren. Släpp i fart: kartan glider vidare och bromsar mjukt.
+   - Ett finger drar, två nyper (zoomen kring mittpunkten), mushjulet zoomar kring pekaren. Dubbeltryck zoomar
+     inte (D30). Släpp i fart: kartan glider vidare och bromsar mjukt.
    - Gränser: zoomen mellan hela Sverige och ~12 gånger det; kartan kan inte dras bort
      (kanten fjädrar och studsar tillbaka).
    - Tryck = en pekare, rörelse under 10 px (mus 5 px), kortare än 400 ms, och kartan stod still när fingret
-     kom ner (ett tryck som stoppar en glidande karta är inget val). Trycket räknas efter 250 ms,
-     så att ett dubbeltryck hinner bli zoom i stället för svar.
+     kom ner (ett tryck som stoppar en glidande karta är inget val). Trycket räknas direkt.
    - Träffen, i tre steg:
      1. Ett litet landskap (inre bredd under 44 px på skärmen) äger en skiva med diametern 44 px runt sin
         mittpunkt (där namnet står); ligger flera skivor under fingret vinner den närmaste mittpunkten.
@@ -788,7 +824,7 @@ function GeoMap(host, o = {}){
     const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'lab'); g.style.display = 'none';
     g.innerHTML = '<text></text>'; gLab.appendChild(g); LB[l.nr] = g;
   }
-  const M = { el, P, k:1, tx:0, ty:0, W:0, H:0, inset:0, home:null, onTap:null, onCam:null, labelFor:null, chips:[], hideLab:new Set(), halo:false, ready:false, taps:0 };
+  const M = { el, P, k:1, tx:0, ty:0, W:0, H:0, inset:0, home:null, onTap:null, onCam:null, labelFor:null, chips:[], hideLab:new Set(), halo:false, ready:false, taps:0, ignored:0 };
   const visH = () => Math.max(60, M.H - M.inset);
   const kMin = () => Math.min((M.W - 16) / WORLD.w, (visH() - 16) / WORLD.h) * 0.9;
   const kMax = () => Math.max(kMin() * 12, 4);
@@ -866,7 +902,7 @@ function GeoMap(host, o = {}){
   }
   /* ── Pekarna ── */
   const ptrs = new Map();
-  let g = null, hist = [], tap = null, lastUp = null, pend = null, dbl = false, two = null;
+  let g = null, hist = [], tap = null, lastUp = null;
   const loc = e => { const r = el.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; };
   function down(e){
     if (!opt.interactive) return;
@@ -877,19 +913,15 @@ function GeoMap(host, o = {}){
     const p = loc(e), now = performance.now();
     ptrs.set(e.pointerId, { x:p.x, y:p.y });
     if (ptrs.size === 1){
-      dbl = false; two = null;
-      if (pend && lastUp && Math.hypot(p.x - lastUp.x, p.y - lastUp.y) < 44){ clearTimeout(pend); pend = null; dbl = true; }   // andra trycket i ett dubbeltryck
       tap = { id:e.pointerId, x:p.x, y:p.y, t:now, valid:!wasGliding, slop:e.pointerType === 'mouse' ? 5 : 10 };
       g = { type:'pan', id:e.pointerId, sx:p.x, sy:p.y, tx:M.tx, ty:M.ty };
       hist = [{ x:p.x, y:p.y, t:now }];
     } else if (ptrs.size === 2){
-      tap = null; dbl = false;
-      if (pend){ clearTimeout(pend); pend = null; }
+      tap = null;
       const [a, b] = [...ptrs.values()];
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       g = { type:'pinch', d0:Math.max(12, Math.hypot(a.x - b.x, a.y - b.y)), k0:M.k, px:(mx - M.tx) / M.k, py:(my - M.ty) / M.k, mx, my };
-      two = { t:now, valid:true, mx, my };
-    } else { tap = null; two = null; }
+    } else { tap = null; }
   }
   function move(e){
     const q = ptrs.get(e.pointerId); if (!q || !g) return;
@@ -899,7 +931,6 @@ function GeoMap(host, o = {}){
       const dx = p.x - g.sx, dy = p.y - g.sy;
       if (tap && tap.valid && Math.hypot(dx, dy) <= tap.slop) return;     // inom trycket: kartan står still
       if (tap) tap.valid = false;
-      if (two && Math.hypot(dx, dy) > 10) two.valid = false;
       const L = lim(M.k);
       M.tx = rub(g.tx + dx, L.x0, L.x1); M.ty = rub(g.ty + dy, L.y0, L.y1);
       hist.push({ x:p.x, y:p.y, t:now }); while (hist.length > 2 && now - hist[0].t > 100) hist.shift();
@@ -907,7 +938,6 @@ function GeoMap(host, o = {}){
     } else if (g.type === 'pinch' && ptrs.size >= 2){
       const [a, b] = [...ptrs.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-      if (two && (Math.abs(d - g.d0) > 14 || Math.hypot(mx - two.mx, my - two.my) > 12)) two.valid = false;
       const k = kSoft(g.k0 * d / g.d0), L = lim(k);
       M.k = k; M.tx = rub(mx - k * g.px, L.x0, L.x1); M.ty = rub(my - k * g.py, L.y0, L.y1); g.mx = mx; g.my = my;
       apply();
@@ -917,7 +947,7 @@ function GeoMap(host, o = {}){
     if (!ptrs.has(e.pointerId)) return;
     const p = loc(e), now = performance.now(), cancel = e.type === 'pointercancel';
     ptrs.delete(e.pointerId);
-    if (cancel){ tap = null; two = null; dbl = false; }
+    if (cancel) tap = null;
     if (g && g.type === 'pinch'){
       if (ptrs.size === 1){                                    // ett finger kvar: fortsätt som panorering
         const [id, r] = [...ptrs.entries()][0];
@@ -931,10 +961,6 @@ function GeoMap(host, o = {}){
     }
     if (ptrs.size > 0) return;
     const wasPan = g; g = null;
-    if (two && two.valid && now - two.t < 350 && !cancel){ two = null; M.zoomAt(0.5, two_mx(), two_my(), 300); return; }
-    function two_mx(){ return (wasPan && wasPan.fx) ?? M.W / 2; }
-    function two_my(){ return (wasPan && wasPan.fy) ?? visH() / 2; }
-    two = null;
     if (tap && tap.valid && tap.id === e.pointerId && now - tap.t < 400 && !cancel){ tap = null; onTapUp(p, now); settle(); return; }
     tap = null;
     if (cancel){ settle(); return; }
@@ -946,12 +972,14 @@ function GeoMap(host, o = {}){
     }
     glide(vx, vy);
   }
+  /* Trycket räknas direkt (D30: dubbeltryck zoomar inte). Ett andra tryck på samma ställe inom 350 ms är
+     ett dubbeltryck av misstag och räknas inte, så att samma landskap inte väljs två gånger. */
   function onTapUp(p, now){
-    if (dbl){ dbl = false; lastUp = null; M.zoomAt(2, p.x, p.y, 300); return; }
+    if (lastUp && now - lastUp.t < 350 && Math.hypot(p.x - lastUp.x, p.y - lastUp.y) < 30){ lastUp.t = now; M.ignored++; return; }
     lastUp = { x:p.x, y:p.y, t:now };
     ripple(p);
     const nr = M.hit(p.x, p.y);
-    pend = setTimeout(() => { pend = null; M.taps++; if (M.onTap) M.onTap(nr, p); }, 250);
+    M.taps++; if (M.onTap) M.onTap(nr, p);
   }
   function ripple(p){
     const c = document.createElementNS(NS, 'circle');
@@ -1199,21 +1227,33 @@ function bindHold(el, opts){
    (som Gångertabellens omvända frågor och Klockans läs/ställ).
 ═══════════════════════════════════════════════════════════ */
 const AREAS = ['Norrland', 'Svealand', 'Götaland', 'Sverige'];
-const S = { preset:'ny', halo:false, dayOff:0, boxes:{}, screen:'geo', binderParty:false,
+const S = { preset:'ny', halo:false, dayOff:0, boxes:{}, kinds:{}, screen:'geo', binderParty:false, pick:'puzzle',
   train:{ mode:'upptack', area:'Norrland', order:'rak', svar:'namn', bild:'djur', bildSvar:'karta' }, pzArea:'Norrland' };
 const today = () => { const d = new Date(); d.setDate(d.getDate() + S.dayOff); return SP.fmtDay(d); };
 const box = nr => S.boxes[nr];
 const isKan = nr => ['kan', 'due'].includes(SP.vis(box(nr), today()));
 function kanState(){ const t = today(); return { box:'kan', okDays:3, level:1, due:SP.addDays(t, 1), lastOk:SP.addDays(t, -1), relearn:false }; }
 function applyPreset(p){
-  S.preset = p; S.dayOff = 0; S.boxes = {}; S.binderParty = false;
-  for (const n of ALL){ const green = p === 'kan' || (p === 'norr' && BY[n].landsdel === 'Norrland'); S.boxes[n] = green ? kanState() : SP.fresh(); }
+  S.preset = p; S.dayOff = 0; S.boxes = {}; S.kinds = {}; S.binderParty = false;
+  for (const n of ALL){
+    const green = p === 'kan' || (p === 'norr' && BY[n].landsdel === 'Norrland');
+    S.boxes[n] = green ? kanState() : SP.fresh();
+    S.kinds[n] = p === 'kan' ? GOLD_KINDS.map(k => k[0]) : green ? ['karta'] : [];   // Norrland klart = silver, allt kan = guld
+  }
   renderLab();
   goto(S.screen === 'geo' || !S.screen ? 'geo' : 'hub');
 }
 const areaMedal = a => SP.medal(areaNrs(a).map(n => SP.vis(box(n), today())));
 const kanTxt = (k, total) => k >= total ? `Du kan alla ${antal(total)} landskap` : k === 0 ? 'Du kan inga landskap än' : `Du kan ${antal(k)} av ${antal(total)} landskap`;
 function recordAnswer(nr, ok){ SP.applyAnswer(box(nr), ok, today()); renderLab(); }
+/* Samlarpärmens nivåer (D30): brons = övat (lådan inte längre "ny"), silver = kan (lådan "kan", rätt tre olika dagar),
+   guld = kan + rätt på första försöket minst en gång i var och en av de sex frågetyperna. Pusslet räknas inte. */
+const GOLD_KINDS = [['karta', 'Kartan'], ['namn', 'Namnet'], ['stad', 'Staden'], ['djur', 'Djuret'], ['blomma', 'Blomman'], ['skold', 'Skölden']];
+const LEVEL = ['', 'brons', 'silver', 'guld'], LEVEL_NAME = ['Låst', 'Brons', 'Silver', 'Guld'];
+const kindKey = it => it.kind === 'var' ? 'karta' : it.kind === 'bild' ? it.bild : it.kind;
+const kindsOf = nr => S.kinds[nr] || (S.kinds[nr] = []);
+function recordKind(nr, it){ const k = kindKey(it), a = kindsOf(nr); if (!a.includes(k)) a.push(k); }
+function level(nr){ const v = SP.vis(box(nr), today()); if (v === 'ny') return 0; if (!isKan(nr)) return 1; return GOLD_KINDS.every(([k]) => kindsOf(nr).includes(k)) ? 3 : 2; }
 
 /* ═══════════════════════════════════════════════════════════
    LABBREGLAGEN
@@ -1225,7 +1265,7 @@ function renderLab(){
   });
   if (!ALL.length) return;
   const md = AREAS.map(a => { const m = areaMedal(a); return `${a === 'Sverige' ? 'H' : a[0]}:${m.medal ? m.medal[0] : '–'}`; }).join(' ');
-  const kort = ALL.filter(isKan).length;
+  const kort = ALL.filter(n => level(n) > 0).length;
   $('labstat').innerHTML = `<span class="labtag">LÄGE</span><b>${S.screen}</b> · dag +${S.dayOff} · ${md} · kort ${kort}`;
 }
 document.querySelectorAll('.tg[data-k]').forEach(tg => tg.addEventListener('click', e => {
@@ -1239,19 +1279,19 @@ $('dayBtn').addEventListener('click', () => { S.dayOff++; renderLab(); refresh()
 /* ═══════════════════════════════════════════════════════════
    NAVIGERING
 ═══════════════════════════════════════════════════════════ */
-const BACK = { sverige:'geo', hub:'sverige', explore:'hub', train:'hub', puzzle:'hub', binder:'hub', teststart:'hub', credits:'hub', trainend:'hub', testdone:'hub' };
+const BACK = { sverige:'geo', hub:'sverige', explore:'hub', train:'hub', pick:'hub', puzzle:'pick', binder:'hub', credits:'hub', trainend:'hub', testdone:'hub' };
 function goto(screen, arg){
   token++; busy = false;
   closeOverlay();
   S.screen = screen;
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === `scr-${screen}`));
   ({ geo:enterGeo, sverige:enterSverige, hub:enterHub, explore:enterExplore, train:enterTrain, play:enterPlay, trainend:enterTrainEnd,
-     puzzle:enterPuzzle, binder:enterBinder, teststart:enterTestStart, testdone:enterTestDone, credits:enterCredits })[screen](arg);
+     puzzle:enterPuzzle, pick:enterPick, binder:enterBinder, testdone:enterTestDone, credits:enterCredits })[screen](arg);
   renderLab();
 }
-function refresh(){ if (['geo', 'sverige', 'hub', 'binder', 'teststart', 'train'].includes(S.screen)) goto(S.screen); }
+function refresh(){ if (['geo', 'sverige', 'hub', 'binder', 'train', 'pick'].includes(S.screen)) goto(S.screen); }
 $('backBtn').addEventListener('click', () => {
-  if (S.screen === 'play') goto(PL && PL.isTest ? 'hub' : 'train');
+  if (S.screen === 'play') goto(PL && PL.isTest ? 'pick' : 'train', PL && PL.isTest ? 'test' : undefined);
   else if (BACK[S.screen]) goto(BACK[S.screen]);
 });
 function setHeader(title, back = 'Tillbaka', right = ''){
@@ -1328,23 +1368,22 @@ function enterHub(){
   $('infoBtn').addEventListener('click', () => goto('credits'));
   $('hubMm').innerHTML = miniMap(n => BOX_COL[SP.vis(box(n), today())]);
   $('hubLegend').innerHTML = `<span><i style="background:#fff"></i>Ny</span><span><i style="background:var(--ovar)"></i>Övar</span><span><i style="background:var(--kan)"></i>Kan</span><span><i style="background:var(--due)"></i>Igen</span>`;
-  $('areas').innerHTML = AREAS.map(a => {
+  $('areas').innerHTML = `<span class="ahead">${svg('target')}Träna</span>` + AREAS.map(a => {
     const m = areaMedal(a), n = areaNrs(a).length;
-    return `<button class="arow${a === 'Sverige' ? ' all' : ''}" data-a="${a}" aria-label="${AREA_NAME[a]}. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. ${kanTxt(m.kan, n)}.">
+    return `<button class="arow${a === 'Sverige' ? ' all' : ''}" data-a="${a}" aria-label="Träna ${AREA_NAME[a]}. ${m.medal ? MEDAL_NAME[m.medal] : 'Ingen medalj än'}. ${kanTxt(m.kan, n)}.">
       <span class="amd">${medalSVG(m.medal)}${m.due ? '<i class="mdue"></i>' : ''}</span>
-      <span class="att"><b>${AREA_NAME[a]}</b><small>${kanTxt(m.kan, n)}</small><span class="tb-bar"><i style="width:${Math.round(m.share * 100)}%"></i></span></span></button>`;
+      <span class="att"><b>${AREA_NAME[a]}</b><small>${kanTxt(m.kan, n)}</small><span class="tb-bar"><i style="width:${Math.round(m.share * 100)}%"></i></span></span><span class="ago">${svg('play')}</span></button>`;
   }).join('');
-  const kort = ALL.filter(isKan).length;
+  const kort = ALL.filter(n => level(n) > 0).length;
   $('doors').innerHTML = `
     <button class="door" data-d="explore"><span class="dic">${svg('compass')}</span><span><b>Utforska</b><small>Tryck och läs</small></span></button>
-    <button class="door prim" data-d="train"><span class="dic">${svg('target')}</span><span><b>Träna</b><small>Upptäck Sverige</small></span></button>
-    <button class="door sm" data-d="puzzle"><span class="dic">${svg('puzzle')}</span><b>Pussel</b></button>
-    <button class="door sm" data-d="binder"><span class="dic">${svg('cards')}</span><b>Samlarpärm</b><small>${kort} av 25</small></button>
-    <button class="door sm" data-d="teststart"><span class="dic">${svg('test')}</span><b>Test</b></button>`;
-  say('hubBubble', 'Börja med Utforska, sedan Träna.', 'Ett landskap du kan ger ett kort i samlarpärmen.');
+    <button class="door" data-d="pick" data-k="puzzle"><span class="dic">${svg('puzzle')}</span><span><b>Pussel</b><small>Lägg landskapen</small></span></button>
+    <button class="door" data-d="binder"><span class="dic">${svg('cards')}</span><span><b>Samlarpärm</b><small>${kort} av 25 kort</small></span></button>
+    <button class="door" data-d="pick" data-k="test"><span class="dic">${svg('test')}</span><span><b>Test</b><small>Utan klocka</small></span></button>`;
+  say('hubBubble', 'Tryck på ett område för att träna.', 'Börja gärna med Utforska.');
 }
-$('areas').addEventListener('click', e => { const b = e.target.closest('.arow'); if (b){ S.train.area = b.dataset.a; goto('train'); } });
-$('doors').addEventListener('click', e => { const b = e.target.closest('.door'); if (b) goto(b.dataset.d); });
+$('areas').addEventListener('click', e => { const b = e.target.closest('.arow'); if (b){ S.train.area = b.dataset.a; goto('train'); } });   // ett tryck: Träna <område>
+$('doors').addEventListener('click', e => { const b = e.target.closest('.door'); if (b) goto(b.dataset.d, b.dataset.k); });
 
 /* ═══════════════════════════════════════════════════════════
    UTFORSKA: fri karta, tryck → landskapskortet glider upp
@@ -1408,40 +1447,42 @@ function bindSheetDrag(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   TRÄNA: välj läge, område och ordning
+   TRÄNA <OMRÅDE> (D30): området valdes på hemvyns kort. Här finns bara ordningen och de fyra lägena;
+   ett tryck på en ruta (eller på en knapp i rutan) startar direkt. Två tryck från hemvyn till första frågan.
 ═══════════════════════════════════════════════════════════ */
 const MODES = [
   { id:'upptack', name:'Upptäck Sverige', icon:'eye', desc:'Hitta landskapen. Kartan blir färg.' },
-  { id:'namn', name:'Vad heter det?', icon:'bulb', desc:'Ett landskap lyser. Välj namnet.' },
+  { id:'namn', name:'Vad heter det?', icon:'bulb', desc:'Ett landskap lyser. Svara med:' },
   { id:'stad', name:'Städerna', icon:'city', desc:'I vilket landskap ligger staden?' },
-  { id:'bild', name:'Djur, blommor, sköldar', icon:'paw', desc:'Vems är det här?' },
+  { id:'bild', name:'Djur, blommor, sköldar', icon:'paw', desc:'Vems är det här? Välj vad du vill se:' },
 ];
 const segHTML = (key, opts, cur) => `<div class="seg" data-key="${key}">${opts.map(([v, t, ic]) => `<button data-v="${v}" class="${v === cur ? 'on' : ''}">${ic ? svg(ic) : ''}${t}</button>`).join('')}</div>`;
 function enterTrain(){
-  setHeader('Träna');
+  setHeader(`Träna ${S.train.area === 'Sverige' ? 'hela Sverige' : S.train.area}`);
   renderTrain();
 }
 function renderTrain(){
-  const T = S.train;
-  $('modes').innerHTML = MODES.map(m => `<button class="mode${T.mode === m.id ? ' on' : ''}" data-m="${m.id}"><span class="mh">${svg(m.icon)}<b>${m.name}</b></span><small>${m.desc}</small></button>`).join('');
-  let extra = '';
-  if (T.mode === 'namn') extra = `<div class="orow"><span class="flabel">Svara med</span>${segHTML('svar', [['namn', 'Namn'], ['nummer', 'Läxbokens nummer']], T.svar)}</div>`;
-  if (T.mode === 'bild') extra = `<div class="orow"><span class="flabel">Visa</span>${segHTML('bild', [['djur', 'Djur'], ['blomma', 'Blommor'], ['skold', 'Sköldar'], ['blandat', 'Blandat']], T.bild)}</div>
-    <div class="orow"><span class="flabel">Svara</span>${segHTML('bildSvar', [['karta', 'På kartan'], ['namn', 'Välj namn']], T.bildSvar)}</div>`;
-  $('topt').innerHTML = `<div class="orow"><span class="flabel">Område</span>${segHTML('area', [['Norrland', 'Norrland'], ['Svealand', 'Svealand'], ['Götaland', 'Götaland'], ['Sverige', 'Hela']], T.area)}</div>
-    <div class="orow"><span class="flabel">Ordning</span>${segHTML('order', [['rak', 'Rak 1, 2, 3', 'straight'], ['blandad', 'Blandad', 'shuffle']], T.order)}</div>${extra}`;
-  const items = buildItems(T);
-  const nrs = areaNrs(T.area), sorted = nrs.slice().sort((a, b) => a - b);
-  const what = T.mode === 'upptack' ? `Hitta ${antal(nrs.length)} landskap i ${AREA_IN(T.area)}.`
-    : T.mode === 'stad' ? `${cap(antal(items.length))} städer i ${AREA_IN(T.area)}.`
-    : `${cap(antal(items.length))} frågor om ${AREA_IN(T.area)}.`;
-  const how = T.order === 'rak' ? `Rak ordning: läxbokens nummer ${sorted[0]} först.` : 'Blandad ordning.';
-  $('tsum').innerHTML = `<span class="tpv">${miniMapArea(nrs)}</span><span><b>${MODES.find(m => m.id === T.mode).name}</b>${what}<br>${how}</span>`;
-  $('tStart').innerHTML = `${svg('play')} Börja träna`;
+  const T = S.train, nrs = areaNrs(T.area);
+  $('ordrow').innerHTML = `<span class="flabel">Ordning</span>${segHTML('order', [['rak', 'Rak 1, 2, 3', 'straight'], ['blandad', 'Blandad', 'shuffle']], T.order)}`;
+  const head = (m, go) => `<span class="th"><span class="tic">${svg(m.icon)}</span><span class="tt"><b>${m.name}</b><small>${m.desc}</small></span>${go ? `<span class="go">${svg('play')}</span>` : ''}</span>`;
+  const [U, N, C, B] = MODES;
+  $('modes').innerHTML = `
+    <button class="tmode main" data-start="upptack">${head({ ...U, desc:`Hitta ${antal(nrs.length)} landskap. Kartan blir färg.` }, true)}</button>
+    <div class="tmode">${head(N)}<div class="tbtns"><button data-start="namn" data-svar="namn">${svg('play')}Namn</button><button data-start="namn" data-svar="nummer">${svg('play')}Läxbokens nummer</button></div></div>
+    <button class="tmode" data-start="stad">${head(C, true)}</button>
+    <div class="tmode">${head(B)}<div class="tbtns"><button data-start="bild" data-bild="djur">Djur</button><button data-start="bild" data-bild="blomma">Blommor</button><button data-start="bild" data-bild="skold">Sköldar</button><button data-start="bild" data-bild="blandat">Blandat</button></div></div>`;
+  say('trBubble', 'Tryck på det du vill träna.', T.order === 'rak' ? `Rak ordning: läxbokens nummer ${Math.min(...nrs)} först.` : 'Blandad ordning.');
 }
-$('modes').addEventListener('click', e => { const b = e.target.closest('.mode'); if (b){ S.train.mode = b.dataset.m; renderTrain(); } });
-$('topt').addEventListener('click', e => { const b = e.target.closest('button'), sg = e.target.closest('.seg'); if (!b || !sg) return; S.train[sg.dataset.key] = b.dataset.v; renderTrain(); });
-$('tStart').addEventListener('click', () => goto('play', { cfg:{ ...S.train } }));
+$('ordrow').addEventListener('click', e => { const b = e.target.closest('.seg button'); if (!b) return; S.train.order = b.dataset.v; renderTrain(); });
+$('modes').addEventListener('click', e => {
+  const b = e.target.closest('[data-start]'); if (!b) return;
+  const cfg = { ...S.train, mode:b.dataset.start };
+  if (b.dataset.svar) cfg.svar = b.dataset.svar;
+  if (b.dataset.bild) cfg.bild = b.dataset.bild;
+  cfg.bildSvar = 'blandat';                                   // djur/blommor/sköldar: varannan fråga på kartan, varannan med namn
+  S.train.mode = cfg.mode; S.train.svar = cfg.svar; S.train.bild = cfg.bild;
+  goto('play', { cfg });
+});
 
 /* Frågorna: en lista per läge. Hela Sverige (utom Upptäck): tolv frågor ur lådorna (övar först, sedan "dags igen", nya, kan). */
 const RANK = { ovar:0, due:1, ny:2, kan:3 };
@@ -1450,7 +1491,7 @@ function buildItems(cfg){
   const nrs = areaNrs(cfg.area);
   let items;
   if (cfg.mode === 'stad') items = nrs.flatMap(n => cities(n).map((c, i) => ({ nr:n, kind:'stad', stad:c, ci:i })));
-  else if (cfg.mode === 'bild'){ const K = ['djur', 'blomma', 'skold'], off = Math.floor(Math.random() * 3); items = nrs.map((n, i) => ({ nr:n, kind:'bild', bild:cfg.bild === 'blandat' ? K[(i + off) % 3] : cfg.bild, svar:cfg.bildSvar })); }
+  else if (cfg.mode === 'bild'){ const K = ['djur', 'blomma', 'skold'], off = Math.floor(Math.random() * 3); items = nrs.map((n, i) => ({ nr:n, kind:'bild', bild:cfg.bild === 'blandat' ? K[(i + off) % 3] : cfg.bild, svar:cfg.bildSvar === 'blandat' ? ((i + off) % 2 ? 'namn' : 'karta') : cfg.bildSvar })); }
   else if (cfg.mode === 'namn') items = nrs.map(n => ({ nr:n, kind:'namn', sub:cfg.svar }));
   else items = nrs.map(n => ({ nr:n, kind:'var' }));
   if (cfg.mode !== 'upptack' && cfg.area === 'Sverige') items = prioritize(items).slice(0, 12);
@@ -1470,8 +1511,8 @@ const bildName = (nr, b) => b === 'djur' ? F(nr).djur : b === 'blomma' ? F(nr).b
 function enterPlay(arg){
   const M = MAPS.play;
   if (arg && arg.test){
-    PL = { isTest:true, cfg:{ mode:'test', area:'Sverige' }, items:arg.items, i:0, results:[], phase:'q', start:Date.now(), pr:0, newCards:[] };
-    setHeader('Test', 'Avbryt');
+    PL = { isTest:true, cfg:{ mode:'test', area:arg.area }, items:arg.items, i:0, results:[], phase:'q', start:Date.now(), pr:0, newCards:[] };
+    setHeader(`Test ${arg.area === 'Sverige' ? 'hela Sverige' : arg.area}`, 'Avbryt');
   } else {
     const cfg = arg.cfg;
     PL = { isTest:false, cfg, upptack:cfg.mode === 'upptack', drill:createDrill(buildItems(cfg)), phase:'q', found:new Set(), start:Date.now(), pr:0, newCards:[], area:areaNrs(cfg.area) };
@@ -1585,11 +1626,12 @@ async function tapAnswer(nr){
   if (nr === PL.cur.nr) right(nr); else wrongTap(nr);
 }
 function right(given){
-  const it = PL.cur, M = MAPS.play, wasKan = isKan(it.nr);
+  const it = PL.cur, M = MAPS.play, lv0 = level(it.nr);
   let retryOk = false;
-  if (PL.isTest){ PL.results.push({ nr:it.nr, ok:true, kind:it.kind }); recordAnswer(it.nr, true); }
-  else { const r = PL.drill.answer(true); if (r.record) recordAnswer(it.nr, true); retryOk = !r.record; }
-  if (!wasKan && isKan(it.nr)) PL.newCards.push(it.nr);
+  if (PL.isTest){ PL.results.push({ nr:it.nr, ok:true, kind:it.kind }); recordAnswer(it.nr, true); recordKind(it.nr, it); }
+  else { const r = PL.drill.answer(true); if (r.record){ recordAnswer(it.nr, true); recordKind(it.nr, it); } retryOk = !r.record; }
+  const lv1 = level(it.nr);
+  if (lv1 > lv0) PL.newCards.push({ nr:it.nr, lv:lv1 });
   PL.phase = 'right';
   M.unfx(null, 'bad'); M.unfx(null, 'mark'); M.unfx(null, 'ref'); M.clearChips();
   if (PL.upptack){ PL.found.add(it.nr); M.cls(it.nr, 'fog', false); M.fx(it.nr, 'found'); M.relayout(); }
@@ -1598,11 +1640,22 @@ function right(given){
   if (PL.opts){ const i = PL.opts.findIndex(o => o.ok); const b = $('pCtrl').querySelectorAll('.opt')[i]; if (b) b.classList.add('ok'); $('pCtrl').querySelectorAll('.opt').forEach(x => x.disabled = true); }
   const lead = retryOk ? 'Rätt! Bra att du försökte igen.' : PRAISE[PL.pr++ % PRAISE.length];
   const later = retryOk && PL.cur.retry && !PL.cur.extra ? 'Frågan kommer tillbaka en gång till senare.' : '';
-  say('pBubble', esc(rightMain(it)), later, { lead, good:true, fact:quickFact(it.nr) });
-  if (!wasKan && isKan(it.nr)) toast(`Nytt kort i samlarpärmen: ${NAME(it.nr)}`);
+  const skip = it.kind === 'stad' ? 'stad' : it.kind === 'bild' && it.bild !== 'skold' ? `bild-${it.bild}` : null;
+  sayFact('pBubble', it.nr, lead, rightMain(it), quickFact(it.nr, skip));
+  if (later){ SAID.add(later); const pr = $('pTop').querySelector('.prompt'); pr.innerHTML = `<span class="qtag">${esc(later)}</span><br>` + pr.innerHTML.replace(/^<span class="qtag">.*?<\/span><br>/, ''); }   // "kommer tillbaka" står vid frågan, så att faktarutan räcker
+  if (lv1 > lv0) toast(lv1 === 1 ? `Nytt kort i samlarpärmen: ${NAME(it.nr)} i brons` : `${NAME(it.nr)} blev ${LEVEL[lv1]} i samlarpärmen`);
   renderTrack();
   const last = PL.isTest ? PL.i >= PL.items.length - 1 : PL.drill.isDone();
   setMain(last ? 'Klar' : 'Nästa', last ? 'check' : 'next', true, !last);
+}
+/* Rätt svar: skölden till vänster, lovordet och meningen, faktan (och blomman eller djuret som bild) */
+function sayFact(id, nr, lead, main, fc, later = ''){
+  [lead, main, fc.text, later].forEach(t => t && SAID.add(t));
+  const th = $(id);
+  th.innerHTML = `<div class="fcard"><img class="fsh" src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false">
+    <div class="ftx"><span class="lead good">${esc(lead)}</span><span>${esc(main)}</span><span class="fact">${svg(fc.icon)}<span>${esc(fc.text)}</span></span>${later ? `<span class="sm">${esc(later)}</span>` : ''}</div>
+    ${fc.pic ? `<img class="fpic${fc.pic.flower ? ' flower' : ''}" style="${fc.pic.flower ? flowerPos(fc.pic.nr) : ''}" src="${fc.pic.src}" alt="" draggable="false">` : ''}</div>`;
+  th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
 }
 function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = `${svg('cards')}${esc(t)}`; $('playMap').appendChild(d); SAID.add(t); }
 async function wrongTap(g){
@@ -1714,11 +1767,11 @@ function enterTrainEnd(){
       <div class="rc-row"><span>Område</span><b>${AREA_NAME[PL.cfg.area]}</b></div>
       <div class="rc-row"><span>Rätt på första försöket</span><b>${s.firstOk} av ${s.asked}</b></div>
       <div class="rc-row"><span>Fel som rättades</span><b>${s.wrongFirst}</b></div>
-      <div class="rc-row"><span>Nya kort i pärmen</span><b class="${nc.length ? 'long' : ''}">${nc.length ? nc.map(NAME).join(', ') : 'Inga den här gången'}</b></div>
+      <div class="rc-row"><span>Pärmen</span><b class="${nc.length ? 'long' : ''}">${nc.length ? nc.map(x => `${NAME(x.nr)} ${LEVEL[x.lv]}`).join(', ') : 'Inga nya nivåer den här gången'}</b></div>
     </div>
     <div class="card" style="flex:1;min-height:0;padding:10px;display:flex;align-items:center;justify-content:center;gap:12px">${miniMapArea(PL.area, true)}<div class="hublegend" style="grid-template-columns:1fr"><span><i style="background:var(--ovar)"></i>Övar</span><span><i style="background:var(--kan)"></i>Kan</span><span><i style="background:var(--due)"></i>Igen</span><span><i style="background:#fff"></i>Ny</span></div></div>
     <div class="duo"><button class="btn btn-sec" id="teAgain">${svg('again')} Igen</button><button class="btn btn-primary" id="teHub">Till landskapen ${svg('next')}</button></div>`;
-  ['Varje fel blev rätt till slut.', 'Varje svar satt på första försöket.', 'Inga den här gången'].forEach(t => SAID.add(t));
+  ['Varje fel blev rätt till slut.', 'Varje svar satt på första försöket.', 'Inga nya nivåer den här gången'].forEach(t => SAID.add(t));
   $('teAgain').addEventListener('click', () => goto('play', { cfg:PL.cfg }));
   $('teHub').addEventListener('click', () => goto('hub'));
 }
@@ -1732,11 +1785,21 @@ function miniMapArea(nrs, byBox = false){
    PUSSLET (D27): dra bitarna till konturen; nära rätt plats snäpper biten fast
 ═══════════════════════════════════════════════════════════ */
 const PZ = { area:'Norrland', left:[], placed:new Set(), miss:{}, drag:null };
-function enterPuzzle(){ setHeader('Pussel'); startPuzzle(S.pzArea); }
+/* Pussel och Test: ett tryck på dörren visar områdena, ett tryck på ett område startar (D30) */
+function enterPick(kind){
+  S.pick = kind || S.pick;
+  const test = S.pick === 'test';
+  setHeader(test ? 'Test' : 'Pussel');
+  $('pick').innerHTML = AREAS.map(a => `<button class="pzarea" data-a="${a}"><span class="pv">${miniMapArea(areaNrs(a))}</span><b>${AREA_NAME[a]}</b><small>${cap(antal(areaNrs(a).length))} ${test ? 'frågor' : 'bitar'}</small></button>`).join('');
+  if (test) say('pickBubble', 'Vilket område vill du testa?', 'Ingen klocka. Alla landskap i området kommer med.');
+  else say('pickBubble', 'Vilket pussel vill du lägga?', 'Tryck på ett område så börjar det.');
+}
+$('pick').addEventListener('click', e => { const b = e.target.closest('.pzarea'); if (!b) return; if (S.pick === 'test') goto('play', { test:true, area:b.dataset.a, items:buildTest(b.dataset.a) }); else goto('puzzle', b.dataset.a); });
+function enterPuzzle(area){ startPuzzle(area || S.pzArea); }
 function startPuzzle(area){
   const M = MAPS.pz, nrs = areaNrs(area);
   S.pzArea = area; PZ.area = area; PZ.left = shuffle(nrs); PZ.placed = new Set(); PZ.miss = {};
-  $('pzSeg').innerHTML = AREAS.map(a => `<button data-a="${a}" class="${a === area ? 'on' : ''}">${a === 'Sverige' ? 'Hela' : a}</button>`).join('');
+  setHeader(`Pussel ${area === 'Sverige' ? 'hela Sverige' : area}`);
   M.reset(); M.setHome(nrs); M.sync(); M.fitHome(0);
   for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (nrs.includes(n) ? 'slot' : 'ctx'));
   M.labelFor = n => PZ.placed.has(n) ? { force:true, text:NAME(n) } : null;
@@ -1752,7 +1815,6 @@ function renderTray(){
       const b = MEAS[n].bbox, pad = Math.max(b.w, b.h) * 0.04;
       return `<span class="tpiece" data-nr="${n}" role="button" aria-label="En pusselbit"><svg viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" preserveAspectRatio="xMidYMid meet"><path d="${PATHS[BY[n].path][1]}" fill="${LD_FILL(n)}"/></svg></span>`; }).join('');
 }
-$('pzSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startPuzzle(b.dataset.a); });
 $('tray').addEventListener('pointerdown', e => {
   const tp = e.target.closest('.tpiece[data-nr]'); if (!tp || PZ.drag) return;
   e.preventDefault();
@@ -1798,8 +1860,7 @@ async function dropPiece(D){
     PZ.placed.add(n); PZ.left = PZ.left.filter(x => x !== n);
     M.P[n].setAttribute('class', 'ls placed'); M.unfx(n, 'mark'); M.fx(n, 'found'); M.relayout();
     renderTray();
-    const fact = quickFact(n);
-    say('pzBubble', `Rätt! Det är ${NAME(n)}.`, '', { lead:null, fact });
+    say('pzBubble', `Rätt! Det är ${NAME(n)}.`, '', { lead:null, fact:factOf(n, ['rank', 'stad', 'bild'][PZ.placed.size % 3], 0) });
     if (!PZ.left.length) setTimeout(() => celebrate({ title:'Pusslet är klart!', sub:PZ.area === 'Sverige' ? 'Du har lagt hela Sverige.' : `Du har lagt hela ${PZ.area}.`,
       buttons:[{ label:'Lägg igen', icon:'again', fn:() => { closeOverlay(); startPuzzle(PZ.area); } }, { label:'Till landskapen', icon:'next', primary:true, fn:() => goto('hub') }] }), 450);
     return;
@@ -1817,54 +1878,61 @@ async function dropPiece(D){
 const SHIELD_SIL = `<svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 2l9 3v8c0 6-4 10.5-9 13-5-2.5-9-7-9-13V5z" fill="#cfd6df"/><path d="M9 13.5h6M12 10.5v6" stroke="#b8c1cc" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 function enterBinder(){
   setHeader('Samlarpärmen');
-  const got = ALL.filter(isKan);
-  $('bHead').innerHTML = `<b>${got.length} av 25</b><div class="bar"><i class="fill" style="transform:scaleX(${got.length / 25})"></i></div><span>kort</span>`;
-  $('binder').innerHTML = ALL.map(n => isKan(n)
-    ? `<button class="bcard" data-nr="${n}" style="--bc:${LD_FILL(n)}" aria-label="Kort ${n}, ${NAME(n)}"><span class="bnr">${n}</span><img src="${img(n, 'vapen')}" alt="" draggable="false"><span class="bn${NAME(n).length > 11 ? ' long' : ''}">${NAME(n)}</span></button>`
+  const lv = ALL.map(level), got = lv.filter(x => x > 0).length, sil = lv.filter(x => x === 2).length, gul = lv.filter(x => x === 3).length;
+  $('bHead').innerHTML = `<b>${got} av 25</b><div class="bar"><i class="fill" style="transform:scaleX(${got / 25})"></i></div><small>${got} kort · ${sil} silver · ${gul} guld</small>`;
+  $('bLegend').innerHTML = `<span><i>${medalSVG('brons')}</i>Brons: övat</span><span><i>${medalSVG('silver')}</i>Silver: kan</span><span><i>${medalSVG('guld')}</i>Guld: alla frågor</span>`;
+  $('binder').innerHTML = ALL.map((n, i) => lv[i]
+    ? `<button class="bcard lvl-${lv[i]}" data-nr="${n}" aria-label="Kort ${n}, ${NAME(n)}, ${LEVEL_NAME[lv[i]]}"><span class="bnr">${n}</span><span class="bmd">${medalSVG(LEVEL[lv[i]])}</span><img src="${img(n, 'vapen')}" alt="" draggable="false"><span class="bn${NAME(n).length > 11 ? ' long' : ''}">${NAME(n)}</span></button>`
     : `<button class="bcard lock" data-nr="${n}" aria-label="Kort ${n}, låst">${SHIELD_SIL}<span class="bnr">${n}</span></button>`).join('');
-  const full = got.length === 25;
+  const full = got === 25, allGold = gul === 25;
   $('bFull').hidden = !full;
-  $('bFull').innerHTML = `${svg('star')}Hela pärmen är full!${svg('star')}`;
-  say('bBubble', full ? 'Alla tjugofem kort är dina.' : got.length === 1 ? 'Ett kort är upplåst.' : got.length ? `${cap(antal(got.length))} kort är upplåsta.` : 'Pärmen väntar på sitt första kort.', 'Ett kort låses upp när du kan landskapet.');
+  $('bFull').innerHTML = `${svg('star')}${allGold ? 'Alla kort i guld!' : 'Hela pärmen är full!'}${svg('star')}`;
+  const main = allGold ? 'Alla tjugofem kort är i guld.' : full ? 'Alla tjugofem kort är dina.' : got === 1 ? 'Ett kort är upplåst.' : got ? `${cap(antal(got))} kort är upplåsta.` : 'Pärmen väntar på sitt första kort.';
+  say('bBubble', main, 'Tryck på ett kort så ser du nästa nivå.');
   if (full && !S.binderParty){ S.binderParty = true; setTimeout(() => celebrate({ title:'Hela pärmen är full!', sub:'Du har samlat alla tjugofem landskap.', buttons:[{ label:'Titta i pärmen', icon:'cards', primary:true, fn:closeOverlay }] }), 350); }
 }
 $('binder').addEventListener('click', e => { const b = e.target.closest('.bcard'); if (b) bigCard(+b.dataset.nr); });
+/* Vad som krävs till nästa nivå (D30) */
+function nextLevelText(n){
+  const L = level(n), N = NAME(n);
+  if (L === 1){ const d = Math.min(3, box(n).okDays || 0); return { head:'Brons', text:`Till silver: svara rätt om ${N} på tre olika dagar. Klart hittills: ${d === 1 ? 'en dag' : `${antal(d)} dagar`} av tre.` }; }
+  if (L === 2) return { head:'Silver', text:'Till guld: svara rätt i alla sex frågetyperna.', chips:true };
+  return { head:'Guld', text:`Du kan allt om ${N}!` };
+}
 function bigCard(n){
-  const f = F(n), open = isKan(n);
-  const inner = open ? `<div class="bc-top"><span class="sh-nr">${n}</span><span class="sh-name"><b>${NAME(n)}</b><small>${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+  const f = F(n), L = level(n);
+  let inner;
+  if (L){
+    const nx = nextLevelText(n); SAID.add(nx.text);
+    const chips = nx.chips ? `<div class="kchips">${GOLD_KINDS.map(([k, t]) => `<span class="${kindsOf(n).includes(k) ? 'ok' : ''}">${kindsOf(n).includes(k) ? svg('check') : ''}${t}</span>`).join('')}</div>` : '';
+    inner = `<div class="bc-top"><span class="sh-nr">${n}</span><span class="sh-name"><b>${NAME(n)}</b><small>${BY[n].landsdel}</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
       <div class="bc-shield"><img src="${img(n, 'vapen')}" alt="${gen(NAME(n))} landskapssköld" draggable="false"></div>
+      <div class="bc-lvl"><span class="lm">${medalSVG(LEVEL[L])}</span><span><b>${nx.head}</b><p>${esc(nx.text)}</p>${chips}</span></div>
       <div class="sh-row" style="padding:0 2px"><span class="sh-city"><span class="sh-k">${svg('city')}Stad</span><b>${esc(cities(n)[0])}</b>${cities(n)[1] ? `<span>också ${esc(cities(n)[1])}</span>` : ''}</span></div>
       <div class="sh-pics"><div class="pic"><div class="im"><img class="flower" style="${flowerPos(n)}" src="${img(n, 'blomma')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></div></div>
-        <div class="pic"><div class="im"><img src="${img(n, 'djur')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></div></div></div>`
-    : `<div class="bc-top"><span class="sh-nr" style="background:#94a3b8">${n}</span><span class="sh-name"><b>Kort ${n}</b><small>Låst</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
-      <div class="bc-lock">${SHIELD_SIL}<span>Kortet låses upp när du kan landskapet med nummer ${n}.</span></div>`;
-  SAID.add(`Kortet låses upp när du kan landskapet med nummer ${n}.`);
-  $('overlay').innerHTML = `<div class="modal" id="modal"><div class="bigcard" style="--bc:${open ? LD_FILL(n) : '#cbd5e1'}">${inner}</div></div>`;
+        <div class="pic"><div class="im"><img src="${img(n, 'djur')}" alt="" draggable="false"></div><div class="cap"><span class="sh-k">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></div></div></div>`;
+  } else {
+    const t = `Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`; SAID.add(t);
+    inner = `<div class="bc-top"><span class="sh-nr" style="background:#94a3b8">${n}</span><span class="sh-name"><b>Kort ${n}</b><small>Låst</small></span><button class="sh-x" data-close aria-label="Stäng">${svg('x')}</button></div>
+      <div class="bc-lock">${SHIELD_SIL}<span>${t}</span></div>`;
+  }
+  const bc = ['#cbd5e1', '#c2733a', '#94a3b8', '#f59e0b'][L];
+  $('overlay').innerHTML = `<div class="modal" id="modal"><div class="bigcard" style="--bc:${bc}">${inner}</div></div>`;
   $('modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeOverlay(); });
 }
 function closeOverlay(){ $('overlay').innerHTML = ''; }
 
 /* ═══════════════════════════════════════════════════════════
-   TEST (D24: "test", inte prov): ingen klocka, blandat ur det man tränat
+   TEST (D24: "test", inte prov; D30): ingen klocka, alla landskap i det valda området (hela Sverige = alla 25),
+   frågetyperna blandade. Ett fel visar svaret och går vidare, utan nötloop.
 ═══════════════════════════════════════════════════════════ */
-const TEST_N = 10;
-function trainedNrs(){ return ALL.filter(n => SP.vis(box(n), today()) !== 'ny'); }
-function enterTestStart(){
-  setHeader('Test');
-  const tr = trainedNrs(), n = Math.min(TEST_N, tr.length);
-  $('tsCard').innerHTML = `<span class="big">${svg('test')}</span><h2>Ett test utan klocka</h2>
-    <p>${n ? `${n === 1 ? 'En fråga' : `${cap(antal(n))} frågor`}, blandat ur det du har tränat. Ta den tid du behöver.` : 'Träna först, så finns det något att testa.'}</p>
-    <div class="tpills"><span>${svg('clock0')}Ingen klocka</span><span>${svg('shuffle')}Blandade frågor</span><span>${svg('check')}Kvitto till en vuxen</span></div>`;
-  $('tsGo').innerHTML = n ? `${svg('play')} Börja testet` : `${svg('target')} Till Träna`;
-  $('tsGo').onclick = () => n ? goto('play', { test:true, items:buildTest() }) : goto('train');
-  ['Träna först, så finns det något att testa.', 'Ta den tid du behöver.'].forEach(t => SAID.add(t));
-}
-function buildTest(){
-  const nrs = shuffle(trainedNrs()).slice(0, TEST_N);
-  const kinds = shuffle(['var', 'namn', 'stad', 'djur', 'blomma', 'var', 'stad', 'namn', 'djur', 'blomma']);
-  return nrs.map((nr, i) => { const k = kinds[i % kinds.length];
-    if (k === 'stad') return { nr, kind:'stad', stad:cities(nr)[0] };
-    if (k === 'djur' || k === 'blomma') return { nr, kind:'bild', bild:k, svar:'namn' };
+function buildTest(area){
+  const nrs = shuffle(areaNrs(area)), K = ['var', 'namn', 'stad', 'djur', 'blomma', 'skold'];
+  let kinds = [];
+  while (kinds.length < nrs.length) kinds = kinds.concat(shuffle(K));
+  return nrs.map((nr, i) => { const k = kinds[i];
+    if (k === 'stad') return { nr, kind:'stad', stad:cities(nr)[Math.random() < 0.5 ? 0 : cities(nr).length - 1] };
+    if (k === 'djur' || k === 'blomma' || k === 'skold') return { nr, kind:'bild', bild:k, svar:'namn' };
     if (k === 'namn') return { nr, kind:'namn', sub:'namn' };
     return { nr, kind:'var' }; });
 }
@@ -1875,12 +1943,13 @@ function enterTestDone(){
   const pct = R.length ? ok / R.length : 0;
   $('tdPraise').textContent = pct === 1 ? 'Allt satt!' : pct >= 0.7 ? 'Bra jobbat! Det mesta satt.' : 'Bra jobbat! Nu vet du vad du ska träna på.';
   SAID.add($('tdPraise').textContent);
-  const M = MAPS.td; M.reset(); M.setHome(R.map(r => r.nr)); M.sync(); M.fitHome(0);
+  const M = MAPS.td; M.reset(); M.setHome(areaNrs(PL.cfg.area)); M.sync(); M.fitHome(0);
   const res = {}; R.forEach(r => res[r.nr] = r.ok);
   for (const n of ALL) M.P[n].setAttribute('class', 'ls ' + (n in res ? (res[n] ? 'res-ok' : 'res-bad') : 'dim'));
   M.labelFor = n => n in res ? { force:true, text:NAME(n) } : null; M.relayout(); M.showHalo(false);
   $('rc').innerHTML = `
     <div class="rc-top"><span class="rc-k">${svg('test')}Test · Geografi · Sveriges landskap</span><span class="rc-when">${cap(fmtWhen(iso))}</span></div>
+    <div class="rc-row"><span>Område</span><b>${AREA_NAME[PL.cfg.area]}</b></div>
     <div class="rc-row"><span>Rätt</span><b>${ok} av ${R.length}</b></div>
     <div class="rc-row"><span>Öva mer på</span><b class="long">${miss.length ? miss.join(', ') : 'Inget, allt satt!'}</b></div>
     <div class="rc-foot"><span class="slot-ph" id="rcPh">Plats för en vuxens stämpel</span><div class="stamp" id="rcStamp"></div></div>`;
@@ -1948,7 +2017,7 @@ async function init(){
 /* Tryck med riktiga pekarhändelser (genom hela kedjan: tryck/drag-skillnaden, 250 ms-väntan, träffen) */
 function ptr(el, type, x, y, id = 1, kind = 'touch'){ el.dispatchEvent(new PointerEvent(type, { bubbles:true, cancelable:true, composed:true, clientX:x, clientY:y, pointerId:id, pointerType:kind, isPrimary:id === 1, button:0, buttons:type === 'pointerup' ? 0 : 1 })); }
 function screenOf(mapKey, nr){ const M = MAPS[mapKey], L = MEAS[nr].label, q = M.toScreen(L.x, L.y), r = M.el.getBoundingClientRect(); return { x:r.left + q.x, y:r.top + q.y }; }
-async function tapNr(mapKey, nr){ const M = MAPS[mapKey], p = screenOf(mapKey, nr); ptr(M.el, 'pointerdown', p.x, p.y); ptr(M.el, 'pointerup', p.x, p.y); await wait(320); return p; }
+async function tapNr(mapKey, nr){ const M = MAPS[mapKey], p = screenOf(mapKey, nr); ptr(M.el, 'pointerdown', p.x, p.y); ptr(M.el, 'pointerup', p.x, p.y); await wait(380); return p; }
 /* Träffytan i px för varje synligt landskap, mätt med samma träffberäkning som trycken (rutnät, steg 2 px) */
 function hitReport(mapKey, step = 2){
   const M = MAPS[mapKey], W = Math.floor(M.W / step), H = Math.floor((M.H - M.inset) / step), grid = new Int16Array(W * H);
@@ -1978,9 +2047,11 @@ function allTexts(){
     const its = [{ nr:n, kind:'var' }, { nr:n, kind:'namn', sub:'namn' }, { nr:n, kind:'namn', sub:'nummer' }, ...cities(n).map(c => ({ nr:n, kind:'stad', stad:c })), ...['djur', 'blomma', 'skold'].map(b => ({ nr:n, kind:'bild', bild:b, svar:'namn' }))];
     for (const it of its){ t.add(promptHTML(it).replace(/<[^>]+>/g, '')); t.add(rightMain(it)); t.add(answerLine(it)); const g = NEAR(n)[0] || (n === 1 ? 2 : 1); optSteps(it, g).forEach(s => t.add(s.text)); optSteps(it, n === 25 ? 1 : 25).forEach(s => t.add(s.text)); }
     t.add(`Det där är ${NAME(n)}.`); t.add(`Det där är ${NAME(n)}. Det hör till ${BY[n].landsdel}.`); t.add(`${NAME(n)} blinkar nu. Tryck där.`); t.add(`${NAME(n)} kommer tillbaka. Var låg det?`);
-    t.add(`Nytt kort i samlarpärmen: ${NAME(n)}`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp när du kan landskapet med nummer ${n}.`);
-    const save = FACTS_SEEN[n]; for (let i = 0; i < 8; i++) t.add(quickFact(n).text); FACTS_SEEN[n] = save;
+    t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`);
+    t.add(`Till silver: svara rätt om ${NAME(n)} på tre olika dagar. Klart hittills: en dag av tre.`); t.add(`Du kan allt om ${NAME(n)}!`);
+    for (const k of FACT_KINDS) for (let v = 0; v < 2; v++) t.add(factOf(n, k, v).text);
   }
+  t.add('Till guld: svara rätt i alla sex frågetyperna.'); t.add('Vilket område vill du testa?'); t.add('Ingen klocka. Alla landskap i området kommer med.'); t.add('Vilket pussel vill du lägga?'); t.add('Tryck på ett område så börjar det.'); t.add('Tryck på det du vill träna.');
   for (const a of AREAS){ t.add(`Du har upptäckt ${AREA_IN(a)}!`); t.add(`Alla ${antal(areaNrs(a).length)} landskap har färg och namn.`); t.add(a === 'Sverige' ? 'Du har lagt hela Sverige.' : `Du har lagt hela ${a}.`); t.add(`Dra bitarna till rätt plats i ${AREA_IN(a)}.`); t.add(`${AREA_NAME[a]} är upptäckt!`); }
   [...PRAISE, 'Rätt! Bra att du försökte igen.', 'Nästan rätt!', 'Bra försök!', 'Frågan kommer tillbaka en gång till senare.', 'Samma fråga en gång till.', 'Den här frågan kommer tillbaka en gång till.',
    'Inte där. Biten glider tillbaka.', 'Titta: den rätta platsen blinkar.', 'Titta på formen och prova en annan plats.', 'Det övar du mer på i Träna.', 'Där finns inget landskap.', 'Tryck inne på ett landskap.',
@@ -1990,7 +2061,7 @@ function allTexts(){
 window.MOCK = {
   S, MEAS, MAPS, get PL(){ return PL; }, get PZ(){ return PZ; }, get busy(){ return busy; }, get FAKTA(){ return FAKTA; }, get BILDER(){ return BILDER; }, get ALL(){ return ALL; },
   goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, quickFact,
-  ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet,
+  ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet, sayFact, factOf, level, kindsOf, GOLD_KINDS,
   /* Svara på frågan som visas: rätt, eller fel (en granne om möjligt, annars långt bort). Kartsvar går genom pekarhändelser. */
   async answer(ok, prefer = 'near'){
     if (!PL || PL.phase !== 'q') return null;
