@@ -36,7 +36,25 @@ Filernas roller och rutinen: `rutiner-och-verktyg/references/15-ordning-och-reda
 plats; loggen slutar med "Läget nu" + "Nästa steg"; beslut som D-poster med Dennis ord; inga kladd- eller
 förbrukade filer i repot (scratch hör hemma i scratchpad); `git add` med explicita sökvägar.
 
+**När Dennis säger "ordning och reda":** kör hela passet i 15 § 3a – logg (Läget nu/Nästa steg), beslut, frågor,
+plan och TODO, historik, register och rent repo, CLAUDE.md, subagenter, lärdomar, städkontrollen tills Rent.
+Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första punkten i loggens "Nästa steg".
+
+| Tillfälle | Gör |
+|---|---|
+| Dennis beslutar något | D-post med hans ord; stryk besvarad fråga; rad i loggen |
+| En punkt blir klar | bocka och stryk i TODO |
+| En fil skapas | rätt mapp + rad i registret |
+| Ett fel rättas | loggraden "Varför fångade inte motorn detta?" + testet som fångar feltypen, provat mot felet först (15 § 5–6) |
+| En subagent rapporterar | fynden in i TODO med id; rapporten sparad i projektet (`brainstorm/`) |
+| Milstolpe (release), före komprimering, sessionens slut | hela passet (15 § 3a), städkontrollen tills Rent |
+| Ny dag | ny loggfil; första avsnittet pekar på gårdagens "Nästa steg" |
+
+Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verktyg/snippets/stadkontroll.py .`
+
 ## Absoluta regler
+
+- Påstå bara det som är uppmätt eller kontrollerat; ett värde som finns i en källa läses därifrån (15 § 7).
 
 **Version och release**
 - `APP_VERSION` i `js/app.js` = `CACHE_VERSION` i `sw.js`, och båda höjs vid varje release.

@@ -1,8 +1,11 @@
 # OPEN_QUESTIONS — det olösta
 
-Besvarad fråga stryks med `~~text~~ → Dn` och raderas aldrig. Nya frågor får nästa P-nummer.
+Öppna frågor står under `## Öppna`. Besvarad fråga flyttas till `## Besvarade`, stryks `~~text~~ → Dn` och raderas
+aldrig. Nya frågor får nästa P-nummer.
 
-## Uppställning och division
+## Öppna
+
+### Uppställning och division
 
 - **P1 Faktan före eller efter svaret i Räkna med hjälp.** I kort division visas tabellraden (`6 · 7 = 42`) innan
   barnet svarar på kvotfrågan, som i mockupen. Mira invände två gånger: läget blir "läs av brickan", och hon vill se
@@ -13,12 +16,12 @@ Besvarad fråga stryks med `~~text~~ → Dn` och raderas aldrig. Nya frågor få
   och Räkna själv saknar texten "Klart". Ska det vara så? (Iakttaget i genomspelen 22–23/9; inte omkontrollerat i
   koden 19/10.)
 
-## Gångertabellen
+### Gångertabellen
 
 - **P4 Prickraden i Öva.** Prickraden saknar förklaring av romb och ring, och två genomgångar kan komma i följd.
   (Dennis 23/9: "jag hänger inte riktigt med i ordningen".)
 
-## Klockan
+### Klockan
 
 - **P5 Tolv fasta tider per steg.** Varje steg har tolv tider, en per timme; i Kvart och Runt halv har varje timme en
   fast form (antingen "över" eller "i"). Förväxlingen finns alltid bland felalternativen. Räcker det, eller ska båda
@@ -30,9 +33,13 @@ Besvarad fråga stryks med `~~text~~ → Dn` och raderas aldrig. Nya frågor få
   hubben i v58. Kontrollerat 19/10: dess vyer finns inte kvar i `js/multiplication.js`. Kvar är loggens etikett
   "Eget prov" med ikonen 🎲 för gamla poster, och `runCustomSession`, som Fokuserad träning i Statistik använder.
 
-## Geografi
+### Geografi
 
 - **P8 Geografimodulens upplägg och pedagogik.** Hur Sveriges landskap ska läras ut och övas (D22): lägen, frågetyper,
   kartans interaktion, hur läxbokens numrering 1–25 används, och om modulen delar lådorna och nötloopen i
   `js/shared.js`. Förslag 19/10: `brainstorm/07-2026-10-19-geografi-landskap.md` och `design-lab/geografi-mockup.html`,
   med sex val att döma i tankepassets Utfall.
+
+## Besvarade
+
+- Inga än.
