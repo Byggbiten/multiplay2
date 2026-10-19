@@ -27,12 +27,12 @@
   const OVA_COUNT = 8;          // uppgifter i ett övningspass
   const TABELLTEST_COUNT = 20;  // tabelltestet: 20 tal i två kolumner, /20
   const SPRINT = { secs:240, max:48 };
-  /* Tabellsprintens resultatintervall (som bladets skala; gränserna är våra egna) */
+  /* Tabellsprintens resultatintervall: bladets åtta steg om sex (1–6 … 43–48), parvis sammanslagna */
   const SPRINT_BANDS = [
-    { lo:0,  hi:15, name:'Fortsätt nöta' },
-    { lo:16, hi:27, name:'Bra fart' },
-    { lo:28, hi:39, name:'Riktigt snabbt' },
-    { lo:40, hi:48, name:'Tabellproffs' },
+    { lo:0,  hi:12, name:'Fortsätt nöta' },
+    { lo:13, hi:24, name:'Bra fart' },
+    { lo:25, hi:36, name:'Riktigt snabbt' },
+    { lo:37, hi:48, name:'Tabellproffs' },
   ];
   const GREEN_PCT = 75;         // momentet blir grönt i kvittot vid minst 75 % rätt
 
@@ -313,8 +313,9 @@
     return cells.reduce((n, d, i) => n + (d == null ? 0 : d) * Math.pow(10, i), 0);
   }
   /* Bedömningen: rows = { p1, p2, s } med siffror per kolumn (null = tom).
-     Rätt = summaraden stämmer, och har barnet skrivit något på rad 2 ska nollan
-     stå i den grå rutan. Felklass:
+     Rätt = båda raderna och summan stämmer, med nollan i den grå rutan (som på provet,
+     där uträkningen ska synas). Felklass:
+       'rader'    summan stämmer men en rad saknas
        'nolla'    glömde nollan i den grå rutan (rad 2 = top · tiotalet utan nolla,
                   eller summan räknad som om nollan saknades)
        'minne'    glömde minnessiffran (i en rad eller i additionen)
@@ -332,7 +333,8 @@
     const p2written = p2 !== null;
     const greyZero = p2cells[0] === 0;
     const noZero = t.top * t.tens;                         // 1 · 32 = 32 i stället för 320
-    if (s === t.answer && (!p2written || greyZero)) return 'ok';
+    if (s === t.answer && p1 === t.p1 && p2 === t.p2 && greyZero) return 'ok';
+    if (s === t.answer && (p1 === null || !p2written)) return 'rader';
     if (p2written && (!greyZero || p2 === noZero)) return 'nolla';
     if (s !== null && s === (p1 === null ? t.p1 : p1) + noZero) return 'nolla';
     const p1nc = noCarryPass(t.top, t.ones), p2nc = noCarryPass(t.top, t.tens) * 10;
@@ -342,6 +344,7 @@
     return 'fel';
   }
   const UPP_FEEDBACK = {
+    rader:'Summan stämmer! Skriv också båda raderna, med nollan i den grå rutan. På provet ska uträkningen synas.',
     nolla:'Du glömde nollan i den grå rutan. Raden för tiotalet börjar alltid med en nolla där.',
     minne:'Du glömde minnessiffran. Skriv den liten ovanför och lägg till den i nästa kolumn.',
     addition:'Raderna stämmer. Räkna additionen en gång till, kolumn för kolumn.',

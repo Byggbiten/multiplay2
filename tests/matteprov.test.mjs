@@ -183,8 +183,9 @@ describe('felklassningen i uppställningen', () => {
     /* rad 2 rätt placerad men den grå rutan tom: räknas som glömd nolla */
     const grey = cells(320, W); grey[0] = null;
     expect(L.classifyUpp(t, { p1:cells(224, W), p2:grey, s:cells(544, W) })).toBe('nolla');
-    /* bara summan, rätt: godkänt */
-    expect(L.classifyUpp(t, { s:cells(544, W) })).toBe('ok');
+    /* rätt summa men en rad saknas: uträkningen ska synas */
+    expect(L.classifyUpp(t, { s:cells(544, W) })).toBe('rader');
+    expect(L.classifyUpp(t, { p1:cells(224, W), s:cells(544, W) })).toBe('rader');
   });
   it('hittar glömd nolla i många slumpade tvåsiffriga uppgifter', () => {
     const r = seeded(31);
