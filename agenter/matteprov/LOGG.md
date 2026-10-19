@@ -53,3 +53,15 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   tomma rutor och ett svep efter dömande ord i koden och i alla genererade texter.
 - **Lärdom:** gå igenom varje läge och fråga vilka två knappar som kan förväxlas; den som avslutar ska inte vara
   framträdande förrän det går att avsluta. Tomt är inte fel.
+
+## Runda 6 · 2026-10-19 · En knapp, och problemlösning i steg (D39 ✎), gren `matteprov-enknapp`
+- **Vad som inte fungerade:** två knappar (Nästa och Klar) var aktiva samtidigt i lägen med flera rutor. I
+  problemlösningen fick barnet ett tomt uttrycksfält och en ✓-knapp utan text, utan att veta hur det skulle skriva.
+- **Varför:** gränssnittet krävde att barnet redan kunde formen (ett helt uttryck) i stället för att leda det dit.
+- **Byggt:** en knapp som heter Nästa tills varje ruta är ifylld, sedan Klar (`oneButton`, `nextEmpty`); tabelltestets
+  andra omgång tömmer de orange rutorna. Problemlösningen i ledda steg med mallen `[ ] op [ ] = [ ]` per steg,
+  tryckbar prislista och tryckbara tidigare svar, trappa per steg och slutsatsen med uttrycket sist.
+- **Rättat under verifieringen:** slutvyn visade inte sista steget; panelen bytte flik till en annan server (5330)
+  mitt i genomklickningen, så webbläsarverktygen kördes mot fel sida.
+- **Lärdom:** när barnet ska lära sig en form, låt appen bära formen (mallen) och låt barnet fylla talen; visa formen
+  som helhet i slutsatsen. Ange alltid flikens id i webbläsarverktygen när panelen delas.

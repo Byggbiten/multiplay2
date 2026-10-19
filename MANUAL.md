@@ -346,10 +346,10 @@ vidare. Bitarna följer lösningsgången: tabellfaktumet för tiotal, uppdelning
 uppställningens summa (först additionens minnessiffror, sedan summans två högra siffror; raderna har en egen trappa,
 se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
 
-1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. **Nästa tal** är huvudknappen tills alla 20 är
-   ifyllda; då blir **Klar** huvudknappen. Trycker barnet Klar med tomma rutor rättas ingenting: en vänlig rad säger
-   hur många tal som är kvar och fokus hoppar till första tomma rutan, utan ljud och färg (D39). Tomma rutor räknas
-   aldrig som fel. Tal som inte satt direkt kan nötas efteråt.
+1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Bredvid sudda finns **en enda knapp**: den heter
+   **Nästa tal** och hoppar till nästa tomma ruta, och när alla 20 är ifyllda byter den till **Klar** och rättar.
+   Suddas en ruta tom heter den Nästa tal igen (D39 ✎). Tomma rutor rättas aldrig. Tal som inte satt direkt kan
+   nötas efteråt. Samma enda knapp ("Nästa ruta" / "Klar") finns i alla lägen med flera rutor.
 2. **Gånger tiotal och hundratal**: som på bladet, med "="-rader. `8 · 40 = 8 · 4 tiotal`, sedan `= [32] tiotal` och
    `= [320]`. Fällan `50 · 60 = 5 · 6 hundratal = 30 hundratal = 3000` (tabellsvaret har redan en nolla) får en egen
    förklaring.
@@ -373,14 +373,19 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
    - Additionens minnessiffror skrivs i de lila rutorna ovanför raderna; de visas när summan låses upp.
    - Vid fel i summan säger appen om en minnessiffra glömdes eller om additionen blev fel.
    Allt detta finns bara i matteprovet; Multiplikationens nivå 1–4 skriver som förut.
-5. **Problemlösning i två steg**: en prislista med sex saker. Barnet **skriver först uttrycket** med knapparna · + och −
-   (till exempel `200 − 6 · 28`), och räknar det sedan rad för rad, gånger först. Svårare har växel och omvända
-   uppgifter ("hur många poäng gav den sista domaren?"). Räkneordningsuppgifterna har uttrycket givet.
+5. **Problemlösning i steg** (D39 ✎): appen delar upp frågan i steg, och varje steg är en fråga med rutor:
+   "Steg 1: Vad kostar 5 bollar?" `[ ] · [ ] = [ ]`, "Steg 2: Hur mycket får … tillbaka?" `[ ] − [ ] = [ ]`. Två köp har
+   tre steg (varje sak, sedan tillsammans), den omvända domaruppgiften två, och räkneordningen "Gånger först" och sedan
+   plus eller minus. Prislistan går att trycka på (priset skrivs i rutan med fokus), och svaret från ett tidigare steg
+   också. Nästa steg visas först när det förra stämmer. Varje steg rättas när barnet trycker **Svara**, i Öva och i
+   provet: försök igen (tyst), sedan står talen i rutorna, sedan svaret. Sist visas slutsatsen med uttrycket, till
+   exempel "Uttrycket blir 200 − 5 · 28 = 60 kr". Knappsatsen har inga räknetecken; tecknen står i mallen.
 
 ### Provet och kvittot
 Provet går igenom momenten i ordning, utan klocka. Det säger rätt eller fel per uppgift och har hjälptrappan (D38).
-Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange ("Du har 17 klara.
-Titta en gång till på de orange.") och får rättas en gång till, sedan visas svaren lugnt i grått. Kvittot visar per
+Tabelltestet rättas med Klar när alla rutor är ifyllda; de tal som inte satt blir milt orange och tomma, med det
+gamla svaret svagt överstruket bredvid ("Du har 17 klara. Titta en gång till på de orange."). De fylls i igen med
+samma knapp, och sedan visas svaren lugnt i grått. Kvittot visar per
 moment **Klarade direkt**, **Klarade med hjälp** och **Övar vi mer på**; grönt (**Klart**, minst 75 %) räknar bara
 klarade direkt.
 
