@@ -76,10 +76,10 @@ const MultGame = (() => {
     #mult-root .mult-hist-card{flex:1;min-height:0;display:flex;flex-direction:column}
     #mult-root .mult-good{color:#16a34a}
     #mult-root .mult-mid{color:#d97706}
-    #mult-root .mult-bad{color:#dc2626}
+    #mult-root .mult-bad{color:#c2410c}
     #mult-root .mult-new{display:inline-block;background:var(--accent-2);color:#fff;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800;vertical-align:middle}
-    #mult-root .mult-focus-card{background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-color:#fca5a5}
-    #mult-root .mult-focus-title{color:#be123c}
+    #mult-root .mult-focus-card{background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fdba74}
+    #mult-root .mult-focus-title{color:#c2410c}
     #mult-root .mult-static{cursor:default}
     #mult-root .mult-left{text-align:left;margin-bottom:10px}
     #mult-root .mult-empty{align-items:center;gap:14px}
@@ -269,12 +269,12 @@ const MultGame = (() => {
     #mult-root .gt .pd{width:10px;height:10px;border-radius:50%;background:rgba(76,29,149,.16);transition:transform .3s var(--spring),background-color .3s}
     #mult-root .gt .pd.intro{border-radius:3px;transform:rotate(45deg) scale(.9)}
     #mult-root .gt .pd.ok{background:var(--kan)}
-    #mult-root .gt .pd.bad{background:#ef4444}
+    #mult-root .gt .pd.bad{background:#fb923c}
     /* Aktuell prick: storlek + ring. Fyllningen visar bara "obesvarad" – ett svar (rött/grönt) syns alltid */
     #mult-root .gt .pd.cur{transform:scale(1.45);box-shadow:0 0 0 1.5px #fff,0 0 0 3px var(--accent)}
     #mult-root .gt .pd.cur:not(.ok):not(.bad){background:var(--accent)}
     #mult-root .gt .pd.intro.cur{transform:rotate(45deg) scale(1.3)}
-    #mult-root .gt .pd.re{box-shadow:0 0 0 2px #fca5a5}
+    #mult-root .gt .pd.re{box-shadow:0 0 0 2px #fdba74}
     #mult-root .gt .pd.re.cur{box-shadow:0 0 0 1.5px #fff,0 0 0 3px var(--accent)}
     #mult-root .gt .pmain{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:6px}
     #mult-root .gt .stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative}
@@ -294,12 +294,12 @@ const MultGame = (() => {
     #mult-root .gt .opt.pair{font-size:30px}
     #mult-root .gt .opt:active{transform:scale(.96)}
     #mult-root .gt .opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
-    #mult-root .gt .opt.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+    #mult-root .gt .opt.bad{background:#fff3e6;border-color:#fdba74;color:#9a3412}
     #mult-root .gt .fdisp{height:48px;border-radius:18px;border:3px solid var(--accent-light);background:#fff;display:flex;align-items:center;justify-content:center;
       font-family:var(--font-head);font-weight:800;font-size:32px;color:var(--deep);margin-bottom:6px;transition:border-color .25s,background-color .25s}
     #mult-root .gt .fdisp .ph{color:#c4b5fd}
     #mult-root .gt .fdisp.ok{border-color:#22c55e;background:#dcfce7;color:#15803d}
-    #mult-root .gt .fdisp.bad{border-color:#ef4444;background:#fee2e2;color:#b91c1c}
+    #mult-root .gt .fdisp.bad{border-color:#fdba74;background:#fff3e6;color:#9a3412}
     #mult-root .gt .keys{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:46px;gap:6px}
     #mult-root .gt .key{border-radius:16px;background:var(--glass-strong);border:1.5px solid color-mix(in srgb,var(--accent) 24%,transparent);font-family:var(--font-head);
       font-weight:800;font-size:22px;color:var(--deep);display:grid;place-items:center;transition:transform .2s var(--spring)}
@@ -312,7 +312,7 @@ const MultGame = (() => {
     #mult-root .gt .oq{font-family:var(--font-head);font-weight:800;font-size:26px;color:var(--deep);white-space:nowrap}
     #mult-root .gt .oq .oa{color:var(--accent)}
     #mult-root .gt .oq .oa.ok{color:#15803d;display:inline-block;animation:gt-pop .5s var(--spring)}
-    #mult-root .gt .oq s{color:#dc2626;font-size:19px;margin-left:10px;text-decoration-thickness:2.5px}
+    #mult-root .gt .oq s{color:#64748b;font-size:19px;margin-left:10px;text-decoration-thickness:2.5px}
     #mult-root .gt .otag{height:26px;padding:0 11px;border-radius:999px;background:var(--tint);color:var(--accent);font-size:12.5px;font-weight:900;display:inline-flex;align-items:center}
     #mult-root .gt .shake{animation:gt-shake .4s ease-in-out}
 
@@ -2359,7 +2359,7 @@ const MultGame = (() => {
       <div class="rc-row"><span>Gånger</span><b>1–${e.upto}</b></div>`}
       <div class="rc-rounds">${e.rounds.map((t, k) => `<span class="rv">${svg('check')}<em>${k + 1}.</em> ${RNAME[t]}</span>`).join('')}</div>
       <div class="rc-row"><span>Rätt på första försöket</span><b>${e.correct} av ${e.total}</b></div>
-      <div class="rc-row"><span>Fel som rättades</span><b>${e.fixed}</b></div>
+      <div class="rc-row"><span>Blev rätt på nytt försök</span><b>${e.fixed}</b></div>
       <div class="rc-row"><span>Tid</span><b>${durTxt(e.secs)}</b></div>`;
   }
   function stampHTML(iso){ return `<span class="st-in">${svg('check')}<span class="st-tx"><b>Sett av en vuxen</b><small>${fmtStamp(iso)}</small></span></span>`; }
@@ -2845,7 +2845,7 @@ const MultGame = (() => {
           <div class="result-pct num">${pct}%</div>
           <div><span class="result-medal">${emoji}</span></div>
           <p class="result-msg">${msg}</p>
-          <p class="result-note num">${correct} rätt av ${total} – ${tables.join(', ')}-tabellerna</p>
+          <p class="result-note num">${SH.resultNote(correct, total)} · ${tables.join(', ')}-tabellerna</p>
         </div>
         <div class="result-actions">
           <button class="btn btn-accent btn-lg" onclick="MultGame.showStats()">Till statistiken</button>
@@ -2928,8 +2928,8 @@ const MultGame = (() => {
                 <p class="mult-sub mult-left">
                   Du har ${problemKeys.length} tal med under 75% – vill du träna på dem?
                 </p>
-                <button class="btn btn-danger btn-block" onclick="MultGame.startFocusedTraining()">
-                  Träna på problemtalen
+                <button class="btn btn-accent btn-block" onclick="MultGame.startFocusedTraining()">
+                  Träna på de svåra talen
                 </button>
               </div>
             ` : ''}
@@ -3234,10 +3234,12 @@ const MultGame = (() => {
   }
 
   /* ── Feedback-animation ────────────────────────────── */
+  /* D39: bara rätt svar får en bock; ett fel svar får ingen symbol (knappens mjuka färg räcker) */
   function flashFeedback(correct) {
+    if (!correct) return;
     const el = document.createElement('div');
     el.className = 'feedback-overlay';
-    el.innerHTML = `<div class="feedback-emoji">${correct ? '✅' : '❌'}</div>`;
+    el.innerHTML = '<div class="feedback-emoji">✅</div>';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 900);
   }
@@ -3299,9 +3301,9 @@ const MultGame = (() => {
         const wasCorrect = guess === _freeAns;
         snd(wasCorrect ? 'correct' : 'wrong');
         flashFeedback(wasCorrect);
-        display.style.background     = wasCorrect ? '#dcfce7' : '#fee2e2';
-        display.style.borderColor    = wasCorrect ? '#22c55e' : '#ef4444';
-        display.style.color          = wasCorrect ? '#166534' : '#991b1b';
+        display.style.background     = wasCorrect ? '#dcfce7' : '#fff3e6';
+        display.style.borderColor    = wasCorrect ? '#22c55e' : '#fdba74';
+        display.style.color          = wasCorrect ? '#166534' : '#9a3412';
         if (!wasCorrect) display.classList.add('animate-shake');
         setTimeout(() => {
           display.style.background  = '';

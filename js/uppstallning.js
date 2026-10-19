@@ -2985,13 +2985,14 @@ const UppstallningGame = (() => {
         finish();
       }
     } else {
-      App.Sound.play('wrong');
+      const cd = exColData[exCurrentCol];
+      if (cd && !cd.hmm) { cd.hmm = true; App.Sound.play('wrong'); }   // D39: ljudet en gång per kolumn
       exInput = '';
       exInputLocked = false;
       const fb = document.getElementById('ex-feedback');
       if (fb) fb.innerHTML = `<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);
         border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:800;
-        color:#92400e;text-align:center">Hmm, prova igen! 💪</div>`;
+        color:#92400e;text-align:center">Inte riktigt – försök igen</div>`;
       const ansCell = document.getElementById(`ans-${colKey}`);
       if (ansCell) ansCell.innerHTML = '';
     }
@@ -3311,8 +3312,8 @@ const UppstallningGame = (() => {
       setTimeout(() => exCheckDone(true), 900);
     } else {
       // Fel — förbrukar första försöket; siffrorna står kvar och kan ändras
+      if (exFreeFirstAttempt) App.Sound.play('wrong');   // D39: ljudet bara vid första Klar som inte stämmer
       exFreeFirstAttempt = false;
-      App.Sound.play('wrong');
       const wrap = document.getElementById('up-table-wrap');
       if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
       // Glömd-minnessiffra-detektion (v30): matchar svaret simuleringen
@@ -3366,7 +3367,7 @@ const UppstallningGame = (() => {
     saveLog(exScore, 5);
     const root = document.getElementById('uppstallning-root');
     const emoji = exScore === 5 ? '🌟' : exScore >= 4 ? '🥇' : exScore >= 3 ? '🥈' : '💪';
-    const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
+    const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Bra kämpat!';
     // Minnesmästare ⭐ (v30): alla placera+stryk-moment klarade utan fel-tap.
     // Aldrig något negativt vid miss — bara utebliven bonus.
     const memStar = mode === 'addition' && helpMode && memMoments > 0 && memPerfect;
@@ -3383,7 +3384,7 @@ const UppstallningGame = (() => {
           <div class="result-pct num">${Math.round((exScore / 5) * 100)} %</div>
           <div class="result-medal">${emoji}</div>
           <div class="result-msg">${msg}</div>
-          <div class="result-note num">${exScore} av 5 rätt</div>
+          <div class="result-note num">${MP.resultNote(exScore, 5)}</div>
           ${memStar ? '<div class="mem-master">⭐ Minnesmästare!</div>' : ''}
           <div class="result-actions">
             <button class="btn btn-primary btn-lg" onclick="UppstallningGame.startExercise()">
