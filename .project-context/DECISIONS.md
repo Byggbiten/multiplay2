@@ -45,6 +45,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 
 - D21 Ordning och reda införs i repot
 - D22 Ny modul Geografi, som börjar med Sveriges landskap
+- D23 Sammanslagna grenar på GitHub tas bort
 
 ---
 
@@ -225,3 +226,15 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-10-19 kl. 07.26: "Jag vill ha en till modul. Geografi. Jag tänkte att vi börjar med
   Sveriges landskap […] I den så har de angett i siffror. Så jag tänker att vi för in siffrorna i den där bilden jag
   hittade."
+
+## D23 · 2026-10-19 · Sammanslagna grenar på GitHub tas bort
+- **Beslut:** grenar som redan finns i `dev` tas bort på GitHub, så att repot inte bär redundanta grenar. Kvar:
+  `main` (live, GitHub Pages), `dev` och `renovering` (25 egna commits). Utfört 19/10: capy-nivaer, dagens-v2,
+  flerval-ordning, gangertabell-pass, gangertabell-v2, klocka-v2, klocklektioner, master, svara-talen och tabellval –
+  var och en kontrollerad att ha 0 commits utanför `origin/dev`; Pages publicerar från `main`. Lokalt rensat på samma
+  sätt (`git branch -d`). Framöver: en egen gren tas bort lokalt och på GitHub när den är sammanslagen i `dev`;
+  återställningstaggarna `fore-*` och `live-fore-*` står kvar.
+- **Varför:** ordning och reda – inga redundanta filer eller grenar som "spökar".
+- **Källa:** Dennis 2026-10-19: "Om det inte är något som är av vikt så kan du ta bort dem. Jag vet inte vad de är
+  eller varför det finns, men som sagt. tanken med ordning och reda rutin är som sagt att hålla välstädat repo, och
+  att inte redunanta filer ligger kvar och spökar"

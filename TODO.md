@@ -13,13 +13,11 @@
 - [ ] P4: förslag på hur prickraden i Öva förklarar romb och ring, och spärr mot två genomgångar i följd — som mockup.
 - [ ] P2, P3: ta upp med Dennis ("1 av 5 rätt"; Klart automatiskt efter ~3 s i hjälpläget, ingen "Klart"-text i
       Räkna själv).
-- [ ] P9: Dennis – ska de tio grenarna på GitHub som redan finns i `dev` tas bort (capy-nivaer, dagens-v2,
-      flerval-ordning, gangertabell-pass, gangertabell-v2, klocka-v2, klocklektioner, master, svara-talen, tabellval)?
-      `renovering` ska stå kvar.
 - [ ] (Senare) P5: avgör om varje timme ska övas i både "över"- och "i"-form i Klockans Kvart och Runt halv.
 
 ## Klart
 
+- [x] 2026-10-19 ~~P9: tio sammanslagna grenar på GitHub borttagna~~ (D23).
 - [x] 2026-10-19 ~~De två gamla agent-worktrees borttagna~~; 18 sammanslagna lokala grenar raderade (kvar: `dev`, `main`).
 - [x] 2026-10-19 Ordning och reda införd i repot (D21): CLAUDE.md, logg/, TODO, `.project-context/`,
       brainstorm/, referens/, design-lab/README.md.
