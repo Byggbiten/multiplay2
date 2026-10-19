@@ -490,3 +490,6 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   på provet snarare än att göra ett skarpt prov. Så om appen frågar rakt ut: vad är 9 x 6? och man svarar 54, så
   bokförs det in automatiskt på sin rätta plats. Men sedan när alla delsummor skall adderas, då får de helt enkelt
   markera cell för cell eller som det är idag."
+- ✎ **2026-10-19, ångra och gör om i kladden:** kladden får Ångra och Gör om i flera steg (per penn- och suddrag;
+  Rensa går att ångra). Källa: Dennis: "sen vill jag har en ångra-knapp på kladdytan. Så om de råkar rita tokigt, så
+  kan de ångra i flera steg. även en återgå knapp som funkar precis som ångra, fast åt andra hållet i flera steg."
