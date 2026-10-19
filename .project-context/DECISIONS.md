@@ -48,7 +48,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D23 Sammanslagna grenar på GitHub tas bort
 - D24 Geografi → Sverige → Sveriges landskap (struktur) ✎ menyn i Geografi
 - D25 Städerna: största staden, plus en väsentligt stor stad där den finns
-- D26 Sköldar och blommor laddas ner från Wikimedia
+- D26 Sköldar och blommor laddas ner från Wikimedia ✎ även djuren
+- D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
 
 ---
 
@@ -269,3 +270,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Beslut:** landskapssköldar och landskapsblommor hämtas som bilder från Wikimedia Commons, med licens och källa
   antecknade per fil i `referens/`.
 - **Källa:** Dennis 2026-10-19: "Ja, ladda ned fårn wikimedia".
+- ✎ **2026-10-19:** landskapsdjuren får också bilder, eftersom frågorna visar bild + text (D27).
+
+## D27 · 2026-10-19 · Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
+- **Beslut:** första versionen har Utforska (landskapskort), Träna med Upptäck Sverige, Vad heter det?, städerna,
+  djur/blommor/sköldar, **pusslet** och **samlarpärmen**, samt Test. Resan genom Sverige och Vem är jag? väntar.
+  Frågor om landskapsdjur och landskapsblommor visar **bild + text**, inte bara bild. **Landskapssköldarna** är med,
+  både på korten och som frågor.
+- **Källa:** Dennis 2026-10-19: "Ta med pusslet och samlarpärmen i första versionen. och gällande 'vems landskapsdjur
+  är det här?' Inte bara visa bild, utan visa bild + text. och glöm inte landskapssköldarna"
