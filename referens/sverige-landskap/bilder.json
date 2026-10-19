@@ -1,5 +1,5 @@
 {
- "_om": "En post per bildfil i referens/sverige-landskap/ (vapen/, blommor/, djur/). Alla hämtade 2026-10-19 från upload.wikimedia.org; källsidan på commons.wikimedia.org. Licens och upphovsperson är lästa ur Commons API (extmetadata), för Moose-Gustav.jpg och Capreolus capreolus (Marek Szczepanek).jpg ur filsidans källtext.",
+ "_om": "En post per bildfil i referens/sverige-landskap/ (vapen/, blommor/, djur/). Alla hämtade 2026-10-19 från upload.wikimedia.org; källsidan på commons.wikimedia.org. Licens och upphovsperson är lästa ur Commons API (extmetadata), för Moose-Gustav.jpg och Capreolus capreolus (Marek Szczepanek).jpg ur filsidans källtext. Bilderna ligger sedan v66 i assets/geografi/sverige/; sökvägarna i fil är relativa den mappen.",
  "filer": [
   {
    "fil": "vapen/1-Lappland.svg",

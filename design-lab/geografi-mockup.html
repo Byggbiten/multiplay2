@@ -490,6 +490,7 @@ div.pzarea:active{transform:none}
     </div>
     <div class="trow">
       <span>Träffytor</span><span class="tg" data-k="halo"><button data-v="av">Dolda</button><button data-v="pa">Visa</button></span>
+      <label class="lbtn" title="Hemlandskap (D36: en vuxens inställning i appen, av från början)">Hem <select id="homeSel" style="font:inherit;border:none;background:transparent;color:inherit;max-width:86px"></select></label>
       <span class="labstat" id="labstat"></span>
     </div>
   </div>
@@ -637,20 +638,21 @@ const SAID = new Set();     // allt som sagts i bubblorna (för MOCK.allTexts)
 
 /* ═══════════════════════════════════════════════════════════
    UNDERLAGET — läses ur källorna i referens/ (inget skrivs av):
-   kartan: referens/sveriges-landskap-farg.svg (25 path)
+   kartan: assets/geografi/sverige/karta.svg (25 path; bilderna i samma mapp sedan v66)
    namn/landsdel/path och ordningen norr till söder: referens/landskap-laxbok.json (numren visas inte, D33)
    fakta: referens/sverige-landskap/landskap-fakta.json
    bildkällorna: referens/sverige-landskap/bilder.json
 ═══════════════════════════════════════════════════════════ */
 const REF = '../referens/';
 const SL = REF + 'sverige-landskap/';
+const ASSET = '../assets/geografi/sverige/';
 let PATHS = [], LANDSKAP = [], FAKTA = {}, BILDER = [];
 const BY = {}; let ALL = [];
 const NAME = nr => BY[nr].namn;
 const LANDSDELAR = ['Norrland', 'Svealand', 'Götaland'];
 const NRS_OF = ld => LANDSKAP.filter(l => l.landsdel === ld).map(l => l.nr);
 const F = nr => FAKTA[String(nr)];
-const img = (nr, kind) => SL + F(nr).bilder[kind];
+const img = (nr, kind) => ASSET + F(nr).bilder[kind];
 /* Beskärningen av blomplanscherna: texten längst ner ska aldrig synas (bilder.json, obs), blomman ska synas.
    Lodrät position i procent per plansch, satt för hand efter en kontaktbild av alla 25 (19/10); annars 22 %. */
 const FLOWER_Y = { 1:3, 2:3, 5:2, 6:15, 9:8, 11:8, 13:2, 14:12, 16:6, 17:6, 18:8, 22:8, 25:3 };
@@ -663,7 +665,7 @@ const cap = s => s[0].toUpperCase() + s.slice(1);
 const inL = nr => (nr === 22 || nr === 23 ? 'på ' : 'i ') + NAME(nr);       // öarna: på Gotland, på Öland
 async function loadData(){
   const [svgTxt, lax, fakta, bilder] = await Promise.all([
-    fetch(REF + 'sveriges-landskap-farg.svg').then(r => { if (!r.ok) throw new Error('kartan'); return r.text(); }),
+    fetch(ASSET + 'karta.svg').then(r => { if (!r.ok) throw new Error('kartan'); return r.text(); }),
     fetch(REF + 'landskap-laxbok.json').then(r => r.json()),
     fetch(SL + 'landskap-fakta.json').then(r => r.json()),
     fetch(SL + 'bilder.json').then(r => r.json()),
@@ -1045,7 +1047,7 @@ function GeoMap(host, o = {}){
       if (spec.force) text = spec.text;
       else if (spec.name && size >= 18 && bw >= spec.name.length * 6.6 + 6) text = spec.name;
       const q = M.toScreen(m.label.x, m.label.y);
-      if (nr === 7 && M.pinOn) q.y += 13;                      // namnet under nålens spets
+      if (nr === M.pinNr && M.pinOn) q.y += 13;                      // namnet under nålens spets
       if (!text || q.x < -40 || q.y < -20 || q.x > M.W + 40 || q.y > visH() + 20){ if (g.style.display !== 'none') g.style.display = 'none'; continue; }
       g.style.display = '';
       g.setAttribute('transform', `translate(${q.x.toFixed(1)} ${q.y.toFixed(1)})`);
@@ -1060,7 +1062,7 @@ function GeoMap(host, o = {}){
   function placeChip(c){
     if (!c.w){ const t = c.g.querySelector('text'); const tw = t ? t.getComputedTextLength() : 0; if (tw){ c.w = tw + (c.kind === 'lake' ? 4 : 18); const r = c.g.querySelector('rect'); r.setAttribute('x', -c.w / 2); r.setAttribute('y', -12); r.setAttribute('width', c.w); r.setAttribute('height', 24); r.setAttribute('rx', 12); } }
     let x, y;
-    if (c.pin){ const L = MEAS[7].label; ({ x, y } = M.toScreen(L.x, L.y)); c.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`); return; }
+    if (c.pin){ const L = MEAS[M.pinNr].label; ({ x, y } = M.toScreen(L.x, L.y)); c.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`); return; }
     if (typeof c.where === 'number'){
       const m = MEAS[c.where]; ({ x, y } = M.toScreen(m.label.x, m.label.y));
       const R = m.r * M.k;
@@ -1082,10 +1084,11 @@ function GeoMap(host, o = {}){
   };
   M.unchip = nr => { M.chips = M.chips.filter(c => { if (c.where === nr && !c.pin){ c.g.remove(); return false; } return true; }); M.hideLab.delete(nr); };
   M.clearChips = () => { for (const c of M.chips) c.g.remove(); M.chips = []; M.hideLab.clear(); layout(); };
-  M.pin = function(on){
+  M.pin = function(on, nr){
+    M.pinNr = nr || M.pinNr;
     M.chips = M.chips.filter(c => { if (c.pin){ c.g.remove(); return false; } return true; });
-    M.pinOn = !!on;
-    if (!on){ layout(); return; }
+    M.pinOn = !!on && !!M.pinNr;
+    if (!M.pinOn){ layout(); return; }
     const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'pin');
     g.innerHTML = `<g class="in"><path d="M0 0c-5-6-9-10-9-15a9 9 0 0 1 18 0c0 5-4 9-9 15z" fill="#dc2626" stroke="#fff" stroke-width="2"/><circle cy="-15" r="3.4" fill="#fff"/>
       <g transform="translate(50 -16)"><rect x="-38" y="-11" width="76" height="22" rx="11" fill="#dc2626"/><text text-anchor="middle" dominant-baseline="central" style="font:900 12px var(--font-body);fill:#fff">Här bor du</text></g></g>`;
@@ -1249,7 +1252,7 @@ function bindHold(el, opts){
    (som Gångertabellens omvända frågor och Klockans läs/ställ).
 ═══════════════════════════════════════════════════════════ */
 const AREAS = ['Norrland', 'Svealand', 'Götaland', 'Sverige'];
-const S = { preset:'ny', halo:false, dayOff:0, boxes:{}, kinds:{}, screen:'geo', binderParty:false, pick:'puzzle',
+const S = { preset:'ny', halo:false, home:null, dayOff:0, boxes:{}, kinds:{}, screen:'geo', binderParty:false, pick:'puzzle',
   train:{ mode:'upptack', area:'Norrland', order:'blandad', bild:'djur', bildSvar:'karta' }, pzArea:'Norrland' };
 const today = () => { const d = new Date(); d.setDate(d.getDate() + S.dayOff); return SP.fmtDay(d); };
 const box = nr => S.boxes[nr];
@@ -1296,6 +1299,9 @@ document.querySelectorAll('.tg[data-k]').forEach(tg => tg.addEventListener('clic
   if (k === 'preset'){ applyPreset(b.dataset.v); return; }
   if (k === 'halo'){ S.halo = b.dataset.v === 'pa'; Object.values(MAPS).forEach(m => m.showHalo(S.halo)); renderLab(); }
 }));
+/* Hemlandskapet (D36): i appen väljer en vuxen det i Geografis inställningar; här ett labbreglage. Från början inget. */
+function renderHomeSel(){ $('homeSel').innerHTML = '<option value="">Inget</option>' + LANDSKAP.map(l => `<option value="${l.nr}"${S.home === l.nr ? ' selected' : ''}>${l.namn}</option>`).join(''); }
+$('homeSel').addEventListener('change', e => { S.home = e.target.value ? +e.target.value : null; if (S.screen === 'explore') goto('explore'); });
 $('dayBtn').addEventListener('click', () => { S.dayOff++; renderLab(); refresh(); });
 
 /* ═══════════════════════════════════════════════════════════
@@ -1418,7 +1424,7 @@ function enterExplore(){
   M.setHome(null); M.inset = 0;
   if (!M.ready) M.sync(); else { M.sync(); }
   M.labelFor = nr => ({ name:NAME(nr) });      // namn där de ryms (inga nummer, D33)
-  M.pin(true); M.showHalo(S.halo);
+  if (S.home) M.pin(true, S.home); M.showHalo(S.halo);      // D36: nålen bara om ett hemlandskap är valt
   M.onTap = nr => { if (nr === null){ closeSheet(); return; } openSheet(nr); };
   EX.nr = null; $('sheet').classList.remove('on'); $('exHint').hidden = false;
   M.fitHome(0);
@@ -1432,7 +1438,7 @@ function openSheet(nr){
   $('sheet').innerHTML = `<div class="sh-grip" id="shGrip"><i></i></div>
     <div class="sh-head"><span class="sh-ld" style="background:${LD_FILL(nr)}"></span>
       <span class="sh-name"><b>${NAME(nr)}</b><small>${BY[nr].landsdel}</small></span>
-      ${nr === 7 ? `<span class="sh-home">${svg('pin')}Här bor du</span>` : ''}
+      ${nr === S.home ? `<span class="sh-home">${svg('pin')}Här bor du</span>` : ''}
       <button class="sh-x" id="shX" aria-label="Stäng">${svg('x')}</button></div>
     <div class="sh-row"><span class="sh-shield"><img src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false"></span>
       <span class="sh-city"><span class="sh-k">${svg('city')}Stad</span><b>${esc(cities(nr)[0])}</b>${cities(nr)[1] ? `<span>också ${esc(cities(nr)[1])}</span>` : ''}</span></div>
@@ -2038,7 +2044,7 @@ function enterCredits(){
   const groups = [['vapen', 'Sköldar'], ['blomma', 'Blommor'], ['djur', 'Djur']];
   const typ = f => f.typ === 'vapen' ? 'vapen' : f.typ.startsWith('blom') ? 'blomma' : 'djur';
   $('cred').innerHTML = `<p class="intro">Bilderna kommer från Wikimedia Commons. Här står vem som har gjort varje bild och under vilken licens den får användas.</p>` +
-    groups.map(([t, h]) => `<h3>${h}</h3>` + BILDER.filter(f => typ(f) === t).sort((a, b) => a.nr - b.nr).map(f => `<div class="crow"><span class="ct"><img class="${t === 'vapen' ? 'shield' : ''}" src="${SL + f.fil}" alt="" loading="lazy" draggable="false"></span>
+    groups.map(([t, h]) => `<h3>${h}</h3>` + BILDER.filter(f => typ(f) === t).sort((a, b) => a.nr - b.nr).map(f => `<div class="crow"><span class="ct"><img class="${t === 'vapen' ? 'shield' : ''}" src="${ASSET + f.fil}" alt="" loading="lazy" draggable="false"></span>
       <span class="cx"><b>${esc(f.landskap)}</b><span>${esc(f.upphov)} · ${esc(f.licens)}</span></span><a href="${esc(f.kallsida)}" target="_blank" rel="noopener" aria-label="Källa för bilden">Källa</a></div>`).join('')).join('');
 }
 
@@ -2063,6 +2069,7 @@ async function init(){
   try { await loadData(); }
   catch (err){ $('app').insertAdjacentHTML('beforeend', `<div class="modal"><div class="bigcard" style="padding:20px"><b>Kunde inte läsa underlaget i referens/.</b><span>Servera mockupen från repots rot (se CLAUDE.md): ${esc(err.message)}</span></div></div>`); return; }
   measure();
+  renderHomeSel();
   MAPS.ex = GeoMap($('exMap'));
   MAPS.play = GeoMap($('playMap'));
   MAPS.td = GeoMap($('tdMap'));
