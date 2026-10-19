@@ -937,9 +937,13 @@ const MatteProv = (() => {
         <button class="mp-k op" data-act="key" data-k="−" aria-label="minus">−</button>${klar(1)}</div>`;
     const multi = IN.kind === 'boxes' || IN.kind === 'sheet' || (IN.kind === 'prob' && IN.v.length > 1);
     let nx = IN.kind === 'sheet' ? `Nästa ${svg('down')}` : multi ? `Nästa ruta ${svg('right')}` : '';
+    if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'grey')   // nollan rättas när den skrivs
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" disabled>${svg('check')}<span>Svara</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase !== 'grey') {
       const last = IN.notes ? IN.notes[L.uppRowsOrder(t)[IN.rq.k]].length - 1 : 0;
-      nx = IN.notes && (IN.f.note == null ? 0 : IN.f.note) < last ? `Nästa ${svg('right')}` : `Svara ${svg('check')}`;
+      /* Radfrågan har EN knapp (Svara, eller Nästa mellan anteckningsrutorna); Klar finns först när summan låsts upp */
+      const lbl = IN.notes && (IN.f.note == null ? 0 : IN.f.note) < last ? `${svg('right')}<span>Nästa</span>` : `${svg('check')}<span>Svara</span>`;
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" data-act="key" data-k="next">${lbl}</button></div>`;
     }
     return `<div class="mp-pad5">${digits}${erase}${nx ? `<button class="mp-k nx" data-act="key" data-k="next">${nx}</button>${klar(2)}` : klar(4)}</div>`;
   }
