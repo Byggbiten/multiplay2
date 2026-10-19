@@ -580,8 +580,8 @@ const NpMatteMuntligt = (() => {
     if (type === 'choice' && optIdx !== null) {
       const btn = document.getElementById(`np-opt-${optIdx}`);
       if (btn) {
-        btn.style.background = 'linear-gradient(135deg,#fee2e2,#fecaca)';
-        btn.style.borderColor = '#ef4444';
+        btn.style.background = 'linear-gradient(135deg,#fff7ed,#ffedd5)';   // D39: persika, inte rött
+        btn.style.borderColor = '#fdba74';
         btn.style.animation = 'wiggle 0.4s var(--smooth)';
         setTimeout(() => {
           if (btn) {
@@ -615,7 +615,7 @@ const NpMatteMuntligt = (() => {
 
   /* ── Feedback: max försök, visa rätt svar ───────────── */
   function showWrongFinal(correct, type, optIdx) {
-    App.Sound.play('wrong');
+    /* D39: felljudet spelades redan vid första försöket – en gång per uppgift räcker */
 
     if (type === 'choice') {
       document.querySelectorAll('[id^="np-opt-"]').forEach(btn => {
@@ -640,7 +640,7 @@ const NpMatteMuntligt = (() => {
           text-align:center;
         ">
           <div style="font-weight:700;color:var(--ink-soft);font-size:var(--text-sm);margin-bottom:var(--space-2)">
-            Rätt svar var:
+            Så här blir det:
           </div>
           <div class="num" style="font-family:var(--font-head);font-weight:900;font-size:var(--text-3xl);color:var(--deep)">
             ${escHtml(correct)}

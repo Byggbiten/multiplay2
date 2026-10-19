@@ -517,13 +517,13 @@ const MultDivGame = (() => {
       transition:border-color 0.2s, background 0.2s; }
     .md-field.has-digits { border-style:solid;
       border-color:color-mix(in srgb, var(--accent) 55%, transparent); }
-    .md-field.wrong { border:2.5px solid #ef4444; background:rgba(239,68,68,0.1); color:#dc2626; }
+    .md-field.wrong { border:2.5px solid #fdba74; background:#fff3e6; color:#9a3412; }  /* D39: mjuk persika, inte rött */
     .md-field.correct { border:2.5px solid #22c55e; background:rgba(34,197,94,0.12); color:#16a34a; }
     .md-field.shake { animation:md-shake 0.3s ease; }
     .md-field-sm { min-height:clamp(44px,6vw,50px); font-size:clamp(1.1rem,2.6vw,1.7rem); margin-bottom:4px; }
     .md-caret { display:inline-block; width:3px; height:1.05em; border-radius:2px;
       background:var(--accent); animation:md-caret 1s steps(1) infinite; }
-    .md-field.wrong .md-caret { background:#dc2626; }
+    .md-field.wrong .md-caret { background:#c2410c; }
 
     /* Kladd */
     .md-scratch { background:var(--glass); border-radius:var(--radius-md);
@@ -2637,7 +2637,7 @@ const MultDivGame = (() => {
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
         memMistakes++; helpTaskClean = false;
-        App.Sound.play('wrong');
+        if (!memAwait.hmm) { memAwait.hmm = true; App.Sound.play('wrong'); }   // D39: en gång per uppgift
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
       }
@@ -2948,7 +2948,7 @@ const MultDivGame = (() => {
      poangstraff; den felaktiga siffran ar forbrukad sa nasta tryck borjar
      om. Byggs pa ETT stalle for alla delfragor. */
   function helpWrong(expected) {
-    App.Sound.play('wrong');
+    if (helpTries === 0) App.Sound.play('wrong');   // D39: ljudet en gång per delfråga, orden varje gång
     helpTaskClean = false;      // uppgiften ar inte langre helratt
     exWrongAnswers++;
     helpInputStale = true;      // nasta siffra borjar om
@@ -2960,7 +2960,7 @@ const MultDivGame = (() => {
        igen!" — den sade aldrig VAD som var fel. Fran andra forsoket ger
        vi en riktning; fran tredje visas vagen, gratis. */
     const givet = parseInt(helpInput, 10);
-    let msg = 'Hmm, prova igen! 💪';
+    let msg = 'Inte riktigt – försök igen';
     if (helpTries >= 2 && Number.isFinite(givet) && Number.isFinite(expected))
       msg = givet > expected ? 'Nästan — men lite för högt. 👇' : 'Nästan — men lite för lågt. 👆';
     const fb = document.getElementById('md-feedback');
@@ -3286,8 +3286,8 @@ const MultDivGame = (() => {
       const extra = notes.length ? 350 + notes.length * 380 + 500 : 0;
       setTimeout(() => finishTask(true), 900 + extra);
     } else {
+      if (exFreeFirstAttempt) App.Sound.play('wrong');   // D39: ljudet bara vid första Klar som inte stämmer
       exFreeFirstAttempt = false;             // fel förbrukar första försöket
-      App.Sound.play('wrong');
       const wrap = mdWrap();
       if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
       // Glömd-minnessiffra-/glömd-rest-detektion (v30/v32): matchar svaret
@@ -3336,7 +3336,7 @@ const MultDivGame = (() => {
     }
     const root = document.getElementById('multdiv-root');
     const emoji = exScore === 5 ? '🌟' : exScore >= 4 ? '🥇' : exScore >= 3 ? '🥈' : '💪';
-    const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Fortsätt öva!';
+    const msg   = exScore === 5 ? 'Perfekt! 🎉' : exScore >= 4 ? 'Fantastiskt!' : exScore >= 3 ? 'Jättebra!' : 'Bra kämpat!';
     // MINNESMÄSTARE ⭐ (v30): alla placera+stryk-moment utan fel-tap.
     // Aldrig något negativt vid miss — bara utebliven bonus.
     /* Samma sanning som poangen: stjarnan ar for den som gick igenom utan
@@ -3355,7 +3355,7 @@ const MultDivGame = (() => {
           <div class="result-pct num">${Math.round((exScore / 5) * 100)} %</div>
           <div class="result-medal">${emoji}</div>
           <div class="result-msg">${msg}</div>
-          <div class="result-note num">${exScore} av 5 rätt</div>
+          <div class="result-note num">${MP.resultNote(exScore, 5)}</div>
           ${memStar ? `<div style="margin:10px auto 0;display:inline-block;
             background:linear-gradient(135deg,#fef9c3,#fef3c7);border:2px solid #fbbf24;
             border-radius:999px;padding:8px 20px;font-weight:900;color:#b45309;

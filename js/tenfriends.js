@@ -160,7 +160,7 @@ const FriendsGame = (() => {
       border: 2px solid transparent;
     }
     .fr-detail.ok   { background: #dcfce7; border-color: #86efac; color: #14532d; }
-    .fr-detail.miss { background: #fee2e2; border-color: #fca5a5; color: #7f1d1d; }
+    .fr-detail.miss { background: #fff3e6; border-color: #fdba74; color: #9a3412; }  /* D39: persika, inte rött */
 
     /* Historik */
     #friends-root .history-list { flex: 1; }
@@ -389,7 +389,9 @@ const FriendsGame = (() => {
 
       FriendsGame._handleAnswer = (chosen) => {
         const wasCorrect = chosen === corr;
-        App.Sound.play(wasCorrect ? 'correct' : 'wrong');
+        // D39: felljudet en gång per tal – inte igen när samma tal kommer tillbaka
+        if (wasCorrect) App.Sound.play('correct');
+        else if (!firstTried.has(n)) App.Sound.play('wrong');
 
         // Visuell feedback på knappar
         document.querySelectorAll('.answer-option').forEach(btn => {
@@ -399,12 +401,14 @@ const FriendsGame = (() => {
           else if (val === chosen && !wasCorrect) btn.classList.add('wrong');
         });
 
-        // Flash
-        const flash = document.createElement('div');
-        flash.className = 'feedback-overlay';
-        flash.innerHTML = `<div class="feedback-emoji">${wasCorrect ? '✅' : '❌'}</div>`;
-        document.body.appendChild(flash);
-        setTimeout(() => flash.remove(), 900);
+        // Flash – D39: bara vid rätt svar; ett fel svar får ingen symbol
+        if (wasCorrect) {
+          const flash = document.createElement('div');
+          flash.className = 'feedback-overlay';
+          flash.innerHTML = '<div class="feedback-emoji">✅</div>';
+          document.body.appendChild(flash);
+          setTimeout(() => flash.remove(), 900);
+        }
 
         // Första försöket på denna fråga avgör poängen
         if (!firstTried.has(n)) {
@@ -472,7 +476,7 @@ const FriendsGame = (() => {
           <div><span class="result-medal">${medal}</span></div>
           ${label ? `<div><span class="result-medal-label">${label}</span></div>` : ''}
           <p class="result-msg">${msg}</p>
-          <p class="result-note num">${totalCorrect} av ${total} rätt på första försöket</p>
+          <p class="result-note num">${MP.resultNote(totalCorrect, total, ' på första försöket')}</p>
         </div>
 
         <!-- Detaljer per tal -->
@@ -484,7 +488,7 @@ const FriendsGame = (() => {
           <div class="fr-detail-grid">
             ${results.map(r => `
               <div class="fr-detail num ${r.correct ? 'ok' : 'miss'}">
-                ${r.n} + ${10 - r.n}<br>${r.correct ? '✓' : '✗'}
+                ${r.n} + ${10 - r.n}<br>${r.correct ? '✓' : '○'}
               </div>
             `).join('')}
           </div>

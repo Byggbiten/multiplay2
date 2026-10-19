@@ -1133,18 +1133,18 @@ const NpMatteSkriftlig = (() => {
         ✅ Rätt! ${pick(['Bra jobbat! 🌟','Fantastiskt! 🎉','Supersnyggt! 💫','Du är grym! 🦁'])}
       </div>`;
     } else if (reveal) {
-      App.Sound.play('wrong');
+      /* D39: felljudet spelades redan vid första försöket – en gång per uppgift räcker */
       const answerText = formatAnswer(currentQ);
-      el.innerHTML = `<div style="background:#fef2f2;border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-sm);font-weight:700;color:#991b1b;animation:wiggle 0.4s ease">
-        ❌ Rätt svar: <strong>${answerText}</strong><br>Bra försök! 💪
+      el.innerHTML = `<div style="background:#fff3e6;border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-sm);font-weight:700;color:#9a3412">
+        Så här blir det: <strong>${answerText}</strong><br>Bra försök!
       </div>`;
       // Show hint
       const hintEl = document.getElementById('nps-hint');
       if (hintEl) hintEl.style.display = 'block';
     } else {
       App.Sound.play('wrong');
-      el.innerHTML = `<div style="text-align:center;font-size:var(--text-base);font-weight:800;color:#dc2626;animation:wiggle 0.4s ease">
-        Försök igen! 🤔
+      el.innerHTML = `<div style="text-align:center;font-size:var(--text-base);font-weight:800;color:#9a3412">
+        Inte riktigt – försök igen
       </div>`;
     }
   }

@@ -102,7 +102,7 @@
     if (pct >= 90)   return { emoji: '🥇', msg: 'Fantastiskt bra!' };
     if (pct >= 75)   return { emoji: '🥈', msg: 'Jättebra jobbat!' };
     if (pct >= 60)   return { emoji: '👍', msg: 'Bra försök! Fortsätt träna!' };
-    return { emoji: '💪', msg: 'Fortsätt träna, det går bättre snart!' };
+    return { emoji: '💪', msg: 'Bra kämpat! Varje gång du övar blir det lättare.' };
   };
 
   /* ── Medaljer: brons 75 / silver 85 / guld 95 ──────── */
@@ -317,8 +317,17 @@
   MP.praiseFor = function (pct) {
     if (pct >= 100) return 'Varje svar satt på första försöket.';
     if (pct >= 85)  return 'Starkt jobbat! Nästan allt satt direkt.';
-    if (pct >= 60)  return 'Bra nött! Du rättade varje fel.';
-    return 'Du nötte dig igenom hela passet. Varje fel blev rätt till slut.';
+    if (pct >= 60)  return 'Bra nött! Du kämpade dig hela vägen.';
+    return 'Du nötte dig igenom hela passet. Allt blev rätt till slut.';
+  };
+  /* Resultatraden efter ett test (D39): säger vad barnet klarade, aldrig "X av Y rätt" som dom.
+     tail (valfri) står efter talen, t.ex. ' på första försöket'. */
+  MP.resultNote = function (correct, total, tail) {
+    const t = tail || '';
+    if (total > 0 && correct >= total) return `Du klarade alla ${total}${t}!`;
+    if (correct <= 0) return 'De här övar vi mer på';
+    if (total - correct === 1) return `Du klarade ${correct} av ${total}${t} – nästan alla!`;
+    return `Du klarade ${correct} av ${total}${t} – de andra övar vi mer på`;
   };
   /* Kvittots datum ("onsdag 23 september kl. 18:05") och stämpelns ("23 sep. 18:05") */
   MP.fmtWhen = function (iso) { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour:'2-digit', minute:'2-digit' })}`; };

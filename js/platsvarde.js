@@ -779,7 +779,7 @@ const PlatsvardeGame = (() => {
     } else if (btn) {
       /* Fel: BARA den tryckta rutan dämpas och låses — de andra förblir
          tryckbara och rätt svar ges inte bort (granskning A1). */
-      btn.style.background = 'rgba(239,68,68,0.2)';
+      btn.style.background = 'rgba(251,146,60,0.18)';   // D39: mjuk persika, inte rött
       btn.style.opacity    = '0.45';
       btn.style.pointerEvents = 'none';
     }
@@ -968,15 +968,15 @@ const PlatsvardeGame = (() => {
       showFeedback(true, '');
       setTimeout(nextQuestion, 1400);
     } else if (attempts >= 2) {
-      App.Sound.play('wrong');
+      /* D39: felljudet har redan spelats vid första försöket — en gång per uppgift räcker. */
       /* Facit är något som ska läras: det står kvar tills barnet trycker
          Nästa — ingen timer (granskning B6). */
       revealAnswer();
-      showFeedback(false, `Rätt svar: <strong>${correctDisplay}</strong>`, true);
+      showFeedback(false, `Så här blir det: <strong>${correctDisplay}</strong>`, true);
     } else {
       inputLocked = false;
       App.Sound.play('wrong');
-      showFeedback(false, 'Prova igen! 💪');
+      showFeedback(false, 'Inte riktigt – försök igen');
     }
   }
 
@@ -1028,7 +1028,7 @@ const PlatsvardeGame = (() => {
     const root = document.getElementById('addsub-root');
     const pct   = Math.round((score / questions.length) * 100);
     const emoji = score === 10 ? '🌟' : score >= 8 ? '🥇' : score >= 6 ? '🥈' : '💪';
-    const msg   = score === 10 ? 'Perfekt! 🎉' : score >= 8 ? 'Fantastiskt bra!' : score >= 6 ? 'Jättebra!' : 'Fortsätt öva!';
+    const msg   = score === 10 ? 'Perfekt! 🎉' : score >= 8 ? 'Fantastiskt bra!' : score >= 6 ? 'Jättebra!' : 'Bra kämpat!';
     root.innerHTML = `
       <div class="app-header">
         <button class="btn-back" onclick="PlatsvardeGame.showSelect()">Tillbaka</button>
@@ -1040,7 +1040,7 @@ const PlatsvardeGame = (() => {
           <div class="result-pct num">${pct} %</div>
           <div class="result-medal">${emoji}</div>
           <div class="result-msg">${msg}</div>
-          <div class="result-note num">${score} av ${questions.length} rätt</div>
+          <div class="result-note num">${MP.resultNote(score, questions.length)}</div>
           <div class="result-actions">
             <button class="btn btn-primary btn-lg" onclick="PlatsvardeGame.startPlatsvarde()">
               <svg class="icn"><use href="#i-refresh"/></svg>Spela igen</button>
