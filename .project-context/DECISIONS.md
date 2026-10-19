@@ -438,3 +438,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   jag markerat i bilden? Knappen kan heta matteprov 4:an. klickar man där så kommer vi löpande lägga ut matteprov som
   har med multiplikation att göra. och detta vi gör nu döps till matteprov 1" och "provet måste som sagt anpassas
   efter appen. Så jag räknar inte med att provet blir 'rakt av'. men att vi kommer nära".
+- ✎ **2026-10-19, isolerat i provet:** provet följer bladens uppställning och lösningsgång (rutnätet, nollan i den grå
+  rutan, =-raderna, uttrycket först). Det som avviker från appens sätt i övrigt gäller bara matteprovet; resten av appen
+  ändras inte. Källa: Dennis: "Försök att följa testens struktur för att lösa problemen och ställa upp talen." och "det
+  vi gör nu om det avviker från multiplays sätt att ställa upp och lösa tal i övrigt skall bara ske isolerat i detta
+  matteprov. vi ändrar inte hela appen i övrigt".
