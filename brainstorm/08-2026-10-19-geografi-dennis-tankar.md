@@ -59,5 +59,5 @@ sitter (lådan "kan"). Hela Sverige = full pärm. Kopplas till capybarakorten so
 
 ## Utfall
 Dennis svar 19/10: städerna → D25, nedladdning från Wikimedia → D26, strukturen Geografi → Sverige → Sveriges
-landskap → D24. Spellägen i första versionen: öppet (P10). Mockupen `design-lab/geografi-mockup.html` (från 07) står som förslag och görs om
+landskap → D24; menyn i Geografi (Sverige, Europa, övriga världsdelar, Hela världen, Världens hav som egna moduler) → D24 ✎. Spellägen i första versionen: öppet (P10). Mockupen `design-lab/geografi-mockup.html` (från 07) står som förslag och görs om
 efter detta samtal.

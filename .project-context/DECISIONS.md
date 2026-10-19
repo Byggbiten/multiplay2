@@ -46,7 +46,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D21 Ordning och reda införs i repot
 - D22 Ny modul Geografi, som börjar med Sveriges landskap
 - D23 Sammanslagna grenar på GitHub tas bort
-- D24 Geografi → Sverige → Sveriges landskap (struktur)
+- D24 Geografi → Sverige → Sveriges landskap (struktur) ✎ menyn i Geografi
 - D25 Städerna: största staden, plus en väsentligt stor stad där den finns
 - D26 Sköldar och blommor laddas ner från Wikimedia
 
@@ -253,6 +253,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-10-19: "Huvudmodulen heter geografi - och denna ska heta Sverige. Och sen väl i sverige kanske
   man bygger ut den med diverse. Nu är det sveriges landskap. Senare kanske det är sjöar eller städer mm." Riktningen i
   övrigt: hans meddelande samma dag, återgivet i `brainstorm/08`.
+- ✎ **2026-10-19, menyn i Geografi:** ett tryck på Geografi visar ett nytt val med egna, valbara moduler: **Sverige,
+  Europa, de andra världsdelarna (Asien, Afrika, Nordamerika, Sydamerika, Oceanien), Hela världen och Världens hav.**
+  Varje val är en egen modul i Geografi. Källa: Dennis: "Geografi med Europa och de andra världsdelarna mm, det blir som
+  egna valbara moduler i geografi. … klickar på geografi -> Sedan väljer man ett nytt val där. de olika valen är:
+  Sverige, Europa, och så de andra världsdelarna och hela världen. Världens hav"
 
 ## D25 · 2026-10-19 · Städerna: största staden, plus en väsentligt stor stad där den finns
 - **Beslut:** varje landskap får sin största stad. Ligger ytterligare en väsentligt stor stad i landskapet tas den med
