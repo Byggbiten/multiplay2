@@ -466,3 +466,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   Källa: Dennis: "Här hade jag önskat att man först räknade ut 8x7= 56 och sedan när man räknar 8x8 så sker det raden
   under förskjutet 1 steg åt vänster så att man bygger på alla uträkningar och sedan får dem i celler efter deras
   värde (ental, tiotal, hundratal etc) och sedan adderar ihop det till en slutsumma."
+- ✎ **2026-10-19, appen leder uppställningen:** appen ber om delproduktsmetoden och visar var barnet ska börja och vad
+  som räknas (aktiv ruta, siffrorna som lyser, en kort rad). Vägvisningen räknas inte som hjälp i kvittot. Källa:
+  Dennis: "i våran app så är det tyvärr begränsat med utrymme. Så då är det inte mer än rätt att appen visar detta och
+  ber om det sättet. och att appen guider barnen vart de skall börja. Det är som sagt till för att träna på prov."
