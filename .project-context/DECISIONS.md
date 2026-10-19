@@ -470,3 +470,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   som räknas (aktiv ruta, siffrorna som lyser, en kort rad). Vägvisningen räknas inte som hjälp i kvittot. Källa:
   Dennis: "i våran app så är det tyvärr begränsat med utrymme. Så då är det inte mer än rätt att appen visar detta och
   ber om det sättet. och att appen guider barnen vart de skall börja. Det är som sagt till för att träna på prov."
+- ✎ **2026-10-19, tvåsiffrig faktor med tankerad:** skolans två rader (rad 1, rad 2 med den grå nollan, summan) står
+  kvar; en tankerad ovanför räknar varje rad med talsorter (8 · 82 = 8 · 80 + 8 · 2 = 640 + 16 = 656). I Öva visas
+  alla led; i provet bara uppdelningen, resten kommer som bitar i hjälptrappan. Valt framför en rad per sifferpar,
+  som blir för lång vid tresiffrigt · tvåsiffrigt och avviker från provets uppställning. Källa: Dennis: "denna vy
+  behöver lite kärlek. för hur de skall på ett pedagogiskt sätt kunna räkna ut detta och summera ihop delsummor när de
+  har så lite yta att jobba med" och, om alternativen, "enligt din rekomendation".
