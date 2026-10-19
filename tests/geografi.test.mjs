@@ -256,6 +256,17 @@ describe('inkopplingen', () => {
     for (const k of ['geo_state_', 'geo_settings_', 'geo_puzzle_', 'geo_log_']) expect(app).toContain('`' + k + '${id}`');
     expect(app).toMatch(/geografi:\s*id => \[`geo_log_\$\{id\}`\]/);
   });
+  it('modulen har inga kvarlevor av mockupens klassnamn och id:n (de byttes vid inbyggnaden)', () => {
+    const src = read('js/geografi.js');
+    // mockupens .btn/.card/.screen/.chip/.modal heter .gb/.gc/.gs/.mchip/.gmodal i appen; #app finns inte
+    const OLD = /\.(btn|card|screen|chip|modal)(?![\w-])/;
+    const sels = [...src.matchAll(/(?:querySelector(?:All)?|closest)\(\s*['"`]([^'"`]*)['"`]/g)].map(m => m[1]);
+    expect(sels.length).toBeGreaterThan(10);
+    expect(sels.filter(x => OLD.test(x))).toEqual([]);
+    const cls = [...src.matchAll(/class="([^"$]*)"/g)].flatMap(m => m[1].split(/\s+/));
+    expect(cls.filter(c => ['btn', 'card', 'screen', 'chip', 'modal', 'btn-primary', 'btn-sec'].includes(c))).toEqual([]);
+    expect(src.match(/\$\('app'\)|getElementById\('app'\)|window\.MOCK/g) || []).toEqual([]);
+  });
   it('Dagens träning tar inte med Geografi (D20)', () => {
     const m = read('js/daily.js').match(/const MODULES = \[([^\]]*)\]/);
     expect(m).not.toBeNull();

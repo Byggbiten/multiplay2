@@ -1,68 +1,86 @@
 # Överlämning – Geografi (levande expert)
 
-**Roll:** bygger och verifierar Geografi-mockupen (`design-lab/geografi-mockup.html`). Kan också granska när
-modulen byggs in i appen.
+**Roll:** byggde Geografi-mockupen (`design-lab/geografi-mockup.html`) och byggde in den i appen. Kan granska,
+rätta och bygga vidare på modulen.
 **Datum:** 2026-10-19.
-**Mockupens version:** commit `0728948` på `dev` (D24–D34 inarbetade).
-**Status:** Dennis har godkänt mockupen ("det ser jättebra ut", 19/10). Nästa steg är att bygga in den i appen,
-efter ett ordning och reda-pass.
+**Läge:** Geografi är inbyggd i appen på grenen `geografi` (v66), pushad men **inte** mergad till `dev`. Taggen
+`fore-geografi` på `dev` är läget före. Commits: `d1785ce` tillgångarna och datan, `886cdfb` delad logik
+(`MP.createDrill` med `opts.sameKey`, `MP.spreadShuffle`, Capy), `61f4222` ren logik med tester, `b90fec8` modulen
+och inkopplingen (v66), `e18ec96` startsidans kortmått, sedan dokumenten.
 
 ## Läs först
-1. `CLAUDE.md`, sedan `.project-context/DECISIONS.md` D22–D34. D30–D34 ändrar mycket i D24–D29.
-2. `logg/2026-10-19.md`, avsnitten om Geografi. Där står vad som verifierats i varje runda, med siffror.
-3. `design-lab/geografi-mockup.html`. Läs kommentarerna vid kartmotorn (`GeoMap`), träffregeln, `sayFact`,
-   `snapRadius`, `spreadShuffle` och `createDrill`.
-4. `referens/sverige-landskap/README.md` (källor, licenser, osäkert) och `referens/README.md`.
-5. `agenter/geografi/LOGG.md` (den här rollens lärdomar).
+1. `CLAUDE.md`, sedan `.project-context/DECISIONS.md` D22–D36 (D30–D34 ändrar mycket i D24–D29; D35 bygget,
+   D36 integriteten och hemlandskapet).
+2. `logg/2026-10-19.md`, avsnitten om Geografi, sist "Geografi inbyggd i appen".
+3. `.project-context/DESIGN.md`, Geografi-raden och lagringsnycklarna.
+4. Koden:
+   - `js/geografi-logic.js`: den rena logiken (texter, urval, nivåer, snäppradie, validering), testad.
+   - `js/geografi.js`: vyerna, kartmotorn `GeoMap`, pusslet, lagringen, Capy-krokarna, `_test`.
+   - `js/geografi-data.js`: genererad, redigeras inte för hand (se nedan).
+5. `referens/sverige-landskap/README.md` (källor, licenser, generatorn) och `agenter/geografi/LOGG.md`.
 
-## Vad som är byggt och verifierat (i mockupen)
+## Hur modulen är byggd
 
-| Del | Beslut | Verifierat |
+| Del | Var | Anmärkning |
 |---|---|---|
-| Menyn Geografi: nio moduler, bara Sverige öppen → Sverige (landskapen; sjöar och städer "Kommer snart") → Sveriges landskap | D24 | Flödet |
-| Kartmotorn: dra, nyp, tröghet, gränser som fjädrar, mushjul. Dubbeltryck zoomar inte. Ett tryck räknas direkt; ett andra tryck på samma ställe inom 350 ms ignoreras | D24, D30 | 35 gestkontroller med riktig touch via CDP |
-| Träffregeln: en skiva på 44 px runt mittpunkten för små landskap, annars landskapet under fingret, i havet det närmaste inom 12 px eller kanten | – | Varje landskaps mitt träffar rätt, 25 av 25, i helbild och inzoomat |
-| Utforska med landskapskort: sköld, stad (och "också"), blomma och djur som bild och text, rang i ord, "Visste du?", "Här bor du" (blir en inställning, D36) | D24, D27, D28 | Flödet; bilderna laddas |
-| Hemvyn: områdeskorten (medaljer ur lådorna) är ingången till Träna; dörrarna Utforska, Pussel, Samlarpärm och Test; informationsknapp till bildkällorna (75 rader) | D29, D30 | Flödet; två tryck till första frågan |
-| Träna <område>: ordningen (Blandad förvald, Norr till söder) och fyra lägen där ett tryck startar | D30, D33, D34 | Flödet; inget val förekommer två gånger |
-| Nötloop som i gångertabellen; Nästa efter rätt svar; standardiserad faktaruta (sköld, Stad/Djur/Blomma i tabell, särskild rad vid rang 1, 2, 24 eller 25) | D30–D32 | 25 landskap × alla bekräftelser: inget klipps; det högsta är 103 av 117 px; Nästa står på y 778 |
-| Pussel: områdesval med "Med gränser" och "Utan gränser", namn på bitarna, generös snäppradie som bara snäpper till den egna platsen | D32 | 37 kontroller med riktig touch, 85 av 85 släpp, 0 av 55 till grannens plats |
-| Samlarpärmen i brons, silver och guld | D30 | Flödet; nivåerna nås genom träning och test |
-| Test per område med alla landskap, utan nötloop, kvitto med "Sett av en vuxen" | D30 | Flödet; hela Sverige ger 25 |
-| Inga läxboksnummer någonstans | D33 | 943 texter genomsökta; inga nummerbrickor |
-| Blandad ordning: ny lottning varje runda, aldrig samma landskap i rad, extratillfället minst två frågor bort | D34 | 500 rundor per läge; korrelation med norr–söder −0,004 |
+| Data | `js/geografi-data.js` (`window.GEO_DATA`) | Genereras: `python3 -I referens/sverige-landskap/gen-geografi-data.py "$PWD"`. Kontrollerar namn och att bildfilerna finns. |
+| Kartan och bilderna | `assets/geografi/sverige/{karta.svg,vapen,blommor,djur}` | `sw.js` förcachar kartan och modulens JS; bilderna cachas vid första användningen. |
+| Ren logik | `js/geografi-logic.js` (`window.GeoLogic`, även CJS) | `buildItems`, `buildTest`, `createDrill`, `levelOf`, `nextLevelText`, `snapRadiusPx`, `validState`, `validSettings`, `allTexts` m.fl. |
+| Vyerna | `js/geografi.js` (`GeoGame.init(profil)`) | En IIFE som bygger allt i `#geo-root` första gången; id:n har prefixet `g-`, klasserna `gb`/`gc`/`gs`/`mchip`/`gmodal` (inte mockupens `btn`/`card`/`screen`/`chip`/`modal`). |
+| Lagring per profil | `geo_state_`, `geo_settings_`, `geo_puzzle_`, `geo_log_` | Rensas i `Store.deleteProfile`; loggen ger statuschippet (`GAME_LOG_KEYS.geografi`). |
+| Hemlandskapet (D36) | Kugghjulet i Geografi-menyn → Inställningar | Inget från början; nålen i landskapets mitt och "Här bor du" bara för det valda. |
+| Capy | `js/capy.js` | Pass och test med `module:'geo'`; guld i pärmen = händelsen `landskap` (köas, en gång per landskap, `st.geoLand`). |
+| Delat | `js/shared.js` | `MP.createDrill(items, r, { sameKey })` och `MP.spreadShuffle`; utan `opts` exakt som förut. |
+| Startsidan | `index.html`, `styles/app.css` | Brett kort under de sex. Mobilens spelkort 132 px (förut 156), korta höjden 90 (förut 104), det breda minst 44. |
+| Dagens träning | `js/daily.js` (orörd) | `MODULES = ['mult', 'clock']`; Geografi ingår inte (D20), ett test vakar. |
+
+## Verifierat 19/10
+- vitest 372 av 372 (39 i `tests/geografi.test.mjs`; de 333 äldre oförändrade).
+- Dev-spegeln, Playwright med riktig touch via CDP: flödet 88 av 88, gesterna 35, pusslet 38 av 38, appens delar
+  30 av 30, Gångertabellen och Klockan startar utan scroll och konsolfel. iPad 820 × 1180 och 1180 × 820: inget
+  sticker ut.
+- iOS-simulatorn, iPhone 17e som PWA (Appium/XCUITest, riktiga tryck): se loggen. Startsidans scroll hittades här.
 
 ## Öppna punkter
-- **Nivåregeln i pärmen** (brons = övat, silver = kan, guld = alla sex frågetyperna) är mitt förslag. Dennis
-  godkände mockupen som helhet, men regeln har inte bekräftats separat. Han skrev tidigare "ett kort låses upp när
-  hon kan landskapet". Fråga om brons vid "övat" är rätt.
-- **Träffytor i helbild.** I spelets karta med hela Sverige (k ≈ 0,31) är många landskap 22–47 px, och i Norrlands
-  vy är fyra landskap 38–41 px. Barnet behöver nypa. Ett nyp ×3 ger alla 43 px eller mer. I Utforskas helbild har
-  Dalsland 29 px.
-- **Ingenting är provat på en riktig iPhone.** Skydden mot sidzoom och textmeny i Safari (`gesturestart`,
-  `-webkit-touch-callout`, `touch-action`) är bara verifierade i Chromium.
-- **Nålen "Här bor du"** är hårdkodad i mockupen. D36: i appen blir den en inställning (av från början), och orten står inte i repot.
-- **Färgkartans licens** är inte kontrollerad (`referens/README.md`). Det går för en privat app, men den måste
-  kontrolleras om appen blir offentlig.
-- **Blomplanschernas beskärning** (`FLOWER_Y`) är satt för hand efter en kontaktbild av alla 25. Kontrollera den
-  igen om bilderna byts.
-- **Extratillfället i slutet av en runda.** När det inte finns plats två frågor bort hamnar det sist och kan då
-  komma direkt efter. Det fallet är inte provat.
-- **Resan genom Sverige och Vem är jag?** väntar enligt D27.
+- **Nivåregeln i pärmen** (brons = övat, silver = kan, guld = alla sex frågetyperna) är mitt förslag och inte
+  bekräftad av Dennis separat. Fråga om brons vid "övat" är rätt.
+- **Startsidans lägre spelkort** (156 → 132 px på mobil) påverkar alla moduler på startsidan. Behövdes för att sju
+  kort ska rymmas utan scroll som PWA. Dennis bör se det.
+- **Träffytor i helbild.** I spelets karta med hela Sverige är många landskap under 44 px (Medelpad 29, Dalsland 24);
+  barnet behöver nypa. Samma värden som i mockupen.
+- **Capy-överlägget** kommer över resultatet efter pass och test, som i de andra modulerna. Det täcker kvittots
+  håll-knapp tills det stängs.
+- **Bildkällorna och färgkartans licens** se `referens/README.md`; kartans licens är inte kontrollerad.
+- **Extratillfället i slutet av en runda** (när det inte finns plats två frågor bort) är inte provat i appen.
+- **Ingen riktig iPhone** än; simulatorn ersätter den inte för Safaris gester fullt ut.
+- Resan genom Sverige och Vem är jag? väntar enligt D27.
 
 ## Kalibrering
 
 **Servrar och verktyg**
 - Mockupen serveras från repots rot: `http://127.0.0.1:5420/design-lab/geografi-mockup.html`; på telefon
-  `https://macbook-pro.tail3c8e5a.ts.net:8446/…`. Den hämtar `../referens/…` med fetch, så den fungerar inte som
-  `file://`.
+  `https://macbook-pro.tail3c8e5a.ts.net:8446/…`. Den hämtar `../referens/…` (JSON) och `../assets/geografi/…`
+  (kartan, bilderna) med fetch, så den fungerar inte som `file://`.
 - **Känt falsklarm:** webbläsarpanelen spärrar adresser som inte är localhost. Tailscale-adressen ser därför trasig
   ut i panelen fast den fungerar på telefonen (den svarade 200). Panelens koordinatklick hamnar fel under emulering;
   driv i stället med `element.click()` eller Playwright.
 - Playwright 1.63 finns i `~/.npm/_npx/e41f203b7505f1fb/node_modules`. Kör med
   `NODE_PATH=… node skript.cjs`. Kontexten är 390 × 844 med `hasTouch`, `isMobile` och `deviceScaleFactor` 2.
-- Skripten från 19/10 låg i sessionens scratchpad (`…/scratchpad/geo2/`: `t-map.cjs`, `t-flow3.cjs` via
-  `gen3.py`, `t-pussel.cjs`, `t-blanda.cjs`, `t-ruta5.cjs`). De försvinner med sessionen, och metoden står nedan.
+- Skripten från 19/10 låg i sessionens scratchpad: `geo2/` mot mockupen, `geo3/` mot appen (`lib.cjs` med
+  `openApp()`, som lägger en `window.MOCK`-yta över `GeoGame._test` så att mockupens tester går mot appen;
+  `t-flow3`, `t-map`, `t-pussel`, `t-app`, `t-mc`, `t-start4`), `sim/` för simulatorn (`simlib.py`, `s2.py`).
+  De försvinner med sessionen; metoden står här.
+- **Appen:** dev-spegeln synkas med rsync (CLAUDE.md) och serveras på :5312 av `~/multiplay-dev-server.py`
+  (no-store). Testprofil via `localStorage` eller `Store.addProfile`, sedan `App.selectProfile(id)` och
+  `App.startGame('geografi')`. `GeoGame._test` har `goto`, `answer`, `drop`, `preset`, `setToday` (datumkroken),
+  `box`, `level`, `MAPS`, `MEAS`, `PL`, `PZ`. Stäng Capy-överlägget (`Capy._close()`) före riktiga tryck efter ett
+  pass eller test.
+- **Simulatorn:** iPhone 17e `3C0FE374-…` har webclipen MULTIPLAY (localhost:5312). `appium --port 4723`, sedan
+  `~/arbetskopia/apps/Byggbiten-Liggare/.project-context/uitest/appiumlib.py`: `new_session(udid)`,
+  `open_webclip('MULTIPLAY')`, `webview()`, `js()`. Riktiga tryck med W3C-actions i NATIVE-läget; webbvyns
+  överkant ligger 47 pt ned (844 − innerHeight 797). Sessionen dör efter cirka en minut utan kommando – skapa en ny.
+  Dubbeltryck måste skickas som en enda action-kedja, annars blir det två separata tryck.
+- **Startsidan mäts i PWA-höjden** 390 × 797, inte bara 844.
 
 **Gester**
 - Använd riktig touch via CDP: `Input.dispatchTouchEvent` med en eller två `touchPoints`. Det ger äkta
@@ -115,30 +133,7 @@ efter ett ordning och reda-pass.
 - Att få den fasta faktarutan att rymmas utan att kartan krymper.
 - Att anpassa testskript efter varje ny runda, där en dubblerad ersättningsankare gav tysta missar.
 
-## Nästa steg (när mockupen byggs in i appen)
-1. Tagga `fore-geografi` på `dev` och bygg på en egen gren som mergas `--no-ff` (D9). Lägg till modulens rad i
-   `.project-context/DESIGN.md` med dess lagringsnycklar.
-2. **`createDrill` avviker.** Mockupens kopia har D34-placeringen av extratillfället (minst två frågor bort, inte
-   bredvid samma landskap). Det måste föras in i `js/shared.js` (`MP.createDrill`) med ett test, och resten av
-   appens användare av `createDrill` måste prövas. Samma sak gäller `spreadShuffle` (ny lottning, aldrig samma
-   landskap i rad), som bör bli en delad hjälpare.
-3. **Tillgångar.** Flytta bilderna (vapen, blommor, djur) och JSON-filerna från `referens/` till appens tillgångar,
-   lägg dem i service workerns cache (`sw.js`) och höj `APP_VERSION` och `CACHE_VERSION`. Kartan läses i dag med
-   fetch ur `referens/sveriges-landskap-farg.svg`. Bildkällornas vy ska läsa den flyttade `bilder.json`.
-4. **Koppla till appen:**
-   - lådorna (`MP.spaced`) per profil i `localStorage`, en låda per landskap, och frågetyperna per landskap för guld
-   - Capybarakorten (D14), där det passar med pärmens nivåer
-   - kvittot och "Sett av en vuxen" till appens logg
-   - medaljerna (`MP.medalSVG`)
-5. **Tester (vitest)** för den rena logiken:
-   - `hit()`-reglerna
-   - `snapRadius`
-   - `specialFacts` (de sju landskapen)
-   - `level()`
-   - `spreadShuffle`
-   - `buildItems`/`buildTest`
-   - språkgenomläsningen (`allTexts`)
-
-   Därtill en kontroll av rutans höjd och bredd, och av att inget scrollar.
-6. UI-test som PWA på iPhone 17e i simulatorn, särskilt gesterna i Safari och att sidan inte zoomar.
-7. Ta upp de öppna punkterna ovan med Dennis innan release, särskilt nivåregeln.
+## Nästa steg
+1. Granskning av grenen `geografi` (två granskare), Dennis provar på telefonen, merge `--no-ff` till `dev`.
+2. Ta upp de öppna punkterna med Dennis före release, särskilt nivåregeln och startsidans kortmått.
+3. Ändras datan: redigera `referens/sverige-landskap/*.json`, kör generatorn och testerna.

@@ -2,10 +2,9 @@
 
 ## Öppet
 
-- [ ] **Geografi: bygg in i appen och livesätt** (D35). Tagga `fore-geografi`, bygg på egen gren efter
-      `design-lab/geografi-mockup.html` och `agenter/geografi/OVERLAMNING.md` (bilder och data från `referens/` till
-      appens tillgångar, `createDrill` med D34-blandningen in i `js/shared.js` utan att Gångertabellen och Klockan
-      ändras, lådor/Capy/kvitto, tester, v66) → granskning → merge till `dev` → P11 avgjord → release.
+- [ ] **Geografi: livesätt** (D35). Bygget är klart på grenen `geografi` (v66, se loggen 19/10 och
+      `agenter/geografi/OVERLAMNING.md`) → granskning (två granskare, särskilt startsidans kortmått) → merge `--no-ff`
+      till `dev` → release. Öppet hos Dennis: nivåregeln i pärmen (brons = övat) och startsidans lägre spelkort.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på Miras eller Dennis telefon).

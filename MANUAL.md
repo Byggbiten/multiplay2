@@ -37,6 +37,7 @@ Efter att du valt en profil kommer du till spelväljaren. Här ser du din avatar
 | **Gångertabellen** | Träna multiplikation (1–12:ans tabell) |
 | **Klockan** | Lär dig läsa och ställa klockan |
 | **10-Kompisar** | Lär dig talpar som tillsammans blir 10 |
+| **Geografi** | Sveriges landskap på kartan (v66) |
 
 Klicka på bilden för det spel du vill öppna. Du kan alltid gå tillbaka till spelväljaren med **"Tillbaka"**-knappen.
 
@@ -314,11 +315,69 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Geografi (v66)
+
+Spelkortet **Geografi** ligger som ett brett kort längst ned i spelväljaren. Geografi ingår inte i Dagens träning.
+
+### Menyn
+Nio val: **Sverige** är öppet, Europa, Asien, Afrika, Nordamerika, Sydamerika, Oceanien, Hela världen och Världens hav
+**kommer snart**. Under Sverige finns **Sveriges landskap**; sjöar och städer kommer snart. Kugghjulet uppe till höger
+öppnar **inställningarna för en vuxen**.
+
+### Hemlandskapet (inställningar, D36)
+En vuxen kan välja ett **hemlandskap** bland de 25. Från början är inget valt, och då visar kartan ingen nål och ingen
+text om var barnet bor. Med ett valt landskap står en nål i landskapets mitt i **Utforska**, och landskapets kort säger
+**Här bor du**. Valet gäller den profilen på den enheten.
+
+### Sveriges landskap: hemvyn
+En liten karta i lådornas färger (Ny, Övar, Kan, Igen), fyra områdeskort (Norrland, Svealand, Götaland, Hela Sverige)
+med medalj och "Du kan … landskap", och fyra dörrar: **Utforska**, **Pussel**, **Samlarpärm** och **Test**.
+Informationsknappen (i) visar **bildkällorna**: upphovsperson och licens för alla 75 bilder.
+
+### Utforska
+Fri karta: dra, nyp för att zooma (med tröghet), knappen i hörnet visar hela kartan. Dubbeltryck zoomar inte.
+Ett tryck på ett landskap öppnar kortet: skölden, största staden (ibland två), blomman och djuret som bilder och
+**Visste du?** med storlek, invånare och en fakta om vapnet eller landskapet.
+
+### Träna
+Tryck på ett områdeskort. Ordningen är **Blandad** från början (ny lottning varje gång, aldrig samma landskap två gånger
+i rad); **Norr till söder** finns som val. Fyra lägen, ett tryck startar:
+- **Upptäck Sverige**: kartan börjar i dimma; hitta landskapen, och varje hittat landskap får färg och namn.
+- **Vad heter det?**: ett landskap lyser, välj bland fyra namn (rätt svars plats lottas).
+- **Städerna**: i vilket landskap ligger staden?
+- **Djur, blommor, sköldar**: landskapsdjur, landskapsblommor, landskapssköldar eller blandat.
+
+Rätt svar visar en faktaruta (skölden, staden, djuret, blomman) och väntar på **Nästa**. Fel ger en förklaring
+("Nästan rätt!" bara när svaret var en granne), efter två fel blinkar rätt landskap, och frågan kommer tillbaka
+senare i passet (nötloopen). Sammanfattningen visar rätt på första försöket, rättade fel och nya nivåer i pärmen.
+
+### Pussel
+Välj område och nivå med ett tryck: **Med gränser** eller **Utan gränser** (bara ytterkonturen). Dra bitarna till
+kartan; namnet följer med ovanför fingret. Nära rätt plats snäpper biten fast, fel plats glider tillbaka, och efter
+två fel blinkar rätt plats. Klara pussel får en bock. Pusslet påverkar inte lådorna eller pärmen.
+
+### Samlarpärmen
+Ett kort per landskap. **Brons**: övat. **Silver**: kan (rätt tre olika dagar). **Guld**: kan och rätt i alla sex
+frågetyperna (kartan, namnet, staden, djuret, blomman, skölden). Tryck på ett kort för att se vad som krävs till
+nästa nivå. Hela pärmen full ger ett firande.
+
+### Test
+Välj område. Testet frågar om **alla** landskap i området en gång var, med blandade frågetyper och utan klocka.
+Fel visar svaret och går vidare. Resultatet visas på kartan (grönt rätt, gult öva mer) och som kvitto, som en vuxen
+stämplar **Sett av en vuxen** genom att hålla inne knappen.
+
+### Logg och belöningar
+Övningspass och test sparas i Geografis logg (statuschippet på spelkortet visar senaste resultatet). Capybara-samlingen
+räknar dem som andra pass och test, och guld på ett landskap ger ett kort (se nedan).
+
+---
+
 ## Capybara-samlingen
 
 24 capybarakort (10 vanliga, 8 sällsynta, 6 legendariska) delas ut som belöning efter resultat: första testet,
 var tredje test eller pass, medaljnivåerna (75, 85 och 95 %), 100 % i en modul, Minnesmästare, dagar i rad med
-Dagens träning, dagens första övningspass, när en hel tabell kan och när ett av klockans steg får guld.
+Dagens träning, dagens första övningspass, när en hel tabell kan, när ett av klockans steg får guld och när ett landskap
+får guld i Geografis samlarpärm.
 Max ett kort per resultat; resten väntar i en kö.
 - **Nivåer (v59):** varje kort finns som vanligt, **silver** och **guld** – 72 belöningar av samma bilder.
   När alla 24 kort finns blir varje ny belöning en uppgradering till silver, och när alla är silver en uppgradering till guld.
@@ -327,6 +386,8 @@ Max ett kort per resultat; resten väntar i en kö.
   vanligt kort eller en uppgradering, en gång per tabell. Kortet delas ut vid nästa resultat.
 - **Klockans steg (v63):** guld på ett steg ger "Du kan klockans steg Halv" – ett vanligt kort eller en uppgradering,
   en gång per steg, vid nästa resultat. Klockans pass ger skälet "Övningspass på klockan: Halv, fyra varv".
+- **Geografi (v66):** guld på ett landskap i samlarpärmen ger "Guld i samlarpärmen: Medelpad" – ett vanligt kort eller
+  en uppgradering, en gång per landskap, vid nästa resultat. Passen ger skälet "Övningspass i Geografi: Städerna, Norrland".
 - **Samlingen** visar t.ex. "24 av 24 kort · 5 silver · 0 guld". Tryck på ett kort för att se det stort under
   **Så fick du den**: en rad per nivå med datum och skäl. Kort från före v59 visar "Du fick den innan appen sparade hur".
 
@@ -392,6 +453,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | Tidsperiod-visning | Visuell indikator för tid på dygnet |
 | 10-Kompisar – Övning | Visuell utforskning av talpar |
 | 10-Kompisar – Test | 10 frågor om talpar som blir 10 |
+| Geografi | Sveriges landskap: Utforska, Träna (fyra lägen), Pussel, Samlarpärm, Test, hemlandskap |
 | Ljudeffekter | Feedback-ljud vid rätt och fel svar |
 | Lokal datalagring | Allt sparas i webbläsaren |
 | PWA-stöd | Kan installeras som app på hemskärmen |
