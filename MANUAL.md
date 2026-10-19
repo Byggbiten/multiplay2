@@ -315,7 +315,7 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
-## Matteprov 4:an (D37, ännu inte släppt)
+## Matteprov 4:an (v67–v68, D37, D38)
 
 Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet
 **Matteprov 4:an**. Det öppnar en lista med prov om multiplikation; nya prov läggs till efter hand. Första provet är
@@ -323,7 +323,8 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 
 ### Provsidan
 - **Lättare / Svårare** överst. Nivån gäller bara när barnet övar. **Provet är alltid på Svårare**, som det svårare
-  övningsbladet eller strax över, så att provet i skolan inte blir svårare än det som övats här.
+  övningsbladet eller strax över. Appen får ändå vara något lättare än skolans prov, eftersom den frågar efter
+  raderna i uppställningen och placerar svaren (D38 ✎).
 - **Öva på ett moment**: de fem momenten med senaste övningens resultat (grönt eller gult märke).
 - **Tabellsprint**: så många gångertal som barnet hinner på 4 minuter, högst 48. Ingår inte i provet. Tiden syns bara
   här. Resultatet visas på en skala (0–12, 13–24, 25–36, 37–48) och bästa resultatet sparas.
@@ -334,7 +335,8 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 ### Öva
 Varje moment börjar med **Så här gör du**: korta steg som barnet klickar fram (ett steg är en idé), eller hoppar över.
 Sedan kommer uppgifterna, med **kladden** under knappsatsen (rita, sudda, rensa; den töms vid ny uppgift). Knappsatsen
-är kompakt: siffrorna i två rader om fem och en rad med sudda, Nästa/Svara och Klar. Kladdens verktyg är ikoner:
+är kompakt: siffrorna i två rader om fem och en rad med sudda och en knapp i full bredd – Svara/Nästa medan
+raderna frågas, Klar först när summan ska skrivas (aldrig två svarsknappar samtidigt). Kladdens verktyg är ikoner:
 rita, sudda, **ångra**, **gör om** och rensa. Ångra och Gör om fungerar i flera steg, Rensa går att ångra, och ett nytt
 drag efter en ångring tömmer Gör om. På korta skärmar ligger verktygen i kladdens hörn.
 

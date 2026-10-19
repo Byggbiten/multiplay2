@@ -60,7 +60,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
-- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt
+- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
 
 ---
 
@@ -445,7 +445,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ändras inte. Källa: Dennis: "Försök att följa testens struktur för att lösa problemen och ställa upp talen." och "det
   vi gör nu om det avviker från multiplays sätt att ställa upp och lösa tal i övrigt skall bara ske isolerat i detta
   matteprov. vi ändrar inte hela appen i övrigt".
-- ✎ **2026-10-19, minst lika svårt:** provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
+- ✎ **2026-10-19, minst lika svårt** (*ändrat av D38 ✎ "frågan per rad": appen får vara något lättare än provet; talens storlek och typer ligger kvar på Svårare-nivå*): provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
   bladets nivå eller strax över. Lättare/Svårare finns kvar som trappsteg i övningen. Källa: Dennis: "viktigt är att
   vårt prov vi bygger nu inte är lättare än underlaget. Det skall vara 'lika svårt' och om det måste gå åt något håll,
   så får det vara lite svårare. Bättre att hon får jobba lite extra i appen och sedan glänsa på provet".
