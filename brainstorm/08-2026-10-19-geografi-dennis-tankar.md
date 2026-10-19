@@ -58,5 +58,6 @@ sitter (lådan "kan"). Hela Sverige = full pärm. Kopplas till capybarakorten so
 - Vilka av förslagen 5–7 och samlarpärmen han vill ha med i första versionen.
 
 ## Utfall
-Väntar på Dennis svar (19/10). Mockupen `design-lab/geografi-mockup.html` (från 07) står som förslag och görs om
+Dennis svar 19/10: städerna → D25, nedladdning från Wikimedia → D26, strukturen Geografi → Sverige → Sveriges
+landskap → D24. Spellägen i första versionen: öppet (P10). Mockupen `design-lab/geografi-mockup.html` (från 07) står som förslag och görs om
 efter detta samtal.

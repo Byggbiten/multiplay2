@@ -40,6 +40,9 @@ aldrig. Nya frågor får nästa P-nummer.
   `js/shared.js`. Förslag 19/10: `brainstorm/07-2026-10-19-geografi-landskap.md` och `design-lab/geografi-mockup.html`,
   med sex val att döma i tankepassets Utfall.
 
+- **P10 Geografi: första versionens spellägen.** Grunden är Upptäck Sverige, Vad heter det? och städerna. Ska
+  pusslet, Resan genom Sverige, Vem är jag? och samlarpärmen vara med från början? (`brainstorm/08`, till: Dennis.)
+
 ## Besvarade
 
 - ~~P9 Grenarna på GitHub: ska de tio sammanslagna grenarna tas bort?~~ → D23

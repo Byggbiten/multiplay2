@@ -46,6 +46,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D21 Ordning och reda införs i repot
 - D22 Ny modul Geografi, som börjar med Sveriges landskap
 - D23 Sammanslagna grenar på GitHub tas bort
+- D24 Geografi → Sverige → Sveriges landskap (struktur)
+- D25 Städerna: största staden, plus en väsentligt stor stad där den finns
+- D26 Sköldar och blommor laddas ner från Wikimedia
 
 ---
 
@@ -238,3 +241,26 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-10-19: "Om det inte är något som är av vikt så kan du ta bort dem. Jag vet inte vad de är
   eller varför det finns, men som sagt. tanken med ordning och reda rutin är som sagt att hålla välstädat repo, och
   att inte redunanta filer ligger kvar och spökar"
+
+## D24 · 2026-10-19 · Geografi → Sverige → Sveriges landskap (struktur)
+- **Beslut:** huvudmodulen heter **Geografi**. Första delen heter **Sverige**, och dess första innehåll är **Sveriges
+  landskap**. Sverige byggs senare ut (t.ex. sjöar, städer). Geografi byggs ut med fler delar: Europa (länder, var de
+  ligger, huvudstad, flagga, invånare – "väldigt kort-fakta"), Asien, Afrika, Nordamerika, Sydamerika, Oceanien,
+  världshaven. Inom Sveriges landskap: läroläge (Utforska, landskapskort), träning per landsdel eller hela Sverige i rak
+  eller blandad ordning, kartan med dra och nyp-zoom som Apples kartor utan bieffekter, svårare steg (städer, djur),
+  Test utan stress, nötning som i gångertabellen, och "Upptäck Sverige" där landskapen färgläggs som i memory.
+  Ersätter mockupens upplägg i `design-lab/geografi-mockup.html` (från `brainstorm/07`); se `brainstorm/08`.
+- **Källa:** Dennis 2026-10-19: "Huvudmodulen heter geografi - och denna ska heta Sverige. Och sen väl i sverige kanske
+  man bygger ut den med diverse. Nu är det sveriges landskap. Senare kanske det är sjöar eller städer mm." Riktningen i
+  övrigt: hans meddelande samma dag, återgivet i `brainstorm/08`.
+
+## D25 · 2026-10-19 · Städerna: största staden, plus en väsentligt stor stad där den finns
+- **Beslut:** varje landskap får sin största stad. Ligger ytterligare en väsentligt stor stad i landskapet tas den med
+  (t.ex. Uppland: Stockholm och Uppsala). Listan tas fram med källa och godkänns av Dennis.
+- **Källa:** Dennis 2026-10-19: "Ta den största staden - men använd din AI-hjärna ifall en väsentligt stor stad också
+  ligger där. t.ex. som Stockholm som är största stad och huvudstad, men uppsala är för liten för att ignorera."
+
+## D26 · 2026-10-19 · Sköldar och blommor laddas ner från Wikimedia
+- **Beslut:** landskapssköldar och landskapsblommor hämtas som bilder från Wikimedia Commons, med licens och källa
+  antecknade per fil i `referens/`.
+- **Källa:** Dennis 2026-10-19: "Ja, ladda ned fårn wikimedia".
