@@ -460,3 +460,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   fel många gånger, så kanske appen kliver in och hjälper dem. Kanske att de inte ger bort hela svaret, men bitar, men
   går det ändå inte så får de hela svaret och får gå vidare. så får appen i slutet komma ihåg vad som va extra svårt
   så att den samlar ihop ett skräddarsytt prov där man får öva på det som va svårt".
+- ✎ **2026-10-19, ensiffrig faktor med delprodukter:** uppställning med ensiffrig faktor räknas med en delprodukt per
+  siffra på egen rad (687 · 8: 56, sedan 64 förskjutet ett steg, sedan 48 förskjutet två steg) och adderas till en
+  slutsumma. Tvåsiffrig faktor behåller rad 1, rad 2 med den grå nollan och summan. Gäller bara matteprovet (D37).
+  Källa: Dennis: "Här hade jag önskat att man först räknade ut 8x7= 56 och sedan när man räknar 8x8 så sker det raden
+  under förskjutet 1 steg åt vänster så att man bygger på alla uträkningar och sedan får dem i celler efter deras
+  värde (ental, tiotal, hundratal etc) och sedan adderar ihop det till en slutsumma."
