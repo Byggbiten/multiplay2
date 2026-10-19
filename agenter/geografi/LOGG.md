@@ -155,7 +155,19 @@ En post per runda: vad som inte fungerade och varför, vad lösningen blev, och 
   - Mät startsidan och varje vy i PWA-höjden (390 × 797) innan "ingen scroll" påstås.
   - Mockupens tester är värda att återanvända: en tunn kompatibilitetsyta gav full täckning direkt.
 
-## Genomgående lärdom (sex rundor)
+## Runda 7 · 2026-10-19 · Releasen v66 och sammanslagningen
+- **Vad som hände:** Dennis sa "livesätt v66". Grenen `geografi` slogs samman i `dev` (`4010076`) tillsammans med
+  grenen `integritet` (rensningen enligt D36: personan Mira, barntest och rollspel), och båda grenarna togs bort
+  lokalt och på GitHub. `main` = `5349f5a`, återställningstaggen `live-fore-v66`. Under sammanslagningen rensades
+  `referens/README.md` från sökvägar till hämtade filer, och dev-spegelns synk undantar nu `_privat/`.
+- **Vad som inte fungerade:** min överlämning beskrev ett läge (gren, inte mergad) som var inaktuellt så snart
+  releasen gjordes, och handlingslistan pekade på en granskning av en gren som inte längre finns.
+- **Lösning:** överlämningen omskriven efter releasen: v66 live, inga grenar, de öppna punkterna och nästa steg
+  (Dennis synpunkter, nästa del av Geografi enligt D24).
+- **Lärdom:** en överlämning skrivs om vid varje milstolpe (release, sammanslagning), inte bara när rollens eget arbete
+  är klart; läget i den ska gå att kontrollera mot `git log` och taggarna.
+
+## Genomgående lärdom (sju rundor)
 Flera rundor gav nya önskemål som en tidigare fråga hade kunnat fånga:
 - Ska ett rätt svar gå vidare själv?
 - Ska rutan vara fast eller rotera?

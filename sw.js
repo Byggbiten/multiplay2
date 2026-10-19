@@ -1,7 +1,7 @@
 /* MULTIPLAY – Service Worker (PWA offline-stöd) */
 
 // VIKTIGT: Öka versionsnumret vid varje push (v2 → v3 → v4 osv)
-const CACHE_VERSION = 'v66';
+const CACHE_VERSION = 'v67';
 const CACHE = `multiplay-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -24,6 +24,8 @@ const ASSETS = [
   './js/platsvarde.js',
   './js/uppstallning.js',
   './js/multdiv.js',
+  './js/matteprov-logic.js',
+  './js/matteprov.js',
   './js/geografi-data.js',
   './js/geografi-logic.js',
   './js/geografi.js',

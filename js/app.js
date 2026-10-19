@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v66';
+const APP_VERSION = 'v67';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
@@ -162,6 +162,7 @@ const Store = {
       `uppstallning_log_${id}`,         // uppstallning.js
       `platsvarde_log_${id}`,           // platsvarde.js
       `multdiv_log_${id}`,              // multdiv.js
+      `matteprov_${id}`,                // matteprov.js (Matteprov 4:an: nivå, övning, prov, sprint; D37)
       `np_svenska_log_${id}`,           // np-svenska.js
       `np_matte_muntligt_stats_${id}`,  // np-matte-muntligt.js
       `np_matte_skriftlig_stats_${id}`, // np-matte-skriftlig.js

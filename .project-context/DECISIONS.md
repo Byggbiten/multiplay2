@@ -59,6 +59,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D34 Blandad ordning är standard i Träna och Test
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
+- D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
+- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt
 
 ---
 
@@ -427,3 +429,55 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   Zelda får förekomma i appen som svar eller i en fråga. Men! det får som sagt inte bli att det är uppenbart så att
   det är […]" och "Byggbiten får finnas kvar. […] jag vill som sagt inte skylta i onödan. Så vi håller det på en
   rimlig nivå där vi inte måste byta konto eller riva upp appen från början".
+
+## D37 · 2026-10-19 · Matteprov 4:an i Multiplikation, första provet är Matteprov 1
+- **Beslut:** lägesvyn i Multiplikation (under Svårighetsgrad) får knappen "Matteprov 4:an". Den leder till en lista
+  med prov som läggs ut löpande, alla om multiplikation. Det första heter "Matteprov 1" och bygger på lärobokens
+  kapitel 2 i åk 4: tabellerna 1–10, gånger tiotal och hundratal, talsorter (T och E), uppställning med en- och
+  tvåsiffrig faktor (nollan i den grå rutan) och problemlösning i två steg, i en lättare och en svårare nivå som
+  övningsbladen. Uppgifterna är egna och liknar övningsbladen; inget skrivs av ordagrant (bladen är upphovsrättsskyddade).
+- **Källa:** Dennis 2026-10-19: "Skulle vi kunna läsa övningsbladen och göra dem till ett matteprov som ligger där
+  jag markerat i bilden? Knappen kan heta matteprov 4:an. klickar man där så kommer vi löpande lägga ut matteprov som
+  har med multiplikation att göra. och detta vi gör nu döps till matteprov 1" och "provet måste som sagt anpassas
+  efter appen. Så jag räknar inte med att provet blir 'rakt av'. men att vi kommer nära".
+- ✎ **2026-10-19, isolerat i provet:** provet följer bladens uppställning och lösningsgång (rutnätet, nollan i den grå
+  rutan, =-raderna, uttrycket först). Det som avviker från appens sätt i övrigt gäller bara matteprovet; resten av appen
+  ändras inte. Källa: Dennis: "Försök att följa testens struktur för att lösa problemen och ställa upp talen." och "det
+  vi gör nu om det avviker från multiplays sätt att ställa upp och lösa tal i övrigt skall bara ske isolerat i detta
+  matteprov. vi ändrar inte hela appen i övrigt".
+- ✎ **2026-10-19, minst lika svårt:** provet får inte vara lättare än underlaget; "Gör provet" ligger på det svårare
+  bladets nivå eller strax över. Lättare/Svårare finns kvar som trappsteg i övningen. Källa: Dennis: "viktigt är att
+  vårt prov vi bygger nu inte är lättare än underlaget. Det skall vara 'lika svårt' och om det måste gå åt något håll,
+  så får det vara lite svårare. Bättre att hon får jobba lite extra i appen och sedan glänsa på provet".
+
+## D38 · 2026-10-19 · Matteprovet: kladdyta, stegvis hjälp och ett skräddarsytt prov
+- **Beslut:** matteprovet får appens kladdyta, så att barnet kan räkna vid sidan av. Provet är ett övningsprov och får
+  hjälpmedel: svarar barnet fel flera gånger kliver appen in med en bit av lösningen i taget, och går det ändå inte
+  visas hela svaret och barnet går vidare. Appen kommer ihåg det som var extra svårt och sätter ihop ett skräddarsytt
+  prov av det.
+- **Källa:** Dennis 2026-10-19: "jag tror att de behöver 'kladd-ytan' om de skall kunna lösa dessa tal." och "eftersom
+  vårt prov är till för att de skall träna på prov. så bör vi ändå slänga in lite hjälpmedel. T.ex. att om de svarar
+  fel många gånger, så kanske appen kliver in och hjälper dem. Kanske att de inte ger bort hela svaret, men bitar, men
+  går det ändå inte så får de hela svaret och får gå vidare. så får appen i slutet komma ihåg vad som va extra svårt
+  så att den samlar ihop ett skräddarsytt prov där man får öva på det som va svårt".
+- ✎ **2026-10-19, ensiffrig faktor med delprodukter:** uppställning med ensiffrig faktor räknas med en delprodukt per
+  siffra på egen rad (687 · 8: 56, sedan 64 förskjutet ett steg, sedan 48 förskjutet två steg) och adderas till en
+  slutsumma. Tvåsiffrig faktor behåller rad 1, rad 2 med den grå nollan och summan. Gäller bara matteprovet (D37).
+  Källa: Dennis: "Här hade jag önskat att man först räknade ut 8x7= 56 och sedan när man räknar 8x8 så sker det raden
+  under förskjutet 1 steg åt vänster så att man bygger på alla uträkningar och sedan får dem i celler efter deras
+  värde (ental, tiotal, hundratal etc) och sedan adderar ihop det till en slutsumma."
+- ✎ **2026-10-19, appen leder uppställningen:** appen ber om delproduktsmetoden och visar var barnet ska börja och vad
+  som räknas (aktiv ruta, siffrorna som lyser, en kort rad). Vägvisningen räknas inte som hjälp i kvittot. Källa:
+  Dennis: "i våran app så är det tyvärr begränsat med utrymme. Så då är det inte mer än rätt att appen visar detta och
+  ber om det sättet. och att appen guider barnen vart de skall börja. Det är som sagt till för att träna på prov."
+- ✎ **2026-10-19, tvåsiffrig faktor med tankerad:** skolans två rader (rad 1, rad 2 med den grå nollan, summan) står
+  kvar; en tankerad ovanför räknar varje rad med talsorter (8 · 82 = 8 · 80 + 8 · 2 = 640 + 16 = 656). I Öva visas
+  alla led; i provet bara uppdelningen, resten kommer som bitar i hjälptrappan. Valt framför en rad per sifferpar,
+  som blir för lång vid tresiffrigt · tvåsiffrigt och avviker från provets uppställning. Källa: Dennis: "denna vy
+  behöver lite kärlek. för hur de skall på ett pedagogiskt sätt kunna räkna ut detta och summera ihop delsummor när de
+  har så lite yta att jobba med" och, om alternativen, "enligt din rekomendation".
+- ✎ **2026-10-19, anteckningsrutor i tankeraden och kompakt knappsats:** tankeraden får små inmatningsrutor (8 · 80 =
+  [ ], 8 · 2 = [ ], [ ] + [ ] = [ ]) där barnet antecknar delsummorna; i Öva rättas de, i provet är de fria
+  anteckningar. Knappsatsen i matteprovet blir tre rader (siffrorna 2 × 5) så att kladden växer. Källa: Dennis: "men
+  [barnet] har ingenstans att anteckna 640 + 16 så hon kan summera det. kanske sifferinmatningen skall bli mindre? så
+  hon får kladdyta? eller har du något tips?"

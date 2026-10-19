@@ -2169,6 +2169,11 @@ const MultDivGame = (() => {
             </div>
             <div class="md-diff-row">${diffBtnsHTML}</div>
           </div>
+          ${div || typeof MatteProv === 'undefined' ? '' : `<div class="md-card md-prov" onclick="MultDivGame.openProv()">
+            <span class="md-aico"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:30px;height:30px;fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/><path d="M10 12h6M10 16h6"/></svg></span>
+            <span><b>Matteprov 4:an</b><small>Prov att öva inför, med kvitto</small></span>
+            <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </div>`}
         </div>
       </div>`;
     Router.show('screen-multdiv');
@@ -3524,6 +3529,13 @@ const MultDivGame = (() => {
     App.Sound.play('click');
   }
 
+  /* D37: Matteprov 4:an (js/matteprov.js) — bara från Multiplikationens lägesvy.
+     Provets egna regler (den grå nollan m.m.) bor i matteprov; multdiv rörs inte. */
+  function openProv() {
+    App.Sound.play('click');
+    MatteProv.open(profile, () => { gameKind = 'mult'; showModeSelect(); });
+  }
+
   /* ── Navigation ─────────────────────────────────────────── */
   function exitToApp() {
     const root = document.getElementById('multdiv-root');
@@ -3546,6 +3558,7 @@ const MultDivGame = (() => {
     useFreeLifeline,                       // livlinan i fria laget (22/9)
     mdToggleEraser, mdClearCanvas,
     exitToApp,
+    openProv,                              // D37: Matteprov 4:an
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },

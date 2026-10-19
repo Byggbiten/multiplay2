@@ -24,7 +24,7 @@ namn i uppgifterna.
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D36) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D38) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |
