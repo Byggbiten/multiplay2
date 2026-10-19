@@ -102,3 +102,7 @@ varför?")
 
 **Gränssnittet**
 - 390 × 844 utan scroll, träffytor ≥ 44 px, inga emojis i nytt (SVG som ikoner).
+- Ingen felsignal (D39): inget rött för fel svar (mjuk persika), inget surr (felljudet högst en gång per uppgift),
+  "Inte riktigt – försök igen" i stället för "Fel". Resultat med `MP.resultNote`: beröm från 60 %, under 60 % bara
+  "Du fick 3 av 10 rätt". `tests/snallare.test.mjs` larmar om "Fel!", "Fel svar" och "Tyvärr".
+- En svarsknapp i taget (D39 ✎): i lägen med flera rutor heter knappen Nästa tills allt är ifyllt och sedan Klar.

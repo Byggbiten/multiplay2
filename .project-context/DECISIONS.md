@@ -61,7 +61,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
-- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör
+- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
 
 ---
 
