@@ -53,3 +53,7 @@
 
 - Felet att service workern inte registreras är en egenhet hos panelen, inte appens. På telefon krävs https
   (Tailscale-adresserna i `CLAUDE.md`).
+
+- **Ny modul: samtal före mockup (19/10).** Geografins tankepass och mockup byggdes direkt ur Dennis material. Dennis:
+  "lite för snabb med att bygga mockupen innan vi hade brainstormat". Vid en ny modul: hör hans tankar först, sedan
+  tankepass och mockup.
