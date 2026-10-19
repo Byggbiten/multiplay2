@@ -60,6 +60,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
+- D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt
 
 ---
 
@@ -448,3 +449,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   bladets nivå eller strax över. Lättare/Svårare finns kvar som trappsteg i övningen. Källa: Dennis: "viktigt är att
   vårt prov vi bygger nu inte är lättare än underlaget. Det skall vara 'lika svårt' och om det måste gå åt något håll,
   så får det vara lite svårare. Bättre att hon får jobba lite extra i appen och sedan glänsa på provet".
+
+## D38 · 2026-10-19 · Matteprovet: kladdyta, stegvis hjälp och ett skräddarsytt prov
+- **Beslut:** matteprovet får appens kladdyta, så att barnet kan räkna vid sidan av. Provet är ett övningsprov och får
+  hjälpmedel: svarar barnet fel flera gånger kliver appen in med en bit av lösningen i taget, och går det ändå inte
+  visas hela svaret och barnet går vidare. Appen kommer ihåg det som var extra svårt och sätter ihop ett skräddarsytt
+  prov av det.
+- **Källa:** Dennis 2026-10-19: "jag tror att de behöver 'kladd-ytan' om de skall kunna lösa dessa tal." och "eftersom
+  vårt prov är till för att de skall träna på prov. så bör vi ändå slänga in lite hjälpmedel. T.ex. att om de svarar
+  fel många gånger, så kanske appen kliver in och hjälper dem. Kanske att de inte ger bort hela svaret, men bitar, men
+  går det ändå inte så får de hela svaret och får gå vidare. så får appen i slutet komma ihåg vad som va extra svårt
+  så att den samlar ihop ett skräddarsytt prov där man får öva på det som va svårt".
