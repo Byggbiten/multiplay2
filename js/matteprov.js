@@ -177,18 +177,11 @@ const MatteProv = (() => {
 #mp-root .mp-sr .fix{color:#15803d;font-size:16px;min-width:26px;text-align:left}
 #mp-root .mp-sheet.demo .mp-sr{min-height:36px;font-size:17px}
 #mp-root .mp-sheet.demo .mp-ans.sm{font-size:16px;min-width:44px;height:30px}
-#mp-root .mp-pad.r5{grid-template-rows:repeat(5,clamp(42px,6vh,52px));grid-auto-rows:auto}
-#mp-root .mp-pad.kl{grid-auto-rows:48px;gap:6px}
-#mp-root .mp-pad.r5.kl{grid-template-rows:repeat(5,44px)}
-#mp-root .mp-pad.k44{grid-auto-rows:44px}
 #mp-root .mp-q.fit .mp-c{width:44px;height:44px;font-size:26px}
 #mp-root .mp-q.fit .mp-m{height:22px;font-size:16px}
 #mp-root .mp-q.fit .mp-paper{border-spacing:5px 3px}
 #mp-root .mp-help{font-size:13.5px;padding:5px 10px}
-#mp-root .mp-pad.r5 .mp-klar{grid-row:1 / span 5}
-#mp-root .mp-pad.low{grid-auto-rows:clamp(44px,5.6vh,50px)}
 #mp-root .mp-k.op{font-size:28px;color:var(--accent)}
-#mp-root .mp-k.op.z2{grid-column:2 / span 2}
 #mp-root .mp-q.fit{flex:0 0 auto;gap:6px;padding:8px 10px}
 #mp-root .mp-guide{margin:0;display:flex;align-items:center;gap:6px;font-weight:900;font-size:14px;color:var(--accent);line-height:1.25;align-self:stretch}
 #mp-root .mp-guide svg.mi{width:18px;height:18px}
@@ -200,6 +193,38 @@ const MatteProv = (() => {
 #mp-root .mp-led{flex-shrink:0;width:44px;height:44px;margin:-8px -4px -8px 0;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 4px 10px var(--glow)}
 #mp-root .mp-led svg.mi{width:20px;height:20px}
 #mp-root .mp-c.in.lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.6)}
+#mp-root .mp-pad5{display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:48px;gap:6px;flex-shrink:0}
+#mp-root .mp-pad5 .mp-k.nx{grid-column:span 2;font-size:14px}
+#mp-root .mp-pad5 .mp-klar{grid-row:auto;grid-column:span 2;flex-direction:row;gap:6px;font-size:18px}
+#mp-root .mp-pad5 .mp-klar svg.mi{width:24px;height:24px}
+#mp-root .mp-pad5 .mp-klar.w1{grid-column:span 1;font-size:15px;gap:2px}
+#mp-root .mp-pad5 .mp-klar.w1 span{display:none}
+#mp-root .mp-pad5 .mp-klar.w4{grid-column:span 4}
+@media (max-height:760px){#mp-root .mp-pad5{grid-auto-rows:44px;gap:5px}
+  /* korta skärmar: talen i faktorerna är inga tryckytor och får krympa; kladden får resten */
+  #mp-root .mp-q.fit .mp-c.fix{height:34px;font-size:24px}
+  #mp-root .mp-q.fit .mp-m{height:18px;font-size:14px}
+  #mp-root .mp-q.fit{padding:5px 8px;gap:4px}
+  #mp-root .mp-body{gap:6px}
+  #mp-root .app-header{margin-bottom:2px}
+  #mp-root .mp-body .mp-scratch{min-height:64px;position:relative;padding:4px}
+  /* kladdens verktyg som ikoner i kladdens hörn, så att ritytan får hela höjden */
+  #mp-root .mp-scratch .mp-sc-bar{position:absolute;top:8px;right:8px;z-index:2;gap:4px}
+  #mp-root .mp-scratch .mp-sc-l{display:none}
+  #mp-root .mp-scratch .mp-sc-b{font-size:0;gap:0;padding:0;width:44px;justify-content:center;background:rgba(255,255,255,.92)}
+  #mp-root .mp-scratch .mp-sc-b.on{background:var(--accent)}
+  #mp-root .mp-scratch .mp-sc-b svg.mi{width:20px;height:20px}
+  #mp-root .mp-scratch .mp-canvas{min-height:56px}
+  #mp-root .mp-q.fit .mp-guide.hm{font-size:12.5px;padding:3px 7px}}
+#mp-root .mp-notes{display:flex;flex-direction:column;gap:4px;align-self:stretch}
+#mp-root .mp-nl{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:var(--font-head);font-weight:800;font-size:14.5px;color:var(--deep);font-variant-numeric:tabular-nums}
+#mp-root .mp-np{display:inline-flex;align-items:center;gap:3px;margin-right:3px}
+#mp-root .mp-nt{white-space:nowrap}
+#mp-root .mp-nt.sm{font-family:var(--font-body);font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+#mp-root .mp-nb{min-width:46px;height:44px;padding:0 4px;border-radius:10px;border:2.5px dashed color-mix(in srgb,var(--accent) 40%,transparent);background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
+#mp-root .mp-nb.focus{border:3px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+#mp-root .mp-nb.ok{border:2.5px solid #22c55e;background:#dcfce7;color:#15803d}
+#mp-root .mp-nb.bad{border:2.5px solid #fdba74;background:#fff7ed;color:#9a3412}
 #mp-root .mp-c.in.lk{opacity:.32;border-style:dashed;cursor:default}
 #mp-root .mp-c.in.sh{border:2px dotted rgba(100,116,139,.25);background:transparent}
 #mp-root .mp-help{display:none;flex-shrink:0;border-radius:16px;padding:7px 12px;background:#fff7ed;border:2px solid #fdba74;color:#7c2d12;font-weight:800;font-size:14px;line-height:1.3}
@@ -231,14 +256,12 @@ const MatteProv = (() => {
 @keyframes mp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}50%{box-shadow:0 0 0 6px rgba(234,88,12,.45)}}
 
 /* Knappsatsen (som multdiv:s fria läge: hög Klar till höger) */
-#mp-root .mp-pad{display:grid;grid-template-columns:repeat(3,1fr) clamp(84px,24vw,112px);grid-auto-rows:clamp(48px,7.2vh,60px);gap:7px;flex-shrink:0}
 #mp-root .mp-k{border-radius:16px;font-family:var(--font-head);font-weight:800;font-size:24px;color:var(--deep);background:linear-gradient(180deg,#fff,var(--glass-strong));
   border:2px solid color-mix(in srgb,var(--accent) 18%,transparent);box-shadow:0 2px 0 color-mix(in srgb,var(--accent) 16%,transparent);display:grid;place-items:center}
 #mp-root .mp-k:active{transform:scale(.94);background:color-mix(in srgb,var(--accent) 12%,#fff)}
 #mp-root .mp-k.er{background:var(--tint)}
 #mp-root .mp-k.nx{font-family:var(--font-body);font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:4px;grid-column:3}
-#mp-root .mp-k.z2{grid-column:2 / span 2}
-#mp-root .mp-klar{grid-column:4;grid-row:1 / span 4;border-radius:18px;font-family:var(--font-head);font-weight:800;font-size:19px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;
+#mp-root .mp-klar{border-radius:18px;font-family:var(--font-head);font-weight:800;font-size:19px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;
   background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 8px 22px var(--glow)}
 #mp-root .mp-klar svg.mi{width:30px;height:30px;stroke-width:3}
 #mp-root .mp-klar:disabled{color:var(--deep);background:linear-gradient(180deg,#fff,var(--tint));box-shadow:inset 0 0 0 2.5px color-mix(in srgb,var(--accent) 40%,transparent)}
@@ -561,7 +584,9 @@ const MatteProv = (() => {
     const W = t.width, blank = () => Array(W).fill(null);
     const rws = t.two ? ['p1', 'p2', 's'] : t.parts.map(p => 'r' + p.i).concat(['s']);   // ensiffrig: en rad per delprodukt
     const vals = { m:blank() }; rws.forEach(r => vals[r] = blank());
-    return { kind:'upp', rows:rws, vals, f:{ row:rws[0], col:0 }, back:null, given:new Set(), pulse:false, H };
+    /* tvåsiffrig: tankeradens anteckningsrutor per rad (en per term + summan); fokus börjar i dem */
+    const notes = t.two ? { p1:Array(L.placeTerms(t.top).length + 1).fill(''), p2:Array(L.placeTerms(t.top).length + 1).fill('') } : null;
+    return { kind:'upp', rows:rws, vals, notes, f:{ row:rws[0], col:0, note:notes ? 0 : null }, back:null, given:new Set(), pulse:false, H };
   }
   const needsScratch = t => t.type !== 'sheet' && S.mode !== 'sprint';
 
@@ -702,9 +727,11 @@ const MatteProv = (() => {
     }
     const G = fb ? null : uppGuide(t), M = !fb && IN.H.msg, open = fb ? null : L.uppOpenRows(t, IN.vals);
     /* uppställningen: hjälpens rad tar vägvisningens plats i kortet (annars får kladden ingen plats) */
+    const noteBlock = !fb && G && G.notes ? notesHTML(t, G.row) : '';
     const top = !fb && IN.note ? `<p class="mp-guide hm retry">${svg('next')}<span>${esc(IN.note)}</span></p>` : M ? `<p class="mp-guide hm ${M.kind}">${svg(M.kind === 'retry' ? 'again' : 'bulb')}<span><b>${esc(M.title)}</b> ${esc(M.text)}</span></p>`
+      : noteBlock ? noteBlock
       : G ? `<p class="mp-guide">${svg('next')}<span class="tx">${esc(G.text)}</span>${G.more ? `<button class="mp-led" data-act="led" aria-label="Nästa led">${svg('right')}</button>` : ''}</p>` : '';
-    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus:fb ? null : IN.f, ok:show || (fb && fb.ok), pulse:(show && fb.cls === 'nolla') || (!fb && (IN.pulse || (G && G.grey))), given:show ? null : IN.given, lit:G ? G.lit : null, open })}`;
+    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus:fb || IN.f.note != null ? null : IN.f, ok:show || (fb && fb.ok), pulse:(show && fb.cls === 'nolla') || (!fb && (IN.pulse || (G && G.grey))), given:show ? null : IN.given, lit:G ? G.lit : null, open })}`;
   }
 
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
@@ -754,8 +781,14 @@ const MatteProv = (() => {
      som ska göras på raden med fokus, och siffrorna som ska multipliceras lyser. Den är vägvisning,
      inte hjälp, och räknas inte som "med hjälp". */
   function uppGuide(t) {
-    /* Tankeraden (L.thinkSteps): ett led i taget, barnet klickar fram nästa led. Provet: bara uppdelningen. */
+    /* Tankeraden (L.thinkSteps): ett led i taget, barnet klickar fram nästa led. Provet: bara uppdelningen.
+       Tvåsiffrig faktor: anteckningsrutorna (L.thinkNotes) i stället för leden. */
     const row = IN.f.row === 'm' ? ((IN.back || {}).row || IN.rows[0]) : IN.f.row;
+    if (t.two && row !== 's') {
+      const bot = [row === 'p1' ? 0 : 1], N = L.thinkNotes(t, row), j = IN.f.note;
+      const top = j != null && j < N.terms.length ? [String(N.terms[j]).length - 1] : L.digitsOf(t.top).map((_, k) => k);
+      return { notes:true, row, lit:{ top, bot }, grey:row === 'p2' && IN.vals.p2[0] == null && j == null };
+    }
     const col = row === 's' ? IN.f.col : null, mode = S && S.mode === 'prov' ? 'prov' : 'ova';
     const st = L.thinkSteps(t, row, mode, col);
     if (!IN.think || IN.think.row !== row || IN.think.col !== col) IN.think = { row, col, i:0 };
@@ -767,6 +800,22 @@ const MatteProv = (() => {
     else if (t.two) lit = { top:allTop, bot:[row === 'p1' ? 0 : 1] };
     else lit = { top:[rowStart(row)], bot:[0] };
     return { text, lit, more:i < st.length - 1, grey:row === 'p2' && IN.vals.p2[0] == null };
+  }
+
+  /* Tankeradens anteckningsrutor: "8 · 80 = [ ]  8 · 2 = [ ]" och "Rad 1: 640 + 16 = [ ]" (barnets egna tal
+     speglas). Öva rättar rutan när barnet lämnat den; provet rättar aldrig och visar inga värden. */
+  function notesHTML(t, row) {
+    const N = L.thinkNotes(t, row), v = IN.notes[row], k = N.terms.length, mode = S && S.mode === 'prov' ? 'prov' : 'ova';
+    const box = j => {
+      const foc = IN.f.row === row && IN.f.note === j;
+      const mark = foc ? 'focus' : (L.noteMark(t, row, j, v[j], mode) || '');
+      return `<span class="mp-nb ${mark}" data-act="note" data-row="${row}" data-j="${j}">${esc(v[j])}</span>`;
+    };
+    const l1 = N.labels.map((lb, j) => `<span class="mp-np"><span class="mp-nt">${esc(lb)} =</span>${box(j)}</span>`).join('');
+    const mirror = v.slice(0, k).map(x => x || '…').join(' + ');
+    const l2 = `<span class="mp-nt">Rad ${row === 'p1' ? 1 : 2}: ${esc(mirror)} =</span>${box(k)}` +
+      (row === 'p2' ? `<span class="mp-nt sm">${IN.vals.p2[0] == null ? 'Nollan i grå rutan först.' : 'Sedan raden.'}</span>` : `<span class="mp-nt sm">Skriv raden.</span>`);
+    return `<div class="mp-notes"><div class="mp-nl">${l1}</div><div class="mp-nl">${l2}</div></div>`;
   }
 
   /* Pappret: kolumner från vänster W-1 … 0 (0 = entalet) */
@@ -797,7 +846,7 @@ const MatteProv = (() => {
     const memRow = `<tr><td></td>${idx.map(memCell).map(x => `<td>${x}</td>`).join('')}</tr>`;
     /* additionens minnesrad ovanför raderna (som i appens addition); den visas först när summan är upplåst */
     const memShown = !o.open || o.open.includes('s');
-    const memLine = memShown ? memRow : `<tr><td></td>${idx.map(() => '<td><div class="mp-m"></div></td>').join('')}</tr>`;
+    const memLine = memShown ? memRow : '';                    // minnesraden finns först när summan är upplåst
     let h = `<table class="mp-paper"><tbody>
       <tr><td></td>${idx.map(i => `<td>${fix(t.top, i, 'top')}</td>`).join('')}</tr>
       <tr><td class="mp-sign">·</td>${idx.map(i => `<td>${fix(t.bot, i, 'bot')}</td>`).join('')}</tr>${line}`;
@@ -812,21 +861,21 @@ const MatteProv = (() => {
   }
 
   /* ── Knappsatsen ── */
+  /* Knappsatsen (D38 ✎, bara i matteprovet): siffrorna i två rader om fem, under dem ⌫ · Nästa · Klar.
+     Tre rader i stället för fyra; höjden går till kladden. */
   function padHTML(t) {
-    const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button class="mp-k" data-act="key" data-k="${k}">${k}</button>`).join('');
+    const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(k => `<button class="mp-k" data-act="key" data-k="${k}">${k}</button>`).join('');
     const erase = `<button class="mp-k er" data-act="key" data-k="erase" aria-label="Sudda">${svg('erase')}</button>`;
-    const klar = `<button class="mp-klar" id="mp-klar" data-act="klar" disabled>${svg('check')}<span>Klar</span></button>`;
+    const klar = w => `<button class="mp-klar w${w}" id="mp-klar" data-act="klar" disabled>${svg('check')}<span>Klar</span></button>`;
     if (t.type === 'prob' && IN.phase === 'expr')
-      return `<div class="mp-pad r5 kl">${digits}${erase}<button class="mp-k" data-act="key" data-k="0">0</button>
+      return `<div class="mp-pad5">${digits}${erase}
         <button class="mp-k op" data-act="key" data-k="·" aria-label="gånger">·</button>
         <button class="mp-k op" data-act="key" data-k="+" aria-label="plus">+</button>
-        <button class="mp-k op z2" data-act="key" data-k="−" aria-label="minus">−</button>${klar}</div>`;
+        <button class="mp-k op" data-act="key" data-k="−" aria-label="minus">−</button>${klar(1)}</div>`;
     const multi = IN.kind === 'boxes' || IN.kind === 'sheet' || (IN.kind === 'prob' && IN.v.length > 1);
-    const nx = IN.kind === 'sheet' ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa ${svg('down')}</button>`
-             : multi ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa ruta ${svg('right')}</button>`
-             : t.type === 'upp' && IN.rows.length > 1 ? `<button class="mp-k nx" data-act="key" data-k="next">Nästa rad ${svg('down')}</button>` : '';
-    return `<div class="mp-pad${IN.kind === 'sheet' ? ' low' : needsScratch(t) ? ' kl' : ''}${t.type === 'upp' ? ' k44' : ''}">${digits}${erase}
-      <button class="mp-k${nx ? '' : ' z2'}" data-act="key" data-k="0">0</button>${nx}${klar}</div>`;
+    const nx = IN.kind === 'sheet' ? `Nästa ${svg('down')}` : multi ? `Nästa ruta ${svg('right')}`
+             : t.type === 'upp' && (IN.rows.length > 1 || IN.notes) ? (IN.f && IN.f.note != null ? `Nästa ${svg('right')}` : `Nästa rad ${svg('down')}`) : '';
+    return `<div class="mp-pad5">${digits}${erase}${nx ? `<button class="mp-k nx" data-act="key" data-k="next">${nx}</button>${klar(2)}` : klar(4)}</div>`;
   }
   function canSubmit() {
     if (!IN) return false;
@@ -874,11 +923,18 @@ const MatteProv = (() => {
   const uppOpen = t => L.uppOpenRows(t, IN.vals);
   function uppFixFocus(t) {
     const open = uppOpen(t), cur = IN.f.row === 'm' ? (IN.back || {}).row : IN.f.row;
-    if (!open.includes(cur)) { const row = open[open.length - 1]; IN.f = { row, col:uppFirstFree(row) }; IN.back = null; }
+    if (!open.includes(cur)) { const row = open[open.length - 1]; IN.f = { row, col:uppFirstFree(row), note:IN.notes && IN.notes[row] ? 0 : null }; IN.back = null; }
   }
   function uppPress(t, k) {
     IN.note = null;
     const f = IN.f, W = t.width, rowVals = IN.vals[f.row];
+    if (f.note != null && IN.notes) {                          // tankeradens anteckningsruta
+      const nv = IN.notes[f.row], last = nv.length - 1;
+      if (k === 'next') { IN.f = f.note < last ? { row:f.row, col:0, note:f.note + 1 } : { row:f.row, col:uppFirstFree(f.row), note:null }; return; }
+      if (k === 'erase') { if (nv[f.note]) nv[f.note] = nv[f.note].slice(0, -1); else if (f.note > 0) IN.f = { row:f.row, col:0, note:f.note - 1 }; return; }
+      if (/^\d$/.test(k) && nv[f.note].length < 5) nv[f.note] = (nv[f.note] === '0' ? '' : nv[f.note]) + k;
+      return;
+    }
     if (k === 'next') {
       const cur = f.row === 'm' ? (IN.back || {}).row || IN.rows[0] : f.row;
       if (cur === 's') return;
@@ -888,7 +944,7 @@ const MatteProv = (() => {
         return;
       }
       const row = IN.rows[IN.rows.indexOf(cur) + 1];
-      IN.f = { row, col:uppFirstFree(row) }; IN.back = null;
+      IN.f = { row, col:uppFirstFree(row), note:IN.notes && IN.notes[row] ? 0 : null }; IN.back = null;
       return;
     }
     if (k === 'erase') {
@@ -1275,6 +1331,9 @@ const MatteProv = (() => {
       case 'ovno':      { const o = document.getElementById('mp-ov'); if (o) o.remove(); break; }
       case 'bx':        if (!locked && IN && IN.v && el.dataset.i != null) { IN.f = +el.dataset.i; refreshQ(curTask()); } break;
       case 'sheetnot':  snd('click'); startDrill('not', S.wrongItems, 'tabell'); break;
+      case 'note':      if (!locked && IN && IN.notes && L.uppOpenRows(curTask(), IN.vals).includes(el.dataset.row)) {
+                          IN.f = { row:el.dataset.row, col:0, note:+el.dataset.j }; refreshQ(curTask());
+                        } break;
       case 'cell':      if (!locked && IN && IN.kind === 'upp') {
                           const row = el.dataset.row, col = +el.dataset.col;
                           if (row === 'm' && IN.f.row !== 'm') IN.back = IN.f;

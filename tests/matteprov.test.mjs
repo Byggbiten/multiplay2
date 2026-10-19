@@ -622,6 +622,9 @@ describe('tankeraden (D38, variant A)', () => {
     expect(L.thinkSteps(b, 'p1', 'ova')).toEqual(['Rad 1: 7 · 286 = 7 · 200 + 7 · 80 + 7 · 6', '= 1400 + 560 + 42', '= 2002. Skriv 2002 på rad 1.']);
     expect(L.thinkSteps(a, 's', 'ova', 0)).toEqual(['Entalet: 6 + 0.']);
     expect(L.thinkSteps(a, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 2.']);
+    const e8 = L.makeUpp(8288, 7);                                     // 56, 56·10, 14·100, 56·1000
+    expect(L.thinkSteps(e8, 's', 'ova', 0)).toEqual(['Entalet: 6.']);               // de förskjutna rutorna räknas inte
+    expect(L.thinkSteps(e8, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 6.']);
     const e = L.makeUpp(687, 8);
     expect(L.thinkSteps(e, 'r0', 'ova')).toEqual(['Börja här: 8 · 7.', '8 · 7 = 56. Skriv det på rad 1.']);
   });
@@ -653,6 +656,41 @@ describe('tankeraden (D38, variant A)', () => {
         if (p.val !== t.bot && p.val !== p.d) expect(nums(st[0])).not.toContain(p.val);
       }
       expect(L.thinkSteps(t, 's', 'prov', 1)).toEqual(['Lägg ihop raderna, kolumn för kolumn.']);
+    }
+  });
+});
+
+describe('tankeradens anteckningsrutor (D38 ✎)', () => {
+  it('82 · 68 och 286 · 17: rutornas rätta värden', () => {
+    const a = L.makeUpp(82, 68), n1 = L.thinkNotes(a, 'p1'), n2 = L.thinkNotes(a, 'p2');
+    expect(n1.labels).toEqual(['8 · 80', '8 · 2']); expect(n1.prods).toEqual([640, 16]); expect(n1.sum).toBe(656);
+    expect(n2.labels).toEqual(['6 · 80', '6 · 2']); expect(n2.prods).toEqual([480, 12]); expect(n2.sum).toBe(492);
+    const b = L.thinkNotes(L.makeUpp(286, 17), 'p1');
+    expect(b.labels).toEqual(['7 · 200', '7 · 80', '7 · 6']); expect(b.prods).toEqual([1400, 560, 42]); expect(b.sum).toBe(2002);
+  });
+  it('Öva rättar varje ruta; termerna summerar till radens värde för många slumpade uppgifter', () => {
+    const r = seeded(601);
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) {
+      const t = L.genUpp(lv, 'tva', r);
+      for (const row of ['p1', 'p2']) {
+        const n = L.thinkNotes(t, row);
+        expect(n.prods.reduce((x, y) => x + y, 0)).toBe(n.sum);
+        expect(n.sum * (row === 'p2' ? 10 : 1)).toBe(row === 'p1' ? t.p1 : t.p2);
+        n.prods.forEach((v, j) => { expect(L.noteMark(t, row, j, String(v), 'ova')).toBe('ok'); expect(L.noteMark(t, row, j, String(v + 1), 'ova')).toBe('bad'); });
+        expect(L.noteMark(t, row, n.prods.length, String(n.sum), 'ova')).toBe('ok');
+        expect(L.noteMark(t, row, 0, '', 'ova')).toBe(null);
+      }
+    }
+  });
+  it('provläget rättar aldrig rutorna, varken rätt eller fel', () => {
+    const r = seeded(602);
+    for (let i = 0; i < N; i++) {
+      const t = L.genUpp('svar', 'tva', r);
+      for (const row of ['p1', 'p2']) {
+        const n = L.thinkNotes(t, row);
+        for (let j = 0; j <= n.prods.length; j++) for (const v of [String(j < n.prods.length ? n.prods[j] : n.sum), '1', '99999'])
+          expect(L.noteMark(t, row, j, v, 'prov')).toBe(null);
+      }
     }
   });
 });

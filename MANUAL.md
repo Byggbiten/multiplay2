@@ -333,7 +333,9 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 
 ### Öva
 Varje moment börjar med **Så här gör du**: korta steg som barnet klickar fram (ett steg är en idé), eller hoppar över.
-Sedan kommer uppgifterna, med **kladden** under knappsatsen (rita, sudda, rensa; den töms vid ny uppgift).
+Sedan kommer uppgifterna, med **kladden** under knappsatsen (rita, sudda, rensa; den töms vid ny uppgift). Knappsatsen
+är kompakt: siffrorna i två rader om fem och en rad med sudda, Nästa och Klar. På korta skärmar ligger kladdens
+verktyg som ikoner i kladdens hörn.
 
 **Hjälptrappan (D38)**, i Öva och i provet: första felet ger "Försök igen" och en kort ledtråd. Andra felet fyller i en
 bit av lösningen (blå rutor), tredje felet nästa bit, och efter det visas hela svaret steg för steg och barnet går
@@ -353,9 +355,12 @@ uppställning har en bit per rad. I Öva kommer uppgiften dessutom tillbaka en g
    - **Ensiffrig faktor**: en delprodukt per siffra, var och en på egen rad, ett steg åt vänster per rad (rutan
      längst till höger står tom), sedan summan. 687 · 8: 56, 64 (förskjuten), 48 (förskjuten två steg), 5496.
    - **Tvåsiffrig faktor**: rad 1 (entalet), rad 2 som börjar med **nollan i den grå rutan**, sedan summan.
-   - **Tankeraden** ovanför rutnätet visar vad som ska räknas och siffrorna lyser. Pilen tar fram nästa led:
-     "8 · 82 = 8 · 80 + 8 · 2", "= 640 + 16", "= 656". I summan visas en kolumn i taget ("Tiotalet: 5 + 2").
-     I provet visar tankeraden bara uppdelningen; resten kommer bara som hjälp efter fel. Tankeraden räknas inte som hjälp.
+   - **Tankeraden** ovanför rutnätet visar vad som ska räknas och siffrorna lyser. Ensiffrig faktor: "Börja här:
+     8 · 7", och pilen tar fram "8 · 7 = 56" (i provet bara "8 · 7"). Tvåsiffrig faktor: **anteckningsrutor**
+     "8 · 80 = [ ]  8 · 2 = [ ]" och "Rad 1: 640 + 16 = [ ]" (barnets egna tal speglas). Fokus går genom rutorna
+     och sedan till raden i rutnätet, som barnet alltid skriver själv; ett tryck i rutnätet hoppar över rutorna. I Öva
+     blir en rätt ruta grön och en fel ruta milt orange; i provet rättas rutorna aldrig. Rutorna och tankeraden
+     räknas inte som hjälp. I summan visas en kolumn i taget ("Tiotalet: 5 + 2").
    - Additionens minnessiffror skrivs i de röda rutorna ovanför raderna; de visas när summan låses upp.
    - Vid fel säger appen vad som gick snett: raden inte förskjuten, glömd nolla i den grå rutan, glömd minnessiffra,
      additionen, eller att alla raderna inte är skrivna.
