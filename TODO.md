@@ -2,6 +2,7 @@
 
 ## Öppet
 
+- [ ] Matteprov 1 (D37): Dennis provar på dev, sedan release v67 före provdagen.
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
 - [ ] P6: prova att dra visarna med ett riktigt finger på telefonen (PWA på en riktig telefon).
