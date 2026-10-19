@@ -58,7 +58,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D33 Läxbokens nummer tas bort ur Geografi
 - D34 Blandad ordning är standard i Träna och Test
 - D35 Geografimockupen godkänd: byggs in i appen och livesätts
-- D36 Orten bort ur repot; "Här bor du" blir en inställning ✎ inga utpekande kombinationer
+- D36 Orten bort ur repot; "Här bor du" blir en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 
 ---
 
@@ -424,3 +424,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   årskurs tillsammans med namnet. Rensat samma dag: orten, efternamnet i en sökväg, "dottern" och årskursen.
   Källa: Dennis: "Jag har lagt in lite blandade namn som bara ska vara generiska. mira är ett av dem tror jag. Men det
   ska inte vara så att Mira […] blir exakt utpekad" (efternamn, ort och årskurs utelämnade i citatet av samma skäl).
+- ✎ **2026-10-19, rimlig nivå:** namnen får stå i frågor och svar. Det som rensas är det som skyltar i onödan:
+  kodkommentarer, README och mockuper där barnet framstår som en verklig person bakom appen eller kopplas till
+  familjen. Repot ligger kvar under Byggbiten, kontot byts inte och git-historiken skrivs inte om. Källa: Dennis:
+  "Mira och Zelda får förekomma i appen som svar eller i en fråga. Men! det får som sagt inte bli att det är uppenbart
+  så att det är [barnet, orten, skolan, pappans företag och efternamnet]" och "Byggbiten får finnas kvar. det går för
+  en duktig nyfiken datateknisk person att lista ut detta. men jag vill som sagt inte skylta i onödan. Så vi håller
+  det på en rimlig nivå där vi inte måste byta konto eller riva upp appen från början".
