@@ -488,6 +488,24 @@ const MatteProv = (() => {
     }
     /* problem: skriv uttrycket och räkna */
     const shop = shopHTML();
+    if (lv === 'svar') {
+      /* Svårare: tvåsiffriga priser (delas upp som i moment 3), växel, omvänd uppgift och två gångertal */
+      const qs = '<p class="mp-text">Alva köper 3 bollar och 2 block. Hur mycket kostar det?</p>';
+      const ex = box('3 · 28 + 2 · 15', 'wide');
+      const qv = '<p class="mp-text">Leo köper 6 bollar och betalar med 200 kr. Hur mycket får Leo tillbaka?</p>';
+      const qo = '<p class="mp-text">6 domare ger poäng. 5 av dem ger 8 poäng var. Totalt blir det 47 poäng. Hur många poäng gav den sista domaren?</p>';
+      return [
+        { v:shop, t:'Här löser du problem i två steg. Prislistan visar vad sakerna kostar.' },
+        { v:shop + qs, t:'Läs frågan. Skriv sedan ett uttryck för det du ska räkna ut.' },
+        { v:qs + rows([ex]), t:'3 bollar kostar 3 · 28 och 2 block kostar 2 · 15. Uttrycket blir 3 · 28 + 2 · 15.' },
+        { v:rows(['3 · 28 = 3 · 20 + 3 · 8', '= ' + box(60) + ' + ' + box(24), '= ' + box(84)]), t:'3 · 28 är svårt i huvudet. Dela upp 28 i tiotal och ental, som i moment 3. Skriv delsummorna i kladden.' },
+        { v:qs + rows([ex, '= ' + box(84) + ' + ' + box(30)]), t:'Gånger först: 3 · 28 = 84 och 2 · 15 = 30.' },
+        { v:qs + rows([ex, '= ' + box(84) + ' + ' + box(30), '= ' + box(114) + ' kr']), t:'Sedan plus: 84 + 30 = 114. Det kostar 114 kr.' },
+        { v:qv + rows([box('200 − 6 · 28', 'wide'), '= 200 − ' + box(168), '= ' + box(32) + ' kr']), t:'Växel: det du betalar minus det som kostar. Gånger först: 6 · 28 = 168. Sedan 200\u00a0−\u00a0168\u00a0=\u00a032.' },
+        { v:qo + rows([box('47 − 5 · 8', 'wide'), '= 47 − ' + box(40), '= ' + box(7) + ' poäng']), t:'Ibland är det totala givet och en del saknas. Ta det totala minus det du vet: 47\u00a0−\u00a040\u00a0=\u00a07.' },
+        { v:rows(['7 · 8 + 6 · 9', '= ' + box(56) + ' + ' + box(54), '= ' + box(110)]), t:'Gånger först gäller alltid: 7 · 8 = 56 och 6 · 9 = 54. Sedan 56 + 54 = 110.' },
+      ];
+    }
     const q = '<p class="mp-text">Alva köper 3 pennor och 2 sudd. Hur mycket kostar det?</p>';
     return [
       { v:shop, t:'Här löser du problem i två steg. Prislistan visar vad sakerna kostar.' },
