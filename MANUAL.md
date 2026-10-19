@@ -315,6 +315,46 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Matteprov 4:an (D37, ännu inte släppt)
+
+Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet
+**Matteprov 4:an**. Det öppnar en lista med prov om multiplikation; nya prov läggs till efter hand. Första provet är
+**Matteprov 1 · Multiplikation** (kapitel 2). Uppgifterna är egna och följer övningsbladens form, inte deras tal.
+
+### Provsidan
+- **Lättare / Svårare** överst. Nivån gäller bara när barnet övar. **Provet är alltid på Svårare**, som det svårare
+  övningsbladet eller strax över, så att provet i skolan inte blir svårare än det som övats här.
+- **Öva på ett moment**: de fem momenten med senaste övningens resultat (grönt eller gult märke).
+- **Tabellsprint**: så många gångertal som barnet hinner på 4 minuter, högst 48. Ingår inte i provet. Tiden syns bara
+  här. Resultatet visas på en skala (0–15, 16–27, 28–39, 40–48) och bästa resultatet sparas.
+- **Gör provet**: tabelltestet och 14 uppgifter till, utan klocka och utan hjälp.
+
+### Öva
+Varje moment börjar med **Så här gör du**: korta steg som barnet klickar fram (ett steg är en idé), eller hoppar över.
+Sedan kommer uppgifterna. Vid fel visas svaret och förklaringen steg för steg; samma uppgift kommer direkt igen och en
+gång till lite senare (nötloopen).
+
+1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Knappen Nästa hoppar till nästa ruta; Klar rättar
+   och ger antal rätt av 20. De tal som blev fel kan nötas efteråt.
+2. **Gånger tiotal och hundratal**: som på bladet, med "="-rader. `8 · 40 = 8 · 4 tiotal`, sedan `= [32] tiotal` och
+   `= [320]`. Fällan `50 · 60 = 5 · 6 hundratal = 30 hundratal = 3000` (tabellsvaret har redan en nolla) får en egen
+   förklaring.
+3. **Dela upp i tiotal och ental**: `4 · 28` med T och E ovanför, och tre rader att fylla i:
+   `= 4 · [20] + 4 · [8]`, `= [80] + [32]`, `= [112]`.
+4. **Uppställning**: som på bladet. Det större talet överst, det mindre under med ·, svaret i rutor. Med tvåsiffrig
+   faktor räknas rad 1 (entalet), rad 2 med **nollan i den grå rutan** längst till höger, och sist summan. De röda
+   rutorna överst är för minnessiffror (frivilliga). Barnet trycker på en ruta och skriver; siffrorna fylls från höger,
+   och Nästa rad hoppar ner. Vid fel säger appen om nollan i den grå rutan eller en minnessiffra glömdes.
+   Den grå rutan finns bara i matteprovet; Multiplikationens nivå 4 skriver som förut.
+5. **Problemlösning i två steg**: en prislista med sex saker. Barnet **skriver först uttrycket** med knapparna · + och −
+   (till exempel `200 − 6 · 28`), och räknar det sedan rad för rad, gånger först. Svårare har växel och omvända
+   uppgifter ("hur många poäng gav den sista domaren?"). Räkneordningsuppgifterna har uttrycket givet.
+
+### Provet och kvittot
+Provet går igenom momenten i ordning, utan rätt/fel-besked och utan klocka. Kvittot visar rätt per moment med grönt
+(**Klart**, minst 75 %) eller gult (**Öva**), en ruta för **Sett av en vuxen** (håll inne knappen) och knappen
+**Öva på det som var svårt**, som ger ett pass med de gula momenten. Resultaten sparas per profil (`matteprov_`).
+
 ## Geografi (v66)
 
 Spelkortet **Geografi** ligger som ett brett kort längst ned i spelväljaren. Geografi ingår inte i Dagens träning.
@@ -454,6 +494,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | 10-Kompisar – Övning | Visuell utforskning av talpar |
 | 10-Kompisar – Test | 10 frågor om talpar som blir 10 |
 | Geografi | Sveriges landskap: Utforska, Träna (fyra lägen), Pussel, Samlarpärm, Test, hemlandskap |
+| Matteprov 4:an | Prov om multiplikation (Matteprov 1): öva fem moment, tabellsprint, provet med kvitto per moment |
 | Ljudeffekter | Feedback-ljud vid rätt och fel svar |
 | Lokal datalagring | Allt sparas i webbläsaren |
 | PWA-stöd | Kan installeras som app på hemskärmen |
