@@ -65,3 +65,10 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   mitt i genomklickningen, så webbläsarverktygen kördes mot fel sida.
 - **Lärdom:** när barnet ska lära sig en form, låt appen bära formen (mallen) och låt barnet fylla talen; visa formen
   som helhet i slutsatsen. Ange alltid flikens id i webbläsarverktygen när panelen delas.
+
+## Ordning och reda · 2026-10-19 · Efter v69
+- **Lärdom:** en text som värderar resultatet ("bra kämpat") är inte neutral för alla barn; under en gräns ska bara
+  resultatet stå (samordnarens `MP.resultNote`). När jag skriver ord till kvitton: fråga om meningen dömer, inte bara
+  om den innehåller "fel".
+- **Lärdom:** när en funktion ersätts (uttrycket → ledda steg) ska den gamla tas bort i samma runda, med sina tester;
+  annars blir den skuld som någon annan måste läsa. Den står nu i TODO.
