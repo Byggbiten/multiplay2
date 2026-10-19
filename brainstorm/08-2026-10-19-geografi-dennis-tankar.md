@@ -75,4 +75,4 @@ mockupen omgjord".
 
 **Efter Dennis prov 19/10 → D30:** Nästa efter rätt svar; snabbfaktan med sköld och roterande fakta;
 ett tryck per val (områdeskorten är ingången till Träna; Pussel och Test väljer område med ett tryck); dubbeltryck
-zoomar inte; samlarpärmen i brons, silver och guld; testet tar alla landskap i området. Inarbetat i mockupen samma dag.
+zoomar inte; samlarpärmen i brons, silver och guld; testet tar alla landskap i området. Inarbetat i mockupen samma dag. Faktarutan standardiserades därefter (D31).

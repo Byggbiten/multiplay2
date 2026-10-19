@@ -283,14 +283,21 @@ button.tmode:active{transform:scale(.98)}
 .arow .ago svg.i{width:15px;height:15px;stroke-width:2.8}
 /* Snabbfaktan efter rätt svar: skölden alltid, faktan roterar (D30) */
 .fcard{display:flex;align-items:center;gap:10px;height:100%}
-.fcard .fsh{width:46px;height:56px;flex-shrink:0;object-fit:contain}
-.fcard .ftx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.fcard .fpic{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;border:1.5px solid #e2e8f0}
-.fcard .fpic.flower{object-fit:cover}
-.fcard .fact{font-size:12.5px;line-height:1.22}
-.thought:has(.fcard){padding:6px 10px 6px 8px}
-.fcard .lead{font-size:14px;line-height:1.2}
-.fcard .ftx > span:nth-child(2){font-size:14.5px;line-height:1.22}
+.fcard .fsh{width:46px;height:56px;flex-shrink:0;object-fit:contain;align-self:center}
+.fcard .ftx{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-start;gap:2px}
+.thought:has(.fcard){padding:4px 10px 3px 8px;justify-content:flex-start}
+.fcard .fmain{font-size:14px;line-height:1.13;font-weight:800;color:var(--ink)}
+.fcard .fmain .lead{font-size:14px}
+.fcard .frow{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:13.5px;line-height:1.2}
+.fcard .frow b{font-weight:900;color:var(--deep);min-width:0}
+.fcard .frow .f2{font-weight:800;color:var(--ink-soft)}
+.fcard .fl{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:9.5px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);width:50px}
+.fcard .fgrid .fl{width:auto}
+.fcard .fl svg.i{width:13px;height:13px}
+.fcard .fgrid{display:grid;grid-template-columns:auto 1fr;column-gap:12px}
+.fcard .fgrid .frow{font-size:13px}
+.fcard .fspec{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:900;color:#92400e;line-height:1.1}
+.fcard .fspec svg.i{width:14px;height:14px;fill:#fbbf24;stroke:#b45309;stroke-width:1.5}
 
 /* ── Spela (träning och test) ─────────── */
 .track{min-height:44px;flex-shrink:0;padding:6px 14px;display:flex;flex-direction:column;justify-content:center;gap:5px}
@@ -726,24 +733,22 @@ function invText(nr){
 }
 const cities = nr => [F(nr).storsta_stad.namn, ...(F(nr).ocksa_stor_stad ? [F(nr).ocksa_stor_stad.namn] : [])];
 const cityLine = nr => { const c = cities(nr); return c.length > 1 ? `${c[0]}, också ${c[1]}` : c[0]; };
-/* Snabbfaktan efter ett rätt svar (D27, D30): skölden visas alltid; faktan roterar mellan placeringen (yta eller
-   invånare), staden, blomman eller djuret (med bild) och "Visste du?". skip = det frågan redan handlade om. */
-const FACT_KINDS = ['rank', 'stad', 'bild', 'visste'];
-let FACT_I = 0; const FACTS_SEEN = {};
+/* Faktarutan efter ett rätt svar (D31): alltid samma uppställning – skölden, stad, djur, blomma – och en rad till
+   bara när landskapet har en utmärkande placering: rang 1, 2, 24 eller 25 i yta_rang eller invanare_rang
+   (landskap-fakta.json). Högst två rader. Saknas en sådan placering visas ingen rad. */
+const SPECIAL = {
+  yta:{ 1:'Sveriges största landskap till ytan', 2:'Sveriges näst största landskap till ytan', 24:'Sveriges näst minsta landskap till ytan', 25:'Sveriges minsta landskap till ytan' },
+  inv:{ 1:'Sveriges folkrikaste landskap', 2:'Sveriges näst folkrikaste landskap', 24:'Näst minst folk av alla landskap', 25:'Minst folk av alla landskap' },
+};
+const specialFacts = nr => [SPECIAL.yta[F(nr).yta_rang], SPECIAL.inv[F(nr).invanare_rang]].filter(Boolean).slice(0, 2);
+/* Pusslets korta fakta efter en lagd bit (D27) */
+const FACT_KINDS = ['rank', 'stad', 'bild'];
 function cityFact(nr){ const c = cities(nr); return c.length > 1 ? `Städerna ${inL(nr)} är ${c[0]} och ${c[1]}.` : `Staden ${inL(nr)} är ${c[0]}.`; }
 function factOf(nr, kind, v){
   const f = F(nr), N = NAME(nr);
   if (kind === 'rank') return v % 2 ? { icon:'people', text:invText(nr) } : { icon:'ruler', text:ytaText(nr) };
   if (kind === 'stad') return { icon:'city', text:cityFact(nr) };
-  if (kind === 'bild'){ const b = v % 2 ? 'djur' : 'blomma'; return { icon:b === 'djur' ? 'paw' : 'flower', text:`${gen(N)} ${BILD_WORD[b]} är ${lc(f[b])}.`, pic:{ src:img(nr, b), flower:b === 'blomma', nr } }; }
-  return { icon:'bulb', text:`Visste du? ${f.visste_du[v % f.visste_du.length].text}` };
-}
-function quickFact(nr, skip = null){
-  const kinds = FACT_KINDS.filter(k => k !== skip), kind = kinds[FACT_I++ % kinds.length];
-  const key = nr + kind, v = FACTS_SEEN[key] = (FACTS_SEEN[key] ?? -1) + 1;
-  const fc = factOf(nr, kind, v);
-  if (kind === 'bild' && skip && skip.startsWith('bild-')){ const other = skip === 'bild-djur' ? 0 : 1; return factOf(nr, 'bild', other); }
-  return fc;
+  const b = v % 2 ? 'djur' : 'blomma'; return { icon:b === 'djur' ? 'paw' : 'flower', text:`${gen(N)} ${BILD_WORD[b]} är ${lc(f[b])}.` };
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1640,21 +1645,24 @@ function right(given){
   if (PL.opts){ const i = PL.opts.findIndex(o => o.ok); const b = $('pCtrl').querySelectorAll('.opt')[i]; if (b) b.classList.add('ok'); $('pCtrl').querySelectorAll('.opt').forEach(x => x.disabled = true); }
   const lead = retryOk ? 'Rätt! Bra att du försökte igen.' : PRAISE[PL.pr++ % PRAISE.length];
   const later = retryOk && PL.cur.retry && !PL.cur.extra ? 'Frågan kommer tillbaka en gång till senare.' : '';
-  const skip = it.kind === 'stad' ? 'stad' : it.kind === 'bild' && it.bild !== 'skold' ? `bild-${it.bild}` : null;
-  sayFact('pBubble', it.nr, lead, rightMain(it), quickFact(it.nr, skip));
+  sayFact('pBubble', it.nr, lead, rightMain(it));
   if (later){ SAID.add(later); const pr = $('pTop').querySelector('.prompt'); pr.innerHTML = `<span class="qtag">${esc(later)}</span><br>` + pr.innerHTML.replace(/^<span class="qtag">.*?<\/span><br>/, ''); }   // "kommer tillbaka" står vid frågan, så att faktarutan räcker
   if (lv1 > lv0) toast(lv1 === 1 ? `Nytt kort i samlarpärmen: ${NAME(it.nr)} i brons` : `${NAME(it.nr)} blev ${LEVEL[lv1]} i samlarpärmen`);
   renderTrack();
   const last = PL.isTest ? PL.i >= PL.items.length - 1 : PL.drill.isDone();
   setMain(last ? 'Klar' : 'Nästa', last ? 'check' : 'next', true, !last);
 }
-/* Rätt svar: skölden till vänster, lovordet och meningen, faktan (och blomman eller djuret som bild) */
-function sayFact(id, nr, lead, main, fc, later = ''){
-  [lead, main, fc.text, later].forEach(t => t && SAID.add(t));
+/* Rätt svar (D31): skölden till vänster; lovordet och meningen; sedan stad, djur och blomma på fasta platser;
+   sist den särskilda placeringen om landskapet har en. Rutan har fast höjd, så att Nästa står still. */
+function sayFact(id, nr, lead, main){
+  const f = F(nr), c = cities(nr), sp = specialFacts(nr);
+  [lead, main, ...sp].forEach(t => t && SAID.add(t));
   const th = $(id);
   th.innerHTML = `<div class="fcard"><img class="fsh" src="${img(nr, 'vapen')}" alt="${gen(NAME(nr))} landskapssköld" draggable="false">
-    <div class="ftx"><span class="lead good">${esc(lead)}</span><span>${esc(main)}</span><span class="fact">${svg(fc.icon)}<span>${esc(fc.text)}</span></span>${later ? `<span class="sm">${esc(later)}</span>` : ''}</div>
-    ${fc.pic ? `<img class="fpic${fc.pic.flower ? ' flower' : ''}" style="${fc.pic.flower ? flowerPos(fc.pic.nr) : ''}" src="${fc.pic.src}" alt="" draggable="false">` : ''}</div>`;
+    <div class="ftx"><span class="fmain"><b class="lead good">${esc(lead)}</b> ${esc(main)}</span>
+      <span class="frow"><span class="fl">${svg('city')}Stad</span><b>${esc(c[0])}${c[1] ? ` <span class="f2">och ${esc(c[1])}</span>` : ''}</b></span>
+      <span class="fgrid"><span class="frow"><span class="fl">${svg('paw')}Djur</span><b>${esc(f.djur)}</b></span><span class="frow"><span class="fl">${svg('flower')}Blomma</span><b>${esc(f.blomma)}</b></span></span>
+      ${sp.map(t => `<span class="fspec">${svg('star')}${esc(t)}</span>`).join('')}</div></div>`;
   th.classList.remove('pop'); void th.offsetWidth; th.classList.add('pop');
 }
 function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = `${svg('cards')}${esc(t)}`; $('playMap').appendChild(d); SAID.add(t); }
@@ -2050,6 +2058,7 @@ function allTexts(){
     t.add(`Nytt kort i samlarpärmen: ${NAME(n)} i brons`); t.add(`${NAME(n)} blev silver i samlarpärmen`); t.add(`${NAME(n)} blev guld i samlarpärmen`); t.add(`Rätt! Det är ${NAME(n)}.`); t.add(`Kortet låses upp i brons när du har övat på landskapet med nummer ${n}.`);
     t.add(`Till silver: svara rätt om ${NAME(n)} på tre olika dagar. Klart hittills: en dag av tre.`); t.add(`Du kan allt om ${NAME(n)}!`);
     for (const k of FACT_KINDS) for (let v = 0; v < 2; v++) t.add(factOf(n, k, v).text);
+    specialFacts(n).forEach(x => t.add(x));
   }
   t.add('Till guld: svara rätt i alla sex frågetyperna.'); t.add('Vilket område vill du testa?'); t.add('Ingen klocka. Alla landskap i området kommer med.'); t.add('Vilket pussel vill du lägga?'); t.add('Tryck på ett område så börjar det.'); t.add('Tryck på det du vill träna.');
   for (const a of AREAS){ t.add(`Du har upptäckt ${AREA_IN(a)}!`); t.add(`Alla ${antal(areaNrs(a).length)} landskap har färg och namn.`); t.add(a === 'Sverige' ? 'Du har lagt hela Sverige.' : `Du har lagt hela ${a}.`); t.add(`Dra bitarna till rätt plats i ${AREA_IN(a)}.`); t.add(`${AREA_NAME[a]} är upptäckt!`); }
@@ -2060,7 +2069,7 @@ function allTexts(){
 }
 window.MOCK = {
   S, MEAS, MAPS, get PL(){ return PL; }, get PZ(){ return PZ; }, get busy(){ return busy; }, get FAKTA(){ return FAKTA; }, get BILDER(){ return BILDER; }, get ALL(){ return ALL; },
-  goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, quickFact,
+  goto, applyPreset, areaMedal, isKan, box, today, NB, NEAR, isNear, buildItems, buildTest, nameOptions, numberOptions, optSteps, ytaText, invText, specialFacts,
   ptr, screenOf, tapNr, hitReport, allTexts, openSheet, closeSheet, sayFact, factOf, level, kindsOf, GOLD_KINDS,
   /* Svara på frågan som visas: rätt, eller fel (en granne om möjligt, annars långt bort). Kartsvar går genom pekarhändelser. */
   async answer(ok, prefer = 'near'){

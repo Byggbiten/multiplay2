@@ -52,7 +52,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D27 Sveriges landskap, första versionen: spellägena, pusslet och samlarpärmen
 - D28 Städerna godkända; skolans vana går före där den skiljer
 - D29 Bildkällorna bakom en liten informationsknapp
-- D30 Geografi efter första provet: Nästa, rikare snabbfakta, ett tryck per val, inget dubbeltryck, sköldar i nivåer, test per område
+- D30 Geografi efter första provet: Nästa, rikare snabbfakta, ett tryck per val, inget dubbeltryck, sköldar i nivåer, test per område ◐ · *snabbfaktan → D31*
+- D31 Faktarutan efter rätt svar är standardiserad
 
 ---
 
@@ -300,6 +301,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   nånstans i appen. så att det inte är något som störs."
 
 ## D30 · 2026-10-19 · Geografi efter första provet av mockupen
+- **Status:** ◐ punkt 2 (snabbfaktan som roterar) ersatt av **D31**.
 - **Beslut:**
   1. **Nästa efter rätt svar.** Ett rätt svar i Träna går inte vidare av sig självt; barnet trycker "Nästa" och
      hinner läsa snabbfaktan.
@@ -334,3 +336,20 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
     Ja, man kan väl låsa upp landskapens landskapssköldar, med brons, silver och guld beroende på hur mycket man
     tränat på dem. Testet har tio frågor utan nötning. Testet borde ha samtliga landskap för valt område. Väljer
     man hela sverige så är det alla landskap som skall tränas. Pusslet räknas inte in i framstegen."
+
+## D31 · 2026-10-19 · Faktarutan efter rätt svar är standardiserad
+- **Beslut:** efter varje rätt svar, i alla lägen i Träna (och i Test), har rutan samma uppställning på fasta platser:
+  - landskapets sköld
+  - stad (största staden enligt D28, med den andra staden som "och …")
+  - djur
+  - blomma
+  En rad till visas bara när landskapet har en utmärkande placering: rang 1, 2, 24 eller 25 i `yta_rang` eller
+  `invanare_rang` i `referens/sverige-landskap/landskap-fakta.json`, högst två rader. Placeringarna skrivs som
+  "Sveriges största/näst största/näst minsta/minsta landskap till ytan", "Sveriges folkrikaste/näst folkrikaste
+  landskap" och "Näst minst folk/Minst folk av alla landskap". Saknas en sådan placering visas ingen rad.
+  "Visste du?" visas inte i rutan, bara på landskapskortet i Utforska. Rutan har samma höjd varje gång.
+  Enligt JSON får sju landskap raden: Lappland, Jämtland, Härjedalen, Uppland, Öland (två rader), Blekinge och
+  Skåne.
+- **Källa:** Dennis 2026-10-19: "Men jag vill ändå att rutan ska vara standardiserad. Så den skall alltid visa
+  största stad, landskapsdjur, landskapsblomma, landskapssköld och sen 'om det finns någon särskild fakta, t.ex.
+  lappland är störst, jämtland är näst störst, eller folkrikaste eller minsta etc.' så skall det vara med."
