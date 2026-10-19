@@ -334,14 +334,15 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 ### Öva
 Varje moment börjar med **Så här gör du**: korta steg som barnet klickar fram (ett steg är en idé), eller hoppar över.
 Sedan kommer uppgifterna, med **kladden** under knappsatsen (rita, sudda, rensa; den töms vid ny uppgift). Knappsatsen
-är kompakt: siffrorna i två rader om fem och en rad med sudda, Nästa och Klar. På korta skärmar ligger kladdens
-verktyg som ikoner i kladdens hörn.
+är kompakt: siffrorna i två rader om fem och en rad med sudda, Nästa/Svara och Klar. Kladdens verktyg är ikoner:
+rita, sudda, **ångra**, **gör om** och rensa. Ångra och Gör om fungerar i flera steg, Rensa går att ångra, och ett nytt
+drag efter en ångring tömmer Gör om. På korta skärmar ligger verktygen i kladdens hörn.
 
 **Hjälptrappan (D38)**, i Öva och i provet: första felet ger "Försök igen" och en kort ledtråd. Andra felet fyller i en
 bit av lösningen (blå rutor), tredje felet nästa bit, och efter det visas hela svaret steg för steg och barnet går
 vidare. Bitarna följer lösningsgången: tabellfaktumet för tiotal, uppdelningen och sedan delarna för TE, raderna för
-uppställning (vid glömd nolla först den grå rutan), uttrycket och sedan första ledet för problemlösning. Ensiffrig
-uppställning har en bit per rad. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
+uppställningens summa (först additionens minnessiffror, sedan summans två högra siffror; raderna har en egen trappa,
+se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer uppgiften dessutom tillbaka en gång senare (nötloopen).
 
 1. **Tabellerna 1–10**: tabelltestet, 20 gångertal i två kolumner. Knappen Nästa hoppar till nästa ruta; Klar rättar
    och ger antal rätt av 20. De tal som blev fel kan nötas efteråt.
@@ -351,19 +352,22 @@ uppställning har en bit per rad. I Öva kommer uppgiften dessutom tillbaka en g
 3. **Dela upp i tiotal och ental**: `4 · 28` med T och E ovanför, och tre rader att fylla i:
    `= 4 · [20] + 4 · [8]`, `= [80] + [32]`, `= [112]`.
 4. **Uppställning**: det större talet överst, det mindre under med ·, svaret i rutor. Raderna fylls i tur och ordning;
-   summaraden är låst (nedtonad) tills alla rader är ifyllda, och **Nästa rad** går bara vidare när raden är klar.
+   summaraden är låst (nedtonad) tills alla rader är ifyllda.
+   - **Raderna fylls med en fråga (D38 ✎)**: appen frågar "Vad är 9 · 6?", barnet svarar 54 i ett vanligt
+     svarsfält, och svaret flyttar in på sin rad och sitt platsvärde (texten först, sedan en kort rörelse). Fel på en
+     rad: försök igen, sedan en ledtråd, sedan svaret (det skrivs också in, i blått). En rad som fått hjälp gör
+     uppgiften "med hjälp" i kvittot. Raderna rättas så i både Öva och provet.
    - **Ensiffrig faktor**: en delprodukt per siffra, var och en på egen rad, ett steg åt vänster per rad (rutan
      längst till höger står tom), sedan summan. 687 · 8: 56, 64 (förskjuten), 48 (förskjuten två steg), 5496.
-   - **Tvåsiffrig faktor**: rad 1 (entalet), rad 2 som börjar med **nollan i den grå rutan**, sedan summan.
-   - **Tankeraden** ovanför rutnätet visar vad som ska räknas och siffrorna lyser. Ensiffrig faktor: "Börja här:
-     8 · 7", och pilen tar fram "8 · 7 = 56" (i provet bara "8 · 7"). Tvåsiffrig faktor: **anteckningsrutor**
-     "8 · 80 = [ ]  8 · 2 = [ ]" och "Rad 1: 640 + 16 = [ ]" (barnets egna tal speglas). Fokus går genom rutorna
-     och sedan till raden i rutnätet, som barnet alltid skriver själv; ett tryck i rutnätet hoppar över rutorna. I Öva
-     blir en rätt ruta grön och en fel ruta milt orange; i provet rättas rutorna aldrig. Rutorna och tankeraden
-     räknas inte som hjälp. I summan visas en kolumn i taget ("Tiotalet: 5 + 2").
+   - **Tvåsiffrig faktor**: rad 1 (entalet) räknas i anteckningsrutorna; radsumman är radens svar. Rad 2 börjar med
+     att barnet själv skriver **0 i den grå rutan**; sedan anteckningsrutorna, och 492 skrivs in som 4920.
+   - **Anteckningsrutor** (tvåsiffrig faktor): "8 · 80 = [ ]  8 · 2 = [ ]" och "Rad 1: 640 + 16 = [ ]" (barnets
+     egna tal speglas). I Öva blir en rätt delruta grön och en fel milt orange; i provet rättas delrutorna aldrig.
+     Radsumman rättas i båda. Siffrorna som räknas lyser.
+   - **Summan** skriver barnet själv, en ruta i taget från höger; siffran hamnar i rutan med fokus. Tankeraden visar
+     en kolumn i taget ("Tiotalet: 5 + 2"), i provet bara "kolumn för kolumn".
    - Additionens minnessiffror skrivs i de röda rutorna ovanför raderna; de visas när summan låses upp.
-   - Vid fel säger appen vad som gick snett: raden inte förskjuten, glömd nolla i den grå rutan, glömd minnessiffra,
-     additionen, eller att alla raderna inte är skrivna.
+   - Vid fel i summan säger appen om en minnessiffra glömdes eller om additionen blev fel.
    Allt detta finns bara i matteprovet; Multiplikationens nivå 1–4 skriver som förut.
 5. **Problemlösning i två steg**: en prislista med sex saker. Barnet **skriver först uttrycket** med knapparna · + och −
    (till exempel `200 − 6 · 28`), och räknar det sedan rad för rad, gånger först. Svårare har växel och omvända

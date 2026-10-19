@@ -336,53 +336,53 @@
     if (!cells || !cells.some(d => d !== null && d !== undefined)) return null;
     return cells.reduce((n, d, i) => n + (d == null ? 0 : d) * Math.pow(10, i), 0);
   }
-  /* Bedömningen: rows = { p1, p2, s } med siffror per kolumn (null = tom).
-     Rätt = båda raderna och summan stämmer, med nollan i den grå rutan (som på provet,
-     där uträkningen ska synas). Felklass:
-       'rader'    summan stämmer men en rad saknas
-       'nolla'    glömde nollan i den grå rutan (rad 2 = top · tiotalet utan nolla,
-                  eller summan räknad som om nollan saknades)
-       'minne'    glömde minnessiffran (i en rad eller i additionen)
-       'addition' raderna stämmer men summan inte
-       'fel'      annat */
+  /* Bedömningen (D38 ✎ "raderna fylls med en fråga"): delproduktsraderna bokförs av appen efter en
+     fråga per rad, så de är alltid rätt när summan rättas. Det som kan bli fel är summan:
+       'summinne' glömd minnessiffra i additionen, 'addition' annat räknefel i summan, 'fel' tom summa. */
+  function uppPlaces(t) { return t.two ? [t.p1, t.p2] : t.parts.map(p => p.place); }
   function classifyUpp(t, rows) {
     const s = rowValue(rows.s);
-    if (!t.two) {
-      /* rows.r0 … rows.r{k-1} = delprodukterna (absoluta kolumner), rows.s = summan.
-         'plats' = en rad står inte förskjuten rätt; 'summinne' = glömd minnessiffra i additionen. */
-      const vals = t.parts.map(p => rowValue(rows['r' + p.i]));
-      const rowsOk = vals.every((v, i) => v === t.parts[i].place);
-      if (rowsOk && s === t.answer) return 'ok';
-      if (s === t.answer && vals.some(v => v === null)) return 'rader';
-      if (vals.some((v, i) => v !== null && v !== t.parts[i].place && [0, 1, 2, 3, 4, 5].some(j => v === t.parts[i].val * Math.pow(10, j)))) return 'plats';
-      if (rowsOk && s !== null) return s === noCarrySumN(t.parts.map(p => p.place)) ? 'summinne' : 'addition';
-      if (s !== null && vals.every(v => v === null) && s === noCarrySumN(t.parts.map(p => p.place))) return 'summinne';
-      return 'fel';
-    }
-    const p1 = rowValue(rows.p1), p2 = rowValue(rows.p2);
-    const p2cells = rows.p2 || [];
-    const p2written = p2 !== null;
-    const greyZero = p2cells[0] === 0;
-    const noZero = t.top * t.tens;                         // 1 · 32 = 32 i stället för 320
-    if (s === t.answer && p1 === t.p1 && p2 === t.p2 && greyZero) return 'ok';
-    if (s === t.answer && (p1 === null || !p2written)) return 'rader';
-    if (p2written && (!greyZero || p2 === noZero)) return 'nolla';
-    if (s !== null && s === (p1 === null ? t.p1 : p1) + noZero) return 'nolla';
-    const p1nc = noCarryPass(t.top, t.ones), p2nc = noCarryPass(t.top, t.tens) * 10;
-    if ((p1 !== null && p1 !== t.p1 && p1 === p1nc) || (p2 !== null && p2 !== t.p2 && p2 === p2nc)) return 'minne';
-    if (s !== null && s !== t.answer && (s === noCarrySum(p1 === null ? t.p1 : p1, p2 === null ? t.p2 : p2) || s === noCarrySum(p1nc, p2nc))) return 'minne';
-    if (p1 === t.p1 && p2 === t.p2 && s !== t.answer) return 'addition';
-    return 'fel';
+    if (s === t.answer) return 'ok';
+    if (s === null) return 'fel';
+    return s === noCarrySumN(uppPlaces(t)) ? 'summinne' : 'addition';
   }
   const UPP_FEEDBACK = {
-    plats:'Varje ny rad flyttas ett steg åt vänster. Rutan längst till höger står tom.',
     summinne:'Raderna stämmer. Glöm inte minnessiffrorna när du lägger ihop.',
-    rader:'Summan stämmer! Skriv också båda raderna, med nollan i den grå rutan. På provet ska uträkningen synas.',
-    nolla:'Du glömde nollan i den grå rutan. Raden för tiotalet börjar alltid med en nolla där.',
-    minne:'Du glömde minnessiffran. Skriv den liten ovanför och lägg till den i nästa kolumn.',
     addition:'Raderna stämmer. Räkna additionen en gång till, kolumn för kolumn.',
-    fel:'Jämför med facit, kolumn för kolumn.',
+    fel:'Lägg ihop raderna, en kolumn i taget från höger.',
   };
+
+  /* RADFRÅGAN (Dennis 19/10, skärmbild 4689 · 6: "om appen frågar rakt ut: vad är 9 x 6? och man svarar 54,
+     så bokförs det in automatiskt på sin rätta plats"). Ensiffrig faktor: en fråga per delprodukt.
+     Tvåsiffrig: anteckningsrutorna, och radsumman (656) är radens svar; rad 2 börjar med nollan i den
+     grå rutan som barnet skriver själv. Svaret skrivs som ett vanligt tal (vänster till höger) och
+     bokförs på rätt platsvärde. Fel per rad: 1 = försök igen, 2 = ledtråd, 3 = svaret (bokförs). */
+  function rowQuestion(t, row) {
+    if (!t.two) {
+      const p = t.parts[+row.slice(1)];
+      return { text:`Vad är ${t.bot} · ${p.d}?`, answer:p.val };
+    }
+    const N = thinkNotes(t, row);
+    return { text:`${N.prods.join(' + ')}`, answer:N.sum, notes:N };
+  }
+  /* Rutorna som svaret bokförs i: { row, col, val } (tvåsiffrig rad 2 börjar ett steg in, efter nollan) */
+  function rowBook(t, row, value) {
+    const v = value == null ? rowQuestion(t, row).answer : value;
+    const start = t.two ? (row === 'p2' ? 1 : 0) : +row.slice(1);
+    return digitsOf(v).map((d, k) => ({ row, col:start + k, val:d }));
+  }
+  const ROW_HELP = ['retry', 'hint', 'svar'];
+  function rowHelpStep(n) { return n <= 0 ? null : ROW_HELP[Math.min(n, ROW_HELP.length) - 1]; }
+  function rowHint(t, row) {
+    if (!t.two) {
+      const p = t.parts[+row.slice(1)], a = t.bot, b = p.d;
+      if (b === 1) return 'Ett gånger ett tal är talet självt.';
+      return `${a} · ${b - 1} = ${a * (b - 1)}. Lägg till en ${a}:a.`;
+    }
+    const N = thinkNotes(t, row);
+    return `Uppdelningen: ${N.labels.map((l, j) => `${l} = ${N.prods[j]}`).join(' och ')}. Lägg ihop dem.`;
+  }
+
   /* Ordningen på pappret (Dennis 19/10: "man måste fylla i allting ovanför där man fyller i slutsumman
      innan man får lov att fylla i slutsumman"): raderna fylls i tur och ordning, summan låses upp sist.
      En rad är ifylld när den har siffror i hela sitt spann: från startrutan (entalet, rad r{i} i kolumn i,
@@ -422,16 +422,7 @@
       if (prov) return [`Lägg ihop raderna, kolumn för kolumn.`];
       return [`${PLACE[c] || 'Kolumnen'}: ${ds.join(' + ')}${carry ? ' + minnessiffran' : ''}.`];
     }
-    if (!t.two) {
-      const p = t.parts[+row.slice(1)], lead = p.i === 0 ? 'Börja här: ' : `Rad ${p.i + 1}, en rad ner och ett steg åt vänster: `;
-      return prov ? [`${lead}${t.bot} · ${p.d}.`] : [`${lead}${t.bot} · ${p.d}.`, `${t.bot} · ${p.d} = ${p.val}. Skriv det på rad ${p.i + 1}.`];
-    }
-    const m = row === 'p1' ? t.ones : t.tens, terms = placeTerms(t.top), prods = terms.map(x => m * x);
-    const split = `${m} · ${t.top} = ${terms.map(x => `${m} · ${x}`).join(' + ')}`;
-    const chain = [`= ${prods.join(' + ')}`, row === 'p1' ? `= ${m * t.top}. Skriv ${m * t.top} på rad 1.` : `= ${m * t.top}. Med nollan blir rad 2 ${m * t.top * 10}.`];
-    if (row === 'p1') return prov ? [`Rad 1: ${split}`] : [`Rad 1: ${split}`].concat(chain);
-    const zero = 'Rad 2 är tiotalet: skriv nollan i den grå rutan.';
-    return prov ? [zero, split] : [zero, split].concat(chain);
+    return [];
   }
 
   /* TANKERADENS ANTECKNINGSRUTOR (Dennis 19/10: "hon har ingenstans att anteckna 640 + 16"), tvåsiffrig faktor:
@@ -444,7 +435,7 @@
     return { m, terms, labels:terms.map(x => `${m} · ${x}`), prods:terms.map(x => m * x), sum:m * t.top };
   }
   function noteMark(t, row, j, val, mode) {
-    if (mode === 'prov' || val === '' || val == null) return null;
+    if (mode === 'prov' || val === '' || val == null) return null;   // radsumman rättas i båda lägena av radfrågan, inte här
     const N = thinkNotes(t, row), want = j < N.terms.length ? N.prods[j] : N.sum;
     return +val === want ? 'ok' : 'bad';
   }
@@ -672,12 +663,8 @@
     if (t.type === 'tio') return { nollfalla:'Se upp med nollan i tabellsvaret. Den ska stå kvar.', nollor:'Räkna nollorna en gång till.',
       tabell:'Kolla tabellsvaret på första raden.' }[cls] || `Skriv om till ${t.unit} först, som på första raden.`;
     if (t.type === 'te') return `Dela upp ${t.b} i tiotal och ental. Räkna sedan varje del för sig.`;
-    if (t.type === 'upp' && !t.two) return { plats:'Varje ny rad flyttas ett steg åt vänster.', rader:'Skriv alla raderna, inte bara summan.',
-      summinne:'Glöm inte minnessiffrorna när du lägger ihop raderna.', addition:'Raderna stämmer. Räkna additionen igen, kolumn för kolumn.' }[cls]
-      || 'En siffra i taget från höger, en rad var.';
-    if (t.type === 'upp') return { nolla:'Titta på den grå rutan. Vad ska stå där på tiotalets rad?', rader:'Skriv båda raderna, inte bara summan.',
-      minne:'Glöm inte minnessiffrorna. Skriv dem små ovanför.', addition:'Raderna stämmer. Räkna additionen igen, kolumn för kolumn.' }[cls]
-      || 'Räkna en kolumn i taget, från höger.';
+    if (t.type === 'upp') return { summinne:'Glöm inte minnessiffrorna när du lägger ihop raderna.',
+      addition:'Räkna additionen igen, en kolumn i taget från höger.' }[cls] || 'Lägg ihop raderna, en kolumn i taget från höger.';
     if (t.type === 'prob') {
       if (cls === 'uttryck') return { kop2:'Skriv ett gångertal för varje sort och lägg ihop dem.', tillbaka:'Vad kostar sakerna? Ta sedan bort det från det som betalas.',
         omvand:'Räkna först poängen från domarna som ger lika. Ta sedan bort dem från summan.' }[t.kind] || 'Skriv ett uttryck med gånger i.';
@@ -709,24 +696,11 @@
       ];
     }
     if (t.type === 'upp') {
-      const rowCells = (row, v) => digitsOf(v).map((d, col) => ({ row, col, val:d }));
-      if (!t.two) {
-        /* en bit per rad (rad 1, rad 2 …); summan är slutsvaret och ges aldrig som bit */
-        const cells = [];
-        return t.parts.map(p => {
-          digitsOf(p.val).forEach((d, k) => cells.push({ row:'r' + p.i, col:p.i + k, val:d }));
-          return { text:`Rad ${p.i + 1}: ${t.bot} · ${p.d} = ${p.val}` + (p.i ? `, ${p.i === 1 ? 'ett steg' : p.i === 2 ? 'två steg' : 'tre steg'} åt vänster.` : '.'),
-                   fill:{ cells:cells.slice() } };
-        });
-      }
-      const p1 = rowCells('p1', t.p1), p2 = rowCells('p2', t.p2), mem1 = [];
-      if (cls === 'nolla') return [
-        { text:'Nollan i den grå rutan: tiotalets rad börjar alltid med 0.', fill:{ cells:[{ row:'p2', col:0, val:0 }], pulse:true } },
-        { text:`Raderna står nu där: ${t.p1} och ${t.p2}. Lägg ihop dem.`, fill:{ cells:p1.concat(p2), mem:mem1 } },
-      ];
+      /* summans bitar: först additionens minnessiffror, sedan de två högra siffrorna i summan */
+      const mem = addCarries(uppPlaces(t)), sd = digitsOf(t.answer);
       return [
-        { text:`Rad 1 är ${t.top} · ${t.ones} = ${t.p1}.`, fill:{ cells:p1, mem:mem1 } },
-        { text:`Rad 2 är ${t.top} · ${t.tens * 10} = ${t.p2}, med nollan i den grå rutan. Lägg ihop raderna.`, fill:{ cells:p1.concat(p2), mem:mem1, pulse:true } },
+        { text:mem.length ? 'Minnessiffrorna står nu ovanför raderna. Lägg till dem när du räknar.' : 'Räkna en kolumn i taget, entalet först.', fill:{ mem, cells:[] } },
+        { text:'De två högra siffrorna i summan står nu där. Räkna resten.', fill:{ mem, cells:[{ row:'s', col:0, val:sd[0] }, { row:'s', col:1, val:sd[1] }] } },
       ];
     }
     if (t.type === 'prob') {
@@ -771,7 +745,7 @@
     'tio:tiotal':'Tiotal gånger ental', 'tio:tusental':'Hundratal gånger tiotal',
     'te':'Dela upp i tiotal och ental',
     'upp:en':'Uppställning, ensiffrig faktor', 'upp:tva':'Uppställning, tvåsiffrig faktor', 'upp:nolla':'Nollan i den grå rutan',
-    'upp:rader':'Skriva alla raderna', 'upp:plats':'Flytta raden ett steg åt vänster', 'upp:minne':'Minnessiffror', 'upp:minnesumma':'Minne i summan',
+ 'upp:minnesumma':'Minne i summan',
     'prob:tillbaka':'Växel', 'prob:omvand':'Omvända uppgifter', 'prob:kop2':'Två sorters varor', 'prob:ordning':'Gånger först',
     'prob:uttryck':'Skriva uttrycket',
   };
@@ -782,34 +756,37 @@
   const tagMoment = tag => tag.startsWith('tab:') ? 'tabell' : tag.startsWith('tio:') ? 'tiotal' : tag === 'te' ? 'talsorter' : tag.startsWith('upp:') ? 'uppstallning' : 'problem';
   function tioType(t) { const hi = Math.max(t.za, t.zb); return t.za && t.zb ? (hi >= 2 ? 'tio:tusental' : 'tio:tvatiotal') : hi >= 2 ? 'tio:hundratal' : 'tio:tiotal'; }
   /* Allt en uppgift övar (en lyckad uppgift räknas för alla dessa) */
+  const factTag = (a, b) => `tab:${Math.min(a, b)}x${Math.max(a, b)}`;
   function tagsCovered(t) {
-    if (t.moment === 'tabell') return [`tab:${Math.min(t.x, t.y)}x${Math.max(t.x, t.y)}`];
+    if (t.moment === 'tabell') return [factTag(t.x, t.y)];
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
-      if (!t.two) return ['upp:en', 'upp:plats', 'upp:rader'].concat(enAddCarries(t) ? ['upp:minnesumma'] : []);
-      const out = ['upp:tva', 'upp:nolla', 'upp:rader'];
-      if (hasCarry(t.top, t.ones) || hasCarry(t.top, t.tens)) out.push('upp:minne');
-      if (noCarrySum(t.p1, t.p2) !== t.answer) out.push('upp:minnesumma');
-      return out;
+      const sumMem = noCarrySumN(uppPlaces(t)) !== t.answer ? ['upp:minnesumma'] : [];
+      if (!t.two) return ['upp:en'].concat(sumMem, t.parts.map(p => factTag(t.bot, p.d)));   // varje radfråga är ett tabellfaktum
+      return ['upp:tva', 'upp:nolla'].concat(sumMem);
     }
     if (t.type === 'prob') return [`prob:${t.kind}`].concat(t.needExpr ? ['prob:uttryck'] : []);
     return [];
   }
-  /* Det som var svårt i en uppgift som krävde hjälp: typen + felklassen */
-  function tagsHard(t, cls) {
+  /* Det som var svårt i en uppgift som krävde hjälp: typen + felklassen.
+     Uppställningen skickar även detaljerna: { rows:[rader som fick hjälp], grey:true om nollan blev fel } */
+  function tagsHard(t, cls, detail) {
     if (t.moment === 'tabell') return tagsCovered(t);
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
-      const extra = { nolla:'upp:nolla', rader:'upp:rader', minne:'upp:minne', addition:'upp:minnesumma', plats:'upp:plats', summinne:'upp:minnesumma' }[cls];
-      return [t.two ? 'upp:tva' : 'upp:en'].concat(extra && tagsCovered(t).includes(extra) ? [extra] : []);
+      const d = detail || {}, out = [t.two ? 'upp:tva' : 'upp:en'];
+      if (cls === 'summinne' || cls === 'addition') out.push('upp:minnesumma');
+      if (d.grey) out.push('upp:nolla');
+      if (!t.two) for (const r of d.rows || []) { const p = t.parts[+r.slice(1)]; out.push(factTag(t.bot, p.d)); }
+      return out;
     }
     if (t.type === 'prob') return [`prob:${t.kind}`].concat(cls === 'uttryck' ? ['prob:uttryck'] : []);
     return [];
   }
   /* outcome: 'direkt' | 'hjalp' | 'svar'. hard = { tag: { level, n, ok, last } } (muteras och returneras) */
-  function recordOutcome(hard, t, outcome, cls, day) {
+  function recordOutcome(hard, t, outcome, cls, day, detail) {
     hard = hard || {};
     if (outcome === 'direkt') {
       for (const tag of tagsCovered(t)) if (hard[tag]) {
@@ -818,7 +795,7 @@
       }
       return hard;
     }
-    for (const tag of tagsHard(t, cls)) {
+    for (const tag of tagsHard(t, cls, detail)) {
       const h = hard[tag] || { level:'hjalp', n:0, ok:0 };
       h.n++; h.ok = 0; h.last = day || null;
       if (outcome === 'svar') h.level = 'svar';
@@ -845,8 +822,8 @@
       return makeTiotal(a, b, form[0], form[1]);
     }
     if (tag === 'te') return genTalsorter(lv, 1, r)[0];
-    if (tag === 'upp:en' || tag === 'upp:plats') return genUpp(lv, 'en', r);
-    if (tag === 'upp:minnesumma' || tag === 'upp:rader') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
+    if (tag === 'upp:en') return genUpp(lv, 'en', r);
+    if (tag === 'upp:minnesumma') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
     if (tag.startsWith('upp:')) return genUpp(lv, 'tva', r);
     if (tag === 'prob:uttryck') return genProblemOne(lv, pick(r, ['kop2', 'tillbaka', 'omvand']), r);
     if (tag.startsWith('prob:')) return genProblemOne(lv, tag.slice(5), r);
@@ -879,6 +856,24 @@
     return out.sort((a, b) => MOMENT_ORDER.indexOf(a.moment) - MOMENT_ORDER.indexOf(b.moment));
   }
 
+  /* KLADDENS HISTORIK (D38 ✎ "ångra … i flera steg" och Gör om): en lista med drag (penndrag, suddrag,
+     rensa) och en pekare. Kladden ritas om från början av listan; Rensa är ett drag och går att ångra.
+     Ett nytt drag efter en ångring tömmer Gör om. Ren logik, testad i vitest. */
+  function createHistory() {
+    let ops = [], idx = 0;
+    return {
+      push(op) { ops.length = idx; ops.push(op); idx = ops.length; },
+      undo() { if (idx > 0) { idx--; return true; } return false; },
+      redo() { if (idx < ops.length) { idx++; return true; } return false; },
+      canUndo() { return idx > 0; },
+      canRedo() { return idx < ops.length; },
+      /* dragen som syns: allt efter den senaste Rensa före pekaren */
+      visible() { const live = ops.slice(0, idx); let k = -1; live.forEach((o, i) => { if (o.type === 'clear') k = i; }); return live.slice(k + 1); },
+      reset() { ops = []; idx = 0; },
+      size() { return { ops:ops.length, idx }; },
+    };
+  }
+
   const API = {
     MOMENTS, PROVS, LEVELS, OVA_COUNT, TABELLTEST_COUNT, SPRINT, SPRINT_BANDS, GREEN_PCT, NAMES, SHOP,
     digitsOf, fmt,
@@ -890,6 +885,7 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
+    uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };
