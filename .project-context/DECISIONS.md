@@ -476,3 +476,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   som blir för lång vid tresiffrigt · tvåsiffrigt och avviker från provets uppställning. Källa: Dennis: "denna vy
   behöver lite kärlek. för hur de skall på ett pedagogiskt sätt kunna räkna ut detta och summera ihop delsummor när de
   har så lite yta att jobba med" och, om alternativen, "enligt din rekomendation".
+- ✎ **2026-10-19, anteckningsrutor i tankeraden och kompakt knappsats:** tankeraden får små inmatningsrutor (8 · 80 =
+  [ ], 8 · 2 = [ ], [ ] + [ ] = [ ]) där barnet antecknar delsummorna; i Öva rättas de, i provet är de fria
+  anteckningar. Knappsatsen i matteprovet blir tre rader (siffrorna 2 × 5) så att kladden växer. Källa: Dennis: "men
+  [barnet] har ingenstans att anteckna 640 + 16 så hon kan summera det. kanske sifferinmatningen skall bli mindre? så
+  hon får kladdyta? eller har du något tips?"
