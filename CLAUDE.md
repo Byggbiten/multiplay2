@@ -78,7 +78,7 @@ agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in d
 
 **Dev och test**
 - Dev-spegeln synkas med
-  `rsync -a --delete --exclude '.git' --exclude 'node_modules' --exclude '.claude' --exclude 'design-lab' ./ ~/multiplay-dev/`
+  `rsync -a --delete --exclude '.git' --exclude 'node_modules' --exclude '.claude' --exclude 'design-lab' --exclude '_privat' ./ ~/multiplay-dev/`
   och serveras på `:5312` (`~/multiplay-dev-server.py`), på telefon via `https://macbook-pro.tail3c8e5a.ts.net:8445`.
 - Mockuper i `design-lab/` serveras på `:5420` från repots rot (så att de når `referens/`), adress
   `/design-lab/<fil>.html`; på telefon `https://macbook-pro.tail3c8e5a.ts.net:8446/design-lab/<fil>.html`.

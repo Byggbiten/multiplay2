@@ -14,7 +14,7 @@ npx vitest run
 **Dev** — spegeln `~/multiplay-dev` serveras utan cache av `~/multiplay-dev-server.py` på port 5312:
 
 ```bash
-rsync -a --delete --exclude '.git' --exclude 'node_modules' --exclude '.claude' --exclude 'design-lab' ./ ~/multiplay-dev/
+rsync -a --delete --exclude '.git' --exclude 'node_modules' --exclude '.claude' --exclude 'design-lab' --exclude '_privat' ./ ~/multiplay-dev/
 python3 ~/multiplay-dev-server.py          # om den inte redan är igång
 # dator: http://127.0.0.1:5312/   telefon: https://macbook-pro.tail3c8e5a.ts.net:8445
 ```
