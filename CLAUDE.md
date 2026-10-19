@@ -1,6 +1,6 @@
 # Multiplay
 
-En PWA där Mira, 10 år, tränar skolmatte: gångertabellen, klockan, uppställning, division, platsvärde,
+En PWA där ett barn (i dokumenten Mira) tränar skolmatte: gångertabellen, klockan, uppställning, division, platsvärde,
 10-kompisar och nationella prov. Dennis bygger den åt henne; pedagogiken är det viktiga.
 
 - **Stack / drift / git:** vanilla JS (IIFE-moduler, inget byggsteg), `localStorage` per profil, service worker.
