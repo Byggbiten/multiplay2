@@ -83,7 +83,11 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 - **Problemlösningen i ledda steg (D39 ✎).** Varje steg är en fråga med mallen `[ ] op [ ] = [ ]`; prislistan och
   tidigare svar går att trycka på; nästa steg visas först när det förra stämmer; varje steg rättas vid Svara, i Öva
   och prov; slutsatsen med uttrycket sist. Knappsatsen har inga räknetecken.
-- **Uppställningen (Dela upp).** Ensiffrig faktor: en delprodukt per siffra, varje rad ett steg åt vänster. Tvåsiffrig: rad 1,
+- **Uppställningen (Dela upp).** Ensiffrig faktor: en delprodukt per siffra, varje rad ett steg åt vänster; rutorna till
+  höger om en förskjuten rad är grå, och appen sätter nollorna där innan radens fråga (D41 ✎, `rowZeros`,
+  `uppRowFlow`). Förklaringen bygger på siffrans värde (`zeroSteps`: Öva tre klickstyrda steg, tiotalet två,
+  provet ett med "därför"); kvittensen `zeroBookText` slutar med "Raden blir 7200.". Summans tankerad räknar
+  nollorna. Språkregeln sveps i vitest (inget tal två gånger i en mening). Tvåsiffrig: rad 1,
   rad 2 som börjar med barnets egen nolla i den grå rutan, summan. Appen frågar per rad och bokför svaret på rätt
   plats; summan skriver barnet själv, ruta för ruta. Tankeraden, de lysande siffrorna och anteckningsrutorna är
   vägvisning och räknas inte som hjälp.

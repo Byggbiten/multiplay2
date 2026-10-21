@@ -94,3 +94,15 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   kladden 165 px från början, minst 95 px när hjälpbiten står i bubblan (108 px med ledtrådsraden utanför provet).
 - **Lärdom:** "barnet räknar i kladden" räcker inte när läraren rättar en mellanrad; det som rättas på pappret ska
   finnas på appens papper.
+
+## Runda 8 · 2026-10-21 · Nollorna i Dela upp (D41 ✎), gren `matteprov-nollor`
+- **Vad som inte fungerade:** Dennis, skärmbild 4819 · 9: "Skulle inte dessa celler vara gråade, och när det är dags
+  så skall 0:an föras in?" Rutorna till höger om de förskjutna raderna var tomma och prickade.
+- **Byggt:** grå rutor (som den osynliga nollan) i de förskjutna raderna; appen sätter nollorna **före** radens fråga
+  (Dennis: "sätt dit nollorna innan du löser det som skall gångras ... annars kanske de skriver in dem i fel cell"),
+  och förklarar dem med siffrans värde (Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i x-antal
+  nollor"): värdet, varför antalet (100 har två nollor), nollorna en i taget; i provet en rad med "därför". Facit och
+  bokföringen har nollorna, summans tankerad räknar dem. Minnessiffreläget (multdiv fas 2) fick samma förklaring.
+- **Uppmätt i 390 × 797:** ingen scroll; kladden minst 85 px under den tvåradiga förklaringen i Öva.
+- **Lärdom:** ordningen är en del av pedagogiken — det som ska stå på pappret före en uträkning ska komma före frågan,
+  annars hamnar svaret i fel ruta. Lägg ordningen som ren data (`uppRowFlow`) så att den går att testa.
