@@ -2,6 +2,7 @@
 
 ## Öppet
 
+- [ ] P16, P17 (uppställningen): ta upp med Dennis.
 - [ ] P13, P14 (snällare app): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
 - [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
@@ -17,9 +18,9 @@
 
 ## Klart
 
-- [x] D41 matteprovets räknesätt (Minnessiffra/Dela upp) och delraderna i Räkna själv – på dev 2026-10-21.
+- [x] D41 matteprovets räknesätt (Minnessiffra/Dela upp), delraderna i Räkna själv, grå nollor i Dela upp – live i v70 2026-10-21.
 
-- [x] D40 nivå 4: den osynliga nollan, pekningen av målceller, blandade tal (3·1, 4·1, 2·2, 3·2) – på dev 2026-10-21.
+- [x] D40 nivå 4: den osynliga nollan, pekningen av målceller, blandade tal, färgade siffror, orange ram – live i v70 2026-10-21.
 
 - [x] D39 snällare app (matteprovet och övriga moduler, en knapp, ledda steg, resultatraden), live i v69 2026-10-19.
 

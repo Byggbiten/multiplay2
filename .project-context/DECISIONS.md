@@ -62,8 +62,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
 - D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
-- D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2)
-- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp
+- D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
+- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor
 
 ---
 

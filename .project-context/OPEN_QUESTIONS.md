@@ -42,6 +42,13 @@ aldrig. Nya frågor får nästa P-nummer.
   vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
 
 
+### Uppställningen (D40, D41)
+
+- **P16 Förklaringens längd i Dela upp.** Med fyrsiffrigt tal i Öva blir det tre förklaringssteg per hundratals- och
+  tusentalsrad (värdet, varför så många nollor, nollorna). Öppet: lagom, eller kortare efter några uppgifter?
+- **P17 Tvåsiffrig faktors nolla i Dela upp.** Barnet skriver själv nollan i den grå rutan (D38 ✎), medan appen sätter
+  nollorna vid ensiffrig faktor. Öppet: ska appen sätta den också?
+
 ## Besvarade
 
 - ~~P15 Delrader i Räkna själv?~~ → D41 ✎ (rad 1, rad 2 med den grå nollan och summan även i Räkna själv vid tvåsiffrig faktor).

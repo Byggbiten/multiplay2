@@ -62,6 +62,7 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 |---|---|---|---|
 | Geografi (mockupen, bygget) | `acf985ddd0b12ab7f` | dagens logg | `agenter/geografi/OVERLAMNING.md`, `LOGG.md` |
 | Matteprov (Matteprov 4:an, D37–D39) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
+| Uppställd multiplikation (multdiv, D40–D41) | `a566d8b8d8411628d` | dagens logg | `agenter/multdiv/OVERLAMNING.md`, `LOGG.md` |
 
 Väck en levande expert med SendMessage till id:t. Ny session: agenterna finns inte längre – starta rollen (samma
 agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in det nya id:t här.
