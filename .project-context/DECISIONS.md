@@ -542,3 +542,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   gångrar med ett 10 tal så fyller vi i en nolla här', och att man får lite förklarat, för rutorna lyser ju upp när
   man gångrar siffrorna med andra siffror. alltså deras celler. så man hänger med på vilken ordning det sker, men att
   man även får förklarat hur det spelar roll med vilka celler man skriver in i nedan i delsummor och summa".
+- ✎ **2026-10-21, siffrorna i texten färgkodas och cellen pulserar:** när bubblan nämner en siffra i uppställningen
+  (98 · 5 — entalssiffran i 65) skrivs siffran i sin platsvärdesfärg, och dess cell pulserar till, så att barnet ser
+  vilken siffra som menas. Källa: Dennis: "kan du färgkoda dessa siffror så att man visuellt hänger med i vad man
+  menar? Eller att de siffrorna kanske vibrerar till eller pulserar till eller liknande? då fattar barn bättre
+  ordningen".
