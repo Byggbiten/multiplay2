@@ -386,6 +386,54 @@
     const start = t.two ? (row === 'p2' ? 1 : 0) : +row.slice(1);
     return digitsOf(v).map((d, k) => ({ row, col:start + k, val:d }));
   }
+  /* D41 ✎ (Dennis, skärmbild 4819 · 9: "Skulle inte dessa celler vara gråade, och när det är dags så skall
+     0:an föras in?"). Ensiffrig faktor i Dela upp: rutorna till höger om en förskjuten rad är grå, och appen
+     för in nollorna — rad 2 en nolla, rad 3 två, rad 4 tre. Barnet skriver dem inte. Ordningen (Dennis: "sätta
+     dit nollorna innan man gångrar [...] annars kanske de skriver in dem i fel cell"): när raden blir aktuell
+     kommer texten, sedan nollorna, och först därefter frågan; svaret bokförs till vänster om nollorna. */
+  function rowZeros(t, row) {
+    if (t.two || !/^r\d+$/.test(row)) return [];
+    return Array.from({ length:+row.slice(1) }, (_, c) => ({ row, col:c, val:0 }));
+  }
+  const PLATS = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet', 'tiotusentalet'];
+  /* Förklaringen innan nollorna förs in (Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i
+     x-antal nollor"): siffrans värde, varför just så många nollor (100 har två nollor), och sedan nollorna en i
+     taget. Ett steg är en idé; Öva har tre klickstyrda steg (tiotalet två), provet ett kort steg med "därför".
+     Varje steg: { text, lit:'top'|'zeros', zeros:true på steget där nollorna förs in }. Inget tal har två roller
+     i samma mening (för siffran 1 hoppas "100 är 1 · 100" över). */
+  const ANTAL = ['', 'en', 'två', 'tre', 'fyra'];
+  const nollor = n => n === 1 ? 'en nolla' : `${ANTAL[n]} nollor`;
+  const RAKNA = ['', 'En nolla.', 'En … två nollor.', 'En … två … tre nollor.', 'En … två … tre … fyra nollor.'];
+  function zeroSteps(t, row, mode) {
+    const p = !t.two && t.parts[+String(row).slice(1)];
+    if (!p || p.i === 0) return [];
+    const d = p.d, P = Math.pow(10, p.i), V = d * P, plats = PLATS[p.i];   // radens nummer står som etikett i UI:t, inte i meningen
+    if (mode === 'prov')
+      return [{ text:`${d} står i ${plats}, och ${P} har ${nollor(p.i)} – därför ${nollor(p.i)} först.`, lit:'zeros', zeros:true }];
+    if (p.i === 1)
+      return [{ text:`${d} står i tiotalet och är värd ${V}. ${P} har en nolla – en nolla först.`, lit:'top' },
+              { text:RAKNA[1], lit:'zeros', zeros:true }];
+    return [{ text:`${d} står i ${plats}. Den är värd ${V}.`, lit:'top' },
+            { text:`${d === 1 ? '' : `${V} är ${d} · ${P}. `}${P} har ${nollor(p.i)}. Därför sätter vi ${nollor(p.i)} först.`, lit:'zeros' },
+            { text:RAKNA[p.i], lit:'zeros', zeros:true }];
+  }
+  /* Kvittensen när en förskjuten rad bokförs: talet till vänster om nollorna, slutsatsen sist */
+  function zeroBookText(t, row, outcome) {
+    const p = !t.two && t.parts[+String(row).slice(1)];
+    if (!p || p.i === 0) return null;
+    const om = p.i === 1 ? 'nollan' : 'nollorna';
+    return outcome === 'svar' ? `Svaret är ${p.val}. Det skrivs till vänster om ${om}, och raden blir ${p.place}.`
+                              : `Rätt! ${p.val} skrivs till vänster om ${om}. Raden blir ${p.place}.`;
+  }
+  /* Radens ordning: nollorna (om raden är förskjuten), sedan frågan, sedan bokföringen. Ren; UI:t följer den. */
+  function uppRowFlow(t) {
+    const out = [];
+    for (const row of uppRowsOrder(t)) {
+      if (rowZeros(t, row).length) out.push({ kind:'zeros', row });
+      out.push({ kind:'ask', row }, { kind:'book', row });
+    }
+    return out;
+  }
   const ROW_HELP = ['retry', 'hint', 'svar'];
   function rowHelpStep(n) { return n <= 0 ? null : ROW_HELP[Math.min(n, ROW_HELP.length) - 1]; }
   function rowHint(t, row) {
@@ -431,8 +479,9 @@
     const prov = mode === 'prov';
     if (row === 's') {
       const nums = t.two ? [t.p1, t.p2] : t.parts.map(p => p.place);
-      const c = col || 0, starts = t.two ? [0, 0] : t.parts.map(p => p.i);      // förskjutna rutor är tomma, inte nollor
-      const ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => c >= starts[k] && nums[k] >= Math.pow(10, c));
+      /* D41 ✎: de förskjutna radernas grå rutor har nollor, och nollorna räknas upp — texten stämmer med pappret */
+      const c = col || 0;
+      const ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => nums[k] >= Math.pow(10, c));
       const carry = addCarries(nums).some(x => x.col === c);
       if (prov) return [`Lägg ihop raderna, kolumn för kolumn.`];
       return [`${PLACE[c] || 'Kolumnen'}: ${ds.join(' + ')}${carry ? ' + minnessiffran' : ''}.`];
@@ -460,7 +509,7 @@
     const W = t.width, row = v => { const d = digitsOf(v); return Array.from({ length:W }, (_, i) => i < d.length ? d[i] : null); };
     if (t.two) return { p1:row(t.p1), p2:row(t.p2), s:row(t.answer) };
     const out = { s:row(t.answer) };
-    for (const p of t.parts) { const r = row(p.place); for (let c = 0; c < p.i; c++) r[c] = null; out['r' + p.i] = r; }   // förskjuten: ingen nolla
+    for (const p of t.parts) out['r' + p.i] = row(p.place);      // D41 ✎: förskjuten rad har nollor i sina grå rutor
     return out;
   }
 
@@ -970,7 +1019,7 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
-    uppPlaces, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    uppPlaces, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,

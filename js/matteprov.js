@@ -170,6 +170,10 @@ const MatteProv = (() => {
 #mp-root .mp-c.in{background:rgba(255,255,255,.8);border:2.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);cursor:pointer}
 #mp-root .mp-c.in.has{border-style:solid}
 #mp-root .mp-c.in.grey{background:#d9dde3;border-color:#9aa3ae}
+#mp-root .mp-c.in.gz{color:#64748b;cursor:default;border-style:solid}
+#mp-root .mp-c.in.gz.ok{background:#d9dde3;border-color:#9aa3ae;color:#64748b}
+#mp-root .mp-c.in.zin{animation:mp-zin .5s ease-out both}
+@keyframes mp-zin{0%{transform:translateY(-14px);opacity:0}70%{transform:translateY(2px);opacity:1}100%{transform:none;opacity:1}}
 #mp-root .mp-c.in.focus{border:3px solid var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent)}
 #mp-root .mp-c.in.ok{border:2.5px solid #22c55e;background:#dcfce7;color:#15803d}
 #mp-root .mp-c.in.grey.ok{background:#bbf7d0}
@@ -246,6 +250,7 @@ const MatteProv = (() => {
 #mp-root .mp-nl{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:var(--font-head);font-weight:800;font-size:14.5px;color:var(--deep);font-variant-numeric:tabular-nums}
 #mp-root .mp-np{display:inline-flex;align-items:center;gap:3px;margin-right:3px}
 #mp-root .mp-nt{white-space:nowrap}
+#mp-root .mp-nt.wr{white-space:normal;line-height:1.3}
 #mp-root .mp-nt.sm{font-family:var(--font-body);font-size:12.5px;font-weight:800;color:var(--ink-soft)}
 #mp-root .mp-nb{min-width:46px;height:44px;padding:0 4px;border-radius:10px;border:2.5px dashed color-mix(in srgb,var(--accent) 40%,transparent);background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
 #mp-root .mp-nb.focus{border:3px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
@@ -519,7 +524,8 @@ const MatteProv = (() => {
       const gl = txt => `<p class="mp-guide" style="max-width:340px">${svg('next')}<span class="tx">${esc(txt)}</span></p>`;
       /* Ensiffrig faktor (Dennis 19/10): en delprodukt per siffra, varje rad ett steg åt vänster */
       const e = L.makeUpp(687, 8), We = e.width;
-      const sh = (v, i) => { const d = L.digitsOf(v), out = Array(We).fill(null); d.forEach((x, k) => { out[i + k] = x; }); return out; };
+      /* D41 ✎: en förskjuten rad har nollor i sina grå rutor */
+      const sh = (v, i) => { const d = L.digitsOf(v), out = Array(We).fill(null); for (let k = 0; k < i; k++) out[k] = 0; d.forEach((x, k) => { out[i + k] = x; }); return out; };
       const E = (vals, lit) => paperHTML(e, { vals, readonly:true, lit });
       const em = Array(We).fill(null); L.addCarries(e.parts.map(q => q.place)).forEach(c => { em[c.col] = c.val; });
       const r0 = sh(56, 0), r1 = sh(64, 1), r2 = sh(48, 2);
@@ -527,8 +533,10 @@ const MatteProv = (() => {
         { v:E({}), t:'Med en ensiffrig faktor räknar du en siffra i taget. Varje svar får en egen rad.' },
         { v:gl('Rad 1: Vad är 8 · 7?') + E({}, { top:[0], bot:[0] }), t:'Appen frågar: Vad är 8 · 7? Du skriver 56 i rutan och trycker Svara.' },
         { v:E({ r0 }, { top:[0], bot:[0] }), t:'Svaret flyttas till rad 1, med 6:an i entalet.' },
-        { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Nästa fråga: 8 · 8 = 64. Raden hamnar ett steg åt vänster, så entalsrutan står tom.' },
-        { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sist 8 · 6 = 48, ett steg till åt vänster. Raden börjar i hundratalet.' },
+        { v:E({ r0, r1:[0].concat(Array(We - 1).fill(null)) }, { top:[1] }), t:'Rad 2: 8 står i tiotalet och är värd 80. 10 har en nolla, så en nolla först, i den grå rutan.' },
+        { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Sedan frågar appen: Vad är 8 · 8? Svaret 64 skrivs till vänster om nollan, så raden blir 640.' },
+        { v:E({ r0, r1, r2:[0, 0].concat(Array(We - 2).fill(null)) }, { top:[2] }), t:'Rad 3: 6 står i hundratalet och är värd 600. 100 har två nollor, så två nollor först.' },
+        { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sedan 8 · 6 = 48, till vänster om nollorna. Raden blir 4800.' },
         { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Summan skriver du själv, en ruta i taget från höger. Minnessiffrorna står i de lila rutorna. Svaret är 5496.' },
         { v:P({}), t:'Med en tvåsiffrig faktor, som 17 · 32, blir det två rader och sedan summan. Det större talet står överst.' },
         { v:gl('7 · 30 = 210   7 · 2 = 14   210 + 14 = 224') + P({}, { lit:{ top:[0, 1], bot:[0] } }), t:'Rad 1 räknar du i rutorna ovanför: 7 · 30 och 7 · 2, sedan summan 224.' },
@@ -873,7 +881,8 @@ const MatteProv = (() => {
     const top = noteBlock ? noteBlock : M ? `<p class="mp-guide hm ${M.kind}">${svg(M.kind === 'retry' ? 'again' : 'bulb')}<span><b>${esc(M.title)}</b> ${esc(M.text)}</span></p>`
       : G ? `<p class="mp-guide">${svg('next')}<span class="tx">${esc(G.text)}</span></p>` : '';
     const focus = fb ? null : G && G.grey ? { row:'p2', col:0 } : inRows ? null : IN.f;
-    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus, ok:show || (fb && fb.ok), pulse:!fb && (IN.pulse || (G && G.grey)), given:show ? null : IN.given, lit:G ? G.lit : null, open })}`;
+    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus, ok:show || (fb && fb.ok), pulse:!fb && (IN.pulse || (G && G.grey)), given:show ? null : IN.given, lit:G ? G.lit : null, open,
+      zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin })}`;
   }
 
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
@@ -923,6 +932,7 @@ const MatteProv = (() => {
     const R = L.uppRowsOrder(t), rq = IN.rq;
     if (rq.k < R.length) {                               // radfrågan
       const row = R[rq.k];
+      if (!t.two && rq.phase === 'zero') return { zero:true, row, lit:rq.zlitTop ? { top:[+row.slice(1)] } : {} };
       if (!t.two) return { ask:true, row, lit:{ top:[+row.slice(1)], bot:[0] } };
       const N = L.thinkNotes(t, row), j = IN.f.note;
       const top = j != null && j < N.terms.length ? [String(N.terms[j]).length - 1] : L.digitsOf(t.top).map((_, k) => k);
@@ -936,7 +946,12 @@ const MatteProv = (() => {
   function rqHTML(t, G) {
     const rq = IN.rq, n = IN.rows.indexOf(G.row) + 1;
     const msg = rq.msg ? `<div class="mp-rqmsg ${rq.msg.kind}">${esc(rq.msg.text)}</div>` : '';
-    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt">Rad 2 är tiotalet: skriv 0 i den grå rutan.</span></div>${msg}</div>`;
+    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr">Rad 2. ${t.tens} står i tiotalet och är värd ${t.tens * 10}. Därför en nolla först: skriv 0 i den grå rutan.</span></div>${msg}</div>`;
+    if (G.zero) {                                         // förklaringen av nollorna: siffran i platsvärdets färg
+      const i = +G.row.slice(1), st = rq.zsteps[rq.zs];
+      const html = esc(st.text).replace(/^(\d)(?= står)/, `<b style="color:${COLV[Math.min(i, 3)]}">$1</b>`);
+      return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr"><b>Rad ${n}.</b> ${html}</span></div></div>`;
+    }
     if (G.ask) {
       const q = L.rowQuestion(t, G.row);
       return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt">Rad ${n}: ${esc(q.text)}</span><span class="mp-nb rq${rq.busy ? '' : ' focus'}" id="mp-rqa">${esc(rq.ans)}</span></div>${msg}</div>`;
@@ -968,12 +983,14 @@ const MatteProv = (() => {
     const fix = (n, i, which) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix${(lit[which] || []).includes(i) ? ' lit' : ''}" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
     const inCell = (row, i) => {
       const v = vals[row] ? vals[row][i] : null;
-      const grey = row === 'p2' && i === 0, gv = given.has(row + ':' + i);
+      /* D41 ✎: en förskjuten rads rutor till höger är grå; appen för in nollorna när raden bokförs */
+      const gz = /^r\d$/.test(row) && i < rowStart(row);
+      const grey = (row === 'p2' && i === 0) || gz, gv = given.has(row + ':' + i);
       const foc = o.focus && o.focus.row === row && o.focus.col === i;
-      const sh = i < rowStart(row) && v == null;                  // förskjutningens tomma ruta
+      const sh = !gz && i < rowStart(row) && v == null;           // förskjutningens tomma ruta
       const lk = o.open && !o.open.includes(row);                 // låst tills raderna ovanför är ifyllda
       const colLit = lit.col != null && lit.col === i && row !== 's' && v != null;   // summans kolumn lyser
-      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', sh ? 'sh' : '', lk ? 'lk' : '', colLit ? 'lit' : '', foc ? 'focus' : '', o.ok && v != null ? 'ok' : '', gv ? 'given' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
+      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', gz ? 'gz' : '', gz && o.zlit === row ? 'lit' : '', gz && o.zin && o.zin.row === row && o.zin.col === i ? 'zin' : '', sh ? 'sh' : '', lk ? 'lk' : '', colLit ? 'lit' : '', foc ? 'focus' : '', o.ok && v != null ? 'ok' : '', gv ? 'given' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
       const edit = !o.readonly && !gv && !lk && row === 's';   // raderna bokförs av appen; summan skriver barnet
       return `<div class="${cls}" data-r="${row}" data-c="${i}" ${edit ? `data-act="cell" data-row="${row}" data-col="${i}"` : ''}${lk ? ' aria-disabled="true"' : ''}>${v != null ? v : ''}</div>`;
     };
@@ -1019,6 +1036,8 @@ const MatteProv = (() => {
       const nx = IN.kind === 'sheet' ? `Nästa tal ${svg('down')}` : `Nästa ruta ${svg('right')}`;
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-k nx w4 pri" data-act="key" data-k="next">${nx}</button></div>`;
     }
+    if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'zero')    // D41 ✎: förklaringen, en knapp
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" data-act="key" data-k="next"${IN.rq.busy ? ' disabled' : ''}>${svg('right')}<span>Nästa</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'grey')   // nollan rättas när den skrivs
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" disabled>${svg('check')}<span>Svara</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase !== 'grey') {
@@ -1078,6 +1097,7 @@ const MatteProv = (() => {
     const R = L.uppRowsOrder(t), rq = IN.rq;
     if (rq.k < R.length) {                                   // radfrågan
       if (rq.busy) return;
+      if (rq.phase === 'zero') { if (k === 'next') zeroNext(t); return; }   // D41 ✎: förklaringen av nollorna
       const row = R[rq.k];
       if (rq.phase === 'grey') {                             // rad 2: barnet skriver nollan själv
         if (!/^\d$/.test(k)) return;
@@ -1127,12 +1147,55 @@ const MatteProv = (() => {
     else if (step === 'hint') rq.msg = { kind:'bit', text:L.rowHint(t, row) };
     else { if (!t.two) rq.ans = String(q.answer); else IN.notes[row][IN.notes[row].length - 1] = String(q.answer); return rowBookAnim(t, row, 'svar'); }
   }
+  /* D41 ✎: en förskjuten rad blir aktuell. Först förklaringen (L.zeroSteps): siffrans värde med siffran i
+     orange ram, varför just så många nollor med de grå rutorna i orange ram, och sist förs nollorna in en i
+     taget. Öva: klickstyrt med Nästa. Provet: ett kort steg, och nollorna förs in direkt efter texten.
+     Först därefter kommer radens fråga (Dennis: "sätt dit nollorna innan du löser det som skall gångras"). */
+  function zerosFirst(t, row) {
+    const rq = IN.rq;
+    rq.phase = 'zero'; rq.zrow = row; rq.zs = 0; rq.msg = null;
+    rq.zsteps = L.zeroSteps(t, row, S && S.mode === 'prov' ? 'prov' : 'ova');
+    IN.f = { row, col:0, note:null };
+    zeroShow(t);
+  }
+  function zeroShow(t) {
+    const rq = IN.rq, st = rq.zsteps[rq.zs], row = rq.zrow, token = IN, prov = S && S.mode === 'prov';
+    IN.zlit = st.lit === 'zeros' ? row : null;
+    rq.zlitTop = st.lit === 'top';
+    rq.busy = !!st.zeros;                                  // knappen väntar tills nollorna står
+    refreshQ(t);
+    if (!st.zeros) return;
+    const zeros = L.rowZeros(t, row);
+    zeros.forEach((z, k) => setTimeout(() => {           // en i taget, från entalet
+      if (IN !== token) return;
+      IN.vals[row][z.col] = 0; IN.booked.add(row + ':' + z.col);
+      IN.zin = { row, col:z.col };
+      refreshQ(t);
+      IN.zin = null;
+      snd('click');
+    }, 700 + k * 550));
+    setTimeout(() => {
+      if (IN !== token) return;
+      rq.busy = false;
+      if (prov) zeroDone(t); else refreshQ(t);
+    }, 700 + zeros.length * 550 + 500);
+  }
+  function zeroNext(t) {
+    const rq = IN.rq;
+    if (rq.busy) return;
+    if (rq.zs < rq.zsteps.length - 1) { rq.zs++; zeroShow(t); } else zeroDone(t);
+  }
+  function zeroDone(t) {
+    const rq = IN.rq;
+    IN.zlit = null; rq.zlitTop = false; rq.zsteps = null; rq.msg = null; rq.phase = 'ask';
+    refreshQ(t);
+  }
   /* Bokföringen: texten först, sedan flyttar talet in på sin rad och sitt platsvärde */
   function rowBookAnim(t, row, outcome) {
     const rq = IN.rq, q = L.rowQuestion(t, row), n = IN.rows.indexOf(row) + 1, token = IN;
     rq.busy = true;
-    const where = row === 'p2' ? 'rad 2, efter nollan' : `rad ${n}`;
-    rq.msg = { kind:outcome === 'svar' ? 'bit' : 'ok', text:outcome === 'svar' ? `Svaret är ${q.answer}. Det skrivs på ${where}.` : `Rätt! ${q.answer} skrivs på ${where}.` };
+    const where = row === 'p2' ? 'rad 2, efter nollan' : `rad ${n}`, zt = L.zeroBookText(t, row, outcome);
+    rq.msg = { kind:outcome === 'svar' ? 'bit' : 'ok', text:zt || (outcome === 'svar' ? `Svaret är ${q.answer}. Det skrivs på ${where}.` : `Rätt! ${q.answer} skrivs på ${where}.`) };
     refreshQ(t);
     const cells = L.rowBook(t, row);
     const land = () => {
@@ -1143,6 +1206,7 @@ const MatteProv = (() => {
       const R = L.uppRowsOrder(t), next = R[rq.k];
       if (!next) IN.f = { row:'s', col:0 };
       else if (next === 'p2') { rq.phase = 'grey'; IN.f = { row:'p2', col:0 }; }
+      else if (L.rowZeros(t, next).length) return zerosFirst(t, next);   // D41 ✎: nollorna före frågan
       else { rq.phase = 'ask'; IN.f = { row:next, col:0, note:t.two ? 0 : null }; }
       refreshQ(t);
     };

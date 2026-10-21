@@ -59,9 +59,11 @@
      ⇒ 'twostep'. Motorn har NCOL = 5 kolumner (E T H T TT, femte färgen
      bärnsten); singlePass/addPass/noCarryAnswer var redan breddoberoende.
    · Rad 2 har en grå ruta i entalet (#md-p2-0, .md-zero). Titta och lär
-     och Räkna med hjälp: fasen "rad 2" säger "Nu gångrar vi med ett
-     tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet." och
-     nollan faller in i rutan (showZero) — barnet skriver den aldrig.
+     och Räkna med hjälp: fasen "rad 2" kommer före rad 2:s första
+     gångertal och förklarar nollan med siffrans värde (D41 ✎): "2 står i
+     tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en
+     nolla i entalet först." Sedan faller nollan in i rutan (showZero) —
+     barnet skriver den aldrig.
      Räkna själv (D41 ✎, ändrar D7 för tvåsiffrig faktor): rad 1, rad 2
      med den grå nollan (ljusgrå från början) och summan; barnet fyller
      rad för rad, "Nästa rad" tills allt är ifyllt, sedan Klar; summan är
@@ -1298,9 +1300,14 @@ const MultDivGame = (() => {
           const ones = { id: 'md-b-0', val: pl.ones };
           return `Först räknar vi <strong>${pl.a} · </strong>${R(ones)} — entalssiffran i ${pl.tens}${R(ones)}! 👇`;
         }
-        if (step.which === 2)
-          return `Nu gångrar vi med ett tiotal (${R({ id: 'md-b-1', val: pl.tens })} betyder <strong>${pl.tens * 10}</strong>). ` +
-                 `Därför fyller vi i en nolla här i entalet.`;
+        if (step.which === 2) {
+          /* D41 ✎ (Dennis: "gör det pedagogiskt, så att de förstår varför"): siffrans värde, sedan varför en
+             nolla — 10 har en nolla. Ett tal har bara en roll per mening ("20 är 2 · 10" står för sig). */
+          const V = pl.tens * 10;
+          return `${R({ id: 'md-b-1', val: pl.tens })} står i tiotalet och är värd <strong>${V}</strong>. ` +
+                 (pl.tens > 1 ? `${V} är ${pl.tens} · 10. ` : '') +
+                 `10 har en nolla – därför en nolla i entalet först.`;
+        }
         return `Nu lägger vi ihop raderna: ental med ental, tiotal med tiotal. Därför står raderna rakt under varandra.`;
       case 'calc':  return calcText(step, pl);
       case 'memjoin':

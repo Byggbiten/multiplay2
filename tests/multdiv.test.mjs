@@ -658,7 +658,15 @@ describe('D40: den osynliga nollan och pekningen', () => {
   it('nollans steg: texten säger tiotal, vad siffran betyder och nollan i entalet', () => {
     const pl = buildPlan(67, 29, 4);
     const ph2 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 2);
-    expect(strip(multStepText(ph2, pl))).toBe('Nu gångrar vi med ett tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet.');
+    expect(strip(multStepText(ph2, pl))).toBe('2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en nolla i entalet först.');
+    const p1 = buildPlan(286, 17, 4);
+    expect(strip(multStepText(planMultSteps(p1).find(s => s.t === 'phase' && s.which === 2), p1)))
+      .toBe('1 står i tiotalet och är värd 10. 10 har en nolla – därför en nolla i entalet först.');
+    // språkregeln: inget tal två gånger i samma mening, för varje tiotalssiffra 1–9
+    for (let tens = 1; tens <= 9; tens++) {
+      const q = buildPlan(87, tens * 10 + 3, 4), txt = strip(multStepText({ t: 'phase', which: 2 }, q));
+      for (const m of txt.split(/(?<=[.?!])\s+|\s+–\s+/)) { const n = m.match(/\d+/g) || []; expect(new Set(n).size, m).toBe(n.length); }
+    }
     const ph3 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 3);
     expect(strip(multStepText(ph3, pl))).toContain('ental med ental, tiotal med tiotal');
   });
@@ -978,5 +986,26 @@ describe('D41 ✎: fria läget med rader vid tvåsiffrig faktor', () => {
     expect(src).toMatch(/if \(r === 'ans' && freeAnsLocked\(plan, exFreeGrid\)\) return;/);
     expect(src).toMatch(/if \(freeRows\(\) && freeButtonMode\(plan, exFreeGrid\) === 'next'\) \{ freeGoNextRow\(\); return; \}/);
     expect(src).toMatch(/Rad 2 räknar med tiotal, därför en nolla i entalet\./);
+  });
+});
+
+/* ── D41 ✎: nollan före radens första gångertal (Dennis: "sätta dit nollorna innan man gångrar") ── */
+describe('D41 ✎: den grå nollan kommer före rad 2:s första gångertal', () => {
+  it('demon och hjälpkön: nollans steg (fas 2) står före rad 2:s första uträkning och fråga', () => {
+    const fel = [];
+    for (let a = 12; a <= 999; a += 37) for (let b = 12; b <= 98; b += 9) {
+      if (b % 10 === 0) continue;
+      const pl = buildPlan(a, b, 4);
+      const st = planMultSteps(pl), z = st.findIndex(s => s.t === 'phase' && s.which === 2), c = st.findIndex(s => s.rowKey === 'p2');
+      if (!(z >= 0 && z < c)) fel.push(`${a}·${b} demo`);
+      const q = planMultHelpQueue(pl), zq = q.findIndex(i => i.kind === 'phase' && i.which === 2), cq = q.findIndex(i => i.rowKey === 'p2');
+      if (!(zq >= 0 && zq < cq)) fel.push(`${a}·${b} hjälp`);
+    }
+    expect(fel).toEqual([]);
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    // hjälpläget: knappen väntar tills nollan står i rutan, sedan kommer rad 2:s fråga
+    expect(src).toMatch(/if \(item\.which === 2 && plan\.kind === 'twostep'\) \{\n\s+\/\/ D40: nollan visas automatiskt/);
+    // Räkna själv: nollan står i rutan från början
+    expect(src).toMatch(/\$\{freeMode \? '<span class="md-zd">0<\/span>' : ''\}/);
   });
 });
