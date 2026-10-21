@@ -573,3 +573,6 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   minnessiffreläget. Källa: Dennis: "jag tycker att ordningen borde vara att sätta dit nollorna innan man gångrar. inte
   alla nollor direkt. men att det blir tydligt för den som skall lösa uppgiften att sätt dit nollorna innan du löser
   det som skall gångras. annars kanske de skriver in dem i fel cell".
+- ✎ **2026-10-21, varför så många nollor:** nollorna förklaras med siffrans värde: "8 står i hundratalet och är värd
+  800 = 8 · 100; 100 har två nollor, därför två nollor först". Gäller Dela upp och minnessiffreläget. Källa: Dennis:
+  "gör det pedagogiskt, så att de förstår varför de fyller i x-antal nollor".
