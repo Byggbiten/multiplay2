@@ -315,6 +315,41 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Multiplikation & Division
+
+Kortet har två delar: **Uppställd multiplikation** och **Kort division**. Båda har tre lägen och fyra nivåer.
+
+- **Titta och lär:** appen räknar uppgiften steg för steg; barnet trycker **Nästa steg**. Texten står först, sedan
+  rör sig siffrorna.
+- **Räkna med hjälp:** appen frågar en kolumn i taget ("Vad är 7 · 9?"), barnet svarar på knappsatsen, placerar och
+  stryker minnessiffrorna själv. Två livlinor per runda.
+- **Räkna själv:** barnet skriver hela svaret i rutorna och räknar i kladden. Fel svar ger "Inte riktigt"; har barnet
+  glömt en minnessiffra säger appen det.
+
+### Uppställd multiplikation: nivåerna
+
+| Nivå | Tal |
+|---|---|
+| 1 Utan minnessiffra | tvåsiffrigt · ensiffrigt utan minne (32 · 3) |
+| 2 Med minnessiffra | tvåsiffrigt · ensiffrigt med minne (28 · 8) |
+| 3 Tresiffrigt tal | tresiffrigt · ensiffrigt (789 · 9) |
+| 4 Svårast – blandat (D40) | blandat som det svårare övningsbladet, ungefär lika ofta och aldrig samma sort tre gånger i rad: tresiffrigt · ensiffrigt och fyrsiffrigt · ensiffrigt med flera minnessiffror (483 · 9, 2475 · 3), tvåsiffrigt · tvåsiffrigt (67 · 29) och tresiffrigt · tvåsiffrigt med 12–19 som andra faktor (286 · 17) |
+
+Svaren kan bli fem siffror långa; kolumnerna heter E, T, H, T och TT.
+
+**Den osynliga nollan (nivå 4, tvåsiffrig faktor).** Rad 2 har en grå ruta i entalet, som på övningsbladen. När rad 2
+börjar säger appen "Nu gångrar vi med ett tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet." och en
+nolla skrivs in i den grå rutan. I Räkna med hjälp kommer nollan av sig själv; barnet skriver den inte. Rad 1 och
+rad 2 läggs sedan ihop kolumn för kolumn, ental med ental och tiotal med tiotal. Räkna själv har inga delrader på
+pappret (barnet ställer upp dem i kladden), så där finns ingen grå ruta; livlinan visar de två delprodukterna, till
+exempel 67 · 9 = 603 och 67 · 20 = 1340.
+
+**Pekningen (nivå 4).** Vid varje uträkning lyser de två siffrorna som gångras och rutan där svaret ska stå, och
+texten säger vilken ruta det är ("7 · 9 är 63. Det hör till entalet."). Rad 2:s första uträkning säger att svaret
+hamnar ett steg till vänster eftersom vi räknar tiotal. Nivå 1–3 har samma texter som förut.
+
+Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
+
 ## Matteprov 4:an (v67–v68, D37, D38)
 
 Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet
@@ -538,6 +573,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | 10-Kompisar – Övning | Visuell utforskning av talpar |
 | 10-Kompisar – Test | 10 frågor om talpar som blir 10 |
 | Geografi | Sveriges landskap: Utforska, Träna (fyra lägen), Pussel, Samlarpärm, Test, hemlandskap |
+| Multiplikation & Division | Uppställd multiplikation och kort division i tre lägen och fyra nivåer; nivå 4 blandat med den osynliga nollan (D40) |
 | Matteprov 4:an | Prov om multiplikation (Matteprov 1): öva fem moment, tabellsprint, provet med kvitto per moment |
 | Ljudeffekter | Feedback-ljud vid rätt och fel svar |
 | Lokal datalagring | Allt sparas i webbläsaren |
