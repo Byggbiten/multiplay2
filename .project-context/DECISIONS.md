@@ -584,3 +584,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   nolla först." och för fler nollor "800 slutar på två nollor. Därför skriver vi två nollor först." Ersätter "är
   värd … 20 är 2 · 10. 10 har en nolla". Källa: Dennis (skärmbild, nivå 4 rad 2): "den här förklaringen blev nästan
   lite som en tungvrickare. kan du bli enklare/mer pedagogisk?"
+- ✎ **2026-10-21, nollan först så att vi bara räknar med siffran:** "2:an i tiotalet är egentligen 20. Vi skriver
+  nollan först – sedan räknar vi bara med 2:an." (fler nollor: "Vi skriver två nollor först – sedan räknar vi bara med
+  8:an."). Ersätter föregående ✎. Källa: Dennis: "2:an står i tiotalet, så den är egentligen 20. Därför tar vi den
+  nollan redan nu till cellen nedan, så behöver vi bara räkna X x 2 istället för X x 20 typ nått sånt, fast du kan få
+  effektivisera det ännu mer".

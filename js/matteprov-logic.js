@@ -409,13 +409,16 @@
     if (!p || p.i === 0) return [];
     const d = p.d, P = Math.pow(10, p.i), V = d * P, plats = PLATS[p.i];   // radens nummer står som etikett i UI:t, inte i meningen
     /* Dennis 21/10: "nästan lite som en tungvrickare" – enklare: siffran är egentligen V, V slutar på n nollor */
+    /* Dennis 21/10: nollorna först, "så behöver vi bara räkna X · 2 istället för X · 20" */
+    const sedan = `sedan räknar vi bara med ${d}:an.`;
+    const forst = p.i === 1 ? 'nollan' : nollor(p.i);
     if (mode === 'prov')
-      return [{ text:`${d}:an står i ${plats}, så den är egentligen ${V}. Därför skriver vi ${nollor(p.i)} först.`, lit:'zeros', zeros:true }];
+      return [{ text:`${d}:an i ${plats} är egentligen ${V}. Vi skriver ${forst} först – ${sedan}`, lit:'zeros', zeros:true }];
     if (p.i === 1)
-      return [{ text:`${d}:an står i tiotalet, så den är egentligen ${V}. Därför skriver vi en nolla först.`, lit:'top' },
+      return [{ text:`${d}:an i tiotalet är egentligen ${V}. Vi skriver nollan först – ${sedan}`, lit:'top' },
               { text:RAKNA[1], lit:'zeros', zeros:true }];
-    return [{ text:`${d}:an står i ${plats}, så den är egentligen ${V}.`, lit:'top' },
-            { text:`${V} slutar på ${nollor(p.i)}. Därför skriver vi ${nollor(p.i)} först.`, lit:'zeros' },
+    return [{ text:`${d}:an i ${plats} är egentligen ${V}.`, lit:'top' },
+            { text:`Vi skriver ${forst} först – ${sedan}`, lit:'zeros' },
             { text:RAKNA[p.i], lit:'zeros', zeros:true }];
   }
   /* Kvittensen när en förskjuten rad bokförs: talet till vänster om nollorna, slutsatsen sist */
