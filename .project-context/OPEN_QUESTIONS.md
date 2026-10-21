@@ -35,9 +35,6 @@ aldrig. Nya frågor får nästa P-nummer.
 
 ### Matteprovet
 
-- **P12 Skolans metod i resten av appen?** Matteprovet ställer upp tvåsiffrig faktor med nollan i den grå rutan
-  (läroboken i åk 4); Multiplikationens nivå 4 skriver rad 2 förskjuten utan nolla (en äldre bok). Dennis 19/10:
-  ändra bara i provet (D37 ✎). Öppet: ska nivå 4 senare följa skolans metod?
 
 ### Snällare app (D39)
 
@@ -48,6 +45,8 @@ aldrig. Nya frågor får nästa P-nummer.
   vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
 
 ## Besvarade
+
+- ~~P12 Skolans metod i resten av appen?~~ → D40 (minnessiffran kvar; den osynliga nollan i en grå ruta på nivå 4).
 
 - ~~P11 Offentligt repo: personuppgifter i dokumenten och "Här bor du" för alla~~ → D36
 - ~~P8 Geografimodulens upplägg och pedagogik~~ → D24–D35 (samtalet i `brainstorm/08`, mockupen godkänd)

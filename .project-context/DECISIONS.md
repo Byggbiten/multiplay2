@@ -62,6 +62,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
 - D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
+- D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2)
 
 ---
 
@@ -518,3 +519,19 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   resultatrader. Källa: Dennis: "den formuleringen gillade jag inte. för vissa barn kanske 7 av 10 är helt
   fantastiskt. då tycker jag: Resultat skrivs som 'Du klarade 7 av 10 – Bra kämpat! 💪' sen kommer man under 6 av 10
   rätt så får man bara veta resultatet, utan någon värdering i det. Typ: Du fick 3 av 10 rätt" (emojin är hans val).
+
+## D40 · 2026-10-21 · Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan, blandat som svårare bladet
+- **Beslut:** den vanliga uppställda multiplikationen behåller minnessiffran (ingen uppdelning i delprodukter per
+  siffra som i matteprovet). På nivå 4 får rad 2 en grå ruta i entalet som visar "den osynliga nollan", så att
+  barnet ser varför raden flyttas ett steg och entalen hamnar under varandra. Nivå 4 blandar talen som det svårare
+  övningsbladet: tresiffrigt och fyrsiffrigt gånger ensiffrigt, tvåsiffrigt gånger tvåsiffrigt och tresiffrigt gånger
+  tvåsiffrigt (bladen har t.ex. 286 · 17, 487 · 13, 638 · 12). Besvarar P12.
+- **Källa:** Dennis 2026-10-21: "de har gråat rutan som jag markerat på bilden (eller på bilden finns den inte ens)
+  det är ju för att barnen skall förstå att det finns en 'osynlig nolla där' och göra det lättare att räkna. […] jag
+  tycker att minnessiffran är enklare att hantera på ett papper. det där när man skall dela upp […] blir mycket kladd
+  på pappret […] Så den vanliga modulen ska fortsätta va med minnessiffra. men vi kanske skall förtydliga det där med
+  att det finns en osynlig nolla. […] i vilken ordning man gör vad och vad man multiplicerar först är krångligt. och om
+  [barnet] inte radar upp ordentligt så entalen är ovanför varandra osv, så kan delsummeringen bli fel. så först
+  införlivar vi den 'osynliga 0:an' så den blir tydlig. Sedan bör vi också ha med, precis som det är i övningsbladen
+  på den svårare. att när man väljer svårighetsgrad 4 så kan det också vara tal såsom tresiffrigt x 1 siffrigt.
+  fanns det i övningsbladet även 3 siffrigt gånger 2 siffrigt? då kanske vi ska ha med det också?"

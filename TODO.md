@@ -4,7 +4,7 @@
 
 - [ ] P13, P14 (snällare app): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
-- [ ] P12: ska Multiplikationens nivå 4 följa skolans metod med nollan i den grå rutan? Ta upp med Dennis efter provet.
+- [ ] D40: Multiplikation nivå 4 – den osynliga nollan i en grå ruta och blandade tal (3·1, 4·1, 2·2, 3·2). Pågår 21/10.
 - [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
