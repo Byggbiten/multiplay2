@@ -63,6 +63,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
 - D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2)
+- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp
 
 ---
 
@@ -551,3 +552,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ram (matteprovets #fb923c) som pulserar mjukt så länge steget visas; gäller multdiv alla nivåer. Källa: Dennis:
   "dett är lite för subtilt den där pulseringen. Kan det bli ännu tydligare vilka tal som är aktuell? kanske en
   orange ram på de aktuella cellerna?"
+
+## D41 · 2026-10-21 · Matteprovets uppställning: välj räknesätt, minnessiffran är förval
+- **Beslut:** uppställningen i matteprovet följer samma metodik som Multiplikation nivå 4 (D40): minnessiffran, den
+  osynliga nollan i en grå ruta, orange ram på de aktuella rutorna, siffrorna i texten i platsvärdesfärg. Barnet kan
+  växla till det andra räknesättet, dela upp (987 · 2 = 2 · 900 + 2 · 80 + 2 · 7, sedan summera delsummorna).
+  Minnessiffran är förvald. Ändrar D38 ✎ (delprodukter per siffra var tidigare det enda sättet i provet).
+- **Källa:** Dennis 2026-10-21: "Nu till matteprovet. Se till att vi följer samma metodik där. Men man skall kunna
+  växla mellan vilket räkningsläge man väljer. om man vill arbeta med t.ex. 987 x 2 = 2 x 900 + 2 x 80 + 2 x 7 och
+  sen summera delsummorna. Eller om man hellre kör med detta minnessiffratänk. vilket jag förespråkar."
