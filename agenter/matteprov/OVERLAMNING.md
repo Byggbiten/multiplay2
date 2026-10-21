@@ -2,11 +2,12 @@
 
 **Roll:** byggde Matteprov 4:an med Matteprov 1 (multiplikation, kapitel 2) och förvaltar det. Kan granska, rätta och
 bygga vidare, och lägga till nästa prov.
-**Datum:** 2026-10-19, D41 tillagt 2026-10-21 (gren `matteprov-metod`).
-**Läge:** live i **v69** (`live-fore-v69` är återställningspunkten; v67 hade rundorna 1–3, v68 runda 4, v69 rundorna
-5–6 och samordnarens resultatregel). Arbetet sker på `dev`. Rundornas grenar är sammanslagna och borttagna:
+**Datum:** 2026-10-19; D41 2026-10-21 (gren `matteprov-metod`); D42 2026-10-21 (gren `matteprov-hjalplage`).
+**Läge:** live i **v72** (rundorna 7–9 gick ut i v70–v72). D42 (runda 10) är byggt på grenen `matteprov-hjalplage`
+(tagg `fore-matteprov-hjalplage`), pushat men inte mergat. Tidigare: v67 rundorna 1–3, v68 runda 4, v69 rundorna 5–6
+och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sammanslagna och borttagna:
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
-Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
+Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
 
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
@@ -20,6 +21,8 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
    - **D40 med ✎** – Multiplikation nivå 4: den osynliga nollan, pekningen, siffrorna i platsvärdesfärg (multdiv).
    - **D41** – uppställningen i provet: välj räknesätt, Minnessiffra (förval, samma metodik och motor som D40)
      eller Dela upp (D38:s delprodukter).
+   - **D42** – Öva får Räkna med hjälp (förval) och Räkna själv; med hjälp leder appen under körningen, ruta för
+     ruta. Provet räknas själv.
 3. `.project-context/DESIGN.md`: raden Matteprov 4:an och lagringsnyckeln `matteprov_`.
 4. `MANUAL.md`, avsnittet "Matteprov 4:an" (vad barnet ser).
 5. `agenter/matteprov/LOGG.md` (rundorna 1–6 och lärdomarna).
@@ -53,6 +56,26 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 - **Det som var svårt:** `tagsCovered`, `tagsHard(t, cls, detail)`, `recordOutcome` (glöms efter `FORGET_AFTER = 3`
   rätt direkt i rad), `hardList`, `tagLabel`, `genForTag`.
 - **Kladden:** `createHistory()` (Ångra/Gör om, Rensa är ett drag).
+
+## Räkna med hjälp / Räkna själv (D42)
+- **Valet** `Med hjälp | Själv` står på provsidan på samma rad som Lättare/Svårare (uppmätt i 390 × 797: ingen scroll,
+  knapparna 85 × 44 px; sidan hade 19 px kvar, så en egen rad fick inte plats). Sparas som `ovaMode` i
+  `matteprov_{id}` (`ovaMode(st)`, `setOvaMode`), förval Med hjälp. `passHelp(mode, passMode)`: hjälp bara i Öva
+  (`ova`, `svag`, `not`) och bara med Med hjälp; `prov` (provet och mitt prov) är alltid själv. UI:ts `helpOn()`.
+- **Med hjälp i tiotal och TE:** `freshInput` ger `IN.hb = { i, sw, outc, ack, msg, adv }`; rutorna fylls en i taget
+  (senare rutor låsta och tonade, klara gröna). Frågeraden (`askHTML`) visar kvittensen efter förra rutan
+  (`boxAck`), frågan om rutan med fokus (`boxAsk`) och hjälpens rad efter fel. Knappen heter Svara och rättar bara
+  rutan (`helpBoxAnswer`); fel: "Inte riktigt – försök igen" tyst, sedan `boxHint`, sedan svaret i rutan och "Nästa
+  ruta" (`hbAdvance`). Uppgiftens utfall: sista rutan visad ⇒ svaret, någon hjälp ⇒ med hjälp. Slutvyn visar talet
+  och svaret ("8 · 40 = 320").
+- **Lysande siffror och färger:** `boxAsk` returnerar `lit` ('x:<plats>', 'y:<plats>', 'a', 'b:T', 'b:E', 'box:<i>')
+  och texten med tokens `[[siffror:plats]]`; `tokHTML` färgar dem (`pvE`, `pvT`, `pvH`, `pvTu`, `pvTT`), `pvRef`
+  ritar faktorerna med en färg per siffra och orange ram på de lysande (`.lit`). Ett tal ritas i en `pvn`-span, annars
+  delar flexraden upp siffrorna ("5 0 · 6 0", rättat under verifieringen).
+- **Problemlösningen:** stegens fråga fanns redan; med hjälp lyser priset som hör till ett gångersteg (`.pick.lit`).
+- **Uppställningen:** `uppEngineMode(method, passMode, mode)`: Minnessiffra med hjälp = multdivs hjälpläge, själv och
+  provet = fria läget via `runTask`. Dela upp är det ledda flödet i båda lägena.
+- **Själv:** som förut: instruktionsraden, alla rutor öppna, en knapp (Nästa ruta → Klar).
 
 ## Räknesätten i uppställningen (D41)
 - **Växeln** `Räkna med: Minnessiffra | Dela upp` står överst i "Så här gör du" för uppställningen (på provsidan fanns
@@ -129,7 +152,9 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
 
 ## Nästa steg
-- Vänta på Dennis och barnets synpunkter på v69.
+- Vänta på Dennis synpunkter på D42 (grenen `matteprov-hjalplage`).
+- Möjligt nästa: Med hjälp även i Dela upp och tabelltestet om Dennis vill (nu: Dela upp är alltid ledd, tabelltestet
+  har ingen extra hjälp).
 - TODO: ta bort den oanvända uttryckslogiken (se ovan).
 
 **Efter runda 9 (samordnaren 21/10):** nollornas förklaring förenklad efter Dennis ("nästan lite som en
