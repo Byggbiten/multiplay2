@@ -568,3 +568,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - ✎ **2026-10-21, grå nollor i Dela upp:** i matteprovets Dela upp blir de tomma rutorna till höger om varje förskjuten
   delproduktsrad grå (som den osynliga nollan), och nollorna förs in av appen när raden är aktuell. Källa: Dennis
   (skärmbild 4819 · 9 i Dela upp): "Skulle inte dessa celler vara gråade, och när det är dags så skall 0:an föras in?"
+- ✎ **2026-10-21, nollorna före gångertalet:** för varje rad sätts radens nolla eller nollor in först, sedan frågas
+  gångertalet och svaret bokförs till vänster om nollorna; inte alla raders nollor på en gång. Gäller Dela upp och
+  minnessiffreläget. Källa: Dennis: "jag tycker att ordningen borde vara att sätta dit nollorna innan man gångrar. inte
+  alla nollor direkt. men att det blir tydligt för den som skall lösa uppgiften att sätt dit nollorna innan du löser
+  det som skall gångras. annars kanske de skriver in dem i fel cell".
