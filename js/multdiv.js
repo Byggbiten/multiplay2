@@ -800,8 +800,8 @@ const MultDivGame = (() => {
       // fyrsiffrigt · ensiffrigt, minst två minnessiffror (2475 · 3)
       do { a = 1000 + rnd(9000); b = 2 + rnd(8); } while (carryCount(a, b) < 2);
     } else if (type === '3x2') {
-      // tresiffrigt · tvåsiffrigt med tiotalssiffran 1, som bladet (286 · 17)
-      do { a = 101 + rnd(899); b = 12 + rnd(8); } while (a % 10 === 0);
+      // tresiffrigt · tvåsiffrigt, andra faktorn 12–59 som det svårare bladet (286 · 17, 169 · 54, 206 · 44)
+      do { a = 101 + rnd(899); b = 12 + rnd(48); } while (a % 10 === 0 || b % 10 === 0);
     } else {
       // 2-siffrigt · 2-siffrigt med delprodukter (bokens metod).
       // Ingen nolla som ental (delprodukt av 0 vore tom pedagogik).

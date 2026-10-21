@@ -575,7 +575,7 @@ describe('D40: nivå 4 blandar fyra typer som det svårare övningsbladet', () =
       if (type !== t || typeOf(a, b) !== t) fel.push(`${t}: ${a}·${b}`);
       if ((t === '3x1' || t === '4x1') && (b < 2 || b > 9 || carries(a, b) < 2)) fel.push(`${t} minne: ${a}·${b}`);
       if (t === '2x2' && (a % 10 === 0 || b % 10 === 0)) fel.push(`2x2 nolla: ${a}·${b}`);
-      if (t === '3x2' && (b < 12 || b > 19 || a % 10 === 0)) fel.push(`3x2: ${a}·${b}`);
+      if (t === '3x2' && (b < 12 || b > 59 || b % 10 === 0 || a % 10 === 0)) fel.push(`3x2: ${a}·${b}`);
       if (String(a * b).length > 5) fel.push(`för brett: ${a}·${b}`);
     }
     expect(fel).toEqual([]);
