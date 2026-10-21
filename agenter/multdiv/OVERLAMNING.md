@@ -41,8 +41,8 @@ breddoberoende.
 
 **Den osynliga nollan** (`#md-p2-0`, `.md-zero`, färgerna `#d9dde3`/`#9aa3ae`, nollan `#64748b`):
 - *Titta och lär:* fasen rad 2 är ett eget steg före rad 2:s första gångertal. Texten förklarar med siffrans
-  värde: "2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en nolla i entalet först."
-  (med 1 i tiotalet utan mellanmeningen). Sedan faller nollan in (`showZero`). Bubblan är fast 88 px vid `twostep`.
+  värde: "2:an i tiotalet är egentligen 20. Vi skriver nollan först – sedan räknar vi bara med 2:an." (förenklad av
+  samordnaren 21/10 efter Dennis "nästan lite som en tungvrickare"). Sedan faller nollan in (`showZero`). Bubblan är fast 88 px vid `twostep`.
 - *Räkna med hjälp:* samma text i bubblan; nollan kommer av sig själv, knappen väntar tills den står.
 - *Räkna själv:* nollan står ljusgrå från början, med raden "Rad 2 räknar med tiotal, därför en nolla i entalet."
 - Additionen: entalskolumnen säger "Nollan lägger inte till något — 3:an åker ner i entalet."

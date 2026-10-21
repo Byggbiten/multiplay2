@@ -1303,10 +1303,11 @@ const MultDivGame = (() => {
         if (step.which === 2) {
           /* D41 ✎ (Dennis: "gör det pedagogiskt, så att de förstår varför"): siffrans värde, sedan varför en
              nolla — 10 har en nolla. Ett tal har bara en roll per mening ("20 är 2 · 10" står för sig). */
+          /* Dennis 21/10: förra texten blev "som en tungvrickare" – nu en tanke: siffran är egentligen ett tiotal */
           const V = pl.tens * 10;
-          return `${R({ id: 'md-b-1', val: pl.tens })} står i tiotalet och är värd <strong>${V}</strong>. ` +
-                 (pl.tens > 1 ? `${V} är ${pl.tens} · 10. ` : '') +
-                 `10 har en nolla – därför en nolla i entalet först.`;
+          /* Dennis 21/10: "tar vi den nollan redan nu … så behöver vi bara räkna X · 2 istället för X · 20" */
+          return `${R({ id: 'md-b-1', val: pl.tens })}:an i tiotalet är egentligen <strong>${V}</strong>. ` +
+                 `Vi skriver nollan först – sedan räknar vi bara med ${R({ id: 'md-b-1', val: pl.tens })}:an.`;
         }
         return `Nu lägger vi ihop raderna: ental med ental, tiotal med tiotal. Därför står raderna rakt under varandra.`;
       case 'calc':  return calcText(step, pl);

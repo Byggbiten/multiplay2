@@ -338,8 +338,8 @@ Kortet har två delar: **Uppställd multiplikation** och **Kort division**. Båd
 Svaren kan bli fem siffror långa; kolumnerna heter E, T, H, T och TT.
 
 **Den osynliga nollan (nivå 4, tvåsiffrig faktor).** Rad 2 har en grå ruta i entalet, som på övningsbladen. När rad 2
-börjar, före radens första gångertal, säger appen "2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla –
-därför en nolla i entalet först." (D41 ✎; med 1 i tiotalet utan mellanmeningen) och en nolla skrivs in i den grå rutan. I Räkna med hjälp kommer nollan av sig själv; barnet skriver den inte. Rad 1 och
+börjar, före radens första gångertal, säger appen "2:an i tiotalet är egentligen 20. Vi skriver nollan först – sedan räknar
+vi bara med 2:an." (D41 ✎, förenklad 21/10) och en nolla skrivs in i den grå rutan. I Räkna med hjälp kommer nollan av sig själv; barnet skriver den inte. Rad 1 och
 rad 2 läggs sedan ihop kolumn för kolumn, ental med ental och tiotal med tiotal.
 
 **Räkna själv med tvåsiffrig faktor (D41 ✎).** Pappret har rad 1, rad 2 och summan. Nollan står ljusgrå i den grå
@@ -430,11 +430,11 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
    - **Ensiffrig faktor**: en delprodukt per siffra, var och en på egen rad, ett steg åt vänster per rad, sedan
      summan. 687 · 8: 56, 640, 4800, 5496. Rutorna till höger om en förskjuten rad är **grå** (D41 ✎), och appen
      sätter nollorna där **innan** radens fråga: rad 2 en nolla, rad 3 två, rad 4 tre. Barnet skriver dem inte.
-     I Öva förklaras det i steg med Nästa: siffrans värde ("8 står i hundratalet. Den är värd 800.", siffran i
-     orange ram), varför så många nollor ("800 är 8 · 100. 100 har två nollor. Därför sätter vi två nollor först.",
+     I Öva förklaras det i steg med Nästa: siffrans värde ("8:an i hundratalet är egentligen 800.", siffran i
+     orange ram), varför så många nollor ("Vi skriver två nollor först – sedan räknar vi bara med 8:an.",
      de grå rutorna i orange ram), och sist förs nollorna in en i taget ("En … två nollor."). Med tiotalet räcker
-     ett steg ("1 står i tiotalet och är värd 10. 10 har en nolla – en nolla först."). I provet är förklaringen
-     en rad ("8 står i hundratalet, och 100 har två nollor – därför två nollor först.") och nollorna förs in direkt.
+     ett steg ("1:an i tiotalet är egentligen 10. Vi skriver nollan först – sedan räknar vi bara med 1:an."). I provet är
+     förklaringen en rad ("8:an i hundratalet är egentligen 800. Vi skriver två nollor först – sedan räknar vi bara med 8:an.") och nollorna förs in direkt.
      Sedan frågar appen "Vad är 9 · 8?" och svaret skrivs till vänster om nollorna ("Raden blir 7200."). Summans
      tankerad räknar med nollorna ("Entalet: 1 + 0 + 0 + 0.").
    - **Tvåsiffrig faktor**: rad 1 (entalet) räknas i anteckningsrutorna; radsumman är radens svar. Rad 2 börjar med

@@ -63,7 +63,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
 - D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
-- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor
+- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte
 
 ---
 
@@ -580,3 +580,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   utan att fokus lämnar rutan barnet står i: tryck på minnesrutan, nästa siffra hamnar där, och fokus står kvar i
   summans ruta. Källa: Dennis (skärmbild 8 · 1416): "när man skall sätta minnessiffra så skiftar cellerna fokus. du
   får gärna lösa så att det går att sätta minnessiffra utan att cellerna byter fokus".
+- ✎ **2026-10-21, enklare förklaring av nollan:** "2:an står i tiotalet, så den är egentligen 20. Därför skriver vi en
+  nolla först." och för fler nollor "800 slutar på två nollor. Därför skriver vi två nollor först." Ersätter "är
+  värd … 20 är 2 · 10. 10 har en nolla". Källa: Dennis (skärmbild, nivå 4 rad 2): "den här förklaringen blev nästan
+  lite som en tungvrickare. kan du bli enklare/mer pedagogisk?"
+- ✎ **2026-10-21, nollan först så att vi bara räknar med siffran:** "2:an i tiotalet är egentligen 20. Vi skriver
+  nollan först – sedan räknar vi bara med 2:an." (fler nollor: "Vi skriver två nollor först – sedan räknar vi bara med
+  8:an."). Ersätter föregående ✎. Källa: Dennis: "2:an står i tiotalet, så den är egentligen 20. Därför tar vi den
+  nollan redan nu till cellen nedan, så behöver vi bara räkna X x 2 istället för X x 20 typ nått sånt, fast du kan få
+  effektivisera det ännu mer".

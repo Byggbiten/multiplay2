@@ -860,13 +860,14 @@ describe('D41 ✎: nollorna i de förskjutna raderna (Dela upp)', () => {
     const tx = (row, m) => L.zeroSteps(t, row, m).map(s => s.text);
     expect(tx('r0', 'ova')).toEqual([]);
     // Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i x-antal nollor"
-    expect(tx('r1', 'ova')).toEqual(['1 står i tiotalet och är värd 10. 10 har en nolla – en nolla först.', 'En nolla.']);
-    expect(tx('r2', 'ova')).toEqual(['8 står i hundratalet. Den är värd 800.',
-      '800 är 8 · 100. 100 har två nollor. Därför sätter vi två nollor först.', 'En … två nollor.']);
-    expect(tx('r3', 'ova')[1]).toBe('4000 är 4 · 1000. 1000 har tre nollor. Därför sätter vi tre nollor först.');
+    expect(tx('r1', 'ova')).toEqual(['1:an i tiotalet är egentligen 10. Vi skriver nollan först – sedan räknar vi bara med 1:an.', 'En nolla.']);
+    // Dennis 21/10: förra texten var "som en tungvrickare" – siffran är egentligen V, V slutar på n nollor
+    expect(tx('r2', 'ova')).toEqual(['8:an i hundratalet är egentligen 800.',
+      'Vi skriver två nollor först – sedan räknar vi bara med 8:an.', 'En … två nollor.']);
+    expect(tx('r3', 'ova')[1]).toBe('Vi skriver tre nollor först – sedan räknar vi bara med 4:an.');
     expect(L.zeroSteps(t, 'r2', 'ova').map(s => [s.lit, !!s.zeros])).toEqual([['top', false], ['zeros', false], ['zeros', true]]);
-    // provet: ett kort steg, men "därför" och sambandet nollor = hundratal finns kvar
-    expect(tx('r2', 'prov')).toEqual(['8 står i hundratalet, och 100 har två nollor – därför två nollor först.']);
+    // provet: ett kort steg, men "därför" och siffrans värde finns kvar
+    expect(tx('r2', 'prov')).toEqual(['8:an i hundratalet är egentligen 800. Vi skriver två nollor först – sedan räknar vi bara med 8:an.']);
     expect(L.zeroBookText(t, 'r2', 'direkt')).toBe('Rätt! 72 skrivs till vänster om nollorna. Raden blir 7200.');
     expect(L.thinkSteps(t, 's', 'ova', 0)).toEqual(['Entalet: 1 + 0 + 0 + 0.']);
   });

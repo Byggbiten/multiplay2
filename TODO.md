@@ -18,6 +18,8 @@
 
 ## Klart
 
+- [x] Minnessiffran utan fokusbyte i matteprovet (D41 ✎) – live i v71 2026-10-21.
+
 - [x] D41 matteprovets räknesätt (Minnessiffra/Dela upp), delraderna i Räkna själv, grå nollor i Dela upp – live i v70 2026-10-21.
 
 - [x] D40 nivå 4: den osynliga nollan, pekningen av målceller, blandade tal, färgade siffror, orange ram – live i v70 2026-10-21.

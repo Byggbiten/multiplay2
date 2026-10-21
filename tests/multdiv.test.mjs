@@ -658,10 +658,10 @@ describe('D40: den osynliga nollan och pekningen', () => {
   it('nollans steg: texten säger tiotal, vad siffran betyder och nollan i entalet', () => {
     const pl = buildPlan(67, 29, 4);
     const ph2 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 2);
-    expect(strip(multStepText(ph2, pl))).toBe('2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en nolla i entalet först.');
+    expect(strip(multStepText(ph2, pl))).toBe('2:an i tiotalet är egentligen 20. Vi skriver nollan först – sedan räknar vi bara med 2:an.');
     const p1 = buildPlan(286, 17, 4);
     expect(strip(multStepText(planMultSteps(p1).find(s => s.t === 'phase' && s.which === 2), p1)))
-      .toBe('1 står i tiotalet och är värd 10. 10 har en nolla – därför en nolla i entalet först.');
+      .toBe('1:an i tiotalet är egentligen 10. Vi skriver nollan först – sedan räknar vi bara med 1:an.');
     // språkregeln: inget tal två gånger i samma mening, för varje tiotalssiffra 1–9
     for (let tens = 1; tens <= 9; tens++) {
       const q = buildPlan(87, tens * 10 + 3, 4), txt = strip(multStepText({ t: 'phase', which: 2 }, q));
