@@ -4,7 +4,6 @@
 
 - [ ] P13, P14 (snällare app): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
-- [ ] P15: delrader med den grå rutan även i Räkna själv? Ta upp med Dennis.
 - [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla
       "Eget prov"-poster i Gångertabellens logg mot SVG (`MP.medalSVG` finns).
@@ -17,6 +16,8 @@
 - [ ] (Senare) P5: avgör om varje timme ska övas i både "över"- och "i"-form i Klockans Kvart och Runt halv.
 
 ## Klart
+
+- [x] D41 matteprovets räknesätt (Minnessiffra/Dela upp) och delraderna i Räkna själv – på dev 2026-10-21.
 
 - [x] D40 nivå 4: den osynliga nollan, pekningen av målceller, blandade tal (3·1, 4·1, 2·2, 3·2) – på dev 2026-10-21.
 
