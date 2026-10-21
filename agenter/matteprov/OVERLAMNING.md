@@ -2,7 +2,7 @@
 
 **Roll:** byggde Matteprov 4:an med Matteprov 1 (multiplikation, kapitel 2) och förvaltar det. Kan granska, rätta och
 bygga vidare, och lägga till nästa prov.
-**Datum:** 2026-10-19.
+**Datum:** 2026-10-19, D41 tillagt 2026-10-21 (gren `matteprov-metod`).
 **Läge:** live i **v69** (`live-fore-v69` är återställningspunkten; v67 hade rundorna 1–3, v68 runda 4, v69 rundorna
 5–6 och samordnarens resultatregel). Arbetet sker på `dev`. Rundornas grenar är sammanslagna och borttagna:
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
@@ -17,6 +17,9 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
      (ändrar D37: appen får vara något lättare än provet); ångra och gör om i kladden.
    - **D39 med tre ✎** – snällare app (inget argt ljud, inget rött för fel, ord som "Inte riktigt"); en knapp som
      byter namn; problemlösningen i ledda steg; resultatraden.
+   - **D40 med ✎** – Multiplikation nivå 4: den osynliga nollan, pekningen, siffrorna i platsvärdesfärg (multdiv).
+   - **D41** – uppställningen i provet: välj räknesätt, Minnessiffra (förval, samma metodik och motor som D40)
+     eller Dela upp (D38:s delprodukter).
 3. `.project-context/DESIGN.md`: raden Matteprov 4:an och lagringsnyckeln `matteprov_`.
 4. `MANUAL.md`, avsnittet "Matteprov 4:an" (vad barnet ser).
 5. `agenter/matteprov/LOGG.md` (rundorna 1–6 och lärdomarna).
@@ -28,7 +31,7 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 | `js/matteprov-logic.js` (`window.MatteProvLogic`, även CJS) | All ren logik: provlistan, generatorer per moment och nivå, facit, rättning, hjälptrappor, radfrågan, problemlösningens steg, knappens läge, det som var svårt, mitt prov, kladdens historik. Testad. |
 | `js/matteprov.js` (`window.MatteProv`) | UI:t: provlistan, provsidan, Så här gör du, passen (öva, tabelltest, prov, mitt prov, sprint), kvittot, kladden, knappsatsen. All CSS är injicerad under `#mp-root`. |
 | `tests/matteprov.test.mjs` | 75 tester. |
-| `js/multdiv.js` | Bara kortet "Matteprov 4:an" i Multiplikationens lägesvy och `openProv()`. |
+| `js/multdiv.js` | Kortet "Matteprov 4:an" i Multiplikationens lägesvy, `openProv()` och (D41) kroken `runTask`: räknar EN uppställning med minnessiffra och lämnar tillbaka `{ outcome, cls, facts }`. Isolerad: `host` är null i multdivs egna lägen. |
 | `js/shared.js` | Matteprovet använder `MP.createDrill`, `MP.receiptFor`, `MP.bindHold`, `MP.spaced.fmtDay`, `MP.resultNote` (resultatraden, D39 ✎) och `MP.praiseFor`. Inget i shared.js är matteprovets eget. |
 | `index.html`, `sw.js`, `js/app.js` | Skärmen `#screen-matteprov` / `#mp-root`, scripten i precache, nyckeln i `Store.deleteProfile`. Felljudet `App.Sound` 'wrong' är ett mjukt "hmm" (D39, samordnaren). |
 
@@ -51,6 +54,21 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
   rätt direkt i rad), `hardList`, `tagLabel`, `genForTag`.
 - **Kladden:** `createHistory()` (Ångra/Gör om, Rensa är ett drag).
 
+## Räknesätten i uppställningen (D41)
+- **Växeln** `Räkna med: Minnessiffra | Dela upp` står överst i "Så här gör du" för uppställningen (på provsidan fanns
+  inte plats i 390 × 797, uppmätt 49 px för mycket; provsidan visar "Räknesätt: …" under momentet). Valet sparas som
+  `upMethod` i `matteprov_{id}` (`uppMethod`, `setUpMethod`), förval Minnessiffra.
+- **Minnessiffra:** `renderTask` lämnar uppgiften till `runMinne`, som anropar `MultDivGame.runTask({ a:top, b:bot,
+  mode, … })` på multiplikationens skärm (`Router.silent`, ingen historikpost). `uppEngineMode(method, S.mode)`:
+  Öva/svag/not = `help` (Räkna med hjälp: appen leder en kolumn i taget, så att barnet lär sig ordningen), prov och
+  mitt prov = `free` (Räkna själv: vid tvåsiffrig faktor skriver barnet rad 1, rad 2 med den grå nollan, som läraren
+  rättar, och summan; vid ensiffrig bara svaret. D41 ✎. Trappan: först en tyst rad som pekar på raden som inte
+  stämmer (`freeCheck`), sedan radens facit som hjälpbit, en rad i taget, och kommer samma rad igen visas svaret). `minneDone` bokför utfallet med
+  `taskDone(t, outcome, cls, { facts })`: nötloopen, kvittot och `recordOutcome` som vanligt. Felklassen `minne`
+  ger taggen `upp:minne` ("Minnessiffran"), `facts` ger tabelltaggarna.
+- **Dela upp:** D38-flödet nedan, oförändrat. Den orange ramen fanns redan där (`.lit`); siffrorna i texten är inte
+  färgkodade i Dela upp (multdivs ref-mekanism finns bara i multdiv).
+
 ## Designval som gäller
 - **Isolerat i provet.** Allt som avviker från appens sätt att ställa upp och lösa tal (bladens rutnät, grå nollan,
   "="-raderna, delprodukterna, radfrågan, mallarna i problemlösningen, den kompakta knappsatsen) bor bara i
@@ -65,7 +83,7 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 - **Problemlösningen i ledda steg (D39 ✎).** Varje steg är en fråga med mallen `[ ] op [ ] = [ ]`; prislistan och
   tidigare svar går att trycka på; nästa steg visas först när det förra stämmer; varje steg rättas vid Svara, i Öva
   och prov; slutsatsen med uttrycket sist. Knappsatsen har inga räknetecken.
-- **Uppställningen.** Ensiffrig faktor: en delprodukt per siffra, varje rad ett steg åt vänster. Tvåsiffrig: rad 1,
+- **Uppställningen (Dela upp).** Ensiffrig faktor: en delprodukt per siffra, varje rad ett steg åt vänster. Tvåsiffrig: rad 1,
   rad 2 som börjar med barnets egen nolla i den grå rutan, summan. Appen frågar per rad och bokför svaret på rätt
   plats; summan skriver barnet själv, ruta för ruta. Tankeraden, de lysande siffrorna och anteckningsrutorna är
   vägvisning och räknas inte som hjälp.

@@ -643,9 +643,10 @@ describe('D40: den osynliga nollan och pekningen', () => {
 
   it('rad 2:s grå ruta finns bara i den tvåstegs-uppställningen (nivå 4 med tvåsiffrig faktor)', () => {
     // Rutan byggs bara i l4-grenen (twostep, inte fria läget) — nivå 1–3 är alltid 'simple'
-    expect(src).toMatch(/const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0"><\/div><\/td>`;/);
+    expect(src).toMatch(/const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0">\$\{freeMode \? '<span class="md-zd">0<\/span>' : ''\}<\/div><\/td>`;/);
     expect(src).toMatch(/idx\.map\(i => i === 0 \? zeroCell : fillCell\('p2', i, i <= p2len\)\)/);
-    expect(src).toMatch(/const l4 = plan\.kind === 'twostep' && !freeMode;/);
+    // D41 ✎: raderna (och nollan) finns i alla tre lägena, men bara vid tvåsiffrig faktor
+    expect(src).toMatch(/const l4 = plan\.kind === 'twostep';/);
     for (let lv = 1; lv <= 3; lv++) for (let i = 0; i < 500; i++) {
       const { a, b } = MD._internals.genProblem(lv);
       expect(buildPlan(a, b, lv).kind).toBe('simple');
@@ -871,5 +872,111 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
     expect(src).toMatch(/return document\.getElementById\(where\);/);
     // båda bubblorna pulserar sina refs
     expect((src.match(/pulseRefs\(area\);/g) || []).length).toBe(2);
+  });
+});
+
+/* ── D41: matteprovet lånar motorn (runTask) ── */
+describe('D41: kroken runTask och dess utfall', () => {
+  const { hostOutcome, hostBitHTML } = MD.__test;
+  const log = o => Object.assign({ facts:[], minne:false, addition:false, lifeline:false, cls0:null }, o);
+  it('Räkna med hjälp: helt rätt = direkt; fel svar eller livlina = med hjälp, med felklass och tabellfakta', () => {
+    expect(hostOutcome({ mode:'help', log:log() }, true, true)).toEqual({ outcome:'direkt', cls:null, facts:[] });
+    expect(hostOutcome({ mode:'help', log:log({ facts:[[2, 8]] }) }, false, true)).toEqual({ outcome:'hjalp', cls:null, facts:[[2, 8]] });
+    expect(hostOutcome({ mode:'help', log:log({ minne:true }) }, false, true).cls).toBe('minne');
+    expect(hostOutcome({ mode:'help', log:log({ addition:true }) }, false, true).cls).toBe('addition');
+    expect(hostOutcome({ mode:'help', log:log({ lifeline:true }) }, true, true).outcome).toBe('hjalp');
+  });
+  it('Räkna själv: första Klar rätt = direkt, senare = med hjälp, visat svar = fick svaret', () => {
+    expect(hostOutcome({ mode:'free', log:log(), revealed:false }, true, true).outcome).toBe('direkt');
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'minne' }), revealed:false }, true, false)).toEqual({ outcome:'hjalp', cls:'minne', facts:[] });
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'fel' }), revealed:true }, true, false).outcome).toBe('svar');
+  });
+  it('hjälpbiten: två rader vid tvåsiffrig faktor, minnessiffrorna vid ensiffrig', () => {
+    const strip = h => h.replace(/<[^>]+>/g, '');
+    // D41 ✎: en rad i taget — den som inte stämmer
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'p1'))).toBe('Rad 1 är 82 · 8 = 656.');
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'p2'))).toBe('Rad 2 är 82 · 60 = 4920. Nollan står redan i entalet.');
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'ans'))).toBe('Raderna stämmer. Lägg ihop dem: 656 + 4920.');
+    expect(strip(hostBitHTML(buildPlan(687, 8, 4)))).toBe('Minnessiffrorna blir 5 och 6, från entalet och vänsterut.');
+    expect(strip(hostBitHTML(buildPlan(4321, 2, 4)))).toBe('1 · 2 = 2, 2 · 2 = 4, 3 · 2 = 6, 4 · 2 = 8.');
+  });
+  it('kroken är isolerad: multdivs egna lägen går som förut när ingen uppgift är lånad', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/let host = null;/);
+    expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
+    expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
+    expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk\);\n\s+\} else \{/);
+    // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
+    expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
+    expect(src).toMatch(/\(\{ difficulty, gameKind, helpMode \} = h\.saved\);/);
+    expect(typeof MD.runTask).toBe('function');
+    // en lånad uppgift som lämnats utan Avsluta följer aldrig med in i multdivs egna lägen
+    expect((src.match(/host = null; \/\/ D41: multdivs egna lägen är aldrig lånade/g) || []).length).toBe(2);
+    expect(src).toMatch(/exGen\+\+; \/\/ avbryter ev\. schemalagd nästa-uppgift \(Avsluta-racet\)\n\s+if \(host\) \{ difficulty = host\.saved\.difficulty; host = null; \}/);
+  });
+});
+
+/* ── D41 ✎ (Dennis 21/10, "den där nollan i grå ruta saknades"): raderna i Räkna själv ── */
+describe('D41 ✎: fria läget med rader vid tvåsiffrig faktor', () => {
+  const { freeRowCols, freeRowValue, freeAnsLocked, freeButtonMode, freeNextRow, freeCheck } = MD.__test;
+  const grid = (pl, o = {}) => {
+    const W = pl.width, put = (v, from) => { const a = Array(W).fill(null); if (v == null) return a; digitsOf(v).forEach((d, k) => { a[from + k] = d; }); return a; };
+    return { p1: put(o.p1, 0), p2: put(o.p2, 1), ans: put(o.ans, 0) };
+  };
+  const pl = buildPlan(82, 68, 4);   // rad 1 656, rad 2 492 (4920), summa 5576
+
+  it('radernas rutor: rad 1 från entalet, rad 2 från tiotalet (entalet är nollan), summan hela bredden', () => {
+    expect(freeRowCols(pl, 'p1')).toEqual([0, 2]);
+    expect(freeRowCols(pl, 'p2')).toEqual([1, 3]);
+    expect(freeRowCols(pl, 'ans')).toEqual([0, 3]);
+    expect(freeRowValue(grid(pl, { p2: 492 }).p2, 1, 3)).toBe(492);
+    expect(freeRowValue([6, null, 5, null], 0, 3)).toBe(null);           // tom ruta mitt i talet
+  });
+
+  it('låset och knappen: summan låst tills båda raderna har siffror; Nästa rad tills allt är ifyllt, sedan Klar', () => {
+    expect(freeAnsLocked(pl, grid(pl))).toBe(true);
+    expect(freeAnsLocked(pl, grid(pl, { p1: 656 }))).toBe(true);
+    expect(freeAnsLocked(pl, grid(pl, { p1: 656, p2: 492 }))).toBe(false);
+    expect(freeButtonMode(pl, grid(pl, { p1: 656, p2: 492 }))).toBe('next');
+    expect(freeButtonMode(pl, grid(pl, { p1: 656, p2: 492, ans: 5576 }))).toBe('klar');
+    expect(freeNextRow(pl, grid(pl, { p1: 656 }), 'p1')).toBe('p2');
+    expect(freeNextRow(pl, grid(pl, { p1: 656, p2: 492 }), 'p2')).toBe('ans');
+    expect(freeNextRow(pl, grid(pl, { p2: 492 }), 'p2')).toBe('p1');         // tom rad före
+    // ensiffrig faktor: bara svarsraden, Klar hela tiden, inget lås
+    const en = buildPlan(687, 8, 4);
+    expect(freeButtonMode(en, { ans: Array(4).fill(null) })).toBe('klar');
+    expect(freeAnsLocked(en, { ans: Array(4).fill(null) })).toBe(false);
+  });
+
+  it('rättningen per rad: raderna före summan, glömd minnessiffra per rad och i summan', () => {
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 5576 })).toEqual({ ok: true, row: null, cls: null, msg: '' });
+    // rad 1: 82 · 8 utan minne = 646
+    expect(freeCheck(pl, { p1: 646, p2: 492, ans: 5576 })).toMatchObject({ row: 'p1', cls: 'minne', msg: 'Titta på rad 1 – kolla minnessiffrorna.' });
+    expect(freeCheck(pl, { p1: 600, p2: 492, ans: 5576 })).toMatchObject({ row: 'p1', cls: 'fel' });
+    // rad 2: 82 · 6 utan minne = 482; ett annat fel pekar på nollan
+    expect(freeCheck(pl, { p1: 656, p2: 482, ans: 5576 })).toMatchObject({ row: 'p2', cls: 'minne' });
+    expect(freeCheck(pl, { p1: 656, p2: 4920, ans: 5576 })).toMatchObject({ row: 'p2', cls: 'fel',
+      msg: 'Titta på rad 2 – nollan står i entalet, så 82 · 6 börjar i tiotalet.' });
+    // summan: 656 + 4920 har minne i hundratalet (6 + 9 = 15); utan minnet blir det 4576
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 4576 })).toMatchObject({ row: 'ans', cls: 'minne' });
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 4000 })).toMatchObject({ row: 'ans', cls: 'addition' });
+    // rätt summa men fel rad är inte rätt
+    expect(freeCheck(pl, { p1: 600, p2: 492, ans: 5576 }).ok).toBe(false);
+    // varje rad och summan över många tal: facit ger ok, en ändrad siffra pekar på rätt rad
+    const fel = [];
+    for (let a = 12; a <= 99; a += 7) for (let b = 12; b <= 99; b += 5) {
+      if (b % 10 === 0) continue;
+      const p = buildPlan(a, b, 4), r = { p1: p.p1.value, p2: p.p2.value, ans: p.answer };
+      if (!freeCheck(p, r).ok) fel.push(`${a}·${b} facit`);
+      for (const row of ['p1', 'p2', 'ans']) if (freeCheck(p, { ...r, [row]: r[row] + 1 }).row !== row) fel.push(`${a}·${b} ${row}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('källan: summan går inte att välja när den är låst; nollan står i fria läget från början', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/if \(r === 'ans' && freeAnsLocked\(plan, exFreeGrid\)\) return;/);
+    expect(src).toMatch(/if \(freeRows\(\) && freeButtonMode\(plan, exFreeGrid\) === 'next'\) \{ freeGoNextRow\(\); return; \}/);
+    expect(src).toMatch(/Rad 2 räknar med tiotal, därför en nolla i entalet\./);
   });
 });

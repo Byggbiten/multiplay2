@@ -802,3 +802,46 @@ describe('problemlösningens steg med mallar (D39 ✎)', () => {
     expect(L.probStepHint(t, 2)).toMatch(/Lägg ihop/);
   });
 });
+
+/* ── D41 (2026-10-21): räknesättet i uppställningen ─────────────────────
+   Dennis: "man skall kunna växla mellan vilket räkningsläge man väljer [...] Eller om man hellre kör
+   med detta minnessiffratänk. vilket jag förespråkar." Minnessiffra är förval; valet sparas per profil
+   och gäller i Öva, Gör provet och Mitt prov. */
+describe('D41: växeln Minnessiffra / Dela upp', () => {
+  const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+  it('två lägen, Minnessiffra först och förvalt', () => {
+    expect(L.UPP_METHODS.map(m => m.name)).toEqual(['Minnessiffra', 'Dela upp']);
+    expect(L.uppMethod({})).toBe('minne');
+    expect(L.uppMethod(null)).toBe('minne');
+    expect(L.uppMethod({ upMethod:'dela' })).toBe('dela');
+    expect(L.uppMethod({ upMethod:'något annat' })).toBe('minne');
+  });
+  it('minnessiffra: Öva och nötpassen räknas med hjälp, provet och mitt prov själv; dela upp går som förut', () => {
+    for (const m of ['ova', 'svag', 'not']) expect(L.uppEngineMode('minne', m)).toBe('help');
+    expect(L.uppEngineMode('minne', 'prov')).toBe('free');      // startProv(false) och startProv(true) har båda mode 'prov'
+    for (const m of ['ova', 'svag', 'not', 'prov']) expect(L.uppEngineMode('dela', m)).toBe(null);
+  });
+  it('valet sparas per profil och läses när uppgiften visas (även i provet)', () => {
+    expect(src).toMatch(/function setUpMethod\(m\) \{ const s = readSt\(\); s\.upMethod = m === 'dela' \? 'dela' : 'minne'; writeSt\(s\); \}/);
+    expect(src).toMatch(/const eng = t\.type === 'upp' && !fb && !keep \? L\.uppEngineMode\(upMethod\(\), S\.mode\) : null;/);
+    expect(src).toMatch(/S = \{ mode:'prov', mitt:!!mitt/);                 // provet och mitt prov har mode 'prov'
+    expect(src).toMatch(/case 'method':\s+snd\('click'\); setUpMethod\(id\);/);
+    // "Så här gör du" visar det valda läget, och växeln står överst där
+    expect(src).toMatch(/if \(moment === 'uppstallning' && upMethod\(\) === 'minne'\) return minneIntroSteps\(\);/);
+    expect(src).toMatch(/\$\{moment === 'uppstallning' \? methodSegHTML\(\) : ''\}/);
+  });
+  it('utfallet från multiplikationens motor bokförs: minnessiffran och tabellfakta blir det som var svårt', () => {
+    const t = L.makeUpp(82, 68);
+    const hard = L.tagsHard(t, 'minne', { rows:[], grey:false, facts:[[2, 8], [8, 6]] });
+    expect(hard).toEqual(['upp:tva', 'upp:minne', 'tab:2x8', 'tab:6x8']);
+    expect(L.tagLabel('upp:minne')).toBe('Minnessiffran');
+    expect(L.tagsCovered(t)).toContain('upp:minne');                    // 82 · 8 har minne
+    expect(L.tagsCovered(L.makeUpp(21, 3))).not.toContain('upp:minne'); // 21 · 3 har inget
+    let h = L.recordOutcome({}, t, 'hjalp', 'minne', '2026-10-21', { facts:[[2, 8]] });
+    expect(Object.keys(h).sort()).toEqual(['tab:2x8', 'upp:minne', 'upp:tva']);
+    for (let i = 0; i < L.FORGET_AFTER; i++) h = L.recordOutcome(h, t, 'direkt', null, '2026-10-21');
+    expect(h['upp:minne']).toBeUndefined();
+    const g = L.genForTag('upp:minne', seeded(3));
+    expect(g.type).toBe('upp');
+  });
+});

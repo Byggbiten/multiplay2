@@ -72,3 +72,25 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   om den innehåller "fel".
 - **Lärdom:** när en funktion ersätts (uttrycket → ledda steg) ska den gamla tas bort i samma runda, med sina tester;
   annars blir den skuld som någon annan måste läsa. Den står nu i TODO.
+
+## Runda 7 · 2026-10-21 · Räknesätten i uppställningen (D41), gren `matteprov-metod`
+- **Vad som inte fungerade:** provets uppställning hade bara delprodukter per siffra (D38 ✎), medan den vanliga
+  multiplikationen lär ut minnessiffran (D40), som Dennis förespråkar. Barnet fick två olika sätt utan att kunna välja.
+- **Byggt:** växeln Minnessiffra | Dela upp överst i "Så här gör du" (förval Minnessiffra, sparad per profil, gäller
+  i Öva, provet och mitt prov; provsidan visar valet under momentet). Minnessiffra räknas av multdiv-motorn via
+  kroken `MultDivGame.runTask` (Öva = med hjälp, provet = själv med hjälptrappan), och utfallet bokförs här
+  (`runMinne`, `minneDone`, taggen `upp:minne`, tabellfakta). Dela upp är oförändrat. Vitest: hela sviten 492.
+- **Avvikelse:** växeln fick inte plats på provsidan i 390 × 797 (uppmätt 49 px för mycket med Mitt prov-kortet), så
+  den står i "Så här gör du"; provsidan visar bara valet.
+- **Lärdom:** när två moduler ska lära ut samma sak, låna motorn i stället för att kopiera den; en isolerad krok
+  med ett utfall tillbaka (direkt, hjälp, svaret, felklass) räcker för att provets bokföring ska fungera som förut.
+
+## Runda 7 ✎ · 2026-10-21 · Raderna och den grå nollan i Räkna själv (D41 ✎, P15)
+- **Vad som inte fungerade:** Dennis: "den där nollan i grå ruta saknades". Provets minnessiffreläge (multdivs fria
+  läge) visade bara svarsraden, men läraren rättar nollan på rad 2.
+- **Byggt (i multdiv, som provet lånar):** vid tvåsiffrig faktor visar Räkna själv rad 1, rad 2 med nollan ljusgrå från
+  början och summan; "Nästa rad" tills allt har siffror, sedan Klar; summan låst tills raderna har siffror; rättning
+  per rad (`freeCheck`, glömd minnessiffra per rad och i summan); hjälptrappan med en rad i taget. Uppmätt i 390 × 797:
+  kladden 165 px från början, minst 95 px när hjälpbiten står i bubblan (108 px med ledtrådsraden utanför provet).
+- **Lärdom:** "barnet räknar i kladden" räcker inte när läraren rättar en mellanrad; det som rättas på pappret ska
+  finnas på appens papper.

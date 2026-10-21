@@ -561,3 +561,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-10-21: "Nu till matteprovet. Se till att vi följer samma metodik där. Men man skall kunna
   växla mellan vilket räkningsläge man väljer. om man vill arbeta med t.ex. 987 x 2 = 2 x 900 + 2 x 80 + 2 x 7 och
   sen summera delsummorna. Eller om man hellre kör med detta minnessiffratänk. vilket jag förespråkar."
+- ✎ **2026-10-21, delraderna och nollan även i Räkna själv:** vid tvåsiffrig faktor visar Räkna själv (multdiv nivå 4
+  och matteprovets provläge) rad 1, rad 2 med den grå nollan och summan på pappret; summan låst tills raderna är
+  ifyllda. Ändrar D7 för tvåsiffrig faktor. Besvarar P15. Källa: Dennis: "den där nollan i grå ruta saknades"
+  (matteprovets provläge räknas i Räkna själv, som bara visade svarsraden).

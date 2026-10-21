@@ -62,8 +62,11 @@
      och Räkna med hjälp: fasen "rad 2" säger "Nu gångrar vi med ett
      tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet." och
      nollan faller in i rutan (showZero) — barnet skriver den aldrig.
-     Räkna själv har inga delrader (D7: barnet räknar i kladden), så där
-     finns ingen grå ruta.
+     Räkna själv (D41 ✎, ändrar D7 för tvåsiffrig faktor): rad 1, rad 2
+     med den grå nollan (ljusgrå från början) och summan; barnet fyller
+     rad för rad, "Nästa rad" tills allt är ifyllt, sedan Klar; summan är
+     låst tills raderna har siffror; freeCheck pekar på raden som inte
+     stämmer. Ensiffrig faktor och nivå 1–3: bara svarsraden, som förut.
    · Pekningen (nivå 4): faktorcellerna och MÅLRUTAN lyser samtidigt
      (multLitCells), och texterna säger platsen ("Det hör till entalet.",
      "3:an skrivs i entalet.", "Tiotalet: 8 + 7 är 15."); rad 2:s första
@@ -84,6 +87,11 @@
    (multLitCells) läser samma platser. Divisionen: täljarsiffran som
    arbetstalet ÄR och kvotsiffran som skrivs (divCurHTML, skriv,
    inget_kvar, fall B:s nolla); rest-texterna och faktabrickan är orörda.
+   D41 (2026-10-21): KROKEN runTask — matteprovets uppställning i läget
+   Minnessiffra lånar motorn för EN uppgift (hjälpläget eller fria
+   läget med matteprovets hjälptrappa) och får tillbaka utfallet. Se
+   blocket "MATTEPROVET LÅNAR MOTORN". host är null i multdivs egna
+   lägen; nivå, räknesätt och läge återställs efter varje lånad uppgift.
    ============================================================ */
 'use strict';
 
@@ -122,6 +130,10 @@ const MultDivGame = (() => {
      två efter fall A. */
   let divStrikeAwait = null;
 
+  /* D41: en uppgift som matteprovet lånar (runTask). null = multdivs egna lägen,
+     som då beter sig exakt som förut. */
+  let host = null;
+
   /* Övning */
   let exerciseIdx = 0, exScore = 0, helpMode = true;
   let lifelines = 2; // v31: 2 livlinor per övningsrunda (hjälpläget) — nollställs i startExercise
@@ -140,6 +152,8 @@ const MultDivGame = (() => {
   /* Fritt läge (utan hjälp): svaret skrivs i cellerna — mult höger→
      vänster från entalet, div vänster→höger från högsta positionen (C3). */
   let exFreeCells = [], exFreeCur = 0;   // rutan med fokus (mult: 0 = entalet; div: width-1 = vänstra)
+  /* D41 ✎: raderna i fria läget. exFreeCells är alltid den aktuella radens rutor. */
+  let exFreeGrid = { ans: [] }, exFreeRow = 'ans';
   let exFreeFirstAttempt = true;
 
   /* Kladd-canvas */
@@ -249,6 +263,12 @@ const MultDivGame = (() => {
       50%     { box-shadow:0 0 0 4px rgba(251,146,60,0.55), 0 0 20px rgba(251,146,60,0.75); }
     }
     .md-zero .md-zd { color:#64748b; display:inline-block; }
+    /* D41 ✎: fria lägets rader — summan låst tills raderna har siffror,
+       raden som inte stämmer milt persika (D39), nollans förklaring */
+    .md-ansc.md-lk { opacity:0.32; cursor:default; }
+    .md-ansc.md-soft { border:2.5px solid #fdba74 !important; background:#fff3e6; }
+    .md-zero-note { text-align:center; font-size:0.78rem; font-weight:800; color:#64748b; margin-top:2px; line-height:1.2; }
+    .md-klar.md-klar-next { font-size:clamp(0.9rem,2.7vw,1.1rem); }
     /* Nivå 4 (8 tabellrader): kompaktare celler så vyn ryms utan scroll */
     .md-l4 .md-cell, .md-l4 .md-ansc {
       width:clamp(33px,6.2vw,56px); height:clamp(33px,6.2vw,56px);
@@ -1413,6 +1433,7 @@ const MultDivGame = (() => {
   const modeTitle = () => gameKind === 'div' ? 'Kort division' : 'Multiplikation';
 
   function startDemo() {
+    host = null; // D41: multdivs egna lägen är aldrig lånade
     App.Sound.play('click');
     generateProblem();
     demoStep = 0; stepLocked = false;
@@ -2239,7 +2260,8 @@ const MultDivGame = (() => {
      TABELL-HTML
      Grid-kolumn g räknas från höger (0=ental). W = svarets bredd.
      Nivå 4: p1-rad + p2-rad (förskjuten, + framför, position 0 TOM)
-     + slutstreck + svarsrad. Fritt läge: inga delrader.
+     + slutstreck + svarsrad. Fritt läge (D41 ✎): samma rader, tappbara,
+     och nollan står ljusgrå i den grå rutan från början.
   ══════════════════════════════════════════════════════════ */
   /* Kort division (v36): BRÅKSTRECKS-NOTATION per skolboken —
      täljarsiffrorna i rad överst (platsvärdes-etikett ovanför, plats
@@ -2298,15 +2320,17 @@ const MultDivGame = (() => {
     const idx = [];
     for (let i = W - 1; i >= 0; i--) idx.push(i);
     const aD = digitsOf(numA), bD = digitsOf(numB);
-    const l4 = plan.kind === 'twostep' && !freeMode;
+    const l4 = plan.kind === 'twostep';   // D41 ✎: raderna finns även i fria läget
 
     const solidCell = (row, i, digit) => digit === null
       ? `<td><div class="md-cell md-ghost" id="md-${row}-${i}"></div></td>`
       : `<td><div class="md-cell" id="md-${row}-${i}" style="border-color:${cv(i)}">
            <span style="color:${cv(i)}">${digit}</span></div></td>`;
-    const fillCell = (row, i, used) => used
-      ? `<td><div class="md-ansc" id="md-${row}-${i}"></div></td>`
-      : `<td><div class="md-ansc md-ghost" id="md-${row}-${i}"></div></td>`;
+    const fillCell = (row, i, used) => !used
+      ? `<td><div class="md-ansc md-ghost" id="md-${row}-${i}"></div></td>`
+      : freeMode   // fria läget: tappbara rutor, fokusringen glider mellan dem
+        ? `<td><div class="md-ansc md-tap" id="md-${row}-${i}" onclick="MultDivGame.exFreeFocus(${i},'${row}')"></div></td>`
+        : `<td><div class="md-ansc" id="md-${row}-${i}"></div></td>`;
     const lineRow = `<tr><td colspan="${W + 2}" style="padding:2px 0">
       <div style="height:3px;background:linear-gradient(90deg,transparent,#374151,transparent);border-radius:2px"></div></td></tr>`;
 
@@ -2325,7 +2349,8 @@ const MultDivGame = (() => {
 
     /* D40: den osynliga nollan — rad 2:s ental är en grå ruta, som på
        övningsbladen. Nollan skrivs in i den när rad 2 börjar (showZero). */
-    const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0"></div></td>`;
+    /* Fria läget (D41 ✎): nollan står ljusgrå i rutan från början — barnet skriver den inte */
+    const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0">${freeMode ? '<span class="md-zd">0</span>' : ''}</div></td>`;
     let midRows = '';
     if (l4) {
       const p1len = plan.p1.digits.length, p2len = plan.p2.digits.length;
@@ -2339,10 +2364,7 @@ const MultDivGame = (() => {
 
     /* Fria läget (C3): samma svarsrutor som demo/hjälp, tappbara, med en
        fokusring som glider höger→vänster (#md-ans-focus, placeras i JS). */
-    const ansRow = freeMode
-      ? `<tr><td></td>${idx.map(i =>
-          `<td><div class="md-ansc md-tap" id="md-ans-${i}" onclick="MultDivGame.exFreeFocus(${i})"></div></td>`).join('')}<td></td></tr>`
-      : `<tr><td></td>${idx.map(i => fillCell('ans', i, true)).join('')}<td></td></tr>`;
+    const ansRow = `<tr><td></td>${idx.map(i => fillCell('ans', i, true)).join('')}<td></td></tr>`;
 
     return `
       <table class="md-table">
@@ -2354,7 +2376,7 @@ const MultDivGame = (() => {
           ${midRows}
           ${ansRow}
         </tbody>
-      </table>${freeMode ? '<div id="md-ans-focus" class="md-ans-focus" style="display:none"></div>' : ''}`;
+      </table>${freeMode && l4 ? '<div class="md-zero-note">Rad 2 räknar med tiotal, därför en nolla i entalet.</div>' : ''}${freeMode ? '<div id="md-ans-focus" class="md-ans-focus" style="display:none"></div>' : ''}`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2423,6 +2445,7 @@ const MultDivGame = (() => {
      gamla hjälpvals-steget ("Med hjälp / Utan hjälp") är borttaget. */
   function showModeSelect() {
     exGen++; // avbryter ev. schemalagd nästa-uppgift (Avsluta-racet)
+    if (host) { difficulty = host.saved.difficulty; host = null; } // D41: en lånad uppgift som lämnats utan Avsluta följer aldrig med
     const root = document.getElementById('multdiv-root');
     const div = gameKind === 'div';
     // Mode-medvetna nivåbeskrivningar (mult = minne, div = rest)
@@ -2487,6 +2510,7 @@ const MultDivGame = (() => {
      (resultatvyens "Spela igen") behålls senaste läget. Nollställning-
      arna som tidigare låg i startExercise/setHelpMode är samlade här. */
   function startExercise(withHelp) {
+    host = null; // D41: multdivs egna lägen är aldrig lånade
     if (withHelp !== undefined) helpMode = withHelp;
     App.Sound.play('click');
     exerciseIdx = 0;
@@ -2520,12 +2544,12 @@ const MultDivGame = (() => {
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.avslutaOvning()">Avsluta</button>
-        <span class="header-title">${modeTitle()}</span>
-        <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
+        <span class="header-title">${host ? host.title : modeTitle()}</span>
+        ${host ? host.right : `<span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>`}
       </div>
       <div id="md-main"${free ? ' class="free-seam"' : ''}>
         <div id="md-left">
-          <div id="md-table-wrap" class="${plan.kind === 'twostep' && !free ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
+          <div id="md-table-wrap" class="${plan.kind === 'twostep' ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
           <div id="md-bubble"${plan.kind === 'division' ? ' class="md-bub-tall"' : ''}></div>
           <div id="md-ui"></div>
           <div id="md-feedback"></div>
@@ -2701,6 +2725,7 @@ const MultDivGame = (() => {
   function memGuide() {
     if (!memAwait) return;
     memMistakes++; helpTaskClean = false;
+    if (host) host.log.minne = true;
     const fb = document.getElementById('md-feedback');
     const msg = memAwait.type === 'place'
       ? 'Nästan — den ska stå här 👉'
@@ -2946,6 +2971,7 @@ const MultDivGame = (() => {
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
         memMistakes++; helpTaskClean = false;
+        if (host) host.log.minne = true;
         if (!memAwait.hmm) { memAwait.hmm = true; App.Sound.play('wrong'); }   // D39: en gång per uppgift
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
@@ -3163,6 +3189,7 @@ const MultDivGame = (() => {
     if (!visaVagen()) return;
     lifelineShownFor = item;
     lifelines--;
+    if (host) host.log.lifeline = true;     // D41: i matteprovet är livlinan hjälp
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
     if (btn) btn.outerHTML = lifelineBtnHTML();
@@ -3273,6 +3300,7 @@ const MultDivGame = (() => {
      poangstraff; den felaktiga siffran ar forbrukad sa nasta tryck borjar
      om. Byggs pa ETT stalle for alla delfragor. */
   function helpWrong(expected) {
+    if (host) hostNoteWrong(helpItem());
     if (helpTries === 0) App.Sound.play('wrong');   // D39: ljudet en gång per delfråga, orden varje gång
     helpTaskClean = false;      // uppgiften ar inte langre helratt
     exWrongAnswers++;
@@ -3356,7 +3384,7 @@ const MultDivGame = (() => {
     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/>' +
     '<path d="M12 3v5.4M12 15.6V21M3 12h5.4M15.6 12H21"/></svg>';
   const isDivFree = () => plan.kind === 'division';
-  const freeCellId = g => (isDivFree() ? 'md-q-' : 'md-ans-') + g;
+  const freeCellId = g => (isDivFree() ? 'md-q-' : `md-${exFreeRow}-`) + g;
 
   function showFreeUI() {
     exFreeInit();
@@ -3389,7 +3417,7 @@ const MultDivGame = (() => {
         <button class="md-nk k-erase" aria-label="Sudda sista siffran"
           onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
         <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
-        ${freeLifelineBtnHTML()}
+        ${host ? '' : freeLifelineBtnHTML()}
         <button class="md-klar" id="md-free-submit" disabled
           onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
@@ -3402,8 +3430,8 @@ const MultDivGame = (() => {
      inte siffran att skriva, för kolumnen där fokusringen står:
      division — tabellraden runt svaret (spec §6);
      multiplikation — tabellfaktan och minnet in ("9 · 9 = 81, och 8 i
-     minne"); nivå 4 — de två delprodukterna (fria läget har inga
-     delrader på pappret, så det är dem barnet ska ställa upp i kladden). */
+     minne"); nivå 4 med tvåsiffrig faktor — de två delprodukterna, som
+     barnet skriver i rad 1 och rad 2. */
   function freeLifelineBtnHTML() {
     const on = lifelines > 0;
     return `<button class="md-btn md-free-ll" id="md-free-lifeline"
@@ -3453,39 +3481,127 @@ const MultDivGame = (() => {
     pulseRefs(b);
   }
 
-  function exFreeInit() {
-    exFreeCells = Array(plan.width).fill(null);
-    exFreeCur = isDivFree() ? plan.width - 1 : 0;   // div: börja längst till vänster
-    exFreePaintCells();
-    requestAnimationFrame(() => exFreePlaceRing(false));
-  }
+  /* ── D41 ✎ (Dennis 21/10, "den där nollan i grå ruta saknades"): RADERNA
+     I RÄKNA SJÄLV. Vid tvåsiffrig faktor visar fria läget rad 1, rad 2 med
+     den grå nollan och summan, som hjälpläget. Barnet fyller rad för rad,
+     ruta för ruta från höger. En knapp: "Nästa rad" tills allt är ifyllt,
+     sedan Klar. Summan är låst tills båda raderna har siffror. Rättningen
+     pekar på raden som inte stämmer (freeCheck). Ensiffrig faktor, nivå
+     1–3 och divisionen har bara svarsraden, som förut (exFreeRow 'ans'). */
+  const freeRows = () => !!plan && plan.kind === 'twostep' && !isDivFree();
+  const FREE_ORDER = ['p1', 'p2', 'ans'];
 
-  /* Svarets värde, eller null om rutorna inte bildar ett tal: ledande
-     tomma rutor hoppas över, en tom ruta MITT i talet kan aldrig bli rätt. */
-  function exFreeValue() {
+  /* Rutorna en rad har: [lägsta, högsta] kolumn. Rad 2 börjar i tiotalet
+     (entalet är den grå nollan). Ren funktion. */
+  function freeRowCols(pl, row) {
+    if (row === 'p1') return [0, pl.p1.digits.length - 1];
+    if (row === 'p2') return [1, pl.p2.digits.length];
+    return [0, pl.width - 1];
+  }
+  /* Radens tal, eller null: ledande tomma hoppas över, en tom ruta mitt i
+     talet kan aldrig bli rätt. Rad 2 läses utan nollan. Ren funktion. */
+  function freeRowValue(cells, lo, hi) {
     let s = '', started = false;
-    for (let g = plan.width - 1; g >= 0; g--) {
-      const v = exFreeCells[g];
-      if (v === null) { if (started) return null; continue; }
+    for (let g = hi; g >= lo; g--) {
+      const v = cells[g];
+      if (v === null || v === undefined) { if (started) return null; continue; }
       started = true; s += v;
     }
     return s === '' ? null : parseInt(s, 10);
   }
-  const exFreeHasDigits = () => exFreeCells.some(v => v !== null);
+  const rowHas = (cells, lo, hi) => { for (let g = lo; g <= hi; g++) if (cells[g] !== null && cells[g] !== undefined) return true; return false; };
+  /* Summan är låst tills båda raderna har siffror */
+  function freeAnsLocked(pl, grid) {
+    if (pl.kind !== 'twostep') return false;
+    return !rowHas(grid.p1, ...freeRowCols(pl, 'p1')) || !rowHas(grid.p2, ...freeRowCols(pl, 'p2'));
+  }
+  /* Knappens läge: 'klar' när varje rad har siffror, annars 'next' (Nästa rad) */
+  function freeButtonMode(pl, grid) {
+    if (pl.kind !== 'twostep') return 'klar';
+    return FREE_ORDER.every(r => rowHas(grid[r], ...freeRowCols(pl, r))) ? 'klar' : 'next';
+  }
+  /* Nästa rad: första raden i ordningen som saknar siffror, annars nästa rad efter den aktuella */
+  function freeNextRow(pl, grid, row) {
+    const empty = FREE_ORDER.find(r => r !== row && !rowHas(grid[r], ...freeRowCols(pl, r)));
+    return empty || FREE_ORDER[(FREE_ORDER.indexOf(row) + 1) % FREE_ORDER.length];
+  }
+  /* Glömd minnessiffra i additionen: varje kolumn mod 10, sista kolumnen hel */
+  function noCarrySum2(x, y) {
+    const d1 = digitsOf(x), d2 = digitsOf(y), len = Math.max(d1.length, d2.length), ds = [];
+    for (let c = 0; c < len; c++) {
+      const sm = (d1[c] || 0) + (d2[c] || 0);
+      if (c === len - 1) digitsOf(sm).forEach(d => ds.push(d)); else ds.push(sm % 10);
+    }
+    return ds.reduce((n, d, i) => n + d * Math.pow(10, i), 0);
+  }
+  /* Rättningen med rader. vals = { p1, p2 (utan nollan), ans }. Raderna rättas
+     före summan; glömd minnessiffra känns igen per rad och i summan. Ren. */
+  function freeCheck(pl, vals) {
+    const nc = (a, m) => noCarryAnswer({ kind: 'simple', a, b: m });
+    if (vals.p1 !== pl.p1.value) {
+      const glomt = nc(pl.a, pl.ones) !== pl.p1.value && vals.p1 === nc(pl.a, pl.ones);
+      return { ok: false, row: 'p1', cls: glomt ? 'minne' : 'fel',
+               msg: glomt ? 'Titta på rad 1 – kolla minnessiffrorna.'
+                          : `Titta på rad 1 – där räknar du ${pl.a} · ${pl.ones}, från entalet.` };
+    }
+    if (vals.p2 !== pl.p2.value) {
+      const glomt = nc(pl.a, pl.tens) !== pl.p2.value && vals.p2 === nc(pl.a, pl.tens);
+      return { ok: false, row: 'p2', cls: glomt ? 'minne' : 'fel',
+               msg: glomt ? 'Titta på rad 2 – kolla minnessiffrorna.'
+                          : `Titta på rad 2 – nollan står i entalet, så ${pl.a} · ${pl.tens} börjar i tiotalet.` };
+    }
+    if (vals.ans !== pl.answer) {
+      const n2 = noCarrySum2(pl.p1.value, pl.p2.value * 10);
+      const glomt = n2 !== pl.answer && vals.ans === n2;
+      return { ok: false, row: 'ans', cls: glomt ? 'minne' : 'addition',
+               msg: glomt ? 'Nästan! Kolla minnessiffrorna när du lägger ihop raderna.'
+                          : 'Titta på summan – lägg ihop ental med ental och tiotal med tiotal.' };
+    }
+    return { ok: true, row: null, cls: null, msg: '' };
+  }
+
+  function exFreeInit() {
+    exFreeGrid = { ans: Array(plan.width).fill(null) };
+    if (freeRows()) { exFreeGrid.p1 = Array(plan.width).fill(null); exFreeGrid.p2 = Array(plan.width).fill(null); }
+    setFreeRow(freeRows() ? 'p1' : 'ans');
+    exFreeCur = isDivFree() ? plan.width - 1 : freeLo();   // div: börja längst till vänster
+    exFreePaintCells();
+    requestAnimationFrame(() => exFreePlaceRing(false));
+  }
+  function setFreeRow(row) { exFreeRow = row; exFreeCells = exFreeGrid[row]; }
+  const freeLo = () => freeRows() ? freeRowCols(plan, exFreeRow)[0] : 0;
+  const freeHi = () => freeRows() ? freeRowCols(plan, exFreeRow)[1] : plan.width - 1;
+
+  /* Svarets värde (summaraden), eller null om rutorna inte bildar ett tal */
+  function exFreeValue() {
+    return freeRowValue(exFreeGrid.ans, 0, plan.width - 1);
+  }
+  const exFreeHasDigits = () => Object.values(exFreeGrid).some(c => c.some(v => v !== null));
+  const freeVals = () => freeRows()
+    ? { p1: freeRowValue(exFreeGrid.p1, ...freeRowCols(plan, 'p1')),
+        p2: freeRowValue(exFreeGrid.p2, ...freeRowCols(plan, 'p2')), ans: exFreeValue() }
+    : { ans: exFreeValue() };
 
   function exFreePaintCells(popG) {
-    for (let g = 0; g < plan.width; g++) {
-      const el = document.getElementById(freeCellId(g));
-      if (!el) continue;
-      const v = exFreeCells[g];
-      el.classList.toggle('filled', v !== null);
-      el.classList.toggle('active-col', g === exFreeCur && !exInputLocked);
-      el.style.borderColor = v !== null ? cv(g) : '';
-      el.style.borderStyle = v !== null ? 'solid' : '';
-      el.innerHTML = v !== null
-        ? `<span style="color:${cv(g)}">${v}</span>`
-        : (g === exFreeCur && !exInputLocked ? '<span class="md-ans-caret"></span>' : '');
-      if (popG === g) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+    const rows = freeRows() ? FREE_ORDER : [exFreeRow];
+    const locked = freeRows() && freeAnsLocked(plan, exFreeGrid);
+    for (const row of rows) {
+      const cells = exFreeGrid[row];
+      const [lo, hi] = freeRows() ? freeRowCols(plan, row) : [0, plan.width - 1];
+      for (let g = lo; g <= hi; g++) {
+        const el = document.getElementById(isDivFree() ? 'md-q-' + g : `md-${row}-${g}`);
+        if (!el) continue;
+        const v = cells[g], here = row === exFreeRow && g === exFreeCur && !exInputLocked;
+        el.classList.toggle('filled', v !== null);
+        el.classList.toggle('active-col', here);
+        if (freeRows() && row === 'ans') el.classList.toggle('md-lk', locked);
+        el.style.borderColor = v !== null ? cv(g) : '';
+        el.style.borderStyle = v !== null ? 'solid' : '';
+        el.innerHTML = v !== null
+          ? `<span style="color:${cv(g)}">${v}</span>`
+          : (here ? '<span class="md-ans-caret"></span>' : '');
+        if (popG === g && row === exFreeRow) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+      }
     }
   }
 
@@ -3504,27 +3620,42 @@ const MultDivGame = (() => {
     if (animate === false) requestAnimationFrame(() => ring.classList.remove('instant'));
   }
 
-  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den gamla. */
-  function exFreeFocus(g) {
+  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den gamla.
+     Summans rutor går inte att välja medan summan är låst. */
+  function exFreeFocus(g, row) {
     if (exInputLocked || helpMode) return;
-    if (g < 0 || g >= plan.width) return;
+    const r = row || 'ans';
+    if (!exFreeGrid[r]) return;
+    if (freeRows()) {
+      const [lo, hi] = freeRowCols(plan, r);
+      if (g < lo || g > hi) return;
+      if (r === 'ans' && freeAnsLocked(plan, exFreeGrid)) return;
+    } else if (g < 0 || g >= plan.width) return;
+    setFreeRow(r);
     exFreeCur = g;
     App.Sound.play('click');
     exFreePaintCells();
     exFreePlaceRing(true);
+    exFreeUpdateSubmit();
   }
 
   function exFreeClearWrong() {
-    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('judged-ok'));
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('judged-ok', 'md-soft'));
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = '';
   }
 
-  /* Klar heter Klar hela tiden — ytan bär tillståndet, inte namnet. */
+  /* En knapp (D39 ✎): med rader heter den "Nästa rad" tills varje rad har
+     siffror, sedan Klar. Utan rader heter den Klar hela tiden — ytan bär
+     tillståndet, inte namnet. */
   function exFreeUpdateSubmit() {
     const btn = document.getElementById('md-free-submit');
     if (!btn) return;
-    const ready = exFreeHasDigits() && !exInputLocked;
+    const next = freeRows() && freeButtonMode(plan, exFreeGrid) === 'next';
+    const ready = !exInputLocked && (next ? rowHas(exFreeCells, freeLo(), freeHi()) : exFreeHasDigits());
+    const label = btn.querySelector('span');
+    if (label) label.textContent = next ? 'Nästa rad' : 'Klar';
+    btn.classList.toggle('md-klar-next', next);
     const was = !btn.disabled;
     btn.disabled = !ready;
     btn.classList.toggle('done', exInputLocked);
@@ -3537,7 +3668,7 @@ const MultDivGame = (() => {
     exFreeCells[exFreeCur] = parseInt(key, 10);
     const popped = exFreeCur;
     if (isDivFree()) { if (exFreeCur > 0) exFreeCur--; }              // div: ett steg HÖGERUT
-    else if (exFreeCur < plan.width - 1) exFreeCur++;                  // mult: ett steg vänsterut
+    else if (exFreeCur < freeHi()) exFreeCur++;                        // mult: ett steg vänsterut
     App.Sound.play('click');
     exFreePaintCells(popped);
     exFreePlaceRing(true);
@@ -3552,8 +3683,20 @@ const MultDivGame = (() => {
     exFreeClearWrong();
     if (exFreeCells[exFreeCur] === null) {
       if (isDivFree()) { if (exFreeCur < plan.width - 1) { exFreeCur++; exFreeCells[exFreeCur] = null; } }
-      else if (exFreeCur > 0) { exFreeCur--; exFreeCells[exFreeCur] = null; }
+      else if (exFreeCur > freeLo()) { exFreeCur--; exFreeCells[exFreeCur] = null; }
     } else exFreeCells[exFreeCur] = null;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
+    exFreeUpdateSubmit();
+  }
+
+  /* Nästa rad: fokus till nästa rad som saknar siffror, i dess ental */
+  function freeGoNextRow() {
+    const row = freeNextRow(plan, exFreeGrid, exFreeRow);
+    if (row === 'ans' && freeAnsLocked(plan, exFreeGrid)) return;
+    setFreeRow(row);
+    exFreeCur = freeLo();
     App.Sound.play('click');
     exFreePaintCells();
     exFreePlaceRing(true);
@@ -3568,8 +3711,6 @@ const MultDivGame = (() => {
     return [...of(pl.p1), ...of(pl.p2), ...of(pl.add)];
   }
 
-
-
   /* Divisionens rester enligt planen: { g: rest } för cellen som tar emot */
   function planRests(pl) {
     const out = {};
@@ -3582,19 +3723,33 @@ const MultDivGame = (() => {
     if (fb) fb.innerHTML = `<div class="md-free-tip">${msg}</div>`;
   }
 
+  /* Raden som inte stämmer blir milt persika (D39) och får fokus i sitt ental */
+  function freeMarkRow(row) {
+    const [lo, hi] = freeRowCols(plan, row);
+    for (let g = lo; g <= hi; g++) {
+      const el = document.getElementById(`md-${row}-${g}`);
+      if (el && exFreeGrid[row][g] !== null) el.classList.add('md-soft');
+    }
+    setFreeRow(row);
+    exFreeCur = lo;
+    exFreePaintCells();
+    exFreePlaceRing(true);
+  }
+
   function exFreeSubmit() {
     if (exInputLocked) return;
+    if (freeRows() && freeButtonMode(plan, exFreeGrid) === 'next') { freeGoNextRow(); return; }
     if (!exFreeHasDigits()) return;          // Klar kräver minst en siffra
     const val = exFreeValue();
     const div = isDivFree();
-    const nd = div ? digitsOf(numA) : null;
-    if (val === plan.answer) {
+    const chk = freeRows() ? freeCheck(plan, freeVals()) : null;
+    if (chk ? chk.ok : val === plan.answer) {
       exInputLocked = true;
       if (exFreeFirstAttempt) exScore++;      // +1 endast helrätt på FÖRSTA Klar
       exFreeClearWrong();
       exFreePaintCells();
       exFreePlaceRing(false);                 // låst ruta → ringen släcks
-      document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.add('judged-ok'));
+      document.querySelectorAll('#md-table-wrap .md-ansc.filled').forEach(el => el.classList.add('judged-ok'));
       exFreeUpdateSubmit();
       App.Sound.play('correct');
       smallBurst();
@@ -3613,11 +3768,14 @@ const MultDivGame = (() => {
       /* Avsluta under väntan (exGen ändras) får inte dra in nästa uppgift */
       const gen = exGen;
       setTimeout(() => { if (gen === exGen) finishTask(true); }, 900 + extra);
+    } else if (host) {
+      hostFreeWrong(val, chk);
     } else {
       if (exFreeFirstAttempt) App.Sound.play('wrong');   // D39: ljudet bara vid första Klar som inte stämmer
       exFreeFirstAttempt = false;             // fel förbrukar första försöket
       const wrap = mdWrap();
       if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+      if (chk) { freeTip(chk.msg); freeMarkRow(chk.row); exFreeUpdateSubmit(); return; }
       // Glömd-minnessiffra-/glömd-rest-detektion (v30/v32): matchar svaret
       // simuleringen där minnen/rester tappas → riktad feedback. Barnets
       // egna anteckningar räknas: en felaktig pekas ut före den generiska.
@@ -3637,8 +3795,182 @@ const MultDivGame = (() => {
     });
   }
 
+  /* ══════════════════════════════════════════════════════════
+     D41: MATTEPROVET LÅNAR MOTORN (runTask)
+     Matteprovets uppställning i läget "Minnessiffra" räknas här, med
+     samma metodik som nivå 4: minnessiffran, den osynliga nollan, den
+     orange ramen, siffrorna i platsvärdesfärg och platsorden. Kroken är
+     isolerad — host är null i multdivs egna lägen, som beter sig som förut.
+       runTask({ a, b, mode:'help'|'free', profile, title, right, exitMsg, exitAsk,
+                 onDone(result), onExit() })
+     result = { outcome:'direkt'|'hjalp'|'svar', cls:null|'minne'|'addition'|'fel',
+                facts:[[siffra, faktor], …] }  (tabellfakta som fick fel svar)
+     Läget 'help' är Räkna med hjälp (frågor kolumn för kolumn, livlinor).
+     Läget 'free' är Räkna själv med matteprovets hjälptrappa: första
+     "inte riktigt" är tyst, andra ger en hjälpbit, tredje visar svaret.
+     Efter uppgiften står en Nästa-knapp (klickstyrt, som i matteprovet).
+  ══════════════════════════════════════════════════════════ */
+  function runTask(o) {
+    host = { a: o.a, b: o.b, mode: o.mode === 'free' ? 'free' : 'help', title: o.title || 'Uppställning',
+             right: o.right || '<span style="width:52px"></span>', exitMsg: o.exitMsg || null,
+             exitAsk: !!o.exitAsk,
+             onDone: o.onDone, onExit: o.onExit,
+             log: { facts: [], minne: false, addition: false, lifeline: false, cls0: null },
+             wrong: 0, revealed: false,
+             saved: { difficulty, gameKind, helpMode } };   // multdivs egna val återställs efter uppgiften
+    if (o.profile) profile = o.profile;
+    gameKind = 'mult'; difficulty = 4; helpMode = host.mode === 'help';
+    exerciseIdx = 0; exScore = 0;
+    memMoments = 0; memMistakes = 0; exWrongAnswers = 0;
+    lifelines = helpMode ? 2 : 0; lifelineShownFor = null;
+    exGen++;
+    forcedNext = { a: o.a, b: o.b };
+    Router.silent(() => Router.show('screen-multdiv'));
+    newExProblem();
+  }
+
+  /* Fel svar i hjälpläget: vad var det som var svårt? (ren bokföring) */
+  function hostNoteWrong(item) {
+    if (!host || !item) return;
+    if (item.kind === 'mult' && item.step === 'table') {
+      if (!host.log.facts.some(f => f[0] === item.aDig && f[1] === item.m)) host.log.facts.push([item.aDig, item.m]);
+    } else if (item.kind === 'add') host.log.addition = true;
+    else host.log.minne = true;          // minnesfrågan och siffran i rutan
+  }
+
+  /* Utfallet — ren funktion av loggen och läget */
+  function hostOutcome(h, clean, firstAttempt) {
+    const log = h.log;
+    let outcome;
+    if (h.mode === 'help') outcome = clean && !log.lifeline ? 'direkt' : 'hjalp';
+    else outcome = h.revealed ? 'svar' : firstAttempt ? 'direkt' : 'hjalp';
+    const cls = h.mode === 'free' ? log.cls0
+      : log.minne ? 'minne' : log.addition ? 'addition' : null;
+    return { outcome, cls: outcome === 'direkt' ? null : cls, facts: outcome === 'direkt' ? [] : log.facts.slice() };
+  }
+
+  /* Hjälpbiten i fria läget: tvåsiffrig faktor ⇒ de två raderna; ensiffrig ⇒
+     minnessiffrorna (eller tabellfakta när det inte finns något minne). Ren. */
+  function hostBitHTML(pl, row) {
+    if (pl.kind === 'twostep') {
+      /* D41 ✎: hjälpbiten "raderna" visar en rad i taget — den som inte stämmer */
+      if (row === 'p2')
+        return `Rad 2 är <strong>${pl.a} · ${pl.tens * 10} = ${pl.p2.value * 10}</strong>. Nollan står redan i entalet.`;
+      if (row === 'ans')
+        return `Raderna stämmer. Lägg ihop dem: <strong>${pl.p1.value} + ${pl.p2.value * 10}</strong>.`;
+      return `Rad 1 är <strong>${pl.a} · ${pl.ones} = ${pl.p1.value}</strong>.`;
+    }
+    const mem = planCarries(pl);
+    if (mem.length) {
+      const lista = mem.length === 1 ? `${mem[0]}` : `${mem.slice(0, -1).join(', ')} och ${mem[mem.length - 1]}`;
+      return `Minnessiffrorna blir <strong style="color:#dc2626">${lista}</strong>, från entalet och vänsterut.`;
+    }
+    return pl.pass.cols.map(c => `${c.aDig} · ${c.m} = ${c.prod}`).join(', ') + '.';
+  }
+
+  /* Räkna själv i matteprovet: hjälptrappan (D38/D39). Med rader (chk) pekar
+     varje steg på raden som inte stämmer: först ledtråden, sedan radens facit
+     som hjälpbit (en rad i taget), och kommer samma rad igen visas svaret. */
+  function hostFreeWrong(val, chk) {
+    const h = host;
+    h.wrong++;
+    exFreeFirstAttempt = false;
+    const nc = noCarryAnswer(plan);
+    const glomt = chk ? chk.cls === 'minne' : (nc !== plan.answer && val === nc);
+    if (h.wrong === 1) h.log.cls0 = chk ? chk.cls : (glomt ? 'minne' : 'fel');
+    if (h.wrong >= 2) App.Sound.play('wrong');            // första "inte riktigt" är tyst (matteprovet, D39)
+    const wrap = mdWrap();
+    if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+    if (h.wrong === 1) {
+      freeTip(chk ? chk.msg : glomt ? 'Nästan! Kolla minnessiffrorna — någon vill vara med.' : 'Inte riktigt – försök igen.');
+      if (chk) freeMarkRow(chk.row);
+      exFreeUpdateSubmit();
+      return;
+    }
+    if (chk) {
+      h.bits = h.bits || [];
+      if (!h.bits.includes(chk.row)) {
+        h.bits.push(chk.row);
+        /* hjälpbiten står i bubblan (den står kvar medan barnet skriver), och ledtrådens ruta
+           töms: bubbla + ruta samtidigt tog kladden ner till 74 px i 390 × 797 */
+        freeMarkRow(chk.row);
+        exFreeClearWrong();
+        document.querySelectorAll(`#md-table-wrap [id^="md-${chk.row}-"].filled`).forEach(el => el.classList.add('md-soft'));
+        helpBubble(hostBitHTML(plan, chk.row));
+        exFreeUpdateSubmit();
+        return;
+      }
+    } else if (h.wrong === 2) {
+      freeTip('Inte riktigt ännu. Här är en hjälp:');
+      helpBubble(hostBitHTML(plan));
+      exFreeUpdateSubmit();
+      return;
+    }
+    // sist: svaret visas, i neutral grå, och minnessiffrorna landar
+    h.revealed = true;
+    exInputLocked = true;
+    const fill = (row, v, from) => { const ds = digitsOf(v); exFreeGrid[row] = Array(plan.width).fill(null).map((_, g) => g >= from && g - from < ds.length ? ds[g - from] : null); };
+    fill('ans', plan.answer, 0);
+    if (freeRows()) { fill('p1', plan.p1.value, 0); fill('p2', plan.p2.value, 1); }
+    setFreeRow('ans');
+    exFreePaintCells();
+    exFreePlaceRing(false);
+    document.querySelectorAll('#md-table-wrap .md-ansc.filled').forEach(el => {
+      el.style.borderColor = '#94a3b8'; el.style.background = '#f1f5f9';
+    });
+    mdMemList = planCarries(plan).map(v => ({ val: v, used: false }));
+    renderMemCol();
+    exFreeClearWrong();
+    helpBubble(`Så här blir det: ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    hostFinish();
+  }
+
+  /* Uppgiften är klar: Nästa-knappen i stället för knappsatsen */
+  function hostFinish() {
+    if (!host) return;
+    const res = hostOutcome(host, helpTaskClean, exFreeFirstAttempt);
+    host.result = res;
+    // pekningen släcks: uppgiften är färdig
+    document.querySelectorAll('#md-table-wrap .md-cell, #md-table-wrap .md-ansc').forEach(el => {
+      el.classList.remove('md-glow', 'dim', 'active-col'); el.style.removeProperty('--gc');
+    });
+    if (res.outcome !== 'svar')
+      helpBubble(res.outcome === 'direkt' ? `Rätt! ${numA} · ${numB} = <strong>${plan.answer}</strong>`
+                                          : `Rätt, med hjälp. ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-host-next"
+      onclick="MultDivGame.hostNext()">Nästa <svg class="icn"><use href="#i-play"/></svg></button>`;
+    const fb = document.getElementById('md-feedback');
+    if (fb && res.outcome !== 'svar') fb.innerHTML = '';
+    const main = document.getElementById('md-main');
+    if (main) main.classList.remove('free-seam');
+  }
+
+  function hostNext() {
+    if (!host || !host.result) return;
+    App.Sound.play('click');
+    const h = host, res = h.result;
+    host = null; exGen++; hostRestore(h);
+    if (h.onDone) h.onDone(res);
+  }
+
+  function hostRestore(h) {
+    ({ difficulty, gameKind, helpMode } = h.saved);
+    const root = document.getElementById('multdiv-root');
+    if (root) root.innerHTML = '';
+  }
+
+  function hostAbort() {
+    if (!host) return;
+    const h = host;
+    host = null; exGen++; hostRestore(h);
+    const o = document.getElementById('md-avslut'); if (o) o.remove();
+    if (h.onExit) h.onExit();
+  }
+
   /* ── Uppgiftsräknare + resultat ─────────────────────────── */
   function finishTask(correct) {
+    if (host) { hostFinish(); return; }
     exerciseIdx++;
     if (exerciseIdx >= 5) {
       showExResults();
@@ -3834,9 +4166,10 @@ const MultDivGame = (() => {
                      !!document.querySelector('#md-table-wrap .md-ansc.filled, ' +
                                               '#md-table-wrap .md-cell.struck, ' +
                                               '#md-table-wrap .md-divrem.on');
-    if (!pabörjad) { showModeSelect(); return; }
+    if (host && !pabörjad && !host.exitAsk) { hostAbort(); return; }
+    if (!host && !pabörjad) { showModeSelect(); return; }
     const root = document.getElementById('multdiv-root');
-    if (!root || document.getElementById('md-avslut')) { showModeSelect(); return; }
+    if (!root || document.getElementById('md-avslut')) { if (host) hostAbort(); else showModeSelect(); return; }
     App.Sound.play('click');
     /* Overlagg, inte en ruta i floden: lagd i #md-feedback tog den 54 px
        fran kladden (uppmatt 128 px mot golvet 150). Ett overlagg ror
@@ -3844,10 +4177,10 @@ const MultDivGame = (() => {
     root.insertAdjacentHTML('beforeend', `<div id="md-avslut" class="md-avslut-bak"
       onclick="if(event.target===this)MultDivGame.avslutaAngra()">
       <div class="md-avslut">
-        <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
+        <div>${host ? MP.escapeHtml(host.exitMsg || 'Avsluta passet?') : `Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.`}</div>
         <div class="md-avslut-rad">
           <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
-          <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
+          <button class="md-btn md-avslut-ja" onclick="MultDivGame.${host ? 'hostAbort' : 'showModeSelect'}()">Ja, avsluta</button>
         </div>
       </div></div>`);
   }
@@ -3887,11 +4220,12 @@ const MultDivGame = (() => {
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     openProv,                              // D37: Matteprov 4:an
+    runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, genL4, drawL4Type, L4_TYPES, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
+    __test: { hostOutcome, hostBitHTML, hostActive: () => !!host, freeRowCols, freeRowValue, freeAnsLocked, freeButtonMode, freeNextRow, freeCheck, planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
               /* hjälpbubblornas frågor mot en given plan (rena; läser inte modultillståndet) */
               askText: (item, pl) => askText(item, pl), helpExprHTML: (item, pl) => helpExprHTML(item, pl), planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
               tabellradHTML, planCarries, planRests,
