@@ -274,7 +274,7 @@
     if (t.type === 'te') {
       const Td = t.T / 10;
       return [
-        { text:`Dela ${tok(Td, 'T')}${tok(t.E, 'E')}: hur många är tiotalen?`, lit:['b:T', 'box:0'] },
+        { text:`Dela ${tok(Td, 'T')}${tok(t.E, 'E')}: vad är tiotalen värda?`, lit:['b:T', 'box:0'] },
         { text:`…och entalen?`, lit:['b:E', 'box:1'] },
         { text:`Vad blir ${t.a} · ${tok(t.T, 'T')}?`, lit:['a', 'box:0', 'box:2'] },
         { text:`Vad blir ${t.a} · ${tok(t.E, 'E')}?`, lit:['a', 'box:1', 'box:3'] },

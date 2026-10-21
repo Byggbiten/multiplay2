@@ -18,6 +18,8 @@
 
 ## Klart
 
+- [x] D42 Räkna med hjälp och Räkna själv i matteprovet – på dev 2026-10-21.
+
 - [x] Enklare förklaring av nollan (D41 ✎) – live i v72 2026-10-21.
 
 - [x] Minnessiffran utan fokusbyte i matteprovet (D41 ✎) – live i v71 2026-10-21.

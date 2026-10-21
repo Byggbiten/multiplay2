@@ -378,7 +378,7 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
   raderna i uppställningen och placerar svaren (D38 ✎).
 - **Med hjälp / Själv** på samma rad som nivån (D42): läget när barnet övar, sparat per profil, förval **Med hjälp**.
   Med hjälp leder appen under själva uppgiften, ruta för ruta: en kort fråga om rutan med fokus ("40 är 4 tiotal. Hur
-  många tiotal blir 8 · 4?", "Dela 28: hur många är tiotalen?"), siffrorna som hör till lyser med orange ram och i sin
+  många tiotal blir 8 · 4?", "Dela 28: vad är tiotalen värda?"), siffrorna som hör till lyser med orange ram och i sin
   platsvärdesfärg (samma färg i frågan), och efter rätt svar en kort kvittens ("Rätt! 8 · 4 = 32.") innan nästa ruta.
   Fel svar: "Inte riktigt – försök igen" (tyst), sedan en ledtråd, sedan svaret i rutan. Gäller tiotal och hundratal
   och talsorter; problemlösningen har sina ledda steg och priset som hör till steget lyser; uppställningens

@@ -1020,7 +1020,7 @@ describe('frågan ruta för ruta (D42)', () => {
   it('4 · 28: tiotalen, entalen, 4 · 20, 4 · 8, summan', () => {
     const t = L.makeTalsorter(4, 28);
     expect([0, 1, 2, 3, 4].map(i => L.askPlain(L.boxAsk(t, i).text))).toEqual(
-      ['Dela 28: hur många är tiotalen?', '…och entalen?', 'Vad blir 4 · 20?', 'Vad blir 4 · 8?', 'Lägg ihop: vad blir 80 + 32?']);
+      ['Dela 28: vad är tiotalen värda?', '…och entalen?', 'Vad blir 4 · 20?', 'Vad blir 4 · 8?', 'Lägg ihop: vad blir 80 + 32?']);
     expect(L.askTokens(L.boxAsk(t, 0).text)).toEqual([{ v:'2', place:'T' }, { v:'8', place:'E' }]);
     expect(L.boxAsk(t, 0).lit).toContain('b:T');
     expect(L.boxAsk(t, 1).lit).toContain('b:E');
