@@ -535,3 +535,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   införlivar vi den 'osynliga 0:an' så den blir tydlig. Sedan bör vi också ha med, precis som det är i övningsbladen
   på den svårare. att när man väljer svårighetsgrad 4 så kan det också vara tal såsom tresiffrigt x 1 siffrigt.
   fanns det i övningsbladet även 3 siffrigt gånger 2 siffrigt? då kanske vi ska ha med det också?"
+- ✎ **2026-10-21, förklara nollan och målcellerna:** demon och hjälpbubblorna säger att vi gångrar med ett tiotal och
+  därför fyller i en nolla i den (lätt grå) rutan, och visar för varje multiplikation både faktorcellerna och cellen
+  där svaret skrivs, med varför (ental, minnessiffra, ett steg till vänster på rad 2; additionen kolumn för kolumn).
+  Källa: Dennis: "Den cellen får gärna vara lite gråad eller liknande. men att animationerna förklarar att 'nu när vi
+  gångrar med ett 10 tal så fyller vi i en nolla här', och att man får lite förklarat, för rutorna lyser ju upp när
+  man gångrar siffrorna med andra siffror. alltså deras celler. så man hänger med på vilken ordning det sker, men att
+  man även får förklarat hur det spelar roll med vilka celler man skriver in i nedan i delsummor och summa".
