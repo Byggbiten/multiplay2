@@ -3,8 +3,8 @@
 **Roll:** byggde Matteprov 4:an med Matteprov 1 (multiplikation, kapitel 2) och förvaltar det. Kan granska, rätta och
 bygga vidare, och lägga till nästa prov.
 **Datum:** 2026-10-19; D41 2026-10-21 (gren `matteprov-metod`); D42 2026-10-21 (gren `matteprov-hjalplage`).
-**Läge:** live i **v72** (rundorna 7–9 gick ut i v70–v72). D42 (runda 10) är byggt på grenen `matteprov-hjalplage`
-(tagg `fore-matteprov-hjalplage`), pushat men inte mergat. Tidigare: v67 rundorna 1–3, v68 runda 4, v69 rundorna 5–6
+**Läge:** live i **v73** med D42 (runda 10; grenen `matteprov-hjalplage` är sammanslagen). Rundorna 7–9 gick ut i
+v70–v72. Tidigare: v67 rundorna 1–3, v68 runda 4, v69 rundorna 5–6
 och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sammanslagna och borttagna:
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
 Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
@@ -76,6 +76,11 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 - **Uppställningen:** `uppEngineMode(method, passMode, mode)`: Minnessiffra med hjälp = multdivs hjälpläge, själv och
   provet = fria läget via `runTask`. Dela upp är det ledda flödet i båda lägena.
 - **Själv:** som förut: instruktionsraden, alla rutor öppna, en knapp (Nästa ruta → Klar).
+- **Samordnarens ändring efter runda 10:** TE:s första fråga heter "Dela 28: vad är tiotalen värda?" (inte "hur
+  många är tiotalen?"), eftersom ett barn kan svara 2 när rutan väntar 20 (`boxAsk`, testet och MANUAL uppdaterade).
+- **Kalibrering för frågetexter:** testa varje fråga mot vad ett barn skulle svara, inte bara mot förväntad text. Läs
+  frågan bokstavligt och skriv upp de rimliga svaren (antalet eller värdet? siffran eller talet?); svarar frågan på
+  något annat än rutan väntar, skriv om den. Gäller alla nya frågor i boxAsk, rowQuestion och problemlösningens steg.
 
 ## Räknesätten i uppställningen (D41)
 - **Växeln** `Räkna med: Minnessiffra | Dela upp` står överst i "Så här gör du" för uppställningen (på provsidan fanns
@@ -152,7 +157,7 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
 
 ## Nästa steg
-- Vänta på Dennis synpunkter på D42 (grenen `matteprov-hjalplage`).
+- Vänta på Dennis synpunkter på D42 (live i v73).
 - Möjligt nästa: Med hjälp även i Dela upp och tabelltestet om Dennis vill (nu: Dela upp är alltid ledd, tabelltestet
   har ingen extra hjälp).
 - TODO: ta bort den oanvända uttryckslogiken (se ovan).
