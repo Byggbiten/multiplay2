@@ -376,6 +376,14 @@ Nås från **Multiplikation & Division → Uppställd multiplikation**: under ko
 - **Lättare / Svårare** överst. Nivån gäller bara när barnet övar. **Provet är alltid på Svårare**, som det svårare
   övningsbladet eller strax över. Appen får ändå vara något lättare än skolans prov, eftersom den frågar efter
   raderna i uppställningen och placerar svaren (D38 ✎).
+- **Med hjälp / Själv** på samma rad som nivån (D42): läget när barnet övar, sparat per profil, förval **Med hjälp**.
+  Med hjälp leder appen under själva uppgiften, ruta för ruta: en kort fråga om rutan med fokus ("40 är 4 tiotal. Hur
+  många tiotal blir 8 · 4?", "Dela 28: hur många är tiotalen?"), siffrorna som hör till lyser med orange ram och i sin
+  platsvärdesfärg (samma färg i frågan), och efter rätt svar en kort kvittens ("Rätt! 8 · 4 = 32.") innan nästa ruta.
+  Fel svar: "Inte riktigt – försök igen" (tyst), sedan en ledtråd, sedan svaret i rutan. Gäller tiotal och hundratal
+  och talsorter; problemlösningen har sina ledda steg och priset som hör till steget lyser; uppställningens
+  Minnessiffra räknas i multiplikationens hjälpläge. Själv ser ut som förut (rutorna, en knapp; Minnessiffra i fria
+  läget). Provet och Mitt prov räknas alltid själv, med hjälptrappan vid fel.
 - **Öva på ett moment**: de fem momenten med senaste övningens resultat (grönt eller gult märke).
 - **Tabellsprint**: så många gångertal som barnet hinner på 4 minuter, högst 48. Ingår inte i provet. Tiden syns bara
   här. Resultatet visas på en skala (0–12, 13–24, 25–36, 37–48) och bästa resultatet sparas.
