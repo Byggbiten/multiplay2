@@ -348,6 +348,14 @@ exempel 67 · 9 = 603 och 67 · 20 = 1340.
 texten säger vilken ruta det är ("7 · 9 är 63. Det hör till entalet."). Rad 2:s första uträkning säger att svaret
 hamnar ett steg till vänster eftersom vi räknar tiotal. Nivå 1–3 har samma texter som förut.
 
+**Siffrorna i texten (alla nivåer, även kort division).** När bubblan i Titta och lär eller Räkna med hjälp nämner en
+siffra som står i uppställningen, är siffran fet och har samma färg som sin ruta: ental grön, tiotal blå, hundratal
+röd, tusental lila. I "Först räknar vi 98 · 5 — entalssiffran i 65" är 5:an grön på båda ställena, och 6:an har
+vanlig textfärg. Minnessiffror är röda som i minnesspalten. Strax efter att texten visats pulserar de rutorna en gång,
+så att barnet ser vilken siffra som menas. Uträkningens svar, till exempel 63, är inte färgat, för det står inte i
+någon ruta. Ett undantag är "3:an skrivs i entalet": där har 3:an samma färg som rutan den hamnar i. I divisionen
+pekas täljarsiffran ("Hur många 6:or ryms i 4?") och kvotsiffran ("Vi skriver 7 i tiotalet") ut på samma sätt.
+
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
 ## Matteprov 4:an (v67–v68, D37, D38)

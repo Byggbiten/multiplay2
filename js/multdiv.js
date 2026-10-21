@@ -72,6 +72,18 @@
      sina gamla texter ordagrant. Additionens logik är oförändrad:
      entalets kolumn är rad 1:s ental + nollan ("Nollan lägger inte till
      något").
+   D40 ✎ (2026-10-21, Dennis): SIFFRORNA I TEXTEN PEKAR PÅ PAPPRET, nivå
+   1–4, Titta och lär och hjälpbubblorna. En siffra i bubblan som står i
+   (eller ska skrivas i) en cell skrivs med ref(plats, värde): fet, i
+   cellens platsvärdesfärg, märkt data-ref. Minnessiffror i minnets röda
+   färg (mem:cur = den som används härnäst, chip:0 = brickans siffra som
+   blir minne). Tal som inte är en cell (produkten 63) färgas aldrig.
+   pulseRefs låter de utpekade noderna pulsera EN gång (Web Animations,
+   box-/text-shadow, 180 ms efter texten). multRefs är den enda källan:
+   texten (multStepText, multHelpText, askText) och pekningen
+   (multLitCells) läser samma platser. Divisionen: täljarsiffran som
+   arbetstalet ÄR och kvotsiffran som skrivs (divCurHTML, skriv,
+   inget_kvar, fall B:s nolla); rest-texterna och faktabrickan är orörda.
    ============================================================ */
 'use strict';
 
@@ -1047,24 +1059,30 @@ const MultDivGame = (() => {
   /* Texterna, ordagrant ur specen §4 — EN mall per stegtyp för N ∈ 2..9.
      Strykningar namnger kolumnen, aldrig siffrans värde; resten heter
      resten från födseln; flytten slutar i det nya talet. */
+  /* D40 ✎: täljarsiffran som arbetstalet ÄR (ingen rest framför, inget
+     hopp) och kvotsiffran som skrivs pekas ut med ref() — samma färg och
+     puls som i multiplikationen. Rest-texterna (rest, flytta, "hela 1:an
+     blir rest") och faktabrickan rörs inte. */
+  const divCurHTML = s => (!s.fromSkip && !(s.remIn > 0) && s.cur === s.digit && isG(s.g))
+    ? ref(`md-n-${s.g}`, s.cur) : `${s.cur}`;
   function divStepText(s) {
     const N = s.N;
     switch (s.t) {
-      case 'fraga':      return `Hur många ${N}:or ryms i ${s.cur}?`;
+      case 'fraga':      return `Hur många ${N}:or ryms i ${divCurHTML(s)}?`;
       case 'ryms_inte':  return s.zero
-        ? `Ingen — ${N} är större än ${s.cur}. Vi skriver 0 i ${pvNamn(s.g)}, och hela ${s.cur}:an blir rest.`
-        : `Ingen — ${N} är större än ${s.cur}. En nolla först skriver vi inte.`;
-      case 'ta_med':     return `Vi tar med ${s.next}:an i ${pvNamn(s.g - 1)} — nu har vi ${s.newCur}.`;
+        ? `Ingen — ${N} är större än ${divCurHTML(s)}. Vi skriver ${isG(s.g) ? ref(`md-q-${s.g}`, 0) : 0} i ${pvNamn(s.g)}, och hela ${s.cur}:an blir rest.`
+        : `Ingen — ${N} är större än ${divCurHTML(s)}. En nolla först skriver vi inte.`;
+      case 'ta_med':     return `Vi tar med ${ref(`md-n-${s.g - 1}`, s.next)}:an i ${pvNamn(s.g - 1)} — nu har vi ${s.newCur}.`;
       case 'fakta':      return s.r === 0
         ? `${stor(nOr(s.q, N))} är precis ${s.cur}.`
         : `${stor(nOr(s.q, N))} är ${s.prod} — det får plats. ${stor(talord(s.q + 1))} vore ${(s.q + 1) * N}, för mycket.`;
-      case 'skriv':      return `Vi skriver ${s.q} i ${pvNamn(s.g)}.`;
+      case 'skriv':      return `Vi skriver ${ref(`md-q-${s.g}`, s.q)} i ${pvNamn(s.g)}.`;
       case 'rest':       return `${s.cur} − ${s.prod} = ${s.r}. Resten är ${s.r}.`;
       case 'flytta':     return `Resten ${s.r} ställer sig framför ${s.next}:an i ${pvNamn(s.toG)} — nu står det ${s.newCur}.`;
       case 'stryk':      return s.gs.length === 1
         ? `${stor(pvNamn(s.gs[0]))} är klart — vi stryker det.`
         : `${stor(pvNamn(s.gs[0]))} och ${pvNamn(s.gs[1])} är klara — ${s.cur} är räknat. Vi stryker dem.`;
-      case 'inget_kvar': return `Inget kvar att dela — vi skriver 0 i ${pvNamn(s.g)}.`;
+      case 'inget_kvar': return `Inget kvar att dela — vi skriver ${ref(`md-q-${s.g}`, 0)} i ${pvNamn(s.g)}.`;
     }
     return '';
   }
@@ -1120,7 +1138,7 @@ const MultDivGame = (() => {
         return divAckOf(divStepText(item.skriv));
       case 'divrest':  return divAckOf(divStepText(item));               // item.t === 'rest'
       case 'divrestb': return `Rätt — resten är ${item.r}.`;
-      case 'divzero':  return `Rätt — 0 i ${pvNamn(item.g)}.`;
+      case 'divzero':  return `Rätt — ${ref(`md-q-${item.g}`, 0)} i ${pvNamn(item.g)}.`;
       case 'divplace': return divAckOf(divStepText(item));               // item.t === 'flytta'
     }
     return '';
@@ -1186,54 +1204,94 @@ const MultDivGame = (() => {
     return `Det hör till ${pvNamn(step.g)}.`;
   }
 
+  /* ── SIFFROR I TEXTEN PEKAR PÅ PAPPRET (D40 ✎, Dennis 21/10) ──────────
+     En siffra i bubbeltexten som står i (eller ska skrivas i) en cell
+     skrivs med ref(): fet, i cellens platsvärdesfärg, och märkt med VAR
+     den finns (data-ref). Efter att texten visats pulserar just de
+     cellerna en gång (pulseRefs) — texten först, rörelsen sedan.
+       md-<rad>-<g>  en cell i uppställningen (a, b, p1, p2, ans; division n, q)
+       mem:cur       minnessiffran som används härnäst (första ostrukna)
+       chip:0        brickans tiotalssiffra, som blir minnessiffra
+     Tal som inte är en cell (produkten 63, summan 15) skrivs aldrig med
+     färg. Pekningen (multLitCells) och texten läser SAMMA källa: multRefs. */
+  const MEM_COLOR = '#dc2626';
+  const refColor = where => where.startsWith('md-')
+    ? cv(+where.split('-').pop()) : MEM_COLOR;
+  const ref = (where, val) =>
+    `<strong class="md-ref" data-ref="${where}" style="color:${refColor(where)}">${val}</strong>`;
+  const R = o => ref(o.id, o.val);
+  const memRef = val => ref('mem:cur', val);
+
+  /* Var stegets siffror står: faktorerna (a, b) eller delsummornas siffror
+     (x, y) och målrutan/målrutorna. Gäller både demons steg och hjälpköns
+     poster (samma fält). Ren funktion. */
+  function multRefs(step, pl) {
+    if (step.aDig !== undefined) {
+      const r = { a: { id: `md-a-${step.aCol !== undefined ? step.aCol : step.col}`, val: step.aDig },
+                  b: { id: `md-b-${step.mCol !== undefined ? step.mCol : step.g - step.col}`, val: step.m },
+                  target: [{ id: `md-${step.rowKey}-${step.g}`, val: step.write }] };
+      if (step.last && step.extra !== null && step.extra !== undefined)
+        r.target.push({ id: `md-${step.rowKey}-${step.g + 1}`, val: step.extra });
+      return r;
+    }
+    const r = { target: [{ id: `md-ans-${step.g}`, val: step.write }] };
+    if (pl.kind === 'twostep') {
+      if (step.g < pl.p1.digits.length) r.x = { id: `md-p1-${step.g}`, val: step.x };
+      if (step.g === 0) r.y = { id: 'md-p2-0', val: 0 };                     // den osynliga nollan
+      else if (step.g - 1 < pl.p2.digits.length) r.y = { id: `md-p2-${step.g}`, val: step.y };
+    }
+    return r;
+  }
+  /* Den ensamma siffran i en additionskolumn (x eller y) */
+  const soloRef = r => (r.x && r.y && r.y.id === 'md-p2-0') ? r.x : (r.x || r.y);
+
   function calcText(step, pl) {
-    const C = cv(step.g);
+    const r = multRefs(step, pl);
     if (!isD40(pl))
-      return `<span style="color:${C}">${step.aDig}</span> · <span style="color:${C}">${step.m}</span> är <strong style="color:${C}">${step.base}</strong>`;
+      return `${R(r.a)} · ${R(r.b)} är <strong>${step.base}</strong>`;
     if (step.phase === 'add') {
       const plats = stor(pvNamn(step.g));
       if (step.memOnly) return `${plats}: bara minnessiffran kvar.`;
-      if (step.single) {
-        const d = step.x === null ? step.y : step.x;
-        return `${plats}: bara <strong style="color:${C}">${d}</strong>:an här.`;
-      }
-      return `${plats}: <span style="color:${C}">${step.x}</span> + <span style="color:${C}">${step.y}</span> är <strong style="color:${C}">${step.base}</strong>.`;
+      if (step.single) return `${plats}: bara ${R(soloRef(r))}:an här.`;
+      return `${plats}: ${R(r.x)} + ${R(r.y)} är <strong>${step.base}</strong>.`;
     }
-    return `<span style="color:${C}">${step.aDig}</span> · <span style="color:${C}">${step.m}</span> är <strong style="color:${C}">${step.base}</strong>. ${multWhyText(step)}`;
+    return `${R(r.a)} · ${R(r.b)} är <strong>${step.base}</strong>. ${multWhyText(step)}`;
   }
 
   /* Multiplikationens alla stegtexter — ren funktion av steget och planen */
   function multStepText(step, pl) {
     const val = step.phase === 'add' ? step.sum : step.prod;
-    const C = cv(step.g);
+    const r = (step.t === 'phase' || step.t === 'mem_strike') ? null : multRefs(step, pl);
     switch (step.t) {
       case 'phase':
-        if (step.which === 1)
-          return `Först räknar vi <strong>${pl.a} · ${pl.ones}</strong> — entalssiffran i ${pl.b}! 👇`;
+        if (step.which === 1) {
+          const ones = { id: 'md-b-0', val: pl.ones };
+          return `Först räknar vi <strong>${pl.a} · </strong>${R(ones)} — entalssiffran i ${pl.tens}${R(ones)}! 👇`;
+        }
         if (step.which === 2)
-          return `Nu gångrar vi med ett tiotal (<strong>${pl.tens}</strong> betyder <strong>${pl.tens * 10}</strong>). ` +
+          return `Nu gångrar vi med ett tiotal (${R({ id: 'md-b-1', val: pl.tens })} betyder <strong>${pl.tens * 10}</strong>). ` +
                  `Därför fyller vi i en nolla här i entalet.`;
         return `Nu lägger vi ihop raderna: ental med ental, tiotal med tiotal. Därför står raderna rakt under varandra.`;
       case 'calc':  return calcText(step, pl);
       case 'memjoin':
-        return `Minnessiffran <strong style="color:#dc2626">${step.carryIn}</strong> gör <strong>${step.base}</strong> till <strong style="color:${C}">${val}</strong>.`;
+        return `Minnessiffran ${memRef(step.carryIn)} gör <strong>${step.base}</strong> till <strong>${val}</strong>.`;
       case 'carry_up':
-        if (!isD40(pl)) return `<strong style="color:#dc2626">${step.carryOut}</strong>:an åker upp som minne. 👉`;
-        return `<strong style="color:#dc2626">${step.carryOut}</strong>:an är minnessiffran — den åker upp. 👉`;
+        if (!isD40(pl)) return `${ref('chip:0', step.carryOut)}:an åker upp som minne. 👉`;
+        return `${ref('chip:0', step.carryOut)}:an är minnessiffran — den åker upp. 👉`;
       case 'write_down':
-        if (!isD40(pl)) return `<strong style="color:${C}">${step.write}</strong>:an åker ner i svaret. ✅`;
-        return `<strong style="color:${C}">${step.write}</strong>:an skrivs i ${pvNamn(step.g)}. ✅`;
+        if (!isD40(pl)) return `${R(r.target[0])}:an åker ner i svaret. ✅`;
+        return `${R(r.target[0])}:an skrivs i ${pvNamn(step.g)}. ✅`;
       case 'move_down': {
-        const d = step.x === null ? step.y : step.x;
-        if (!isD40(pl)) return `Bara <strong style="color:${C}">${d}</strong>:an här — den åker ner. ✅`;
+        const d = soloRef(r);
+        if (!isD40(pl)) return `Bara ${R(d)}:an här — den åker ner. ✅`;
         if (isZeroCol(step, pl))
-          return `Nollan lägger inte till något — <strong style="color:${C}">${d}</strong>:an åker ner i entalet. ✅`;
-        return `${stor(pvNamn(step.g))}: bara <strong style="color:${C}">${d}</strong>:an här — den åker ner. ✅`;
+          return `Nollan lägger inte till något — ${R(r.target[0])}:an åker ner i entalet. ✅`;
+        return `${stor(pvNamn(step.g))}: bara ${R(d)}:an här — den åker ner. ✅`;
       }
       case 'write_full':
-        return `Sista kolumnen — hela <strong style="color:${C}">${val}</strong> får plats! ✅`;
+        return `Sista kolumnen — hela ${R(r.target[1])}${R(r.target[0])} får plats! ✅`;
       case 'mem_strike':
-        return `Nu stryker vi <strong style="color:#dc2626">${step.val}</strong>:an — den är använd. ✏️`;
+        return `Nu stryker vi ${memRef(step.val)}:an — den är använd. ✏️`;
     }
     return '';
   }
@@ -1241,19 +1299,74 @@ const MultDivGame = (() => {
   /* Pekningen (D40): högst faktorcellerna och målrutan lyser samtidigt.
      Multiplikation: a-siffran, b-siffran och rutan svaret skrivs i (sista
      kolumnen: även rutan till vänster, där hela värdet får plats).
-     Additionen: kolumnens delsummesiffror och summans ruta. Ren funktion. */
+     Additionen: kolumnens delsummesiffror och summans ruta. Samma källa
+     som texten (multRefs). Ren funktion. */
   function multLitCells(step, pl) {
-    if (step.phase === 'mult') {
-      const t = [`md-${step.rowKey}-${step.g}`];
-      if (step.last && step.extra !== null && step.extra !== undefined) t.push(`md-${step.rowKey}-${step.g + 1}`);
-      return { src: [`md-a-${step.aCol}`, `md-b-${step.mCol}`], target: t };
+    const r = multRefs(step, pl);
+    const src = r.a ? [r.a.id, r.b.id] : [r.x, r.y].filter(Boolean).map(o => o.id);
+    return { src, target: r.target.map(o => o.id) };
+  }
+
+  /* Hjälplägets kvittenser och minnesrader — rena funktioner av posten
+     och planen, med samma ref-markering som demon. */
+  function multHelpText(what, item, pl, val) {
+    const r = !item || item.kind === 'memstrike' || item.kind === 'memplace' ? null : multRefs(item, pl);
+    switch (what) {
+      case 'flydown':
+        if (item.last && item.extra !== null && item.extra !== undefined)
+          return `Sista kolumnen — hela ${R(r.target[1])}${R(r.target[0])} får plats! ✅`;
+        return isD40(pl) ? `${R(r.target[0])}:an skrivs i ${pvNamn(item.g)}. ✅`
+                         : `${R(r.target[0])}:an åker ner i svaret. ✅`;
+      case 'memwrite':
+        return isD40(pl) ? `Rätt! ${R(r.target[0])}:an skrivs i ${pvNamn(item.g)}. ✅`
+                         : `Rätt! ${R(r.target[0])}:an åker ner i svaret. ✅`;
+      case 'table':
+        return isD40(pl) && item.kind === 'mult'
+          ? `Rätt! <strong>${val}</strong>. Det hör till ${pvNamn(item.g)}.`
+          : `Rätt! <strong>${val}</strong> ✅`;
+      case 'mem':
+        return `Rätt! <strong>${val}</strong> ✅`;
+      case 'trivial':
+        return isZeroCol({ phase: 'add', g: item.g }, pl)
+          ? `Nollan lägger inte till något — ${R(r.target[0])}:an flyttas ner i entalet! ✅`
+          : `Här står bara ${R(soloRef(r))}:an — den flyttas ner! ✅`;
+      case 'strike':
+        return `Minnessiffran ${memRef(item.val)} är använd. Tryck på den i spalten till höger för att stryka den! ✏️`;
+      case 'pick':
+        return `${ref('chip:0', val)}:an åker upp som minne. ✅`;
     }
-    const src = [];
-    if (pl.kind === 'twostep') {
-      if (step.g < pl.p1.digits.length) src.push(`md-p1-${step.g}`);
-      if (step.g === 0 || step.g - 1 < pl.p2.digits.length) src.push(`md-p2-${step.g}`);
-    }
-    return { src, target: [`md-ans-${step.g}`] };
+    return '';
+  }
+
+  /* Pulsen: cellerna (eller minnessiffran/brickans siffra) som texten
+     pekar på pulserar EN gång, kort och mjukt, strax efter att texten
+     visats. Noderna slås upp NU — innan stegets rörelse flyttar dem — och
+     Web Animations lägger pulsen ovanpå cellens egen glöd utan att röra
+     den. Rör bara box-/text-shadow: en skriven siffra skalas aldrig (P1). */
+  function refElement(where) {
+    if (where === 'mem:cur') return currentMemNode();
+    if (where === 'chip:0') { const c = mdChip(); return c ? c.querySelector('.md-cd') : null; }
+    return document.getElementById(where);
+  }
+  function pulseRefs(container) {
+    if (!container) return;
+    const seen = new Set();
+    container.querySelectorAll('.md-ref[data-ref]').forEach(sp => {
+      const el = refElement(sp.dataset.ref);
+      if (!el || seen.has(el) || typeof el.animate !== 'function') return;
+      seen.add(el);
+      const hex = refColor(sp.dataset.ref);
+      const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(',');
+      const box = el.classList.contains('md-cell') || el.classList.contains('md-ansc');
+      const kf = box
+        ? [{ boxShadow: `0 0 0 0 rgba(${rgb},0)` },
+           { boxShadow: `0 0 0 4px rgba(${rgb},0.3), 0 0 16px rgba(${rgb},0.75)` },
+           { boxShadow: `0 0 0 0 rgba(${rgb},0)` }]
+        : [{ textShadow: `0 0 0 rgba(${rgb},0)` },
+           { textShadow: `0 0 9px rgba(${rgb},0.95), 0 0 3px rgba(${rgb},0.95)` },
+           { textShadow: `0 0 0 rgba(${rgb},0)` }];
+      el.animate(kf, { duration: 560, delay: 180, easing: 'ease-in-out' });
+    });
   }
 
   function stepBubbleHTML(step) {
@@ -1368,6 +1481,7 @@ const MultDivGame = (() => {
     if (!area) return;
     const html = stepBubbleHTML(step === undefined ? demoSteps[demoStep] : step);
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
+    pulseRefs(area);
   }
 
   function nextBtnHTML() {
@@ -2544,8 +2658,7 @@ const MultDivGame = (() => {
       renderMemCol(); // siffran pulserar
       /* "Stryk minnessiffran 1" sade inte att BARNET ska trycka — exakt
          det ordvalet fick rollspelet att sitta och vanta i divisionen. */
-      helpBubble(`Minnessiffran <strong style="color:#dc2626">${item.val}</strong> är använd. ` +
-                 `Tryck på den i spalten till höger för att stryka den! ✏️`);
+      helpBubble(multHelpText('strike', item, plan));
     }
   }
 
@@ -2559,13 +2672,11 @@ const MultDivGame = (() => {
     const gen = exGen;
     const next = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
     if (item.last && item.extra !== null && item.extra !== undefined) {
-      helpBubble(`Sista kolumnen — hela <strong style="color:${cv(item.g)}">${item.prod}</strong> får plats! ✅`);
+      helpBubble(multHelpText('flydown', item, plan));
       chipDigitToCell(item.rowKey, item.g + 1, () => {});
       setTimeout(() => chipToCell(item.rowKey, item.g, item.write, next), 350);
     } else {
-      helpBubble(isD40(plan)
-        ? `<strong style="color:${cv(item.g)}">${item.write}</strong>:an skrivs i ${pvNamn(item.g)}. ✅`
-        : `<strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
+      helpBubble(multHelpText('flydown', item, plan));
       chipToCell(item.rowKey, item.g, item.write, next);
     }
   }
@@ -2829,7 +2940,7 @@ const MultDivGame = (() => {
       if (fb) fb.innerHTML = '';
       const srcG = memAwait.srcG;
       memAwait = null;
-      helpBubble(`<strong style="color:#dc2626">${d}</strong>:an åker upp som minne. ✅`);
+      helpBubble(multHelpText('pick', null, plan, d));
       const gen = exGen;
       // Samma siffra som lossnar ur brickan landar i spalten (A2)
       chipDigitToMem({ carryOut: d, g: srcG }, () => {
@@ -2849,6 +2960,7 @@ const MultDivGame = (() => {
     const cur = area.firstElementChild;
     if (cur && html && cur.innerHTML === `<div class="md-tx">${html}</div>`) return;
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
+    pulseRefs(area);
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
@@ -2863,24 +2975,23 @@ const MultDivGame = (() => {
   }
 
   /* v31: uttrycket för aktuell delfråga (livlinans "4 · 7 = 28") */
-  function helpExprHTML(item) {
-    const C = cv(item.g);
+  function helpExprHTML(item, pl = plan) {
     if (item.kind === 'divq')
-      return `<strong style="color:${C}">${item.cur}</strong> ÷ <strong>${numB}</strong>`;
+      return `<strong>${divCurHTML(item)}</strong> ÷ <strong>${numB}</strong>`;
     if (item.kind === 'divrest')
       return `<strong>${item.cur}</strong> − <strong>${item.prod}</strong>`;
     if (item.kind === 'divrestb' || item.kind === 'divzero') return '';
     if (item.kind === 'memwrite') return '';
     if (item.step === 'mem')
-      return `<strong>${helpBase(item)}</strong> + <strong style="color:#dc2626">${item.carryIn}</strong>`;
-    if (item.kind === 'mult')
-      return `<strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>`;
+      return `<strong>${helpBase(item)}</strong> + ${memRef(item.carryIn)}`;
+    const r = multRefs(item, pl);
+    if (item.kind === 'mult') return `${R(r.a)} · ${R(r.b)}`;
     if (item.x === null || item.y === null) return ''; // bara-minnet-kolumnen (91·12) — inget uttryck
-    return `<strong style="color:${C}">${item.x}</strong> + <strong style="color:${C}">${item.y}</strong>`;
+    return `${R(r.x)} + ${R(r.y)}`;
   }
 
-  function askText(item) {
-    const C = cv(item.g);
+  function askText(item, pl = plan) {
+    const r = item.kind.startsWith('div') || item.kind === 'memwrite' ? null : multRefs(item, pl);
     /* Divisionens frågor: facit sägs aldrig i frågan (spec §5) */
     if (item.kind.startsWith('div')) return divHelpAsk(item);
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
@@ -2900,7 +3011,7 @@ const MultDivGame = (() => {
          se — men här ÄR uträkningen steget, och då skrivs den som den
          skrivs på papper. Uttrycket byggs av helpExprHTML, samma som
          livlinan visar, så siffrorna och färgerna aldrig kan gå isär. */
-      const uttryck = `<span class="md-qexpr">(${helpExprHTML(item)} = ?)</span>`;
+      const uttryck = `<span class="md-qexpr">(${helpExprHTML(item, pl)} = ?)</span>`;
       if (item.single) {
         /* Med uttrycket utskrivet sa den gamla meningen bada talen tva
            ganger ("6:an och 1:an i minne" + "(6 + 1 = ?)") och radbrot vid
@@ -2908,30 +3019,26 @@ const MultDivGame = (() => {
            ner under fingret, samma fel som C4 rattade i demon. Kortad, och
            till SAMMA form som den vanliga minnesfragan: minnets varde star
            i uttrycket, dar det bara behover sagas en gang. */
-        const d = item.x === null ? item.y : item.x;
-        return `<strong style="color:${C}">${d}</strong>:an och minnet — vad blir det? ${uttryck}`;
+        return `${R(soloRef(r))}:an och minnet — vad blir det? ${uttryck}`;
       }
-      return `Nu <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det? ${uttryck}`;
+      return `Nu ${memRef(item.carryIn)}:an i minne — vad blir det? ${uttryck}`;
     }
     if (item.kind === 'mult') {
       // v31: ren tabellfråga — minnet kommer som egen fråga efteråt.
       // D40: rad 2:s första fråga säger varför svaret hamnar ett steg till vänster.
-      if (isD40(plan) && item.rowKey === 'p2' && item.g === 1)
-        return `${multWhyText(item)} Vad är <strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>?`;
-      return `Vad är <strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>?`;
+      if (isD40(pl) && item.rowKey === 'p2' && item.g === 1)
+        return `${multWhyText(item)} Vad är ${R(r.a)} · ${R(r.b)}?`;
+      return `Vad är ${R(r.a)} · ${R(r.b)}?`;
     }
     const x = item.x, y = item.y;
     if (x === null && y === null) {
       // Kolumn utan siffror — bara minnessiffran (t.ex. 91·12, 33·33)
-      return `Bara minnessiffran kvar! Vad är <strong style="color:#d97706">${item.carryIn}</strong>?`;
+      return `Bara minnessiffran kvar! Vad är ${memRef(item.carryIn)}?`;
     }
-    if (x === null || y === null) {
-      const d = x === null ? y : x;
-      return `Vad är <strong style="color:${C}">${d}</strong>?`;
-    }
-    if (isD40(plan))
-      return `${stor(pvNamn(item.g))}: vad är <strong style="color:${C}">${x}</strong> + <strong style="color:${C}">${y}</strong>?`;
-    return `Vad är <strong style="color:${C}">${x}</strong> + <strong style="color:${C}">${y}</strong>?`;
+    if (x === null || y === null) return `Vad är ${R(soloRef(r))}?`;
+    if (isD40(pl))
+      return `${stor(pvNamn(item.g))}: vad är ${R(r.x)} + ${R(r.y)}?`;
+    return `Vad är ${R(r.x)} + ${R(r.y)}?`;
   }
 
   function showHelpUI() {
@@ -2966,9 +3073,7 @@ const MultDivGame = (() => {
 
     if (item.kind === 'trivial') {
       const d = item.x === null ? item.y : item.x;
-      helpBubble(isZeroCol({ phase: 'add', g: item.g }, plan)
-        ? `Nollan lägger inte till något — <strong style="color:${cv(item.g)}">${d}</strong>:an flyttas ner i entalet! ✅`
-        : `Här står bara <strong style="color:${cv(item.g)}">${d}</strong>:an — den flyttas ner! ✅`);
+      helpBubble(multHelpText('trivial', item, plan));
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
         onclick="MultDivGame.helpAction()">Skriv ${d}:an ✏️</button>`;
       return;
@@ -3112,9 +3217,7 @@ const MultDivGame = (() => {
       if (item.kind.startsWith('div')) { divHelpCorrect(item); return; }
       if (item.kind === 'memwrite') {
         // B5: siffran som skrivs — brickans rest åker ner i rutan
-        helpBubble(isD40(plan)
-          ? `Rätt! <strong style="color:${cv(item.g)}">${item.write}</strong>:an skrivs i ${pvNamn(item.g)}. ✅`
-          : `Rätt! <strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
+        helpBubble(multHelpText('memwrite', item, plan));
         smallBurst();
         chipToCell(item.rowKey, item.g, item.write, () => {
           setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
@@ -3125,9 +3228,7 @@ const MultDivGame = (() => {
         // Tabellsvaret klart: BRICKAN föds i marginalen och står kvar där
         // tills kolumnen är färdig (B2). Minnesfrågan kommer som egen fråga.
         // D40: multiplikationens svar säger vilken ruta det hör till.
-        helpBubble(isD40(plan) && item.kind === 'mult'
-          ? `Rätt! <strong style="color:${cv(item.g)}">${expected}</strong>. Det hör till ${pvNamn(item.g)}.`
-          : `Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+        helpBubble(multHelpText('table', item, plan, expected));
         smallBurst();
         const step = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, memOnly: !!item.memOnly };
         chipBorn(step, expected, calcSources(step), () => {
@@ -3138,7 +3239,7 @@ const MultDivGame = (() => {
       // step === 'mem': minnet läggs SYNLIGT till brickan (eller föder den
       // när kolumnen bara hade en siffra + minne, B7)
       consumeCarry(item);
-      helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+      helpBubble(multHelpText('mem', item, plan, expected));
       smallBurst();
       const stepM = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, prod: item.prod, sum: item.sum };
       const done = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
@@ -3332,6 +3433,7 @@ const MultDivGame = (() => {
     if (btn) btn.outerHTML = freeLifelineBtnHTML();
     const b = document.getElementById('md-bubble');
     if (b) b.innerHTML = `<div class="md-thought"><div class="md-tx">${tabellradHTML(numB, st.cur, st.g)}</div></div>`;
+    pulseRefs(b);
   }
 
   function exFreeInit() {
@@ -3772,7 +3874,9 @@ const MultDivGame = (() => {
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, genL4, drawL4Type, L4_TYPES, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
+    __test: { planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
+              /* hjälpbubblornas frågor mot en given plan (rena; läser inte modultillståndet) */
+              askText: (item, pl) => askText(item, pl), helpExprHTML: (item, pl) => helpExprHTML(item, pl), planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
               tabellradHTML, planCarries, planRests,
               /* headless-verifiering (aldrig anropade av appen) */
               forceNext: (a, b) => { forcedNext = { a, b }; },
