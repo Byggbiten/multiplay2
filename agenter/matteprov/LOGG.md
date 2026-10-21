@@ -106,3 +106,14 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Uppmätt i 390 × 797:** ingen scroll; kladden minst 85 px under den tvåradiga förklaringen i Öva.
 - **Lärdom:** ordningen är en del av pedagogiken — det som ska stå på pappret före en uträkning ska komma före frågan,
   annars hamnar svaret i fel ruta. Lägg ordningen som ren data (`uppRowFlow`) så att den går att testa.
+
+## Runda 9 · 2026-10-21 · Minnessiffran utan fokusbyte (D41 ✎), gren `minne-fokus`
+- **Vad som inte fungerade:** Dennis (8 · 1416, summafasen): "när man skall sätta minnessiffra så skiftar cellerna
+  fokus". Ett tryck på en minnesruta flyttade fokus dit, och efter siffran gick fokus tillbaka; fokusringen hoppade
+  två gånger för en enda siffra.
+- **Byggt:** minnesrutan väntar på en siffra (`IN.mw`) medan summans fokus står kvar; siffran eller ⌫ gäller den
+  väntande rutan; andra trycket tömmer den. Logiken är ren (`memCellTap`/`memCellKey`) och testad.
+- **Kontrollerat:** multdivs Räkna själv (och därmed provets minnessiffreläge) har ingen minnesinmatning i fria läget;
+  minnessiffrorna landar först vid rätt svar, så inget fokus byts där.
+- **Lärdom:** en hjälpruta som barnet fyller i "vid sidan av" ska inte låna huvudfokus; ge den ett eget väntläge, så
+  står barnets plats i talet still.

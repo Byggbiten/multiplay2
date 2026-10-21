@@ -83,6 +83,9 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 - **Problemlösningen i ledda steg (D39 ✎).** Varje steg är en fråga med mallen `[ ] op [ ] = [ ]`; prislistan och
   tidigare svar går att trycka på; nästa steg visas först när det förra stämmer; varje steg rättas vid Svara, i Öva
   och prov; slutsatsen med uttrycket sist. Knappsatsen har inga räknetecken.
+- **Minnesrutorna i summan (D41 ✎).** Ett tryck på en lila minnesruta gör att den väntar (`IN.mw`, klassen `wait`);
+  summans fokus (`IN.f`) rörs aldrig. Nästa siffra eller ⌫ gäller minnesrutan, sedan är den klar. Andra trycket på
+  en väntande ruta tömmer den. Ren logik: `memCellTap`/`memCellKey` (vitest). `IN.back` finns inte längre.
 - **Uppställningen (Dela upp).** Ensiffrig faktor: en delprodukt per siffra, varje rad ett steg åt vänster; rutorna till
   höger om en förskjuten rad är grå, och appen sätter nollorna där innan radens fråga (D41 ✎, `rowZeros`,
   `uppRowFlow`). Förklaringen bygger på siffrans värde (`zeroSteps`: Öva tre klickstyrda steg, tiotalet två,

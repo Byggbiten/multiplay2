@@ -89,6 +89,8 @@ Utfallet bokförs i kvittot och i "det som var svårt" (`upp:minne`, tabellfakta
 - **P14:** skakningar vid fel svar finns kvar, och demon pulserar tiotalssiffran rött i fasen rad 2 (`md-prob`).
 - **P13:** i Räkna själv räknas en siffra följd av Klar som ett försök.
 - Dela upp har färgade siffror i förklaringen men ingen ref-puls (mekanismen finns bara i multdiv).
+- Fria läget har ingen minnesinmatning (spalten har ingen plats och ingen väljare; minnessiffrorna landar vid rätt
+  svar), så inget fokus byts där. Kontrollerat 21/10 i webbläsaren efter matteprovets D41 ✎ om minnesrutorna.
 
 ## Nästa steg
 - Vänta på Dennis synpunkter på v70.

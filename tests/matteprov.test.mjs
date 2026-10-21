@@ -939,3 +939,37 @@ describe('D41 ✎: nollornas texter — inget tal två gånger i samma mening', 
     expect(dubblett('100 är 1 · 100.')).toBe(true);                    // vakten fäller det som undviks
   });
 });
+
+/* ── D41 ✎ (Dennis, 8 · 1416): "du får gärna lösa så att det går att sätta minnessiffra utan att cellerna
+   byter fokus" ── */
+describe('D41 ✎: minnessiffran utan fokusbyte', () => {
+  const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+  const f = { row:'s', col:2 }, tom = [null, null, null, null];
+  it('tryck på minnesrutan: den väntar, summans fokus står kvar; siffran hamnar i minnesrutan och fokus är oförändrat', () => {
+    let st = L.memCellTap({ f, m:tom, mw:null }, 3);
+    expect(st).toEqual({ f, m:tom, mw:3 });
+    st = L.memCellKey(st, '1');
+    expect(st).toEqual({ f, m:[null, null, null, 1], mw:null });
+    expect(st.f).toBe(f);                                                   // samma fokus, orört
+    expect(L.memCellKey(st, '5')).toBe(null);                              // ingen väntar: siffran gäller summan
+  });
+  it('⌫ medan minnesrutan väntar tömmer bara minnesrutan', () => {
+    const st = L.memCellKey({ f, m:[null, null, 1, null], mw:2 }, 'erase');
+    expect(st).toEqual({ f, m:[null, null, null, null], mw:null });
+  });
+  it('en ruta med siffra: första trycket gör den redo att skrivas över, andra trycket tömmer den', () => {
+    let st = L.memCellTap({ f, m:[null, 1, null, null], mw:null }, 1);
+    expect(st.mw).toBe(1); expect(st.m[1]).toBe(1);
+    expect(L.memCellKey(st, '2').m[1]).toBe(2);                            // skrivs över
+    st = L.memCellTap(st, 1);
+    expect(st).toEqual({ f, m:[null, null, null, null], mw:null });        // tömd, väntar inte längre
+    // tryck på en annan minnesruta flyttar väntan dit, fortfarande utan att röra fokus
+    expect(L.memCellTap({ f, m:tom, mw:1 }, 3)).toEqual({ f, m:tom, mw:3 });
+  });
+  it('knappen påverkas inte av minnesrutorna, och klicket på en minnesruta rör inte summans fokus', () => {
+    // Klar beror bara på summan (och att raderna är klara); minnesrutorna räknas inte som rutor att fylla i
+    expect(src).toMatch(/return !!t && IN\.rq\.k >= L\.uppRowsOrder\(t\)\.length && !IN\.rq\.busy && IN\.vals\.s\.some\(d => d != null\);/);
+    expect(src).toMatch(/if \(row === 'm'\) \{[^}]*L\.memCellTap\(\{ f:IN\.f, m:IN\.vals\.m, mw:IN\.mw \}, col\);\n\s+IN\.vals\.m = mst\.m; IN\.mw = mst\.mw; snd\('click'\);\n\s+\} else \{ IN\.mw = null; IN\.f = \{ row, col \}; \}/);
+    expect(src).not.toMatch(/IN\.back/);                                   // fokus lämnas aldrig för minnesrutan
+  });
+});

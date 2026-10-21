@@ -434,6 +434,27 @@
     }
     return out;
   }
+  /* D41 ✎ (Dennis, skärmbild 8 · 1416: "du får gärna lösa så att det går att sätta minnessiffra utan att
+     cellerna byter fokus"). Minnesrutan i summan väntar på en siffra utan att ta fokus från summans ruta.
+     st = { f (summans fokus), mw (minnesrutan som väntar, eller null), m (minnesrutorna) }. Rena funktioner;
+     f lämnas alltid orörd.
+       tryck på en minnesruta:          den väntar (har den en siffra skrivs den över av nästa siffra)
+       tryck igen på den väntande rutan: rutan töms och väntar inte längre
+       siffra medan rutan väntar:        siffran hamnar i minnesrutan, som är klar
+       ⌫ medan rutan väntar:             minnesrutan töms (inte summans ruta) och är klar */
+  function memCellTap(st, col) {
+    const m = st.m.slice();
+    if (st.mw === col) { m[col] = null; return { f:st.f, m, mw:null }; }
+    return { f:st.f, m, mw:col };
+  }
+  function memCellKey(st, k) {
+    if (st.mw == null) return null;                        // ingen minnesruta väntar: knappen gäller summan
+    const m = st.m.slice();
+    if (k === 'erase') m[st.mw] = null;
+    else if (/^\d$/.test(k)) m[st.mw] = +k;
+    else return { f:st.f, m, mw:null };                    // Nästa/Klar: väntan släpps, inget skrivs
+    return { f:st.f, m, mw:null };
+  }
   const ROW_HELP = ['retry', 'hint', 'svar'];
   function rowHelpStep(n) { return n <= 0 ? null : ROW_HELP[Math.min(n, ROW_HELP.length) - 1]; }
   function rowHint(t, row) {
@@ -1019,7 +1040,7 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
-    uppPlaces, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    uppPlaces, memCellTap, memCellKey, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
