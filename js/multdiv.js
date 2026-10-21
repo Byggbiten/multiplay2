@@ -238,6 +238,16 @@ const MultDivGame = (() => {
     .md-ansc.md-zero { border:2px solid #9aa3ae; background:#d9dde3; }
     .md-ansc.md-zero.active-col { background:#d9dde3; border-color:#64748b;
       box-shadow:0 0 0 3px rgba(100,116,139,0.28); }
+    /* D40 ✎ (Dennis 21/10: "pulseringen är lite för subtil … en orange ram på de aktuella cellerna"):
+       rutorna som räknas just nu och rutan där svaret skrivs får matteprovets orange ram, som pulserar
+       mjukt så länge steget visas. Siffrans platsvärdesfärg står kvar. */
+    .md-cell.md-glow, .md-ansc.md-glow, .md-ansc.active-col, .md-ansc.md-zero.active-col {
+      border:3px solid #fb923c !important; animation:md-focus 1.1s ease-in-out infinite; }
+    .md-ansc.active-col, .md-ansc.md-zero.active-col { border-style:solid !important; }
+    @keyframes md-focus {
+      0%,100% { box-shadow:0 0 0 3px rgba(251,146,60,0.35), 0 0 8px rgba(251,146,60,0.45); }
+      50%     { box-shadow:0 0 0 4px rgba(251,146,60,0.55), 0 0 20px rgba(251,146,60,0.75); }
+    }
     .md-zero .md-zd { color:#64748b; display:inline-block; }
     /* Nivå 4 (8 tabellrader): kompaktare celler så vyn ryms utan scroll */
     .md-l4 .md-cell, .md-l4 .md-ansc {

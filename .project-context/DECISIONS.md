@@ -547,3 +547,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   vilken siffra som menas. Källa: Dennis: "kan du färgkoda dessa siffror så att man visuellt hänger med i vad man
   menar? Eller att de siffrorna kanske vibrerar till eller pulserar till eller liknande? då fattar barn bättre
   ordningen".
+- ✎ **2026-10-21, orange ram på de aktuella rutorna:** rutorna som räknas och rutan där svaret skrivs får en orange
+  ram (matteprovets #fb923c) som pulserar mjukt så länge steget visas; gäller multdiv alla nivåer. Källa: Dennis:
+  "dett är lite för subtilt den där pulseringen. Kan det bli ännu tydligare vilka tal som är aktuell? kanske en
+  orange ram på de aktuella cellerna?"
