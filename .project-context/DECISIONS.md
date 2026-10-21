@@ -64,6 +64,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte
+- D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
 
 ---
 
@@ -589,3 +590,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   8:an."). Ersätter föregående ✎. Källa: Dennis: "2:an står i tiotalet, så den är egentligen 20. Därför tar vi den
   nollan redan nu till cellen nedan, så behöver vi bara räkna X x 2 istället för X x 20 typ nått sånt, fast du kan få
   effektivisera det ännu mer".
+
+## D42 · 2026-10-21 · Matteprovet: Räkna med hjälp och Räkna själv, hjälpen sker under körningen
+- **Beslut:** matteprovets Öva får två lägen som i Multiplikation: Räkna med hjälp (förval) och Räkna själv. Med hjälp
+  leder appen under själva uppgiften, ruta för ruta: en kort fråga om just den ruta som är aktuell, de siffror som
+  hör till lyser (orange ram, platsvärdesfärg), och en kort kvittens efter varje ruta. Det gäller först moment 2
+  (tiotal och hundratal) och 3 (talsorter), sedan övriga moment där det passar. Räkna själv är som i dag. Provet räknas
+  själv, med hjälptrappan vid fel.
+- **Källa:** Dennis 2026-10-21: "modul 2 och 3 i matteprovet förstår jag inte intuitivt vad jag skall göra när jag
+  sätter igång. Barn har en förmåga att snabbt klicka förbi instruktioner pga. bristande tålamod. Så kan appen vara
+  lite mer pedagogisk under själva körningen också? Kanske matteprovet ska ha en slags 'räkna med hjälp' och 'räkna
+  själv' också?"
