@@ -5,7 +5,7 @@
 'use strict';
 
 /* ── App-version (matchar CACHE_VERSION i sw.js) ────── */
-const APP_VERSION = 'v69';
+const APP_VERSION = 'v70';
 
 /* ── Avatarer ─────────────────────────────────────────── */
 const AVATARS = ['🤖', '⭐', '🐉', '🦊', '🧙', '🧠', '👧', '👽'];
