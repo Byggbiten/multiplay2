@@ -5,8 +5,10 @@ import { readFileSync } from 'node:fs';
 const require = createRequire(import.meta.url);
 const MD = require('../js/multdiv.js');
 const { buildPlan, buildDivPlan, digitsOf } = MD._internals;
+/* Texterna bär ref-markeringar (D40 ✎) — de ordagranna jämförelserna gäller orden */
+const ord = h => h.replace(/<[^>]+>/g, '');
 const { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue,
-        divStepText, divHelpAsk, divHelpAck, tabellradHTML } = MD.__test;
+        divStepText, divHelpAsk, divHelpAck, tabellradHTML, multStepText, multLitCells } = MD.__test;
 
 /* ── Talrymden = generatorernas intervall (genProblem 466–489, genDivProblem 556–578) ── */
 function* multSpace() {
@@ -331,7 +333,7 @@ describe('kort division — stegkedjan ur modellen', () => {
     expect(fel).toEqual([]);
   });
 
-  const kedja = (n, d) => planDivSteps(buildDivPlan(n, d, 4)).filter(s => s.t !== 'klart').map(divStepText);
+  const kedja = (n, d) => planDivSteps(buildDivPlan(n, d, 4)).filter(s => s.t !== 'klart').map(s => ord(divStepText(s)));
   it('420 ÷ 6 — A · C · B′ — ordagrant ur mockupen', () => {
     expect(kedja(420, 6)).toEqual([
       'Hur många 6:or ryms i 4?',
@@ -424,7 +426,7 @@ describe('kort division — hjälpkön', () => {
   });
   it('420 ÷ 6: frågor, tryck och kvittenser ordagrant', () => {
     const q = planDivHelpQueue(buildDivPlan(420, 6, 4));
-    expect(q.map(i => [i.kind, divHelpAsk(i), divHelpAck(i)])).toEqual([
+    expect(q.map(i => [i.kind, ord(divHelpAsk(i)), ord(divHelpAck(i))])).toEqual([
       ['divq', 'Hur många 6:or ryms i 4?', 'Rätt — ingen. En nolla först skriver vi inte. Vi tar med 2:an i tiotalet — nu har vi 42.'],
       ['divq', 'Hur många 6:or ryms i 42?', 'Rätt — vi skriver 7 i tiotalet.'],
       ['divstrike', 'Hundratalet och tiotalet är klara — 42 är räknat. Tryck på dem, så stryker vi dem.', ''],
@@ -434,7 +436,7 @@ describe('kort division — hjälpkön', () => {
   });
   it('612 ÷ 6: fall B frågar "Hur mycket blir rest?" och placerar resten', () => {
     const q = planDivHelpQueue(buildDivPlan(612, 6, 4));
-    expect(q.map(i => [i.kind, divHelpAsk(i), divHelpAck(i)])).toEqual([
+    expect(q.map(i => [i.kind, ord(divHelpAsk(i)), ord(divHelpAck(i))])).toEqual([
       ['divq', 'Hur många 6:or ryms i 6?', 'Rätt — vi skriver 1 i hundratalet.'],
       ['divstrike', 'Hundratalet är klart — tryck på det, så stryker vi det.', ''],
       ['divq', 'Hur många 6:or ryms i 1?', 'Rätt — ingen. 6 är större än 1. Vi skriver 0 i tiotalet, och hela 1:an blir rest.'],
@@ -465,7 +467,7 @@ describe('kort division — hjälpkön', () => {
     // okänd kolumn får aldrig bli "spalt NaN"
     expect(tabellradHTML(6, 1, undefined)).not.toMatch(/NaN|undefined/);
     expect(tabellradHTML(6, 7, 1)).not.toContain('6 · 0');
-    expect(tabellradHTML(6, 1, 1)).toBe('Ingen — 6 är större än 1. Vi skriver 0 i tiotalet, och hela 1:an blir rest.');
+    expect(ord(tabellradHTML(6, 1, 1))).toBe('Ingen — 6 är större än 1. Vi skriver 0 i tiotalet, och hela 1:an blir rest.');
   });
 });
 
@@ -558,5 +560,452 @@ describe('ovningslaget raknar bara helratt', () => {
 
   it('Capy far pct ur exScore — ingen egen sanning', () => {
     expect(src).toMatch(/Capy\.award\(profile, \{ type: 'test', data: \{ module: 'multdiv', pct: Math\.round\(\(exScore \/ 5\) \* 100\), memStar \} \}\)/);
+  });
+});
+
+/* ── D40 (2026-10-21): nivå 4 blandat, den osynliga nollan, pekningen ── */
+describe('D40: nivå 4 blandar fyra typer som det svårare övningsbladet', () => {
+  const { genProblem, genL4, drawL4Type, L4_TYPES, singlePass } = MD._internals;
+  const len = n => String(n).length;
+  const carries = (a, m) => singlePass(a, m).cols.filter(c => !c.last && c.carryOut > 0).length;
+  const typeOf = (a, b) => `${len(a)}x${len(b)}`;
+
+  it('varje typ håller sina villkor (2000 lottningar per typ)', () => {
+    const fel = [];
+    for (const t of L4_TYPES) for (let i = 0; i < 2000; i++) {
+      const { a, b, type } = genL4(t);
+      if (type !== t || typeOf(a, b) !== t) fel.push(`${t}: ${a}·${b}`);
+      if ((t === '3x1' || t === '4x1') && (b < 2 || b > 9 || carries(a, b) < 2)) fel.push(`${t} minne: ${a}·${b}`);
+      if (t === '2x2' && (a % 10 === 0 || b % 10 === 0)) fel.push(`2x2 nolla: ${a}·${b}`);
+      if (t === '3x2' && (b < 12 || b > 59 || b % 10 === 0 || a % 10 === 0)) fel.push(`3x2: ${a}·${b}`);
+      if (String(a * b).length > 5) fel.push(`för brett: ${a}·${b}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('genProblem(4): ungefär jämn fördelning, aldrig samma typ tre gånger i rad', () => {
+    const seq = [];
+    for (let i = 0; i < 4000; i++) { const { a, b } = genProblem(4); seq.push(typeOf(a, b)); }
+    const n = Object.fromEntries(L4_TYPES.map(t => [t, seq.filter(x => x === t).length]));
+    for (const t of L4_TYPES) expect(n[t]).toBeGreaterThanOrEqual(900);
+    for (let i = 2; i < seq.length; i++) expect(seq[i] === seq[i - 1] && seq[i] === seq[i - 2]).toBe(false);
+    expect(drawL4Type()).toMatch(/^(3x1|4x1|2x2|3x2)$/);
+  });
+
+  it('nivå 1–3 genererar samma typer som förut', () => {
+    const fel = [];
+    for (let i = 0; i < 3000; i++) {
+      const p1 = genProblem(1), p2 = genProblem(2), p3 = genProblem(3);
+      if (!(len(p1.a) === 2 && p1.b >= 2 && p1.b <= 4 && carries(p1.a, p1.b) === 0 && !singlePass(p1.a, p1.b).hasCarry)) fel.push(`1: ${p1.a}·${p1.b}`);
+      if (!(len(p2.a) === 2 && p2.b >= 2 && p2.b <= 9 && singlePass(p2.a, p2.b).hasCarry)) fel.push(`2: ${p2.a}·${p2.b}`);
+      if (!(len(p3.a) === 3 && p3.b >= 2 && p3.b <= 9 && p3.a * p3.b <= 9999 && singlePass(p3.a, p3.b).hasCarry)) fel.push(`3: ${p3.a}·${p3.b}`);
+      for (const p of [p1, p2, p3]) if (p.type !== undefined) fel.push('typ på nivå 1–3');
+      for (const [p, lv] of [[p1, 1], [p2, 2], [p3, 3]]) if (buildPlan(p.a, p.b, lv).kind !== 'simple') fel.push(`${lv}: inte simple`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('motorns facit för upp till fem kolumner: steg, hjälpkö och delprodukter, 3000 slumpade tal per typ', () => {
+    const fel = [];
+    const join = ds => ds.reduce((n, d, i) => n + (d || 0) * Math.pow(10, i), 0);
+    let fem = 0;
+    for (const t of L4_TYPES) for (let i = 0; i < 3000; i++) {
+      const { a, b } = genL4(t), pl = buildPlan(a, b, 4);
+      if (pl.answer !== a * b || pl.width !== len(a * b)) fel.push(`${a}·${b} plan`);
+      if (pl.kind !== (b < 10 ? 'simple' : 'twostep')) fel.push(`${a}·${b} kind`);
+      if (pl.width === 5) fem++;
+      const rows = { ans: [], p1: [], p2: [] }, hrows = { ans: [], p1: [], p2: [] };
+      for (const s of planMultSteps(pl)) {
+        if (s.t === 'write_down' || s.t === 'move_down') rows[s.rowKey][s.g] = s.write;
+        if (s.t === 'write_full') { rows[s.rowKey][s.g] = s.write; rows[s.rowKey][s.g + 1] = s.extra; }
+        if ((s.g ?? 0) > 4) fel.push(`${a}·${b} kolumn ${s.g}`);
+      }
+      for (const it of planMultHelpQueue(pl)) {
+        if (it.kind === 'memwrite' || it.kind === 'trivial') hrows[it.rowKey][it.g] = it.write;
+        if (it.kind === 'flydown') { hrows[it.rowKey][it.g] = it.write; if (it.extra) hrows[it.rowKey][it.g + 1] = it.extra; }
+      }
+      for (const r of [rows, hrows]) {
+        if (join(r.ans) !== a * b) fel.push(`${a}·${b} svar`);
+        if (pl.kind === 'twostep' && (join(r.p1) !== pl.p1.value || join(r.p2) / 10 !== pl.p2.value)) fel.push(`${a}·${b} delprodukt`);
+      }
+      const nc = MD._internals.noCarryAnswer(pl);
+      if (!Number.isFinite(nc)) fel.push(`${a}·${b} noCarry`);
+    }
+    expect(fel).toEqual([]);
+    expect(fem).toBeGreaterThan(0);   // femsiffriga svar förekommer (4 · 1 och 3 · 2)
+  });
+});
+
+describe('D40: den osynliga nollan och pekningen', () => {
+  const strip = h => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const PV = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet', 'tiotusentalet'];
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+
+  it('rad 2:s grå ruta finns bara i den tvåstegs-uppställningen (nivå 4 med tvåsiffrig faktor)', () => {
+    // Rutan byggs bara i l4-grenen (twostep, inte fria läget) — nivå 1–3 är alltid 'simple'
+    expect(src).toMatch(/const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0">\$\{freeMode \? '<span class="md-zd">0<\/span>' : ''\}<\/div><\/td>`;/);
+    expect(src).toMatch(/idx\.map\(i => i === 0 \? zeroCell : fillCell\('p2', i, i <= p2len\)\)/);
+    // D41 ✎: raderna (och nollan) finns i alla tre lägena, men bara vid tvåsiffrig faktor
+    expect(src).toMatch(/const l4 = plan\.kind === 'twostep';/);
+    for (let lv = 1; lv <= 3; lv++) for (let i = 0; i < 500; i++) {
+      const { a, b } = MD._internals.genProblem(lv);
+      expect(buildPlan(a, b, lv).kind).toBe('simple');
+    }
+    expect(buildPlan(67, 29, 4).kind).toBe('twostep');
+    expect(buildPlan(483, 9, 4).kind).toBe('simple');
+  });
+
+  it('nollans steg: texten säger tiotal, vad siffran betyder och nollan i entalet', () => {
+    const pl = buildPlan(67, 29, 4);
+    const ph2 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 2);
+    expect(strip(multStepText(ph2, pl))).toBe('2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en nolla i entalet först.');
+    const p1 = buildPlan(286, 17, 4);
+    expect(strip(multStepText(planMultSteps(p1).find(s => s.t === 'phase' && s.which === 2), p1)))
+      .toBe('1 står i tiotalet och är värd 10. 10 har en nolla – därför en nolla i entalet först.');
+    // språkregeln: inget tal två gånger i samma mening, för varje tiotalssiffra 1–9
+    for (let tens = 1; tens <= 9; tens++) {
+      const q = buildPlan(87, tens * 10 + 3, 4), txt = strip(multStepText({ t: 'phase', which: 2 }, q));
+      for (const m of txt.split(/(?<=[.?!])\s+|\s+–\s+/)) { const n = m.match(/\d+/g) || []; expect(new Set(n).size, m).toBe(n.length); }
+    }
+    const ph3 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 3);
+    expect(strip(multStepText(ph3, pl))).toContain('ental med ental, tiotal med tiotal');
+  });
+
+  it('pekningen: målrutan är kolumnen aCol + mCol (mult) eller kolumnen (add); högst faktorer + mål lyser', () => {
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 800; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) {
+        if (s.t !== 'calc' && s.t !== 'move_down') continue;
+        const lit = multLitCells(s, pl);
+        if (s.phase === 'mult') {
+          if (s.g !== s.aCol + s.mCol) fel.push(`${a}·${b} g`);
+          if (lit.target[0] !== `md-${s.rowKey}-${s.g}`) fel.push(`${a}·${b} mål`);
+          if (lit.src.length !== 2) fel.push(`${a}·${b} källor`);
+          if (lit.target.length !== (s.last && s.extra !== null ? 2 : 1)) fel.push(`${a}·${b} sista`);
+        } else {
+          if (lit.target.join() !== `md-ans-${s.g}`) fel.push(`${a}·${b} summans ruta`);
+          if (lit.src.length !== (s.memOnly ? 0 : s.single ? 1 : 2) && !(s.g === 0)) fel.push(`${a}·${b} add-källor`);   // memOnly: källan är minnessiffran
+          if (s.g === 0 && !lit.src.includes('md-p2-0')) fel.push(`${a}·${b} nollan pekas inte ut`);
+        }
+        if (lit.src.length + lit.target.length > 4) fel.push(`${a}·${b} för många`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('texterna pekar ut platsen: uträkning och skriv nämner målrutans platsord; rad 2 säger ett steg till vänster', () => {
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 800; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) {
+        const txt = strip(multStepText(s, pl));
+        if (s.t === 'calc' && s.phase === 'mult') {
+          if (s.rowKey === 'p2' && s.g === 1) { if (!/Vi räknar tiotal, så svaret hamnar ett steg till vänster — i tiotalet\./.test(txt)) fel.push(`${a}·${b}: ${txt}`); }
+          else if (!txt.endsWith(`Det hör till ${PV[s.g]}.`)) fel.push(`${a}·${b}: ${txt}`);
+        }
+        if (s.t === 'calc' && s.phase === 'add' && !txt.toLowerCase().startsWith(PV[s.g])) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'write_down' && !txt.includes(`skrivs i ${PV[s.g]}`)) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'carry_up' && !txt.includes('är minnessiffran')) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'move_down' && s.g === 0 && pl.kind === 'twostep' && !txt.startsWith('Nollan lägger inte till något')) fel.push(`${a}·${b}: ${txt}`);
+        if (/undefined|NaN|spalt/.test(txt)) fel.push(`${a}·${b}: ${txt}`);
+      }
+    }
+    expect(fel).toEqual([]);
+    const pl = buildPlan(67, 29, 4);
+    const calc = planMultSteps(pl).filter(s => s.t === 'calc' && s.phase === 'mult').map(s => strip(multStepText(s, pl)));
+    expect(calc[0]).toBe('7 · 9 är 63. Det hör till entalet.');
+    expect(calc[2]).toBe('7 · 2 är 14. Vi räknar tiotal, så svaret hamnar ett steg till vänster — i tiotalet.');
+  });
+
+  it('nivå 1–3 behåller sina texter ordagrant', () => {
+    const t = (a, b, lv) => planMultSteps(buildPlan(a, b, lv)).filter(s => s.t !== 'done').map(s => strip(multStepText(s, buildPlan(a, b, lv))));
+    expect(t(28, 8, 2)).toEqual(['8 · 8 är 64', '6:an åker upp som minne. 👉', '4:an åker ner i svaret. ✅',
+      '2 · 8 är 16', 'Minnessiffran 6 gör 16 till 22.', 'Sista kolumnen — hela 22 får plats! ✅']);
+    expect(t(32, 3, 1)).toEqual(['2 · 3 är 6', '6:an åker ner i svaret. ✅', '3 · 3 är 9', '9:an åker ner i svaret. ✅']);
+  });
+
+  it('texterna säger aldrig samma tal i två roller och inga jämförelseord', () => {
+    const JAMFORANDE = /\b(närmast|närmare|bäst|bättre|hellre|i stället för)\b/i;
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 300; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) { const x = strip(multStepText(s, pl)); if (JAMFORANDE.test(x)) fel.push(x); }
+    }
+    expect(fel).toEqual([]);
+  });
+});
+
+/* ── D40 ✎ (2026-10-21): siffrorna i texten pekar på pappret ──────────
+   Dennis: "kan du färgkoda dessa siffror så att man visuellt hänger med i
+   vad man menar? [...] eller att de siffrorna [...] pulserar till". Varje
+   färgad siffra i bubblan är en ref med en plats (data-ref); platsen ska
+   bära just den siffran, färgen ska vara platsens, och det ska finnas
+   något på pappret som kan pulsera. */
+describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
+  const { genProblem } = MD._internals;
+  const { multHelpText, askText, helpExprHTML } = MD.__test;
+  const COLV = ['#22c55e', '#3b82f6', '#ef4444', '#a855f7', '#f59e0b'];
+  const REF = /<strong class="md-ref" data-ref="([^"]+)" style="color:([^"]+)">(\d+)<\/strong>/g;
+  const refsOf = h => [...h.matchAll(REF)].map(m => ({ where: m[1], color: m[2], val: +m[3] }));
+  const dig = (n, i) => { const d = digitsOf(n); return i >= 0 && i < d.length ? d[i] : undefined; };
+  /* Cellen finns i uppställningen och bär värdet: undefined = ingen sådan cell */
+  function cellVal(id, pl) {
+    const [, row, gs] = id.split('-'), g = +gs;
+    if (row === 'a' || row === 'n') return dig(pl.a, g);
+    if (row === 'b') return dig(pl.b, g);
+    if (row === 'ans' || row === 'q') return g < pl.width ? dig(pl.answer, g) : undefined;
+    if (pl.kind !== 'twostep') return undefined;
+    if (row === 'p1') return dig(pl.p1.value, g);
+    if (row === 'p2') return g === 0 ? 0 : dig(pl.p2.value, g - 1);
+    return undefined;
+  }
+  /* Kontrollerar en text; mem = värdet på minnessiffran som används härnäst */
+  function kolla(h, pl, ctx, fel, opt = {}) {
+    const refs = refsOf(h);
+    const fargade = (h.match(/style="color:/g) || []).length;
+    if (fargade !== refs.length) fel.push(`${ctx}: färgad siffra utan plats: ${h}`);
+    for (const r of refs) {
+      if (r.where.startsWith('md-')) {
+        const v = cellVal(r.where, pl);
+        if (v !== r.val) fel.push(`${ctx}: ${r.where} bär ${v}, texten säger ${r.val}`);
+        if (r.color !== COLV[+r.where.split('-').pop()]) fel.push(`${ctx}: ${r.where} fel färg`);
+      } else {
+        if (r.color !== '#dc2626') fel.push(`${ctx}: minnets färg`);
+        if (r.where === 'mem:cur' && r.val !== opt.mem) fel.push(`${ctx}: mem:cur ${r.val} ≠ ${opt.mem}`);
+        if (r.where === 'chip:0' && r.val !== opt.chip) fel.push(`${ctx}: chip:0 ${r.val} ≠ ${opt.chip}`);
+        if (!['mem:cur', 'chip:0'].includes(r.where)) fel.push(`${ctx}: okänd plats ${r.where}`);
+      }
+    }
+    return refs;
+  }
+  const uppgifter = () => {
+    const ut = [];
+    for (let lv = 1; lv <= 4; lv++) for (let i = 0; i < 400; i++) { const { a, b } = genProblem(lv); ut.push(buildPlan(a, b, lv)); }
+    ut.push(buildPlan(98, 65, 4), buildPlan(67, 29, 4), buildPlan(91, 12, 4), buildPlan(987, 19, 4), buildPlan(8765, 9, 4));
+    return ut;
+  };
+
+  it('Titta och lär: varje ref pekar på en cell som bär siffran, i cellens färg; minnet i minnets färg', () => {
+    const fel = [];
+    for (const pl of uppgifter()) {
+      const mem = [];
+      for (const s of planMultSteps(pl)) {
+        if (s.t === 'done') continue;
+        const cur = (mem.find(e => !e.used) || {}).val;
+        kolla(multStepText(s, pl), pl, `${pl.a}·${pl.b} ${s.t}`, fel, { mem: cur, chip: s.carryOut });
+        if (s.t === 'carry_up') mem.push({ val: s.carryOut, used: false });
+        if (s.t === 'mem_strike') mem.find(e => !e.used).used = true;
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('Räkna med hjälp: frågor, uttryck och kvittenser pekar rätt', () => {
+    const fel = [];
+    for (const pl of uppgifter()) {
+      const mem = [];
+      for (const it of planMultHelpQueue(pl)) {
+        const ctx = `${pl.a}·${pl.b} ${it.kind}${it.step ? ':' + it.step : ''}`;
+        const cur = (mem.find(e => !e.used) || {}).val;
+        const o = { mem: cur, chip: it.val };
+        if (['mult', 'add'].includes(it.kind)) {
+          kolla(askText(it, pl), pl, ctx + ' fråga', fel, o);
+          kolla(helpExprHTML(it, pl), pl, ctx + ' uttryck', fel, o);
+          kolla(multHelpText(it.step === 'mem' ? 'mem' : 'table', it, pl, 99), pl, ctx + ' kvittens', fel, o);
+        }
+        if (it.kind === 'memwrite') { kolla(askText(it, pl), pl, ctx, fel, o); kolla(multHelpText('memwrite', it, pl), pl, ctx, fel, o); }
+        if (it.kind === 'flydown') kolla(multHelpText('flydown', it, pl), pl, ctx, fel, o);
+        if (it.kind === 'trivial') kolla(multHelpText('trivial', it, pl), pl, ctx, fel, o);
+        if (it.kind === 'memstrike') kolla(multHelpText('strike', it, pl), pl, ctx, fel, o);
+        if (it.kind === 'memplace') { kolla(multHelpText('pick', null, pl, it.val), pl, ctx, fel, { chip: it.val }); mem.push({ val: it.val, used: false }); }
+        if (it.kind === 'memstrike') mem.find(e => !e.used).used = true;
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('pekningen och texten har samma källa: uträkningens refs är exakt faktorcellerna/delsummecellerna', () => {
+    const fel = [];
+    for (const pl of uppgifter()) for (const s of planMultSteps(pl)) {
+      if (s.t !== 'calc' || s.memOnly) continue;
+      const refs = refsOf(multStepText(s, pl)).map(r => r.where);
+      const lit = multLitCells(s, pl);
+      const ok = s.single ? refs.length === 1 && lit.src.includes(refs[0])
+                          : JSON.stringify(refs) === JSON.stringify(lit.src);
+      if (!ok) fel.push(`${pl.a}·${pl.b} g${s.g}: ${refs} ≠ ${lit.src}`);
+    }
+    for (const pl of uppgifter()) for (const s of planMultSteps(pl)) {
+      if (s.t !== 'write_down' && s.t !== 'write_full') continue;
+      const refs = refsOf(multStepText(s, pl)).map(r => r.where).sort();
+      if (JSON.stringify(refs) !== JSON.stringify(multLitCells(s, pl).target.slice().sort())) fel.push(`${pl.a}·${pl.b} ${s.t} g${s.g}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('Dennis skärmbild, 98 · 65: 5:an är grön på båda ställena, 6:an står i textfärg', () => {
+    const pl = buildPlan(98, 65, 4);
+    const h = multStepText(planMultSteps(pl)[0], pl);
+    expect(refsOf(h)).toEqual([
+      { where: 'md-b-0', color: '#22c55e', val: 5 },
+      { where: 'md-b-0', color: '#22c55e', val: 5 }]);
+    expect(h.replace(/<[^>]+>/g, '')).toBe('Först räknar vi 98 · 5 — entalssiffran i 65! 👇');
+    expect(h).toMatch(/i 6<strong class="md-ref" data-ref="md-b-0"/);
+    // produkten är ingen cell och färgas inte
+    const calc = planMultSteps(pl).find(s => s.t === 'calc');
+    expect(multStepText(calc, pl)).toMatch(/är <strong>40<\/strong>\./);
+  });
+
+  it('kort division: täljarsiffran och kvotsiffran pekar rätt; rest-texterna är orörda', () => {
+    const fel = [];
+    for (let d = 2; d <= 9; d++) for (let q = Math.ceil(10 / d); q <= Math.floor(999 / d); q++) {
+      const n = q * d, pl = buildDivPlan(n, d, 4), ctx = `${n}÷${d}`;
+      for (const s of planDivSteps(pl)) if (s.t !== 'klart') {
+        const refs = kolla(divStepText(s), pl, `${ctx} ${s.t}`, fel);
+        if (['rest', 'flytta', 'fakta', 'stryk'].includes(s.t) && refs.length) fel.push(`${ctx} ${s.t} fick ref`);
+      }
+      for (const it of planDivHelpQueue(pl)) { kolla(divHelpAsk(it), pl, `${ctx} ${it.kind}`, fel); kolla(divHelpAck(it), pl, `${ctx} ${it.kind} ack`, fel); }
+    }
+    expect(fel).toEqual([]);
+    const s612 = planDivSteps(buildDivPlan(612, 6, 4));
+    expect(refsOf(divStepText(s612.find(s => s.t === 'skriv'))).map(r => r.where)).toEqual(['md-q-2']);
+    expect(refsOf(divStepText(s612[0])).map(r => r.where)).toEqual(['md-n-2']);
+  });
+
+  it('pulsen: varje ref slås upp till en nod på pappret (källan i modulen)', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    // refElement känner alla platstyper som texterna använder
+    expect(src).toMatch(/if \(where === 'mem:cur'\) return currentMemNode\(\);/);
+    expect(src).toMatch(/if \(where === 'chip:0'\)/);
+    expect(src).toMatch(/return document\.getElementById\(where\);/);
+    // båda bubblorna pulserar sina refs
+    expect((src.match(/pulseRefs\(area\);/g) || []).length).toBe(2);
+  });
+});
+
+/* ── D41: matteprovet lånar motorn (runTask) ── */
+describe('D41: kroken runTask och dess utfall', () => {
+  const { hostOutcome, hostBitHTML } = MD.__test;
+  const log = o => Object.assign({ facts:[], minne:false, addition:false, lifeline:false, cls0:null }, o);
+  it('Räkna med hjälp: helt rätt = direkt; fel svar eller livlina = med hjälp, med felklass och tabellfakta', () => {
+    expect(hostOutcome({ mode:'help', log:log() }, true, true)).toEqual({ outcome:'direkt', cls:null, facts:[] });
+    expect(hostOutcome({ mode:'help', log:log({ facts:[[2, 8]] }) }, false, true)).toEqual({ outcome:'hjalp', cls:null, facts:[[2, 8]] });
+    expect(hostOutcome({ mode:'help', log:log({ minne:true }) }, false, true).cls).toBe('minne');
+    expect(hostOutcome({ mode:'help', log:log({ addition:true }) }, false, true).cls).toBe('addition');
+    expect(hostOutcome({ mode:'help', log:log({ lifeline:true }) }, true, true).outcome).toBe('hjalp');
+  });
+  it('Räkna själv: första Klar rätt = direkt, senare = med hjälp, visat svar = fick svaret', () => {
+    expect(hostOutcome({ mode:'free', log:log(), revealed:false }, true, true).outcome).toBe('direkt');
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'minne' }), revealed:false }, true, false)).toEqual({ outcome:'hjalp', cls:'minne', facts:[] });
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'fel' }), revealed:true }, true, false).outcome).toBe('svar');
+  });
+  it('hjälpbiten: två rader vid tvåsiffrig faktor, minnessiffrorna vid ensiffrig', () => {
+    const strip = h => h.replace(/<[^>]+>/g, '');
+    // D41 ✎: en rad i taget — den som inte stämmer
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'p1'))).toBe('Rad 1 är 82 · 8 = 656.');
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'p2'))).toBe('Rad 2 är 82 · 60 = 4920. Nollan står redan i entalet.');
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4), 'ans'))).toBe('Raderna stämmer. Lägg ihop dem: 656 + 4920.');
+    expect(strip(hostBitHTML(buildPlan(687, 8, 4)))).toBe('Minnessiffrorna blir 5 och 6, från entalet och vänsterut.');
+    expect(strip(hostBitHTML(buildPlan(4321, 2, 4)))).toBe('1 · 2 = 2, 2 · 2 = 4, 3 · 2 = 6, 4 · 2 = 8.');
+  });
+  it('kroken är isolerad: multdivs egna lägen går som förut när ingen uppgift är lånad', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/let host = null;/);
+    expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
+    expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
+    expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk\);\n\s+\} else \{/);
+    // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
+    expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
+    expect(src).toMatch(/\(\{ difficulty, gameKind, helpMode \} = h\.saved\);/);
+    expect(typeof MD.runTask).toBe('function');
+    // en lånad uppgift som lämnats utan Avsluta följer aldrig med in i multdivs egna lägen
+    expect((src.match(/host = null; \/\/ D41: multdivs egna lägen är aldrig lånade/g) || []).length).toBe(2);
+    expect(src).toMatch(/exGen\+\+; \/\/ avbryter ev\. schemalagd nästa-uppgift \(Avsluta-racet\)\n\s+if \(host\) \{ difficulty = host\.saved\.difficulty; host = null; \}/);
+  });
+});
+
+/* ── D41 ✎ (Dennis 21/10, "den där nollan i grå ruta saknades"): raderna i Räkna själv ── */
+describe('D41 ✎: fria läget med rader vid tvåsiffrig faktor', () => {
+  const { freeRowCols, freeRowValue, freeAnsLocked, freeButtonMode, freeNextRow, freeCheck } = MD.__test;
+  const grid = (pl, o = {}) => {
+    const W = pl.width, put = (v, from) => { const a = Array(W).fill(null); if (v == null) return a; digitsOf(v).forEach((d, k) => { a[from + k] = d; }); return a; };
+    return { p1: put(o.p1, 0), p2: put(o.p2, 1), ans: put(o.ans, 0) };
+  };
+  const pl = buildPlan(82, 68, 4);   // rad 1 656, rad 2 492 (4920), summa 5576
+
+  it('radernas rutor: rad 1 från entalet, rad 2 från tiotalet (entalet är nollan), summan hela bredden', () => {
+    expect(freeRowCols(pl, 'p1')).toEqual([0, 2]);
+    expect(freeRowCols(pl, 'p2')).toEqual([1, 3]);
+    expect(freeRowCols(pl, 'ans')).toEqual([0, 3]);
+    expect(freeRowValue(grid(pl, { p2: 492 }).p2, 1, 3)).toBe(492);
+    expect(freeRowValue([6, null, 5, null], 0, 3)).toBe(null);           // tom ruta mitt i talet
+  });
+
+  it('låset och knappen: summan låst tills båda raderna har siffror; Nästa rad tills allt är ifyllt, sedan Klar', () => {
+    expect(freeAnsLocked(pl, grid(pl))).toBe(true);
+    expect(freeAnsLocked(pl, grid(pl, { p1: 656 }))).toBe(true);
+    expect(freeAnsLocked(pl, grid(pl, { p1: 656, p2: 492 }))).toBe(false);
+    expect(freeButtonMode(pl, grid(pl, { p1: 656, p2: 492 }))).toBe('next');
+    expect(freeButtonMode(pl, grid(pl, { p1: 656, p2: 492, ans: 5576 }))).toBe('klar');
+    expect(freeNextRow(pl, grid(pl, { p1: 656 }), 'p1')).toBe('p2');
+    expect(freeNextRow(pl, grid(pl, { p1: 656, p2: 492 }), 'p2')).toBe('ans');
+    expect(freeNextRow(pl, grid(pl, { p2: 492 }), 'p2')).toBe('p1');         // tom rad före
+    // ensiffrig faktor: bara svarsraden, Klar hela tiden, inget lås
+    const en = buildPlan(687, 8, 4);
+    expect(freeButtonMode(en, { ans: Array(4).fill(null) })).toBe('klar');
+    expect(freeAnsLocked(en, { ans: Array(4).fill(null) })).toBe(false);
+  });
+
+  it('rättningen per rad: raderna före summan, glömd minnessiffra per rad och i summan', () => {
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 5576 })).toEqual({ ok: true, row: null, cls: null, msg: '' });
+    // rad 1: 82 · 8 utan minne = 646
+    expect(freeCheck(pl, { p1: 646, p2: 492, ans: 5576 })).toMatchObject({ row: 'p1', cls: 'minne', msg: 'Titta på rad 1 – kolla minnessiffrorna.' });
+    expect(freeCheck(pl, { p1: 600, p2: 492, ans: 5576 })).toMatchObject({ row: 'p1', cls: 'fel' });
+    // rad 2: 82 · 6 utan minne = 482; ett annat fel pekar på nollan
+    expect(freeCheck(pl, { p1: 656, p2: 482, ans: 5576 })).toMatchObject({ row: 'p2', cls: 'minne' });
+    expect(freeCheck(pl, { p1: 656, p2: 4920, ans: 5576 })).toMatchObject({ row: 'p2', cls: 'fel',
+      msg: 'Titta på rad 2 – nollan står i entalet, så 82 · 6 börjar i tiotalet.' });
+    // summan: 656 + 4920 har minne i hundratalet (6 + 9 = 15); utan minnet blir det 4576
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 4576 })).toMatchObject({ row: 'ans', cls: 'minne' });
+    expect(freeCheck(pl, { p1: 656, p2: 492, ans: 4000 })).toMatchObject({ row: 'ans', cls: 'addition' });
+    // rätt summa men fel rad är inte rätt
+    expect(freeCheck(pl, { p1: 600, p2: 492, ans: 5576 }).ok).toBe(false);
+    // varje rad och summan över många tal: facit ger ok, en ändrad siffra pekar på rätt rad
+    const fel = [];
+    for (let a = 12; a <= 99; a += 7) for (let b = 12; b <= 99; b += 5) {
+      if (b % 10 === 0) continue;
+      const p = buildPlan(a, b, 4), r = { p1: p.p1.value, p2: p.p2.value, ans: p.answer };
+      if (!freeCheck(p, r).ok) fel.push(`${a}·${b} facit`);
+      for (const row of ['p1', 'p2', 'ans']) if (freeCheck(p, { ...r, [row]: r[row] + 1 }).row !== row) fel.push(`${a}·${b} ${row}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('källan: summan går inte att välja när den är låst; nollan står i fria läget från början', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/if \(r === 'ans' && freeAnsLocked\(plan, exFreeGrid\)\) return;/);
+    expect(src).toMatch(/if \(freeRows\(\) && freeButtonMode\(plan, exFreeGrid\) === 'next'\) \{ freeGoNextRow\(\); return; \}/);
+    expect(src).toMatch(/Rad 2 räknar med tiotal, därför en nolla i entalet\./);
+  });
+});
+
+/* ── D41 ✎: nollan före radens första gångertal (Dennis: "sätta dit nollorna innan man gångrar") ── */
+describe('D41 ✎: den grå nollan kommer före rad 2:s första gångertal', () => {
+  it('demon och hjälpkön: nollans steg (fas 2) står före rad 2:s första uträkning och fråga', () => {
+    const fel = [];
+    for (let a = 12; a <= 999; a += 37) for (let b = 12; b <= 98; b += 9) {
+      if (b % 10 === 0) continue;
+      const pl = buildPlan(a, b, 4);
+      const st = planMultSteps(pl), z = st.findIndex(s => s.t === 'phase' && s.which === 2), c = st.findIndex(s => s.rowKey === 'p2');
+      if (!(z >= 0 && z < c)) fel.push(`${a}·${b} demo`);
+      const q = planMultHelpQueue(pl), zq = q.findIndex(i => i.kind === 'phase' && i.which === 2), cq = q.findIndex(i => i.rowKey === 'p2');
+      if (!(zq >= 0 && zq < cq)) fel.push(`${a}·${b} hjälp`);
+    }
+    expect(fel).toEqual([]);
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    // hjälpläget: knappen väntar tills nollan står i rutan, sedan kommer rad 2:s fråga
+    expect(src).toMatch(/if \(item\.which === 2 && plan\.kind === 'twostep'\) \{\n\s+\/\/ D40: nollan visas automatiskt/);
+    // Räkna själv: nollan står i rutan från början
+    expect(src).toMatch(/\$\{freeMode \? '<span class="md-zd">0<\/span>' : ''\}/);
   });
 });

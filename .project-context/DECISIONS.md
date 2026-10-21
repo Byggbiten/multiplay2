@@ -61,7 +61,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D36 Offentligt repo: inga uppgifter om testare; "Här bor du" är en inställning ✎ inga utpekande kombinationer ✎ rimlig nivå
 - D37 Matteprov 4:an i Multiplikation, första provet Matteprov 1 ✎ bladens struktur, isolerat i provet ✎ minst lika svårt
 - D38 Matteprovet: kladdyta, stegvis hjälp vid upprepade fel, skräddarsytt prov av det som var svårt ✎ delprodukter ✎ appen leder ✎ tankerad ✎ anteckningsrutor ✎ frågan per rad, appen får vara lite lättare ✎ ångra/gör om
-- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör
+- D39 Snällare app: inget ljud, ingen färg och ingen text som säger misslyckande; tydligt vad Klar gör ✎ en knapp som byter namn ✎ problemlösningen i ledda steg ✎ resultatraden
+- D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2)
+- D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp
 
 ---
 
@@ -518,3 +520,59 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   resultatrader. Källa: Dennis: "den formuleringen gillade jag inte. för vissa barn kanske 7 av 10 är helt
   fantastiskt. då tycker jag: Resultat skrivs som 'Du klarade 7 av 10 – Bra kämpat! 💪' sen kommer man under 6 av 10
   rätt så får man bara veta resultatet, utan någon värdering i det. Typ: Du fick 3 av 10 rätt" (emojin är hans val).
+
+## D40 · 2026-10-21 · Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan, blandat som svårare bladet
+- **Beslut:** den vanliga uppställda multiplikationen behåller minnessiffran (ingen uppdelning i delprodukter per
+  siffra som i matteprovet). På nivå 4 får rad 2 en grå ruta i entalet som visar "den osynliga nollan", så att
+  barnet ser varför raden flyttas ett steg och entalen hamnar under varandra. Nivå 4 blandar talen som det svårare
+  övningsbladet: tresiffrigt och fyrsiffrigt gånger ensiffrigt, tvåsiffrigt gånger tvåsiffrigt och tresiffrigt gånger
+  tvåsiffrigt (bladen har t.ex. 286 · 17, 487 · 13, 638 · 12). Besvarar P12.
+- **Källa:** Dennis 2026-10-21: "de har gråat rutan som jag markerat på bilden (eller på bilden finns den inte ens)
+  det är ju för att barnen skall förstå att det finns en 'osynlig nolla där' och göra det lättare att räkna. […] jag
+  tycker att minnessiffran är enklare att hantera på ett papper. det där när man skall dela upp […] blir mycket kladd
+  på pappret […] Så den vanliga modulen ska fortsätta va med minnessiffra. men vi kanske skall förtydliga det där med
+  att det finns en osynlig nolla. […] i vilken ordning man gör vad och vad man multiplicerar först är krångligt. och om
+  [barnet] inte radar upp ordentligt så entalen är ovanför varandra osv, så kan delsummeringen bli fel. så först
+  införlivar vi den 'osynliga 0:an' så den blir tydlig. Sedan bör vi också ha med, precis som det är i övningsbladen
+  på den svårare. att när man väljer svårighetsgrad 4 så kan det också vara tal såsom tresiffrigt x 1 siffrigt.
+  fanns det i övningsbladet även 3 siffrigt gånger 2 siffrigt? då kanske vi ska ha med det också?"
+- ✎ **2026-10-21, förklara nollan och målcellerna:** demon och hjälpbubblorna säger att vi gångrar med ett tiotal och
+  därför fyller i en nolla i den (lätt grå) rutan, och visar för varje multiplikation både faktorcellerna och cellen
+  där svaret skrivs, med varför (ental, minnessiffra, ett steg till vänster på rad 2; additionen kolumn för kolumn).
+  Källa: Dennis: "Den cellen får gärna vara lite gråad eller liknande. men att animationerna förklarar att 'nu när vi
+  gångrar med ett 10 tal så fyller vi i en nolla här', och att man får lite förklarat, för rutorna lyser ju upp när
+  man gångrar siffrorna med andra siffror. alltså deras celler. så man hänger med på vilken ordning det sker, men att
+  man även får förklarat hur det spelar roll med vilka celler man skriver in i nedan i delsummor och summa".
+- ✎ **2026-10-21, siffrorna i texten färgkodas och cellen pulserar:** när bubblan nämner en siffra i uppställningen
+  (98 · 5 — entalssiffran i 65) skrivs siffran i sin platsvärdesfärg, och dess cell pulserar till, så att barnet ser
+  vilken siffra som menas. Källa: Dennis: "kan du färgkoda dessa siffror så att man visuellt hänger med i vad man
+  menar? Eller att de siffrorna kanske vibrerar till eller pulserar till eller liknande? då fattar barn bättre
+  ordningen".
+- ✎ **2026-10-21, orange ram på de aktuella rutorna:** rutorna som räknas och rutan där svaret skrivs får en orange
+  ram (matteprovets #fb923c) som pulserar mjukt så länge steget visas; gäller multdiv alla nivåer. Källa: Dennis:
+  "dett är lite för subtilt den där pulseringen. Kan det bli ännu tydligare vilka tal som är aktuell? kanske en
+  orange ram på de aktuella cellerna?"
+
+## D41 · 2026-10-21 · Matteprovets uppställning: välj räknesätt, minnessiffran är förval
+- **Beslut:** uppställningen i matteprovet följer samma metodik som Multiplikation nivå 4 (D40): minnessiffran, den
+  osynliga nollan i en grå ruta, orange ram på de aktuella rutorna, siffrorna i texten i platsvärdesfärg. Barnet kan
+  växla till det andra räknesättet, dela upp (987 · 2 = 2 · 900 + 2 · 80 + 2 · 7, sedan summera delsummorna).
+  Minnessiffran är förvald. Ändrar D38 ✎ (delprodukter per siffra var tidigare det enda sättet i provet).
+- **Källa:** Dennis 2026-10-21: "Nu till matteprovet. Se till att vi följer samma metodik där. Men man skall kunna
+  växla mellan vilket räkningsläge man väljer. om man vill arbeta med t.ex. 987 x 2 = 2 x 900 + 2 x 80 + 2 x 7 och
+  sen summera delsummorna. Eller om man hellre kör med detta minnessiffratänk. vilket jag förespråkar."
+- ✎ **2026-10-21, delraderna och nollan även i Räkna själv:** vid tvåsiffrig faktor visar Räkna själv (multdiv nivå 4
+  och matteprovets provläge) rad 1, rad 2 med den grå nollan och summan på pappret; summan låst tills raderna är
+  ifyllda. Ändrar D7 för tvåsiffrig faktor. Besvarar P15. Källa: Dennis: "den där nollan i grå ruta saknades"
+  (matteprovets provläge räknas i Räkna själv, som bara visade svarsraden).
+- ✎ **2026-10-21, grå nollor i Dela upp:** i matteprovets Dela upp blir de tomma rutorna till höger om varje förskjuten
+  delproduktsrad grå (som den osynliga nollan), och nollorna förs in av appen när raden är aktuell. Källa: Dennis
+  (skärmbild 4819 · 9 i Dela upp): "Skulle inte dessa celler vara gråade, och när det är dags så skall 0:an föras in?"
+- ✎ **2026-10-21, nollorna före gångertalet:** för varje rad sätts radens nolla eller nollor in först, sedan frågas
+  gångertalet och svaret bokförs till vänster om nollorna; inte alla raders nollor på en gång. Gäller Dela upp och
+  minnessiffreläget. Källa: Dennis: "jag tycker att ordningen borde vara att sätta dit nollorna innan man gångrar. inte
+  alla nollor direkt. men att det blir tydligt för den som skall lösa uppgiften att sätt dit nollorna innan du löser
+  det som skall gångras. annars kanske de skriver in dem i fel cell".
+- ✎ **2026-10-21, varför så många nollor:** nollorna förklaras med siffrans värde: "8 står i hundratalet och är värd
+  800 = 8 · 100; 100 har två nollor, därför två nollor först". Gäller Dela upp och minnessiffreläget. Källa: Dennis:
+  "gör det pedagogiskt, så att de förstår varför de fyller i x-antal nollor".

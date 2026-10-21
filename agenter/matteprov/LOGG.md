@@ -65,3 +65,44 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   mitt i genomklickningen, så webbläsarverktygen kördes mot fel sida.
 - **Lärdom:** när barnet ska lära sig en form, låt appen bära formen (mallen) och låt barnet fylla talen; visa formen
   som helhet i slutsatsen. Ange alltid flikens id i webbläsarverktygen när panelen delas.
+
+## Ordning och reda · 2026-10-19 · Efter v69
+- **Lärdom:** en text som värderar resultatet ("bra kämpat") är inte neutral för alla barn; under en gräns ska bara
+  resultatet stå (samordnarens `MP.resultNote`). När jag skriver ord till kvitton: fråga om meningen dömer, inte bara
+  om den innehåller "fel".
+- **Lärdom:** när en funktion ersätts (uttrycket → ledda steg) ska den gamla tas bort i samma runda, med sina tester;
+  annars blir den skuld som någon annan måste läsa. Den står nu i TODO.
+
+## Runda 7 · 2026-10-21 · Räknesätten i uppställningen (D41), gren `matteprov-metod`
+- **Vad som inte fungerade:** provets uppställning hade bara delprodukter per siffra (D38 ✎), medan den vanliga
+  multiplikationen lär ut minnessiffran (D40), som Dennis förespråkar. Barnet fick två olika sätt utan att kunna välja.
+- **Byggt:** växeln Minnessiffra | Dela upp överst i "Så här gör du" (förval Minnessiffra, sparad per profil, gäller
+  i Öva, provet och mitt prov; provsidan visar valet under momentet). Minnessiffra räknas av multdiv-motorn via
+  kroken `MultDivGame.runTask` (Öva = med hjälp, provet = själv med hjälptrappan), och utfallet bokförs här
+  (`runMinne`, `minneDone`, taggen `upp:minne`, tabellfakta). Dela upp är oförändrat. Vitest: hela sviten 492.
+- **Avvikelse:** växeln fick inte plats på provsidan i 390 × 797 (uppmätt 49 px för mycket med Mitt prov-kortet), så
+  den står i "Så här gör du"; provsidan visar bara valet.
+- **Lärdom:** när två moduler ska lära ut samma sak, låna motorn i stället för att kopiera den; en isolerad krok
+  med ett utfall tillbaka (direkt, hjälp, svaret, felklass) räcker för att provets bokföring ska fungera som förut.
+
+## Runda 7 ✎ · 2026-10-21 · Raderna och den grå nollan i Räkna själv (D41 ✎, P15)
+- **Vad som inte fungerade:** Dennis: "den där nollan i grå ruta saknades". Provets minnessiffreläge (multdivs fria
+  läge) visade bara svarsraden, men läraren rättar nollan på rad 2.
+- **Byggt (i multdiv, som provet lånar):** vid tvåsiffrig faktor visar Räkna själv rad 1, rad 2 med nollan ljusgrå från
+  början och summan; "Nästa rad" tills allt har siffror, sedan Klar; summan låst tills raderna har siffror; rättning
+  per rad (`freeCheck`, glömd minnessiffra per rad och i summan); hjälptrappan med en rad i taget. Uppmätt i 390 × 797:
+  kladden 165 px från början, minst 95 px när hjälpbiten står i bubblan (108 px med ledtrådsraden utanför provet).
+- **Lärdom:** "barnet räknar i kladden" räcker inte när läraren rättar en mellanrad; det som rättas på pappret ska
+  finnas på appens papper.
+
+## Runda 8 · 2026-10-21 · Nollorna i Dela upp (D41 ✎), gren `matteprov-nollor`
+- **Vad som inte fungerade:** Dennis, skärmbild 4819 · 9: "Skulle inte dessa celler vara gråade, och när det är dags
+  så skall 0:an föras in?" Rutorna till höger om de förskjutna raderna var tomma och prickade.
+- **Byggt:** grå rutor (som den osynliga nollan) i de förskjutna raderna; appen sätter nollorna **före** radens fråga
+  (Dennis: "sätt dit nollorna innan du löser det som skall gångras ... annars kanske de skriver in dem i fel cell"),
+  och förklarar dem med siffrans värde (Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i x-antal
+  nollor"): värdet, varför antalet (100 har två nollor), nollorna en i taget; i provet en rad med "därför". Facit och
+  bokföringen har nollorna, summans tankerad räknar dem. Minnessiffreläget (multdiv fas 2) fick samma förklaring.
+- **Uppmätt i 390 × 797:** ingen scroll; kladden minst 85 px under den tvåradiga förklaringen i Öva.
+- **Lärdom:** ordningen är en del av pedagogiken — det som ska stå på pappret före en uträkning ska komma före frågan,
+  annars hamnar svaret i fel ruta. Lägg ordningen som ren data (`uppRowFlow`) så att den går att testa.

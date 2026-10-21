@@ -7,7 +7,8 @@
    Klart-bubbla med 1,8 s lästid), exFree-miniräknaren, kladd-lagen.
    OBS: skolboken använder · (mittpunkt) som gångertecken — multdiv
    följer boken. Nivå 4 skriver delprodukt 2 FÖRSKJUTEN ett steg åt
-   vänster (ingen platshållar-nolla), med + framför, per boken.
+   vänster, med + framför, per boken; sedan D40 står den osynliga nollan
+   i en grå ruta i rad 2:s ental (se D40 nedan).
    v30: LEVANDE MINNESSIFFROR (SPEC-MINNESSIFFROR.md) — minnes-
    SPALT till höger om faktorraden (per Dennis foto: "1̶ 2" bredvid
    ·43). Varje minne appendas efter föregående, stryks med penndrag
@@ -49,6 +50,50 @@
    lär / Räkna med hjälp / Räkna själv) + svårighetschipsen i botten.
    Hjälpvals-steget (showHelpSelect/setHelpMode) är BORTTAGET —
    startExercise(withHelp) startar rundan direkt. Spel-/poänglogik orörd.
+   D40 (2026-10-21, Dennis): NIVÅ 4 BLANDAT + DEN OSYNLIGA NOLLAN.
+   · Generatorn: nivå 4 drar typ ur en blandad påse (genL4/drawL4Type):
+     3 · 1 och 4 · 1 med minst två minnessiffror, 2 · 2 som förut, 3 · 2
+     med 12–19 som andra faktor (bladets 286 · 17). Jämn fördelning,
+     högst två av samma typ i rad. Nivå 1–3 är orörda.
+   · buildPlan väljer form efter FAKTORN: ensiffrig b ⇒ 'simple', tvåsiffrig
+     ⇒ 'twostep'. Motorn har NCOL = 5 kolumner (E T H T TT, femte färgen
+     bärnsten); singlePass/addPass/noCarryAnswer var redan breddoberoende.
+   · Rad 2 har en grå ruta i entalet (#md-p2-0, .md-zero). Titta och lär
+     och Räkna med hjälp: fasen "rad 2" kommer före rad 2:s första
+     gångertal och förklarar nollan med siffrans värde (D41 ✎): "2 står i
+     tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla – därför en
+     nolla i entalet först." Sedan faller nollan in i rutan (showZero) —
+     barnet skriver den aldrig.
+     Räkna själv (D41 ✎, ändrar D7 för tvåsiffrig faktor): rad 1, rad 2
+     med den grå nollan (ljusgrå från början) och summan; barnet fyller
+     rad för rad, "Nästa rad" tills allt är ifyllt, sedan Klar; summan är
+     låst tills raderna har siffror; freeCheck pekar på raden som inte
+     stämmer. Ensiffrig faktor och nivå 1–3: bara svarsraden, som förut.
+   · Pekningen (nivå 4): faktorcellerna och MÅLRUTAN lyser samtidigt
+     (multLitCells), och texterna säger platsen ("Det hör till entalet.",
+     "3:an skrivs i entalet.", "Tiotalet: 8 + 7 är 15."); rad 2:s första
+     uträkning säger att svaret hamnar ett steg till vänster. Texterna är
+     rena funktioner (multStepText) och sveps av vitest. Nivå 1–3 har
+     sina gamla texter ordagrant. Additionens logik är oförändrad:
+     entalets kolumn är rad 1:s ental + nollan ("Nollan lägger inte till
+     något").
+   D40 ✎ (2026-10-21, Dennis): SIFFRORNA I TEXTEN PEKAR PÅ PAPPRET, nivå
+   1–4, Titta och lär och hjälpbubblorna. En siffra i bubblan som står i
+   (eller ska skrivas i) en cell skrivs med ref(plats, värde): fet, i
+   cellens platsvärdesfärg, märkt data-ref. Minnessiffror i minnets röda
+   färg (mem:cur = den som används härnäst, chip:0 = brickans siffra som
+   blir minne). Tal som inte är en cell (produkten 63) färgas aldrig.
+   pulseRefs låter de utpekade noderna pulsera EN gång (Web Animations,
+   box-/text-shadow, 180 ms efter texten). multRefs är den enda källan:
+   texten (multStepText, multHelpText, askText) och pekningen
+   (multLitCells) läser samma platser. Divisionen: täljarsiffran som
+   arbetstalet ÄR och kvotsiffran som skrivs (divCurHTML, skriv,
+   inget_kvar, fall B:s nolla); rest-texterna och faktabrickan är orörda.
+   D41 (2026-10-21): KROKEN runTask — matteprovets uppställning i läget
+   Minnessiffra lånar motorn för EN uppgift (hjälpläget eller fria
+   läget med matteprovets hjälptrappa) och får tillbaka utfallet. Se
+   blocket "MATTEPROVET LÅNAR MOTORN". host är null i multdivs egna
+   lägen; nivå, räknesätt och läge återställs efter varje lånad uppgift.
    ============================================================ */
 'use strict';
 
@@ -56,15 +101,19 @@ const MultDivGame = (() => {
 
   /* ── State ─────────────────────────────────────────────── */
   let profile    = null;
-  let difficulty = 1;   // 1🌱 utan minne · 2🌿 med minne · 3🌾 tresiffrigt · 4🌳 två tvåsiffriga
+  let difficulty = 1;   // 1🌱 utan minne · 2🌿 med minne · 3🌾 tresiffrigt · 4🌳 blandat (D40)
   let gameKind   = 'mult'; // v32: 'mult' | 'div' — hubbens två spelkort
   let numA = 0, numB = 0;  // div: numA = täljare, numB = divisor
   let plan = null;      // förberäknad uppgiftsplan (buildPlan/buildDivPlan) — FACIT för alla lägen
 
   /* Demo */
   let demoStep = 0, demoSteps = [], stepLocked = false;
-  let mdCarries   = [0,0,0,0];
-  let mdCarryUsed = [false,false,false,false];
+  /* D40: nivå 4 har svar på upp till fem siffror (4 · 1 och 3 · 2) —
+     motorn räknar med NCOL kolumner (E, T, H, T, TT). */
+  const NCOL = 5;
+  const freshCarries = () => { mdCarries = Array(NCOL + 1).fill(0); mdCarryUsed = Array(NCOL + 1).fill(false); };
+  let mdCarries   = Array(NCOL + 1).fill(0);
+  let mdCarryUsed = Array(NCOL + 1).fill(false);
 
   /* Minnesspalten (v30) — visningsmodell, rör ALDRIG matte-kärnan.
      Appendas hela uppgiften (strukna står kvar), töms först vid ny uppgift. */
@@ -82,6 +131,10 @@ const MultDivGame = (() => {
   /* Divisionens STRYK-fas: { gs, cur } — kolumnerna som är kvar att stryka;
      två efter fall A. */
   let divStrikeAwait = null;
+
+  /* D41: en uppgift som matteprovet lånar (runTask). null = multdivs egna lägen,
+     som då beter sig exakt som förut. */
+  let host = null;
 
   /* Övning */
   let exerciseIdx = 0, exScore = 0, helpMode = true;
@@ -101,6 +154,8 @@ const MultDivGame = (() => {
   /* Fritt läge (utan hjälp): svaret skrivs i cellerna — mult höger→
      vänster från entalet, div vänster→höger från högsta positionen (C3). */
   let exFreeCells = [], exFreeCur = 0;   // rutan med fokus (mult: 0 = entalet; div: width-1 = vänstra)
+  /* D41 ✎: raderna i fria läget. exFreeCells är alltid den aktuella radens rutor. */
+  let exFreeGrid = { ans: [] }, exFreeRow = 'ans';
   let exFreeFirstAttempt = true;
 
   /* Kladd-canvas */
@@ -108,9 +163,9 @@ const MultDivGame = (() => {
   let mdLastX = 0, mdLastY = 0, mdResizeObs = null;
 
   /* ── Konstanter ─────────────────────────────────────────── */
-  const COLV = ['#22c55e','#3b82f6','#ef4444','#a855f7']; // E grön, T blå, H röd, Tu lila
-  const LBL  = ['E','T','H','T'];                          // tusental skrivs T i boken
-  const cv = g => COLV[Math.min(g, 3)];
+  const COLV = ['#22c55e','#3b82f6','#ef4444','#a855f7','#f59e0b']; // E grön, T blå, H röd, Tu lila, TT bärnsten
+  const LBL  = ['E','T','H','T','TT'];                               // tusental skrivs T i boken
+  const cv = g => COLV[Math.min(g, NCOL - 1)];
   const getLog = () => MP.createLog('multdiv_log_' + profile.id, 40);
 
   /* ── CSS (injiceras per vy, md-prefix så uppstallning ej krockar) ── */
@@ -194,6 +249,28 @@ const MultDivGame = (() => {
       box-shadow:0 0 0 3px color-mix(in srgb, var(--qc, var(--accent)) 22%, transparent); }
     .md-ansc.filled { border-style:solid; }
     .md-ansc.md-glow { animation:md-glow 1.1s ease-in-out infinite; }
+    /* D40: den osynliga nollans grå ruta (färgerna ur matteprovets grå ruta)
+       och den ljusgrå nollan som skrivs in när rad 2 börjar */
+    .md-ansc.md-zero { border:2px solid #9aa3ae; background:#d9dde3; }
+    .md-ansc.md-zero.active-col { background:#d9dde3; border-color:#64748b;
+      box-shadow:0 0 0 3px rgba(100,116,139,0.28); }
+    /* D40 ✎ (Dennis 21/10: "pulseringen är lite för subtil … en orange ram på de aktuella cellerna"):
+       rutorna som räknas just nu och rutan där svaret skrivs får matteprovets orange ram, som pulserar
+       mjukt så länge steget visas. Siffrans platsvärdesfärg står kvar. */
+    .md-cell.md-glow, .md-ansc.md-glow, .md-ansc.active-col, .md-ansc.md-zero.active-col {
+      border:3px solid #fb923c !important; animation:md-focus 1.1s ease-in-out infinite; }
+    .md-ansc.active-col, .md-ansc.md-zero.active-col { border-style:solid !important; }
+    @keyframes md-focus {
+      0%,100% { box-shadow:0 0 0 3px rgba(251,146,60,0.35), 0 0 8px rgba(251,146,60,0.45); }
+      50%     { box-shadow:0 0 0 4px rgba(251,146,60,0.55), 0 0 20px rgba(251,146,60,0.75); }
+    }
+    .md-zero .md-zd { color:#64748b; display:inline-block; }
+    /* D41 ✎: fria lägets rader — summan låst tills raderna har siffror,
+       raden som inte stämmer milt persika (D39), nollans förklaring */
+    .md-ansc.md-lk { opacity:0.32; cursor:default; }
+    .md-ansc.md-soft { border:2.5px solid #fdba74 !important; background:#fff3e6; }
+    .md-zero-note { text-align:center; font-size:0.78rem; font-weight:800; color:#64748b; margin-top:2px; line-height:1.2; }
+    .md-klar.md-klar-next { font-size:clamp(0.9rem,2.7vw,1.1rem); }
     /* Nivå 4 (8 tabellrader): kompaktare celler så vyn ryms utan scroll */
     .md-l4 .md-cell, .md-l4 .md-ansc {
       width:clamp(33px,6.2vw,56px); height:clamp(33px,6.2vw,56px);
@@ -248,6 +325,8 @@ const MultDivGame = (() => {
       box-shadow:0 7px 20px rgba(239,68,68,.45), inset 0 1px 0 rgba(255,255,255,.35); }
     .md-chip.chip-purple { background:linear-gradient(135deg,#a855f7,#d8b4fe);
       box-shadow:0 7px 20px rgba(168,85,247,.45), inset 0 1px 0 rgba(255,255,255,.35); }
+    .md-chip.chip-amber  { background:linear-gradient(135deg,#f59e0b,#fbbf24);
+      box-shadow:0 7px 20px rgba(245,158,11,.45), inset 0 1px 0 rgba(255,255,255,.35); }
     .md-chip.chip-in  { animation:md-chip-in .38s cubic-bezier(0.34,1.3,0.4,1) both; }
     .md-chip.chip-pop { animation:md-chip-pop .3s var(--spring) both; }
     .md-l4 .md-chip { font-size:1.15rem; min-width:44px; padding:2px 8px; }
@@ -671,9 +750,12 @@ const MultDivGame = (() => {
     return { cols, value: total, digits: td };
   }
 
-  /* Uppgiftsplan — FACIT för demo, hjälp och fritt läge */
+  /* Uppgiftsplan — FACIT för demo, hjälp och fritt läge.
+     D40: formen avgörs av FAKTORN, inte nivån — ensiffrig b ger ett pass
+     (nivå 1–3 och nivå 4:s 3 · 1 / 4 · 1), tvåsiffrig b ger två
+     delprodukter och additionen (nivå 4:s 2 · 2 / 3 · 2). */
   function buildPlan(a, b, level) {
-    if (level < 4) {
+    if (b < 10) {
       const pass = singlePass(a, b);
       return { level, a, b, kind: 'simple', pass,
                answer: a * b, width: digitsOf(a * b).length };
@@ -730,12 +812,47 @@ const MultDivGame = (() => {
       do { a = 100 + rnd(900); b = 2 + rnd(8); }
       while (a * b > 9999 || !singlePass(a, b).hasCarry);
     } else {
+      return genL4(drawL4Type());
+    }
+    return { a, b };
+  }
+
+  /* ── Nivå 4 (D40): blandat som det svårare övningsbladet ──────────
+     Fyra typer: 3 · 1 och 4 · 1 med flera minnessiffror, 2 · 2 (som
+     förut) och 3 · 2 (bladets 286 · 17, 487 · 13, 638 · 12). Typerna dras
+     ur en blandad påse med en av varje — jämn fördelning, och samma typ
+     kan komma högst två gånger i rad (sist i en påse + först i nästa). */
+  const L4_TYPES = ['3x1', '4x1', '2x2', '3x2'];
+  let l4Bag = [];
+  function drawL4Type() {
+    if (!l4Bag.length) {
+      l4Bag = L4_TYPES.slice();
+      for (let i = l4Bag.length - 1; i > 0; i--) {
+        const j = rnd(i + 1); [l4Bag[i], l4Bag[j]] = [l4Bag[j], l4Bag[i]];
+      }
+    }
+    return l4Bag.pop();
+  }
+  /* Minnessiffror som skrivs upp (sista kolumnen skriver hela värdet) */
+  const carryCount = (a, m) => singlePass(a, m).cols.filter(c => !c.last && c.carryOut > 0).length;
+  function genL4(type) {
+    let a = 0, b = 0;
+    if (type === '3x1') {
+      // tresiffrigt · ensiffrigt, minnessiffra i båda kolumnerna före den sista (483 · 9)
+      do { a = 100 + rnd(900); b = 2 + rnd(8); } while (carryCount(a, b) < 2);
+    } else if (type === '4x1') {
+      // fyrsiffrigt · ensiffrigt, minst två minnessiffror (2475 · 3)
+      do { a = 1000 + rnd(9000); b = 2 + rnd(8); } while (carryCount(a, b) < 2);
+    } else if (type === '3x2') {
+      // tresiffrigt · tvåsiffrigt, andra faktorn 12–59 som det svårare bladet (286 · 17, 169 · 54, 206 · 44)
+      do { a = 101 + rnd(899); b = 12 + rnd(48); } while (a % 10 === 0 || b % 10 === 0);
+    } else {
       // 2-siffrigt · 2-siffrigt med delprodukter (bokens metod).
       // Ingen nolla som ental (delprodukt av 0 vore tom pedagogik).
       do { a = 12 + rnd(87); b = 12 + rnd(87); }
       while (a % 10 === 0 || b % 10 === 0);
     }
-    return { a, b };
+    return { a, b, type };
   }
 
   /* ── KORT DIVISION — ren matte-kärna (v32) ─────────────────
@@ -839,7 +956,8 @@ const MultDivGame = (() => {
       numA = p.a; numB = p.b;
       plan = buildDivPlan(numA, numB, difficulty);
     } else {
-      const p = genProblem(difficulty);
+      const p = forcedNext || genProblem(difficulty);
+      forcedNext = null;
       numA = p.a; numB = p.b;
       plan = buildPlan(numA, numB, difficulty);
     }
@@ -924,7 +1042,7 @@ const MultDivGame = (() => {
        C  går jämnt ut               fraga → fakta → skriv → stryk
        D  med rest                   fraga → fakta → skriv → rest → flytta → stryk
      Ren byggare: läser bara planen — vitest kör den över hela rymden. */
-  const PV_NAMN = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet'];
+  const PV_NAMN = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet', 'tiotusentalet'];
   const pvNamn = g => PV_NAMN[g] || `spalt ${g + 1}`;
   const TALORD = ['noll','en','två','tre','fyra','fem','sex','sju','åtta','nio','tio'];
   const talord = n => TALORD[n] || String(n);
@@ -973,24 +1091,30 @@ const MultDivGame = (() => {
   /* Texterna, ordagrant ur specen §4 — EN mall per stegtyp för N ∈ 2..9.
      Strykningar namnger kolumnen, aldrig siffrans värde; resten heter
      resten från födseln; flytten slutar i det nya talet. */
+  /* D40 ✎: täljarsiffran som arbetstalet ÄR (ingen rest framför, inget
+     hopp) och kvotsiffran som skrivs pekas ut med ref() — samma färg och
+     puls som i multiplikationen. Rest-texterna (rest, flytta, "hela 1:an
+     blir rest") och faktabrickan rörs inte. */
+  const divCurHTML = s => (!s.fromSkip && !(s.remIn > 0) && s.cur === s.digit && isG(s.g))
+    ? ref(`md-n-${s.g}`, s.cur) : `${s.cur}`;
   function divStepText(s) {
     const N = s.N;
     switch (s.t) {
-      case 'fraga':      return `Hur många ${N}:or ryms i ${s.cur}?`;
+      case 'fraga':      return `Hur många ${N}:or ryms i ${divCurHTML(s)}?`;
       case 'ryms_inte':  return s.zero
-        ? `Ingen — ${N} är större än ${s.cur}. Vi skriver 0 i ${pvNamn(s.g)}, och hela ${s.cur}:an blir rest.`
-        : `Ingen — ${N} är större än ${s.cur}. En nolla först skriver vi inte.`;
-      case 'ta_med':     return `Vi tar med ${s.next}:an i ${pvNamn(s.g - 1)} — nu har vi ${s.newCur}.`;
+        ? `Ingen — ${N} är större än ${divCurHTML(s)}. Vi skriver ${isG(s.g) ? ref(`md-q-${s.g}`, 0) : 0} i ${pvNamn(s.g)}, och hela ${s.cur}:an blir rest.`
+        : `Ingen — ${N} är större än ${divCurHTML(s)}. En nolla först skriver vi inte.`;
+      case 'ta_med':     return `Vi tar med ${ref(`md-n-${s.g - 1}`, s.next)}:an i ${pvNamn(s.g - 1)} — nu har vi ${s.newCur}.`;
       case 'fakta':      return s.r === 0
         ? `${stor(nOr(s.q, N))} är precis ${s.cur}.`
         : `${stor(nOr(s.q, N))} är ${s.prod} — det får plats. ${stor(talord(s.q + 1))} vore ${(s.q + 1) * N}, för mycket.`;
-      case 'skriv':      return `Vi skriver ${s.q} i ${pvNamn(s.g)}.`;
+      case 'skriv':      return `Vi skriver ${ref(`md-q-${s.g}`, s.q)} i ${pvNamn(s.g)}.`;
       case 'rest':       return `${s.cur} − ${s.prod} = ${s.r}. Resten är ${s.r}.`;
       case 'flytta':     return `Resten ${s.r} ställer sig framför ${s.next}:an i ${pvNamn(s.toG)} — nu står det ${s.newCur}.`;
       case 'stryk':      return s.gs.length === 1
         ? `${stor(pvNamn(s.gs[0]))} är klart — vi stryker det.`
         : `${stor(pvNamn(s.gs[0]))} och ${pvNamn(s.gs[1])} är klara — ${s.cur} är räknat. Vi stryker dem.`;
-      case 'inget_kvar': return `Inget kvar att dela — vi skriver 0 i ${pvNamn(s.g)}.`;
+      case 'inget_kvar': return `Inget kvar att dela — vi skriver ${ref(`md-q-${s.g}`, 0)} i ${pvNamn(s.g)}.`;
     }
     return '';
   }
@@ -1046,7 +1170,7 @@ const MultDivGame = (() => {
         return divAckOf(divStepText(item.skriv));
       case 'divrest':  return divAckOf(divStepText(item));               // item.t === 'rest'
       case 'divrestb': return `Rätt — resten är ${item.r}.`;
-      case 'divzero':  return `Rätt — 0 i ${pvNamn(item.g)}.`;
+      case 'divzero':  return `Rätt — ${ref(`md-q-${item.g}`, 0)} i ${pvNamn(item.g)}.`;
       case 'divplace': return divAckOf(divStepText(item));               // item.t === 'flytta'
     }
     return '';
@@ -1096,45 +1220,198 @@ const MultDivGame = (() => {
   /* Multiplikationens bubblor: en mening, en idé, ingen uträkning att
      göra i huvudet. Tabellfaktan ("8 · 8 är 64") är premissen — brickan
      som föds är slutsatsen. Minnet läggs till som ett konstaterande
-     ("gör 64 till 70"), aldrig som en addition barnet ska utföra. */
-  function calcText(step) {
-    const C = cv(step.g);
-    if (step.phase === 'add') {
-      if (step.memOnly) return `Bara minnessiffran kvar.`;
-      if (step.single) {
-        const d = step.x === null ? step.y : step.x;
-        return `Bara <strong style="color:${C}">${d}</strong>:an här.`;
-      }
-      return `<span style="color:${C}">${step.x}</span> + <span style="color:${C}">${step.y}</span> är <strong style="color:${C}">${step.base}</strong>`;
+     ("gör 64 till 70"), aldrig som en addition barnet ska utföra.
+     D40 (Dennis 21/10): varje uträkning säger VILKEN ruta svaret hör
+     till — målrutan lyser samtidigt (multLitCells) — och rad 2 säger att
+     allt hamnar ett steg till vänster eftersom vi räknar tiotal. Texterna
+     är rena funktioner av steget och planen (vitest sveper dem).
+     Nivå 1–3 behåller sina texter ordagrant (pl.level < 4). */
+  const isD40 = pl => !!pl && pl.level >= 4;
+  const isZeroCol = (step, pl) => pl.kind === 'twostep' && step.phase === 'add' && step.g === 0;
+
+  /* Varför målrutan: "— det hör till entalet." / rad 2:s första kolumn */
+  function multWhyText(step) {
+    if (step.rowKey === 'p2' && step.g === 1)
+      return `Vi räknar tiotal, så svaret hamnar ett steg till vänster — i tiotalet.`;
+    return `Det hör till ${pvNamn(step.g)}.`;
+  }
+
+  /* ── SIFFROR I TEXTEN PEKAR PÅ PAPPRET (D40 ✎, Dennis 21/10) ──────────
+     En siffra i bubbeltexten som står i (eller ska skrivas i) en cell
+     skrivs med ref(): fet, i cellens platsvärdesfärg, och märkt med VAR
+     den finns (data-ref). Efter att texten visats pulserar just de
+     cellerna en gång (pulseRefs) — texten först, rörelsen sedan.
+       md-<rad>-<g>  en cell i uppställningen (a, b, p1, p2, ans; division n, q)
+       mem:cur       minnessiffran som används härnäst (första ostrukna)
+       chip:0        brickans tiotalssiffra, som blir minnessiffra
+     Tal som inte är en cell (produkten 63, summan 15) skrivs aldrig med
+     färg. Pekningen (multLitCells) och texten läser SAMMA källa: multRefs. */
+  const MEM_COLOR = '#dc2626';
+  const refColor = where => where.startsWith('md-')
+    ? cv(+where.split('-').pop()) : MEM_COLOR;
+  const ref = (where, val) =>
+    `<strong class="md-ref" data-ref="${where}" style="color:${refColor(where)}">${val}</strong>`;
+  const R = o => ref(o.id, o.val);
+  const memRef = val => ref('mem:cur', val);
+
+  /* Var stegets siffror står: faktorerna (a, b) eller delsummornas siffror
+     (x, y) och målrutan/målrutorna. Gäller både demons steg och hjälpköns
+     poster (samma fält). Ren funktion. */
+  function multRefs(step, pl) {
+    if (step.aDig !== undefined) {
+      const r = { a: { id: `md-a-${step.aCol !== undefined ? step.aCol : step.col}`, val: step.aDig },
+                  b: { id: `md-b-${step.mCol !== undefined ? step.mCol : step.g - step.col}`, val: step.m },
+                  target: [{ id: `md-${step.rowKey}-${step.g}`, val: step.write }] };
+      if (step.last && step.extra !== null && step.extra !== undefined)
+        r.target.push({ id: `md-${step.rowKey}-${step.g + 1}`, val: step.extra });
+      return r;
     }
-    return `<span style="color:${C}">${step.aDig}</span> · <span style="color:${C}">${step.m}</span> är <strong style="color:${C}">${step.base}</strong>`;
+    const r = { target: [{ id: `md-ans-${step.g}`, val: step.write }] };
+    if (pl.kind === 'twostep') {
+      if (step.g < pl.p1.digits.length) r.x = { id: `md-p1-${step.g}`, val: step.x };
+      if (step.g === 0) r.y = { id: 'md-p2-0', val: 0 };                     // den osynliga nollan
+      else if (step.g - 1 < pl.p2.digits.length) r.y = { id: `md-p2-${step.g}`, val: step.y };
+    }
+    return r;
+  }
+  /* Den ensamma siffran i en additionskolumn (x eller y) */
+  const soloRef = r => (r.x && r.y && r.y.id === 'md-p2-0') ? r.x : (r.x || r.y);
+
+  function calcText(step, pl) {
+    const r = multRefs(step, pl);
+    if (!isD40(pl))
+      return `${R(r.a)} · ${R(r.b)} är <strong>${step.base}</strong>`;
+    if (step.phase === 'add') {
+      const plats = stor(pvNamn(step.g));
+      if (step.memOnly) return `${plats}: bara minnessiffran kvar.`;
+      if (step.single) return `${plats}: bara ${R(soloRef(r))}:an här.`;
+      return `${plats}: ${R(r.x)} + ${R(r.y)} är <strong>${step.base}</strong>.`;
+    }
+    return `${R(r.a)} · ${R(r.b)} är <strong>${step.base}</strong>. ${multWhyText(step)}`;
+  }
+
+  /* Multiplikationens alla stegtexter — ren funktion av steget och planen */
+  function multStepText(step, pl) {
+    const val = step.phase === 'add' ? step.sum : step.prod;
+    const r = (step.t === 'phase' || step.t === 'mem_strike') ? null : multRefs(step, pl);
+    switch (step.t) {
+      case 'phase':
+        if (step.which === 1) {
+          const ones = { id: 'md-b-0', val: pl.ones };
+          return `Först räknar vi <strong>${pl.a} · </strong>${R(ones)} — entalssiffran i ${pl.tens}${R(ones)}! 👇`;
+        }
+        if (step.which === 2) {
+          /* D41 ✎ (Dennis: "gör det pedagogiskt, så att de förstår varför"): siffrans värde, sedan varför en
+             nolla — 10 har en nolla. Ett tal har bara en roll per mening ("20 är 2 · 10" står för sig). */
+          const V = pl.tens * 10;
+          return `${R({ id: 'md-b-1', val: pl.tens })} står i tiotalet och är värd <strong>${V}</strong>. ` +
+                 (pl.tens > 1 ? `${V} är ${pl.tens} · 10. ` : '') +
+                 `10 har en nolla – därför en nolla i entalet först.`;
+        }
+        return `Nu lägger vi ihop raderna: ental med ental, tiotal med tiotal. Därför står raderna rakt under varandra.`;
+      case 'calc':  return calcText(step, pl);
+      case 'memjoin':
+        return `Minnessiffran ${memRef(step.carryIn)} gör <strong>${step.base}</strong> till <strong>${val}</strong>.`;
+      case 'carry_up':
+        if (!isD40(pl)) return `${ref('chip:0', step.carryOut)}:an åker upp som minne. 👉`;
+        return `${ref('chip:0', step.carryOut)}:an är minnessiffran — den åker upp. 👉`;
+      case 'write_down':
+        if (!isD40(pl)) return `${R(r.target[0])}:an åker ner i svaret. ✅`;
+        return `${R(r.target[0])}:an skrivs i ${pvNamn(step.g)}. ✅`;
+      case 'move_down': {
+        const d = soloRef(r);
+        if (!isD40(pl)) return `Bara ${R(d)}:an här — den åker ner. ✅`;
+        if (isZeroCol(step, pl))
+          return `Nollan lägger inte till något — ${R(r.target[0])}:an åker ner i entalet. ✅`;
+        return `${stor(pvNamn(step.g))}: bara ${R(d)}:an här — den åker ner. ✅`;
+      }
+      case 'write_full':
+        return `Sista kolumnen — hela ${R(r.target[1])}${R(r.target[0])} får plats! ✅`;
+      case 'mem_strike':
+        return `Nu stryker vi ${memRef(step.val)}:an — den är använd. ✏️`;
+    }
+    return '';
+  }
+
+  /* Pekningen (D40): högst faktorcellerna och målrutan lyser samtidigt.
+     Multiplikation: a-siffran, b-siffran och rutan svaret skrivs i (sista
+     kolumnen: även rutan till vänster, där hela värdet får plats).
+     Additionen: kolumnens delsummesiffror och summans ruta. Samma källa
+     som texten (multRefs). Ren funktion. */
+  function multLitCells(step, pl) {
+    const r = multRefs(step, pl);
+    const src = r.a ? [r.a.id, r.b.id] : [r.x, r.y].filter(Boolean).map(o => o.id);
+    return { src, target: r.target.map(o => o.id) };
+  }
+
+  /* Hjälplägets kvittenser och minnesrader — rena funktioner av posten
+     och planen, med samma ref-markering som demon. */
+  function multHelpText(what, item, pl, val) {
+    const r = !item || item.kind === 'memstrike' || item.kind === 'memplace' ? null : multRefs(item, pl);
+    switch (what) {
+      case 'flydown':
+        if (item.last && item.extra !== null && item.extra !== undefined)
+          return `Sista kolumnen — hela ${R(r.target[1])}${R(r.target[0])} får plats! ✅`;
+        return isD40(pl) ? `${R(r.target[0])}:an skrivs i ${pvNamn(item.g)}. ✅`
+                         : `${R(r.target[0])}:an åker ner i svaret. ✅`;
+      case 'memwrite':
+        return isD40(pl) ? `Rätt! ${R(r.target[0])}:an skrivs i ${pvNamn(item.g)}. ✅`
+                         : `Rätt! ${R(r.target[0])}:an åker ner i svaret. ✅`;
+      case 'table':
+        return isD40(pl) && item.kind === 'mult'
+          ? `Rätt! <strong>${val}</strong>. Det hör till ${pvNamn(item.g)}.`
+          : `Rätt! <strong>${val}</strong> ✅`;
+      case 'mem':
+        return `Rätt! <strong>${val}</strong> ✅`;
+      case 'trivial':
+        return isZeroCol({ phase: 'add', g: item.g }, pl)
+          ? `Nollan lägger inte till något — ${R(r.target[0])}:an flyttas ner i entalet! ✅`
+          : `Här står bara ${R(soloRef(r))}:an — den flyttas ner! ✅`;
+      case 'strike':
+        return `Minnessiffran ${memRef(item.val)} är använd. Tryck på den i spalten till höger för att stryka den! ✏️`;
+      case 'pick':
+        return `${ref('chip:0', val)}:an åker upp som minne. ✅`;
+    }
+    return '';
+  }
+
+  /* Pulsen: cellerna (eller minnessiffran/brickans siffra) som texten
+     pekar på pulserar EN gång, kort och mjukt, strax efter att texten
+     visats. Noderna slås upp NU — innan stegets rörelse flyttar dem — och
+     Web Animations lägger pulsen ovanpå cellens egen glöd utan att röra
+     den. Rör bara box-/text-shadow: en skriven siffra skalas aldrig (P1). */
+  function refElement(where) {
+    if (where === 'mem:cur') return currentMemNode();
+    if (where === 'chip:0') { const c = mdChip(); return c ? c.querySelector('.md-cd') : null; }
+    return document.getElementById(where);
+  }
+  function pulseRefs(container) {
+    if (!container) return;
+    const seen = new Set();
+    container.querySelectorAll('.md-ref[data-ref]').forEach(sp => {
+      const el = refElement(sp.dataset.ref);
+      if (!el || seen.has(el) || typeof el.animate !== 'function') return;
+      seen.add(el);
+      const hex = refColor(sp.dataset.ref);
+      const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(',');
+      const box = el.classList.contains('md-cell') || el.classList.contains('md-ansc');
+      const kf = box
+        ? [{ boxShadow: `0 0 0 0 rgba(${rgb},0)` },
+           { boxShadow: `0 0 0 4px rgba(${rgb},0.3), 0 0 16px rgba(${rgb},0.75)` },
+           { boxShadow: `0 0 0 0 rgba(${rgb},0)` }]
+        : [{ textShadow: `0 0 0 rgba(${rgb},0)` },
+           { textShadow: `0 0 9px rgba(${rgb},0.95), 0 0 3px rgba(${rgb},0.95)` },
+           { textShadow: `0 0 0 rgba(${rgb},0)` }];
+      el.animate(kf, { duration: 560, delay: 180, easing: 'ease-in-out' });
+    });
   }
 
   function stepBubbleHTML(step) {
     if (!step) return '';
-    const val = step.phase === 'add' ? step.sum : step.prod;
     switch (step.t) {
-      case 'phase':
-        if (step.which === 1)
-          return `Först räknar vi <strong>${numA} · ${plan.ones}</strong> — entalssiffran i ${numB}! 👇`;
-        if (step.which === 2)
-          return `<strong>${plan.tens}</strong>:an är tiotal — därför börjar vi skriva ett steg åt vänster! 👈`;
-        return `Nu adderar vi raderna. ➕`;
-      case 'calc':  return calcText(step);
-      case 'memjoin':
-        return `Minnessiffran <strong style="color:#dc2626">${step.carryIn}</strong> gör <strong>${step.base}</strong> till <strong style="color:${cv(step.g)}">${val}</strong>.`;
-      case 'carry_up':
-        return `<strong style="color:#dc2626">${step.carryOut}</strong>:an åker upp som minne. 👉`;
-      case 'write_down':
-        return `<strong style="color:${cv(step.g)}">${step.write}</strong>:an åker ner i svaret. ✅`;
-      case 'move_down': {
-        const d = step.x === null ? step.y : step.x;
-        return `Bara <strong style="color:${cv(step.g)}">${d}</strong>:an här — den åker ner. ✅`;
-      }
-      case 'write_full':
-        return `Sista kolumnen — hela <strong style="color:${cv(step.g)}">${val}</strong> får plats! ✅`;
-      case 'mem_strike':
-        return `Nu stryker vi <strong style="color:#dc2626">${step.val}</strong>:an — den är använd. ✏️`;
+      case 'phase': case 'calc': case 'memjoin': case 'carry_up': case 'write_down':
+      case 'move_down': case 'write_full': case 'mem_strike':
+        return multStepText(step, plan);
       /* Kort division (spec 23/9): alla texter ur EN mall, ordagrant ur mockupen */
       case 'fraga': case 'ryms_inte': case 'ta_med': case 'fakta': case 'skriv':
       case 'rest': case 'flytta': case 'stryk': case 'inget_kvar':
@@ -1163,10 +1440,11 @@ const MultDivGame = (() => {
   const modeTitle = () => gameKind === 'div' ? 'Kort division' : 'Multiplikation';
 
   function startDemo() {
+    host = null; // D41: multdivs egna lägen är aldrig lånade
     App.Sound.play('click');
     generateProblem();
     demoStep = 0; stepLocked = false;
-    mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
+    freshCarries();
     mdMemList = []; memAwait = null; memPickerOpen = false; memColMode = 'demo';
     divAwait = null; divStrikeAwait = null;
     demoSteps = buildDemoSteps();
@@ -1185,7 +1463,7 @@ const MultDivGame = (() => {
       <div id="md-main">
         <div id="md-left">
           <div id="md-table-wrap" class="${plan.kind === 'twostep' ? 'md-l4' : ''}">${buildTableHTML(false)}</div>
-          <div id="md-bubble" class="md-bub-demo${plan.kind === 'division' ? ' md-bub-tall' : ''}"></div>
+          <div id="md-bubble" class="md-bub-demo${plan.kind === 'division' || plan.kind === 'twostep' ? ' md-bub-tall' : ''}"></div>
           <div id="md-next-area">${nextBtnHTML()}</div>
         </div>
         <div id="md-right">${scratchHTML()}</div>
@@ -1241,6 +1519,7 @@ const MultDivGame = (() => {
     if (!area) return;
     const html = stepBubbleHTML(step === undefined ? demoSteps[demoStep] : step);
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
+    pulseRefs(area);
   }
 
   function nextBtnHTML() {
@@ -1275,10 +1554,46 @@ const MultDivGame = (() => {
   }
 
   /* ── Steg-exekvering (animationer) ──────────────────────── */
+  /* D40: den osynliga nollan. Rutan lyser först (texten är redan läst:
+     "Därför fyller vi i en nolla här i entalet"), sedan faller den
+     ljusgrå nollan ner i den grå rutan. Idempotent — en gång per uppgift. */
+  function showZero(cb) {
+    const cell = document.getElementById('md-p2-0');
+    if (!cell || cell.querySelector('.md-zd')) { cb && cb(); return; }
+    // Rad 1:s pekning släcks — nu lyser bara tiotalssiffran och den grå rutan
+    document.querySelectorAll('#md-table-wrap .md-cell, #md-table-wrap .md-ansc').forEach(el => {
+      el.classList.remove('md-glow', 'dim', 'active-col'); el.style.removeProperty('--gc');
+    });
+    const tens = document.getElementById('md-b-1');
+    if (tens) { tens.style.setProperty('--gc', 'rgba(59,130,246,0.65)'); tens.classList.add('md-glow'); }
+    cell.style.setProperty('--gc', 'rgba(100,116,139,0.65)');
+    cell.classList.add('active-col', 'md-glow');
+    const gen = exGen;
+    setTimeout(() => {
+      if (gen !== exGen || !document.body.contains(cell)) return;
+      cell.innerHTML = `<span class="md-zd" style="animation:md-drop 0.6s ease-out both">0</span>`;
+      App.Sound.play('click');
+      setTimeout(() => {
+        /* D40 ✎: den orange ramen står kvar på nollans ruta så länge texten "här i entalet" visas;
+           nästa stegs belysning rensar md-glow */
+        cell.classList.remove('active-col');
+        cb && cb();
+      }, 700);
+    }, 700);
+  }
+
   function executeStep(step, cb) {
     if (step.t === 'phase') {
       if (step.which >= 2) clearCarryRow();
-      if (step.which <= 2) {
+      if (step.which === 2 && plan.kind === 'twostep') {
+        // D40: tiotalssiffran pulserar, den grå rutan lyser, nollan skrivs in
+        const bCell = document.getElementById('md-b-1');
+        if (bCell) {
+          bCell.classList.add('md-prob');
+          setTimeout(() => bCell.classList.remove('md-prob'), 1100);
+        }
+        showZero(() => setTimeout(cb, 150));
+      } else if (step.which <= 2) {
         // Pulsera B-siffran som fasen gäller (ental=grid 0, tiotal=grid 1)
         const bCell = document.getElementById(`md-b-${step.which - 1}`);
         if (bCell) {
@@ -1425,6 +1740,19 @@ const MultDivGame = (() => {
         }
       });
     }
+    /* D40: målrutan lyser i samma stund som faktorcellerna (nivå 4) */
+    if (isD40(plan)) {
+      document.querySelectorAll('#md-table-wrap .md-ansc.active-col').forEach(el => el.classList.remove('active-col'));
+      if (opts.g >= 0 && (opts.phase === 'add' || opts.rowKey)) {
+        multLitCells(opts, plan).target.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && !el.classList.contains('filled') && !el.classList.contains('md-ghost')) {
+            el.style.setProperty('--qc', cv(+id.split('-').pop()));
+            el.classList.add('active-col');
+          }
+        });
+      }
+    }
   }
 
   /* ── Divisionens ljus och glöd ──────────────────────────────
@@ -1536,7 +1864,7 @@ const MultDivGame = (() => {
   function clearCarryRow() {
     // Nollställer bara den interna carry-bokföringen mellan faserna.
     // Minnesspalten (mdMemList) RÖRS ALDRIG under uppgiften.
-    mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
+    freshCarries();
   }
 
   /* ── Minnesspalten (v30): rendering + interaktion ────────── */
@@ -1594,7 +1922,7 @@ const MultDivGame = (() => {
      minnesspalten — inget skapas och förstörs i samma steg. */
   const mdWrap = () => document.getElementById('md-table-wrap');
   const mdChip = () => document.querySelector('#md-table-wrap .md-chip');
-  const CHIP_CLS = ['chip-green', 'chip-blue', 'chip-red', 'chip-purple'];
+  const CHIP_CLS = ['chip-green', 'chip-blue', 'chip-red', 'chip-purple', 'chip-amber'];
 
   /* Parkeringsplatsen: fri marginal till HÖGER om tabellen, samma x hela
      uppgiften igenom (uppstallning.js rightMarginSpot). */
@@ -1656,7 +1984,7 @@ const MultDivGame = (() => {
     if (!wrap) { setTimeout(cb, 300); return null; }
     wrap.querySelectorAll('.md-chip').forEach(e => e.remove()); // säkerhetsnät — normalt förbrukad
     const chip = document.createElement('div');
-    chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, 3)]}` +
+    chip.className = `md-chip ${CHIP_CLS[Math.min(step.g, NCOL - 1)]}` +
       (plan && plan.kind === 'division' ? ' md-chip-sm' : '');
     chip.dataset.g = step.g;
     chip.innerHTML = String(value).split('').map(d => `<span class="md-cd">${d}</span>`).join('');
@@ -1860,7 +2188,7 @@ const MultDivGame = (() => {
   function divFaktaBorn(step, cb) {
     if (!mdWrap()) { setTimeout(cb, 300); return; }
     divGlow([...divSrcCells(step), document.getElementById('md-d-0')], 300);
-    const chip = divChipEl(`md-fakta ${CHIP_CLS[Math.min(step.g, 3)]}`, faktaHTML(step.N, step.q, step.prod, false), step.g);
+    const chip = divChipEl(`md-fakta ${CHIP_CLS[Math.min(step.g, NCOL - 1)]}`, faktaHTML(step.N, step.q, step.prod, false), step.g);
     divPlaceChip(chip, divMarginTop());
     divChipIn(chip, 300, 'click');
     if (step.r > 0) {
@@ -1939,7 +2267,8 @@ const MultDivGame = (() => {
      TABELL-HTML
      Grid-kolumn g räknas från höger (0=ental). W = svarets bredd.
      Nivå 4: p1-rad + p2-rad (förskjuten, + framför, position 0 TOM)
-     + slutstreck + svarsrad. Fritt läge: inga delrader.
+     + slutstreck + svarsrad. Fritt läge (D41 ✎): samma rader, tappbara,
+     och nollan står ljusgrå i den grå rutan från början.
   ══════════════════════════════════════════════════════════ */
   /* Kort division (v36): BRÅKSTRECKS-NOTATION per skolboken —
      täljarsiffrorna i rad överst (platsvärdes-etikett ovanför, plats
@@ -1998,15 +2327,17 @@ const MultDivGame = (() => {
     const idx = [];
     for (let i = W - 1; i >= 0; i--) idx.push(i);
     const aD = digitsOf(numA), bD = digitsOf(numB);
-    const l4 = plan.kind === 'twostep' && !freeMode;
+    const l4 = plan.kind === 'twostep';   // D41 ✎: raderna finns även i fria läget
 
     const solidCell = (row, i, digit) => digit === null
       ? `<td><div class="md-cell md-ghost" id="md-${row}-${i}"></div></td>`
       : `<td><div class="md-cell" id="md-${row}-${i}" style="border-color:${cv(i)}">
            <span style="color:${cv(i)}">${digit}</span></div></td>`;
-    const fillCell = (row, i, used) => used
-      ? `<td><div class="md-ansc" id="md-${row}-${i}"></div></td>`
-      : `<td><div class="md-ansc md-ghost" id="md-${row}-${i}"></div></td>`;
+    const fillCell = (row, i, used) => !used
+      ? `<td><div class="md-ansc md-ghost" id="md-${row}-${i}"></div></td>`
+      : freeMode   // fria läget: tappbara rutor, fokusringen glider mellan dem
+        ? `<td><div class="md-ansc md-tap" id="md-${row}-${i}" onclick="MultDivGame.exFreeFocus(${i},'${row}')"></div></td>`
+        : `<td><div class="md-ansc" id="md-${row}-${i}"></div></td>`;
     const lineRow = `<tr><td colspan="${W + 2}" style="padding:2px 0">
       <div style="height:3px;background:linear-gradient(90deg,transparent,#374151,transparent);border-radius:2px"></div></td></tr>`;
 
@@ -2023,6 +2354,10 @@ const MultDivGame = (() => {
       ${idx.map(i => solidCell('b', i, i < bD.length ? bD[i] : null)).join('')}
       <td class="md-memtd"><div class="md-memcol" id="md-memcol"></div></td></tr>`;
 
+    /* D40: den osynliga nollan — rad 2:s ental är en grå ruta, som på
+       övningsbladen. Nollan skrivs in i den när rad 2 börjar (showZero). */
+    /* Fria läget (D41 ✎): nollan står ljusgrå i rutan från början — barnet skriver den inte */
+    const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0">${freeMode ? '<span class="md-zd">0</span>' : ''}</div></td>`;
     let midRows = '';
     if (l4) {
       const p1len = plan.p1.digits.length, p2len = plan.p2.digits.length;
@@ -2030,16 +2365,13 @@ const MultDivGame = (() => {
         <tr><td></td>${idx.map(i => fillCell('p1', i, i < p1len)).join('')}<td></td></tr>
         <tr>
           <td style="font-size:1.5rem;font-weight:900;color:#555;text-align:right;padding-right:6px">+</td>
-          ${idx.map(i => fillCell('p2', i, i >= 1 && i <= p2len)).join('')}<td></td></tr>
+          ${idx.map(i => i === 0 ? zeroCell : fillCell('p2', i, i <= p2len)).join('')}<td></td></tr>
         ${lineRow}`;
     }
 
     /* Fria läget (C3): samma svarsrutor som demo/hjälp, tappbara, med en
        fokusring som glider höger→vänster (#md-ans-focus, placeras i JS). */
-    const ansRow = freeMode
-      ? `<tr><td></td>${idx.map(i =>
-          `<td><div class="md-ansc md-tap" id="md-ans-${i}" onclick="MultDivGame.exFreeFocus(${i})"></div></td>`).join('')}<td></td></tr>`
-      : `<tr><td></td>${idx.map(i => fillCell('ans', i, true)).join('')}<td></td></tr>`;
+    const ansRow = `<tr><td></td>${idx.map(i => fillCell('ans', i, true)).join('')}<td></td></tr>`;
 
     return `
       <table class="md-table">
@@ -2051,7 +2383,7 @@ const MultDivGame = (() => {
           ${midRows}
           ${ansRow}
         </tbody>
-      </table>${freeMode ? '<div id="md-ans-focus" class="md-ans-focus" style="display:none"></div>' : ''}`;
+      </table>${freeMode && l4 ? '<div class="md-zero-note">Rad 2 räknar med tiotal, därför en nolla i entalet.</div>' : ''}${freeMode ? '<div id="md-ans-focus" class="md-ans-focus" style="display:none"></div>' : ''}`;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2120,6 +2452,7 @@ const MultDivGame = (() => {
      gamla hjälpvals-steget ("Med hjälp / Utan hjälp") är borttaget. */
   function showModeSelect() {
     exGen++; // avbryter ev. schemalagd nästa-uppgift (Avsluta-racet)
+    if (host) { difficulty = host.saved.difficulty; host = null; } // D41: en lånad uppgift som lämnats utan Avsluta följer aldrig med
     const root = document.getElementById('multdiv-root');
     const div = gameKind === 'div';
     // Mode-medvetna nivåbeskrivningar (mult = minne, div = rest)
@@ -2127,7 +2460,7 @@ const MultDivGame = (() => {
       { n: 1, emoji: '🌱', desc: div ? 'Utan mellanrest'  : 'Utan minnessiffra' },
       { n: 2, emoji: '🌿', desc: div ? 'Med mellanrest'   : 'Med minnessiffra' },
       { n: 3, emoji: '🌾', desc: 'Tresiffrigt tal' },
-      { n: 4, emoji: '🌳', desc: div ? 'Klurigaste nivån' : 'Två tvåsiffriga' },
+      { n: 4, emoji: '🌳', desc: div ? 'Klurigaste nivån' : 'Svårast – blandat' },
     ];
     const diffBtnsHTML = levels.map(l => `
       <button class="md-diff-btn ${difficulty === l.n ? 'active' : ''}"
@@ -2184,6 +2517,7 @@ const MultDivGame = (() => {
      (resultatvyens "Spela igen") behålls senaste läget. Nollställning-
      arna som tidigare låg i startExercise/setHelpMode är samlade här. */
   function startExercise(withHelp) {
+    host = null; // D41: multdivs egna lägen är aldrig lånade
     if (withHelp !== undefined) helpMode = withHelp;
     App.Sound.play('click');
     exerciseIdx = 0;
@@ -2199,7 +2533,7 @@ const MultDivGame = (() => {
   function newExProblem() {
     generateProblem();
     exInputLocked = false;
-    mdCarries = [0,0,0,0]; mdCarryUsed = [false,false,false,false];
+    freshCarries();
     mdMemList = []; memAwait = null; memPickerOpen = false; // nytt papper
     divAwait = null; divStrikeAwait = null; divAck = null;
     memColMode = helpMode ? 'help' : 'free';
@@ -2217,12 +2551,12 @@ const MultDivGame = (() => {
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.avslutaOvning()">Avsluta</button>
-        <span class="header-title">${modeTitle()}</span>
-        <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
+        <span class="header-title">${host ? host.title : modeTitle()}</span>
+        ${host ? host.right : `<span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>`}
       </div>
       <div id="md-main"${free ? ' class="free-seam"' : ''}>
         <div id="md-left">
-          <div id="md-table-wrap" class="${plan.kind === 'twostep' && !free ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
+          <div id="md-table-wrap" class="${plan.kind === 'twostep' ? 'md-l4' : ''}">${buildTableHTML(free)}</div>
           <div id="md-bubble"${plan.kind === 'division' ? ' class="md-bub-tall"' : ''}></div>
           <div id="md-ui"></div>
           <div id="md-feedback"></div>
@@ -2331,14 +2665,21 @@ const MultDivGame = (() => {
     if (item.kind === 'divstrike') { showDivStrike(item); return; }
     if (item.kind === 'divq') { showDivQ(item); return; }
     if (item.kind === 'divrest' || item.kind === 'divrestb' || item.kind === 'divzero') { showDivAsk(item); return; }
-    if (item.kind === 'mult') doHighlight({ phase: 'mult', aCol: item.col, mCol: item.mCol, g: item.g });
-    else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ phase: 'add', g: item.g });
-    else if (item.kind === 'memwrite') doHighlight(item.rowKey === 'ans' && plan.kind === 'twostep' ? { phase: 'add', g: item.g } : { phase: 'mult', aCol: item.col, mCol: item.g - item.col, g: item.g });
-    // Markera målcellen
-    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
+    const hl = { rowKey: item.rowKey, last: item.last, extra: item.extra, g: item.g };
+    if (item.kind === 'mult') doHighlight({ ...hl, phase: 'mult', aCol: item.col, mCol: item.mCol });
+    else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ ...hl, phase: 'add' });
+    else if (item.kind === 'memwrite') doHighlight(item.rowKey === 'ans' && plan.kind === 'twostep' ? { ...hl, phase: 'add' } : { ...hl, phase: 'mult', aCol: item.col, mCol: item.g - item.col });
+    // Markera målcellen (D40: doHighlight har redan tänt den, sista kolumnen två rutor)
+    if (!isD40(plan) || item.kind === 'phase')
+      document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('active-col'));
     if (item.kind !== 'phase') {
       const cell = document.getElementById(`md-${item.rowKey}-${item.g}`);
       if (cell && !cell.classList.contains('filled')) cell.classList.add('active-col');
+      /* D40 ✎ (Dennis 21/10: "sista rutan här i totalsumman. den behöver inte lysa förrän den är aktuell"):
+         bara rutor i den rad som räknas just nu får lysa */
+      document.querySelectorAll('#md-table-wrap .md-ansc.active-col').forEach(el => {
+        if (!el.id.startsWith(`md-${item.rowKey}-`)) el.classList.remove('active-col');
+      });
     }
     renderMemCol();
     showHelpUI();
@@ -2365,8 +2706,7 @@ const MultDivGame = (() => {
       renderMemCol(); // siffran pulserar
       /* "Stryk minnessiffran 1" sade inte att BARNET ska trycka — exakt
          det ordvalet fick rollspelet att sitta och vanta i divisionen. */
-      helpBubble(`Minnessiffran <strong style="color:#dc2626">${item.val}</strong> är använd. ` +
-                 `Tryck på den i spalten till höger för att stryka den! ✏️`);
+      helpBubble(multHelpText('strike', item, plan));
     }
   }
 
@@ -2380,11 +2720,11 @@ const MultDivGame = (() => {
     const gen = exGen;
     const next = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
     if (item.last && item.extra !== null && item.extra !== undefined) {
-      helpBubble(`Sista kolumnen — hela <strong style="color:${cv(item.g)}">${item.prod}</strong> får plats! ✅`);
+      helpBubble(multHelpText('flydown', item, plan));
       chipDigitToCell(item.rowKey, item.g + 1, () => {});
       setTimeout(() => chipToCell(item.rowKey, item.g, item.write, next), 350);
     } else {
-      helpBubble(`<strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
+      helpBubble(multHelpText('flydown', item, plan));
       chipToCell(item.rowKey, item.g, item.write, next);
     }
   }
@@ -2392,6 +2732,7 @@ const MultDivGame = (() => {
   function memGuide() {
     if (!memAwait) return;
     memMistakes++; helpTaskClean = false;
+    if (host) host.log.minne = true;
     const fb = document.getElementById('md-feedback');
     const msg = memAwait.type === 'place'
       ? 'Nästan — den ska stå här 👉'
@@ -2637,6 +2978,7 @@ const MultDivGame = (() => {
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
         memMistakes++; helpTaskClean = false;
+        if (host) host.log.minne = true;
         if (!memAwait.hmm) { memAwait.hmm = true; App.Sound.play('wrong'); }   // D39: en gång per uppgift
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
@@ -2648,7 +2990,7 @@ const MultDivGame = (() => {
       if (fb) fb.innerHTML = '';
       const srcG = memAwait.srcG;
       memAwait = null;
-      helpBubble(`<strong style="color:#dc2626">${d}</strong>:an åker upp som minne. ✅`);
+      helpBubble(multHelpText('pick', null, plan, d));
       const gen = exGen;
       // Samma siffra som lossnar ur brickan landar i spalten (A2)
       chipDigitToMem({ carryOut: d, g: srcG }, () => {
@@ -2668,6 +3010,7 @@ const MultDivGame = (() => {
     const cur = area.firstElementChild;
     if (cur && html && cur.innerHTML === `<div class="md-tx">${html}</div>`) return;
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
+    pulseRefs(area);
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
@@ -2682,24 +3025,23 @@ const MultDivGame = (() => {
   }
 
   /* v31: uttrycket för aktuell delfråga (livlinans "4 · 7 = 28") */
-  function helpExprHTML(item) {
-    const C = cv(item.g);
+  function helpExprHTML(item, pl = plan) {
     if (item.kind === 'divq')
-      return `<strong style="color:${C}">${item.cur}</strong> ÷ <strong>${numB}</strong>`;
+      return `<strong>${divCurHTML(item)}</strong> ÷ <strong>${numB}</strong>`;
     if (item.kind === 'divrest')
       return `<strong>${item.cur}</strong> − <strong>${item.prod}</strong>`;
     if (item.kind === 'divrestb' || item.kind === 'divzero') return '';
     if (item.kind === 'memwrite') return '';
     if (item.step === 'mem')
-      return `<strong>${helpBase(item)}</strong> + <strong style="color:#dc2626">${item.carryIn}</strong>`;
-    if (item.kind === 'mult')
-      return `<strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>`;
+      return `<strong>${helpBase(item)}</strong> + ${memRef(item.carryIn)}`;
+    const r = multRefs(item, pl);
+    if (item.kind === 'mult') return `${R(r.a)} · ${R(r.b)}`;
     if (item.x === null || item.y === null) return ''; // bara-minnet-kolumnen (91·12) — inget uttryck
-    return `<strong style="color:${C}">${item.x}</strong> + <strong style="color:${C}">${item.y}</strong>`;
+    return `${R(r.x)} + ${R(r.y)}`;
   }
 
-  function askText(item) {
-    const C = cv(item.g);
+  function askText(item, pl = plan) {
+    const r = item.kind.startsWith('div') || item.kind === 'memwrite' ? null : multRefs(item, pl);
     /* Divisionens frågor: facit sägs aldrig i frågan (spec §5) */
     if (item.kind.startsWith('div')) return divHelpAsk(item);
     /* B5: efter minnesvalet — vilken siffra står kvar på brickan och skrivs */
@@ -2719,7 +3061,7 @@ const MultDivGame = (() => {
          se — men här ÄR uträkningen steget, och då skrivs den som den
          skrivs på papper. Uttrycket byggs av helpExprHTML, samma som
          livlinan visar, så siffrorna och färgerna aldrig kan gå isär. */
-      const uttryck = `<span class="md-qexpr">(${helpExprHTML(item)} = ?)</span>`;
+      const uttryck = `<span class="md-qexpr">(${helpExprHTML(item, pl)} = ?)</span>`;
       if (item.single) {
         /* Med uttrycket utskrivet sa den gamla meningen bada talen tva
            ganger ("6:an och 1:an i minne" + "(6 + 1 = ?)") och radbrot vid
@@ -2727,25 +3069,26 @@ const MultDivGame = (() => {
            ner under fingret, samma fel som C4 rattade i demon. Kortad, och
            till SAMMA form som den vanliga minnesfragan: minnets varde star
            i uttrycket, dar det bara behover sagas en gang. */
-        const d = item.x === null ? item.y : item.x;
-        return `<strong style="color:${C}">${d}</strong>:an och minnet — vad blir det? ${uttryck}`;
+        return `${R(soloRef(r))}:an och minnet — vad blir det? ${uttryck}`;
       }
-      return `Nu <strong style="color:#dc2626">${item.carryIn}</strong>:an i minne — vad blir det? ${uttryck}`;
+      return `Nu ${memRef(item.carryIn)}:an i minne — vad blir det? ${uttryck}`;
     }
     if (item.kind === 'mult') {
-      // v31: ren tabellfråga — minnet kommer som egen fråga efteråt
-      return `Vad är <strong style="color:${C}">${item.aDig}</strong> · <strong style="color:${C}">${item.m}</strong>?`;
+      // v31: ren tabellfråga — minnet kommer som egen fråga efteråt.
+      // D40: rad 2:s första fråga säger varför svaret hamnar ett steg till vänster.
+      if (isD40(pl) && item.rowKey === 'p2' && item.g === 1)
+        return `${multWhyText(item)} Vad är ${R(r.a)} · ${R(r.b)}?`;
+      return `Vad är ${R(r.a)} · ${R(r.b)}?`;
     }
     const x = item.x, y = item.y;
     if (x === null && y === null) {
       // Kolumn utan siffror — bara minnessiffran (t.ex. 91·12, 33·33)
-      return `Bara minnessiffran kvar! Vad är <strong style="color:#d97706">${item.carryIn}</strong>?`;
+      return `Bara minnessiffran kvar! Vad är ${memRef(item.carryIn)}?`;
     }
-    if (x === null || y === null) {
-      const d = x === null ? y : x;
-      return `Vad är <strong style="color:${C}">${d}</strong>?`;
-    }
-    return `Vad är <strong style="color:${C}">${x}</strong> + <strong style="color:${C}">${y}</strong>?`;
+    if (x === null || y === null) return `Vad är ${R(soloRef(r))}?`;
+    if (isD40(pl))
+      return `${stor(pvNamn(item.g))}: vad är ${R(r.x)} + ${R(r.y)}?`;
+    return `Vad är ${R(r.x)} + ${R(r.y)}?`;
   }
 
   function showHelpUI() {
@@ -2761,12 +3104,26 @@ const MultDivGame = (() => {
                   : 'Dags att addera! ➕';
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
         onclick="MultDivGame.helpAction()">${label}</button>`;
+      if (item.which === 2 && plan.kind === 'twostep') {
+        // D40: nollan visas automatiskt — barnet skriver den inte. Knappen
+        // väntar tills nollan står i rutan (texten först, rörelsen sedan).
+        exInputLocked = true;
+        const btn = document.getElementById('md-action-btn');
+        if (btn) btn.disabled = true;
+        const gen = exGen;
+        showZero(() => {
+          if (gen !== exGen || helpItem() !== item) return;
+          exInputLocked = false;
+          const b = document.getElementById('md-action-btn');
+          if (b) b.disabled = false;
+        });
+      }
       return;
     }
 
     if (item.kind === 'trivial') {
       const d = item.x === null ? item.y : item.x;
-      helpBubble(`Här står bara <strong style="color:${cv(item.g)}">${d}</strong>:an — den flyttas ner! ✅`);
+      helpBubble(multHelpText('trivial', item, plan));
       ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-action-btn"
         onclick="MultDivGame.helpAction()">Skriv ${d}:an ✏️</button>`;
       return;
@@ -2839,6 +3196,7 @@ const MultDivGame = (() => {
     if (!visaVagen()) return;
     lifelineShownFor = item;
     lifelines--;
+    if (host) host.log.lifeline = true;     // D41: i matteprovet är livlinan hjälp
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
     if (btn) btn.outerHTML = lifelineBtnHTML();
@@ -2910,7 +3268,7 @@ const MultDivGame = (() => {
       if (item.kind.startsWith('div')) { divHelpCorrect(item); return; }
       if (item.kind === 'memwrite') {
         // B5: siffran som skrivs — brickans rest åker ner i rutan
-        helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${item.write}</strong>:an åker ner i svaret. ✅`);
+        helpBubble(multHelpText('memwrite', item, plan));
         smallBurst();
         chipToCell(item.rowKey, item.g, item.write, () => {
           setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 500);
@@ -2920,18 +3278,19 @@ const MultDivGame = (() => {
       if (item.step === 'table') {
         // Tabellsvaret klart: BRICKAN föds i marginalen och står kvar där
         // tills kolumnen är färdig (B2). Minnesfrågan kommer som egen fråga.
-        helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+        // D40: multiplikationens svar säger vilken ruta det hör till.
+        helpBubble(multHelpText('table', item, plan, expected));
         smallBurst();
         const step = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, memOnly: !!item.memOnly };
         chipBorn(step, expected, calcSources(step), () => {
-          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
+          setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, isD40(plan) && item.kind === 'mult' ? 900 : 400);
         });
         return;
       }
       // step === 'mem': minnet läggs SYNLIGT till brickan (eller föder den
       // när kolumnen bara hade en siffra + minne, B7)
       consumeCarry(item);
-      helpBubble(`Rätt! <strong style="color:${cv(item.g)}">${expected}</strong> ✅`);
+      helpBubble(multHelpText('mem', item, plan, expected));
       smallBurst();
       const stepM = { phase: item.kind === 'mult' ? 'mult' : 'add', aCol: item.col, mCol: item.mCol, g: item.g, prod: item.prod, sum: item.sum };
       const done = () => setTimeout(() => { if (gen === exGen) advanceHelp(helpIdx + 1); }, 400);
@@ -2948,6 +3307,7 @@ const MultDivGame = (() => {
      poangstraff; den felaktiga siffran ar forbrukad sa nasta tryck borjar
      om. Byggs pa ETT stalle for alla delfragor. */
   function helpWrong(expected) {
+    if (host) hostNoteWrong(helpItem());
     if (helpTries === 0) App.Sound.play('wrong');   // D39: ljudet en gång per delfråga, orden varje gång
     helpTaskClean = false;      // uppgiften ar inte langre helratt
     exWrongAnswers++;
@@ -3031,7 +3391,7 @@ const MultDivGame = (() => {
     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/>' +
     '<path d="M12 3v5.4M12 15.6V21M3 12h5.4M15.6 12H21"/></svg>';
   const isDivFree = () => plan.kind === 'division';
-  const freeCellId = g => (isDivFree() ? 'md-q-' : 'md-ans-') + g;
+  const freeCellId = g => (isDivFree() ? 'md-q-' : `md-${exFreeRow}-`) + g;
 
   function showFreeUI() {
     exFreeInit();
@@ -3064,7 +3424,7 @@ const MultDivGame = (() => {
         <button class="md-nk k-erase" aria-label="Sudda sista siffran"
           onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
         <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
-        ${freeLifelineBtnHTML()}
+        ${host ? '' : freeLifelineBtnHTML()}
         <button class="md-klar" id="md-free-submit" disabled
           onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
@@ -3077,8 +3437,8 @@ const MultDivGame = (() => {
      inte siffran att skriva, för kolumnen där fokusringen står:
      division — tabellraden runt svaret (spec §6);
      multiplikation — tabellfaktan och minnet in ("9 · 9 = 81, och 8 i
-     minne"); nivå 4 — de två delprodukterna (fria läget har inga
-     delrader på pappret, så det är dem barnet ska ställa upp i kladden). */
+     minne"); nivå 4 med tvåsiffrig faktor — de två delprodukterna, som
+     barnet skriver i rad 1 och rad 2. */
   function freeLifelineBtnHTML() {
     const on = lifelines > 0;
     return `<button class="md-btn md-free-ll" id="md-free-lifeline"
@@ -3125,41 +3485,130 @@ const MultDivGame = (() => {
     if (btn) btn.outerHTML = freeLifelineBtnHTML();
     const b = document.getElementById('md-bubble');
     if (b) b.innerHTML = `<div class="md-thought"><div class="md-tx">${tabellradHTML(numB, st.cur, st.g)}</div></div>`;
+    pulseRefs(b);
   }
 
-  function exFreeInit() {
-    exFreeCells = Array(plan.width).fill(null);
-    exFreeCur = isDivFree() ? plan.width - 1 : 0;   // div: börja längst till vänster
-    exFreePaintCells();
-    requestAnimationFrame(() => exFreePlaceRing(false));
-  }
+  /* ── D41 ✎ (Dennis 21/10, "den där nollan i grå ruta saknades"): RADERNA
+     I RÄKNA SJÄLV. Vid tvåsiffrig faktor visar fria läget rad 1, rad 2 med
+     den grå nollan och summan, som hjälpläget. Barnet fyller rad för rad,
+     ruta för ruta från höger. En knapp: "Nästa rad" tills allt är ifyllt,
+     sedan Klar. Summan är låst tills båda raderna har siffror. Rättningen
+     pekar på raden som inte stämmer (freeCheck). Ensiffrig faktor, nivå
+     1–3 och divisionen har bara svarsraden, som förut (exFreeRow 'ans'). */
+  const freeRows = () => !!plan && plan.kind === 'twostep' && !isDivFree();
+  const FREE_ORDER = ['p1', 'p2', 'ans'];
 
-  /* Svarets värde, eller null om rutorna inte bildar ett tal: ledande
-     tomma rutor hoppas över, en tom ruta MITT i talet kan aldrig bli rätt. */
-  function exFreeValue() {
+  /* Rutorna en rad har: [lägsta, högsta] kolumn. Rad 2 börjar i tiotalet
+     (entalet är den grå nollan). Ren funktion. */
+  function freeRowCols(pl, row) {
+    if (row === 'p1') return [0, pl.p1.digits.length - 1];
+    if (row === 'p2') return [1, pl.p2.digits.length];
+    return [0, pl.width - 1];
+  }
+  /* Radens tal, eller null: ledande tomma hoppas över, en tom ruta mitt i
+     talet kan aldrig bli rätt. Rad 2 läses utan nollan. Ren funktion. */
+  function freeRowValue(cells, lo, hi) {
     let s = '', started = false;
-    for (let g = plan.width - 1; g >= 0; g--) {
-      const v = exFreeCells[g];
-      if (v === null) { if (started) return null; continue; }
+    for (let g = hi; g >= lo; g--) {
+      const v = cells[g];
+      if (v === null || v === undefined) { if (started) return null; continue; }
       started = true; s += v;
     }
     return s === '' ? null : parseInt(s, 10);
   }
-  const exFreeHasDigits = () => exFreeCells.some(v => v !== null);
+  const rowHas = (cells, lo, hi) => { for (let g = lo; g <= hi; g++) if (cells[g] !== null && cells[g] !== undefined) return true; return false; };
+  /* Summan är låst tills båda raderna har siffror */
+  function freeAnsLocked(pl, grid) {
+    if (pl.kind !== 'twostep') return false;
+    return !rowHas(grid.p1, ...freeRowCols(pl, 'p1')) || !rowHas(grid.p2, ...freeRowCols(pl, 'p2'));
+  }
+  /* Knappens läge: 'klar' när varje rad har siffror, annars 'next' (Nästa rad) */
+  function freeButtonMode(pl, grid) {
+    if (pl.kind !== 'twostep') return 'klar';
+    return FREE_ORDER.every(r => rowHas(grid[r], ...freeRowCols(pl, r))) ? 'klar' : 'next';
+  }
+  /* Nästa rad: första raden i ordningen som saknar siffror, annars nästa rad efter den aktuella */
+  function freeNextRow(pl, grid, row) {
+    const empty = FREE_ORDER.find(r => r !== row && !rowHas(grid[r], ...freeRowCols(pl, r)));
+    return empty || FREE_ORDER[(FREE_ORDER.indexOf(row) + 1) % FREE_ORDER.length];
+  }
+  /* Glömd minnessiffra i additionen: varje kolumn mod 10, sista kolumnen hel */
+  function noCarrySum2(x, y) {
+    const d1 = digitsOf(x), d2 = digitsOf(y), len = Math.max(d1.length, d2.length), ds = [];
+    for (let c = 0; c < len; c++) {
+      const sm = (d1[c] || 0) + (d2[c] || 0);
+      if (c === len - 1) digitsOf(sm).forEach(d => ds.push(d)); else ds.push(sm % 10);
+    }
+    return ds.reduce((n, d, i) => n + d * Math.pow(10, i), 0);
+  }
+  /* Rättningen med rader. vals = { p1, p2 (utan nollan), ans }. Raderna rättas
+     före summan; glömd minnessiffra känns igen per rad och i summan. Ren. */
+  function freeCheck(pl, vals) {
+    const nc = (a, m) => noCarryAnswer({ kind: 'simple', a, b: m });
+    if (vals.p1 !== pl.p1.value) {
+      const glomt = nc(pl.a, pl.ones) !== pl.p1.value && vals.p1 === nc(pl.a, pl.ones);
+      return { ok: false, row: 'p1', cls: glomt ? 'minne' : 'fel',
+               msg: glomt ? 'Titta på rad 1 – kolla minnessiffrorna.'
+                          : `Titta på rad 1 – där räknar du ${pl.a} · ${pl.ones}, från entalet.` };
+    }
+    if (vals.p2 !== pl.p2.value) {
+      const glomt = nc(pl.a, pl.tens) !== pl.p2.value && vals.p2 === nc(pl.a, pl.tens);
+      return { ok: false, row: 'p2', cls: glomt ? 'minne' : 'fel',
+               msg: glomt ? 'Titta på rad 2 – kolla minnessiffrorna.'
+                          : `Titta på rad 2 – nollan står i entalet, så ${pl.a} · ${pl.tens} börjar i tiotalet.` };
+    }
+    if (vals.ans !== pl.answer) {
+      const n2 = noCarrySum2(pl.p1.value, pl.p2.value * 10);
+      const glomt = n2 !== pl.answer && vals.ans === n2;
+      return { ok: false, row: 'ans', cls: glomt ? 'minne' : 'addition',
+               msg: glomt ? 'Nästan! Kolla minnessiffrorna när du lägger ihop raderna.'
+                          : 'Titta på summan – lägg ihop ental med ental och tiotal med tiotal.' };
+    }
+    return { ok: true, row: null, cls: null, msg: '' };
+  }
+
+  function exFreeInit() {
+    exFreeGrid = { ans: Array(plan.width).fill(null) };
+    if (freeRows()) { exFreeGrid.p1 = Array(plan.width).fill(null); exFreeGrid.p2 = Array(plan.width).fill(null); }
+    setFreeRow(freeRows() ? 'p1' : 'ans');
+    exFreeCur = isDivFree() ? plan.width - 1 : freeLo();   // div: börja längst till vänster
+    exFreePaintCells();
+    requestAnimationFrame(() => exFreePlaceRing(false));
+  }
+  function setFreeRow(row) { exFreeRow = row; exFreeCells = exFreeGrid[row]; }
+  const freeLo = () => freeRows() ? freeRowCols(plan, exFreeRow)[0] : 0;
+  const freeHi = () => freeRows() ? freeRowCols(plan, exFreeRow)[1] : plan.width - 1;
+
+  /* Svarets värde (summaraden), eller null om rutorna inte bildar ett tal */
+  function exFreeValue() {
+    return freeRowValue(exFreeGrid.ans, 0, plan.width - 1);
+  }
+  const exFreeHasDigits = () => Object.values(exFreeGrid).some(c => c.some(v => v !== null));
+  const freeVals = () => freeRows()
+    ? { p1: freeRowValue(exFreeGrid.p1, ...freeRowCols(plan, 'p1')),
+        p2: freeRowValue(exFreeGrid.p2, ...freeRowCols(plan, 'p2')), ans: exFreeValue() }
+    : { ans: exFreeValue() };
 
   function exFreePaintCells(popG) {
-    for (let g = 0; g < plan.width; g++) {
-      const el = document.getElementById(freeCellId(g));
-      if (!el) continue;
-      const v = exFreeCells[g];
-      el.classList.toggle('filled', v !== null);
-      el.classList.toggle('active-col', g === exFreeCur && !exInputLocked);
-      el.style.borderColor = v !== null ? cv(g) : '';
-      el.style.borderStyle = v !== null ? 'solid' : '';
-      el.innerHTML = v !== null
-        ? `<span style="color:${cv(g)}">${v}</span>`
-        : (g === exFreeCur && !exInputLocked ? '<span class="md-ans-caret"></span>' : '');
-      if (popG === g) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+    const rows = freeRows() ? FREE_ORDER : [exFreeRow];
+    const locked = freeRows() && freeAnsLocked(plan, exFreeGrid);
+    for (const row of rows) {
+      const cells = exFreeGrid[row];
+      const [lo, hi] = freeRows() ? freeRowCols(plan, row) : [0, plan.width - 1];
+      for (let g = lo; g <= hi; g++) {
+        const el = document.getElementById(isDivFree() ? 'md-q-' + g : `md-${row}-${g}`);
+        if (!el) continue;
+        const v = cells[g], here = row === exFreeRow && g === exFreeCur && !exInputLocked;
+        el.classList.toggle('filled', v !== null);
+        el.classList.toggle('active-col', here);
+        if (freeRows() && row === 'ans') el.classList.toggle('md-lk', locked);
+        el.style.borderColor = v !== null ? cv(g) : '';
+        el.style.borderStyle = v !== null ? 'solid' : '';
+        el.innerHTML = v !== null
+          ? `<span style="color:${cv(g)}">${v}</span>`
+          : (here ? '<span class="md-ans-caret"></span>' : '');
+        if (popG === g && row === exFreeRow) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+      }
     }
   }
 
@@ -3178,27 +3627,42 @@ const MultDivGame = (() => {
     if (animate === false) requestAnimationFrame(() => ring.classList.remove('instant'));
   }
 
-  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den gamla. */
-  function exFreeFocus(g) {
+  /* Vilken ruta som helst går att trycka på; nästa siffra ersätter den gamla.
+     Summans rutor går inte att välja medan summan är låst. */
+  function exFreeFocus(g, row) {
     if (exInputLocked || helpMode) return;
-    if (g < 0 || g >= plan.width) return;
+    const r = row || 'ans';
+    if (!exFreeGrid[r]) return;
+    if (freeRows()) {
+      const [lo, hi] = freeRowCols(plan, r);
+      if (g < lo || g > hi) return;
+      if (r === 'ans' && freeAnsLocked(plan, exFreeGrid)) return;
+    } else if (g < 0 || g >= plan.width) return;
+    setFreeRow(r);
     exFreeCur = g;
     App.Sound.play('click');
     exFreePaintCells();
     exFreePlaceRing(true);
+    exFreeUpdateSubmit();
   }
 
   function exFreeClearWrong() {
-    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('judged-ok'));
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.remove('judged-ok', 'md-soft'));
     const fb = document.getElementById('md-feedback');
     if (fb) fb.innerHTML = '';
   }
 
-  /* Klar heter Klar hela tiden — ytan bär tillståndet, inte namnet. */
+  /* En knapp (D39 ✎): med rader heter den "Nästa rad" tills varje rad har
+     siffror, sedan Klar. Utan rader heter den Klar hela tiden — ytan bär
+     tillståndet, inte namnet. */
   function exFreeUpdateSubmit() {
     const btn = document.getElementById('md-free-submit');
     if (!btn) return;
-    const ready = exFreeHasDigits() && !exInputLocked;
+    const next = freeRows() && freeButtonMode(plan, exFreeGrid) === 'next';
+    const ready = !exInputLocked && (next ? rowHas(exFreeCells, freeLo(), freeHi()) : exFreeHasDigits());
+    const label = btn.querySelector('span');
+    if (label) label.textContent = next ? 'Nästa rad' : 'Klar';
+    btn.classList.toggle('md-klar-next', next);
     const was = !btn.disabled;
     btn.disabled = !ready;
     btn.classList.toggle('done', exInputLocked);
@@ -3211,7 +3675,7 @@ const MultDivGame = (() => {
     exFreeCells[exFreeCur] = parseInt(key, 10);
     const popped = exFreeCur;
     if (isDivFree()) { if (exFreeCur > 0) exFreeCur--; }              // div: ett steg HÖGERUT
-    else if (exFreeCur < plan.width - 1) exFreeCur++;                  // mult: ett steg vänsterut
+    else if (exFreeCur < freeHi()) exFreeCur++;                        // mult: ett steg vänsterut
     App.Sound.play('click');
     exFreePaintCells(popped);
     exFreePlaceRing(true);
@@ -3226,8 +3690,20 @@ const MultDivGame = (() => {
     exFreeClearWrong();
     if (exFreeCells[exFreeCur] === null) {
       if (isDivFree()) { if (exFreeCur < plan.width - 1) { exFreeCur++; exFreeCells[exFreeCur] = null; } }
-      else if (exFreeCur > 0) { exFreeCur--; exFreeCells[exFreeCur] = null; }
+      else if (exFreeCur > freeLo()) { exFreeCur--; exFreeCells[exFreeCur] = null; }
     } else exFreeCells[exFreeCur] = null;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
+    exFreeUpdateSubmit();
+  }
+
+  /* Nästa rad: fokus till nästa rad som saknar siffror, i dess ental */
+  function freeGoNextRow() {
+    const row = freeNextRow(plan, exFreeGrid, exFreeRow);
+    if (row === 'ans' && freeAnsLocked(plan, exFreeGrid)) return;
+    setFreeRow(row);
+    exFreeCur = freeLo();
     App.Sound.play('click');
     exFreePaintCells();
     exFreePlaceRing(true);
@@ -3242,8 +3718,6 @@ const MultDivGame = (() => {
     return [...of(pl.p1), ...of(pl.p2), ...of(pl.add)];
   }
 
-
-
   /* Divisionens rester enligt planen: { g: rest } för cellen som tar emot */
   function planRests(pl) {
     const out = {};
@@ -3256,19 +3730,33 @@ const MultDivGame = (() => {
     if (fb) fb.innerHTML = `<div class="md-free-tip">${msg}</div>`;
   }
 
+  /* Raden som inte stämmer blir milt persika (D39) och får fokus i sitt ental */
+  function freeMarkRow(row) {
+    const [lo, hi] = freeRowCols(plan, row);
+    for (let g = lo; g <= hi; g++) {
+      const el = document.getElementById(`md-${row}-${g}`);
+      if (el && exFreeGrid[row][g] !== null) el.classList.add('md-soft');
+    }
+    setFreeRow(row);
+    exFreeCur = lo;
+    exFreePaintCells();
+    exFreePlaceRing(true);
+  }
+
   function exFreeSubmit() {
     if (exInputLocked) return;
+    if (freeRows() && freeButtonMode(plan, exFreeGrid) === 'next') { freeGoNextRow(); return; }
     if (!exFreeHasDigits()) return;          // Klar kräver minst en siffra
     const val = exFreeValue();
     const div = isDivFree();
-    const nd = div ? digitsOf(numA) : null;
-    if (val === plan.answer) {
+    const chk = freeRows() ? freeCheck(plan, freeVals()) : null;
+    if (chk ? chk.ok : val === plan.answer) {
       exInputLocked = true;
       if (exFreeFirstAttempt) exScore++;      // +1 endast helrätt på FÖRSTA Klar
       exFreeClearWrong();
       exFreePaintCells();
       exFreePlaceRing(false);                 // låst ruta → ringen släcks
-      document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => el.classList.add('judged-ok'));
+      document.querySelectorAll('#md-table-wrap .md-ansc.filled').forEach(el => el.classList.add('judged-ok'));
       exFreeUpdateSubmit();
       App.Sound.play('correct');
       smallBurst();
@@ -3284,12 +3772,17 @@ const MultDivGame = (() => {
           });
       notes.forEach((f, i) => setTimeout(() => { f(); App.Sound.play('click'); }, 350 + i * 380));
       const extra = notes.length ? 350 + notes.length * 380 + 500 : 0;
-      setTimeout(() => finishTask(true), 900 + extra);
+      /* Avsluta under väntan (exGen ändras) får inte dra in nästa uppgift */
+      const gen = exGen;
+      setTimeout(() => { if (gen === exGen) finishTask(true); }, 900 + extra);
+    } else if (host) {
+      hostFreeWrong(val, chk);
     } else {
       if (exFreeFirstAttempt) App.Sound.play('wrong');   // D39: ljudet bara vid första Klar som inte stämmer
       exFreeFirstAttempt = false;             // fel förbrukar första försöket
       const wrap = mdWrap();
       if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+      if (chk) { freeTip(chk.msg); freeMarkRow(chk.row); exFreeUpdateSubmit(); return; }
       // Glömd-minnessiffra-/glömd-rest-detektion (v30/v32): matchar svaret
       // simuleringen där minnen/rester tappas → riktad feedback. Barnets
       // egna anteckningar räknas: en felaktig pekas ut före den generiska.
@@ -3309,8 +3802,182 @@ const MultDivGame = (() => {
     });
   }
 
+  /* ══════════════════════════════════════════════════════════
+     D41: MATTEPROVET LÅNAR MOTORN (runTask)
+     Matteprovets uppställning i läget "Minnessiffra" räknas här, med
+     samma metodik som nivå 4: minnessiffran, den osynliga nollan, den
+     orange ramen, siffrorna i platsvärdesfärg och platsorden. Kroken är
+     isolerad — host är null i multdivs egna lägen, som beter sig som förut.
+       runTask({ a, b, mode:'help'|'free', profile, title, right, exitMsg, exitAsk,
+                 onDone(result), onExit() })
+     result = { outcome:'direkt'|'hjalp'|'svar', cls:null|'minne'|'addition'|'fel',
+                facts:[[siffra, faktor], …] }  (tabellfakta som fick fel svar)
+     Läget 'help' är Räkna med hjälp (frågor kolumn för kolumn, livlinor).
+     Läget 'free' är Räkna själv med matteprovets hjälptrappa: första
+     "inte riktigt" är tyst, andra ger en hjälpbit, tredje visar svaret.
+     Efter uppgiften står en Nästa-knapp (klickstyrt, som i matteprovet).
+  ══════════════════════════════════════════════════════════ */
+  function runTask(o) {
+    host = { a: o.a, b: o.b, mode: o.mode === 'free' ? 'free' : 'help', title: o.title || 'Uppställning',
+             right: o.right || '<span style="width:52px"></span>', exitMsg: o.exitMsg || null,
+             exitAsk: !!o.exitAsk,
+             onDone: o.onDone, onExit: o.onExit,
+             log: { facts: [], minne: false, addition: false, lifeline: false, cls0: null },
+             wrong: 0, revealed: false,
+             saved: { difficulty, gameKind, helpMode } };   // multdivs egna val återställs efter uppgiften
+    if (o.profile) profile = o.profile;
+    gameKind = 'mult'; difficulty = 4; helpMode = host.mode === 'help';
+    exerciseIdx = 0; exScore = 0;
+    memMoments = 0; memMistakes = 0; exWrongAnswers = 0;
+    lifelines = helpMode ? 2 : 0; lifelineShownFor = null;
+    exGen++;
+    forcedNext = { a: o.a, b: o.b };
+    Router.silent(() => Router.show('screen-multdiv'));
+    newExProblem();
+  }
+
+  /* Fel svar i hjälpläget: vad var det som var svårt? (ren bokföring) */
+  function hostNoteWrong(item) {
+    if (!host || !item) return;
+    if (item.kind === 'mult' && item.step === 'table') {
+      if (!host.log.facts.some(f => f[0] === item.aDig && f[1] === item.m)) host.log.facts.push([item.aDig, item.m]);
+    } else if (item.kind === 'add') host.log.addition = true;
+    else host.log.minne = true;          // minnesfrågan och siffran i rutan
+  }
+
+  /* Utfallet — ren funktion av loggen och läget */
+  function hostOutcome(h, clean, firstAttempt) {
+    const log = h.log;
+    let outcome;
+    if (h.mode === 'help') outcome = clean && !log.lifeline ? 'direkt' : 'hjalp';
+    else outcome = h.revealed ? 'svar' : firstAttempt ? 'direkt' : 'hjalp';
+    const cls = h.mode === 'free' ? log.cls0
+      : log.minne ? 'minne' : log.addition ? 'addition' : null;
+    return { outcome, cls: outcome === 'direkt' ? null : cls, facts: outcome === 'direkt' ? [] : log.facts.slice() };
+  }
+
+  /* Hjälpbiten i fria läget: tvåsiffrig faktor ⇒ de två raderna; ensiffrig ⇒
+     minnessiffrorna (eller tabellfakta när det inte finns något minne). Ren. */
+  function hostBitHTML(pl, row) {
+    if (pl.kind === 'twostep') {
+      /* D41 ✎: hjälpbiten "raderna" visar en rad i taget — den som inte stämmer */
+      if (row === 'p2')
+        return `Rad 2 är <strong>${pl.a} · ${pl.tens * 10} = ${pl.p2.value * 10}</strong>. Nollan står redan i entalet.`;
+      if (row === 'ans')
+        return `Raderna stämmer. Lägg ihop dem: <strong>${pl.p1.value} + ${pl.p2.value * 10}</strong>.`;
+      return `Rad 1 är <strong>${pl.a} · ${pl.ones} = ${pl.p1.value}</strong>.`;
+    }
+    const mem = planCarries(pl);
+    if (mem.length) {
+      const lista = mem.length === 1 ? `${mem[0]}` : `${mem.slice(0, -1).join(', ')} och ${mem[mem.length - 1]}`;
+      return `Minnessiffrorna blir <strong style="color:#dc2626">${lista}</strong>, från entalet och vänsterut.`;
+    }
+    return pl.pass.cols.map(c => `${c.aDig} · ${c.m} = ${c.prod}`).join(', ') + '.';
+  }
+
+  /* Räkna själv i matteprovet: hjälptrappan (D38/D39). Med rader (chk) pekar
+     varje steg på raden som inte stämmer: först ledtråden, sedan radens facit
+     som hjälpbit (en rad i taget), och kommer samma rad igen visas svaret. */
+  function hostFreeWrong(val, chk) {
+    const h = host;
+    h.wrong++;
+    exFreeFirstAttempt = false;
+    const nc = noCarryAnswer(plan);
+    const glomt = chk ? chk.cls === 'minne' : (nc !== plan.answer && val === nc);
+    if (h.wrong === 1) h.log.cls0 = chk ? chk.cls : (glomt ? 'minne' : 'fel');
+    if (h.wrong >= 2) App.Sound.play('wrong');            // första "inte riktigt" är tyst (matteprovet, D39)
+    const wrap = mdWrap();
+    if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+    if (h.wrong === 1) {
+      freeTip(chk ? chk.msg : glomt ? 'Nästan! Kolla minnessiffrorna — någon vill vara med.' : 'Inte riktigt – försök igen.');
+      if (chk) freeMarkRow(chk.row);
+      exFreeUpdateSubmit();
+      return;
+    }
+    if (chk) {
+      h.bits = h.bits || [];
+      if (!h.bits.includes(chk.row)) {
+        h.bits.push(chk.row);
+        /* hjälpbiten står i bubblan (den står kvar medan barnet skriver), och ledtrådens ruta
+           töms: bubbla + ruta samtidigt tog kladden ner till 74 px i 390 × 797 */
+        freeMarkRow(chk.row);
+        exFreeClearWrong();
+        document.querySelectorAll(`#md-table-wrap [id^="md-${chk.row}-"].filled`).forEach(el => el.classList.add('md-soft'));
+        helpBubble(hostBitHTML(plan, chk.row));
+        exFreeUpdateSubmit();
+        return;
+      }
+    } else if (h.wrong === 2) {
+      freeTip('Inte riktigt ännu. Här är en hjälp:');
+      helpBubble(hostBitHTML(plan));
+      exFreeUpdateSubmit();
+      return;
+    }
+    // sist: svaret visas, i neutral grå, och minnessiffrorna landar
+    h.revealed = true;
+    exInputLocked = true;
+    const fill = (row, v, from) => { const ds = digitsOf(v); exFreeGrid[row] = Array(plan.width).fill(null).map((_, g) => g >= from && g - from < ds.length ? ds[g - from] : null); };
+    fill('ans', plan.answer, 0);
+    if (freeRows()) { fill('p1', plan.p1.value, 0); fill('p2', plan.p2.value, 1); }
+    setFreeRow('ans');
+    exFreePaintCells();
+    exFreePlaceRing(false);
+    document.querySelectorAll('#md-table-wrap .md-ansc.filled').forEach(el => {
+      el.style.borderColor = '#94a3b8'; el.style.background = '#f1f5f9';
+    });
+    mdMemList = planCarries(plan).map(v => ({ val: v, used: false }));
+    renderMemCol();
+    exFreeClearWrong();
+    helpBubble(`Så här blir det: ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    hostFinish();
+  }
+
+  /* Uppgiften är klar: Nästa-knappen i stället för knappsatsen */
+  function hostFinish() {
+    if (!host) return;
+    const res = hostOutcome(host, helpTaskClean, exFreeFirstAttempt);
+    host.result = res;
+    // pekningen släcks: uppgiften är färdig
+    document.querySelectorAll('#md-table-wrap .md-cell, #md-table-wrap .md-ansc').forEach(el => {
+      el.classList.remove('md-glow', 'dim', 'active-col'); el.style.removeProperty('--gc');
+    });
+    if (res.outcome !== 'svar')
+      helpBubble(res.outcome === 'direkt' ? `Rätt! ${numA} · ${numB} = <strong>${plan.answer}</strong>`
+                                          : `Rätt, med hjälp. ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-host-next"
+      onclick="MultDivGame.hostNext()">Nästa <svg class="icn"><use href="#i-play"/></svg></button>`;
+    const fb = document.getElementById('md-feedback');
+    if (fb && res.outcome !== 'svar') fb.innerHTML = '';
+    const main = document.getElementById('md-main');
+    if (main) main.classList.remove('free-seam');
+  }
+
+  function hostNext() {
+    if (!host || !host.result) return;
+    App.Sound.play('click');
+    const h = host, res = h.result;
+    host = null; exGen++; hostRestore(h);
+    if (h.onDone) h.onDone(res);
+  }
+
+  function hostRestore(h) {
+    ({ difficulty, gameKind, helpMode } = h.saved);
+    const root = document.getElementById('multdiv-root');
+    if (root) root.innerHTML = '';
+  }
+
+  function hostAbort() {
+    if (!host) return;
+    const h = host;
+    host = null; exGen++; hostRestore(h);
+    const o = document.getElementById('md-avslut'); if (o) o.remove();
+    if (h.onExit) h.onExit();
+  }
+
   /* ── Uppgiftsräknare + resultat ─────────────────────────── */
   function finishTask(correct) {
+    if (host) { hostFinish(); return; }
     exerciseIdx++;
     if (exerciseIdx >= 5) {
       showExResults();
@@ -3506,9 +4173,10 @@ const MultDivGame = (() => {
                      !!document.querySelector('#md-table-wrap .md-ansc.filled, ' +
                                               '#md-table-wrap .md-cell.struck, ' +
                                               '#md-table-wrap .md-divrem.on');
-    if (!pabörjad) { showModeSelect(); return; }
+    if (host && !pabörjad && !host.exitAsk) { hostAbort(); return; }
+    if (!host && !pabörjad) { showModeSelect(); return; }
     const root = document.getElementById('multdiv-root');
-    if (!root || document.getElementById('md-avslut')) { showModeSelect(); return; }
+    if (!root || document.getElementById('md-avslut')) { if (host) hostAbort(); else showModeSelect(); return; }
     App.Sound.play('click');
     /* Overlagg, inte en ruta i floden: lagd i #md-feedback tog den 54 px
        fran kladden (uppmatt 128 px mot golvet 150). Ett overlagg ror
@@ -3516,10 +4184,10 @@ const MultDivGame = (() => {
     root.insertAdjacentHTML('beforeend', `<div id="md-avslut" class="md-avslut-bak"
       onclick="if(event.target===this)MultDivGame.avslutaAngra()">
       <div class="md-avslut">
-        <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
+        <div>${host ? MP.escapeHtml(host.exitMsg || 'Avsluta passet?') : `Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.`}</div>
         <div class="md-avslut-rad">
           <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
-          <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
+          <button class="md-btn md-avslut-ja" onclick="MultDivGame.${host ? 'hostAbort' : 'showModeSelect'}()">Ja, avsluta</button>
         </div>
       </div></div>`);
   }
@@ -3559,11 +4227,14 @@ const MultDivGame = (() => {
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     openProv,                              // D37: Matteprov 4:an
+    runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn
     /* Endast för vitest: ren matte-kärna + generator */
-    _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, noCarryAnswer,
+    _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, genL4, drawL4Type, L4_TYPES, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, divStepText, planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
+    __test: { hostOutcome, hostBitHTML, hostActive: () => !!host, freeRowCols, freeRowValue, freeAnsLocked, freeButtonMode, freeNextRow, freeCheck, planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
+              /* hjälpbubblornas frågor mot en given plan (rena; läser inte modultillståndet) */
+              askText: (item, pl) => askText(item, pl), helpExprHTML: (item, pl) => helpExprHTML(item, pl), planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
               tabellradHTML, planCarries, planRests,
               /* headless-verifiering (aldrig anropade av appen) */
               forceNext: (a, b) => { forcedNext = { a, b }; },

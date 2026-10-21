@@ -315,6 +315,57 @@ Klicka på historik-ikonen i övre högra hörnet för att se alla tidigare test
 
 ---
 
+## Multiplikation & Division
+
+Kortet har två delar: **Uppställd multiplikation** och **Kort division**. Båda har tre lägen och fyra nivåer.
+
+- **Titta och lär:** appen räknar uppgiften steg för steg; barnet trycker **Nästa steg**. Texten står först, sedan
+  rör sig siffrorna.
+- **Räkna med hjälp:** appen frågar en kolumn i taget ("Vad är 7 · 9?"), barnet svarar på knappsatsen, placerar och
+  stryker minnessiffrorna själv. Två livlinor per runda.
+- **Räkna själv:** barnet skriver hela svaret i rutorna och räknar i kladden. Fel svar ger "Inte riktigt"; har barnet
+  glömt en minnessiffra säger appen det.
+
+### Uppställd multiplikation: nivåerna
+
+| Nivå | Tal |
+|---|---|
+| 1 Utan minnessiffra | tvåsiffrigt · ensiffrigt utan minne (32 · 3) |
+| 2 Med minnessiffra | tvåsiffrigt · ensiffrigt med minne (28 · 8) |
+| 3 Tresiffrigt tal | tresiffrigt · ensiffrigt (789 · 9) |
+| 4 Svårast – blandat (D40) | blandat som det svårare övningsbladet, ungefär lika ofta och aldrig samma sort tre gånger i rad: tresiffrigt · ensiffrigt och fyrsiffrigt · ensiffrigt med flera minnessiffror (483 · 9, 2475 · 3), tvåsiffrigt · tvåsiffrigt (67 · 29) och tresiffrigt · tvåsiffrigt med 12–19 som andra faktor (286 · 17) |
+
+Svaren kan bli fem siffror långa; kolumnerna heter E, T, H, T och TT.
+
+**Den osynliga nollan (nivå 4, tvåsiffrig faktor).** Rad 2 har en grå ruta i entalet, som på övningsbladen. När rad 2
+börjar, före radens första gångertal, säger appen "2 står i tiotalet och är värd 20. 20 är 2 · 10. 10 har en nolla –
+därför en nolla i entalet först." (D41 ✎; med 1 i tiotalet utan mellanmeningen) och en nolla skrivs in i den grå rutan. I Räkna med hjälp kommer nollan av sig själv; barnet skriver den inte. Rad 1 och
+rad 2 läggs sedan ihop kolumn för kolumn, ental med ental och tiotal med tiotal.
+
+**Räkna själv med tvåsiffrig faktor (D41 ✎).** Pappret har rad 1, rad 2 och summan. Nollan står ljusgrå i den grå
+rutan från början, och en rad under uppställningen säger varför ("Rad 2 räknar med tiotal, därför en nolla i
+entalet."). Barnet fyller rad 1, rad 2 och summan, ruta för ruta från höger. Knappen heter **Nästa rad** tills varje
+rad har siffror och **Klar** sedan; summan är nedtonad och går inte att trycka på förrän båda raderna har siffror.
+Vid Klar rättas raderna före summan. Raden som inte stämmer blir milt persika och får fokus, och en rad säger var
+felet finns ("Titta på rad 2 – nollan står i entalet, så 82 · 6 börjar i tiotalet.", eller "kolla minnessiffrorna"
+när en minnessiffra har glömts i raden eller i summan). Rätt direkt kräver rätt rader och rätt summa. Livlinan visar
+de två delprodukterna, till exempel 67 · 9 = 603 och 67 · 20 = 1340. Med ensiffrig faktor och på nivå 1–3 finns bara
+svarsraden, som förut.
+
+**Pekningen (nivå 4).** Vid varje uträkning lyser de två siffrorna som gångras och rutan där svaret ska stå, och
+texten säger vilken ruta det är ("7 · 9 är 63. Det hör till entalet."). Rad 2:s första uträkning säger att svaret
+hamnar ett steg till vänster eftersom vi räknar tiotal. Nivå 1–3 har samma texter som förut.
+
+**Siffrorna i texten (alla nivåer, även kort division).** När bubblan i Titta och lär eller Räkna med hjälp nämner en
+siffra som står i uppställningen, är siffran fet och har samma färg som sin ruta: ental grön, tiotal blå, hundratal
+röd, tusental lila. I "Först räknar vi 98 · 5 — entalssiffran i 65" är 5:an grön på båda ställena, och 6:an har
+vanlig textfärg. Minnessiffror är röda som i minnesspalten. Strax efter att texten visats pulserar de rutorna en gång,
+så att barnet ser vilken siffra som menas. Uträkningens svar, till exempel 63, är inte färgat, för det står inte i
+någon ruta. Ett undantag är "3:an skrivs i entalet": där har 3:an samma färg som rutan den hamnar i. I divisionen
+pekas täljarsiffran ("Hur många 6:or ryms i 4?") och kvotsiffran ("Vi skriver 7 i tiotalet") ut på samma sätt.
+
+Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
+
 ## Matteprov 4:an (v67–v68, D37, D38)
 
 Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet
@@ -355,16 +406,40 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
    förklaring.
 3. **Dela upp i tiotal och ental**: `4 · 28` med T och E ovanför, och tre rader att fylla i:
    `= 4 · [20] + 4 · [8]`, `= [80] + [32]`, `= [112]`.
-4. **Uppställning**: det större talet överst, det mindre under med ·, svaret i rutor. Raderna fylls i tur och ordning;
-   summaraden är låst (nedtonad) tills alla rader är ifyllda.
+4. **Uppställning**: det större talet överst, det mindre under med ·. Två räknesätt (D41), valda med växeln
+   **Räkna med: Minnessiffra | Dela upp** överst i "Så här gör du" för uppställningen. Minnessiffra är förvalt. Valet
+   sparas per profil och gäller i Öva, Gör provet och Mitt prov; provsidan visar det under momentet ("Räknesätt:
+   Minnessiffra"). "Så här gör du" visar det valda räknesättet.
+   - **Minnessiffra**: samma sätt som Multiplikation nivå 4 (samma motor): en kolumn i taget med minnessiffran i
+     spalten till höger, den osynliga nollan i den grå rutan på rad 2, orange ram på rutorna som räknas, siffrorna i
+     texten i platsvärdesfärg, och ord om var svaret hamnar. Ensiffrig faktor ger en rad med minnessiffror.
+     - *I Öva* räknar barnet **med hjälp**: appen frågar en kolumn i taget, barnet svarar, placerar och stryker
+       minnessiffrorna. Fel svar eller livlina gör uppgiften "med hjälp" i kvittot.
+     - *I provet och Mitt prov* räknar barnet **själv**, som i multiplikationens Räkna själv: med tvåsiffrig faktor
+       skriver barnet rad 1, rad 2 (den grå nollan står redan där, så att läraren ser den) och summan; med ensiffrig
+       faktor bara svaret. Första gången det inte stämmer pekar en rad på raden (eller summan) som inte stämmer,
+       utan ljud. Sedan visar en hjälp den raden, en rad i taget ("Rad 2 är 82 · 60 = 4920."; vid ensiffrig faktor
+       minnessiffrorna). Kommer samma rad fel igen visas svaret i grått, och Nästa går vidare.
+     - Det som var svårt: tabellfakta som fick fel svar, "Minnessiffran" och "Minne i summan".
+   - **Dela upp**: som förut (nedan). Raderna fylls i tur och ordning; summaraden är låst (nedtonad) tills alla rader
+     är ifyllda.
    - **Raderna fylls med en fråga (D38 ✎)**: appen frågar "Vad är 9 · 6?", barnet svarar 54 i ett vanligt
      svarsfält, och svaret flyttar in på sin rad och sitt platsvärde (texten först, sedan en kort rörelse). Fel på en
      rad: försök igen, sedan en ledtråd, sedan svaret (det skrivs också in, i blått). En rad som fått hjälp gör
      uppgiften "med hjälp" i kvittot. Raderna rättas så i både Öva och provet.
-   - **Ensiffrig faktor**: en delprodukt per siffra, var och en på egen rad, ett steg åt vänster per rad (rutan
-     längst till höger står tom), sedan summan. 687 · 8: 56, 64 (förskjuten), 48 (förskjuten två steg), 5496.
+   - **Ensiffrig faktor**: en delprodukt per siffra, var och en på egen rad, ett steg åt vänster per rad, sedan
+     summan. 687 · 8: 56, 640, 4800, 5496. Rutorna till höger om en förskjuten rad är **grå** (D41 ✎), och appen
+     sätter nollorna där **innan** radens fråga: rad 2 en nolla, rad 3 två, rad 4 tre. Barnet skriver dem inte.
+     I Öva förklaras det i steg med Nästa: siffrans värde ("8 står i hundratalet. Den är värd 800.", siffran i
+     orange ram), varför så många nollor ("800 är 8 · 100. 100 har två nollor. Därför sätter vi två nollor först.",
+     de grå rutorna i orange ram), och sist förs nollorna in en i taget ("En … två nollor."). Med tiotalet räcker
+     ett steg ("1 står i tiotalet och är värd 10. 10 har en nolla – en nolla först."). I provet är förklaringen
+     en rad ("8 står i hundratalet, och 100 har två nollor – därför två nollor först.") och nollorna förs in direkt.
+     Sedan frågar appen "Vad är 9 · 8?" och svaret skrivs till vänster om nollorna ("Raden blir 7200."). Summans
+     tankerad räknar med nollorna ("Entalet: 1 + 0 + 0 + 0.").
    - **Tvåsiffrig faktor**: rad 1 (entalet) räknas i anteckningsrutorna; radsumman är radens svar. Rad 2 börjar med
-     att barnet själv skriver **0 i den grå rutan**; sedan anteckningsrutorna, och 492 skrivs in som 4920.
+     att barnet själv skriver **0 i den grå rutan** ("Rad 2. 6 står i tiotalet och är värd 60. Därför en nolla
+     först: skriv 0 i den grå rutan."); sedan anteckningsrutorna, och 492 skrivs in som 4920.
    - **Anteckningsrutor** (tvåsiffrig faktor): "8 · 80 = [ ]  8 · 2 = [ ]" och "Rad 1: 640 + 16 = [ ]" (barnets
      egna tal speglas). I Öva blir en rätt delruta grön och en fel milt orange; i provet rättas delrutorna aldrig.
      Radsumman rättas i båda. Siffrorna som räknas lyser.
@@ -538,6 +613,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | 10-Kompisar – Övning | Visuell utforskning av talpar |
 | 10-Kompisar – Test | 10 frågor om talpar som blir 10 |
 | Geografi | Sveriges landskap: Utforska, Träna (fyra lägen), Pussel, Samlarpärm, Test, hemlandskap |
+| Multiplikation & Division | Uppställd multiplikation och kort division i tre lägen och fyra nivåer; nivå 4 blandat med den osynliga nollan (D40) |
 | Matteprov 4:an | Prov om multiplikation (Matteprov 1): öva fem moment, tabellsprint, provet med kvitto per moment |
 | Ljudeffekter | Feedback-ljud vid rätt och fel svar |
 | Lokal datalagring | Allt sparas i webbläsaren |

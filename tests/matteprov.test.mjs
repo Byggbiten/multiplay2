@@ -185,7 +185,7 @@ describe('felklassningen i uppställningen (raderna bokförs av appen, bara summ
     const e = L.makeUpp(687, 8);
     expect(L.noCarrySumN(L.uppPlaces(e))).toBe(4496);                // 56 + 640 + 4800 utan minnet i hundratalet
     expect(L.classifyUpp(e, { s:cells(4496, 4) })).toBe('summinne');
-    expect(L.uppFacitRows(e).r1).toEqual([null, 4, 6, null]);        // förskjuten, entalsrutan tom
+    expect(L.uppFacitRows(e).r1).toEqual([0, 4, 6, null]);           // förskjuten: nollan i den grå rutan (D41 ✎)
   });
   it('glömd minnessiffra i summan hittas för många slumpade uppgifter', () => {
     const r = seeded(32);
@@ -224,6 +224,7 @@ describe('radfrågan (D38 ✎): appen frågar, barnet svarar, appen bokför på 
       for (const row of L.uppRowsOrder(t)) {
         vals[row] = Array(t.width).fill(null);
         for (const c of L.rowBook(t, row)) vals[row][c.col] = c.val;
+        for (const z of L.rowZeros(t, row)) vals[row][z.col] = z.val;       // D41 ✎: appens nollor
         if (row === 'p2') vals.p2[0] = 0;                                    // barnets nolla
         expect(vals[row]).toEqual(F[row]);
       }
@@ -591,13 +592,13 @@ describe('uppställningens ordning: raderna först, summan sist (D38)', () => {
 });
 
 describe('tankeraden i summan (D38)', () => {
-  it('en kolumn i taget; förskjutna tomrutor räknas inte; provet säger bara "kolumn för kolumn"', () => {
+  it('en kolumn i taget; de grå rutornas nollor räknas upp (D41 ✎); provet säger bara "kolumn för kolumn"', () => {
     const a = L.makeUpp(82, 68);
     expect(L.thinkSteps(a, 's', 'ova', 0)).toEqual(['Entalet: 6 + 0.']);
     expect(L.thinkSteps(a, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 2.']);
     const e8 = L.makeUpp(8288, 7);                                     // 56, 56·10, 14·100, 56·1000
-    expect(L.thinkSteps(e8, 's', 'ova', 0)).toEqual(['Entalet: 6.']);
-    expect(L.thinkSteps(e8, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 6.']);
+    expect(L.thinkSteps(e8, 's', 'ova', 0)).toEqual(['Entalet: 6 + 0 + 0 + 0.']);
+    expect(L.thinkSteps(e8, 's', 'ova', 1)).toEqual(['Tiotalet: 5 + 6 + 0 + 0.']);
     expect(L.thinkSteps(a, 's', 'prov', 1)).toEqual(['Lägg ihop raderna, kolumn för kolumn.']);
     expect(L.thinkSteps(a, 'p1', 'ova')).toEqual([]);                  // raderna har radfrågan i stället
   });
@@ -800,5 +801,141 @@ describe('problemlösningens steg med mallar (D39 ✎)', () => {
     const t = L.makeKop2('Leo', L.SHOP[0], 3, L.SHOP[1], 2);
     expect(L.probStepBit(t, 0).fill).toEqual({ 0:3, 1:7 });
     expect(L.probStepHint(t, 2)).toMatch(/Lägg ihop/);
+  });
+});
+
+/* ── D41 (2026-10-21): räknesättet i uppställningen ─────────────────────
+   Dennis: "man skall kunna växla mellan vilket räkningsläge man väljer [...] Eller om man hellre kör
+   med detta minnessiffratänk. vilket jag förespråkar." Minnessiffra är förval; valet sparas per profil
+   och gäller i Öva, Gör provet och Mitt prov. */
+describe('D41: växeln Minnessiffra / Dela upp', () => {
+  const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+  it('två lägen, Minnessiffra först och förvalt', () => {
+    expect(L.UPP_METHODS.map(m => m.name)).toEqual(['Minnessiffra', 'Dela upp']);
+    expect(L.uppMethod({})).toBe('minne');
+    expect(L.uppMethod(null)).toBe('minne');
+    expect(L.uppMethod({ upMethod:'dela' })).toBe('dela');
+    expect(L.uppMethod({ upMethod:'något annat' })).toBe('minne');
+  });
+  it('minnessiffra: Öva och nötpassen räknas med hjälp, provet och mitt prov själv; dela upp går som förut', () => {
+    for (const m of ['ova', 'svag', 'not']) expect(L.uppEngineMode('minne', m)).toBe('help');
+    expect(L.uppEngineMode('minne', 'prov')).toBe('free');      // startProv(false) och startProv(true) har båda mode 'prov'
+    for (const m of ['ova', 'svag', 'not', 'prov']) expect(L.uppEngineMode('dela', m)).toBe(null);
+  });
+  it('valet sparas per profil och läses när uppgiften visas (även i provet)', () => {
+    expect(src).toMatch(/function setUpMethod\(m\) \{ const s = readSt\(\); s\.upMethod = m === 'dela' \? 'dela' : 'minne'; writeSt\(s\); \}/);
+    expect(src).toMatch(/const eng = t\.type === 'upp' && !fb && !keep \? L\.uppEngineMode\(upMethod\(\), S\.mode\) : null;/);
+    expect(src).toMatch(/S = \{ mode:'prov', mitt:!!mitt/);                 // provet och mitt prov har mode 'prov'
+    expect(src).toMatch(/case 'method':\s+snd\('click'\); setUpMethod\(id\);/);
+    // "Så här gör du" visar det valda läget, och växeln står överst där
+    expect(src).toMatch(/if \(moment === 'uppstallning' && upMethod\(\) === 'minne'\) return minneIntroSteps\(\);/);
+    expect(src).toMatch(/\$\{moment === 'uppstallning' \? methodSegHTML\(\) : ''\}/);
+  });
+  it('utfallet från multiplikationens motor bokförs: minnessiffran och tabellfakta blir det som var svårt', () => {
+    const t = L.makeUpp(82, 68);
+    const hard = L.tagsHard(t, 'minne', { rows:[], grey:false, facts:[[2, 8], [8, 6]] });
+    expect(hard).toEqual(['upp:tva', 'upp:minne', 'tab:2x8', 'tab:6x8']);
+    expect(L.tagLabel('upp:minne')).toBe('Minnessiffran');
+    expect(L.tagsCovered(t)).toContain('upp:minne');                    // 82 · 8 har minne
+    expect(L.tagsCovered(L.makeUpp(21, 3))).not.toContain('upp:minne'); // 21 · 3 har inget
+    let h = L.recordOutcome({}, t, 'hjalp', 'minne', '2026-10-21', { facts:[[2, 8]] });
+    expect(Object.keys(h).sort()).toEqual(['tab:2x8', 'upp:minne', 'upp:tva']);
+    for (let i = 0; i < L.FORGET_AFTER; i++) h = L.recordOutcome(h, t, 'direkt', null, '2026-10-21');
+    expect(h['upp:minne']).toBeUndefined();
+    const g = L.genForTag('upp:minne', seeded(3));
+    expect(g.type).toBe('upp');
+  });
+});
+
+/* ── D41 ✎ (Dennis, 4819 · 9 i Dela upp): "Skulle inte dessa celler vara gråade, och när det är dags så skall
+   0:an föras in?" ── */
+describe('D41 ✎: nollorna i de förskjutna raderna (Dela upp)', () => {
+  const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+  it('4819 · 9: rad 2 en nolla, rad 3 två, rad 4 tre; texten först säger "först nollan"', () => {
+    const t = L.makeUpp(4819, 9), F = L.uppFacitRows(t);
+    expect(L.rowZeros(t, 'r0')).toEqual([]);
+    expect(L.rowZeros(t, 'r3')).toEqual([0, 1, 2].map(c => ({ row:'r3', col:c, val:0 })));
+    expect(F.r1).toEqual([0, 9, null, null, null]);
+    expect(F.r3).toEqual([0, 0, 0, 6, 3]);
+    const tx = (row, m) => L.zeroSteps(t, row, m).map(s => s.text);
+    expect(tx('r0', 'ova')).toEqual([]);
+    // Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i x-antal nollor"
+    expect(tx('r1', 'ova')).toEqual(['1 står i tiotalet och är värd 10. 10 har en nolla – en nolla först.', 'En nolla.']);
+    expect(tx('r2', 'ova')).toEqual(['8 står i hundratalet. Den är värd 800.',
+      '800 är 8 · 100. 100 har två nollor. Därför sätter vi två nollor först.', 'En … två nollor.']);
+    expect(tx('r3', 'ova')[1]).toBe('4000 är 4 · 1000. 1000 har tre nollor. Därför sätter vi tre nollor först.');
+    expect(L.zeroSteps(t, 'r2', 'ova').map(s => [s.lit, !!s.zeros])).toEqual([['top', false], ['zeros', false], ['zeros', true]]);
+    // provet: ett kort steg, men "därför" och sambandet nollor = hundratal finns kvar
+    expect(tx('r2', 'prov')).toEqual(['8 står i hundratalet, och 100 har två nollor – därför två nollor först.']);
+    expect(L.zeroBookText(t, 'r2', 'direkt')).toBe('Rätt! 72 skrivs till vänster om nollorna. Raden blir 7200.');
+    expect(L.thinkSteps(t, 's', 'ova', 0)).toEqual(['Entalet: 1 + 0 + 0 + 0.']);
+  });
+  it('varje förskjuten rad har lika många nollor som steg, och summan är oförändrad (många slumpade tal)', () => {
+    const r = seeded(4819), fel = [];
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) {
+      const t = L.genUpp(lv, 'en', r), F = L.uppFacitRows(t);
+      let sum = 0;
+      for (const p of t.parts) {
+        const row = F['r' + p.i];
+        if (L.rowZeros(t, 'r' + p.i).length !== p.i) fel.push(`${t.text} r${p.i} antal`);
+        if (row.slice(0, p.i).some(v => v !== 0)) fel.push(`${t.text} r${p.i} inte nollor`);
+        sum += L.rowValue(row);
+        if (L.rowValue(row) !== p.place) fel.push(`${t.text} r${p.i} värde`);
+      }
+      if (sum !== t.answer || L.check(t, F).ok !== true) fel.push(`${t.text} summa`);
+      for (const p of t.parts) if (p.i > 0 && L.zeroSteps(t, 'r' + p.i, 'ova').filter(s => s.zeros).length !== 1) fel.push(`${t.text} r${p.i} steg`);
+    }
+    expect(fel).toEqual([]);
+  });
+  it('tvåsiffrig faktor: inga appnollor (barnet skriver nollan i rad 2, som förut)', () => {
+    const t = L.makeUpp(286, 17);
+    expect(L.rowZeros(t, 'p2')).toEqual([]);
+    expect(L.zeroSteps(t, 'p2', 'ova')).toEqual([]);
+  });
+  it('rutorna är grå och går inte att skriva i; nollorna förs in efter texten med den orange ramen', () => {
+    expect(src).toMatch(/const gz = \/\^r\\d\$\/\.test\(row\) && i < rowStart\(row\);/);
+    expect(src).toMatch(/const edit = !o\.readonly && !gv && !lk && row === 's';/);           // bara summan går att skriva i
+    expect(src).toMatch(/IN\.zlit = st\.lit === 'zeros' \? row : null;/);                    // de grå rutorna lyser
+    expect(src).toMatch(/rq\.busy = !!st\.zeros;/);                                           // knappen väntar på nollorna
+  });
+  /* Dennis: "sätta dit nollorna innan man gångrar. inte alla nollor direkt [...] annars kanske de skriver in dem
+     i fel cell" — per rad: nollorna, sedan frågan, sedan bokföringen; aldrig alla rader på en gång. */
+  it('ordningen: en förskjuten rads nollor kommer före radens fråga och bokföring, en rad i taget', () => {
+    const r = seeded(91), fel = [];
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) for (const t of [L.genUpp(lv, 'en', r), L.genUpp(lv, 'tva', r)]) {
+      const flow = L.uppRowFlow(t);
+      for (const row of L.uppRowsOrder(t)) {
+        const z = flow.findIndex(s => s.kind === 'zeros' && s.row === row);
+        const a = flow.findIndex(s => s.kind === 'ask' && s.row === row);
+        const b = flow.findIndex(s => s.kind === 'book' && s.row === row);
+        if (L.rowZeros(t, row).length ? !(z >= 0 && z === a - 1 && a < b) : z >= 0) fel.push(`${t.text} ${row}`);
+        const prevBook = flow.findIndex((s, k) => k < (z >= 0 ? z : a) && s.kind === 'book' && L.uppRowsOrder(t).indexOf(s.row) === L.uppRowsOrder(t).indexOf(row) - 1);
+        if (L.uppRowsOrder(t).indexOf(row) > 0 && prevBook < 0) fel.push(`${t.text} ${row} före förra raden`);
+      }
+    }
+    expect(fel).toEqual([]);
+    // UI:t: nollorna sätts när raden blir aktuell (före frågan), inte när den bokförs
+    expect(src).toMatch(/else if \(L\.rowZeros\(t, next\)\.length\) return zerosFirst\(t, next\);/);
+    expect(src).toMatch(/IN\.zlit = null; rq\.zlitTop = false; rq\.zsteps = null; rq\.msg = null; rq\.phase = 'ask';/);
+    expect(src).not.toMatch(/landZeros/);
+  });
+});
+
+/* Språkregeln (CLAUDE.md): samma tal får aldrig ha två roller i samma mening. Svep över nollornas texter. */
+describe('D41 ✎: nollornas texter — inget tal två gånger i samma mening', () => {
+  const meningar = txt => txt.replace(/<[^>]+>/g, '').split(/(?<=[.?!])\s+|\s+–\s+/).filter(Boolean);
+  const dubblett = m => { const n = m.match(/\d+/g) || []; return n.some((x, i) => n.indexOf(x) !== i); };
+  it('Öva och provet, alla förskjutna rader, många slumpade tal och siffran 1', () => {
+    const r = seeded(77), fel = [];
+    const tal = [];
+    for (let i = 0; i < N; i++) for (const lv of LEVELS) tal.push(L.genUpp(lv, 'en', r));
+    tal.push(L.makeUpp(1111, 9), L.makeUpp(4819, 9), L.makeUpp(2222, 2), L.makeUpp(9191, 9));
+    for (const t of tal) for (const p of t.parts) for (const m of ['ova', 'prov']) {
+      for (const st of L.zeroSteps(t, 'r' + p.i, m)) for (const s of meningar(st.text)) if (dubblett(s)) fel.push(`${t.text}: "${s}"`);
+      const b = L.zeroBookText(t, 'r' + p.i, 'direkt');
+      if (b) for (const s of meningar(b)) if (dubblett(s)) fel.push(`${t.text}: "${s}"`);
+    }
+    expect(fel).toEqual([]);
+    expect(dubblett('100 är 1 · 100.')).toBe(true);                    // vakten fäller det som undviks
   });
 });

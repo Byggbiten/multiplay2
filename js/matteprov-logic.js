@@ -225,6 +225,21 @@
   ══════════════════════════════════════════════════════════ */
   /* Minnessiffror i en rad: bara kolumner FÖRE den sista (sista kolumnen skrivs hel) */
   function hasCarry(a, m) { return carryCount(a, m) > 0; }
+  /* D41: har uppgiften minnessiffror i gångerdelen (räknesättet Minnessiffra)? */
+  function uppHasMulCarry(t) {
+    const m = (a, b) => { let c = 0; return digitsOf(a).some(d => { const p = d * b + c; c = Math.floor(p / 10); return c > 0; }); };
+    return t.two ? m(t.top, t.ones) || m(t.top, t.tens) : m(t.top, t.bot);
+  }
+  /* D41: räknesätten i uppställningen. 'minne' (förval) = minnessiffran, samma metodik och motor som
+     Multiplikation nivå 4; 'dela' = delprodukt per siffra (D38 ✎). Med minnessiffra är Öva "Räkna med
+     hjälp" (appen frågar en kolumn i taget, barnet lär sig ordningen) och provet "Räkna själv" (barnet
+     skriver svaret och räknar i kladden, som på det skarpa provet; hjälptrappan efter fel). */
+  const UPP_METHODS = [{ id:'minne', name:'Minnessiffra' }, { id:'dela', name:'Dela upp' }];
+  const uppMethod = st => (st && st.upMethod === 'dela') ? 'dela' : 'minne';
+  function uppEngineMode(method, passMode) {
+    if (method !== 'minne') return null;
+    return passMode === 'prov' ? 'free' : 'help';
+  }
   function carryCount(a, m) { let c = 0, n = 0; const ds = digitsOf(a); ds.forEach((d, i) => { const p = d * m + c; c = Math.floor(p / 10); if (i < ds.length - 1 && c > 0) n++; }); return n; }
   /* Glömd minnessiffra: varje kolumn skrivs mod 10, minnet läggs aldrig till
      (sista kolumnen skrivs hel) — samma regel som multdiv:s noCarryAnswer. */
@@ -371,6 +386,54 @@
     const start = t.two ? (row === 'p2' ? 1 : 0) : +row.slice(1);
     return digitsOf(v).map((d, k) => ({ row, col:start + k, val:d }));
   }
+  /* D41 ✎ (Dennis, skärmbild 4819 · 9: "Skulle inte dessa celler vara gråade, och när det är dags så skall
+     0:an föras in?"). Ensiffrig faktor i Dela upp: rutorna till höger om en förskjuten rad är grå, och appen
+     för in nollorna — rad 2 en nolla, rad 3 två, rad 4 tre. Barnet skriver dem inte. Ordningen (Dennis: "sätta
+     dit nollorna innan man gångrar [...] annars kanske de skriver in dem i fel cell"): när raden blir aktuell
+     kommer texten, sedan nollorna, och först därefter frågan; svaret bokförs till vänster om nollorna. */
+  function rowZeros(t, row) {
+    if (t.two || !/^r\d+$/.test(row)) return [];
+    return Array.from({ length:+row.slice(1) }, (_, c) => ({ row, col:c, val:0 }));
+  }
+  const PLATS = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet', 'tiotusentalet'];
+  /* Förklaringen innan nollorna förs in (Dennis: "gör det pedagogiskt, så att de förstår varför de fyller i
+     x-antal nollor"): siffrans värde, varför just så många nollor (100 har två nollor), och sedan nollorna en i
+     taget. Ett steg är en idé; Öva har tre klickstyrda steg (tiotalet två), provet ett kort steg med "därför".
+     Varje steg: { text, lit:'top'|'zeros', zeros:true på steget där nollorna förs in }. Inget tal har två roller
+     i samma mening (för siffran 1 hoppas "100 är 1 · 100" över). */
+  const ANTAL = ['', 'en', 'två', 'tre', 'fyra'];
+  const nollor = n => n === 1 ? 'en nolla' : `${ANTAL[n]} nollor`;
+  const RAKNA = ['', 'En nolla.', 'En … två nollor.', 'En … två … tre nollor.', 'En … två … tre … fyra nollor.'];
+  function zeroSteps(t, row, mode) {
+    const p = !t.two && t.parts[+String(row).slice(1)];
+    if (!p || p.i === 0) return [];
+    const d = p.d, P = Math.pow(10, p.i), V = d * P, plats = PLATS[p.i];   // radens nummer står som etikett i UI:t, inte i meningen
+    if (mode === 'prov')
+      return [{ text:`${d} står i ${plats}, och ${P} har ${nollor(p.i)} – därför ${nollor(p.i)} först.`, lit:'zeros', zeros:true }];
+    if (p.i === 1)
+      return [{ text:`${d} står i tiotalet och är värd ${V}. ${P} har en nolla – en nolla först.`, lit:'top' },
+              { text:RAKNA[1], lit:'zeros', zeros:true }];
+    return [{ text:`${d} står i ${plats}. Den är värd ${V}.`, lit:'top' },
+            { text:`${d === 1 ? '' : `${V} är ${d} · ${P}. `}${P} har ${nollor(p.i)}. Därför sätter vi ${nollor(p.i)} först.`, lit:'zeros' },
+            { text:RAKNA[p.i], lit:'zeros', zeros:true }];
+  }
+  /* Kvittensen när en förskjuten rad bokförs: talet till vänster om nollorna, slutsatsen sist */
+  function zeroBookText(t, row, outcome) {
+    const p = !t.two && t.parts[+String(row).slice(1)];
+    if (!p || p.i === 0) return null;
+    const om = p.i === 1 ? 'nollan' : 'nollorna';
+    return outcome === 'svar' ? `Svaret är ${p.val}. Det skrivs till vänster om ${om}, och raden blir ${p.place}.`
+                              : `Rätt! ${p.val} skrivs till vänster om ${om}. Raden blir ${p.place}.`;
+  }
+  /* Radens ordning: nollorna (om raden är förskjuten), sedan frågan, sedan bokföringen. Ren; UI:t följer den. */
+  function uppRowFlow(t) {
+    const out = [];
+    for (const row of uppRowsOrder(t)) {
+      if (rowZeros(t, row).length) out.push({ kind:'zeros', row });
+      out.push({ kind:'ask', row }, { kind:'book', row });
+    }
+    return out;
+  }
   const ROW_HELP = ['retry', 'hint', 'svar'];
   function rowHelpStep(n) { return n <= 0 ? null : ROW_HELP[Math.min(n, ROW_HELP.length) - 1]; }
   function rowHint(t, row) {
@@ -416,8 +479,9 @@
     const prov = mode === 'prov';
     if (row === 's') {
       const nums = t.two ? [t.p1, t.p2] : t.parts.map(p => p.place);
-      const c = col || 0, starts = t.two ? [0, 0] : t.parts.map(p => p.i);      // förskjutna rutor är tomma, inte nollor
-      const ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => c >= starts[k] && nums[k] >= Math.pow(10, c));
+      /* D41 ✎: de förskjutna radernas grå rutor har nollor, och nollorna räknas upp — texten stämmer med pappret */
+      const c = col || 0;
+      const ds = nums.map(n => Math.floor(n / Math.pow(10, c)) % 10).filter((d, k) => nums[k] >= Math.pow(10, c));
       const carry = addCarries(nums).some(x => x.col === c);
       if (prov) return [`Lägg ihop raderna, kolumn för kolumn.`];
       return [`${PLACE[c] || 'Kolumnen'}: ${ds.join(' + ')}${carry ? ' + minnessiffran' : ''}.`];
@@ -445,7 +509,7 @@
     const W = t.width, row = v => { const d = digitsOf(v); return Array.from({ length:W }, (_, i) => i < d.length ? d[i] : null); };
     if (t.two) return { p1:row(t.p1), p2:row(t.p2), s:row(t.answer) };
     const out = { s:row(t.answer) };
-    for (const p of t.parts) { const r = row(p.place); for (let c = 0; c < p.i; c++) r[c] = null; out['r' + p.i] = r; }   // förskjuten: ingen nolla
+    for (const p of t.parts) out['r' + p.i] = row(p.place);      // D41 ✎: förskjuten rad har nollor i sina grå rutor
     return out;
   }
 
@@ -812,6 +876,7 @@
     'tio:tiotal':'Tiotal gånger ental', 'tio:tusental':'Hundratal gånger tiotal',
     'te':'Dela upp i tiotal och ental',
     'upp:en':'Uppställning, ensiffrig faktor', 'upp:tva':'Uppställning, tvåsiffrig faktor', 'upp:nolla':'Nollan i den grå rutan',
+    'upp:minne':'Minnessiffran',
  'upp:minnesumma':'Minne i summan',
     'prob:tillbaka':'Växel', 'prob:omvand':'Omvända uppgifter', 'prob:kop2':'Två sorters varor', 'prob:ordning':'Gånger först',
     'prob:uttryck':'Skriva uttrycket',
@@ -829,7 +894,7 @@
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
-      const sumMem = noCarrySumN(uppPlaces(t)) !== t.answer ? ['upp:minnesumma'] : [];
+      const sumMem = (noCarrySumN(uppPlaces(t)) !== t.answer ? ['upp:minnesumma'] : []).concat(uppHasMulCarry(t) ? ['upp:minne'] : []);
       if (!t.two) return ['upp:en'].concat(sumMem, t.parts.map(p => factTag(t.bot, p.d)));   // varje radfråga är ett tabellfaktum
       return ['upp:tva', 'upp:nolla'].concat(sumMem);
     }
@@ -845,6 +910,8 @@
     if (t.type === 'upp') {
       const d = detail || {}, out = [t.two ? 'upp:tva' : 'upp:en'];
       if (cls === 'summinne' || cls === 'addition') out.push('upp:minnesumma');
+      if (cls === 'minne') out.push('upp:minne');                                   // D41: minnessiffran i gångerdelen
+      for (const [a, b] of d.facts || []) { const f = factTag(a, b); if (!out.includes(f)) out.push(f); }
       if (d.grey) out.push('upp:nolla');
       if (!t.two) for (const r of d.rows || []) { const p = t.parts[+r.slice(1)]; out.push(factTag(t.bot, p.d)); }
       return out;
@@ -890,7 +957,7 @@
     }
     if (tag === 'te') return genTalsorter(lv, 1, r)[0];
     if (tag === 'upp:en') return genUpp(lv, 'en', r);
-    if (tag === 'upp:minnesumma') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
+    if (tag === 'upp:minnesumma' || tag === 'upp:minne') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
     if (tag.startsWith('upp:')) return genUpp(lv, 'tva', r);
     if (tag === 'prob:uttryck') return genProblemOne(lv, pick(r, ['kop2', 'tillbaka', 'omvand']), r);
     if (tag.startsWith('prob:')) return genProblemOne(lv, tag.slice(5), r);
@@ -952,7 +1019,7 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
-    uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    uppPlaces, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,

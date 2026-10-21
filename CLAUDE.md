@@ -24,7 +24,7 @@ namn i uppgifterna.
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D39) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D41) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |
@@ -61,7 +61,7 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 | Roll | Agent-id | Rapport | Överlämning + logg |
 |---|---|---|---|
 | Geografi (mockupen, bygget) | `acf985ddd0b12ab7f` | dagens logg | `agenter/geografi/OVERLAMNING.md`, `LOGG.md` |
-| Matteprov (Matteprov 4:an, D37–D38) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
+| Matteprov (Matteprov 4:an, D37–D39) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
 
 Väck en levande expert med SendMessage till id:t. Ny session: agenterna finns inte längre – starta rollen (samma
 agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in det nya id:t här.
@@ -102,3 +102,7 @@ varför?")
 
 **Gränssnittet**
 - 390 × 844 utan scroll, träffytor ≥ 44 px, inga emojis i nytt (SVG som ikoner).
+- Ingen felsignal (D39): inget rött för fel svar (mjuk persika), inget surr (felljudet högst en gång per uppgift),
+  "Inte riktigt – försök igen" i stället för "Fel". Resultat med `MP.resultNote`: beröm från 60 %, under 60 % bara
+  "Du fick 3 av 10 rätt". `tests/snallare.test.mjs` larmar om "Fel!", "Fel svar" och "Tyvärr".
+- En svarsknapp i taget (D39 ✎): i lägen med flera rutor heter knappen Nästa tills allt är ifyllt och sedan Klar.

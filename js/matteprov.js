@@ -8,7 +8,11 @@
    Uppställningens pappret följer multdiv:s (cellerna, färgerna,
    minnessiffrorna i rött, knappsatsen med hög Klar) men har den
    grå rutan för tiotalsradens nolla, som bara provet använder.
-   Lagring per profil: matteprov_{id}.
+   D41: uppställningen har två räknesätt. "Minnessiffra" (förval)
+   räknas av multiplikationens motor via MultDivGame.runTask (Öva =
+   hjälpläget, provet = fria läget med hjälptrappan) och bokförs här
+   (runMinne/minneDone); "Dela upp" är D38:s delprodukter (nedan).
+   Lagring per profil: matteprov_{id}, räknesättet i upMethod.
    ============================================================ */
 'use strict';
 
@@ -79,6 +83,20 @@ const MatteProv = (() => {
   }
   function level() { return readSt().level === 'svar' ? 'svar' : 'latt'; }
   function setLevel(lv) { const s = readSt(); s.level = lv; writeSt(s); }
+  /* D41: räknesättet i uppställningen, per profil (förval Minnessiffra) */
+  function upMethod() { return L.uppMethod(readSt()); }
+  function setUpMethod(m) { const s = readSt(); s.upMethod = m === 'dela' ? 'dela' : 'minne'; writeSt(s); }
+  /* Provsidan säger vilket räknesätt som gäller; växeln står överst i "Så här gör du" för uppställningen
+     (på provsidan fanns inte plats för den i 390 × 797 utan scroll, uppmätt 49 px för mycket). */
+  const methodNote = () => `Räknesätt: ${L.UPP_METHODS.find(x => x.id === upMethod()).name}`;
+  /* Växeln: två knappar, den valda fylld. */
+  function methodSegHTML() {
+    const m = upMethod();
+    return `<div class="mp-meth"><span class="mp-meth-l">Räkna med</span>
+      <div class="mp-seg" role="group" aria-label="Räknesätt i uppställningen">
+        ${L.UPP_METHODS.map(x => `<button class="${x.id === m ? 'on' : ''}" data-act="method" data-id="${x.id}" aria-pressed="${x.id === m}">${x.name}</button>`).join('')}
+      </div></div>`;
+  }
 
   /* ══════════════════════════════════════════════════════════
      CSS (injiceras i roten; allt under #mp-root)
@@ -111,6 +129,13 @@ const MatteProv = (() => {
 #mp-root .mp-note{text-align:center;font-size:13px;font-weight:800;color:var(--ink-soft);margin:0}
 #mp-root .mp-seg{display:flex;background:rgba(255,255,255,.6);border:1px solid var(--glass-line);border-radius:999px;padding:4px;box-shadow:var(--shadow-panel);flex-shrink:0}
 #mp-root .mp-seg button{flex:1;min-height:44px;border-radius:999px;font-weight:800;font-size:15px;color:var(--deep)}
+#mp-root .mp-meth{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#mp-root .mp-meth-l{font-size:13px;font-weight:800;color:var(--ink-soft);white-space:nowrap;padding-left:4px}
+#mp-root .mp-meth .mp-seg{flex:1;padding:3px}
+#mp-root .mp-meth .mp-seg button{font-size:14px}
+#mp-root .mp-mpaper .mp-mcol{text-align:left;padding-left:4px;min-width:40px}
+#mp-root .mp-mpaper .mp-md{display:inline-block;font-family:var(--font-head);font-weight:900;font-size:20px;color:#dc2626;transform:rotate(-4deg);margin-right:4px}
+#mp-root .mp-mpaper .mp-md.u{opacity:.5;text-decoration:line-through;text-decoration-thickness:2px}
 #mp-root .mp-seg button.on{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 4px 14px var(--glow)}
 #mp-root .mp-list{display:flex;flex-direction:column;gap:8px}
 #mp-root .mp-h{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--ink-soft);margin:2px 4px -2px;letter-spacing:.02em}
@@ -145,6 +170,10 @@ const MatteProv = (() => {
 #mp-root .mp-c.in{background:rgba(255,255,255,.8);border:2.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);color:var(--deep);cursor:pointer}
 #mp-root .mp-c.in.has{border-style:solid}
 #mp-root .mp-c.in.grey{background:#d9dde3;border-color:#9aa3ae}
+#mp-root .mp-c.in.gz{color:#64748b;cursor:default;border-style:solid}
+#mp-root .mp-c.in.gz.ok{background:#d9dde3;border-color:#9aa3ae;color:#64748b}
+#mp-root .mp-c.in.zin{animation:mp-zin .5s ease-out both}
+@keyframes mp-zin{0%{transform:translateY(-14px);opacity:0}70%{transform:translateY(2px);opacity:1}100%{transform:none;opacity:1}}
 #mp-root .mp-c.in.focus{border:3px solid var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent)}
 #mp-root .mp-c.in.ok{border:2.5px solid #22c55e;background:#dcfce7;color:#15803d}
 #mp-root .mp-c.in.grey.ok{background:#bbf7d0}
@@ -221,6 +250,7 @@ const MatteProv = (() => {
 #mp-root .mp-nl{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:var(--font-head);font-weight:800;font-size:14.5px;color:var(--deep);font-variant-numeric:tabular-nums}
 #mp-root .mp-np{display:inline-flex;align-items:center;gap:3px;margin-right:3px}
 #mp-root .mp-nt{white-space:nowrap}
+#mp-root .mp-nt.wr{white-space:normal;line-height:1.3}
 #mp-root .mp-nt.sm{font-family:var(--font-body);font-size:12.5px;font-weight:800;color:var(--ink-soft)}
 #mp-root .mp-nb{min-width:46px;height:44px;padding:0 4px;border-radius:10px;border:2.5px dashed color-mix(in srgb,var(--accent) 40%,transparent);background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
 #mp-root .mp-nb.focus{border:3px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
@@ -426,7 +456,7 @@ const MatteProv = (() => {
       <div class="mp-list">
         ${P.moments.map(id => { const m = momentOf(id); return `<button class="mp-row" data-act="ova" data-id="${id}">
           <span class="mp-nr">${m.nr}</span>
-          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : m.desc)}</small></span>
+          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
           ${ovaBadge(id)}${svg('chev', 'chev')}</button>`; }).join('')}
         <button class="mp-row" data-act="sprint" style="min-height:54px">
           <span class="mp-nr alt">${svg('timer')}</span>
@@ -486,6 +516,7 @@ const MatteProv = (() => {
       { v:rows([teHead(4, 28), '= 4 · ' + box(20) + ' + 4 · ' + box(8), '= ' + box(80) + ' + ' + box(32), '= ' + box(112)]), t:'Tredje raden: lägg ihop. 80 + 32 = 112.' },
       { v:rows([teHead(4, 28), '= 4 · ' + box(20) + ' + 4 · ' + box(8), '= ' + box(80) + ' + ' + box(32), '= ' + box(112)]), t:'I uppgifterna fyller du i rutorna en i taget. Knappen Nästa hoppar till nästa ruta.' },
     ];
+    if (moment === 'uppstallning' && upMethod() === 'minne') return minneIntroSteps();
     if (moment === 'uppstallning') {
       const t = L.makeUpp(17, 32), W = t.width;
       const row = (v, n) => { const d = L.digitsOf(v), out = Array(W).fill(null); for (let i = 0; i < Math.min(n == null ? d.length : n, d.length); i++) out[i] = d[i]; return out; };
@@ -493,7 +524,8 @@ const MatteProv = (() => {
       const gl = txt => `<p class="mp-guide" style="max-width:340px">${svg('next')}<span class="tx">${esc(txt)}</span></p>`;
       /* Ensiffrig faktor (Dennis 19/10): en delprodukt per siffra, varje rad ett steg åt vänster */
       const e = L.makeUpp(687, 8), We = e.width;
-      const sh = (v, i) => { const d = L.digitsOf(v), out = Array(We).fill(null); d.forEach((x, k) => { out[i + k] = x; }); return out; };
+      /* D41 ✎: en förskjuten rad har nollor i sina grå rutor */
+      const sh = (v, i) => { const d = L.digitsOf(v), out = Array(We).fill(null); for (let k = 0; k < i; k++) out[k] = 0; d.forEach((x, k) => { out[i + k] = x; }); return out; };
       const E = (vals, lit) => paperHTML(e, { vals, readonly:true, lit });
       const em = Array(We).fill(null); L.addCarries(e.parts.map(q => q.place)).forEach(c => { em[c.col] = c.val; });
       const r0 = sh(56, 0), r1 = sh(64, 1), r2 = sh(48, 2);
@@ -501,8 +533,10 @@ const MatteProv = (() => {
         { v:E({}), t:'Med en ensiffrig faktor räknar du en siffra i taget. Varje svar får en egen rad.' },
         { v:gl('Rad 1: Vad är 8 · 7?') + E({}, { top:[0], bot:[0] }), t:'Appen frågar: Vad är 8 · 7? Du skriver 56 i rutan och trycker Svara.' },
         { v:E({ r0 }, { top:[0], bot:[0] }), t:'Svaret flyttas till rad 1, med 6:an i entalet.' },
-        { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Nästa fråga: 8 · 8 = 64. Raden hamnar ett steg åt vänster, så entalsrutan står tom.' },
-        { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sist 8 · 6 = 48, ett steg till åt vänster. Raden börjar i hundratalet.' },
+        { v:E({ r0, r1:[0].concat(Array(We - 1).fill(null)) }, { top:[1] }), t:'Rad 2: 8 står i tiotalet och är värd 80. 10 har en nolla, så en nolla först, i den grå rutan.' },
+        { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Sedan frågar appen: Vad är 8 · 8? Svaret 64 skrivs till vänster om nollan, så raden blir 640.' },
+        { v:E({ r0, r1, r2:[0, 0].concat(Array(We - 2).fill(null)) }, { top:[2] }), t:'Rad 3: 6 står i hundratalet och är värd 600. 100 har två nollor, så två nollor först.' },
+        { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sedan 8 · 6 = 48, till vänster om nollorna. Raden blir 4800.' },
         { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Summan skriver du själv, en ruta i taget från höger. Minnessiffrorna står i de lila rutorna. Svaret är 5496.' },
         { v:P({}), t:'Med en tvåsiffrig faktor, som 17 · 32, blir det två rader och sedan summan. Det större talet står överst.' },
         { v:gl('7 · 30 = 210   7 · 2 = 14   210 + 14 = 224') + P({}, { lit:{ top:[0, 1], bot:[0] } }), t:'Rad 1 räknar du i rutorna ovanför: 7 · 30 och 7 · 2, sedan summan 224.' },
@@ -544,6 +578,44 @@ const MatteProv = (() => {
       { v:big('6 · 7 + 34') + tm(6, '·', 7, 42) + tm(42, '+', 34, 76), t:'Utan prislista gäller samma sak: gånger först, sedan plus.' },
     ];
   }
+  /* D41: "Så här gör du" med minnessiffra — samma metodik som Multiplikation nivå 4: en kolumn i taget,
+     minnessiffran i spalten till höger (struken när den är använd), rad 2 med den osynliga nollan. */
+  function minnePaper(top, bot, o) {
+    const W = L.digitsOf(top * bot).length, idx = [];
+    for (let i = W - 1; i >= 0; i--) idx.push(i);
+    const lit = o.lit || {};
+    const fix = (n, i, which) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix${(lit[which] || []).includes(i) ? ' lit' : ''}" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
+    const row = (v, shift, n, cls) => idx.map(i => {
+      const d = v == null ? [] : L.digitsOf(v), k = i - shift;
+      const has = k >= 0 && k < Math.min(d.length, n == null ? 99 : n);
+      const z = shift && i === 0;
+      return `<td><div class="mp-c in${has || (z && o.zero) ? ' has' : ''}${z ? ' grey' : ''}${(lit[cls] || []).includes(i) ? ' lit' : ''}">${has ? d[k] : z && o.zero ? '0' : ''}</div></td>`;
+    }).join('');
+    const mem = (o.mem || []).map(m => `<span class="mp-md${m.u ? ' u' : ''}">${m.v}</span>`).join('');
+    const line = `<tr class="mp-line"><td></td><td colspan="${W}"></td><td style="background:none"></td></tr>`;
+    let h = `<table class="mp-paper mp-mpaper"><tbody>
+      <tr><td></td>${idx.map(i => `<td>${fix(top, i, 'top')}</td>`).join('')}<td></td></tr>
+      <tr><td class="mp-sign">·</td>${idx.map(i => `<td>${fix(bot, i, 'bot')}</td>`).join('')}<td class="mp-mcol">${mem}</td></tr>${line}`;
+    if (bot >= 10) h += `<tr><td></td>${row(o.p1, 0, o.p1n, 'p1')}<td></td></tr>
+      <tr><td class="mp-sign">+</td>${row(o.p2, 1, o.p2n, 'p2')}<td></td></tr>${line}`;
+    h += `<tr><td></td>${row(o.ans, 0, o.ansn, 'ans')}<td></td></tr></tbody></table>`;
+    return h;
+  }
+  function minneIntroSteps() {
+    const E = o => minnePaper(687, 8, o), T = o => minnePaper(32, 17, o);
+    return [
+      { v:E({}), t:'Med minnessiffra räknar du en kolumn i taget, från entalet. Hela svaret står på en rad.' },
+      { v:E({ lit:{ top:[0], bot:[0], ans:[0] }, ans:6, ansn:1, mem:[{ v:5 }] }), t:'8 · 7 är 56. 6:an skrivs i entalet, och 5:an är minnessiffran. Den skrivs till höger.' },
+      { v:E({ lit:{ top:[1], bot:[0], ans:[1] }, ans:6, ansn:1, mem:[{ v:5, u:true }] }), t:'8 · 8 är 64. Minnessiffran 5 gör det till 69, och 5:an stryks, för den är använd.' },
+      { v:E({ lit:{ top:[1], bot:[0], ans:[1] }, ans:96, ansn:2, mem:[{ v:5, u:true }, { v:6 }] }), t:'9:an skrivs i tiotalet, och 6:an blir den nya minnessiffran.' },
+      { v:E({ lit:{ top:[2], bot:[0], ans:[3, 2] }, ans:5496, mem:[{ v:5, u:true }, { v:6 }] }), t:'8 · 6 är 48, och minnessiffran gör det till 54. Det är sista kolumnen, så hela 54 får plats. Svaret är 5496.' },
+      { v:T({ p1:224, mem:[{ v:1, u:true }] }), t:'Med en tvåsiffrig faktor, som 32 · 17, blir det två rader. Rad 1 är 32 · 7 = 224.' },
+      { v:T({ p1:224, zero:true, lit:{ bot:[1], p2:[0] }, mem:[{ v:1, u:true }] }), t:'Rad 2 räknar med tiotalet 1, som betyder 10. Därför står det en osynlig nolla i den grå rutan.' },
+      { v:T({ p1:224, p2:32, zero:true, mem:[{ v:1, u:true }] }), t:'32 · 1 = 32 skrivs ett steg till vänster, efter nollan: rad 2 blir 320.' },
+      { v:T({ p1:224, p2:32, zero:true, ans:544, mem:[{ v:1, u:true }] }), t:'Sist lägger du ihop raderna: ental med ental, tiotal med tiotal. 224 + 320 = 544.' },
+      { v:`<div style="color:var(--accent)">${svg('target')}</div>`, t:'När du övar frågar appen en kolumn i taget. I provet skriver du svaret själv och räknar i kladden.' },
+    ];
+  }
   function sheetDemo() {
     const ex = [[6, 7], [3, 8], [9, 4], [7, 7], [2, 9]], ex2 = [[8, 6], [4, 4], [10, 3], [5, 9], [7, 8]];
     const col = E => E.map(([a, b]) => `<div class="mp-sr"><span class="ex">${a} · ${b} =</span>${box('')}</div>`).join('');
@@ -555,6 +627,7 @@ const MatteProv = (() => {
     S = { mode:'intro', moment, i };
     frame('Så här gör du', 'prov', 'Tillbaka', `<button class="mp-skip" data-act="introskip">Hoppa över</button>`, `
       <div class="mp-intro">
+        ${moment === 'uppstallning' ? methodSegHTML() : ''}
         <div class="mp-vis">${s.v}</div>
         <div class="mp-say">${esc(s.t)}</div>
         <div class="mp-dots">${st.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
@@ -641,6 +714,9 @@ const MatteProv = (() => {
   function renderTask(fb, keep, task) {
     const t = task || curTask();
     if (!t) return finish();
+    /* D41: uppställning med minnessiffra räknas av multiplikationens motor (MultDivGame.runTask) */
+    const eng = t.type === 'upp' && !fb && !keep ? L.uppEngineMode(upMethod(), S.mode) : null;
+    if (eng && typeof MultDivGame !== 'undefined' && MultDivGame.runTask) return runMinne(t, eng);
     if (!fb && !keep) { IN = freshInput(t); locked = false; }
     const q = document.getElementById('mp-q');
     if (keep && q) {
@@ -805,7 +881,8 @@ const MatteProv = (() => {
     const top = noteBlock ? noteBlock : M ? `<p class="mp-guide hm ${M.kind}">${svg(M.kind === 'retry' ? 'again' : 'bulb')}<span><b>${esc(M.title)}</b> ${esc(M.text)}</span></p>`
       : G ? `<p class="mp-guide">${svg('next')}<span class="tx">${esc(G.text)}</span></p>` : '';
     const focus = fb ? null : G && G.grey ? { row:'p2', col:0 } : inRows ? null : IN.f;
-    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus, ok:show || (fb && fb.ok), pulse:!fb && (IN.pulse || (G && G.grey)), given:show ? null : IN.given, lit:G ? G.lit : null, open })}`;
+    return `${top}${paperHTML(t, { vals, readonly:!!fb, focus, ok:show || (fb && fb.ok), pulse:!fb && (IN.pulse || (G && G.grey)), given:show ? null : IN.given, lit:G ? G.lit : null, open,
+      zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin })}`;
   }
 
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
@@ -855,6 +932,7 @@ const MatteProv = (() => {
     const R = L.uppRowsOrder(t), rq = IN.rq;
     if (rq.k < R.length) {                               // radfrågan
       const row = R[rq.k];
+      if (!t.two && rq.phase === 'zero') return { zero:true, row, lit:rq.zlitTop ? { top:[+row.slice(1)] } : {} };
       if (!t.two) return { ask:true, row, lit:{ top:[+row.slice(1)], bot:[0] } };
       const N = L.thinkNotes(t, row), j = IN.f.note;
       const top = j != null && j < N.terms.length ? [String(N.terms[j]).length - 1] : L.digitsOf(t.top).map((_, k) => k);
@@ -868,7 +946,12 @@ const MatteProv = (() => {
   function rqHTML(t, G) {
     const rq = IN.rq, n = IN.rows.indexOf(G.row) + 1;
     const msg = rq.msg ? `<div class="mp-rqmsg ${rq.msg.kind}">${esc(rq.msg.text)}</div>` : '';
-    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt">Rad 2 är tiotalet: skriv 0 i den grå rutan.</span></div>${msg}</div>`;
+    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr">Rad 2. ${t.tens} står i tiotalet och är värd ${t.tens * 10}. Därför en nolla först: skriv 0 i den grå rutan.</span></div>${msg}</div>`;
+    if (G.zero) {                                         // förklaringen av nollorna: siffran i platsvärdets färg
+      const i = +G.row.slice(1), st = rq.zsteps[rq.zs];
+      const html = esc(st.text).replace(/^(\d)(?= står)/, `<b style="color:${COLV[Math.min(i, 3)]}">$1</b>`);
+      return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr"><b>Rad ${n}.</b> ${html}</span></div></div>`;
+    }
     if (G.ask) {
       const q = L.rowQuestion(t, G.row);
       return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt">Rad ${n}: ${esc(q.text)}</span><span class="mp-nb rq${rq.busy ? '' : ' focus'}" id="mp-rqa">${esc(rq.ans)}</span></div>${msg}</div>`;
@@ -900,12 +983,14 @@ const MatteProv = (() => {
     const fix = (n, i, which) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix${(lit[which] || []).includes(i) ? ' lit' : ''}" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
     const inCell = (row, i) => {
       const v = vals[row] ? vals[row][i] : null;
-      const grey = row === 'p2' && i === 0, gv = given.has(row + ':' + i);
+      /* D41 ✎: en förskjuten rads rutor till höger är grå; appen för in nollorna när raden bokförs */
+      const gz = /^r\d$/.test(row) && i < rowStart(row);
+      const grey = (row === 'p2' && i === 0) || gz, gv = given.has(row + ':' + i);
       const foc = o.focus && o.focus.row === row && o.focus.col === i;
-      const sh = i < rowStart(row) && v == null;                  // förskjutningens tomma ruta
+      const sh = !gz && i < rowStart(row) && v == null;           // förskjutningens tomma ruta
       const lk = o.open && !o.open.includes(row);                 // låst tills raderna ovanför är ifyllda
       const colLit = lit.col != null && lit.col === i && row !== 's' && v != null;   // summans kolumn lyser
-      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', sh ? 'sh' : '', lk ? 'lk' : '', colLit ? 'lit' : '', foc ? 'focus' : '', o.ok && v != null ? 'ok' : '', gv ? 'given' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
+      const cls = ['mp-c', 'in', v != null ? 'has' : '', grey ? 'grey' : '', gz ? 'gz' : '', gz && o.zlit === row ? 'lit' : '', gz && o.zin && o.zin.row === row && o.zin.col === i ? 'zin' : '', sh ? 'sh' : '', lk ? 'lk' : '', colLit ? 'lit' : '', foc ? 'focus' : '', o.ok && v != null ? 'ok' : '', gv ? 'given' : '', grey && o.pulse ? 'pulse' : ''].join(' ');
       const edit = !o.readonly && !gv && !lk && row === 's';   // raderna bokförs av appen; summan skriver barnet
       return `<div class="${cls}" data-r="${row}" data-c="${i}" ${edit ? `data-act="cell" data-row="${row}" data-col="${i}"` : ''}${lk ? ' aria-disabled="true"' : ''}>${v != null ? v : ''}</div>`;
     };
@@ -951,6 +1036,8 @@ const MatteProv = (() => {
       const nx = IN.kind === 'sheet' ? `Nästa tal ${svg('down')}` : `Nästa ruta ${svg('right')}`;
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-k nx w4 pri" data-act="key" data-k="next">${nx}</button></div>`;
     }
+    if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'zero')    // D41 ✎: förklaringen, en knapp
+      return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" data-act="key" data-k="next"${IN.rq.busy ? ' disabled' : ''}>${svg('right')}<span>Nästa</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase === 'grey')   // nollan rättas när den skrivs
       return `<div class="mp-pad5">${digits}${erase}<button class="mp-klar w4" disabled>${svg('check')}<span>Svara</span></button></div>`;
     if (t.type === 'upp' && IN.rq.k < L.uppRowsOrder(t).length && IN.rq.phase !== 'grey') {
@@ -1010,6 +1097,7 @@ const MatteProv = (() => {
     const R = L.uppRowsOrder(t), rq = IN.rq;
     if (rq.k < R.length) {                                   // radfrågan
       if (rq.busy) return;
+      if (rq.phase === 'zero') { if (k === 'next') zeroNext(t); return; }   // D41 ✎: förklaringen av nollorna
       const row = R[rq.k];
       if (rq.phase === 'grey') {                             // rad 2: barnet skriver nollan själv
         if (!/^\d$/.test(k)) return;
@@ -1059,12 +1147,55 @@ const MatteProv = (() => {
     else if (step === 'hint') rq.msg = { kind:'bit', text:L.rowHint(t, row) };
     else { if (!t.two) rq.ans = String(q.answer); else IN.notes[row][IN.notes[row].length - 1] = String(q.answer); return rowBookAnim(t, row, 'svar'); }
   }
+  /* D41 ✎: en förskjuten rad blir aktuell. Först förklaringen (L.zeroSteps): siffrans värde med siffran i
+     orange ram, varför just så många nollor med de grå rutorna i orange ram, och sist förs nollorna in en i
+     taget. Öva: klickstyrt med Nästa. Provet: ett kort steg, och nollorna förs in direkt efter texten.
+     Först därefter kommer radens fråga (Dennis: "sätt dit nollorna innan du löser det som skall gångras"). */
+  function zerosFirst(t, row) {
+    const rq = IN.rq;
+    rq.phase = 'zero'; rq.zrow = row; rq.zs = 0; rq.msg = null;
+    rq.zsteps = L.zeroSteps(t, row, S && S.mode === 'prov' ? 'prov' : 'ova');
+    IN.f = { row, col:0, note:null };
+    zeroShow(t);
+  }
+  function zeroShow(t) {
+    const rq = IN.rq, st = rq.zsteps[rq.zs], row = rq.zrow, token = IN, prov = S && S.mode === 'prov';
+    IN.zlit = st.lit === 'zeros' ? row : null;
+    rq.zlitTop = st.lit === 'top';
+    rq.busy = !!st.zeros;                                  // knappen väntar tills nollorna står
+    refreshQ(t);
+    if (!st.zeros) return;
+    const zeros = L.rowZeros(t, row);
+    zeros.forEach((z, k) => setTimeout(() => {           // en i taget, från entalet
+      if (IN !== token) return;
+      IN.vals[row][z.col] = 0; IN.booked.add(row + ':' + z.col);
+      IN.zin = { row, col:z.col };
+      refreshQ(t);
+      IN.zin = null;
+      snd('click');
+    }, 700 + k * 550));
+    setTimeout(() => {
+      if (IN !== token) return;
+      rq.busy = false;
+      if (prov) zeroDone(t); else refreshQ(t);
+    }, 700 + zeros.length * 550 + 500);
+  }
+  function zeroNext(t) {
+    const rq = IN.rq;
+    if (rq.busy) return;
+    if (rq.zs < rq.zsteps.length - 1) { rq.zs++; zeroShow(t); } else zeroDone(t);
+  }
+  function zeroDone(t) {
+    const rq = IN.rq;
+    IN.zlit = null; rq.zlitTop = false; rq.zsteps = null; rq.msg = null; rq.phase = 'ask';
+    refreshQ(t);
+  }
   /* Bokföringen: texten först, sedan flyttar talet in på sin rad och sitt platsvärde */
   function rowBookAnim(t, row, outcome) {
     const rq = IN.rq, q = L.rowQuestion(t, row), n = IN.rows.indexOf(row) + 1, token = IN;
     rq.busy = true;
-    const where = row === 'p2' ? 'rad 2, efter nollan' : `rad ${n}`;
-    rq.msg = { kind:outcome === 'svar' ? 'bit' : 'ok', text:outcome === 'svar' ? `Svaret är ${q.answer}. Det skrivs på ${where}.` : `Rätt! ${q.answer} skrivs på ${where}.` };
+    const where = row === 'p2' ? 'rad 2, efter nollan' : `rad ${n}`, zt = L.zeroBookText(t, row, outcome);
+    rq.msg = { kind:outcome === 'svar' ? 'bit' : 'ok', text:zt || (outcome === 'svar' ? `Svaret är ${q.answer}. Det skrivs på ${where}.` : `Rätt! ${q.answer} skrivs på ${where}.`) };
     refreshQ(t);
     const cells = L.rowBook(t, row);
     const land = () => {
@@ -1075,6 +1206,7 @@ const MatteProv = (() => {
       const R = L.uppRowsOrder(t), next = R[rq.k];
       if (!next) IN.f = { row:'s', col:0 };
       else if (next === 'p2') { rq.phase = 'grey'; IN.f = { row:'p2', col:0 }; }
+      else if (L.rowZeros(t, next).length) return zerosFirst(t, next);   // D41 ✎: nollorna före frågan
       else { rq.phase = 'ask'; IN.f = { row:next, col:0, note:t.two ? 0 : null }; }
       refreshQ(t);
     };
@@ -1212,10 +1344,30 @@ const MatteProv = (() => {
       IN.f = { row, col:uppFirstFree(row) };
     }
   }
+  /* D41: en uppställning med minnessiffra. Motorn visar uppgiften på multiplikationens skärm (utan
+     historikpost) och lämnar tillbaka utfallet; här bokförs det som vilken uppgift som helst. */
+  function runMinne(t, mode) {
+    IN = null; locked = true;
+    const H = header(t);
+    const exitMsg = S.mode === 'prov' ? `Avsluta provet? Du är på uppgift ${S.idx + 1} av ${S.items.length}, och provet sparas inte.` : 'Avsluta passet?';
+    const back = () => Router.silent(() => Router.show('screen-matteprov'));
+    MultDivGame.runTask({ a:t.top, b:t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
+      onDone:res => { back(); minneDone(t, res); },
+      onExit:() => { back(); showProv(); } });
+  }
+  function minneDone(t, res) {
+    S.touched = true;
+    if (isDrill() && res.outcome !== 'direkt') S.drill.answer(false);   // nötloopen: uppgiften kommer igen
+    taskDone(t, res.outcome, res.cls, { rows:[], grey:false, facts:res.facts || [] });
+    if (isDrill() && res.outcome === 'svar') S.drill.answer(true);
+    locked = false;
+    renderTask();
+  }
+
   /* Utfallet sparas: i provets resultat, i passets räkning och i "det som var svårt" */
-  function taskDone(t, outcome, cls) {
-    let detail = null;
-    if (t.type === 'upp' && IN && IN.rq) {                   // en rad som fått hjälp gör uppgiften "med hjälp"
+  function taskDone(t, outcome, cls, given) {
+    let detail = given || null;
+    if (!given && t.type === 'upp' && IN && IN.rq) {                   // en rad som fått hjälp gör uppgiften "med hjälp"
       const rows = Object.keys(IN.rq.outc).filter(r => IN.rq.outc[r] !== 'direkt');
       detail = { rows, grey:IN.rq.greyWrong > 0 };
       if (outcome === 'direkt' && (rows.length || detail.grey)) outcome = 'hjalp';
@@ -1483,6 +1635,7 @@ const MatteProv = (() => {
       case 'list':      snd('click'); showList(); break;
       case 'prov':      snd('click'); if (id) provId = id; showProv(); break;
       case 'level':     snd('click'); setLevel(id); showProv(); break;
+      case 'method':    snd('click'); setUpMethod(id); if (S && S.mode === 'intro') showIntro(S.moment, 0); else showProv(); break;
       case 'ova':       snd('click'); showIntro(id, 0); break;
       case 'intronext': snd('click'); showIntro(S.moment, S.i + 1); break;
       case 'introprev': snd('click'); showIntro(S.moment, Math.max(0, S.i - 1)); break;
@@ -1532,7 +1685,7 @@ const MatteProv = (() => {
     else if (e.key === 'Tab' && IN.kind !== 'num') { e.preventDefault(); press('next'); }
   }
 
-  return { open, showList, showProv,
+  return { open, showList, showProv, upMethod,
            /* bara för test i webbläsaren */
            _peek:() => ({ S, IN, task:curTask() }),
            _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };
