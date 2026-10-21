@@ -41,6 +41,10 @@ aldrig. Nya frågor får nästa P-nummer.
 - **P14 Skakningar och röd puls.** Skak-animationerna vid fel svar finns kvar i flera moduler, och demon pulserar rött
   vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
 
+- **P15 Delrader i Räkna själv?** I Räkna själv skriver barnet bara svaret och räknar i kladden (D7), så den grå
+  rutan och delraderna syns inte där. Öppet: ska Räkna själv på nivå 4 få rad 1, rad 2 med den grå rutan och summan
+  på pappret? Det ändrar D7 och tar kladdyta.
+
 ## Besvarade
 
 - ~~P12 Skolans metod i resten av appen?~~ → D40 (minnessiffran kvar; den osynliga nollan i en grå ruta på nivå 4).
