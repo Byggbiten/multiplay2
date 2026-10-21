@@ -340,9 +340,17 @@ Svaren kan bli fem siffror långa; kolumnerna heter E, T, H, T och TT.
 **Den osynliga nollan (nivå 4, tvåsiffrig faktor).** Rad 2 har en grå ruta i entalet, som på övningsbladen. När rad 2
 börjar säger appen "Nu gångrar vi med ett tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet." och en
 nolla skrivs in i den grå rutan. I Räkna med hjälp kommer nollan av sig själv; barnet skriver den inte. Rad 1 och
-rad 2 läggs sedan ihop kolumn för kolumn, ental med ental och tiotal med tiotal. Räkna själv har inga delrader på
-pappret (barnet ställer upp dem i kladden), så där finns ingen grå ruta; livlinan visar de två delprodukterna, till
-exempel 67 · 9 = 603 och 67 · 20 = 1340.
+rad 2 läggs sedan ihop kolumn för kolumn, ental med ental och tiotal med tiotal.
+
+**Räkna själv med tvåsiffrig faktor (D41 ✎).** Pappret har rad 1, rad 2 och summan. Nollan står ljusgrå i den grå
+rutan från början, och en rad under uppställningen säger varför ("Rad 2 räknar med tiotal, därför en nolla i
+entalet."). Barnet fyller rad 1, rad 2 och summan, ruta för ruta från höger. Knappen heter **Nästa rad** tills varje
+rad har siffror och **Klar** sedan; summan är nedtonad och går inte att trycka på förrän båda raderna har siffror.
+Vid Klar rättas raderna före summan. Raden som inte stämmer blir milt persika och får fokus, och en rad säger var
+felet finns ("Titta på rad 2 – nollan står i entalet, så 82 · 6 börjar i tiotalet.", eller "kolla minnessiffrorna"
+när en minnessiffra har glömts i raden eller i summan). Rätt direkt kräver rätt rader och rätt summa. Livlinan visar
+de två delprodukterna, till exempel 67 · 9 = 603 och 67 · 20 = 1340. Med ensiffrig faktor och på nivå 1–3 finns bara
+svarsraden, som förut.
 
 **Pekningen (nivå 4).** Vid varje uträkning lyser de två siffrorna som gångras och rutan där svaret ska stå, och
 texten säger vilken ruta det är ("7 · 9 är 63. Det hör till entalet."). Rad 2:s första uträkning säger att svaret
@@ -407,10 +415,11 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
      texten i platsvärdesfärg, och ord om var svaret hamnar. Ensiffrig faktor ger en rad med minnessiffror.
      - *I Öva* räknar barnet **med hjälp**: appen frågar en kolumn i taget, barnet svarar, placerar och stryker
        minnessiffrorna. Fel svar eller livlina gör uppgiften "med hjälp" i kvittot.
-     - *I provet och Mitt prov* räknar barnet **själv**: svaret skrivs i rutorna och uträkningen görs i kladden.
-       Första gången det inte stämmer: "Inte riktigt – försök igen." (eller en påminnelse om minnessiffrorna), utan
-       ljud. Andra gången: en hjälp (raderna 82 · 8 = 656 och 82 · 60 = 4920, eller minnessiffrorna). Tredje
-       gången: svaret visas i grått, och Nästa går vidare.
+     - *I provet och Mitt prov* räknar barnet **själv**, som i multiplikationens Räkna själv: med tvåsiffrig faktor
+       skriver barnet rad 1, rad 2 (den grå nollan står redan där, så att läraren ser den) och summan; med ensiffrig
+       faktor bara svaret. Första gången det inte stämmer pekar en rad på raden (eller summan) som inte stämmer,
+       utan ljud. Sedan visar en hjälp den raden, en rad i taget ("Rad 2 är 82 · 60 = 4920."; vid ensiffrig faktor
+       minnessiffrorna). Kommer samma rad fel igen visas svaret i grått, och Nästa går vidare.
      - Det som var svårt: tabellfakta som fick fel svar, "Minnessiffran" och "Minne i summan".
    - **Dela upp**: som förut (nedan). Raderna fylls i tur och ordning; summaraden är låst (nedtonad) tills alla rader
      är ifyllda.

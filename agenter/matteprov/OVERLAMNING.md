@@ -61,8 +61,9 @@ Vitest 19/10: hela sviten 468, varav 75 i `tests/matteprov.test.mjs`.
 - **Minnessiffra:** `renderTask` lämnar uppgiften till `runMinne`, som anropar `MultDivGame.runTask({ a:top, b:bot,
   mode, … })` på multiplikationens skärm (`Router.silent`, ingen historikpost). `uppEngineMode(method, S.mode)`:
   Öva/svag/not = `help` (Räkna med hjälp: appen leder en kolumn i taget, så att barnet lär sig ordningen), prov och
-  mitt prov = `free` (Räkna själv: svaret i rutorna, uträkningen i kladden, som på det skarpa provet; trappan:
-  tyst "Inte riktigt – försök igen", sedan en hjälpbit, sedan svaret). `minneDone` bokför utfallet med
+  mitt prov = `free` (Räkna själv: vid tvåsiffrig faktor skriver barnet rad 1, rad 2 med den grå nollan, som läraren
+  rättar, och summan; vid ensiffrig bara svaret. D41 ✎. Trappan: först en tyst rad som pekar på raden som inte
+  stämmer (`freeCheck`), sedan radens facit som hjälpbit, en rad i taget, och kommer samma rad igen visas svaret). `minneDone` bokför utfallet med
   `taskDone(t, outcome, cls, { facts })`: nötloopen, kvittot och `recordOutcome` som vanligt. Felklassen `minne`
   ger taggen `upp:minne` ("Minnessiffran"), `facts` ger tabelltaggarna.
 - **Dela upp:** D38-flödet nedan, oförändrat. Den orange ramen fanns redan där (`.lit`); siffrorna i texten är inte

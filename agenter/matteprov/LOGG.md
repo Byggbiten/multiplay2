@@ -84,3 +84,13 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   den står i "Så här gör du"; provsidan visar bara valet.
 - **Lärdom:** när två moduler ska lära ut samma sak, låna motorn i stället för att kopiera den; en isolerad krok
   med ett utfall tillbaka (direkt, hjälp, svaret, felklass) räcker för att provets bokföring ska fungera som förut.
+
+## Runda 7 ✎ · 2026-10-21 · Raderna och den grå nollan i Räkna själv (D41 ✎, P15)
+- **Vad som inte fungerade:** Dennis: "den där nollan i grå ruta saknades". Provets minnessiffreläge (multdivs fria
+  läge) visade bara svarsraden, men läraren rättar nollan på rad 2.
+- **Byggt (i multdiv, som provet lånar):** vid tvåsiffrig faktor visar Räkna själv rad 1, rad 2 med nollan ljusgrå från
+  början och summan; "Nästa rad" tills allt har siffror, sedan Klar; summan låst tills raderna har siffror; rättning
+  per rad (`freeCheck`, glömd minnessiffra per rad och i summan); hjälptrappan med en rad i taget. Uppmätt i 390 × 797:
+  kladden 165 px från början, minst 95 px när hjälpbiten står i bubblan (108 px med ledtrådsraden utanför provet).
+- **Lärdom:** "barnet räknar i kladden" räcker inte när läraren rättar en mellanrad; det som rättas på pappret ska
+  finnas på appens papper.
