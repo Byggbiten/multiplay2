@@ -580,3 +580,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   utan att fokus lämnar rutan barnet står i: tryck på minnesrutan, nästa siffra hamnar där, och fokus står kvar i
   summans ruta. Källa: Dennis (skärmbild 8 · 1416): "när man skall sätta minnessiffra så skiftar cellerna fokus. du
   får gärna lösa så att det går att sätta minnessiffra utan att cellerna byter fokus".
+- ✎ **2026-10-21, enklare förklaring av nollan:** "2:an står i tiotalet, så den är egentligen 20. Därför skriver vi en
+  nolla först." och för fler nollor "800 slutar på två nollor. Därför skriver vi två nollor först." Ersätter "är
+  värd … 20 är 2 · 10. 10 har en nolla". Källa: Dennis (skärmbild, nivå 4 rad 2): "den här förklaringen blev nästan
+  lite som en tungvrickare. kan du bli enklare/mer pedagogisk?"

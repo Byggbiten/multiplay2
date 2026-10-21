@@ -534,9 +534,9 @@ const MatteProv = (() => {
         { v:E({}), t:'Med en ensiffrig faktor räknar du en siffra i taget. Varje svar får en egen rad.' },
         { v:gl('Rad 1: Vad är 8 · 7?') + E({}, { top:[0], bot:[0] }), t:'Appen frågar: Vad är 8 · 7? Du skriver 56 i rutan och trycker Svara.' },
         { v:E({ r0 }, { top:[0], bot:[0] }), t:'Svaret flyttas till rad 1, med 6:an i entalet.' },
-        { v:E({ r0, r1:[0].concat(Array(We - 1).fill(null)) }, { top:[1] }), t:'Rad 2: 8 står i tiotalet och är värd 80. 10 har en nolla, så en nolla först, i den grå rutan.' },
+        { v:E({ r0, r1:[0].concat(Array(We - 1).fill(null)) }, { top:[1] }), t:'Rad 2: 8:an står i tiotalet, så den är egentligen 80. Därför skriver vi en nolla först, i den grå rutan.' },
         { v:gl('Rad 2: Vad är 8 · 8?') + E({ r0, r1 }, { top:[1], bot:[0] }), t:'Sedan frågar appen: Vad är 8 · 8? Svaret 64 skrivs till vänster om nollan, så raden blir 640.' },
-        { v:E({ r0, r1, r2:[0, 0].concat(Array(We - 2).fill(null)) }, { top:[2] }), t:'Rad 3: 6 står i hundratalet och är värd 600. 100 har två nollor, så två nollor först.' },
+        { v:E({ r0, r1, r2:[0, 0].concat(Array(We - 2).fill(null)) }, { top:[2] }), t:'Rad 3: 6:an står i hundratalet, så den är egentligen 600. 600 slutar på två nollor – därför två nollor först.' },
         { v:E({ r0, r1, r2 }, { top:[2], bot:[0] }), t:'Sedan 8 · 6 = 48, till vänster om nollorna. Raden blir 4800.' },
         { v:E({ r0, r1, r2, m:em, s:sh(5496, 0) }), t:'Summan skriver du själv, en ruta i taget från höger. Minnessiffrorna står i de lila rutorna. Svaret är 5496.' },
         { v:P({}), t:'Med en tvåsiffrig faktor, som 17 · 32, blir det två rader och sedan summan. Det större talet står överst.' },
@@ -947,7 +947,7 @@ const MatteProv = (() => {
   function rqHTML(t, G) {
     const rq = IN.rq, n = IN.rows.indexOf(G.row) + 1;
     const msg = rq.msg ? `<div class="mp-rqmsg ${rq.msg.kind}">${esc(rq.msg.text)}</div>` : '';
-    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr">Rad 2. ${t.tens} står i tiotalet och är värd ${t.tens * 10}. Därför en nolla först: skriv 0 i den grå rutan.</span></div>${msg}</div>`;
+    if (G.grey) return `<div class="mp-notes"><div class="mp-nl"><span class="mp-nt wr">Rad 2. ${t.tens}:an står i tiotalet, så den är egentligen ${t.tens * 10}. Därför skriver du 0 först i den grå rutan.</span></div>${msg}</div>`;
     if (G.zero) {                                         // förklaringen av nollorna: siffran i platsvärdets färg
       const i = +G.row.slice(1), st = rq.zsteps[rq.zs];
       const html = esc(st.text).replace(/^(\d)(?= står)/, `<b style="color:${COLV[Math.min(i, 3)]}">$1</b>`);
