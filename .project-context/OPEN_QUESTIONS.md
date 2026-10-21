@@ -33,9 +33,6 @@ aldrig. Nya frågor får nästa P-nummer.
   hubben i v58. Kontrollerat 19/10: dess vyer finns inte kvar i `js/multiplication.js`. Kvar är loggens etikett
   "Eget prov" med ikonen 🎲 för gamla poster, och `runCustomSession`, som Fokuserad träning i Statistik använder.
 
-### Matteprovet
-
-
 ### Snällare app (D39)
 
 - **P13 Klar efter en enda siffra i fria lägen.** I Räkna själv i multdiv och uppställningen räknas en siffra följd
