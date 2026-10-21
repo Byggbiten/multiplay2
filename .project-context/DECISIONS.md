@@ -565,3 +565,6 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   och matteprovets provläge) rad 1, rad 2 med den grå nollan och summan på pappret; summan låst tills raderna är
   ifyllda. Ändrar D7 för tvåsiffrig faktor. Besvarar P15. Källa: Dennis: "den där nollan i grå ruta saknades"
   (matteprovets provläge räknas i Räkna själv, som bara visade svarsraden).
+- ✎ **2026-10-21, grå nollor i Dela upp:** i matteprovets Dela upp blir de tomma rutorna till höger om varje förskjuten
+  delproduktsrad grå (som den osynliga nollan), och nollorna förs in av appen när raden är aktuell. Källa: Dennis
+  (skärmbild 4819 · 9 i Dela upp): "Skulle inte dessa celler vara gråade, och när det är dags så skall 0:an föras in?"
