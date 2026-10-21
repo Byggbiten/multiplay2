@@ -576,3 +576,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - ✎ **2026-10-21, varför så många nollor:** nollorna förklaras med siffrans värde: "8 står i hundratalet och är värd
   800 = 8 · 100; 100 har två nollor, därför två nollor först". Gäller Dela upp och minnessiffreläget. Källa: Dennis:
   "gör det pedagogiskt, så att de förstår varför de fyller i x-antal nollor".
+- ✎ **2026-10-21, minnessiffran utan fokusbyte:** i summans uppställning (matteprovet, Dela upp) skrivs en minnessiffra
+  utan att fokus lämnar rutan barnet står i: tryck på minnesrutan, nästa siffra hamnar där, och fokus står kvar i
+  summans ruta. Källa: Dennis (skärmbild 8 · 1416): "när man skall sätta minnessiffra så skiftar cellerna fokus. du
+  får gärna lösa så att det går att sätta minnessiffra utan att cellerna byter fokus".
