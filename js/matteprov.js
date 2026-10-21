@@ -183,6 +183,7 @@ const MatteProv = (() => {
 #mp-root .mp-m.in{border:2px dashed rgba(124,58,237,.4);cursor:pointer;transform:none}
 #mp-root .mp-m.in::after{content:'';position:absolute;left:50%;top:50%;width:46px;height:44px;transform:translate(-50%,-50%)}
 #mp-root .mp-m.in.focus{border:2.5px solid #7c3aed;background:#f5f3ff}
+#mp-root .mp-m.in.wait{border:2.5px solid #7c3aed;background:#f5f3ff;box-shadow:0 0 0 2px rgba(124,58,237,.18),0 0 8px rgba(124,58,237,.45)}
 #mp-root .mp-sign{font-family:var(--font-head);font-weight:900;font-size:26px;color:#475569;width:22px}
 #mp-root .mp-line td{height:3px;border-radius:2px}
 #mp-root .mp-line td + td{background:#374151}
@@ -705,7 +706,7 @@ const MatteProv = (() => {
     /* rq = radfrågan (D38 ✎): k = raden som frågas (index i delprodukternas ordning), phase 'grey' (rad 2:s nolla)
        eller 'ask', ans = svaret (ensiffrig), wrong = fel på raden, outc = utfallet per rad */
     const rq = { k:0, phase:'ask', ans:'', wrong:0, msg:null, outc:{}, greyWrong:0, busy:false };
-    return { kind:'upp', rows:rws, vals, notes, rq, booked:new Set(), f:{ row:rws[0], col:0, note:notes ? 0 : null }, back:null, given:new Set(), pulse:false, H };
+    return { kind:'upp', rows:rws, vals, notes, rq, booked:new Set(), f:{ row:rws[0], col:0, note:notes ? 0 : null }, mw:null, given:new Set(), pulse:false, H };
   }
   const needsScratch = t => t.type !== 'sheet' && S.mode !== 'sprint';
 
@@ -882,7 +883,7 @@ const MatteProv = (() => {
       : G ? `<p class="mp-guide">${svg('next')}<span class="tx">${esc(G.text)}</span></p>` : '';
     const focus = fb ? null : G && G.grey ? { row:'p2', col:0 } : inRows ? null : IN.f;
     return `${top}${paperHTML(t, { vals, readonly:!!fb, focus, ok:show || (fb && fb.ok), pulse:!fb && (IN.pulse || (G && G.grey)), given:show ? null : IN.given, lit:G ? G.lit : null, open,
-      zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin })}`;
+      zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin, mwait:fb ? null : IN.mw })}`;
   }
 
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
@@ -997,9 +998,9 @@ const MatteProv = (() => {
     const memCell = i => {
       if (i === 0) return '<div class="mp-m"></div>';
       const v = vals.m ? vals.m[i] : null;
-      const foc = o.focus && o.focus.row === 'm' && o.focus.col === i;
+      const wait = o.mwait === i;                                 // D41 ✎: väntar på en siffra, summans fokus står kvar
       if (o.readonly || given.has('m:' + i)) return `<div class="mp-m">${v != null ? v : ''}</div>`;
-      return `<div class="mp-m in${foc ? ' focus' : ''}" data-act="cell" data-row="m" data-col="${i}" aria-label="Minnessiffra">${v != null ? v : ''}</div>`;
+      return `<div class="mp-m in${wait ? ' wait' : ''}" data-act="cell" data-row="m" data-col="${i}" aria-label="Minnessiffra${wait ? ', väntar på en siffra' : ''}">${v != null ? v : ''}</div>`;
     };
     const line = `<tr class="mp-line"><td></td><td colspan="${W}"></td></tr>`;
     const memRow = `<tr><td></td>${idx.map(memCell).map(x => `<td>${x}</td>`).join('')}</tr>`;
@@ -1119,6 +1120,9 @@ const MatteProv = (() => {
       if (/^\d$/.test(k) && nv[j].length < 5) nv[j] = (nv[j] === '0' ? '' : nv[j]) + k;
       return;
     }
+    /* D41 ✎: en minnesruta väntar på en siffra — siffran (eller ⌫) gäller den, och summans fokus står kvar */
+    const mst = L.memCellKey({ f:IN.f, m:IN.vals.m, mw:IN.mw }, k);
+    if (mst) { IN.vals.m = mst.m; IN.mw = mst.mw; return; }
     /* summan: siffran hamnar i rutan med fokus, sedan ett steg åt vänster */
     const f = IN.f, W = t.width, rowVals = IN.vals[f.row];
     if (k === 'next') return;
@@ -1129,7 +1133,6 @@ const MatteProv = (() => {
     }
     if (!/^\d$/.test(k) || !uppFree(f.row, f.col)) return;
     rowVals[f.col] = +k;
-    if (f.row === 'm') { IN.f = IN.back || { row:'s', col:0 }; IN.back = null; return; }
     let c = f.col + 1;
     while (c < W - 1 && !uppFree('s', c)) c++;
     if (c < W && uppFree('s', c)) IN.f = { row:'s', col:c };
@@ -1671,8 +1674,11 @@ const MatteProv = (() => {
                         } break;
       case 'cell':      if (!locked && IN && IN.kind === 'upp') {
                           const row = el.dataset.row, col = +el.dataset.col;
-                          if (row === 'm' && IN.f.row !== 'm') IN.back = IN.f;
-                          IN.f = { row, col }; refreshQ(curTask());
+                          if (row === 'm') {                // D41 ✎: minnesrutan väntar; summans fokus står kvar
+                            const mst = L.memCellTap({ f:IN.f, m:IN.vals.m, mw:IN.mw }, col);
+                            IN.vals.m = mst.m; IN.mw = mst.mw; snd('click');
+                          } else { IN.mw = null; IN.f = { row, col }; }
+                          refreshQ(curTask());
                         } break;
     }
   }

@@ -50,3 +50,12 @@ Rollens lärdomslogg: en post per runda. Tillståndet nu: `OVERLAMNING.md`.
   etikett, och för siffran 1 hoppas mellanmeningen över. Ett svep i vitest vaktar regeln.
 - **Lärdom:** ordningen är en del av pedagogiken. Lägg den som ren data (`uppRowFlow`) så att den går att testa, och
   svep språkregeln maskinellt i stället för att läsa exemplen.
+
+## Runda 6 · 2026-10-21 · Minnessiffran utan fokusbyte (kontroll), gren `minne-fokus`
+- **Uppdrag:** kontrollera om fria läget (Räkna själv, och matteprovets minnessiffreläge via `runTask`) byter fokus
+  när en minnessiffra sätts, som matteprovets Dela upp gjorde.
+- **Utfall:** nej. Fria läget har ingen minnesinmatning: spalten har ingen plats och ingen väljare, och minnessiffrorna
+  landar först vid rätt svar. Uppmätt i webbläsaren (82 · 68): fokus står kvar på `md-p1-1` efter ett tryck i spalten.
+  Ingen ändring i `js/multdiv.js`.
+- **Lärdom:** kontrollera "samma fel här?" genom att mäta fokus före och efter i det andra läget, inte genom att
+  läsa koden; minnesspalten beter sig olika i hjälpläget (väljare) och fria läget (bara landning).

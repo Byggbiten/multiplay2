@@ -445,7 +445,12 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
      Radsumman rättas i båda. Siffrorna som räknas lyser.
    - **Summan** skriver barnet själv, en ruta i taget från höger; siffran hamnar i rutan med fokus. Tankeraden visar
      en kolumn i taget ("Tiotalet: 5 + 2"), i provet bara "kolumn för kolumn".
-   - Additionens minnessiffror skrivs i de lila rutorna ovanför raderna; de visas när summan låses upp.
+   - Additionens minnessiffror skrivs i de lila rutorna ovanför raderna; de visas när summan låses upp. Ett tryck
+     på en lila ruta gör att den väntar på en siffra (lila ram och ett litet sken), medan summans ruta behåller
+     fokus. Nästa siffra hamnar i den lila rutan, och sedan skriver barnet vidare i summan där det var (D41 ✎).
+     ⌫ medan den lila rutan väntar tömmer den i stället för summans ruta. En lila ruta som redan har en siffra
+     skrivs över av nästa siffra; ett andra tryck på samma ruta tömmer den. Knappen (Klar) bryr sig inte om de
+     lila rutorna.
    - Vid fel i summan säger appen om en minnessiffra glömdes eller om additionen blev fel.
    Allt detta finns bara i matteprovet; Multiplikationens nivå 1–4 skriver som förut.
 5. **Problemlösning i steg** (D39 ✎): appen delar upp frågan i steg, och varje steg är en fråga med rutor:
