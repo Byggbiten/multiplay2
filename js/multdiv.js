@@ -1546,7 +1546,9 @@ const MultDivGame = (() => {
       cell.innerHTML = `<span class="md-zd" style="animation:md-drop 0.6s ease-out both">0</span>`;
       App.Sound.play('click');
       setTimeout(() => {
-        cell.classList.remove('active-col', 'md-glow');
+        /* D40 ✎: den orange ramen står kvar på nollans ruta så länge texten "här i entalet" visas;
+           nästa stegs belysning rensar md-glow */
+        cell.classList.remove('active-col');
         cb && cb();
       }, 700);
     }, 700);
@@ -2642,6 +2644,11 @@ const MultDivGame = (() => {
     if (item.kind !== 'phase') {
       const cell = document.getElementById(`md-${item.rowKey}-${item.g}`);
       if (cell && !cell.classList.contains('filled')) cell.classList.add('active-col');
+      /* D40 ✎ (Dennis 21/10: "sista rutan här i totalsumman. den behöver inte lysa förrän den är aktuell"):
+         bara rutor i den rad som räknas just nu får lysa */
+      document.querySelectorAll('#md-table-wrap .md-ansc.active-col').forEach(el => {
+        if (!el.id.startsWith(`md-${item.rowKey}-`)) el.classList.remove('active-col');
+      });
     }
     renderMemCol();
     showHelpUI();
