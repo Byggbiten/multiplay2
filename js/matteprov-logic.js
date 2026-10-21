@@ -236,10 +236,78 @@
      skriver svaret och räknar i kladden, som på det skarpa provet; hjälptrappan efter fel). */
   const UPP_METHODS = [{ id:'minne', name:'Minnessiffra' }, { id:'dela', name:'Dela upp' }];
   const uppMethod = st => (st && st.upMethod === 'dela') ? 'dela' : 'minne';
-  function uppEngineMode(method, passMode) {
+  /* D42: läget i Öva följer barnets val (ovaMode); provet och mitt prov räknas alltid själv. */
+  function uppEngineMode(method, passMode, mode) {
     if (method !== 'minne') return null;
-    return passMode === 'prov' ? 'free' : 'help';
+    return passHelp(mode, passMode) ? 'help' : 'free';
   }
+
+  /* ══════════════════════════════════════════════════════════
+     D42: RÄKNA MED HJÄLP / RÄKNA SJÄLV i matteprovets Öva. Med hjälp leder appen ruta för ruta under själva
+     uppgiften: en kort fråga om rutan med fokus, siffrorna som hör till lyser (orange ram, platsvärdesfärg),
+     en kort kvittens efter rätt svar. Provet (och mitt prov) räknas alltid själv.
+     Texterna bär siffror som tokens [[siffror:plats]] (plats E T H Tu TT) så att UI:t kan färga dem;
+     askPlain tar bort dem. lit = rutorna/siffrorna som lyser: 'x:<plats>', 'y:<plats>' (tiotalens faktorer),
+     'a' och 'b:T'/'b:E' (TE), 'box:<i>'. */
+  const OVA_MODES = [{ id:'help', name:'Med hjälp' }, { id:'self', name:'Själv' }];
+  const ovaMode = st => (st && st.ovaMode === 'self') ? 'self' : 'help';
+  function passHelp(mode, passMode) { return passMode !== 'prov' && mode !== 'self'; }
+  const PLACE_ID = ['E', 'T', 'H', 'Tu', 'TT'];
+  const tok = (v, place) => `[[${v}:${place}]]`;
+  /* ett tal med varje siffra i sin platsvärdesfärg */
+  const pvNum = n => digitsOf(n).map((d, i) => tok(d, PLACE_ID[i])).reverse().join('');
+  function askPlain(text) { return String(text).replace(/\[\[(\d+):[A-Za-z]+\]\]/g, '$1'); }
+  function askTokens(text) { return [...String(text).matchAll(/\[\[(\d+):([A-Za-z]+)\]\]/g)].map(m => ({ v:m[1], place:m[2] })); }
+  const NOLLOR = ['', 'en nolla', 'två nollor', 'tre nollor', 'fyra nollor'];
+  /* Frågan om ruta i (tio: 0 = antal tiotal/hundratal, 1 = talet; te: 0 tiotalen, 1 entalen, 2 a·T, 3 a·E, 4 summan) */
+  function boxAsk(t, i) {
+    if (t.type === 'tio') {
+      const xa = tok(t.a, PLACE_ID[t.za]), yb = tok(t.b, PLACE_ID[t.zb]);
+      if (i === 0) {
+        const lit = ['x:' + t.za, 'y:' + t.zb, 'box:0'];
+        if (t.za && t.zb) return { text:`${t.za === t.zb ? UNIT[t.za][0].toUpperCase() + UNIT[t.za].slice(1) + ' gånger ' + UNIT[t.zb] : UNIT[Math.max(t.za, t.zb)][0].toUpperCase() + UNIT[Math.max(t.za, t.zb)].slice(1) + ' gånger ' + UNIT[Math.min(t.za, t.zb)]} blir ${t.unit}. Hur många ${t.unit} blir ${xa} · ${yb}?`, lit };
+        const zf = t.za ? { n:t.x, d:xa, z:t.za } : { n:t.y, d:yb, z:t.zb };
+        return { text:`${pvNum(zf.n)} är ${zf.d} ${UNIT[zf.z]}. Hur många ${t.unit} blir ${xa} · ${yb}?`, lit };
+      }
+      return { text:`${t.fact} ${t.unit} – hur mycket är det?`, lit:['box:0', 'box:1'] };
+    }
+    if (t.type === 'te') {
+      const Td = t.T / 10;
+      return [
+        { text:`Dela ${tok(Td, 'T')}${tok(t.E, 'E')}: hur många är tiotalen?`, lit:['b:T', 'box:0'] },
+        { text:`…och entalen?`, lit:['b:E', 'box:1'] },
+        { text:`Vad blir ${t.a} · ${tok(t.T, 'T')}?`, lit:['a', 'box:0', 'box:2'] },
+        { text:`Vad blir ${t.a} · ${tok(t.E, 'E')}?`, lit:['a', 'box:1', 'box:3'] },
+        { text:`Lägg ihop: vad blir ${t.a * t.T} + ${t.a * t.E}?`, lit:['box:2', 'box:3', 'box:4'] },
+      ][i];
+    }
+    return null;
+  }
+  /* Den andra hjälpen för rutan (efter "försök igen"); den tredje är svaret. */
+  function boxHint(t, i) {
+    const tab = (a, b) => b > 1 ? `${a} · ${b - 1} = ${a * (b - 1)}. Lägg till en ${a}:a.` : 'Ett gånger ett tal är talet självt.';
+    if (t.type === 'tio') return i === 0 ? tab(t.a, t.b) : `Skriv ${t.fact} och lägg till ${NOLLOR[t.zeros]}.` + (t.trap ? ` Nollan i ${t.fact} står kvar.` : '');
+    if (t.type === 'te') {
+      const u = t.a * t.E, s = t.a * t.T, ut = u - u % 10;
+      return [
+        `Siffran under T är tiotalssiffran. Ett tiotal är 10.`,
+        `Siffran under E är entalen.`,
+        `${t.a} · ${t.T / 10} = ${t.a * t.T / 10}. Lägg till en nolla.`,
+        tab(t.a, t.E),
+        u % 10 ? `Lägg ihop tiotalen först: ${s} + ${ut} = ${s + ut}. Lägg sedan till entalen.` : `Lägg ihop tiotalen: ${s} + ${u}.`,
+      ][i];
+    }
+    return '';
+  }
+  /* Kort kvittens efter rätt svar i ruta i (före nästa ruta) */
+  function boxAck(t, i) {
+    if (t.type === 'tio') return i === 0 ? `Rätt! ${t.a} · ${t.b} = ${t.fact}.` : 'Rätt!';
+    if (t.type === 'te') return [`Rätt! Tiotalen är ${t.T}.`, `Rätt! ${t.b} = ${t.T} + ${t.E}.`, `Rätt! ${t.a} · ${t.T} = ${t.a * t.T}.`, `Rätt! ${t.a} · ${t.E} = ${t.a * t.E}.`, 'Rätt!'][i];
+    return 'Rätt!';
+  }
+  const boxHelpStep = n => n <= 0 ? null : ['retry', 'hint', 'svar'][Math.min(n, 3) - 1];
+  /* Facit per ruta (tio: [fact, svar]; te: [T, E, aT, aE, ab]) */
+  const boxAnswer = (t, i) => t.fields[i].ans;
   function carryCount(a, m) { let c = 0, n = 0; const ds = digitsOf(a); ds.forEach((d, i) => { const p = d * m + c; c = Math.floor(p / 10); if (i < ds.length - 1 && c > 0) n++; }); return n; }
   /* Glömd minnessiffra: varje kolumn skrivs mod 10, minnet läggs aldrig till
      (sista kolumnen skrivs hel) — samma regel som multdiv:s noCarryAnswer. */
@@ -1044,7 +1112,8 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
-    uppPlaces, memCellTap, memCellKey, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    uppPlaces, memCellTap, memCellKey, rowZeros, zeroSteps, zeroBookText, uppRowFlow, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode,
+    OVA_MODES, ovaMode, passHelp, PLACE_ID, pvNum, askPlain, askTokens, boxAsk, boxHint, boxAck, boxHelpStep, boxAnswer, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,

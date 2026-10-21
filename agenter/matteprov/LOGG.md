@@ -117,3 +117,17 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   minnessiffrorna landar först vid rätt svar, så inget fokus byts där.
 - **Lärdom:** en hjälpruta som barnet fyller i "vid sidan av" ska inte låna huvudfokus; ge den ett eget väntläge, så
   står barnets plats i talet still.
+
+## Runda 10 · 2026-10-21 · Räkna med hjälp och Räkna själv (D42), gren `matteprov-hjalplage`
+- **Vad som inte fungerade:** Dennis: "modul 2 och 3 i matteprovet förstår jag inte intuitivt vad jag skall göra när
+  jag sätter igång. Barn har en förmåga att snabbt klicka förbi instruktioner". All vägledning låg i "Så här gör du"
+  före uppgiften; under själva uppgiften stod bara "Räkna. Skriv i rutorna."
+- **Byggt:** valet Med hjälp | Själv på provsidan (sparat, förval Med hjälp, provet alltid själv). Med hjälp fylls
+  tiotal och TE ruta för ruta med en fråga om rutan i fokus, lysande siffror i platsvärdesfärg (samma färg i frågan),
+  kvittens efter rätt svar och trappan per ruta; problemlösningens pris lyser; Minnessiffra följer valet. Vitest för
+  valet, att det används, att provet räknas själv, frågetexterna för slumpade uppgifter och ett språksvep.
+- **Rättat under verifieringen:** siffrorna i ett tal blev egna flexobjekt och fick mellanrum ("5 0 · 6 0") – ett
+  tal ska ritas som en enhet.
+- **Lärdom:** hjälp som barnet kan klicka förbi hjälper inte; lägg frågan där barnet redan tittar (över rutan med
+  fokus) och låt den vara en fråga, inte en uppmaning. Mät färgade tal i flexrader: färg per siffra får inte bryta
+  talet.

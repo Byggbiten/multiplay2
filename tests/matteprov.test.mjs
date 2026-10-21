@@ -824,7 +824,7 @@ describe('D41: växeln Minnessiffra / Dela upp', () => {
   });
   it('valet sparas per profil och läses när uppgiften visas (även i provet)', () => {
     expect(src).toMatch(/function setUpMethod\(m\) \{ const s = readSt\(\); s\.upMethod = m === 'dela' \? 'dela' : 'minne'; writeSt\(s\); \}/);
-    expect(src).toMatch(/const eng = t\.type === 'upp' && !fb && !keep \? L\.uppEngineMode\(upMethod\(\), S\.mode\) : null;/);
+    expect(src).toMatch(/const eng = t\.type === 'upp' && !fb && !keep \? L\.uppEngineMode\(upMethod\(\), S\.mode, ovaModeNow\(\)\) : null;/);
     expect(src).toMatch(/S = \{ mode:'prov', mitt:!!mitt/);                 // provet och mitt prov har mode 'prov'
     expect(src).toMatch(/case 'method':\s+snd\('click'\); setUpMethod\(id\);/);
     // "Så här gör du" visar det valda läget, och växeln står överst där
@@ -972,5 +972,104 @@ describe('D41 ✎: minnessiffran utan fokusbyte', () => {
     expect(src).toMatch(/return !!t && IN\.rq\.k >= L\.uppRowsOrder\(t\)\.length && !IN\.rq\.busy && IN\.vals\.s\.some\(d => d != null\);/);
     expect(src).toMatch(/if \(row === 'm'\) \{[^}]*L\.memCellTap\(\{ f:IN\.f, m:IN\.vals\.m, mw:IN\.mw \}, col\);\n\s+IN\.vals\.m = mst\.m; IN\.mw = mst\.mw; snd\('click'\);\n\s+\} else \{ IN\.mw = null; IN\.f = \{ row, col \}; \}/);
     expect(src).not.toMatch(/IN\.back/);                                   // fokus lämnas aldrig för minnesrutan
+  });
+});
+
+/* ══ D42: Räkna med hjälp / Räkna själv, frågan ruta för ruta ══ */
+describe('lägesvalet i Öva (D42)', () => {
+  it('förval Med hjälp, sparat Själv används; provet räknas alltid själv', () => {
+    expect(L.ovaMode({})).toBe('help');
+    expect(L.ovaMode(null)).toBe('help');
+    expect(L.ovaMode({ ovaMode:'self' })).toBe('self');
+    expect(L.ovaMode({ ovaMode:'konstigt' })).toBe('help');
+    for (const pass of ['ova', 'svag', 'not']) { expect(L.passHelp('help', pass)).toBe(true); expect(L.passHelp('self', pass)).toBe(false); }
+    expect(L.passHelp('help', 'prov')).toBe(false);
+    expect(L.passHelp('self', 'prov')).toBe(false);
+  });
+  it('uppställningens Minnessiffra följer valet: med hjälp = hjälpläget, själv = fria läget, provet = fria', () => {
+    expect(L.uppEngineMode('minne', 'ova', 'help')).toBe('help');
+    expect(L.uppEngineMode('minne', 'ova')).toBe('help');                      // förval
+    expect(L.uppEngineMode('minne', 'ova', 'self')).toBe('free');
+    expect(L.uppEngineMode('minne', 'svag', 'self')).toBe('free');
+    expect(L.uppEngineMode('minne', 'prov', 'help')).toBe('free');
+    expect(L.uppEngineMode('dela', 'ova', 'help')).toBe(null);                // Dela upp är det ledda flödet
+  });
+  it('knapparna har namn', () => { expect(L.OVA_MODES.map(m => m.name)).toEqual(['Med hjälp', 'Själv']); });
+  it('valet sparas per profil och används: hjälpen ruta för ruta bara när passet är Öva och läget Med hjälp', () => {
+    const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/function setOvaMode\(m\) \{ const s = readSt\(\); s\.ovaMode = m === 'self' \? 'self' : 'help'; writeSt\(s\); \}/);
+    expect(src).toMatch(/const helpOn = \(\) => !!S && L\.passHelp\(ovaModeNow\(\), S\.mode\);/);
+    expect(src).toMatch(/hb:helpOn\(\) \?/);                                         // tiotal och TE
+    expect(src).toMatch(/case 'ovamode':\s+snd\('click'\); setOvaMode\(id\);/);
+    expect(src).toMatch(/S = \{ mode:'prov', mitt:!!mitt/);                           // provet: mode 'prov' ⇒ själv
+  });
+});
+
+describe('frågan ruta för ruta (D42)', () => {
+  const PL = ['E', 'T', 'H', 'Tu', 'TT'];
+  it('8 · 40: "40 är 4 tiotal. Hur många tiotal blir 8 · 4?", sedan "32 tiotal – hur mycket är det?"', () => {
+    const t = L.makeTiotal(8, 4, 0, 1);
+    const q0 = L.boxAsk(t, 0), q1 = L.boxAsk(t, 1);
+    expect(L.askPlain(q0.text)).toBe('40 är 4 tiotal. Hur många tiotal blir 8 · 4?');
+    expect(q0.lit).toEqual(['x:0', 'y:1', 'box:0']);                          // 8:an och 4:an i 40 lyser
+    expect(L.askTokens(q0.text).filter(k => k.v === '4').every(k => k.place === 'T')).toBe(true);
+    expect(L.askPlain(q1.text)).toBe('32 tiotal – hur mycket är det?');
+    const h = L.makeTiotal(5, 6, 1, 1);
+    expect(L.askPlain(L.boxAsk(h, 0).text)).toBe('Tiotal gånger tiotal blir hundratal. Hur många hundratal blir 5 · 6?');
+  });
+  it('4 · 28: tiotalen, entalen, 4 · 20, 4 · 8, summan', () => {
+    const t = L.makeTalsorter(4, 28);
+    expect([0, 1, 2, 3, 4].map(i => L.askPlain(L.boxAsk(t, i).text))).toEqual(
+      ['Dela 28: hur många är tiotalen?', '…och entalen?', 'Vad blir 4 · 20?', 'Vad blir 4 · 8?', 'Lägg ihop: vad blir 80 + 32?']);
+    expect(L.askTokens(L.boxAsk(t, 0).text)).toEqual([{ v:'2', place:'T' }, { v:'8', place:'E' }]);
+    expect(L.boxAsk(t, 0).lit).toContain('b:T');
+    expect(L.boxAsk(t, 1).lit).toContain('b:E');
+  });
+  it('för många slumpade uppgifter: rätt platsord och siffror, målrutan lyser, ledtråden ger inte svaret', () => {
+    const r = seeded(901);
+    for (let n = 0; n < N; n++) for (const lv of LEVELS) {
+      for (const t of L.genTiotal(lv, 2, r)) {
+        const q0 = L.boxAsk(t, 0), p0 = L.askPlain(q0.text), tk = L.askTokens(q0.text);
+        expect(p0).toContain(t.unit);
+        expect(p0).toContain(`${t.a} · ${t.b}`);
+        expect(tk.some(k => +k.v === t.a && k.place === PL[t.za])).toBe(true);    // a i sin platsfärg
+        expect(tk.some(k => +k.v === t.b && k.place === PL[t.zb])).toBe(true);
+        if (!(t.za && t.zb)) expect(p0).toMatch(new RegExp(`^${t.za ? t.x : t.y} är ${t.za ? t.a : t.b} ${L.UNIT[t.za || t.zb]}\\.`));
+        expect(L.askPlain(L.boxAsk(t, 1).text)).toBe(`${t.fact} ${t.unit} – hur mycket är det?`);
+        for (const i of [0, 1]) {
+          expect(L.boxAsk(t, i).lit).toContain('box:' + i);
+          expect((L.boxHint(t, i).match(/\d+/g) || []).map(Number)).not.toContain(L.boxAnswer(t, i));
+          expect(L.askPlain(L.boxAsk(t, i).text)).not.toMatch(/\[\[|\]\]/);            // inga tokens kvar i texten
+        }
+      }
+      for (const t of L.genTalsorter(lv, 1, r)) {
+        const tk0 = L.askTokens(L.boxAsk(t, 0).text);
+        expect(tk0).toEqual([{ v:String(t.T / 10), place:'T' }, { v:String(t.E), place:'E' }]);
+        expect(L.askPlain(L.boxAsk(t, 2).text)).toBe(`Vad blir ${t.a} · ${t.T}?`);
+        expect(L.askPlain(L.boxAsk(t, 3).text)).toBe(`Vad blir ${t.a} · ${t.E}?`);
+        expect(L.askPlain(L.boxAsk(t, 4).text)).toBe(`Lägg ihop: vad blir ${t.a * t.T} + ${t.a * t.E}?`);
+        for (let i = 0; i < 5; i++) {
+          expect(L.boxAsk(t, i).lit).toContain('box:' + i);
+          if (i >= 2) expect((L.boxHint(t, i).match(/\d+/g) || []).map(Number)).not.toContain(L.boxAnswer(t, i));
+          expect(L.boxAck(t, i)).toMatch(/^Rätt!/);
+        }
+      }
+    }
+  });
+  it('språksvep: utanför räkneuttrycken har inget tal två roller i samma mening; frågorna är korta', () => {
+    const r = seeded(902), texts = [];
+    for (let n = 0; n < N; n++) for (const lv of LEVELS) {
+      for (const t of [...L.genTiotal(lv, 2, r), ...L.genTalsorter(lv, 1, r)])
+        for (let i = 0; i < t.fields.length; i++) texts.push(L.askPlain(L.boxAsk(t, i).text), L.boxHint(t, i), L.boxAck(t, i));
+    }
+    for (const s of texts) for (const sent of s.split(/(?<=[.?!])\s+/)) {
+      let prose = sent;
+      for (let k = 0; k < 3; k++) prose = prose.replace(/\d+\s*[·+−=]\s*\d+(\s*=\s*\d+)?/g, ' ');
+      const ns = prose.match(/\d+/g) || [];
+      expect(new Set(ns).size).toBe(ns.length);
+      expect(sent).not.toMatch(/\bFel\b|fel!|Du glömde/);
+    }
+    /* frågorna (inte ledtrådarna) ryms på en eller två rader i 390 bredd */
+    for (const t of [L.makeTalsorter(9, 98), L.makeTiotal(8, 9, 0, 1)]) for (let i = 0; i < t.fields.length; i++) expect(L.askPlain(L.boxAsk(t, i).text).length).toBeLessThanOrEqual(70);
   });
 });
