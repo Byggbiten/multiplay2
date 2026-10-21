@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 const MD = require('../js/multdiv.js');
 const { buildPlan, buildDivPlan, digitsOf } = MD._internals;
 const { planMultSteps, planDivSteps, planMultHelpQueue, planDivHelpQueue,
-        divStepText, divHelpAsk, divHelpAck, tabellradHTML } = MD.__test;
+        divStepText, divHelpAsk, divHelpAck, tabellradHTML, multStepText, multLitCells } = MD.__test;
 
 /* ── Talrymden = generatorernas intervall (genProblem 466–489, genDivProblem 556–578) ── */
 function* multSpace() {
@@ -558,5 +558,169 @@ describe('ovningslaget raknar bara helratt', () => {
 
   it('Capy far pct ur exScore — ingen egen sanning', () => {
     expect(src).toMatch(/Capy\.award\(profile, \{ type: 'test', data: \{ module: 'multdiv', pct: Math\.round\(\(exScore \/ 5\) \* 100\), memStar \} \}\)/);
+  });
+});
+
+/* ── D40 (2026-10-21): nivå 4 blandat, den osynliga nollan, pekningen ── */
+describe('D40: nivå 4 blandar fyra typer som det svårare övningsbladet', () => {
+  const { genProblem, genL4, drawL4Type, L4_TYPES, singlePass } = MD._internals;
+  const len = n => String(n).length;
+  const carries = (a, m) => singlePass(a, m).cols.filter(c => !c.last && c.carryOut > 0).length;
+  const typeOf = (a, b) => `${len(a)}x${len(b)}`;
+
+  it('varje typ håller sina villkor (2000 lottningar per typ)', () => {
+    const fel = [];
+    for (const t of L4_TYPES) for (let i = 0; i < 2000; i++) {
+      const { a, b, type } = genL4(t);
+      if (type !== t || typeOf(a, b) !== t) fel.push(`${t}: ${a}·${b}`);
+      if ((t === '3x1' || t === '4x1') && (b < 2 || b > 9 || carries(a, b) < 2)) fel.push(`${t} minne: ${a}·${b}`);
+      if (t === '2x2' && (a % 10 === 0 || b % 10 === 0)) fel.push(`2x2 nolla: ${a}·${b}`);
+      if (t === '3x2' && (b < 12 || b > 59 || b % 10 === 0 || a % 10 === 0)) fel.push(`3x2: ${a}·${b}`);
+      if (String(a * b).length > 5) fel.push(`för brett: ${a}·${b}`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('genProblem(4): ungefär jämn fördelning, aldrig samma typ tre gånger i rad', () => {
+    const seq = [];
+    for (let i = 0; i < 4000; i++) { const { a, b } = genProblem(4); seq.push(typeOf(a, b)); }
+    const n = Object.fromEntries(L4_TYPES.map(t => [t, seq.filter(x => x === t).length]));
+    for (const t of L4_TYPES) expect(n[t]).toBeGreaterThanOrEqual(900);
+    for (let i = 2; i < seq.length; i++) expect(seq[i] === seq[i - 1] && seq[i] === seq[i - 2]).toBe(false);
+    expect(drawL4Type()).toMatch(/^(3x1|4x1|2x2|3x2)$/);
+  });
+
+  it('nivå 1–3 genererar samma typer som förut', () => {
+    const fel = [];
+    for (let i = 0; i < 3000; i++) {
+      const p1 = genProblem(1), p2 = genProblem(2), p3 = genProblem(3);
+      if (!(len(p1.a) === 2 && p1.b >= 2 && p1.b <= 4 && carries(p1.a, p1.b) === 0 && !singlePass(p1.a, p1.b).hasCarry)) fel.push(`1: ${p1.a}·${p1.b}`);
+      if (!(len(p2.a) === 2 && p2.b >= 2 && p2.b <= 9 && singlePass(p2.a, p2.b).hasCarry)) fel.push(`2: ${p2.a}·${p2.b}`);
+      if (!(len(p3.a) === 3 && p3.b >= 2 && p3.b <= 9 && p3.a * p3.b <= 9999 && singlePass(p3.a, p3.b).hasCarry)) fel.push(`3: ${p3.a}·${p3.b}`);
+      for (const p of [p1, p2, p3]) if (p.type !== undefined) fel.push('typ på nivå 1–3');
+      for (const [p, lv] of [[p1, 1], [p2, 2], [p3, 3]]) if (buildPlan(p.a, p.b, lv).kind !== 'simple') fel.push(`${lv}: inte simple`);
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('motorns facit för upp till fem kolumner: steg, hjälpkö och delprodukter, 3000 slumpade tal per typ', () => {
+    const fel = [];
+    const join = ds => ds.reduce((n, d, i) => n + (d || 0) * Math.pow(10, i), 0);
+    let fem = 0;
+    for (const t of L4_TYPES) for (let i = 0; i < 3000; i++) {
+      const { a, b } = genL4(t), pl = buildPlan(a, b, 4);
+      if (pl.answer !== a * b || pl.width !== len(a * b)) fel.push(`${a}·${b} plan`);
+      if (pl.kind !== (b < 10 ? 'simple' : 'twostep')) fel.push(`${a}·${b} kind`);
+      if (pl.width === 5) fem++;
+      const rows = { ans: [], p1: [], p2: [] }, hrows = { ans: [], p1: [], p2: [] };
+      for (const s of planMultSteps(pl)) {
+        if (s.t === 'write_down' || s.t === 'move_down') rows[s.rowKey][s.g] = s.write;
+        if (s.t === 'write_full') { rows[s.rowKey][s.g] = s.write; rows[s.rowKey][s.g + 1] = s.extra; }
+        if ((s.g ?? 0) > 4) fel.push(`${a}·${b} kolumn ${s.g}`);
+      }
+      for (const it of planMultHelpQueue(pl)) {
+        if (it.kind === 'memwrite' || it.kind === 'trivial') hrows[it.rowKey][it.g] = it.write;
+        if (it.kind === 'flydown') { hrows[it.rowKey][it.g] = it.write; if (it.extra) hrows[it.rowKey][it.g + 1] = it.extra; }
+      }
+      for (const r of [rows, hrows]) {
+        if (join(r.ans) !== a * b) fel.push(`${a}·${b} svar`);
+        if (pl.kind === 'twostep' && (join(r.p1) !== pl.p1.value || join(r.p2) / 10 !== pl.p2.value)) fel.push(`${a}·${b} delprodukt`);
+      }
+      const nc = MD._internals.noCarryAnswer(pl);
+      if (!Number.isFinite(nc)) fel.push(`${a}·${b} noCarry`);
+    }
+    expect(fel).toEqual([]);
+    expect(fem).toBeGreaterThan(0);   // femsiffriga svar förekommer (4 · 1 och 3 · 2)
+  });
+});
+
+describe('D40: den osynliga nollan och pekningen', () => {
+  const strip = h => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const PV = ['entalet', 'tiotalet', 'hundratalet', 'tusentalet', 'tiotusentalet'];
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+
+  it('rad 2:s grå ruta finns bara i den tvåstegs-uppställningen (nivå 4 med tvåsiffrig faktor)', () => {
+    // Rutan byggs bara i l4-grenen (twostep, inte fria läget) — nivå 1–3 är alltid 'simple'
+    expect(src).toMatch(/const zeroCell = `<td><div class="md-ansc md-zero" id="md-p2-0"><\/div><\/td>`;/);
+    expect(src).toMatch(/idx\.map\(i => i === 0 \? zeroCell : fillCell\('p2', i, i <= p2len\)\)/);
+    expect(src).toMatch(/const l4 = plan\.kind === 'twostep' && !freeMode;/);
+    for (let lv = 1; lv <= 3; lv++) for (let i = 0; i < 500; i++) {
+      const { a, b } = MD._internals.genProblem(lv);
+      expect(buildPlan(a, b, lv).kind).toBe('simple');
+    }
+    expect(buildPlan(67, 29, 4).kind).toBe('twostep');
+    expect(buildPlan(483, 9, 4).kind).toBe('simple');
+  });
+
+  it('nollans steg: texten säger tiotal, vad siffran betyder och nollan i entalet', () => {
+    const pl = buildPlan(67, 29, 4);
+    const ph2 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 2);
+    expect(strip(multStepText(ph2, pl))).toBe('Nu gångrar vi med ett tiotal (2 betyder 20). Därför fyller vi i en nolla här i entalet.');
+    const ph3 = planMultSteps(pl).find(s => s.t === 'phase' && s.which === 3);
+    expect(strip(multStepText(ph3, pl))).toContain('ental med ental, tiotal med tiotal');
+  });
+
+  it('pekningen: målrutan är kolumnen aCol + mCol (mult) eller kolumnen (add); högst faktorer + mål lyser', () => {
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 800; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) {
+        if (s.t !== 'calc' && s.t !== 'move_down') continue;
+        const lit = multLitCells(s, pl);
+        if (s.phase === 'mult') {
+          if (s.g !== s.aCol + s.mCol) fel.push(`${a}·${b} g`);
+          if (lit.target[0] !== `md-${s.rowKey}-${s.g}`) fel.push(`${a}·${b} mål`);
+          if (lit.src.length !== 2) fel.push(`${a}·${b} källor`);
+          if (lit.target.length !== (s.last && s.extra !== null ? 2 : 1)) fel.push(`${a}·${b} sista`);
+        } else {
+          if (lit.target.join() !== `md-ans-${s.g}`) fel.push(`${a}·${b} summans ruta`);
+          if (lit.src.length !== (s.memOnly ? 0 : s.single ? 1 : 2) && !(s.g === 0)) fel.push(`${a}·${b} add-källor`);   // memOnly: källan är minnessiffran
+          if (s.g === 0 && !lit.src.includes('md-p2-0')) fel.push(`${a}·${b} nollan pekas inte ut`);
+        }
+        if (lit.src.length + lit.target.length > 4) fel.push(`${a}·${b} för många`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+
+  it('texterna pekar ut platsen: uträkning och skriv nämner målrutans platsord; rad 2 säger ett steg till vänster', () => {
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 800; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) {
+        const txt = strip(multStepText(s, pl));
+        if (s.t === 'calc' && s.phase === 'mult') {
+          if (s.rowKey === 'p2' && s.g === 1) { if (!/Vi räknar tiotal, så svaret hamnar ett steg till vänster — i tiotalet\./.test(txt)) fel.push(`${a}·${b}: ${txt}`); }
+          else if (!txt.endsWith(`Det hör till ${PV[s.g]}.`)) fel.push(`${a}·${b}: ${txt}`);
+        }
+        if (s.t === 'calc' && s.phase === 'add' && !txt.toLowerCase().startsWith(PV[s.g])) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'write_down' && !txt.includes(`skrivs i ${PV[s.g]}`)) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'carry_up' && !txt.includes('är minnessiffran')) fel.push(`${a}·${b}: ${txt}`);
+        if (s.t === 'move_down' && s.g === 0 && pl.kind === 'twostep' && !txt.startsWith('Nollan lägger inte till något')) fel.push(`${a}·${b}: ${txt}`);
+        if (/undefined|NaN|spalt/.test(txt)) fel.push(`${a}·${b}: ${txt}`);
+      }
+    }
+    expect(fel).toEqual([]);
+    const pl = buildPlan(67, 29, 4);
+    const calc = planMultSteps(pl).filter(s => s.t === 'calc' && s.phase === 'mult').map(s => strip(multStepText(s, pl)));
+    expect(calc[0]).toBe('7 · 9 är 63. Det hör till entalet.');
+    expect(calc[2]).toBe('7 · 2 är 14. Vi räknar tiotal, så svaret hamnar ett steg till vänster — i tiotalet.');
+  });
+
+  it('nivå 1–3 behåller sina texter ordagrant', () => {
+    const t = (a, b, lv) => planMultSteps(buildPlan(a, b, lv)).filter(s => s.t !== 'done').map(s => strip(multStepText(s, buildPlan(a, b, lv))));
+    expect(t(28, 8, 2)).toEqual(['8 · 8 är 64', '6:an åker upp som minne. 👉', '4:an åker ner i svaret. ✅',
+      '2 · 8 är 16', 'Minnessiffran 6 gör 16 till 22.', 'Sista kolumnen — hela 22 får plats! ✅']);
+    expect(t(32, 3, 1)).toEqual(['2 · 3 är 6', '6:an åker ner i svaret. ✅', '3 · 3 är 9', '9:an åker ner i svaret. ✅']);
+  });
+
+  it('texterna säger aldrig samma tal i två roller och inga jämförelseord', () => {
+    const JAMFORANDE = /\b(närmast|närmare|bäst|bättre|hellre|i stället för)\b/i;
+    const fel = [];
+    for (const t of MD._internals.L4_TYPES) for (let i = 0; i < 300; i++) {
+      const { a, b } = MD._internals.genL4(t), pl = buildPlan(a, b, 4);
+      for (const s of planMultSteps(pl)) { const x = strip(multStepText(s, pl)); if (JAMFORANDE.test(x)) fel.push(x); }
+    }
+    expect(fel).toEqual([]);
   });
 });
