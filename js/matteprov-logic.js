@@ -225,6 +225,21 @@
   ══════════════════════════════════════════════════════════ */
   /* Minnessiffror i en rad: bara kolumner FÖRE den sista (sista kolumnen skrivs hel) */
   function hasCarry(a, m) { return carryCount(a, m) > 0; }
+  /* D41: har uppgiften minnessiffror i gångerdelen (räknesättet Minnessiffra)? */
+  function uppHasMulCarry(t) {
+    const m = (a, b) => { let c = 0; return digitsOf(a).some(d => { const p = d * b + c; c = Math.floor(p / 10); return c > 0; }); };
+    return t.two ? m(t.top, t.ones) || m(t.top, t.tens) : m(t.top, t.bot);
+  }
+  /* D41: räknesätten i uppställningen. 'minne' (förval) = minnessiffran, samma metodik och motor som
+     Multiplikation nivå 4; 'dela' = delprodukt per siffra (D38 ✎). Med minnessiffra är Öva "Räkna med
+     hjälp" (appen frågar en kolumn i taget, barnet lär sig ordningen) och provet "Räkna själv" (barnet
+     skriver svaret och räknar i kladden, som på det skarpa provet; hjälptrappan efter fel). */
+  const UPP_METHODS = [{ id:'minne', name:'Minnessiffra' }, { id:'dela', name:'Dela upp' }];
+  const uppMethod = st => (st && st.upMethod === 'dela') ? 'dela' : 'minne';
+  function uppEngineMode(method, passMode) {
+    if (method !== 'minne') return null;
+    return passMode === 'prov' ? 'free' : 'help';
+  }
   function carryCount(a, m) { let c = 0, n = 0; const ds = digitsOf(a); ds.forEach((d, i) => { const p = d * m + c; c = Math.floor(p / 10); if (i < ds.length - 1 && c > 0) n++; }); return n; }
   /* Glömd minnessiffra: varje kolumn skrivs mod 10, minnet läggs aldrig till
      (sista kolumnen skrivs hel) — samma regel som multdiv:s noCarryAnswer. */
@@ -812,6 +827,7 @@
     'tio:tiotal':'Tiotal gånger ental', 'tio:tusental':'Hundratal gånger tiotal',
     'te':'Dela upp i tiotal och ental',
     'upp:en':'Uppställning, ensiffrig faktor', 'upp:tva':'Uppställning, tvåsiffrig faktor', 'upp:nolla':'Nollan i den grå rutan',
+    'upp:minne':'Minnessiffran',
  'upp:minnesumma':'Minne i summan',
     'prob:tillbaka':'Växel', 'prob:omvand':'Omvända uppgifter', 'prob:kop2':'Två sorters varor', 'prob:ordning':'Gånger först',
     'prob:uttryck':'Skriva uttrycket',
@@ -829,7 +845,7 @@
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
-      const sumMem = noCarrySumN(uppPlaces(t)) !== t.answer ? ['upp:minnesumma'] : [];
+      const sumMem = (noCarrySumN(uppPlaces(t)) !== t.answer ? ['upp:minnesumma'] : []).concat(uppHasMulCarry(t) ? ['upp:minne'] : []);
       if (!t.two) return ['upp:en'].concat(sumMem, t.parts.map(p => factTag(t.bot, p.d)));   // varje radfråga är ett tabellfaktum
       return ['upp:tva', 'upp:nolla'].concat(sumMem);
     }
@@ -845,6 +861,8 @@
     if (t.type === 'upp') {
       const d = detail || {}, out = [t.two ? 'upp:tva' : 'upp:en'];
       if (cls === 'summinne' || cls === 'addition') out.push('upp:minnesumma');
+      if (cls === 'minne') out.push('upp:minne');                                   // D41: minnessiffran i gångerdelen
+      for (const [a, b] of d.facts || []) { const f = factTag(a, b); if (!out.includes(f)) out.push(f); }
       if (d.grey) out.push('upp:nolla');
       if (!t.two) for (const r of d.rows || []) { const p = t.parts[+r.slice(1)]; out.push(factTag(t.bot, p.d)); }
       return out;
@@ -890,7 +908,7 @@
     }
     if (tag === 'te') return genTalsorter(lv, 1, r)[0];
     if (tag === 'upp:en') return genUpp(lv, 'en', r);
-    if (tag === 'upp:minnesumma') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
+    if (tag === 'upp:minnesumma' || tag === 'upp:minne') return genUpp(lv, r() < 0.5 ? 'en' : 'tva', r);
     if (tag.startsWith('upp:')) return genUpp(lv, 'tva', r);
     if (tag === 'prob:uttryck') return genProblemOne(lv, pick(r, ['kop2', 'tillbaka', 'omvand']), r);
     if (tag.startsWith('prob:')) return genProblemOne(lv, tag.slice(5), r);
@@ -952,7 +970,7 @@
     makeOmvand, PROV_LEVEL, TE_MIN,
     makeSheet, checkSheet, sheetEmpty, oneButton, nextEmpty, genMoment, ovaCount, buildProv, buildWeakPass, check, provSummary,
     uppRowsOrder, uppRowSpan, uppRowFilled, uppOpenRows, thinkSteps, placeTerms, thinkNotes, noteMark,
-    uppPlaces, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
+    uppPlaces, uppHasMulCarry, UPP_METHODS, uppMethod, uppEngineMode, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,

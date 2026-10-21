@@ -8,7 +8,11 @@
    Uppställningens pappret följer multdiv:s (cellerna, färgerna,
    minnessiffrorna i rött, knappsatsen med hög Klar) men har den
    grå rutan för tiotalsradens nolla, som bara provet använder.
-   Lagring per profil: matteprov_{id}.
+   D41: uppställningen har två räknesätt. "Minnessiffra" (förval)
+   räknas av multiplikationens motor via MultDivGame.runTask (Öva =
+   hjälpläget, provet = fria läget med hjälptrappan) och bokförs här
+   (runMinne/minneDone); "Dela upp" är D38:s delprodukter (nedan).
+   Lagring per profil: matteprov_{id}, räknesättet i upMethod.
    ============================================================ */
 'use strict';
 
@@ -79,6 +83,20 @@ const MatteProv = (() => {
   }
   function level() { return readSt().level === 'svar' ? 'svar' : 'latt'; }
   function setLevel(lv) { const s = readSt(); s.level = lv; writeSt(s); }
+  /* D41: räknesättet i uppställningen, per profil (förval Minnessiffra) */
+  function upMethod() { return L.uppMethod(readSt()); }
+  function setUpMethod(m) { const s = readSt(); s.upMethod = m === 'dela' ? 'dela' : 'minne'; writeSt(s); }
+  /* Provsidan säger vilket räknesätt som gäller; växeln står överst i "Så här gör du" för uppställningen
+     (på provsidan fanns inte plats för den i 390 × 797 utan scroll, uppmätt 49 px för mycket). */
+  const methodNote = () => `Räknesätt: ${L.UPP_METHODS.find(x => x.id === upMethod()).name}`;
+  /* Växeln: två knappar, den valda fylld. */
+  function methodSegHTML() {
+    const m = upMethod();
+    return `<div class="mp-meth"><span class="mp-meth-l">Räkna med</span>
+      <div class="mp-seg" role="group" aria-label="Räknesätt i uppställningen">
+        ${L.UPP_METHODS.map(x => `<button class="${x.id === m ? 'on' : ''}" data-act="method" data-id="${x.id}" aria-pressed="${x.id === m}">${x.name}</button>`).join('')}
+      </div></div>`;
+  }
 
   /* ══════════════════════════════════════════════════════════
      CSS (injiceras i roten; allt under #mp-root)
@@ -111,6 +129,13 @@ const MatteProv = (() => {
 #mp-root .mp-note{text-align:center;font-size:13px;font-weight:800;color:var(--ink-soft);margin:0}
 #mp-root .mp-seg{display:flex;background:rgba(255,255,255,.6);border:1px solid var(--glass-line);border-radius:999px;padding:4px;box-shadow:var(--shadow-panel);flex-shrink:0}
 #mp-root .mp-seg button{flex:1;min-height:44px;border-radius:999px;font-weight:800;font-size:15px;color:var(--deep)}
+#mp-root .mp-meth{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#mp-root .mp-meth-l{font-size:13px;font-weight:800;color:var(--ink-soft);white-space:nowrap;padding-left:4px}
+#mp-root .mp-meth .mp-seg{flex:1;padding:3px}
+#mp-root .mp-meth .mp-seg button{font-size:14px}
+#mp-root .mp-mpaper .mp-mcol{text-align:left;padding-left:4px;min-width:40px}
+#mp-root .mp-mpaper .mp-md{display:inline-block;font-family:var(--font-head);font-weight:900;font-size:20px;color:#dc2626;transform:rotate(-4deg);margin-right:4px}
+#mp-root .mp-mpaper .mp-md.u{opacity:.5;text-decoration:line-through;text-decoration-thickness:2px}
 #mp-root .mp-seg button.on{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 4px 14px var(--glow)}
 #mp-root .mp-list{display:flex;flex-direction:column;gap:8px}
 #mp-root .mp-h{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--ink-soft);margin:2px 4px -2px;letter-spacing:.02em}
@@ -426,7 +451,7 @@ const MatteProv = (() => {
       <div class="mp-list">
         ${P.moments.map(id => { const m = momentOf(id); return `<button class="mp-row" data-act="ova" data-id="${id}">
           <span class="mp-nr">${m.nr}</span>
-          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : m.desc)}</small></span>
+          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
           ${ovaBadge(id)}${svg('chev', 'chev')}</button>`; }).join('')}
         <button class="mp-row" data-act="sprint" style="min-height:54px">
           <span class="mp-nr alt">${svg('timer')}</span>
@@ -486,6 +511,7 @@ const MatteProv = (() => {
       { v:rows([teHead(4, 28), '= 4 · ' + box(20) + ' + 4 · ' + box(8), '= ' + box(80) + ' + ' + box(32), '= ' + box(112)]), t:'Tredje raden: lägg ihop. 80 + 32 = 112.' },
       { v:rows([teHead(4, 28), '= 4 · ' + box(20) + ' + 4 · ' + box(8), '= ' + box(80) + ' + ' + box(32), '= ' + box(112)]), t:'I uppgifterna fyller du i rutorna en i taget. Knappen Nästa hoppar till nästa ruta.' },
     ];
+    if (moment === 'uppstallning' && upMethod() === 'minne') return minneIntroSteps();
     if (moment === 'uppstallning') {
       const t = L.makeUpp(17, 32), W = t.width;
       const row = (v, n) => { const d = L.digitsOf(v), out = Array(W).fill(null); for (let i = 0; i < Math.min(n == null ? d.length : n, d.length); i++) out[i] = d[i]; return out; };
@@ -544,6 +570,44 @@ const MatteProv = (() => {
       { v:big('6 · 7 + 34') + tm(6, '·', 7, 42) + tm(42, '+', 34, 76), t:'Utan prislista gäller samma sak: gånger först, sedan plus.' },
     ];
   }
+  /* D41: "Så här gör du" med minnessiffra — samma metodik som Multiplikation nivå 4: en kolumn i taget,
+     minnessiffran i spalten till höger (struken när den är använd), rad 2 med den osynliga nollan. */
+  function minnePaper(top, bot, o) {
+    const W = L.digitsOf(top * bot).length, idx = [];
+    for (let i = W - 1; i >= 0; i--) idx.push(i);
+    const lit = o.lit || {};
+    const fix = (n, i, which) => { const d = L.digitsOf(n); return i < d.length ? `<div class="mp-c fix${(lit[which] || []).includes(i) ? ' lit' : ''}" style="color:${COLV[Math.min(i, 3)]}">${d[i]}</div>` : '<div class="mp-c ghost"></div>'; };
+    const row = (v, shift, n, cls) => idx.map(i => {
+      const d = v == null ? [] : L.digitsOf(v), k = i - shift;
+      const has = k >= 0 && k < Math.min(d.length, n == null ? 99 : n);
+      const z = shift && i === 0;
+      return `<td><div class="mp-c in${has || (z && o.zero) ? ' has' : ''}${z ? ' grey' : ''}${(lit[cls] || []).includes(i) ? ' lit' : ''}">${has ? d[k] : z && o.zero ? '0' : ''}</div></td>`;
+    }).join('');
+    const mem = (o.mem || []).map(m => `<span class="mp-md${m.u ? ' u' : ''}">${m.v}</span>`).join('');
+    const line = `<tr class="mp-line"><td></td><td colspan="${W}"></td><td style="background:none"></td></tr>`;
+    let h = `<table class="mp-paper mp-mpaper"><tbody>
+      <tr><td></td>${idx.map(i => `<td>${fix(top, i, 'top')}</td>`).join('')}<td></td></tr>
+      <tr><td class="mp-sign">·</td>${idx.map(i => `<td>${fix(bot, i, 'bot')}</td>`).join('')}<td class="mp-mcol">${mem}</td></tr>${line}`;
+    if (bot >= 10) h += `<tr><td></td>${row(o.p1, 0, o.p1n, 'p1')}<td></td></tr>
+      <tr><td class="mp-sign">+</td>${row(o.p2, 1, o.p2n, 'p2')}<td></td></tr>${line}`;
+    h += `<tr><td></td>${row(o.ans, 0, o.ansn, 'ans')}<td></td></tr></tbody></table>`;
+    return h;
+  }
+  function minneIntroSteps() {
+    const E = o => minnePaper(687, 8, o), T = o => minnePaper(32, 17, o);
+    return [
+      { v:E({}), t:'Med minnessiffra räknar du en kolumn i taget, från entalet. Hela svaret står på en rad.' },
+      { v:E({ lit:{ top:[0], bot:[0], ans:[0] }, ans:6, ansn:1, mem:[{ v:5 }] }), t:'8 · 7 är 56. 6:an skrivs i entalet, och 5:an är minnessiffran. Den skrivs till höger.' },
+      { v:E({ lit:{ top:[1], bot:[0], ans:[1] }, ans:6, ansn:1, mem:[{ v:5, u:true }] }), t:'8 · 8 är 64. Minnessiffran 5 gör det till 69, och 5:an stryks, för den är använd.' },
+      { v:E({ lit:{ top:[1], bot:[0], ans:[1] }, ans:96, ansn:2, mem:[{ v:5, u:true }, { v:6 }] }), t:'9:an skrivs i tiotalet, och 6:an blir den nya minnessiffran.' },
+      { v:E({ lit:{ top:[2], bot:[0], ans:[3, 2] }, ans:5496, mem:[{ v:5, u:true }, { v:6 }] }), t:'8 · 6 är 48, och minnessiffran gör det till 54. Det är sista kolumnen, så hela 54 får plats. Svaret är 5496.' },
+      { v:T({ p1:224, mem:[{ v:1, u:true }] }), t:'Med en tvåsiffrig faktor, som 32 · 17, blir det två rader. Rad 1 är 32 · 7 = 224.' },
+      { v:T({ p1:224, zero:true, lit:{ bot:[1], p2:[0] }, mem:[{ v:1, u:true }] }), t:'Rad 2 räknar med tiotalet 1, som betyder 10. Därför står det en osynlig nolla i den grå rutan.' },
+      { v:T({ p1:224, p2:32, zero:true, mem:[{ v:1, u:true }] }), t:'32 · 1 = 32 skrivs ett steg till vänster, efter nollan: rad 2 blir 320.' },
+      { v:T({ p1:224, p2:32, zero:true, ans:544, mem:[{ v:1, u:true }] }), t:'Sist lägger du ihop raderna: ental med ental, tiotal med tiotal. 224 + 320 = 544.' },
+      { v:`<div style="color:var(--accent)">${svg('target')}</div>`, t:'När du övar frågar appen en kolumn i taget. I provet skriver du svaret själv och räknar i kladden.' },
+    ];
+  }
   function sheetDemo() {
     const ex = [[6, 7], [3, 8], [9, 4], [7, 7], [2, 9]], ex2 = [[8, 6], [4, 4], [10, 3], [5, 9], [7, 8]];
     const col = E => E.map(([a, b]) => `<div class="mp-sr"><span class="ex">${a} · ${b} =</span>${box('')}</div>`).join('');
@@ -555,6 +619,7 @@ const MatteProv = (() => {
     S = { mode:'intro', moment, i };
     frame('Så här gör du', 'prov', 'Tillbaka', `<button class="mp-skip" data-act="introskip">Hoppa över</button>`, `
       <div class="mp-intro">
+        ${moment === 'uppstallning' ? methodSegHTML() : ''}
         <div class="mp-vis">${s.v}</div>
         <div class="mp-say">${esc(s.t)}</div>
         <div class="mp-dots">${st.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
@@ -641,6 +706,9 @@ const MatteProv = (() => {
   function renderTask(fb, keep, task) {
     const t = task || curTask();
     if (!t) return finish();
+    /* D41: uppställning med minnessiffra räknas av multiplikationens motor (MultDivGame.runTask) */
+    const eng = t.type === 'upp' && !fb && !keep ? L.uppEngineMode(upMethod(), S.mode) : null;
+    if (eng && typeof MultDivGame !== 'undefined' && MultDivGame.runTask) return runMinne(t, eng);
     if (!fb && !keep) { IN = freshInput(t); locked = false; }
     const q = document.getElementById('mp-q');
     if (keep && q) {
@@ -1212,10 +1280,30 @@ const MatteProv = (() => {
       IN.f = { row, col:uppFirstFree(row) };
     }
   }
+  /* D41: en uppställning med minnessiffra. Motorn visar uppgiften på multiplikationens skärm (utan
+     historikpost) och lämnar tillbaka utfallet; här bokförs det som vilken uppgift som helst. */
+  function runMinne(t, mode) {
+    IN = null; locked = true;
+    const H = header(t);
+    const exitMsg = S.mode === 'prov' ? `Avsluta provet? Du är på uppgift ${S.idx + 1} av ${S.items.length}, och provet sparas inte.` : 'Avsluta passet?';
+    const back = () => Router.silent(() => Router.show('screen-matteprov'));
+    MultDivGame.runTask({ a:t.top, b:t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
+      onDone:res => { back(); minneDone(t, res); },
+      onExit:() => { back(); showProv(); } });
+  }
+  function minneDone(t, res) {
+    S.touched = true;
+    if (isDrill() && res.outcome !== 'direkt') S.drill.answer(false);   // nötloopen: uppgiften kommer igen
+    taskDone(t, res.outcome, res.cls, { rows:[], grey:false, facts:res.facts || [] });
+    if (isDrill() && res.outcome === 'svar') S.drill.answer(true);
+    locked = false;
+    renderTask();
+  }
+
   /* Utfallet sparas: i provets resultat, i passets räkning och i "det som var svårt" */
-  function taskDone(t, outcome, cls) {
-    let detail = null;
-    if (t.type === 'upp' && IN && IN.rq) {                   // en rad som fått hjälp gör uppgiften "med hjälp"
+  function taskDone(t, outcome, cls, given) {
+    let detail = given || null;
+    if (!given && t.type === 'upp' && IN && IN.rq) {                   // en rad som fått hjälp gör uppgiften "med hjälp"
       const rows = Object.keys(IN.rq.outc).filter(r => IN.rq.outc[r] !== 'direkt');
       detail = { rows, grey:IN.rq.greyWrong > 0 };
       if (outcome === 'direkt' && (rows.length || detail.grey)) outcome = 'hjalp';
@@ -1483,6 +1571,7 @@ const MatteProv = (() => {
       case 'list':      snd('click'); showList(); break;
       case 'prov':      snd('click'); if (id) provId = id; showProv(); break;
       case 'level':     snd('click'); setLevel(id); showProv(); break;
+      case 'method':    snd('click'); setUpMethod(id); if (S && S.mode === 'intro') showIntro(S.moment, 0); else showProv(); break;
       case 'ova':       snd('click'); showIntro(id, 0); break;
       case 'intronext': snd('click'); showIntro(S.moment, S.i + 1); break;
       case 'introprev': snd('click'); showIntro(S.moment, Math.max(0, S.i - 1)); break;
@@ -1532,7 +1621,7 @@ const MatteProv = (() => {
     else if (e.key === 'Tab' && IN.kind !== 'num') { e.preventDefault(); press('next'); }
   }
 
-  return { open, showList, showProv,
+  return { open, showList, showProv, upMethod,
            /* bara för test i webbläsaren */
            _peek:() => ({ S, IN, task:curTask() }),
            _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };

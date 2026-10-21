@@ -84,6 +84,11 @@
    (multLitCells) läser samma platser. Divisionen: täljarsiffran som
    arbetstalet ÄR och kvotsiffran som skrivs (divCurHTML, skriv,
    inget_kvar, fall B:s nolla); rest-texterna och faktabrickan är orörda.
+   D41 (2026-10-21): KROKEN runTask — matteprovets uppställning i läget
+   Minnessiffra lånar motorn för EN uppgift (hjälpläget eller fria
+   läget med matteprovets hjälptrappa) och får tillbaka utfallet. Se
+   blocket "MATTEPROVET LÅNAR MOTORN". host är null i multdivs egna
+   lägen; nivå, räknesätt och läge återställs efter varje lånad uppgift.
    ============================================================ */
 'use strict';
 
@@ -121,6 +126,10 @@ const MultDivGame = (() => {
   /* Divisionens STRYK-fas: { gs, cur } — kolumnerna som är kvar att stryka;
      två efter fall A. */
   let divStrikeAwait = null;
+
+  /* D41: en uppgift som matteprovet lånar (runTask). null = multdivs egna lägen,
+     som då beter sig exakt som förut. */
+  let host = null;
 
   /* Övning */
   let exerciseIdx = 0, exScore = 0, helpMode = true;
@@ -2520,8 +2529,8 @@ const MultDivGame = (() => {
       <style id="md-base">${BASE_CSS}</style>
       <div class="app-header">
         <button class="btn-back" onclick="MultDivGame.avslutaOvning()">Avsluta</button>
-        <span class="header-title">${modeTitle()}</span>
-        <span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>
+        <span class="header-title">${host ? host.title : modeTitle()}</span>
+        ${host ? host.right : `<span class="num" style="width:52px;text-align:right;font-family:var(--font-head);font-weight:700;font-size:15px;color:var(--ink-soft)">${exerciseIdx + 1}/5</span>`}
       </div>
       <div id="md-main"${free ? ' class="free-seam"' : ''}>
         <div id="md-left">
@@ -2701,6 +2710,7 @@ const MultDivGame = (() => {
   function memGuide() {
     if (!memAwait) return;
     memMistakes++; helpTaskClean = false;
+    if (host) host.log.minne = true;
     const fb = document.getElementById('md-feedback');
     const msg = memAwait.type === 'place'
       ? 'Nästan — den ska stå här 👉'
@@ -2946,6 +2956,7 @@ const MultDivGame = (() => {
       if (d !== memAwait.val) {
         // Fel siffra → mild vägledning (barn-UX-lagen), räknas i Minnesmästare
         memMistakes++; helpTaskClean = false;
+        if (host) host.log.minne = true;
         if (!memAwait.hmm) { memAwait.hmm = true; App.Sound.play('wrong'); }   // D39: en gång per uppgift
         divGuideFb('Nästan — titta på brickan: vilken siffra är tiotalet? 👀');
         return;
@@ -3163,6 +3174,7 @@ const MultDivGame = (() => {
     if (!visaVagen()) return;
     lifelineShownFor = item;
     lifelines--;
+    if (host) host.log.lifeline = true;     // D41: i matteprovet är livlinan hjälp
     App.Sound.play('click');
     const btn = document.getElementById('md-lifeline');
     if (btn) btn.outerHTML = lifelineBtnHTML();
@@ -3273,6 +3285,7 @@ const MultDivGame = (() => {
      poangstraff; den felaktiga siffran ar forbrukad sa nasta tryck borjar
      om. Byggs pa ETT stalle for alla delfragor. */
   function helpWrong(expected) {
+    if (host) hostNoteWrong(helpItem());
     if (helpTries === 0) App.Sound.play('wrong');   // D39: ljudet en gång per delfråga, orden varje gång
     helpTaskClean = false;      // uppgiften ar inte langre helratt
     exWrongAnswers++;
@@ -3389,7 +3402,7 @@ const MultDivGame = (() => {
         <button class="md-nk k-erase" aria-label="Sudda sista siffran"
           onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
         <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
-        ${freeLifelineBtnHTML()}
+        ${host ? '' : freeLifelineBtnHTML()}
         <button class="md-klar" id="md-free-submit" disabled
           onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
@@ -3613,6 +3626,8 @@ const MultDivGame = (() => {
       /* Avsluta under väntan (exGen ändras) får inte dra in nästa uppgift */
       const gen = exGen;
       setTimeout(() => { if (gen === exGen) finishTask(true); }, 900 + extra);
+    } else if (host) {
+      hostFreeWrong(val);
     } else {
       if (exFreeFirstAttempt) App.Sound.play('wrong');   // D39: ljudet bara vid första Klar som inte stämmer
       exFreeFirstAttempt = false;             // fel förbrukar första försöket
@@ -3637,8 +3652,159 @@ const MultDivGame = (() => {
     });
   }
 
+  /* ══════════════════════════════════════════════════════════
+     D41: MATTEPROVET LÅNAR MOTORN (runTask)
+     Matteprovets uppställning i läget "Minnessiffra" räknas här, med
+     samma metodik som nivå 4: minnessiffran, den osynliga nollan, den
+     orange ramen, siffrorna i platsvärdesfärg och platsorden. Kroken är
+     isolerad — host är null i multdivs egna lägen, som beter sig som förut.
+       runTask({ a, b, mode:'help'|'free', profile, title, right, exitMsg, exitAsk,
+                 onDone(result), onExit() })
+     result = { outcome:'direkt'|'hjalp'|'svar', cls:null|'minne'|'addition'|'fel',
+                facts:[[siffra, faktor], …] }  (tabellfakta som fick fel svar)
+     Läget 'help' är Räkna med hjälp (frågor kolumn för kolumn, livlinor).
+     Läget 'free' är Räkna själv med matteprovets hjälptrappa: första
+     "inte riktigt" är tyst, andra ger en hjälpbit, tredje visar svaret.
+     Efter uppgiften står en Nästa-knapp (klickstyrt, som i matteprovet).
+  ══════════════════════════════════════════════════════════ */
+  function runTask(o) {
+    host = { a: o.a, b: o.b, mode: o.mode === 'free' ? 'free' : 'help', title: o.title || 'Uppställning',
+             right: o.right || '<span style="width:52px"></span>', exitMsg: o.exitMsg || null,
+             exitAsk: !!o.exitAsk,
+             onDone: o.onDone, onExit: o.onExit,
+             log: { facts: [], minne: false, addition: false, lifeline: false, cls0: null },
+             wrong: 0, revealed: false,
+             saved: { difficulty, gameKind, helpMode } };   // multdivs egna val återställs efter uppgiften
+    if (o.profile) profile = o.profile;
+    gameKind = 'mult'; difficulty = 4; helpMode = host.mode === 'help';
+    exerciseIdx = 0; exScore = 0;
+    memMoments = 0; memMistakes = 0; exWrongAnswers = 0;
+    lifelines = helpMode ? 2 : 0; lifelineShownFor = null;
+    exGen++;
+    forcedNext = { a: o.a, b: o.b };
+    Router.silent(() => Router.show('screen-multdiv'));
+    newExProblem();
+  }
+
+  /* Fel svar i hjälpläget: vad var det som var svårt? (ren bokföring) */
+  function hostNoteWrong(item) {
+    if (!host || !item) return;
+    if (item.kind === 'mult' && item.step === 'table') {
+      if (!host.log.facts.some(f => f[0] === item.aDig && f[1] === item.m)) host.log.facts.push([item.aDig, item.m]);
+    } else if (item.kind === 'add') host.log.addition = true;
+    else host.log.minne = true;          // minnesfrågan och siffran i rutan
+  }
+
+  /* Utfallet — ren funktion av loggen och läget */
+  function hostOutcome(h, clean, firstAttempt) {
+    const log = h.log;
+    let outcome;
+    if (h.mode === 'help') outcome = clean && !log.lifeline ? 'direkt' : 'hjalp';
+    else outcome = h.revealed ? 'svar' : firstAttempt ? 'direkt' : 'hjalp';
+    const cls = h.mode === 'free' ? log.cls0
+      : log.minne ? 'minne' : log.addition ? 'addition' : null;
+    return { outcome, cls: outcome === 'direkt' ? null : cls, facts: outcome === 'direkt' ? [] : log.facts.slice() };
+  }
+
+  /* Hjälpbiten i fria läget: tvåsiffrig faktor ⇒ de två raderna; ensiffrig ⇒
+     minnessiffrorna (eller tabellfakta när det inte finns något minne). Ren. */
+  function hostBitHTML(pl) {
+    if (pl.kind === 'twostep')
+      return `Rad 1 är <strong>${pl.a} · ${pl.ones} = ${pl.p1.value}</strong>. ` +
+             `Rad 2 är <strong>${pl.a} · ${pl.tens * 10} = ${pl.p2.value * 10}</strong>. Lägg ihop dem.`;
+    const mem = planCarries(pl);
+    if (mem.length) {
+      const lista = mem.length === 1 ? `${mem[0]}` : `${mem.slice(0, -1).join(', ')} och ${mem[mem.length - 1]}`;
+      return `Minnessiffrorna blir <strong style="color:#dc2626">${lista}</strong>, från entalet och vänsterut.`;
+    }
+    return pl.pass.cols.map(c => `${c.aDig} · ${c.m} = ${c.prod}`).join(', ') + '.';
+  }
+
+  /* Räkna själv i matteprovet: hjälptrappan (D38/D39) */
+  function hostFreeWrong(val) {
+    const h = host;
+    h.wrong++;
+    exFreeFirstAttempt = false;
+    const nc = noCarryAnswer(plan);
+    if (h.wrong === 1) h.log.cls0 = (nc !== plan.answer && val === nc) ? 'minne' : 'fel';
+    if (h.wrong >= 2) App.Sound.play('wrong');            // första "inte riktigt" är tyst (matteprovet, D39)
+    const wrap = mdWrap();
+    if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
+    if (h.wrong === 1) {
+      freeTip(nc !== plan.answer && val === nc ? 'Nästan! Kolla minnessiffrorna — någon vill vara med.'
+                                               : 'Inte riktigt – försök igen.');
+      exFreeUpdateSubmit();
+      return;
+    }
+    if (h.wrong === 2) {
+      freeTip('Inte riktigt ännu. Här är en hjälp:');
+      helpBubble(hostBitHTML(plan));
+      exFreeUpdateSubmit();
+      return;
+    }
+    // tredje gången: svaret visas, i neutral grå, och minnessiffrorna landar
+    h.revealed = true;
+    exInputLocked = true;
+    const ds = digitsOf(plan.answer);
+    exFreeCells = Array(plan.width).fill(null).map((_, g) => ds[g]);
+    exFreePaintCells();
+    exFreePlaceRing(false);
+    document.querySelectorAll('#md-table-wrap .md-ansc').forEach(el => {
+      el.style.borderColor = '#94a3b8'; el.style.background = '#f1f5f9';
+    });
+    mdMemList = planCarries(plan).map(v => ({ val: v, used: false }));
+    renderMemCol();
+    exFreeClearWrong();
+    helpBubble(`Så här blir det: ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    hostFinish();
+  }
+
+  /* Uppgiften är klar: Nästa-knappen i stället för knappsatsen */
+  function hostFinish() {
+    if (!host) return;
+    const res = hostOutcome(host, helpTaskClean, exFreeFirstAttempt);
+    host.result = res;
+    // pekningen släcks: uppgiften är färdig
+    document.querySelectorAll('#md-table-wrap .md-cell, #md-table-wrap .md-ansc').forEach(el => {
+      el.classList.remove('md-glow', 'dim', 'active-col'); el.style.removeProperty('--gc');
+    });
+    if (res.outcome !== 'svar')
+      helpBubble(res.outcome === 'direkt' ? `Rätt! ${numA} · ${numB} = <strong>${plan.answer}</strong>`
+                                          : `Rätt, med hjälp. ${numA} · ${numB} = <strong>${plan.answer}</strong>`);
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = `<button class="btn btn-primary btn-block" id="md-host-next"
+      onclick="MultDivGame.hostNext()">Nästa <svg class="icn"><use href="#i-play"/></svg></button>`;
+    const fb = document.getElementById('md-feedback');
+    if (fb && res.outcome !== 'svar') fb.innerHTML = '';
+    const main = document.getElementById('md-main');
+    if (main) main.classList.remove('free-seam');
+  }
+
+  function hostNext() {
+    if (!host || !host.result) return;
+    App.Sound.play('click');
+    const h = host, res = h.result;
+    host = null; exGen++; hostRestore(h);
+    if (h.onDone) h.onDone(res);
+  }
+
+  function hostRestore(h) {
+    ({ difficulty, gameKind, helpMode } = h.saved);
+    const root = document.getElementById('multdiv-root');
+    if (root) root.innerHTML = '';
+  }
+
+  function hostAbort() {
+    if (!host) return;
+    const h = host;
+    host = null; exGen++; hostRestore(h);
+    const o = document.getElementById('md-avslut'); if (o) o.remove();
+    if (h.onExit) h.onExit();
+  }
+
   /* ── Uppgiftsräknare + resultat ─────────────────────────── */
   function finishTask(correct) {
+    if (host) { hostFinish(); return; }
     exerciseIdx++;
     if (exerciseIdx >= 5) {
       showExResults();
@@ -3834,9 +4000,10 @@ const MultDivGame = (() => {
                      !!document.querySelector('#md-table-wrap .md-ansc.filled, ' +
                                               '#md-table-wrap .md-cell.struck, ' +
                                               '#md-table-wrap .md-divrem.on');
-    if (!pabörjad) { showModeSelect(); return; }
+    if (host && !pabörjad && !host.exitAsk) { hostAbort(); return; }
+    if (!host && !pabörjad) { showModeSelect(); return; }
     const root = document.getElementById('multdiv-root');
-    if (!root || document.getElementById('md-avslut')) { showModeSelect(); return; }
+    if (!root || document.getElementById('md-avslut')) { if (host) hostAbort(); else showModeSelect(); return; }
     App.Sound.play('click');
     /* Overlagg, inte en ruta i floden: lagd i #md-feedback tog den 54 px
        fran kladden (uppmatt 128 px mot golvet 150). Ett overlagg ror
@@ -3844,10 +4011,10 @@ const MultDivGame = (() => {
     root.insertAdjacentHTML('beforeend', `<div id="md-avslut" class="md-avslut-bak"
       onclick="if(event.target===this)MultDivGame.avslutaAngra()">
       <div class="md-avslut">
-        <div>Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.</div>
+        <div>${host ? MP.escapeHtml(host.exitMsg || 'Avsluta passet?') : `Avsluta rundan? Du är på uppgift <strong>${exerciseIdx + 1}</strong> av 5.`}</div>
         <div class="md-avslut-rad">
           <button class="md-btn" onclick="MultDivGame.avslutaAngra()">Nej, fortsätt</button>
-          <button class="md-btn md-avslut-ja" onclick="MultDivGame.showModeSelect()">Ja, avsluta</button>
+          <button class="md-btn md-avslut-ja" onclick="MultDivGame.${host ? 'hostAbort' : 'showModeSelect'}()">Ja, avsluta</button>
         </div>
       </div></div>`);
   }
@@ -3887,11 +4054,12 @@ const MultDivGame = (() => {
     mdToggleEraser, mdClearCanvas,
     exitToApp,
     openProv,                              // D37: Matteprov 4:an
+    runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, genL4, drawL4Type, L4_TYPES, noCarryAnswer,
                   divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
-    __test: { planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
+    __test: { hostOutcome, hostBitHTML, hostActive: () => !!host, planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
               /* hjälpbubblornas frågor mot en given plan (rena; läser inte modultillståndet) */
               askText: (item, pl) => askText(item, pl), helpExprHTML: (item, pl) => helpExprHTML(item, pl), planMultHelpQueue, planDivHelpQueue, divHelpAsk, divHelpAck,
               tabellradHTML, planCarries, planRests,

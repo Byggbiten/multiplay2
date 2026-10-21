@@ -873,3 +873,38 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
     expect((src.match(/pulseRefs\(area\);/g) || []).length).toBe(2);
   });
 });
+
+/* ── D41: matteprovet lånar motorn (runTask) ── */
+describe('D41: kroken runTask och dess utfall', () => {
+  const { hostOutcome, hostBitHTML } = MD.__test;
+  const log = o => Object.assign({ facts:[], minne:false, addition:false, lifeline:false, cls0:null }, o);
+  it('Räkna med hjälp: helt rätt = direkt; fel svar eller livlina = med hjälp, med felklass och tabellfakta', () => {
+    expect(hostOutcome({ mode:'help', log:log() }, true, true)).toEqual({ outcome:'direkt', cls:null, facts:[] });
+    expect(hostOutcome({ mode:'help', log:log({ facts:[[2, 8]] }) }, false, true)).toEqual({ outcome:'hjalp', cls:null, facts:[[2, 8]] });
+    expect(hostOutcome({ mode:'help', log:log({ minne:true }) }, false, true).cls).toBe('minne');
+    expect(hostOutcome({ mode:'help', log:log({ addition:true }) }, false, true).cls).toBe('addition');
+    expect(hostOutcome({ mode:'help', log:log({ lifeline:true }) }, true, true).outcome).toBe('hjalp');
+  });
+  it('Räkna själv: första Klar rätt = direkt, senare = med hjälp, visat svar = fick svaret', () => {
+    expect(hostOutcome({ mode:'free', log:log(), revealed:false }, true, true).outcome).toBe('direkt');
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'minne' }), revealed:false }, true, false)).toEqual({ outcome:'hjalp', cls:'minne', facts:[] });
+    expect(hostOutcome({ mode:'free', log:log({ cls0:'fel' }), revealed:true }, true, false).outcome).toBe('svar');
+  });
+  it('hjälpbiten: två rader vid tvåsiffrig faktor, minnessiffrorna vid ensiffrig', () => {
+    const strip = h => h.replace(/<[^>]+>/g, '');
+    expect(strip(hostBitHTML(buildPlan(82, 68, 4)))).toBe('Rad 1 är 82 · 8 = 656. Rad 2 är 82 · 60 = 4920. Lägg ihop dem.');
+    expect(strip(hostBitHTML(buildPlan(687, 8, 4)))).toBe('Minnessiffrorna blir 5 och 6, från entalet och vänsterut.');
+    expect(strip(hostBitHTML(buildPlan(4321, 2, 4)))).toBe('1 · 2 = 2, 2 · 2 = 4, 3 · 2 = 6, 4 · 2 = 8.');
+  });
+  it('kroken är isolerad: multdivs egna lägen går som förut när ingen uppgift är lånad', () => {
+    const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/let host = null;/);
+    expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
+    expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
+    expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val\);\n\s+\} else \{/);
+    // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
+    expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
+    expect(src).toMatch(/\(\{ difficulty, gameKind, helpMode \} = h\.saved\);/);
+    expect(typeof MD.runTask).toBe('function');
+  });
+});

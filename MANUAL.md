@@ -398,8 +398,22 @@ se nedan), uttrycket och sedan första ledet för problemlösning. I Öva kommer
    förklaring.
 3. **Dela upp i tiotal och ental**: `4 · 28` med T och E ovanför, och tre rader att fylla i:
    `= 4 · [20] + 4 · [8]`, `= [80] + [32]`, `= [112]`.
-4. **Uppställning**: det större talet överst, det mindre under med ·, svaret i rutor. Raderna fylls i tur och ordning;
-   summaraden är låst (nedtonad) tills alla rader är ifyllda.
+4. **Uppställning**: det större talet överst, det mindre under med ·. Två räknesätt (D41), valda med växeln
+   **Räkna med: Minnessiffra | Dela upp** överst i "Så här gör du" för uppställningen. Minnessiffra är förvalt. Valet
+   sparas per profil och gäller i Öva, Gör provet och Mitt prov; provsidan visar det under momentet ("Räknesätt:
+   Minnessiffra"). "Så här gör du" visar det valda räknesättet.
+   - **Minnessiffra**: samma sätt som Multiplikation nivå 4 (samma motor): en kolumn i taget med minnessiffran i
+     spalten till höger, den osynliga nollan i den grå rutan på rad 2, orange ram på rutorna som räknas, siffrorna i
+     texten i platsvärdesfärg, och ord om var svaret hamnar. Ensiffrig faktor ger en rad med minnessiffror.
+     - *I Öva* räknar barnet **med hjälp**: appen frågar en kolumn i taget, barnet svarar, placerar och stryker
+       minnessiffrorna. Fel svar eller livlina gör uppgiften "med hjälp" i kvittot.
+     - *I provet och Mitt prov* räknar barnet **själv**: svaret skrivs i rutorna och uträkningen görs i kladden.
+       Första gången det inte stämmer: "Inte riktigt – försök igen." (eller en påminnelse om minnessiffrorna), utan
+       ljud. Andra gången: en hjälp (raderna 82 · 8 = 656 och 82 · 60 = 4920, eller minnessiffrorna). Tredje
+       gången: svaret visas i grått, och Nästa går vidare.
+     - Det som var svårt: tabellfakta som fick fel svar, "Minnessiffran" och "Minne i summan".
+   - **Dela upp**: som förut (nedan). Raderna fylls i tur och ordning; summaraden är låst (nedtonad) tills alla rader
+     är ifyllda.
    - **Raderna fylls med en fråga (D38 ✎)**: appen frågar "Vad är 9 · 6?", barnet svarar 54 i ett vanligt
      svarsfält, och svaret flyttar in på sin rad och sitt platsvärde (texten först, sedan en kort rörelse). Fel på en
      rad: försök igen, sedan en ledtråd, sedan svaret (det skrivs också in, i blått). En rad som fått hjälp gör
