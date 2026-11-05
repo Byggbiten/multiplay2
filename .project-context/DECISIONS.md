@@ -66,6 +66,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte ✎ enklare förklaring ✎ nollan först, sedan bara siffran
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
 - D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
+- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven)
 
 ---
 
@@ -612,3 +613,18 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-11-05, efter lärarens beskrivning (division med hjälp av multiplikation, med rest, kort
   division med och utan minnessiffra, division med nollor) och kapitlets kopieringsunderlag: "Jag tänker i första hand
   en den vanliga modulen 'kort division'. Om den når det dom skrev med räkna med rest och hur man ställer upp."
+
+## D44 · 2026-11-05 · Matteprov 2 · Division, och det ska synas vad man fyller i
+- **Beslut:** Matteprov 4:an får Matteprov 2 · Division, byggt som Matteprov 1 men ur kapitel 3:s kopieringsunderlag
+  (egna tal i bladens form). Princip för båda proven: barnet ska intuitivt se vad som ska fyllas i och räknas ut –
+  uppställningen, rutans plats och det som lyser ska säga det; texten är bara reserv för den som verkligen inte
+  förstår. Matteprov 1 ses över efter principen (de frågor där det inte syns vad man ska göra).
+- **Källa:** Dennis 2026-11-05: "Sen kan du direkt sätta igång med att göra ett 'prov' med division. på samma sätt
+  som för multiplikation fast inspirerat ur bladen du fick nu. Jag är inte helt nöjd med multiplikationsprovet. jag
+  tycker att vissa frågor som kommer, att jag inte direkt förstår vad man skall göra. en bra pedagogisk app så skall
+  man intuitivt förstå vad man skall fylla i och räkna ut. Texten är bara till för om man verkligen inte förstår."
+- ✎ **2026-11-05, nivå 3 med rest, nivå 4 med decimaler (gäller D43):** Kort division nivå 3 "Med rest" (allt kapitel
+  3 kräver: tre- och fyrsiffrigt, nämnare 2–9, nollor, rest, kontroll), nivå 4 "Med decimaler" (man stannar inte vid
+  resten: 122 / 4 = 30,5; högst två decimaler). Källa: Dennis: "I sånna fall tycker jag att räkna med rest borde vara
+  svårighetsgrad 3, och att svårighetsgrad 4 är hela sättet. vet inte vad det kallas? är det att räkna med decimal?
+  som i mitt exempel. att 122/4 = 30,5?"
