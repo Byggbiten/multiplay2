@@ -67,6 +67,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
 - D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven)
+- D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad)
 
 ---
 
@@ -623,3 +624,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   som för multiplikation fast inspirerat ur bladen du fick nu. Jag är inte helt nöjd med multiplikationsprovet. jag
   tycker att vissa frågor som kommer, att jag inte direkt förstår vad man skall göra. en bra pedagogisk app så skall
   man intuitivt förstå vad man skall fylla i och räkna ut. Texten är bara till för om man verkligen inte förstår."
+
+## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
+- **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
+  (ingen transform:scale; se minnet om iPad-PWA). iPhone-layouten (390 × 844) förblir måttstocken och ändras inte.
+  Först en mätning per skärm på iPad-storlekar och ett förslag, sedan bygget efter Matteprov 2.
+- **Källa:** Dennis 2026-11-05: "Du får gärna också se över hur formatet är för multiplay på iphone kontra ipad. på
+  ipaden så tycker jag att den inte fullt ut utnyttjar skärmens yta i portätt och liggande läge" och "det gäller
+  generellt sätt för hela appen".
