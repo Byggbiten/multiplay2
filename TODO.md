@@ -18,7 +18,7 @@
 
 ## Klart
 
-- [x] D42 Räkna med hjälp och Räkna själv i matteprovet – på dev 2026-10-21.
+- [x] D42 Räkna med hjälp och Räkna själv i matteprovet – live i v73 2026-10-21.
 
 - [x] Enklare förklaring av nollan (D41 ✎) – live i v72 2026-10-21.
 

@@ -131,3 +131,11 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Lärdom:** hjälp som barnet kan klicka förbi hjälper inte; lägg frågan där barnet redan tittar (över rutan med
   fokus) och låt den vara en fråga, inte en uppmaning. Mät färgade tal i flexrader: färg per siffra får inte bryta
   talet.
+
+## Efter runda 10 · 2026-10-21 · Frågan som kunde besvaras på två sätt (samordnaren, v73)
+- **Vad som inte fungerade:** "Dela 28: hur många är tiotalen?" kan besvaras med 2 (antalet tiotal), men rutan väntar
+  20 (tiotalens värde). Testerna kontrollerade bara att texten var den förväntade, inte vad ett barn skulle svara.
+- **Lösning:** "Dela 28: vad är tiotalen värda?" (samordnaren; `boxAsk`, testet och MANUAL).
+- **Lärdom:** frågor ska testas mot vad ett barn skulle svara, inte bara mot förväntad text. Läs frågan bokstavligt,
+  lista de rimliga svaren och kontrollera att bara rutans svar passar; "hur många" frågar efter ett antal, "vad är …
+  värd" efter ett värde.
