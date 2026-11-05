@@ -65,6 +65,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte ✎ enklare förklaring ✎ nollan först, sedan bara siffran
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
+- D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
 
 ---
 
@@ -601,3 +602,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   sätter igång. Barn har en förmåga att snabbt klicka förbi instruktioner pga. bristande tålamod. Så kan appen vara
   lite mer pedagogisk under själva körningen också? Kanske matteprovet ska ha en slags 'räkna med hjälp' och 'räkna
   själv' också?"
+
+## D43 · 2026-11-05 · Kort division når lärarens kapitel 3
+- **Beslut:** den vanliga modulen Kort division (Multiplikation & Division) byggs ut så att den täcker lärarens mål
+  för kapitel 3 (åk 4): division med rest (kvot och rest på slutet, "= 144, rest 3"), kontroll med multiplikation
+  (4 · 144 + 3 = 579) som sista steg, uppställningen som i läroboken (bråkstreck, mellanresten som liten siffra framför
+  nästa siffra, kvoten efter likhetstecknet), fyrsiffrig täljare och nämnare 2–9 på de högre nivåerna, och nollor i
+  kvoten (mitt i och först). Matteprovet för division väntar.
+- **Källa:** Dennis 2026-11-05, efter lärarens beskrivning (division med hjälp av multiplikation, med rest, kort
+  division med och utan minnessiffra, division med nollor) och kapitlets kopieringsunderlag: "Jag tänker i första hand
+  en den vanliga modulen 'kort division'. Om den når det dom skrev med räkna med rest och hur man ställer upp."
