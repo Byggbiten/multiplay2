@@ -632,3 +632,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-11-05: "Du får gärna också se över hur formatet är för multiplay på iphone kontra ipad. på
   ipaden så tycker jag att den inte fullt ut utnyttjar skärmens yta i portätt och liggande läge" och "det gäller
   generellt sätt för hela appen".
+- ✎ **2026-11-05, övningsblad i stället för prov:** divisionen får inget prov utan övningsblad/övningsmoduler som
+  kopieringsunderlaget för kapitel 3 – olika problembeskrivningar och övningssätt (dela lika, grupper, tabell, rest
+  med bilder, talsorter, 10/100/1000, kort division, pengar, begrepp, problemlösning, slutledning). Nås som kortet
+  "Övningsblad" i divisionens lägesvy. Källa: Dennis: "gällande matteprovet för division. Det skall som sagt inte vara
+  ett prov. Det skall vara övningsblad/övningsmoduler. Precis som den där kopieringsunderlag_kap3. Så de får träna på
+  de olika delarna för att bygga upp en intuitiv förståelse runt om division med olika problembeskrivningar och
+  övningssätt".
