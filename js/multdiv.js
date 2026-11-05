@@ -94,6 +94,15 @@
    läget med matteprovets hjälptrappa) och får tillbaka utfallet. Se
    blocket "MATTEPROVET LÅNAR MOTORN". host är null i multdivs egna
    lägen; nivå, räknesätt och läge återställs efter varje lånad uppgift.
+   D43 (2026-11-05): KORT DIVISION NÅR LÄRARENS KAPITEL 3 — rest på
+   slutet ("= 144, rest 3", restrutan #md-rest efter kvoten, alltid på
+   nivå 3–4 så att den inte avslöjar om det blir rest), kontrollen med
+   multiplikation som eget sista steg ("Kontrollera: 4 · 144 + 3 = 579."),
+   fyrsiffrig täljare och nämnare 2–9, nollor i kvoten (mitt i och först).
+   Nivå 1–2 orörda; nivå 3–4 drar typ ur en påse (DIV_TYPES). Stegen
+   restut/kontroll, hjälpposterna divrestut/divrest0/divkontroll, och
+   fria lägets divFreeCheck (tom restruta = 0). Multiplikationen och
+   matteprovet (runTask) är orörda.
    ============================================================ */
 'use strict';
 
@@ -156,6 +165,8 @@ const MultDivGame = (() => {
   let exFreeCells = [], exFreeCur = 0;   // rutan med fokus (mult: 0 = entalet; div: width-1 = vänstra)
   /* D41 ✎: raderna i fria läget. exFreeCells är alltid den aktuella radens rutor. */
   let exFreeGrid = { ans: [] }, exFreeRow = 'ans';
+  /* D43: divisionens restruta i fria läget (efter kvoten); null = tom (räknas som 0) */
+  let exFreeRest = null, exFreeOnRest = false;
   let exFreeFirstAttempt = true;
 
   /* Kladd-canvas */
@@ -490,6 +501,10 @@ const MultDivGame = (() => {
     .md-fracrow { display:flex; gap:clamp(11px,3vw,16px); }
     .md-fraccol { display:flex; flex-direction:column; align-items:center; gap:2px; }
     .md-flbl { font-size:clamp(0.8rem,1.6vw,1.15rem); font-weight:900; line-height:1.1; }
+    .md-restlbl { font-family:var(--font-head); font-weight:800; color:#475569; align-self:flex-end;
+      font-size:clamp(0.95rem,2.4vw,1.4rem); padding:0 1px 6px 0; white-space:nowrap; }
+    .md-ansc.md-rest { border-color:rgba(220,38,38,0.45); }
+    .md-ansc.md-rest.filled { border-color:#dc2626; border-style:solid; }
     .md-fracbar { align-self:stretch; height:4px; border-radius:2px;
       background:linear-gradient(90deg,transparent,#374151 6%,#374151 94%,transparent); }
     .md-diveq { display:flex; align-items:flex-end; gap:clamp(3px,0.9vw,7px); }
@@ -891,51 +906,111 @@ const MultDivGame = (() => {
     };
   }
 
-  /* Nivåvillkoren (spec-tabellen) verifieras på den FRAMRÄKNADE
-     stegsekvensen — inte på slumptalen. Jämn delning är garanterad
-     av baklänges-konstruktionen (n = q·d), remainder-koll ändå. */
+  /* Nivåvillkoren verifieras på den FRAMRÄKNADE stegsekvensen — inte på
+     slumptalen. D43 (lärarens kapitel 3): nivå 1–2 som förut (tvåsiffrigt,
+     jämnt); nivå 3 och 4 drar en typ ur en påse (som multiplikationens
+     nivå 4) så att nollor i kvoten, nolla först och rest förekommer tydligt.
+       nivå 3 (tresiffrigt ÷ 2–6): mellan (mellanrester, inga nollor),
+         noll-mitt (612 ÷ 6 = 102), noll-forst (144 ÷ 3 = 48), rest (357 ÷ 2
+         = 178, rest 1)
+       nivå 4 (blandat ÷ 2–9): tre-rest (579 ÷ 4 = 144, rest 3), fyra (9639 ÷ 3),
+         fyra-rest, fyra-noll (2084 ÷ 2 = 1042, 1344 ÷ 6 = 224) */
+  const DIV_TYPES = { 3: ['mellan', 'noll-mitt', 'noll-forst', 'rest'], 4: ['tre-rest', 'fyra', 'fyra-rest', 'fyra-noll'] };
+  const DIV_RANGE = { 3: [2, 6], 4: [2, 9] };
+  const divRestLevel = level => level >= 3;                 // där rest kan förekomma: restrutan finns alltid
+  function divTypeOk(type, n, d, p) {
+    const nLen = digitsOf(n).length, r = p.remainder;
+    const qd = digitsOf(p.quotient), midZero = qd.slice(1, -1).includes(0);   // nolla mitt i kvoten (102)
+    switch (type) {
+      case 'mellan':     return nLen === 3 && r === 0 && !p.hasSkip && p.hasMidRem && !p.qHasZero;
+      case 'noll-mitt':  return nLen === 3 && r === 0 && !p.hasSkip && midZero;
+      case 'noll-forst': return nLen === 3 && r === 0 && p.hasSkip;
+      case 'rest':       return nLen === 3 && r > 0 && !p.qHasZero;
+      case 'tre-rest':   return nLen === 3 && r > 0 && d >= 3;
+      case 'fyra':       return nLen === 4 && r === 0 && !p.qHasZero && !p.hasSkip;   // med eller utan mellanrest (9639 ÷ 3)
+      case 'fyra-rest':  return nLen === 4 && r > 0;
+      case 'fyra-noll':  return nLen === 4 && (p.qHasZero || p.hasSkip);
+    }
+    return false;
+  }
   function divLevelOk(level, d, q, n, p) {
-    if (p.remainder !== 0) return false;
     const nLen = digitsOf(n).length, qd = digitsOf(q);
-    if (level === 1) // 2-siffrigt ÷ (2–5), ingen mellanrest (varje siffra delbar)
-      return nLen === 2 && !p.hasSkip && !p.hasMidRem && qd.length === 2 && qd.every(x => x > 0);
-    if (level === 2) // 2-siffrigt ÷ (2–5), MED mellanrest
-      return nLen === 2 && !p.hasSkip && p.hasMidRem;
-    if (level === 3) // 3-siffrigt, mellanrester, ingen nolla i kvoten, första siffran ≥ divisorn
-      return nLen === 3 && !p.hasSkip && p.hasMidRem && qd.length === 3 && qd.every(x => x > 0);
-    // Nivå 4: 3-siffrigt ÷ (6–9) OCH/ELLER första siffran < divisorn ELLER nolla i kvoten
-    return nLen === 3 && (d >= 6 || p.hasSkip || p.qHasZero);
+    if (level === 1) // 2-siffrigt ÷ (2–5), ingen mellanrest (varje siffra delbar), jämnt
+      return p.remainder === 0 && nLen === 2 && !p.hasSkip && !p.hasMidRem && qd.length === 2 && qd.every(x => x > 0);
+    if (level === 2) // 2-siffrigt ÷ (2–5), MED mellanrest, jämnt
+      return p.remainder === 0 && nLen === 2 && !p.hasSkip && p.hasMidRem;
+    return (DIV_TYPES[level] || []).some(t => divTypeOk(t, n, d, p));
+  }
+  /* Typen dras ur en blandad påse: jämn fördelning, högst två av samma i rad */
+  const divBags = { 3: [], 4: [] };
+  function drawDivType(level) {
+    const bag = divBags[level];
+    if (!bag.length) {
+      bag.push(...DIV_TYPES[level]);
+      for (let i = bag.length - 1; i > 0; i--) { const j = rnd(i + 1); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    }
+    return bag.pop();
+  }
+  /* Ett tal av given typ: kvot och nämnare baklänges, resten läggs till (n = q·d + r) */
+  function genDivType(type) {
+    const four = type.startsWith('fyra'), level = type === 'tre-rest' || four ? 4 : 3;
+    const [dLo, dHi] = DIV_RANGE[level];
+    for (let t = 0; t < 4000; t++) {
+      const d = dLo + rnd(dHi - dLo + 1);
+      const nLo = four ? 1000 : 100, nHi = four ? 9999 : 999;
+      const wantRest = type === 'rest' || type.endsWith('-rest') || (type === 'fyra-noll' && rnd(2) === 1);
+      const r = wantRest ? 1 + rnd(d - 1) : 0;
+      const lo = Math.ceil((nLo - r) / d), hi = Math.floor((nHi - r) / d);
+      if (hi < lo) continue;
+      const q = lo + rnd(hi - lo + 1), n = q * d + r;
+      const p = divPass(n, d);
+      if (divTypeOk(type, n, d, p)) return { a: n, b: d, type };
+    }
+    return { 'mellan': { a: 738, b: 3 }, 'noll-mitt': { a: 612, b: 6 }, 'noll-forst': { a: 144, b: 3 }, 'rest': { a: 357, b: 2 },
+             'tre-rest': { a: 579, b: 4 }, 'fyra': { a: 9639, b: 3 }, 'fyra-rest': { a: 5307, b: 4 }, 'fyra-noll': { a: 2084, b: 2 } }[type];
   }
 
-  /* Generator: slumpa kvot + divisor BAKLÄNGES → täljare = kvot·divisor
-     (alltid jämn delning), verifiera nivåvillkoren, annars slumpa om.
-     Deterministisk fallback om slumpen mot förmodan aldrig träffar. */
+  /* Generator: nivå 1–2 slumpar kvot + divisor BAKLÄNGES → täljare =
+     kvot·divisor (alltid jämn delning) och verifierar nivåvillkoren;
+     nivå 3–4 drar en typ ur påsen (genDivType). */
   function genDivProblem(level) {
+    if (level >= 3) return genDivType(drawDivType(level));
     for (let t = 0; t < 400; t++) {
       let d, q;
       if (level === 1) {
         d = 2 + rnd(3); // 2–4: d=5 ger bara 55÷5 (m=1) — för mager variation
         const m = Math.floor(9 / d); // kvotsiffra ≤ m ⇒ varje täljarsiffra = siffra·d ≤ 9
         q = (1 + rnd(m)) * 10 + (1 + rnd(m));
-      } else if (level === 2) {
-        d = 2 + rnd(4); q = 11 + rnd(Math.floor(99 / d) - 10);
-      } else if (level === 3) {
-        d = 2 + rnd(4); q = 100 + rnd(Math.floor(999 / d) - 99);
       } else {
-        d = 2 + rnd(8);
-        const lo = Math.ceil(100 / d), hi = Math.floor(999 / d);
-        q = lo + rnd(hi - lo + 1);
+        d = 2 + rnd(4); q = 11 + rnd(Math.floor(99 / d) - 10);
       }
       const n = q * d, p = divPass(n, d);
       if (divLevelOk(level, d, q, n, p)) return { a: n, b: d };
     }
-    return [{ a: 84, b: 4 }, { a: 96, b: 4 }, { a: 738, b: 3 }, { a: 336, b: 6 }][level - 1];
+    return [{ a: 84, b: 4 }, { a: 96, b: 4 }][level - 1];
   }
 
   function buildDivPlan(n, d, level) {
     const pass = divPass(n, d);
     return { level, a: n, b: d, kind: 'division', pass,
-             answer: pass.quotient, width: digitsOf(pass.quotient).length };
+             answer: pass.quotient, rest: pass.remainder, restLevel: divRestLevel(level),
+             width: digitsOf(pass.quotient).length };
+  }
+
+  /* D43: rättningen i fria läget med rest. Tom restruta räknas som 0 (det
+     får stå tomt när det går jämnt). Kvoten rättas först; glömd mellanrest
+     (divNoRemAnswer) och en rest som är för stor pekas ut. Ren funktion. */
+  function divFreeCheck(pl, kvot, rest) {
+    const r = rest == null ? 0 : rest;
+    if (kvot === pl.answer && r === pl.rest) return { ok: true, cls: null, msg: '' };
+    if (r >= pl.b)
+      return { ok: false, cls: 'rest', msg: 'Resten ska vara mindre än nämnaren. Ryms nämnaren en gång till?' };
+    if (kvot === pl.answer)
+      return { ok: false, cls: 'rest', msg: 'Kvoten stämmer. Kolla resten: hur mycket blir kvar efter sista siffran?' };
+    const nr = divNoRemAnswer(pl.a, pl.b);
+    if (nr !== pl.answer && kvot === nr)
+      return { ok: false, cls: 'mellanrest', msg: 'Nästan! Kolla resterna — de följer med till nästa siffra.' };
+    return { ok: false, cls: 'fel', msg: 'Inte riktigt – försök igen.' };
   }
 
   /* Glömd-rest-detektorn (fria läget): simulera divisionen där mellan-
@@ -1084,6 +1159,12 @@ const MultDivGame = (() => {
       }
       steps.push({ t: 'stryk', ...base, gs: cells });
     }
+    /* D43: resten skrivs efter kvoten (där rest kan förekomma), och sist
+       kontrollen med multiplikation — slutsatsen i ett eget steg. */
+    const last = pl.pass.steps[pl.pass.steps.length - 1];
+    const fin = { N, n: pl.a, q: pl.answer, r: pl.rest, g: last.g, cells: [last.g], remIn: 0, cur: last.cur };
+    if (pl.restLevel) steps.push({ t: 'restut', ...fin });
+    steps.push({ t: 'kontroll', ...fin });
     steps.push({ t: 'klart' });
     return steps;
   }
@@ -1115,6 +1196,13 @@ const MultDivGame = (() => {
         ? `${stor(pvNamn(s.gs[0]))} är klart — vi stryker det.`
         : `${stor(pvNamn(s.gs[0]))} och ${pvNamn(s.gs[1])} är klara — ${s.cur} är räknat. Vi stryker dem.`;
       case 'inget_kvar': return `Inget kvar att dela — vi skriver ${ref(`md-q-${s.g}`, 0)} i ${pvNamn(s.g)}.`;
+      /* D43: resten efter kvoten, och kontrollen "division med hjälp av multiplikation" */
+      case 'restut':     return s.r > 0
+        ? `Det blir ${ref('md-rest', s.r)} kvar – det är resten. Den skrivs efter kvoten.`
+        : `Det blir inget kvar – resten är ${ref('md-rest', 0)}.`;
+      case 'kontroll':   return s.r > 0
+        ? `Kontrollera: ${ref('md-d-0', s.N)} · ${s.q} + ${ref('md-rest', s.r)} = ${s.n}.`
+        : `Kontrollera: ${ref('md-d-0', s.N)} · ${s.q} = ${s.n}.`;
     }
     return '';
   }
@@ -1144,6 +1232,9 @@ const MultDivGame = (() => {
         case 'rest':       q.push({ kind: 'divrest', ...s, answer: s.r }); break;
         case 'flytta':     q.push({ kind: 'divplace', ...s }); break;
         case 'stryk':      q.push({ kind: 'divstrike', ...s }); break;
+        /* D43: med rest flyttar resten till sin ruta (kvittens); utan rest frågar appen om resten (0) */
+        case 'restut':     q.push(s.r > 0 ? { kind: 'divrestut', ...s } : { kind: 'divrest0', ...s, answer: 0 }); break;
+        case 'kontroll':   q.push({ kind: 'divkontroll', ...s }); break;
       }
     }
     return q;
@@ -1155,6 +1246,8 @@ const MultDivGame = (() => {
       case 'divrest':   return `${item.cur} − ${item.prod} = ?`;
       case 'divrestb':  return 'Hur mycket blir rest?';
       case 'divzero':   return 'Inget kvar att dela — vad skriver vi?';
+      case 'divrest0':  return 'Blev något kvar efter sista siffran? Skriv resten.';
+      case 'divrestut': case 'divkontroll': return divStepText(item);
       case 'divplace':  return `Tryck på platsen framför ${item.next}:an i ${pvNamn(item.toG)} — där ska resten ${item.r} stå.`;
       case 'divstrike': return item.gs.length === 1
         ? `${stor(pvNamn(item.gs[0]))} är klart — tryck på det, så stryker vi det.`
@@ -1171,6 +1264,7 @@ const MultDivGame = (() => {
       case 'divrest':  return divAckOf(divStepText(item));               // item.t === 'rest'
       case 'divrestb': return `Rätt — resten är ${item.r}.`;
       case 'divzero':  return `Rätt — ${ref(`md-q-${item.g}`, 0)} i ${pvNamn(item.g)}.`;
+      case 'divrest0': return `Rätt — det blir inget kvar, så resten är ${ref('md-rest', 0)}.`;
       case 'divplace': return divAckOf(divStepText(item));               // item.t === 'flytta'
     }
     return '';
@@ -1247,8 +1341,9 @@ const MultDivGame = (() => {
      Tal som inte är en cell (produkten 63, summan 15) skrivs aldrig med
      färg. Pekningen (multLitCells) och texten läser SAMMA källa: multRefs. */
   const MEM_COLOR = '#dc2626';
-  const refColor = where => where.startsWith('md-')
-    ? cv(+where.split('-').pop()) : MEM_COLOR;
+  const refColor = where => where === 'md-rest' ? MEM_COLOR      // D43: restrutan efter kvoten, rött som resterna
+    : where === 'md-d-0' ? '#475569'                              // nämnaren under bråkstrecket
+    : where.startsWith('md-') ? cv(+where.split('-').pop()) : MEM_COLOR;
   const ref = (where, val) =>
     `<strong class="md-ref" data-ref="${where}" style="color:${refColor(where)}">${val}</strong>`;
   const R = o => ref(o.id, o.val);
@@ -1415,7 +1510,7 @@ const MultDivGame = (() => {
         return multStepText(step, plan);
       /* Kort division (spec 23/9): alla texter ur EN mall, ordagrant ur mockupen */
       case 'fraga': case 'ryms_inte': case 'ta_med': case 'fakta': case 'skriv':
-      case 'rest': case 'flytta': case 'stryk': case 'inget_kvar':
+      case 'rest': case 'flytta': case 'stryk': case 'inget_kvar': case 'restut': case 'kontroll':
         return divStepText(step);
       case 'klart':
       case 'done':
@@ -1431,8 +1526,9 @@ const MultDivGame = (() => {
     if (plan.kind !== 'division') {
       return `Klart! 🎉 ${numA} · ${numB} = <strong>${plan.answer}</strong>`;
     }
+    /* D43: kontrollen är nu ett eget steg före Klart; resten skrivs som i boken */
     return `Klart! 🎉 ${numA} ÷ ${numB} = <strong>${plan.answer}</strong>` +
-           `<span class="md-check">Kolla: ${plan.answer} · ${numB} = ${numA} ✅</span>`;
+           (plan.restLevel && plan.rest > 0 ? `, rest <strong>${plan.rest}</strong>` : '');
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -1492,7 +1588,7 @@ const MultDivGame = (() => {
      900 ms i divisionen; multiplikationen låser som förr tills rörelsen
      är klar. */
   const isDoneStep = s => !s || s.t === 'done' || s.t === 'klart';
-  const DIV_LOCK = { fraga: 300, ryms_inte: 500, ta_med: 300, fakta: 800, skriv: 700,
+  const DIV_LOCK = { fraga: 300, ryms_inte: 500, ta_med: 300, fakta: 800, skriv: 700, restut: 900, kontroll: 600,
                      rest: 800, flytta: 900, stryk: 400, inget_kvar: 500 };
   let lockTimer = null, demoRun = 0;
 
@@ -1692,6 +1788,13 @@ const MultDivGame = (() => {
       step.gs.forEach(g => divStrikeDigit(g, true));
       App.Sound.play('click');
       setTimeout(cb, 400);
+
+    } else if (step.t === 'restut') {
+      divRestOut(step, () => setTimeout(cb, 200));
+
+    } else if (step.t === 'kontroll') {
+      divCheckGlow();
+      setTimeout(cb, 600);
 
     } else if (step.t === 'inget_kvar') {
       divLight([step.g], null, step.g);
@@ -2253,6 +2356,43 @@ const MultDivGame = (() => {
     setTimeout(() => cb(chip), 800);
   }
 
+  /* D43: resten skrivs efter kvoten. Restbrickan (född i rest-steget eller ur
+     siffran i fall B) flyger till restrutan och BLIR siffran där. Utan rest
+     skrivs 0. */
+  function divWriteRestBox(val, anim) {
+    const cell = document.getElementById('md-rest');
+    if (!cell) return;
+    cell.innerHTML = `<span style="color:#dc2626;display:inline-block;animation:${anim || 'md-land 0.4s ease-out both'}">${val}</span>`;
+    cell.classList.add('filled');
+  }
+  function divRestOut(step, cb) {
+    const cell = document.getElementById('md-rest');
+    if (!cell || !(step.r > 0)) { divWriteRestBox(step.r || 0); App.Sound.play('click'); setTimeout(cb, 500); return; }
+    const land = chip => {
+      const d = chip && chip.querySelector('.md-cd');
+      if (!chip || !d) { divWriteRestBox(step.r); setTimeout(cb, 400); return; }
+      playCarrySound();
+      flyNode(d, d.getBoundingClientRect(), cell.getBoundingClientRect(), {
+        dur: 600, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fontSize: '1.35rem',
+        color: '#ffffff', endColor: '#dc2626', endTransform: 'scale(1.2)'
+      }, node => {
+        node.className = '';
+        node.style.cssText = 'color:#dc2626;display:inline-block;animation:md-land 0.36s ease-out both';
+        cell.innerHTML = ''; cell.appendChild(node); cell.classList.add('filled');
+        chip.remove();
+        cb && cb();
+      });
+    };
+    const chip = divRestChip();
+    if (chip) land(chip); else divRestBornFromDigit(step, land);
+  }
+  /* Kontrollen: nämnaren, kvoten och resten lyser — de är det som multipliceras och läggs till */
+  function divCheckGlow() {
+    const els = [document.getElementById('md-d-0'), ...document.querySelectorAll('#md-table-wrap [id^="md-q-"]'),
+                 document.getElementById('md-rest')];
+    divGlow(els.filter(Boolean), 400, 2);
+  }
+
   /* flytta: brickan flyger till platsen framför nästa siffra (600) och
      lyser sedan upp med den — de läses som ett tal (300). */
   function divRestToPlace(step, cb) {
@@ -2304,11 +2444,17 @@ const MultDivGame = (() => {
        "=" vid ledande hopp (336 ÷ 6 = 56 ritas "= [5][6]"). Fria läget:
        samma rutor, tappbara, med fokusring som glider vänster→höger. */
     const qs = []; for (let g = plan.width - 1; g >= 0; g--) qs.push(g);
+    /* D43: ", rest [ ]" efter kvoten, som i boken ("= 144, rest 3"). Finns alltid på nivåerna där rest kan
+       förekomma — även när det går jämnt — så att rutan aldrig avslöjar om det blir rest. */
+    const restPart = plan.restLevel
+      ? `<span class="md-restlbl">, rest</span><div class="md-fraccol"><span class="md-flbl">&nbsp;</span>
+           <div class="md-ansc md-rest${freeMode ? ' md-tap' : ''}" id="md-rest"${freeMode ? ' onclick="MultDivGame.exFreeFocusRest()"' : ''}></div></div>`
+      : '';
     /* Kvotrutorna bär H/T/E-etiketter i platsvärdesfärg, precis som täljaren
        (spec §7): "Vi skriver 7 i tiotalet" pekar på en ruta som heter tiotalet. */
     const eqPart = `<div class="md-diveq"><span class="md-eqsign num">=</span>
            ${qs.map(g => `<div class="md-fraccol"><span class="md-flbl" style="color:${cv(g)}">${LBL[g]}</span>
-             <div class="md-ansc${freeMode ? ' md-tap' : ''}" id="md-q-${g}" style="--qc:${cv(g)}"${freeMode ? ` onclick="MultDivGame.exFreeFocus(${g})"` : ''}></div></div>`).join('')}</div>`;
+             <div class="md-ansc${freeMode ? ' md-tap' : ''}" id="md-q-${g}" style="--qc:${cv(g)}"${freeMode ? ` onclick="MultDivGame.exFreeFocus(${g})"` : ''}></div></div>`).join('')}${restPart}</div>`;
 
     return `
       <div class="md-divwrap">
@@ -2460,8 +2606,8 @@ const MultDivGame = (() => {
     const levels = [
       { n: 1, emoji: '🌱', desc: div ? 'Utan mellanrest'  : 'Utan minnessiffra' },
       { n: 2, emoji: '🌿', desc: div ? 'Med mellanrest'   : 'Med minnessiffra' },
-      { n: 3, emoji: '🌾', desc: 'Tresiffrigt tal' },
-      { n: 4, emoji: '🌳', desc: div ? 'Klurigaste nivån' : 'Svårast – blandat' },
+      { n: 3, emoji: '🌾', desc: div ? 'Nollor och rest' : 'Tresiffrigt tal' },   // D43
+      { n: 4, emoji: '🌳', desc: 'Svårast – blandat' },
     ];
     const diffBtnsHTML = levels.map(l => `
       <button class="md-diff-btn ${difficulty === l.n ? 'active' : ''}"
@@ -2665,7 +2811,8 @@ const MultDivGame = (() => {
     if (item.kind === 'divplace') { showDivPlace(item); return; }
     if (item.kind === 'divstrike') { showDivStrike(item); return; }
     if (item.kind === 'divq') { showDivQ(item); return; }
-    if (item.kind === 'divrest' || item.kind === 'divrestb' || item.kind === 'divzero') { showDivAsk(item); return; }
+    if (item.kind === 'divrest' || item.kind === 'divrestb' || item.kind === 'divzero' || item.kind === 'divrest0') { showDivAsk(item); return; }
+    if (item.kind === 'divrestut' || item.kind === 'divkontroll') { showDivInfo(item); return; }
     const hl = { rowKey: item.rowKey, last: item.last, extra: item.extra, g: item.g };
     if (item.kind === 'mult') doHighlight({ ...hl, phase: 'mult', aCol: item.col, mCol: item.mCol });
     else if (item.kind === 'add' || item.kind === 'trivial') doHighlight({ ...hl, phase: 'add' });
@@ -2787,8 +2934,23 @@ const MultDivGame = (() => {
   /* Restfrågan (D), "Hur mycket blir rest?" (B) och "vad skriver vi?" (B′) */
   function showDivAsk(item) {
     if (item.kind === 'divrest') divGlow([...divSrcCells(item), divQCell(item.g)], 300);
+    else if (item.kind === 'divrest0') {                 // D43: restrutan är målet
+      document.querySelectorAll('#md-table-wrap .md-lit').forEach(el => el.classList.remove('md-lit'));
+      const rc = document.getElementById('md-rest'); if (rc) rc.classList.add('active-col');
+    }
     else divLight([item.g], item.remIn > 0 ? item.g : null, item.g);
     showHelpUI();
+  }
+
+  /* D43: resten flyttar till sin ruta, och kontrollen — texten först, sedan rörelsen, sedan Nästa */
+  function showDivInfo(item) {
+    exInputLocked = true;
+    const ui = document.getElementById('md-ui');
+    if (ui) ui.innerHTML = '';
+    helpBubble(divHelpAsk(item));
+    const gen = exGen, done = () => { if (gen === exGen && helpItem() === item) divAckBtn(item); };
+    if (item.kind === 'divrestut') divRestOut(item, done);
+    else { divCheckGlow(); setTimeout(done, 600); }
   }
 
   /* Rätt svar: kvittensen står, sedan samma rörelse som demon, sedan Nästa. */
@@ -2815,6 +2977,12 @@ const MultDivGame = (() => {
         writeDigit('q', item.g, 0, 'md-land 0.4s ease-out both');
         setTimeout(done, 500);
         break;
+      case 'divrest0': {
+        const rc = document.getElementById('md-rest'); if (rc) rc.classList.remove('active-col');
+        divWriteRestBox(0);
+        setTimeout(done, 500);
+        break;
+      }
     }
   }
 
@@ -3031,7 +3199,7 @@ const MultDivGame = (() => {
       return `<strong>${divCurHTML(item)}</strong> ÷ <strong>${numB}</strong>`;
     if (item.kind === 'divrest')
       return `<strong>${item.cur}</strong> − <strong>${item.prod}</strong>`;
-    if (item.kind === 'divrestb' || item.kind === 'divzero') return '';
+    if (item.kind === 'divrestb' || item.kind === 'divzero' || item.kind === 'divrest0') return '';
     if (item.kind === 'memwrite') return '';
     if (item.step === 'mem')
       return `<strong>${helpBase(item)}</strong> + ${memRef(item.carryIn)}`;
@@ -3175,7 +3343,7 @@ const MultDivGame = (() => {
      Avsluta och forlora allt." Ett procedurlage far aldrig sakna utgang. */
   function visaVagen() {
     const item = helpItem();
-    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero'].includes(item.kind)) return false;
+    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero', 'divrest0'].includes(item.kind)) return false;
     /* Svaret VISAS i bubblan — ingen auto-fyllning: knappsatsen är kvar
        och barnet måste själv skriva rätt svar för att gå vidare. */
     const expr = helpExprHTML(item);
@@ -3259,7 +3427,7 @@ const MultDivGame = (() => {
   function helpSubmit() {
     if (exInputLocked || !helpInput) return;
     const item = helpItem();
-    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero'].includes(item.kind)) return;
+    if (!item || !['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero', 'divrest0'].includes(item.kind)) return;
     const expected = helpExpected(item); // v31: per delfråga (tabell/minne/ruta)
 
     if (parseInt(helpInput, 10) === expected) {
@@ -3392,7 +3560,7 @@ const MultDivGame = (() => {
     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/>' +
     '<path d="M12 3v5.4M12 15.6V21M3 12h5.4M15.6 12H21"/></svg>';
   const isDivFree = () => plan.kind === 'division';
-  const freeCellId = g => (isDivFree() ? 'md-q-' : `md-${exFreeRow}-`) + g;
+  const freeCellId = g => isDivFree() && exFreeOnRest ? 'md-rest' : (isDivFree() ? 'md-q-' : `md-${exFreeRow}-`) + g;
 
   function showFreeUI() {
     exFreeInit();
@@ -3572,6 +3740,7 @@ const MultDivGame = (() => {
     exFreeGrid = { ans: Array(plan.width).fill(null) };
     if (freeRows()) { exFreeGrid.p1 = Array(plan.width).fill(null); exFreeGrid.p2 = Array(plan.width).fill(null); }
     setFreeRow(freeRows() ? 'p1' : 'ans');
+    exFreeRest = null; exFreeOnRest = false;
     exFreeCur = isDivFree() ? plan.width - 1 : freeLo();   // div: börja längst till vänster
     exFreePaintCells();
     requestAnimationFrame(() => exFreePlaceRing(false));
@@ -3584,7 +3753,7 @@ const MultDivGame = (() => {
   function exFreeValue() {
     return freeRowValue(exFreeGrid.ans, 0, plan.width - 1);
   }
-  const exFreeHasDigits = () => Object.values(exFreeGrid).some(c => c.some(v => v !== null));
+  const exFreeHasDigits = () => Object.values(exFreeGrid).some(c => c.some(v => v !== null)) || exFreeRest !== null;
   const freeVals = () => freeRows()
     ? { p1: freeRowValue(exFreeGrid.p1, ...freeRowCols(plan, 'p1')),
         p2: freeRowValue(exFreeGrid.p2, ...freeRowCols(plan, 'p2')), ans: exFreeValue() }
@@ -3599,7 +3768,7 @@ const MultDivGame = (() => {
       for (let g = lo; g <= hi; g++) {
         const el = document.getElementById(isDivFree() ? 'md-q-' + g : `md-${row}-${g}`);
         if (!el) continue;
-        const v = cells[g], here = row === exFreeRow && g === exFreeCur && !exInputLocked;
+        const v = cells[g], here = row === exFreeRow && g === exFreeCur && !exInputLocked && !exFreeOnRest;
         el.classList.toggle('filled', v !== null);
         el.classList.toggle('active-col', here);
         if (freeRows() && row === 'ans') el.classList.toggle('md-lk', locked);
@@ -3610,6 +3779,15 @@ const MultDivGame = (() => {
           : (here ? '<span class="md-ans-caret"></span>' : '');
         if (popG === g && row === exFreeRow) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
       }
+    }
+    const rc = isDivFree() && document.getElementById('md-rest');
+    if (rc) {                                              // D43: restrutan efter kvoten
+      const here = exFreeOnRest && !exInputLocked;
+      rc.classList.toggle('filled', exFreeRest !== null);
+      rc.classList.toggle('active-col', here);
+      rc.innerHTML = exFreeRest !== null ? `<span style="color:#dc2626">${exFreeRest}</span>`
+        : (here ? '<span class="md-ans-caret"></span>' : '');
+      if (popG === 'rest') { rc.classList.remove('hop'); void rc.offsetWidth; rc.classList.add('hop'); }
     }
   }
 
@@ -3632,6 +3810,7 @@ const MultDivGame = (() => {
      Summans rutor går inte att välja medan summan är låst. */
   function exFreeFocus(g, row) {
     if (exInputLocked || helpMode) return;
+    exFreeOnRest = false;
     const r = row || 'ans';
     if (!exFreeGrid[r]) return;
     if (freeRows()) {
@@ -3641,6 +3820,16 @@ const MultDivGame = (() => {
     } else if (g < 0 || g >= plan.width) return;
     setFreeRow(r);
     exFreeCur = g;
+    App.Sound.play('click');
+    exFreePaintCells();
+    exFreePlaceRing(true);
+    exFreeUpdateSubmit();
+  }
+
+  /* D43: restrutan går att trycka på när som helst */
+  function exFreeFocusRest() {
+    if (exInputLocked || helpMode || !isDivFree() || !plan.restLevel) return;
+    exFreeOnRest = true;
     App.Sound.play('click');
     exFreePaintCells();
     exFreePlaceRing(true);
@@ -3673,9 +3862,15 @@ const MultDivGame = (() => {
   function exFreePress(key) {
     if (exInputLocked) return;
     exFreeClearWrong();
+    if (isDivFree() && exFreeOnRest) {                                 // D43: siffran i restrutan
+      exFreeRest = parseInt(key, 10);
+      App.Sound.play('click');
+      exFreePaintCells('rest'); exFreePlaceRing(true); exFreeUpdateSubmit();
+      return;
+    }
     exFreeCells[exFreeCur] = parseInt(key, 10);
     const popped = exFreeCur;
-    if (isDivFree()) { if (exFreeCur > 0) exFreeCur--; }              // div: ett steg HÖGERUT
+    if (isDivFree()) { if (exFreeCur > 0) exFreeCur--; else if (plan.restLevel) exFreeOnRest = true; }   // div: ett steg HÖGERUT, sist restrutan
     else if (exFreeCur < freeHi()) exFreeCur++;                        // mult: ett steg vänsterut
     App.Sound.play('click');
     exFreePaintCells(popped);
@@ -3689,7 +3884,10 @@ const MultDivGame = (() => {
   function exFreeErase() {
     if (exInputLocked) return;
     exFreeClearWrong();
-    if (exFreeCells[exFreeCur] === null) {
+    if (isDivFree() && exFreeOnRest) {                                 // D43: ⌫ i restrutan
+      if (exFreeRest !== null) exFreeRest = null;
+      else { exFreeOnRest = false; exFreeCells[exFreeCur] = null; }
+    } else if (exFreeCells[exFreeCur] === null) {
       if (isDivFree()) { if (exFreeCur < plan.width - 1) { exFreeCur++; exFreeCells[exFreeCur] = null; } }
       else if (exFreeCur > freeLo()) { exFreeCur--; exFreeCells[exFreeCur] = null; }
     } else exFreeCells[exFreeCur] = null;
@@ -3751,7 +3949,8 @@ const MultDivGame = (() => {
     const val = exFreeValue();
     const div = isDivFree();
     const chk = freeRows() ? freeCheck(plan, freeVals()) : null;
-    if (chk ? chk.ok : val === plan.answer) {
+    const dchk = div && plan.restLevel ? divFreeCheck(plan, val, exFreeRest) : null;   // D43: kvot och rest
+    if (chk ? chk.ok : dchk ? dchk.ok : val === plan.answer) {
       exInputLocked = true;
       if (exFreeFirstAttempt) exScore++;      // +1 endast helrätt på FÖRSTA Klar
       exFreeClearWrong();
@@ -3784,6 +3983,7 @@ const MultDivGame = (() => {
       const wrap = mdWrap();
       if (wrap) { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); }
       if (chk) { freeTip(chk.msg); freeMarkRow(chk.row); exFreeUpdateSubmit(); return; }
+      if (dchk) { freeTip(dchk.msg); exFreeUpdateSubmit(); return; }
       // Glömd-minnessiffra-/glömd-rest-detektion (v30/v32): matchar svaret
       // simuleringen där minnen/rester tappas → riktad feedback. Barnets
       // egna anteckningar räknas: en felaktig pekas ut före den generiska.
@@ -4222,7 +4422,7 @@ const MultDivGame = (() => {
     memTap, memTapSlot, memPick,           // minnesspalten (v30)
     divTapSlot,                            // divisionens PLACERA-fas (v32)
     divDigitTap,                           // divisionens STRYK-fas (v36)
-    exFreePress, exFreeErase, exFreeSubmit, exFreeFocus,
+    exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeFocusRest,
     avslutaOvning, avslutaAngra,           // bekraftelse nar en runda ar pabörjad
     useFreeLifeline,                       // livlinan i fria laget (22/9)
     mdToggleEraser, mdClearCanvas,
@@ -4231,7 +4431,8 @@ const MultDivGame = (() => {
     runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn
     /* Endast för vitest: ren matte-kärna + generator */
     _internals: { digitsOf, singlePass, addPass, buildPlan, genProblem, genL4, drawL4Type, L4_TYPES, noCarryAnswer,
-                  divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer },
+                  divPass, divLevelOk, genDivProblem, buildDivPlan, divNoRemAnswer,
+                  DIV_TYPES, divTypeOk, genDivType, drawDivType, divFreeCheck },
     /* Rena stegbyggare — demo- och hjälpkedjorna, låsta av tests/multdiv.test.mjs */
     __test: { hostOutcome, hostBitHTML, hostActive: () => !!host, freeRowCols, freeRowValue, freeAnsLocked, freeButtonMode, freeNextRow, freeCheck, planMultSteps, planDivSteps, divStepText, multStepText, multLitCells, multWhyText, multRefs, multHelpText,
               /* hjälpbubblornas frågor mot en given plan (rena; läser inte modultillståndet) */

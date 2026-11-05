@@ -2,12 +2,11 @@
 
 **Roll:** byggde och förvaltar den uppställda multiplikationen i `js/multdiv.js`: nivå 4 med den osynliga nollan
 (D40), pekningen med färgade siffror, delraderna i Räkna själv och kroken som matteprovet lånar motorn genom (D41).
-Kan granska, rätta och bygga vidare. Divisionen bor i samma fil, men den här rollen har bara rört dess texter
-(täljar- och kvotsiffrorna som ref).
-**Datum:** 2026-10-21.
-**Läge:** live i **v70** (`main` = `ea258a3`, återställningspunkt `live-fore-v70`). Arbetet sker på `dev`. Dagens
-grenar (`niva4`, `farg-siffror`, `matteprov-metod`, `matteprov-nollor`) är sammanslagna och borttagna.
-Vitest 21/10: hela sviten 503, varav 61 i `tests/multdiv.test.mjs` och 85 i `tests/matteprov.test.mjs`.
+Kan granska, rätta och bygga vidare. Sedan D43 (5/11) förvaltar rollen också **kort division** i samma fil: rest,
+kontroll med multiplikation, nivå 3–4 med nollor och fyrsiffrigt.
+**Datum:** 2026-11-05.
+**Läge:** live i **v73** (`main` = `31b3996`). D43 ligger på grenen `kort-division-rest` (återställningspunkt
+`fore-kort-division-rest`), inte mergad. Vitest 5/11 på grenen: hela sviten 521, varav 67 i `tests/multdiv.test.mjs`.
 
 ## Läs först
 1. `CLAUDE.md`: pedagogiken (ett steg är en idé, texten före rörelsen, slutsatsen sist, klickstyrt), språket (ett
@@ -70,6 +69,20 @@ använder `help` i Öva och `free` i provet och Mitt prov, med en hjälptrappa p
 `hostBitHTML(pl, rad)`): först en tyst ledtråd, sedan radens facit, och kommer samma rad igen visas svaret i grått.
 Utfallet bokförs i kvittot och i "det som var svårt" (`upp:minne`, tabellfakta).
 
+**Kort division (D43, lärarens kapitel 3).** Uppställningen är bokens: täljaren överst, mellanresten som liten röd
+siffra framför nästa siffra, bråkstreck, nämnaren under, kvoten efter "=" (radbryter under bråket vid 390).
+- *Nivåer:* 1–2 orörda (tvåsiffrigt, jämnt). 3 och 4 drar typ ur en påse (`DIV_TYPES`, `drawDivType`, `genDivType`,
+  `divTypeOk`): nivå 3 tresiffrigt ÷ 2–6 (`mellan`, `noll-mitt` 612 ÷ 6, `noll-forst` 144 ÷ 3, `rest` 357 ÷ 2);
+  nivå 4 ÷ 2–9 (`tre-rest` 579 ÷ 4, `fyra` 9639 ÷ 3, `fyra-rest`, `fyra-noll` 2084 ÷ 2 / 1344 ÷ 6). Talen byggs
+  baklänges, n = q · d + r. 705 ÷ 5 = 141 har nollan i täljaren, inte i kvoten (typ `mellan`).
+- *Planen:* `buildDivPlan` har `rest` och `restLevel` (nivå ≥ 3). Restrutan `#md-rest` efter ", rest" finns alltid på
+  nivå 3–4. `refColor`: `md-rest` rött, `md-d-0` (nämnaren) skiffer.
+- *Stegen:* efter sista strykningen `restut` (resten flyger från restbrickan till rutan, eller 0 skrivs), sedan
+  `kontroll` ("Kontrollera: 4 · 144 + 3 = 579."), sist `klart` ("= 144, rest 3"). Hjälpkön: `divrestut` (kvittens),
+  `divrest0` (fråga, svar 0, när det går jämnt), `divkontroll` (kvittens); `showDivInfo`, `divRestOut`, `divCheckGlow`.
+- *Fria läget:* `exFreeRest`/`exFreeOnRest`; fokus går från sista kvotsiffran till restrutan, ⌫ på tom restruta
+  backar till entalet. `divFreeCheck`: tom rest = 0; för stor rest före "kvoten stämmer"; glömd mellanrest.
+
 ## Samordnarens två rättningar 21/10 (`6edd0a9`)
 - `showZero`: nollans ruta behåller den orange ramen (`md-glow`) så länge texten visas; nästa stegs belysning rensar.
 - Hjälpläget: bara rutor i den rad som räknas just nu får `active-col` (Dennis: "sista rutan här i totalsumman. den
@@ -91,6 +104,9 @@ Utfallet bokförs i kvittot och i "det som var svårt" (`upp:minne`, tabellfakta
 - Dela upp har färgade siffror i förklaringen men ingen ref-puls (mekanismen finns bara i multdiv).
 - Fria läget har ingen minnesinmatning (spalten har ingen plats och ingen väljare; minnessiffrorna landar vid rätt
   svar), så inget fokus byts där. Kontrollerat 21/10 i webbläsaren efter matteprovets D41 ✎ om minnesrutorna.
+
+- **Kort division:** "= kvoten, rest" radbryter alltid under bråket vid 390 (även tresiffrig kvot). Matteprovet för
+  division väntar (D43).
 
 ## Nästa steg
 - Vänta på Dennis synpunkter på v70.

@@ -364,6 +364,32 @@ så att barnet ser vilken siffra som menas. Uträkningens svar, till exempel 63,
 någon ruta. Ett undantag är "3:an skrivs i entalet": där har 3:an samma färg som rutan den hamnar i. I divisionen
 pekas täljarsiffran ("Hur många 6:or ryms i 4?") och kvotsiffran ("Vi skriver 7 i tiotalet") ut på samma sätt.
 
+### Kort division: nivåerna, resten och kontrollen (D43)
+
+Uppställningen är som i läroboken: täljaren överst, bråkstrecket, nämnaren under, och kvoten efter likhetstecknet.
+En mellanrest står som en liten röd siffra framför nästa siffra ("9 ¹0 8 / 2 = 454"). På smala skärmar hamnar
+"= kvoten" på raden under bråket.
+
+| Nivå | Tal |
+|---|---|
+| 1 Utan mellanrest | tvåsiffrigt ÷ 2–4, varje siffra går jämnt ut (84 ÷ 4) |
+| 2 Med mellanrest | tvåsiffrigt ÷ 2–5 med mellanrest (72 ÷ 3) |
+| 3 Nollor och rest | tresiffrigt ÷ 2–6, lika ofta: med mellanrester (738 ÷ 3), nolla mitt i kvoten (612 ÷ 6 = 102), första siffran för liten så kvoten börjar en plats senare (144 ÷ 3 = 48), och med rest (357 ÷ 2 = 178, rest 1) |
+| 4 Svårast – blandat | tre- och fyrsiffrigt ÷ 2–9, lika ofta: tresiffrigt med rest (579 ÷ 4 = 144, rest 3), fyrsiffrigt (9639 ÷ 3), fyrsiffrigt med rest (5307 ÷ 4 = 1326, rest 3) och fyrsiffrigt med nollor (2084 ÷ 2 = 1042, 1344 ÷ 6 = 224) |
+
+Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
+
+- **Resten:** på nivå 3 och 4 står ", rest [ ]" efter kvoten, som i boken ("= 144, rest 3"). Rutan finns alltid där,
+  även när det går jämnt, så att den inte avslöjar om det blir rest. I Titta och lär kommer ett eget steg sist:
+  "Det blir 3 kvar – det är resten. Den skrivs efter kvoten." (utan rest: "Det blir inget kvar – resten är 0.").
+  Räkna med hjälp frågar om resten ("19 − 16 = ?", eller "Blev något kvar efter sista siffran? Skriv resten." när
+  det går jämnt). I Räkna själv skriver barnet kvoten och sedan resten; en tom restruta räknas som 0.
+- **Kontrollen med multiplikation:** sista steget i Titta och lär och Räkna med hjälp, på alla nivåer: "Kontrollera:
+  4 · 144 + 3 = 579." eller "Kontrollera: 3 · 48 = 144." Nämnaren och resten är färgade och pulserar.
+- **Räkna själv med rest:** kvot och rest rättas tillsammans. Stämmer kvoten men inte resten: "Kvoten stämmer. Kolla
+  resten: hur mycket blir kvar efter sista siffran?". En rest som är lika stor som nämnaren eller större: "Resten ska
+  vara mindre än nämnaren. Ryms nämnaren en gång till?". Glömd mellanrest känns igen som förut.
+
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
 ## Matteprov 4:an (v67–v68, D37, D38)
@@ -626,7 +652,7 @@ Appen har inbyggda ljudeffekter som ger direkt feedback:
 | 10-Kompisar – Övning | Visuell utforskning av talpar |
 | 10-Kompisar – Test | 10 frågor om talpar som blir 10 |
 | Geografi | Sveriges landskap: Utforska, Träna (fyra lägen), Pussel, Samlarpärm, Test, hemlandskap |
-| Multiplikation & Division | Uppställd multiplikation och kort division i tre lägen och fyra nivåer; nivå 4 blandat med den osynliga nollan (D40) |
+| Multiplikation & Division | Uppställd multiplikation och kort division i tre lägen och fyra nivåer; multiplikationens nivå 4 blandat med den osynliga nollan (D40); divisionen med rest, kontroll med multiplikation, nollor i kvoten och fyrsiffriga tal (D43) |
 | Matteprov 4:an | Prov om multiplikation (Matteprov 1): öva fem moment, tabellsprint, provet med kvitto per moment |
 | Ljudeffekter | Feedback-ljud vid rätt och fel svar |
 | Lokal datalagring | Allt sparas i webbläsaren |
