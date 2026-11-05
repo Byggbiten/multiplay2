@@ -407,6 +407,39 @@ const MatteProv = (() => {
 #mp-root .mp-ovc{background:#fff;border-radius:22px;padding:18px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
 #mp-root .mp-ovc p{margin:0;font-weight:800;font-size:17px;color:var(--ink);text-align:center}
 #mp-root .mp-ovc .mp-navrow .mp-cta{flex:1}
+
+/* D44: Matteprov 2 · Division — bråket, bollarna i grupper, varje talsort, nollorna */
+#mp-root .mp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.02;vertical-align:middle}
+#mp-root .mp-frac>span{border-radius:8px;padding:0 7px;display:inline-flex;align-items:flex-end;gap:2px}
+#mp-root .mp-frac .nu{border-bottom:3px solid var(--deep);border-radius:8px 8px 0 0}
+#mp-root .mp-frac .lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.55);background:#fff7ed}
+#mp-root .mp-dr .ln{gap:6px}
+#mp-root .mp-dr .mp-rl{font-size:.72em;color:var(--ink-soft);margin-left:-2px}
+#mp-root .mp-dr .mp-kl{font-size:.74em;gap:5px}
+#mp-root .mp-dr .mp-kl .mp-ans.sm{font-size:1em;min-width:1.9em;height:max(44px,1.35em)}
+#mp-root .mp-klbl{font-family:var(--font-body);font-size:13px;font-weight:900;color:var(--ink-soft);width:100%}
+#mp-root .mp-kd{border-radius:8px;padding:0 3px}
+#mp-root .mp-kd.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-pic{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;max-width:350px}
+#mp-root .mp-grp{display:inline-grid;gap:3px;padding:4px;border:2px dashed #94a3b8;border-radius:12px}
+#mp-root .mp-grp.box{border-style:solid;border-color:#b45309;background:#fef3c7;border-radius:5px}
+#mp-root .mp-loose{display:inline-flex;gap:3px;padding:4px}
+#mp-root .mp-ball{width:16px;height:16px;border-radius:50%;background:#475569;display:inline-block}
+#mp-root .mp-pic.sm .mp-ball{width:10px;height:10px}
+#mp-root .mp-intro .mp-ball{width:22px;height:22px}
+#mp-root .mp-intro .mp-pic{gap:10px 12px}
+#mp-root .mp-pic.sm .mp-grp{gap:2px;padding:3px}
+#mp-root .mp-grp.lit,#mp-root .mp-loose.lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.5);border-color:#fb923c;border-radius:12px}
+#mp-root .mp-loose.lit .mp-ball{background:#ea580c}
+#mp-root .mp-ts .ln{align-items:center;gap:4px}
+#mp-root .mp-ts .mp-frac .nu{gap:6px}
+#mp-root .mp-ts .mp-ans.sm{min-width:1.45em;padding:0}
+#mp-root .mp-ts .mp-tecol i{font-size:.42em;margin-bottom:1px}
+#mp-root .mp-z{border-radius:6px}
+#mp-root .mp-z.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-op.sm{font-size:16px;color:var(--ink-soft)}
+#mp-root .mp-intro .mp-te{font-size:clamp(24px,7vw,32px)}
+#mp-root .mp-mr{font-size:.5em;color:#dc2626;align-self:flex-start;margin:0 1px 0 3px}
 `;
 
   /* ══════════════════════════════════════════════════════════
@@ -427,7 +460,7 @@ const MatteProv = (() => {
   /* ══════════════════════════════════════════════════════════
      PROVLISTAN OCH PROVSIDAN
   ══════════════════════════════════════════════════════════ */
-  function open(p, back) {
+  function open(p, back, pid) {
     profile = p; onBack = back || null;
     const r = root();
     if (r && !r._mpBound) {
@@ -435,7 +468,8 @@ const MatteProv = (() => {
       r._mpBound = true;
       document.addEventListener('keydown', onKey);
     }
-    showList();
+    if (pid && L.PROVS.some(x => x.id === pid)) { provId = pid; showProv(); }   // D44: från Kort division direkt till Matteprov 2
+    else showList();
     show();
   }
 
@@ -448,7 +482,7 @@ const MatteProv = (() => {
   function showList() {
     stopSprint(); S = null;
     frame('Matteprov 4:an', 'back', 'Tillbaka', '', `
-      <p class="mp-note" style="margin-top:6px">Prov om multiplikation. Nya prov läggs ut här efter hand.</p>
+      <p class="mp-note" style="margin-top:6px">Prov om multiplikation och division. Nya prov läggs ut här efter hand.</p>
       <div class="mp-list">
         ${L.PROVS.map((p, i) => `<button class="mp-row" data-act="prov" data-id="${p.id}">
           <span class="mp-nr">${i + 1}</span>
@@ -467,6 +501,7 @@ const MatteProv = (() => {
       return `<span class="mp-badge ${green ? 'g' : 'y'}">${o.ok}/${o.total}</span>`;
     };
     const total = Object.values(P.provCount).reduce((a, b) => a + b, 0);
+    const sheetM = P.moments.find(L.isSheetMoment), sheetName = momentOf(sheetM).sheet;
     frame(esc(P.title), 'list', 'Tillbaka', '', `
       <div class="mp-segrow">
         <div class="mp-seg" role="group" aria-label="Nivå">
@@ -481,17 +516,17 @@ const MatteProv = (() => {
       <div class="mp-list">
         ${P.moments.map(id => { const m = momentOf(id); return `<button class="mp-row" data-act="ova" data-id="${id}">
           <span class="mp-nr">${m.nr}</span>
-          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
+          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(m.sheet ? `${m.sheet} med 20 tal` : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
           ${ovaBadge(id)}${svg('chev', 'chev')}</button>`; }).join('')}
-        <button class="mp-row" data-act="sprint" style="min-height:54px">
+        ${P.sprint ? `<button class="mp-row" data-act="sprint" style="min-height:54px">
           <span class="mp-nr alt">${svg('timer')}</span>
           <span class="mp-tx"><b>Tabellsprint</b><small>Så många du hinner på 4 minuter${ps.sprint.best ? ' · bäst ' + ps.sprint.best : ''}</small></span>
-          ${svg('chev', 'chev')}</button>
+          ${svg('chev', 'chev')}</button>` : ''}
       </div>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
         ${mittCard(ps)}
         <button class="mp-cta" data-act="startprov">${svg('paper')}Gör provet</button>
-        <p class="mp-note">Tabelltestet och ${total - P.provCount.tabell} uppgifter till, utan klocka. ${esc(lastTestTxt(provId))}.</p>
+        <p class="mp-note">${esc(sheetName)}et och ${total - P.provCount[sheetM]} uppgifter till, utan klocka. ${esc(lastTestTxt(provId))}.</p>
       </div>`);
   }
 
@@ -531,6 +566,8 @@ const MatteProv = (() => {
       <div class="mp-q1">${tokHTML(q.text)}</div>${hb.msg ? `<div class="mp-rqmsg ${hb.msg.kind}">${esc(hb.msg.text)}</div>` : ''}</div>`;
   }
   function introSteps(moment, lv) {
+    const dv = divIntroSteps(moment);
+    if (dv) return dv;
     if (moment === 'tabell') return [
       { v:sheetDemo(), t:'Det här är ett tabelltest: 20 gångertal i två kolumner. Du skriver svaret i rutan efter varje tal.' },
       { v:big('6 · 7 = ' + box(42, 'focus')), t:'Skriv svaret med knapparna. Knappen Nästa hoppar till nästa ruta.' },
@@ -616,6 +653,77 @@ const MatteProv = (() => {
       { v:big('6 · 7 + 34') + tm(6, '·', 7, 42) + tm(42, '+', 34, 76), t:'Utan prislista gäller samma sak: gånger först, sedan plus.' },
     ];
   }
+  /* D44: "Så här gör du" i Matteprov 2. Ett steg är en idé; bilden och rutorna visar, texten säger det kort. */
+  function divIntroSteps(moment) {
+    const fr = (n, d) => fracHTML(n, d, null);
+    const drForm = (n, d, q, r, k) => `<div class="mp-te mp-dr"><div class="ln">${fr(n, d)}<span>=</span>${box(q)}<span class="mp-rl">, rest</span>${box(r)}</div>` +
+      (k ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera:</span>${box(d)}<span>·</span>${box(q)}<span>+</span>${box(r)}<span>=</span>${box(n)}</div>` : '') + '</div>';
+    if (moment === 'dtabell') {
+      const ex = [[56, 8], [24, 3], [36, 9], [42, 6], [20, 5]], ex2 = [[63, 7], [32, 4], [18, 2], [45, 9], [28, 7]];
+      const col = E => E.map(([a, b]) => `<div class="mp-sr"><span class="ex">${a}/${b} =</span>${box('')}</div>`).join('');
+      return [
+        { v:`<div class="mp-sheet demo"><div class="col">${col(ex)}</div><div class="col">${col(ex2)}</div></div>`, t:'Det här är ett divisionstest: 20 divisioner i två kolumner. Du skriver svaret i rutan efter varje tal.' },
+        { v:big('56/8 = ' + box(7, 'focus')), t:'56/8 betyder 56 delat med 8. Hur många 8:or ryms i 56?' },
+        { v:big('8 · 7 = 56'), t:'Kontrollera med gånger: 8 · 7 = 56. Då stämmer det.' },
+        { v:big('<span class="mp-score">17<small>/20</small></span>'), t:'När alla 20 är ifyllda trycker du Klar. Då ser du vilka du klarade.' },
+        { v:`<div style="color:var(--accent)">${svg('again')}</div>`, t:'De tal som blev fel kan du sedan nöta: samma tal direkt igen, och en gång till lite senare.' },
+      ];
+    }
+    if (moment === 'drest') {
+      const g = L.makeDrest(14, 3, 'grupp', 'latt'), d = L.makeDrest(14, 3, 'dela', 'latt');
+      const all = new Set(['grp', 'rest']);
+      return [
+        { v:drPic(g, new Set(['grp'])), t:'14 bollar i grupper med 3. Det blir 4 hela grupper.' },
+        { v:drPic(g, new Set(['rest'])), t:'2 bollar blir över. De räcker inte till en grupp till.' },
+        { v:drPic(g, all) + drForm(14, 3, 4, 2, false), t:'Det skrivs 14/3 = 4, rest 2. Kvoten är 4 och resten är 2.' },
+        { v:drForm(14, 3, 4, 2, true), t:'Kontrollera med gånger: 3 · 4 + 2 = 14. Det blir täljaren, så det stämmer.' },
+        { v:drPic(d, all), t:'Samma division kan också betyda: dela 14 bollar lika i 3 lådor. Det blir 4 i varje låda, och 2 blir över.' },
+        { v:big('rest 2 &lt; 3'), t:'Resten är alltid mindre än nämnaren. Annars ryms en grupp till.' },
+      ];
+    }
+    if (moment === 'kortdiv') {
+      const mr = v => `<small class="mp-mr">${v}</small>`, num = h => `<span style="display:inline-flex;align-items:flex-start">${h}</span>`;
+      const P = (h, q) => `<div class="mp-te"><div class="ln">${fr(num(h), 3)}<span>=</span><span>${q}</span></div></div>`;
+      return [
+        { v:P('586', ''), t:'Kort division: du delar en siffra i taget, från vänster. Kvoten skrivs efter likhetstecknet.' },
+        { v:P('5' + mr(2) + '86', '1'), t:'5/3 = 1, och 2 blir över. Skriv 1 i kvoten. Resten 2 skrivs litet framför 8:an.' },
+        { v:P('5' + mr(2) + '8' + mr(1) + '6', '19'), t:'Nu är det 28. 28/3 = 9, och 1 blir över. Resten 1 skrivs framför 6:an.' },
+        { v:P('5' + mr(2) + '8' + mr(1) + '6', '195, rest 1'), t:'Nu är det 16. 16/3 = 5, och det som blir över är resten: 195, rest 1.' },
+        { v:big('3 · 195 + 1 = 586'), t:'Kontrollera med gånger: 3 · 195 + 1 = 586. Det blir täljaren, så det stämmer.' },
+        { v:`<div style="color:var(--accent)">${svg('target')}</div>`, t:'Med hjälp frågar appen en siffra i taget. Själv skriver du kvoten och resten och räknar i kladden.' },
+      ];
+    }
+    if (moment === 'dnoll') {
+      const P = (n, d, q) => `<div class="mp-te"><div class="ln">${fr(n, d)}<span>=</span><span>${q}</span></div></div>`;
+      const ts = L.makeTs(6360, 3);
+      const tsv = q => `<div class="mp-te mp-ts"><div class="ln">${fr(ts.fields.map(f => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i><b class="pv${L.PLACE_ID[f.place]}">${f.dig}</b></span>`).join(''), 3)}<span>=</span>${ts.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${box(i < q ? f.ans : '')}</span>`).join('')}</div></div>`;
+      return [
+        { v:P(618, 3, '2'), t:'En nolla i kvoten: 618/3. Först 6/3 = 2.' },
+        { v:P(618, 3, '20'), t:'Sedan 1/3: 3 ryms inte i 1. Skriv 0 i kvoten, och 1:an följer med till 8:an.' },
+        { v:P(618, 3, '206'), t:'18/3 = 6. Kvoten är 206. Nollan håller platsen för tiotalet.' },
+        { v:P(156, 4, '39'), t:'En nolla först skriver man inte: 1/4 ryms inte, så du tar med nästa siffra och delar 15/4.' },
+        { v:tsv(2), t:'Ibland går varje talsort jämnt att dela. Då delar du en talsort i taget och skriver svaret under samma talsort.' },
+        { v:tsv(4), t:'Nollan i entalet blir en nolla i kvoten: 6360/3 = 2120.' },
+        { v:big(`65<span class="mp-z lit">00</span>/1<span class="mp-z lit">00</span> = 65`), t:'Dela med 100: 100 har två nollor. Stryk lika många nollor i täljaren.' },
+        { v:big(`6000/${box(100, 'focus')} = 60`), t:'Ibland saknas nämnaren eller täljaren. Rutans plats visar vad du ska skriva.' },
+      ];
+    }
+    if (moment === 'dproblem') {
+      const tm = (a, op, b, c, r, u) => `<div class="mp-nl mp-ptmpl">${box(a)}<span class="mp-op">${op}</span>${box(b)}<span class="mp-op">=</span>${box(c)}${r != null ? `<span class="mp-op sm">, rest</span>${box(r)}` : ''}${u ? ` <span class="mp-unit sm">${u}</span>` : ''}</div>`;
+      const lab = t => `<div class="mp-plabel">${t}</div>`;
+      const q1 = '<p class="mp-text">Leo delar 84 kulor lika i 4 burkar. Hur många kulor blir det i varje burk?</p>';
+      const q2 = '<p class="mp-text">Alva lägger 38 kakor i askar, 5 i varje. Hur många askar blir fulla, och hur många kakor blir över?</p>';
+      const q3 = '<p class="mp-text">Alva ska packa 38 kakor i askar. Det får plats 5 i varje ask. Hur många askar behövs för att alla ska få plats?</p>';
+      return [
+        { v:q1 + lab('Steg 1: Hur många kulor i varje burk?') + tm('', '/', '', ''), t:'Här löser du problem steg för steg. Rutorna visar uträkningen: täljaren, nämnaren och svaret.' },
+        { v:q1 + lab('Steg 1: Hur många kulor i varje burk?') + tm(84, '/', 4, 21, null, 'kulor'), t:'Dela lika: det totala delat med antalet burkar. 84/4 = 21.' },
+        { v:q2 + lab('Steg 1: Dela, och skriv resten.') + tm(38, '/', 5, 7, 3), t:'Blir det något över skriver du det i restrutan. 7 askar blir fulla och 3 kakor blir över.' },
+        { v:q3 + lab('Steg 2: De 3 som blir över behöver också en ask.') + tm(7, '+', 1, 8, null, 'askar'), t:'Ibland behöver resten också en plats. Då behövs en ask till: 8 askar.' },
+        { v:big(fr('täljare', 'nämnare') + ' = kvot'), t:'Täljaren står överst och nämnaren under strecket. Kvoten är svaret, och resten är det som blir över.' },
+      ];
+    }
+    return null;
+  }
   /* D41: "Så här gör du" med minnessiffra — samma metodik som Multiplikation nivå 4: en kolumn i taget,
      minnessiffran i spalten till höger (struken när den är använd), rad 2 med den osynliga nollan. */
   function minnePaper(top, bot, o) {
@@ -684,7 +792,7 @@ const MatteProv = (() => {
   const today = () => MP.spaced.fmtDay(new Date());
   function startOva(moment) {
     const lv = level();
-    if (moment === 'tabell') return startSheet();
+    if (L.isSheetMoment(moment)) return startSheet(moment);
     startDrill('ova', L.genMoment(moment, lv, L.ovaCount(moment, lv)), moment);
   }
   function startDrill(mode, items, moment) {
@@ -692,9 +800,10 @@ const MatteProv = (() => {
     S = { mode, moment, lv:level(), drill:MP.createDrill(items), start:Date.now(), touched:false, outc:{ direkt:0, hjalp:0, svar:0 } };
     renderTask();
   }
-  function startSheet() {
+  function startSheet(moment) {
     stopSprint();
-    S = { mode:'sheet', moment:'tabell', lv:level(), task:L.makeSheet(level()), start:Date.now(), touched:false };
+    const m = moment || 'tabell';
+    S = { mode:'sheet', moment:m, lv:level(), task:L.makeSheet(level(), null, m), start:Date.now(), touched:false };
     renderTask();
   }
   function startProv(mitt) {
@@ -720,7 +829,7 @@ const MatteProv = (() => {
       const tot  = S.mode === 'prov' ? S.items.length : S.drill.progress().total;
       right = `<span class="header-progress"><span class="progress-bar"><i style="width:${Math.round(100 * done / tot)}%"></i></span><span class="hp-label num">${Math.min(done + 1, tot)}/${tot}</span></span>`;
     }
-    let title = S.mode === 'prov' ? (S.mitt ? 'Mitt prov' : 'Provet') : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? 'Tabelltest' : 'Öva';
+    let title = S.mode === 'prov' ? (S.mitt ? 'Mitt prov' : 'Provet') : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? ((momentOf(t.moment) || {}).sheet || 'Tabelltest') : 'Öva';
     if (t.type === 'upp') title = esc(t.text);          // uppställningen: uppgiften i rubriken, så att kladden får plats
     return { title, right };
   }
@@ -731,11 +840,11 @@ const MatteProv = (() => {
     const blanks = n => Array(n).fill('');
     const H = { wrong:0, cls0:null, bits:null, msg:null };
     if (t.type === 'num') return { kind:'num', v:'', H };
-    if (t.type === 'tio' || t.type === 'te') return { kind:'boxes', v:blanks(t.fields.length), f:0, given:new Set(), bad:new Set(), H,
+    if (t.type === 'tio' || t.type === 'te' || DIVBOX(t)) return { kind:'boxes', v:blanks(t.fields.length), f:0, given:new Set(), bad:new Set(), H, pic:false,
       hb:helpOn() ? { i:0, sw:0, outc:[], ack:null, msg:null, adv:false } : null };     // D42: med hjälp, ruta för ruta
     if (t.type === 'sheet') return { kind:'sheet', v:blanks(t.items.length), f:0, round:1, out:Array(t.items.length).fill(null), bad:new Set(), H };
     if (t.type === 'prob')                                  // D39 ✎: steg för steg, mallen [ ] op [ ] = [ ]
-      return { kind:'prob', k:0, v:blanks(3), f:0, given:new Set(), bad:new Set(), sw:0, outc:[], msg:null, H };
+      return { kind:'prob', k:0, v:blanks(t.flow[0].rest ? 4 : 3), f:0, given:new Set(), bad:new Set(), sw:0, outc:[], msg:null, H };
     const W = t.width, blank = () => Array(W).fill(null);
     const rws = t.two ? ['p1', 'p2', 's'] : t.parts.map(p => 'r' + p.i).concat(['s']);   // ensiffrig: en rad per delprodukt
     const vals = { m:blank() }; rws.forEach(r => vals[r] = blank());
@@ -746,6 +855,7 @@ const MatteProv = (() => {
     const rq = { k:0, phase:'ask', ans:'', wrong:0, msg:null, outc:{}, greyWrong:0, busy:false };
     return { kind:'upp', rows:rws, vals, notes, rq, booked:new Set(), f:{ row:rws[0], col:0, note:notes ? 0 : null }, mw:null, given:new Set(), pulse:false, H };
   }
+  const DIVBOX = t => t.type === 'dr' || t.type === 'ts' || t.type === 'dz';     // D44: rutorna i Matteprov 2
   const needsScratch = t => t.type !== 'sheet' && S.mode !== 'sprint';
 
   /* Ritar uppgiften. Ny uppgift ⇒ hela ramen (och en tom kladd). keep ⇒ bara frågekortet,
@@ -756,6 +866,9 @@ const MatteProv = (() => {
     /* D41: uppställning med minnessiffra räknas av multiplikationens motor (MultDivGame.runTask) */
     const eng = t.type === 'upp' && !fb && !keep ? L.uppEngineMode(upMethod(), S.mode, ovaModeNow()) : null;
     if (eng && typeof MultDivGame !== 'undefined' && MultDivGame.runTask) return runMinne(t, eng);
+    /* D44: kort division räknas alltid av divisionens motor (Med hjälp = hjälpläget, Själv och provet = fria läget) */
+    if (t.type === 'kd' && !fb && !keep && typeof MultDivGame !== 'undefined' && MultDivGame.runTask)
+      return runMinne(t, L.passHelp(ovaModeNow(), S.mode) ? 'help' : 'free');
     if (!fb && !keep) { IN = freshInput(t); locked = false; }
     const q = document.getElementById('mp-q');
     if (keep && q) {
@@ -914,6 +1027,9 @@ const MatteProv = (() => {
     }
     if (t.type === 'prob') return probHTML(t, fb);
     if (t.type === 'sheet') return sheetHTML(t, fb);
+    if (t.type === 'dr') return drHTML(t, fb, lit);
+    if (t.type === 'ts') return tsHTML(t, fb, lit);
+    if (t.type === 'dz') return dzHTML(t, fb, lit);
     /* upp */
     let vals = show ? Object.assign({ m:fb.mem || Array(t.width).fill(null) }, L.uppFacitRows(t)) : IN.vals;
     if (show && fb.reveal != null) {                     // förklaringen visar en rad i taget
@@ -932,6 +1048,49 @@ const MatteProv = (() => {
       zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin, mwait:fb ? null : IN.mw })}`;
   }
 
+  /* ── D44: Matteprov 2 ── rutornas plats säger vad som ska skrivas; det som räknas lyser (Med hjälp) */
+  const LBLP = ['E', 'T', 'H', 'T', 'TT'];
+  const litC = (lit, k) => lit && lit.has(k) ? ' lit' : '';
+  const fracHTML = (nu, de, lit) => `<span class="mp-frac"><span class="nu${litC(lit, 'n')}">${nu}</span><span class="de${litC(lit, 'd')}">${de}</span></span>`;
+  /* Bollarna: 'grupp' = grupper med d bollar, 'dela' = d lådor med lika många; resten ligger utanför */
+  function drPic(t, lit) {
+    const ball = '<i class="mp-ball"></i>', cols = k => k <= 5 ? k : Math.ceil(k / 2);
+    const grp = (k, cls) => `<span class="mp-grp${cls}${litC(lit, 'grp')}" style="grid-template-columns:repeat(${cols(k)},auto)">${ball.repeat(k)}</span>`;
+    const groups = t.kind === 'grupp' ? Array(t.q).fill(grp(t.d, '')) : Array(t.d).fill(grp(t.q, ' box'));
+    const loose = t.r ? `<span class="mp-loose${litC(lit, 'rest')}">${ball.repeat(t.r)}</span>` : '';
+    return `<div class="mp-pic${t.n > 40 ? ' sm' : ''}" aria-label="${t.n} bollar">${groups.join('')}${loose}</div>`;
+  }
+  function drHTML(t, fb, lit) {
+    const HB = !fb && IN.hb, show = fb && fb.showAns;
+    const B = role => { const i = L.drField(t, role); return fbox(t, i, fb, t.fields[i].ans); };
+    const k1 = t.kGiven ? `<span class="mp-kd${litC(lit, 'kd')}">${t.d}</span>` : B('k1');
+    const pic = t.pic || HB || (IN && IN.pic) || show ? drPic(t, lit) : '';
+    return (HB ? askHTML(t) : '') + pic + `<div class="mp-te mp-dr">
+      <div class="ln">${fracHTML(t.n, t.d, lit)}<span>=</span>${B('q')}<span class="mp-rl">, rest</span>${B('r')}</div>
+      <div class="ln mp-kl"><span class="mp-klbl">Kontrollera:</span>${k1}<span>·</span>${B('k2')}<span>+</span>${B('k3')}<span>=</span>${B('k4')}</div></div>`;
+  }
+  /* Dela varje talsort: täljarens siffror under sina talsorter, kvoten en ruta per talsort i samma färg */
+  function tsHTML(t, fb, lit) {
+    const HB = !fb && IN.hb;
+    const nu = t.fields.map(f => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i><b class="pvd pv${L.PLACE_ID[f.place]}${litC(lit, 'x:' + f.place)}">${f.dig}</b></span>`).join('');
+    const qs = t.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${fbox(t, i, fb, f.ans)}</span>`).join('');
+    return (HB ? askHTML(t) : '') + `<div class="mp-te mp-ts"><div class="ln">${fracHTML(nu, t.d, lit)}<span>=</span>${qs}</div></div>`;
+  }
+  /* Med 10, 100 och 1000: nollorna som försvinner lyser; rutan står där talet saknas */
+  function dzHTML(t, fb, lit) {
+    const HB = !fb && IN.hb;
+    const zeros = (n, k, key) => { const s = String(n); return esc(s.slice(0, s.length - k)) + s.slice(s.length - k).split('').map(c => `<span class="mp-z${litC(lit, key)}">${c}</span>`).join(''); };
+    const N = zeros(t.n, t.z, 'nz'), D = zeros(t.d, t.z, 'dz'), bx = fbox(t, 0, fb, t.answer);
+    const expr = t.form === 'kvot' ? `${N}/${D} = ${bx}` : t.form === 'namnare' ? `${N}/${bx} = ${esc(L.fmt(t.q))}` : `${bx}/${D} = ${esc(L.fmt(t.q))}`;
+    return (HB ? askHTML(t) : '') + big(expr);
+  }
+  /* Slutsatsen efter sista rutan */
+  function conclText(t) {
+    if (t.type === 'dr') return `${t.n}/${t.d} = ${t.q}, rest ${t.r}. Kontroll: ${t.d} · ${t.q} + ${t.r} = ${t.n}.`;
+    if (t.type === 'dz' || t.type === 'ts') return `${L.fmt(t.n)}/${L.fmt(t.d)} = ${L.fmt(t.n / t.d)}`;
+    return `${t.text} = ${L.fmt(t.answer)}`;
+  }
+
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
   function probHTML(t, fb) {
     /* Prislistan går att trycka på: priset skrivs i rutan med fokus. Tidigare stegs svar går också att trycka på. */
@@ -939,7 +1098,7 @@ const MatteProv = (() => {
     const shop = t.shop ? `<div class="mp-shop">${L.SHOP.map(x => `<div class="pick${x.price === litPrice ? ' lit' : ''}" data-act="pick" data-v="${x.price}" role="button" aria-label="${esc(x.one)} ${x.price} kr">${shopIcon(x.id)}<span>${esc(x.one)}<b>${x.price} kr</b></span></div>`).join('')}</div>` : '';
     const head = t.kind === 'ordning' ? `<p class="mp-text">${esc(t.text)}</p>${big(esc(t.expr))}` : `<p class="mp-text">${esc(t.text)}</p>`;
     const unit = st => st.unit ? ` <span class="mp-unit sm">${esc(st.unit)}</span>` : '';
-    const done = t.flow.slice(0, fb && fb.final ? t.flow.length : IN.k).map((st, j) => `<div class="mp-pdone"><span class="mp-pst">Steg ${j + 1}</span>${st.ans[0]} ${st.op} ${st.ans[1]} = <span class="mp-pchip" data-act="pick" data-v="${st.ans[2]}" role="button" aria-label="${st.ans[2]}">${st.ans[2]}</span>${unit(st)}</div>`).join('');
+    const done = t.flow.slice(0, fb && fb.final ? t.flow.length : IN.k).map((st, j) => `<div class="mp-pdone"><span class="mp-pst">Steg ${j + 1}</span>${st.ans[0]} ${st.op} ${st.ans[1]} = <span class="mp-pchip" data-act="pick" data-v="${st.ans[2]}" role="button" aria-label="${st.ans[2]}">${st.ans[2]}</span>${st.rest ? `, rest <span class="mp-pchip" data-act="pick" data-v="${st.ans[3]}" role="button" aria-label="rest ${st.ans[3]}">${st.ans[3]}</span>` : ''}${unit(st)}</div>`).join('');
     if (fb && fb.final) return shop + head + done;
     const st = t.flow[IN.k], show = fb && fb.showAns;
     const bx = i => {
@@ -948,8 +1107,9 @@ const MatteProv = (() => {
       return `<span class="mp-nb${cls}" data-act="bx" data-i="${i}">${esc(IN.v[i])}</span>`;
     };
     const msg = IN.msg ? `<div class="mp-rqmsg ${IN.msg.kind}">${esc(IN.msg.text)}</div>` : '';
+    const restBx = st.rest ? `<span class="mp-op sm">, rest</span>${bx(3)}` : '';          // D44: ", rest [ ]"
     return shop + head + done + `<div class="mp-pcur"><div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.q)}</div>
-      <div class="mp-nl mp-ptmpl">${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${unit(st)}</div>${msg}</div>`;
+      <div class="mp-nl mp-ptmpl">${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${restBx}${unit(st)}</div>${msg}</div>`;
   }
 
   /* Tabelltestet: 20 tal i två kolumner. Runda 2: de orange rättas. */
@@ -1300,7 +1460,7 @@ const MatteProv = (() => {
   const num = x => x === '' ? null : +x;
   function readResp(t) {
     if (t.type === 'num') return num(IN.v);
-    if (t.type === 'tio' || t.type === 'te' || t.type === 'sheet') return IN.v.map(num);
+    if (t.type === 'tio' || t.type === 'te' || t.type === 'sheet' || DIVBOX(t)) return IN.v.map(num);
     if (t.type === 'prob') return IN.v.slice();
     return Object.assign({}, IN.vals);                 // alla rader: p1/p2 eller r0 … r{k-1}, och s
   }
@@ -1337,11 +1497,11 @@ const MatteProv = (() => {
     if (hb.i < t.fields.length - 1) { hb.i++; IN.f = hb.i; return refreshQ(t); }
     locked = true;
     const outcome = hb.outc[hb.outc.length - 1] === 'svar' ? 'svar' : hb.outc.some(o => o !== 'direkt') ? 'hjalp' : 'direkt';
-    taskDone(t, outcome, null);
+    taskDone(t, outcome, L.hbClass(t, hb.outc));
     const title = outcome === 'svar' ? 'Så här blir det' : `Rätt!${outcome === 'hjalp' ? '<small>med hjälp</small>' : ''}`;
     hb.i = t.fields.length; hb.ack = null;
     renderTask({ ok:true, hbDone:true, html:`<div class="mp-fb good"><h3>${svg('check')}${title}</h3>
-      <p class="mp-concl">${esc(t.text)} = ${esc(L.fmt(t.answer))}</p>
+      <p class="mp-concl">${esc(conclText(t))}</p>
       <button class="mp-cta" data-act="${outcome === 'svar' ? 'svarnext' : 'next'}">Nästa ${svg('next')}</button></div>` }, true, t);
   }
 
@@ -1364,7 +1524,7 @@ const MatteProv = (() => {
     } else {
       st.ans.forEach((v, i) => { IN.v[i] = String(v); IN.given.add(i); });
       IN.bad = new Set(); IN.outc[IN.k] = 'svar';
-      IN.msg = { kind:'bit', text:`Så här blir det: ${st.ans[0]} ${st.op} ${st.ans[1]} = ${st.ans[2]}.` };
+      IN.msg = { kind:'bit', text:`Så här blir det: ${st.ans[0]} ${st.op} ${st.ans[1]} = ${st.ans[2]}${st.rest ? `, rest ${st.ans[3]}` : ''}.` };
       IN.adv = true;
     }
     refreshQ(t);
@@ -1372,7 +1532,7 @@ const MatteProv = (() => {
   function probAdvance(t) {
     IN.adv = false; IN.msg = null;
     if (IN.k < t.flow.length - 1) {
-      IN.k++; IN.v = ['', '', '']; IN.f = 0; IN.given = new Set(); IN.bad = new Set(); IN.sw = 0;
+      IN.k++; IN.v = Array(t.flow[IN.k].rest ? 4 : 3).fill(''); IN.f = 0; IN.given = new Set(); IN.bad = new Set(); IN.sw = 0;
       return refreshQ(t);
     }
     /* slutsatsen sist, i ett eget steg: uttrycket som läraren vill se */
@@ -1423,6 +1583,7 @@ const MatteProv = (() => {
   /* Hjälpens bit skrivs in åt barnet och låses */
   function applyFill(t, fill) {
     if (!fill) return;
+    if (fill.pic && IN) IN.pic = true;                       // D44: bollarna i grupper är hjälpen
     if (fill.boxes && IN.v) {
       for (const [i, v] of Object.entries(fill.boxes)) { IN.v[+i] = String(v); IN.given.add(+i); IN.bad.delete(+i); }
       IN.f = nextOpen(-1);
@@ -1442,7 +1603,8 @@ const MatteProv = (() => {
     const H = header(t);
     const exitMsg = S.mode === 'prov' ? `Avsluta provet? Du är på uppgift ${S.idx + 1} av ${S.items.length}, och provet sparas inte.` : 'Avsluta passet?';
     const back = () => Router.silent(() => Router.show('screen-matteprov'));
-    MultDivGame.runTask({ a:t.top, b:t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
+    const kd = t.type === 'kd';
+    MultDivGame.runTask({ kind:kd ? 'div' : 'mult', a:kd ? t.n : t.top, b:kd ? t.d : t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
       onDone:res => { back(); minneDone(t, res); },
       onExit:() => { back(); showProv(); } });
   }
@@ -1482,7 +1644,7 @@ const MatteProv = (() => {
       if (res.ok) return sheetDone(t);
       IN.round = 2; IN.bad = new Set(res.per.map((ok, i) => ok ? -1 : i).filter(i => i >= 0)); IN.f = [...IN.bad][0];
       IN.old = {}; for (const i of IN.bad) { IN.old[i] = IN.v[i]; IN.v[i] = ''; }   // de orange töms; det gamla svaret syns svagt
-      IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:'Titta en gång till på de orange.' };
+      IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:t.moment === 'dtabell' ? 'Titta en gång till på de orange. Kontrollera med gånger.' : 'Titta en gång till på de orange.' };
       return renderTask(null, true, t);
     }
     res.per.forEach((ok, i) => { if (!IN.out[i]) IN.out[i] = ok ? 'hjalp' : 'svar'; });
@@ -1493,14 +1655,14 @@ const MatteProv = (() => {
     const s = readSt(), p = provSt(s), day = today();
     t.items.forEach((it, i) => { p.hard = L.recordOutcome(p.hard, it, IN.out[i], 'tabell', day); });
     const c = { direkt:0, hjalp:0, svar:0 }; IN.out.forEach(o => c[o]++);
-    if (S.mode === 'sheet') p.ova.tabell = { date:new Date().toISOString(), ok:c.direkt, total:t.items.length, level:S.lv };
+    if (S.mode === 'sheet') p.ova[t.moment] = { date:new Date().toISOString(), ok:c.direkt, total:t.items.length, level:S.lv };
     writeSt(s);
     snd(c.direkt === t.items.length ? 'fanfare' : 'correct');
     const sc = document.getElementById('mp-score'); if (sc) sc.innerHTML = `${c.direkt}<small>/${t.items.length}</small>`;
     const sum = `<p class="mp-k3l">${k3(c.direkt, c.hjalp, c.svar)}</p>`;
     let html;
     if (S.mode === 'prov') {
-      t.items.forEach((it, i) => S.results.push({ moment:'tabell', ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
+      t.items.forEach((it, i) => S.results.push({ moment:t.moment, ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
       S.idx++;
       html = `${resHead(c.direkt, t.items.length)}${sum}
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>`;
@@ -1525,6 +1687,11 @@ const MatteProv = (() => {
 
   /* Hela svaret (trappans sista steg): förklaringen i steg, sedan Nästa */
   function explainSteps(t, res) {
+    if (t.type === 'dr') return [`Det ryms ${t.q} hela ${t.d}:or i ${t.n}: ${t.d} · ${t.q} = ${t.d * t.q}.`,
+      `${t.n} − ${t.d * t.q} = ${t.r}. Det som blir över är resten.`, `Kontrollera: ${t.d} · ${t.q} + ${t.r} = ${t.n}.`];
+    if (t.type === 'ts') return [`Dela varje talsort: ${t.fields.map(f => `${f.dig}/${t.d} = ${f.ans}`).join(', ')}.`, `${L.fmt(t.n)}/${t.d} = ${L.fmt(t.answer)}.`];
+    if (t.type === 'dz') return [L.divHint(t, 0), `${L.fmt(t.n)}/${L.fmt(t.d)} = ${L.fmt(t.q)}, för ${L.fmt(t.q)} · ${L.fmt(t.d)} = ${L.fmt(t.n)}.`];
+    if (t.type === 'num' && t.op === '/') return [`${t.text} = ${t.answer}, för ${t.y} · ${t.answer} = ${t.x}.`];
     if (t.moment === 'tiotal') return L.explainTiotal(t).map(s => s.text);
     if (t.moment === 'problem') {
       const st = t.steps.map(s => s.text);
@@ -1759,7 +1926,7 @@ const MatteProv = (() => {
       case 'avsluta':   avsluta(); break;
       case 'ovno':      { const o = document.getElementById('mp-ov'); if (o) o.remove(); break; }
       case 'bx':        if (!locked && IN && IN.v && el.dataset.i != null && !(IN.hb && +el.dataset.i !== IN.hb.i)) { IN.f = +el.dataset.i; refreshQ(curTask()); } break;
-      case 'sheetnot':  snd('click'); startDrill('not', S.wrongItems, 'tabell'); break;
+      case 'sheetnot':  snd('click'); startDrill('not', S.wrongItems, S.moment || 'tabell'); break;
       case 'note':      if (!locked && IN && IN.notes && !IN.rq.busy && IN.rq.phase === 'ask' && L.uppRowsOrder(curTask())[IN.rq.k] === el.dataset.row) {
                           IN.f = { row:el.dataset.row, col:0, note:+el.dataset.j }; refreshQ(curTask());
                         } break;
