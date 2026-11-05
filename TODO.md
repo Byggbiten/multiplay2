@@ -2,6 +2,7 @@
 
 ## Öppet
 
+- [ ] Matteprov 1: rätta de 15 fynden i `brainstorm/11` (D44), efter divisionens övningsblad.
 - [ ] P16, P17 (uppställningen): ta upp med Dennis.
 - [ ] P13, P14 (snällare app): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
