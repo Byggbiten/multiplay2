@@ -381,7 +381,7 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 - **Resten:** på nivå 3 och 4 står ", rest [ ]" efter kvoten, som i boken ("= 144, rest 3"). Rutan finns alltid där,
   även när det går jämnt, så att den inte avslöjar om det blir rest. I Titta och lär kommer ett eget steg sist:
-  "Det blir 3 kvar – det är resten. Den skrivs efter kvoten." (utan rest: "Det blir inget kvar – resten är 0.").
+  "Allt är delat. Resten 3 skrivs efter kvoten." (utan rest: "Det blir inget kvar – resten är 0.").
   Räkna med hjälp frågar om resten ("19 − 16 = ?", eller "Blev något kvar efter sista siffran? Skriv resten." när
   det går jämnt). I Räkna själv skriver barnet kvoten och sedan resten; en tom restruta räknas som 0.
 - **Kontrollen med multiplikation:** sista steget i Titta och lär och Räkna med hjälp, på alla nivåer: "Kontrollera:

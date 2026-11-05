@@ -1198,7 +1198,7 @@ const MultDivGame = (() => {
       case 'inget_kvar': return `Inget kvar att dela — vi skriver ${ref(`md-q-${s.g}`, 0)} i ${pvNamn(s.g)}.`;
       /* D43: resten efter kvoten, och kontrollen "division med hjälp av multiplikation" */
       case 'restut':     return s.r > 0
-        ? `Det blir ${ref('md-rest', s.r)} kvar – det är resten. Den skrivs efter kvoten.`
+        ? `Allt är delat. Resten ${ref('md-rest', s.r)} skrivs efter kvoten.`
         : `Det blir inget kvar – resten är ${ref('md-rest', 0)}.`;
       case 'kontroll':   return s.r > 0
         ? `Kontrollera: ${ref('md-d-0', s.N)} · ${s.q} + ${ref('md-rest', s.r)} = ${s.n}.`

@@ -1108,7 +1108,7 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
       }
     }
     expect(fel).toEqual([]);
-    expect(strip(divStepText(planDivSteps(buildDivPlan(579, 4, 4)).slice(-3)[0]))).toBe('Det blir 3 kvar – det är resten. Den skrivs efter kvoten.');
+    expect(strip(divStepText(planDivSteps(buildDivPlan(579, 4, 4)).slice(-3)[0]))).toBe('Allt är delat. Resten 3 skrivs efter kvoten.');
   });
 
   it('fria läget: rättningen med rest, tom restruta = 0, glömd mellanrest och för stor rest', () => {
