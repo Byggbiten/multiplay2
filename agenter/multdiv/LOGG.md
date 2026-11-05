@@ -59,3 +59,14 @@ Rollens lärdomslogg: en post per runda. Tillståndet nu: `OVERLAMNING.md`.
   Ingen ändring i `js/multdiv.js`.
 - **Lärdom:** kontrollera "samma fel här?" genom att mäta fokus före och efter i det andra läget, inte genom att
   läsa koden; minnesspalten beter sig olika i hjälpläget (väljare) och fria läget (bara landning).
+
+## Runda 7 · 2026-11-05 · Kort division når lärarens kapitel 3 (D43), gren `kort-division-rest`
+- **Vad som saknades:** alla uppgifter delade jämnt, kontrollen med multiplikation stod bara som en rad i Klart-bubblan,
+  talen var högst tresiffriga och nollor i kvoten förekom bara av en slump på nivå 4.
+- **Byggt:** rest på slutet med restruta efter kvoten ("= 144, rest 3", alltid på nivå 3–4), stegen resten och
+  kontrollen sist i demo och hjälp, restfrågan också när det går jämnt, nivå 3–4 som påsar med nollor mitt i och
+  först, rest och fyrsiffrigt, fria lägets rättning av kvot och rest (`divFreeCheck`).
+- **Rättat:** två fokusringar i fria läget när restrutan hade fokus (kvotens sista ruta lyste kvar); för stor rest
+  pekas ut före "kvoten stämmer". Brieffallet 705 ÷ 5 visade sig ha nollan i täljaren, inte i kvoten (141).
+- **Lärdom:** kontrollera exempeltalen i uppdraget mot motorn innan de blir facit i ett test — två av dem (705 ÷ 5,
+  9639 ÷ 3 utan mellanrest) passade inte den typ jag först gav dem.
