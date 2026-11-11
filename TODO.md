@@ -2,6 +2,8 @@
 
 ## Öppet
 
+- [ ] Övningsblad runda 8: felen A1–A6 i `brainstorm/14` (matteprov-agenten).
+- [ ] Övningsblad: förbättringarna B1–B8 i `brainstorm/14` – Dennis väljer.
 - [ ] Övningsblad, småputs efter runda 6: pilspetsen strax utanför rutans kant; kontrollraden luftigare ("Kontrollera med gånger" på en rad); knyt "över" och "rest" tydligare.
 - [ ] Övningsblad division runda 2 (stil C, fynden i `brainstorm/13`), sedan genomspelning, Dennis prov, v76.
 - [ ] iPad-planen (D45 ✎, `brainstorm/12`) efter v76.
