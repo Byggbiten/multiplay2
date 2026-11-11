@@ -451,7 +451,7 @@ const MatteProv = (() => {
 #mp-root .mp-q1 .mp-n{font-family:var(--font-head)}
 #mp-root .mp-gn{position:absolute;top:-9px;left:-7px;min-width:20px;height:20px;border-radius:10px;background:#fff;border:2px solid #c084fc;font:800 12px var(--font-head);display:grid;place-items:center;cursor:pointer}
 #mp-root .mp-grp{position:relative}
-#mp-root .mp-gc{font:800 16px var(--font-head);min-height:20px;cursor:pointer}
+#mp-root .mp-gc{font:800 13px var(--font-head);min-height:14px;line-height:1}
 #mp-root .mp-line .jn{font:800 12px var(--font-head);fill:#2563eb;text-anchor:middle;cursor:pointer}
 #mp-root .mp-line .rl{font:800 13px var(--font-head);fill:#7c3aed;text-anchor:middle;cursor:pointer}
 #mp-root .mp-z.struck{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#7c3aed;opacity:.45}
@@ -494,8 +494,10 @@ const MatteProv = (() => {
 #mp-root .mp-capw>i.rest{color:#6d28d9}
 #mp-root .mp-dr.sum1 .ln:first-child{padding-top:74px}
 #mp-root .mp-dr.sum2 .ln:first-child{padding-top:84px}
-#mp-root .mp-dr.sum2 .mp-sumov{flex-direction:column-reverse;align-items:flex-start;top:-88px}
-#mp-root .mp-dr.sum2 .mp-sumov>i{margin:0 0 1px;transform:translateX(-50%)}
+#mp-root .mp-dr.sum1.w .ln:first-child{padding-top:30px}
+#mp-root .mp-dr.sum2.w .ln:first-child{padding-top:46px}
+#mp-root .mp-dr.sum2 .mp-sumov{flex-direction:column-reverse;align-items:flex-start;top:-85px}
+#mp-root .mp-dr.sum2 .mp-sumov>i{margin:0 0 1px;line-height:12px;transform:translateX(-50%)}
 #mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
 #mp-root .mp-nearcol{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;gap:10px;margin-right:14px}
 #mp-root .mp-nearph{display:block;height:30px}
@@ -509,7 +511,7 @@ const MatteProv = (() => {
 #mp-root .mp-tile .mp-nr{width:30px;height:30px;font-size:15px;flex-shrink:0}
 #mp-root .mp-tile .mp-tt{font-weight:900;font-size:14px;line-height:1.15;color:var(--deep);flex:1}
 #mp-root .mp-tile .mp-badge{position:absolute;top:-7px;right:6px;font-size:10.5px;padding:1px 6px}
-#mp-root .mp-pic{flex-direction:column;gap:6px}
+#mp-root .mp-pic{flex-direction:column;gap:4px}
 #mp-root .mp-grps{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;min-height:8px}
 #mp-root .mp-pile{display:inline-grid;gap:3px;padding:6px;border-radius:14px;border:2px dashed transparent}
 #mp-root .mp-pile.tap{cursor:pointer;border-color:#94a3b8;background:#fff}
@@ -518,9 +520,9 @@ const MatteProv = (() => {
 #mp-root .mp-pile.rest .mp-ball{background:#7c3aed}
 #mp-root .mp-pile.rest.lit{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.3);animation:none}
 #mp-root .mp-ball.ghost{background:transparent;border:1.5px dashed #cbd5e1}
-#mp-root .mp-kidc{display:inline-flex;flex-direction:column;align-items:center;gap:2px;border-radius:10px;padding:2px}
+#mp-root .mp-kidc{display:inline-flex;flex-direction:column;align-items:center;gap:1px;border-radius:10px;padding:2px}
 #mp-root .mp-kidc.lit{box-shadow:0 0 0 3px #fb923c}
-#mp-root .mp-kid{width:18px;height:18px;fill:#e2e8f0;stroke:#475569;stroke-width:1.6}
+#mp-root .mp-kid{width:16px;height:16px;fill:#e2e8f0;stroke:#475569;stroke-width:1.6}
 #mp-root .mp-line{width:100%;max-width:350px;height:auto}
 #mp-root .mp-line.tap{cursor:pointer}
 #mp-root .mp-line .ax{stroke:#334155;stroke-width:2}
@@ -1060,7 +1062,7 @@ const MatteProv = (() => {
       paintHelp();
       document.getElementById('mp-ctrl').innerHTML = fb ? fb.html : padHTML(t);
       updKlar();
-      if (!fb) requestAnimationFrame(drawBand);
+      if (!fb) scheduleBand();
       return;
     }
     const H = header(t);
@@ -1073,7 +1075,7 @@ const MatteProv = (() => {
     paintHelp();
     if (needsScratch(t)) scSetup();
     updKlar();
-    if (!fb) requestAnimationFrame(drawBand);
+    if (!fb) scheduleBand();
   }
   function paintHelp() {
     const el = document.getElementById('mp-help');
@@ -1271,7 +1273,7 @@ const MatteProv = (() => {
     if (t.pic === 'grupp') for (let g = 0; g < made; g++)
       groups += `<span class="mp-grp${litC(lit, 'grp')}" style="grid-template-columns:repeat(${cols(t.d)},auto)"><b class="mp-gn">${pvHTML(g + 1)}</b>${ball.repeat(t.d)}</span>`;
     else for (let g = 0; g < t.d; g++)
-      groups += `<span class="mp-kidc${litC(lit, 'grp')}">${KID}<span class="mp-grp box" style="grid-template-columns:repeat(${Math.max(1, cols(made))},auto)">${made ? ball.repeat(made) : '<i class="mp-ball ghost"></i>'}</span><b class="mp-gc">${made ? pvHTML(made) : ''}</b></span>`;
+      groups += `<span class="mp-kidc${litC(lit, 'grp')}">${KID}<span class="mp-grp box" style="grid-template-columns:repeat(${Math.max(1, t.d >= 4 ? Math.min(3, made) : cols(made))},auto)">${made ? ball.repeat(made) : '<i class="mp-ball ghost"></i>'}</span><b class="mp-gc">${made ? pvHTML(made) : ''}</b></span>`;
     const pileLit = done ? litC(lit, 'rest') : litC(lit, 'pile');
     const tap = tapOn && !done;
     const pile = left > 0 ? `<span class="mp-pile${done ? ' rest' : ''}${pileLit}${tap ? ' tap' : ''}" style="grid-template-columns:repeat(${Math.min(10, left)},auto)"${tap ? ' data-act="deal" role="button" aria-label="Dela ut"' : ''}>${ball.repeat(left)}</span>` : '';
@@ -1279,22 +1281,22 @@ const MatteProv = (() => {
   }
   /* Tallinjen (27b): numrerade hopp om d från 0; resten (lila) är biten som är kvar till n */
   function lineSVG(t, lit, made, tapOn) {
-    const W = 340, x0 = 12, x1 = W - 12, X = v => x0 + (x1 - x0) * v / t.n, y = 54, done = made >= L.picMax(t);
+    const W = 340, x0 = 12, x1 = W - 12, X = v => x0 + (x1 - x0) * v / t.n, y = 46, done = made >= L.picMax(t);   // låg tallinje: kladden ska ha plats
     let h = `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="ax"/>`;
     for (let v = 0; v <= t.n; v++) h += `<line x1="${X(v)}" y1="${y - (v % t.d === 0 ? 6 : 3)}" x2="${X(v)}" y2="${y + (v % t.d === 0 ? 6 : 3)}" class="tk"/>`;
     for (let k = 0; k < made; k++) {
       const a = X(k * t.d), b = X((k + 1) * t.d);
-      h += `<path d="M${a} ${y - 4} Q${(a + b) / 2} ${y - 36} ${b} ${y - 4}" class="jump${litC(lit, 'grp')}${k === made - 1 ? ' new' : ''}"/>` +
-        `<text x="${(a + b) / 2}" y="${y - 24}" class="jn">${k + 1}</text>`;
+      h += `<path d="M${a} ${y - 4} Q${(a + b) / 2} ${y - 32} ${b} ${y - 4}" class="jump${litC(lit, 'grp')}${k === made - 1 ? ' new' : ''}"/>` +
+        `<text x="${(a + b) / 2}" y="${y - 21}" class="jn">${k + 1}</text>`;
     }
     if (done && t.r) {
       const a = X(made * t.d), b = X(t.n);
       h += `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" class="restseg${litC(lit, 'rest')}"/><text x="${(a + b) / 2}" y="${y - 10}" class="rl">${t.r}</text>`;
     }
     const lab = new Set([0, t.n]); for (let k = 1; k <= made; k++) lab.add(k * t.d);
-    for (const v of lab) h += `<text x="${X(v)}" y="${y + 20}" class="lb${v === t.n ? ' n' : ''}">${v}</text>`;
+    for (const v of lab) h += `<text x="${X(v)}" y="${y + 18}" class="lb${v === t.n ? ' n' : ''}">${v}</text>`;
     const tap = tapOn && !done;
-    return `<svg class="mp-line${tap ? ' tap' : ''}${!done ? litC(lit, 'pile') : ''}" viewBox="0 0 ${W} 80"${tap ? ' data-act="deal" role="button" aria-label="Hoppa"' : ''}>${h}</svg>`;
+    return `<svg class="mp-line${tap ? ' tap' : ''}${!done ? litC(lit, 'pile') : ''}" viewBox="0 0 ${W} 66"${tap ? ' data-act="deal" role="button" aria-label="Hoppa"' : ''}>${h}</svg>`;
   }
   /* Summan under bilden när allt är utdelat: talet barnet ska skriva, som bricka ("6 grupper", "2 över").
      Regel (brainstorm/13, Dennis 11/11): det som är i fokus och bandets start är exakt det tal barnet ska skriva. */
@@ -1308,7 +1310,10 @@ const MatteProv = (() => {
     const HB = !fb && IN.hb, show = fb && fb.showAns;
     const B = role => { const i = L.drField(t, role); return fbox(t, i, fb, t.fields[i].ans, null, role === 'r' || role === 'k3' ? 'rest' : ''); };
     /* summan ur bilden ("9 grupper", "4 över") står ovanför sin ruta när allt är utdelat */
-    const made = show ? L.picMax(t) : IN.made, sumOn = t.pic && made >= L.picMax(t);
+    /* summan visas med hjälp bara när kvoten eller resten är i fokus; i Själv när allt är utdelat */
+    const qIdx = L.drField(t, 'q'), lastIdx = t.rest ? L.drField(t, 'r') : qIdx;
+    const stepOk = !HB || (IN.hb.i >= qIdx && IN.hb.i <= lastIdx);   // med hjälp bara i kvotens och restens steg; i kontrollen är källorna rutorna
+    const made = show ? L.picMax(t) : IN.made, sumOn = t.pic && made >= L.picMax(t) && stepOk;
     const what = t.pic === 'dela' ? 'i varje' : t.pic === 'linje' ? 'hopp' : 'grupper';
     const pill = (v, word, cls, k) => `<span class="mp-sumov ${cls}${litC(lit, k)}"><b class="mp-pnum mp-near${litC(lit, k)}"${pk(v)}>${pvHTML(v)}</b><i>${word}</i></span>`;
     const k1 = !t.kontroll ? '' : t.kGiven ? `<span class="mp-kd${litC(lit, 'kd')}"${pk(t.d)}>${pvHTML(t.d)}</span>` : B('k1');
@@ -1318,7 +1323,7 @@ const MatteProv = (() => {
     const kontroll = t.kontroll ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera med gånger</span>${k1}<span>·</span>${B('k2')}${t.rest ? `<span>+</span>${B('k3')}` : ''}<span>=</span>${B('k4')}</div>` : '';
     const qcol = `<span class="mp-capw">${sumOn ? pill(t.q, what, 'lo', 'grp') : ''}${B('q')}<i>kvot</i></span>`;
     const rcol = t.rest ? `<span class="mp-rl">,</span><span class="mp-capw">${sumOn && t.r ? pill(t.r, 'över', 'lo rest', 'rest') : ''}${B('r')}<i class="rest">rest</i></span>` : '';
-    const sumCls = sumOn ? (t.r ? ' sum2' : ' sum1') : '';   // med rest står orden ovanför talen, så att de två summorna inte krockar
+    const sumCls = sumOn ? (t.r ? ' sum2' : ' sum1') + (t.write ? ' w' : '') : '';   // w: bråket med två rutor är högt, så summan behöver mindre extra plats   // med rest står orden ovanför talen, så att de två summorna inte krockar
     return (HB ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr${sumCls}"><div class="ln">${frac}<span>=</span>${qcol}${rcol}</div>${kontroll}</div>`;
   }
   /* Hundraplattor, tiostavar och ental (K_S 67): ett kluster per talsort, i talsortens färg */
@@ -1379,7 +1384,35 @@ const MatteProv = (() => {
     if (IN.kind === 'prob' && !IN.adv && t.flow[IN.k]) return t.flow[IN.k].ans[IN.f];
     return null;
   }
-  let lastBand = null;          // senaste bandets underlag (för kontrollen i webbläsaren)
+  let lastBand = null;
+  /* Siffrornas egen ruta (runda 7): en Range över elementets text, inte brickans eller radens ruta. Ett element utan
+     text (en tom ruta) mäts med sin egen ram. */
+  function digitsRect(el) {
+    if (el && /\d/.test(el.textContent)) { const rg = document.createRange(); rg.selectNodeContents(el); const r = rg.getBoundingClientRect(); if (r.width && r.height) return r; }
+    return el.getBoundingClientRect();
+  }
+  /* Samma regel för alla källor och mål: en källa mäts med siffrornas egen ruta (ensiffrigt, flersiffrigt, decimaltal,
+     siffror i platsvärdesfärg i egna <span>, bråkets täljare och nämnare, brickor, rutor med ett tal), ett mål med
+     rutans ram. anchorOf ger den exakta punkten mitt på en sida, med avståndet utanför; bandRoute räknar med samma
+     sidmitt och samma avstånd (BAND_START från källan, BAND_TIP utanför målets ram). */
+  const anchorRect = (el, source) => source ? digitsRect(el) : el.getBoundingClientRect();
+  function anchorOf(el, side, gap, digits) {
+    const r = anchorRect(el, digits), g = gap || 0;
+    return { t:{ x:(r.left + r.right) / 2, y:r.top - g }, b:{ x:(r.left + r.right) / 2, y:r.bottom + g },
+             l:{ x:r.left - g, y:(r.top + r.bottom) / 2 }, r:{ x:r.right + g, y:(r.top + r.bottom) / 2 } }[side];
+  }          // senaste bandets underlag (för kontrollen i webbläsaren)
+  /* Ritas när layouten stabiliserats: typsnitten klara och två bildrutor senare; och om vid storleksändring */
+  let bandObs = null, bandTimer = 0;
+  function scheduleBand() {
+    const go = () => requestAnimationFrame(() => requestAnimationFrame(drawBand));
+    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(go); else go();
+    const q = document.getElementById('mp-q');
+    if (q && typeof ResizeObserver !== 'undefined' && (!bandObs || bandObs._q !== q)) {
+      if (bandObs) bandObs.disconnect();
+      bandObs = new ResizeObserver(() => { clearTimeout(bandTimer); bandTimer = setTimeout(go, 60); });
+      bandObs._q = q; bandObs.observe(q);
+    }
+  }
   function drawBand() {
     const q = document.getElementById('mp-q'), t = curTask();
     if (!q || !t || !isOv(t) || !helpOn() || locked) return;
@@ -1402,10 +1435,11 @@ const MatteProv = (() => {
       const pad = /\d/.test(n.nodeValue) ? 10 : 2;
       for (const r of rg.getClientRects()) if (r.width && r.height) rects.push(Object.assign(rel(r), { hard, w, pad }));
     }
-    q.querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc, .mp-ans, .mp-nb').forEach(e => {
-      if (!mine(e) && !e.contains(src) && !e.contains(focus)) rects.push(Object.assign(rel(e.getBoundingClientRect()), { hard:false }));
+    /* bilderna är hårda hinder (runda 7: ett band genom grupperna lästes som "skriv antalet grupper"); tomma rutor mjuka */
+    q.querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc, .mp-ans, .mp-nb, .mp-sumov').forEach(e => {
+      if (!mine(e) && !e.contains(src) && !e.contains(focus)) rects.push(Object.assign(rel(e.getBoundingClientRect()), { hard:false, pic:!e.matches('.mp-ans, .mp-nb') }));
     });
-    lastBand = { S:rel(src.getBoundingClientRect()), T:rel(focus.getBoundingClientRect()), rects, box:{ l:2, t:2, r:qr.width - 2, b:qr.height - 2 } };
+    lastBand = { S:rel(anchorRect(src, true)), T:rel(anchorRect(focus, false)), rects, box:{ l:2, t:2, r:qr.width - 2, b:qr.height - 2 } };
     const route = L.bandRoute(lastBand.S, lastBand.T, rects, lastBand.box);
     src.classList.add('mp-bsrc');
     if (!route) {                                   // ingen fri väg: ingen linje, källan får samma lila ring som pulserar
@@ -1414,7 +1448,7 @@ const MatteProv = (() => {
       q.classList.add('mp-fm');
       return;
     }
-    const e = route.end, A = 6, tip = { down:[0, 1], up:[0, -1], right:[1, 0], left:[-1, 0] }[e.dir];
+    const e = route.end, A = L.BAND_ARROW, tip = { down:[0, 1], up:[0, -1], right:[1, 0], left:[-1, 0] }[e.dir];
     const tx = e.x + tip[0] * A, ty = e.y + tip[1] * A, px = -tip[1], py = tip[0];
     q.insertAdjacentHTML('beforeend', `<svg class="mp-band" aria-hidden="true"><path d="${route.d}"/><polygon points="${tx},${ty} ${e.x + px * 5},${e.y + py * 5} ${e.x - px * 5},${e.y - py * 5}"/><circle cx="${route.pts[0].x}" cy="${route.pts[0].y}" r="3.5"/></svg>`);
     for (const e of [src, focus, ...q.querySelectorAll('.lit')]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
@@ -1834,7 +1868,7 @@ const MatteProv = (() => {
     if (q) q.innerHTML = questionHTML(t);
     if (IN && IN.kind !== 'num') { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
     updKlar();
-    requestAnimationFrame(drawBand);
+    scheduleBand();
   }
 
   const num = x => x === '' ? null : +x;
@@ -2358,7 +2392,7 @@ const MatteProv = (() => {
 
   return { open, showList, showProv, upMethod,
            /* bara för test i webbläsaren */
-           _peek:() => ({ S, IN, task:curTask(), band:lastBand }),
+           _peek:() => ({ S, IN, task:curTask(), band:lastBand }), _digitsRect:el => digitsRect(el), _anchorOf:(el, side, gap, digits) => anchorOf(el, side, gap, digits),
            _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };
 })();
 

@@ -1114,7 +1114,11 @@
     const p = pad == null ? 2 : pad;
     return pts.some(q => rects.some(r => q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p));
   }
-  const BAND_GAP = 7;
+  /* Fästpunkterna (runda 7, Dennis: "fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär eller
+     uppskattade'"): starten ligger BAND_START px utanför siffrornas egen ruta, mitt på sidan mot målet; pilspetsen
+     ligger BAND_TIP px utanför rutans ram (ramen ingår i rutans mått), och kurvan slutar BAND_ARROW längre ut, där
+     pilen tar vid. Handtagen går vinkelrätt ut från sidorna; i linje blir bandet rakt. */
+  const BAND_START = 3, BAND_TIP = 3, BAND_ARROW = 6, BAND_GAP = BAND_TIP + BAND_ARROW;
   /* Bästa möjliga kompromiss (Dennis 11/11: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång",
      "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'"). Varje väg får poäng: längden mot det raka
      avståndet, plus straff för att snudda vid bilder och, lättare (w), vid etiketterna (mjuka hinder, hard:false) och för att gå längre än
@@ -1129,7 +1133,7 @@
     let soft = 0;
     for (const q of pts) for (const r of rects) {
       const p = r.pad == null ? 2 : r.pad;                 // andra tal har marginal (runda 5): nära ett tal läses som "därifrån"
-      if (q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p) { if (r.hard) return null; soft += r.w == null ? 1 : r.w; }
+      if (q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p) { if (r.hard || r.pic) return null; soft += r.w == null ? 1 : r.w; }   // runda 7: aldrig genom bilden (grupperna, högen, barnen, tallinjen, blocken)
     }
     return len / straight + soft * 0.15 + (len > Math.min(BAND_MAX, BAND_RATIO * straight) ? 0.5 : 0);
   }
@@ -1153,7 +1157,8 @@
   }
   function bandRoute(S, T, rects, box) {
     const cx = R => (R.l + R.r) / 2, cy = R => (R.t + R.b) / 2;
-    const sa = { b:{ x:cx(S), y:S.b + 2, dx:0, dy:1 }, t:{ x:cx(S), y:S.t - 2, dx:0, dy:-1 }, r:{ x:S.r + 2, y:cy(S), dx:1, dy:0 }, l:{ x:S.l - 2, y:cy(S), dx:-1, dy:0 } };
+    const o = BAND_START;
+    const sa = { b:{ x:cx(S), y:S.b + o, dx:0, dy:1 }, t:{ x:cx(S), y:S.t - o, dx:0, dy:-1 }, r:{ x:S.r + o, y:cy(S), dx:1, dy:0 }, l:{ x:S.l - o, y:cy(S), dx:-1, dy:0 } };
     const ta = { t:{ x:cx(T), y:T.t - BAND_GAP, dx:0, dy:-1, dir:'down' }, l:{ x:T.l - BAND_GAP, y:cy(T), dx:-1, dy:0, dir:'right' },
                  r:{ x:T.r + BAND_GAP, y:cy(T), dx:1, dy:0, dir:'left' }, b:{ x:cx(T), y:T.b + BAND_GAP, dx:0, dy:1, dir:'up' } };
     const straight = Math.max(20, Math.hypot(cx(T) - cx(S), cy(T) - cy(S)));
@@ -1163,8 +1168,12 @@
     for (const [ks, s] of Object.entries(sa)) for (const [kt, e] of Object.entries(ta)) {
       if (!sidesFace(S, T, ks, kt)) continue;
       const dist = Math.hypot(e.x - s.x, e.y - s.y), k = Math.max(12, dist / 2.6);
-      const c1 = { x:s.x + s.dx * k, y:s.y + s.dy * k }, c2 = { x:e.x + e.dx * k, y:e.y + e.dy * k };
-      consider({ d:`M${s.x} ${s.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${e.x} ${e.y}`, pts:bezierPts(s, c1, c2, e, 40), end:e });
+      const inLine = (s.dx === 0 && e.dx === 0 && Math.abs(s.x - e.x) < 1.5) || (s.dy === 0 && e.dy === 0 && Math.abs(s.y - e.y) < 1.5);
+      if (inLine) consider({ d:`M${s.x} ${s.y} L ${e.x} ${e.y}`, pts:polyPts([s, e], 2), end:e });
+      else {
+        const c1 = { x:s.x + s.dx * k, y:s.y + s.dy * k }, c2 = { x:e.x + e.dx * k, y:e.y + e.dy * k };
+        consider({ d:`M${s.x} ${s.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${e.x} ${e.y}`, pts:bezierPts(s, c1, c2, e, 40), end:e });
+      }
       /* ett hörn: ut från källan rakt, in i rutan rakt */
       const corner = s.dx !== 0 ? { x:e.x, y:s.y } : { x:s.x, y:e.y };
       const straightIn = s.dx !== 0 ? e.dx === 0 : e.dy === 0;
@@ -1190,7 +1199,7 @@
       const role = t.fields[i].role, B = k => 'box:' + drField(t, k);
       const kd = t.kGiven ? ['kd'] : [B('k1')];
       if (role === 'n') return { text:t.pic ? 'Skriv divisionen. Hur många är det från början?' : 'Skriv divisionen. Vilket tal delas?', lit:['prompt', 'pile', B('n')] };
-      if (role === 'd') return { text:t.pic === 'dela' ? 'Hur många barn delar?' : t.pic ? `Hur många är det i varje ${t.pic === 'linje' ? 'hopp' : 'grupp'}?` : 'Vad delar du med?', lit:['prompt', 'grp', B('d')] };
+      if (role === 'd') return { text:t.pic === 'dela' ? 'Hur många barn delar?' : t.pic ? `Hur många är det i varje ${t.pic === 'linje' ? 'hopp' : 'grupp'}?` : 'Vad delar du med?', lit:['prompt', B('d')] };   // runda 7: grupperna lyser inte här – svaret är talet i frågan, inte antalet grupper
       if (role === 'q') {
         if (t.pic === 'grupp') return { text:'Hur många hela grupper blev det?', lit:['grp', B('q')] };
         if (t.pic === 'dela') return { text:'Hur många fick varje barn?', lit:['grp', B('q')] };
@@ -1860,7 +1869,7 @@
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     /* D44 ✎: övningsbladen */
     DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
+    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_START, BAND_TIP, BAND_ARROW, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
     genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };

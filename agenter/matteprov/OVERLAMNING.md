@@ -231,7 +231,34 @@ med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
   etiketterna täljare/nämnare till vänster om brickorna, så att bandet går fritt. Kladden är minst 121 px (Dela lika,
   Lättare med hjälp); kulorna är 13 px och barnens ikon 18 px för att det ska rymmas.
 - Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
-  aldrig ned. Pilspetsen slutar 1 px utanför rutans kant.
+  aldrig ned. Pilspetsen slutar 3 px utanför rutans ram (runda 7, nedan).
+
+**Runda 7 (gren `ovningsblad-runda7`, ej mergad): standardmetoden för alla band.**
+Dennis: "fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär eller uppskattade'" och "nånting
+som funkar oavsett vilken siffra det gäller". En metod för alla källor och mål, inga specialvägar:
+- **Källan mäts på siffrornas egen ruta:** `digitsRect(el)` i `js/matteprov.js` är en `Range` över elementets text
+  (`getBoundingClientRect` på rangen), inte brickans eller radens ruta. Det fungerar lika för en- och flersiffriga tal,
+  decimaltal med komma, platsvärdesfärgade spann, bråkets täljare och nämnare, en siffra i ett flersiffrigt tal,
+  tallinjens siffror, kvot- och restrutan och pengar. Ett element utan siffror mäts med sin ram. `anchorRect(el, källa)`
+  väljer: källa ⇒ siffrorna, mål ⇒ rutans ram (ramen ingår). `anchorOf(el, sida, avstånd, källa)` ger punkten mitt på
+  en sida med avståndet utanför.
+- **Konstanterna** i `js/matteprov-logic.js`: `BAND_START = 3` (starten 3 px från siffrornas kant, mitt på sidan mot
+  målet), `BAND_TIP = 3` (pilspetsen 3 px utanför rutans ram, rör den aldrig), `BAND_ARROW = 6` (pilens längd; kurvan
+  slutar `BAND_GAP = 9` px från ramen). `bandRoute` lägger handtagen vinkelrätt ut från sidorna (fast andel av
+  avståndet) och ritar rakt när start och mål står i linje.
+- **Ritas när layouten är stabil:** `scheduleBand()` väntar på `document.fonts.ready` och två bildrutor, och ritar om
+  vid storleksändring (`ResizeObserver` på `#mp-q`, 60 ms). Rita aldrig bandet direkt i `renderTask`.
+- **Bilden är hård:** grupperingarna, barnen, högen, tallinjen och blocken (`pic` i hindren) får aldrig korsas; finns
+  ingen kort väg blir det ringen på källan och rutan.
+- **Summabrickan bara i kvot- och reststeget** med hjälp: i täljar- och nämnarstegen syns inte "5 grupper", och
+  nämnarstegen lyser bara frågan och nämnarrutan, inte grupperna. Nämnarens källa är talet i frågan ("3" i "Grupper med
+  3 i varje"); finns ingen fri kort väg dit får "3" och rutan den lila ringen.
+- **Svepet i webbläsaren:** `tests/webblasare/band-svep.js`. Synka dev-spegeln, öppna `localhost:5312` i 390 × 797,
+  ladda filen med en `<script>`-tagg och kör `await bandSvep({ niva:'latt' })` och `({ niva:'svar' })` (kör den i
+  bakgrunden i sidan och läs resultatet efteråt; ett svep tar över 45 s). Det spelar alla moduler med hjälp i riktiga
+  flöden ur generatorn och kontrollerar i varje steg: inget genom siffror, text eller bild; inte över 2 gånger det raka
+  eller 220 px; starten 3 ± 1 px från siffrorna och spetsen 3 ± 1 px utanför ramen, också efter en storleksändring;
+  summabrickan inte på bilden; kladden minst 120 px. `res.sorter` räknar källornas sorter. **Båda nivåerna ska svepas.**
 
 ## Nästa steg
 - Övningsbladen: Dennis provar grenen `matteprov2`; återstår slutledning med figurer (26b/35c) och tabellformen i 36a.
