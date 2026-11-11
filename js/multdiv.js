@@ -103,12 +103,12 @@
    restut/kontroll, hjälpposterna divrestut/divrest0/divkontroll, och
    fria lägets divFreeCheck (tom restruta = 0). Multiplikationen och
    matteprovet (runTask) är orörda.
-   D44 (2026-11-05): runTask({ kind:'div' }) — Matteprov 2 lånar den
+   D44 (2026-11-05): runTask({ kind:'div' }) — övningsbladen (D44 ✎) lånar den
    korta divisionen på samma sätt (nivå 4, restrutan alltid): hjälpläget
    bokför noll/mellanrest/rest och tabellfakta [nämnare, kvotsiffra];
    fria läget har trappan hostDivFreeWrong (ledtråd → mellanresterna på
    pappret → svaret). Utan kind är allt som förut. Kort divisions lägesvy
-   har kortet till Matteprov 4:an, som öppnar Matteprov 2.
+   har kortet Övningsblad (D44 ✎), som öppnar divisionens övningsblad.
    ============================================================ */
 'use strict';
 
@@ -2791,7 +2791,7 @@ const MultDivGame = (() => {
           </div>
           ${typeof MatteProv === 'undefined' ? '' : `<div class="md-card md-prov" onclick="MultDivGame.openProv()">
             <span class="md-aico"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:30px;height:30px;fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/><path d="M10 12h6M10 16h6"/></svg></span>
-            <span><b>Matteprov 4:an</b><small>Prov att öva inför, med kvitto</small></span>
+            <span>${div ? '<b>Övningsblad</b><small>Division på olika sätt, som bladen i boken</small>' : '<b>Matteprov 4:an</b><small>Prov att öva inför, med kvitto</small>'}</span>
             <svg class="icn chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           </div>`}
         </div>
@@ -4177,7 +4177,7 @@ const MultDivGame = (() => {
      Efter uppgiften står en Nästa-knapp (klickstyrt, som i matteprovet).
   ══════════════════════════════════════════════════════════ */
   function runTask(o) {
-    const div = o.kind === 'div';            // D44: matteprovets kortdivision (Matteprov 2) lånar divisionens motor
+    const div = o.kind === 'div';            // D44: övningsbladens kortdivision lånar divisionens motor
     host = { kind: div ? 'div' : 'mult', a: o.a, b: o.b, mode: o.mode === 'free' ? 'free' : 'help', title: o.title || (div ? 'Kort division' : 'Uppställning'),
              right: o.right || '<span style="width:52px"></span>', exitMsg: o.exitMsg || null,
              exitAsk: !!o.exitAsk,
@@ -4186,7 +4186,7 @@ const MultDivGame = (() => {
              wrong: 0, revealed: false,
              saved: { difficulty, gameKind, helpMode } };   // multdivs egna val återställs efter uppgiften
     if (o.profile) profile = o.profile;
-    gameKind = div ? 'div' : 'mult'; difficulty = 4; helpMode = host.mode === 'help';   // div nivå 4: restrutan finns alltid
+    gameKind = div ? 'div' : 'mult'; difficulty = div ? 3 : 4; helpMode = host.mode === 'help';   // div: nivå 3 "Med rest", restrutan finns alltid
     exerciseIdx = 0; exScore = 0;
     memMoments = 0; memMistakes = 0; exWrongAnswers = 0;
     lifelines = helpMode ? 2 : 0; lifelineShownFor = null;
@@ -4255,7 +4255,7 @@ const MultDivGame = (() => {
   /* Räkna själv i matteprovet: hjälptrappan (D38/D39). Med rader (chk) pekar
      varje steg på raden som inte stämmer: först ledtråden, sedan radens facit
      som hjälpbit (en rad i taget), och kommer samma rad igen visas svaret. */
-  /* D44: Räkna själv i Matteprov 2 (kort division): samma trappa. Första "inte riktigt" är tyst med
+  /* D44: Räkna själv i övningsbladen (kort division): samma trappa. Första "inte riktigt" är tyst med
      motorns ledtråd (divFreeCheck), andra skriver mellanresterna på pappret, tredje visar svaret. */
   function hostDivFreeWrong(val, dchk) {
     const h = host;
@@ -4608,8 +4608,8 @@ const MultDivGame = (() => {
      Provets egna regler (den grå nollan m.m.) bor i matteprov; multdiv rörs inte. */
   function openProv() {
     App.Sound.play('click');
-    const kind = gameKind;                   // D44: från Kort division öppnas Matteprov 2 direkt
-    MatteProv.open(profile, () => { gameKind = kind; showModeSelect(); }, kind === 'div' ? 'prov2' : null);
+    const kind = gameKind;                   // D44: från Kort division öppnas övningsbladen direkt
+    MatteProv.open(profile, () => { gameKind = kind; showModeSelect(); }, kind === 'div' ? 'ovdiv' : null);
   }
 
   /* ── Navigation ─────────────────────────────────────────── */

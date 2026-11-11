@@ -392,6 +392,18 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
+## Övningsblad · Division (D44 ✎, grenen matteprov2)
+
+I Kort divisions lägesvy finns kortet **Övningsblad**. Det öppnar tretton moduler i kapitel 3:s olika sorters blad,
+med egna tal: Dela lika, Hur många grupper?, Divisionstabellen (20 tal, /20), Kontrollera med gånger, Division med
+rest (bollar och tallinje), Ingår hur många gånger?, Dividera varje talsort (plattor, stavar och ental), Division med
+10, 100 och 1000, Kort division (divisionens motor), Pengar och tabeller, Begrepp, Problemlösning och Slutledning.
+Överst väljs Lättare/Svårare och Med hjälp/Själv. Det finns inget prov: varje modul börjar med "Så här gör du" och
+slutar med kvittot "Bra nött!". En modul där något var svårt märks **Öva mer på**, en avklarad **Klart**.
+Bilderna går att trycka på: högen delar ut ett varv till barnen eller ringar in en grupp, tallinjen tar ett hopp.
+Med hjälp delar barnet ut först, sedan frågar appen en ruta i taget. Talen i bråket och i frågan går att trycka på.
+En ruta som inte stämmer töms och får fokus. Resten är alltid lila.
+
 ## Matteprov 4:an (v67–v68, D37, D38)
 
 Nås från **Multiplikation & Division → Uppställd multiplikation**: under kortet Svårighetsgrad ligger kortet

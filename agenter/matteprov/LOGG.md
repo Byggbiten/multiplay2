@@ -139,3 +139,12 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Lärdom:** frågor ska testas mot vad ett barn skulle svara, inte bara mot förväntad text. Läs frågan bokstavligt,
   lista de rimliga svaren och kontrollera att bara rutans svar passar; "hur många" frågar efter ett antal, "vad är …
   värd" efter ett värde.
+
+
+## 2026-11-11 · Övningsblad · Division (D44 ✎)
+- Matteprov 2 byggdes om till övningsblad efter Dennis kursändring: tretton moduler, inget prov. Dev (v75) mergad in;
+  den lånade korta divisionen går nu på multdivs nivå 3 (nivå 4 är decimaler sedan v75).
+- **Fel:** Lättare "Ingår hur många gånger?" ritades inte (kontrollens första ruta byggdes även när modulen saknar
+  kontroll). **Varför fångade inte testerna det:** vitest kör bara logiken; rendreringen prövades först i svepet i
+  webbläsaren (alla moduler × nivå × läge). **Lärdom:** svep varje modul i båda nivåerna och lägena i webbläsaren
+  innan rapport; ett modulval som stänger av en del av mallen ska prövas i rendreringen.

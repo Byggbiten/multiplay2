@@ -147,6 +147,27 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 - Gamla poster i `matteprov_{id}.provs.prov1.hard` kan ha taggar som inte längre skapas (`upp:plats`, `upp:rader`,
   `upp:minne`, `prob:uttryck`); de ger en uppgift av närmaste typ och glöms efter tre rätt.
 
+## Övningsblad · Division (D44 ✎, 2026-11-11, gren `matteprov2`, ej mergad)
+Inget prov: posten `ovdiv` (`kind:'ovning'`) i `PROVS` med tretton moduler (`DIV_IDS`). Nås från kortet
+**Övningsblad** i Kort divisions lägesvy (`openProv` → `MatteProv.open(p, back, 'ovdiv')`); provlistan visar den
+inte. Sidan är `showOvning`: nivå och Med hjälp/Själv, modulerna i ett rutnät, märket "Öva mer på" (`hardFor`) eller
+"Klart". Varje modul: Så här gör du (`divIntroSteps`) → nötloopen → "Bra nött!"-kvittot. Ingen Gör provet, inget Mitt
+prov (`genForTag` ger null för divisionens taggar).
+- **Typen `dr`** (`makeDr`, moduler dela, grupper, dkontroll, drest, ingar): mallen `[n]/[d] = [kvot], rest [rest]` och
+  `Kontrollera: [d] · [kvot] + [rest] = [n]`; `write` = barnet skriver täljare och nämnare; `kGiven` = nämnaren står i
+  kontrollen (Lättare). `pic` 'dela'/'grupp'/'linje' är interaktiv: varje tryck på högen (eller tallinjen) delar ut ett
+  varv, ringar in en grupp eller tar ett hopp (`IN.made`, `picMax`, `picLeft`); med hjälp först (`IN.dealPending`,
+  `dealAsk`, `dealDone`), sedan rutorna. Rättning `checkDrest`: kontrollen i valfri ordning, och den rättas först när
+  divisionen stämmer; felklasser kvot/stor/kontroll/skriv.
+- **ts** (talsort, block i talsortens färg), **dz** (10/100/1000, en ruta per siffra, kvot/nämnare/täljare saknas),
+  **pt** (pengar, 33b-tabellens rad), **kd** (kort division i motorn, `runTask({ kind:'div' })` på multdivs nivå 3),
+  **sheet** för divisionstabellen, **prob** för begrepp, problemlösning och slutledning (steg med `op:'/'` och
+  `rest:true` ger ", rest [ ]").
+- Designreglerna (brainstorm/11) som är inbyggda: fel ruta töms och får fokus (`markBad` för `DIVBOX`), rest lila
+  (`.mp-ans.rest`, högen som blir över), talen i bråket, frågan och tidigare svar går att trycka på (`pick` för rutor),
+  kontrollen som mall, inga lika tal i olika roller eller dubbelsiffror (`distinct`, `twinDigits`).
+- Tester: `tests/ovningsblad.test.mjs` (48).
+
 ## Så läggs Matteprov 2 till
 1. En post i `PROVS` i `js/matteprov-logic.js`: `{ id:'prov2', title:'Matteprov 2', sub:'…', moments:[…],
    provCount:{ … } }`. Provlistan och provsidan ritas ur `PROVS`; lagringen är redan per prov-id (`provs[provId]`).
@@ -157,6 +178,7 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
 
 ## Nästa steg
+- Övningsbladen: Dennis provar grenen `matteprov2`; återstår slutledning med figurer (26b/35c) och tabellformen i 36a.
 - Vänta på Dennis synpunkter på D42 (live i v73).
 - Möjligt nästa: Med hjälp även i Dela upp och tabelltestet om Dennis vill (nu: Dela upp är alltid ledd, tabelltestet
   har ingen extra hjälp).
