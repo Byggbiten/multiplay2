@@ -320,3 +320,26 @@ describe('runda 7: Dennis fall, Hur många grupper Svårare med hjälp, nämnare
     expect(L.bandRoute(S, T, rects, box)).toBeNull();
   });
 });
+
+describe('runda 8: stegtexterna följer rutan och talet', () => {
+  it('A2: Begrepp nämnaren – med hjälp nämner texten täljaren först, nämnaren först i nämnarens ruta', () => {
+    const st = L.makeBnamnare(91, 13).flow[0];
+    expect(st.fq).toHaveLength(3);
+    expect(st.fq[0]).not.toMatch(/under strecket|nämnaren/i);
+    expect(st.fq[1]).not.toMatch(/överst|täljaren/i);
+    expect(st.fq[1]).toMatch(/under strecket/);
+  });
+  it('B7 och Dennis 8008/4: talsortens steg säger talsorten och att det är en del ("Börja med tusentalen")', () => {
+    const t = L.makeTs(8008, 4);
+    const txt = t.fields.map((_, i) => L.askPlain ? L.askPlain(L.divAsk(t, i).text) : L.divAsk(t, i).text);
+    expect(txt[0]).toMatch(/^Börja med tusentalen: .*8.* tusental delat med .*4/);
+    expect(txt[3]).toMatch(/^Sedan entalen: .*ental delat med/);
+    txt.forEach(x => expect(x).not.toMatch(/\d\/\d/));
+  });
+  it('B2: Hur många grupper, täljarens steg, ber om hoppräkning', () => {
+    const t = L.makeDr({ n:15, d:3, moment:'grupper', pic:'grupp', write:true });
+    const a = L.divAsk(t, L.drField(t, 'n'));
+    expect(a.text).toMatch(/hopp om 3/);
+    expect(a.lit).toContain('grp');
+  });
+});

@@ -228,3 +228,34 @@ barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knyt
   Platsen ovanför två brickor höjdes från 40 till 46 px, bildens radavstånd sänktes från 6 till 4 px och ordens
   radhöjd till 12 px, så att kladden stannar på 121 px; svepet kontrollerar nu att summabrickan inte ligger på bilden
   (provat mot de gamla måtten: 6,5 px överlapp).
+
+## 2026-11-11 · Runda 8: VD:ns genomspelning (brainstorm/14) och Dennis 8008/4
+- **A1–A5 rättade:** Pengar-summan stod inte ovanför sin ruta och bandet gick genom rubrikerna; Begreppens stegtext
+  sa "under strecket" när täljaren var i fokus; divisionstestets kontrollrad låg över "Du har 19 klara" och räknaren
+  visade bara "/20"; slutledningens använda bricka svävade kvar och "fem" saknade källa; kontrollens band gick genom
+  "kvot". B1–B4, B6–B8 (Dennis val) byggda. Kort division (A6, B5) utgick ur uppdraget.
+- **Varför fångade inte svepet A1, A2, A3, A5:** svepet räknade bara siffror och frågetext som hinder, inte rubriker och
+  etiketter (A1, A5), det läste aldrig stegtexten mot rutan i fokus (A2), och det spelade inte divisionstestet eller
+  tittade efter meddelanden som ligger över annat (A3). **Lärdom:** ett svep ska mäta varje sorts text på skärmen
+  (fråga, steg, rubrik, etikett, meddelande) och varje modul, också bladen som inte har band. Allt det ligger nu i
+  `tests/webblasare/band-svep.js`.
+- **Dennis 8008/4:** "det står vad är 8 tusental delat med 4. men det står 8008?" och "jag såg inte de små gröna
+  prickarna". En stegfråga som bara gäller en del av talet ser ut att motsäga uppgiften: hela uppgiften står nu alltid
+  överst, och stegfrågan säger att den är en del ("Börja med tusentalen"). Bilden visar alla talsorter som lika
+  tydliga ramar, nollorna som tomma ramar. **Lärdom:** det som är litet nog att en vuxen missar det finns inte för ett
+  barn; mät storleken på det som ska räknas, inte bara att det finns.
+- **Fel under bygget:** `.mp-bc .b0` fanns i två regler och den senare (7 px) vann över den nya; en rad med fyra
+  talsorter radbröts när texten växte. Mätt i webbläsaren, rättat.
+- Vitest: tre nya test (A2, B7/8008, B2), röda mot den gamla logiken, gröna nu; 594 gröna.
+
+## 2026-11-11 · Runda 8b: nummerbrickan täckte en prick
+- **Fyndet (samordnarens granskning):** i Slutledning, Lättare, låg gruppens nummerbricka helt över första pricken, så
+  att en grupp om 5 såg ut att ha 4. Samma överlapp i Hur många grupper (8 av 8) och Rest (2 av 2). Det lär barnet fel.
+- **Varför fångade inte svepet det:** svepet mätte vad bandet korsade och var summabrickan stod, aldrig vad en bricka
+  täckte i bilden. Brickan i ramens hörn var ett beslut från runda 2 som ingen mätte när prickarna växte. **Lärdom:**
+  allt som läggs ovanpå en bild ska mätas mot det som ska räknas i bilden; ett räknebart föremål som täcks ändrar
+  svaret. Kontrollen ligger nu i svepet och slog till mot den gamla koden i Grupper, Kontrollera, Rest, Ingår och
+  Slutledning (264 träffar på Lättare), noll efter rättelsen.
+- **Kostnad:** 12 px prickar och brickan i egen plats tog cirka 40 px i Ingår, Svårare (kladden 82 px). Återtagen med
+  grupper i två rader i stora tal, resten i gruppernas rad, tätare kort när barnet skriver divisionen och ett kortare
+  band (cirka 28 px).
