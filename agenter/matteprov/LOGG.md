@@ -172,3 +172,15 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Varför fångade inte testerna det:** svepet mätte att bandet fanns och att fokus var opakt, inte vad bandet pekade
   ut. **Lärdom:** mät källan mot svaret i varje steg (`mp-bsrc` mot rutans facit); mätningen hittade också att
   bandstartens närmaste-element-gissning gav falska fel, därför markeras källan nu i DOM.
+
+## 2026-11-11 · Runda 4: bandet går aldrig genom text, och det är kort
+- Samordnarens granskning: bandet gick genom "kvot", genom frågan, genom nämnaren och genom stegets text; talen i
+  frågan var för nedtonade. Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång" och
+  "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'".
+- Byggt: poängsatt väg (`bandRoute`, `bandScore`), hårda hinder (siffror, läsbar text) och mjuka (etiketter, bilder),
+  ring i stället för band när ingen väg duger, etiketterna under rutan, brickorna nära mallen, nedtoning i gråskala.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och var opakt, aldrig vad det korsade eller hur
+  långt det var. **Lärdom:** ett visuellt hjälpmedel ska mätas mot det det ska undvika; svepet räknar nu korsad text
+  och längd mot det raka avståndet i varje steg (alla moduler: ingen korsning, inget över 2 gånger).
+- Första försöket, en väg runt hindren i ett rutnät, gav fria men långa och slingriga band; det togs bort när Dennis
+  satte längdgränsen.

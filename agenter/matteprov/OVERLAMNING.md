@@ -205,6 +205,22 @@ med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
 4. Nivågolv som vitest (mönstret "provet är aldrig lättare än underlaget"), och lägg de nya texterna i svepet.
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
 
+**Regler för bandet (runda 4, Dennis 11/11): fri väg och kort band, som bästa möjliga kompromiss.**
+- Fri väg: bandet går aldrig genom läsbar text eller siffror (frågan, uppgiften, stegets rad, alla tal). Att snudda vid
+  en etikett (täljare, nämnare, kvot, Kontrollera) eller en bild kostar lite i poängen men är tillåtet.
+- Kort band: helst högst 1,5 gånger det raka avståndet och 160 px, aldrig över 2 gånger eller 220 px, högst ett hörn.
+- `L.bandRoute` poängsätter kurvor mellan alla par av sidor och vägar med ett rundat hörn (längd mot rakt avstånd,
+  straff för etiketter och bilder och för att gå över 1,5 gånger); bästa poäng vinner. Ingen godkänd väg: inget band,
+  källan och rutan får den lila ringen (`mp-bring`), och talet flyger som förut när det trycks.
+- Hellre flytta källan än dra långt: etiketterna kvot och rest står under rutan; Kontrollera står till vänster på raden;
+  i problemlösning, begrepp och slutledning upprepas stegets tal (ur texten och svaren från förra stegen) som brickor
+  nära mallen, i en division i höjd med täljaren och nämnaren.
+- Kompromisser som valts: bandet får snudda vid etiketter (en kort väg som tydligt visar kopplingen väger tyngre);
+  kontrollens sista ruta (svaret = täljaren) och Ingår:s första steg (täljaren ur frågan) får oftast ringen, för att
+  vägen skulle gå genom siffror; i 10/100/1000 får rutorna ringen, för att täljarens siffror står tätt intill.
+- Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
+  aldrig ned. Pilspetsen slutar 1 px utanför rutans kant.
+
 ## Nästa steg
 - Övningsbladen: Dennis provar grenen `matteprov2`; återstår slutledning med figurer (26b/35c) och tabellformen i 36a.
 - Vänta på Dennis synpunkter på D42 (live i v73).

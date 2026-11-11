@@ -1090,6 +1090,74 @@
     return out;
   }
 
+  /* ── Bandets väg (runda 4): bandet får aldrig korsa text, siffror, etiketter eller bilder ──
+     Ren geometri (testbar): S = källans ruta, T = målets ruta, rects = hinder, box = kortets kant, alla { l, t, r, b }.
+     Prövar i ordning: en rak kurva (alla par av sidor), en väg via en fri vågrät korridor (under eller ovanför blocket),
+     en väg runt i marginalen till vänster eller höger. Ger { d, pts, end:{ x, y, dir } } eller null (då ritas inget band). */
+  function bezierPts(p0, c1, c2, p3, n) {
+    const out = [];
+    for (let i = 0; i <= n; i++) {
+      const u = i / n, a = (1 - u) * (1 - u) * (1 - u), b = 3 * (1 - u) * (1 - u) * u, c = 3 * (1 - u) * u * u, e = u * u * u;
+      out.push({ x:a * p0.x + b * c1.x + c * c2.x + e * p3.x, y:a * p0.y + b * c1.y + c * c2.y + e * p3.y });
+    }
+    return out;
+  }
+  function polyPts(ps, step) {
+    const out = [];
+    for (let i = 1; i < ps.length; i++) {
+      const a = ps[i - 1], b = ps[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / (step || 4)));
+      for (let k = 0; k <= n; k++) out.push({ x:a.x + (b.x - a.x) * k / n, y:a.y + (b.y - a.y) * k / n });
+    }
+    return out;
+  }
+  function pathHits(pts, rects, pad) {
+    const p = pad == null ? 2 : pad;
+    return pts.some(q => rects.some(r => q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p));
+  }
+  const BAND_GAP = 7;
+  /* Bästa möjliga kompromiss (Dennis 11/11: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång",
+     "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'"). Varje väg får poäng: längden mot det raka
+     avståndet, plus straff för att snudda vid bilder och, lättare (w), vid etiketterna (mjuka hinder, hard:false) och för att gå längre än
+     1,5 gånger eller 160 px. Aldrig genom läsbar text eller siffror (hard:true), aldrig över 2 gånger det raka avståndet
+     eller 220 px: då null, och källan och rutan får ringen i stället. Vägarna: en kurva mellan alla par av sidor, eller
+     en väg med ett rundat hörn. Ger { d, pts, end, score } eller null. */
+  const BAND_MAX = 160, BAND_RATIO = 1.5, BAND_HARD_RATIO = 2, BAND_HARD_MAX = 220;
+  const ptsLen = pts => pts.reduce((a, q, i) => i ? a + Math.hypot(q.x - pts[i - 1].x, q.y - pts[i - 1].y) : 0, 0);
+  function bandScore(pts, rects, straight) {
+    const len = ptsLen(pts);
+    if (len > Math.min(BAND_HARD_MAX, BAND_HARD_RATIO * straight)) return null;
+    let soft = 0;
+    for (const q of pts) for (const r of rects) if (q.x > r.l - 2 && q.x < r.r + 2 && q.y > r.t - 2 && q.y < r.b + 2) { if (r.hard) return null; soft += r.w == null ? 1 : r.w; }
+    return len / straight + soft * 0.15 + (len > Math.min(BAND_MAX, BAND_RATIO * straight) ? 0.5 : 0);
+  }
+  function bandRoute(S, T, rects, box) {
+    const cx = R => (R.l + R.r) / 2, cy = R => (R.t + R.b) / 2;
+    const sa = { b:{ x:cx(S), y:S.b + 2, dx:0, dy:1 }, t:{ x:cx(S), y:S.t - 2, dx:0, dy:-1 }, r:{ x:S.r + 2, y:cy(S), dx:1, dy:0 }, l:{ x:S.l - 2, y:cy(S), dx:-1, dy:0 } };
+    const ta = { t:{ x:cx(T), y:T.t - BAND_GAP, dx:0, dy:-1, dir:'down' }, l:{ x:T.l - BAND_GAP, y:cy(T), dx:-1, dy:0, dir:'right' },
+                 r:{ x:T.r + BAND_GAP, y:cy(T), dx:1, dy:0, dir:'left' }, b:{ x:cx(T), y:T.b + BAND_GAP, dx:0, dy:1, dir:'up' } };
+    const straight = Math.max(20, Math.hypot(cx(T) - cx(S), cy(T) - cy(S)));
+    const inBox = pts => pts.every(q => q.x >= box.l && q.x <= box.r && q.y >= box.t && q.y <= box.b);
+    let best = null;
+    const consider = c => { if (!inBox(c.pts)) return; const sc = bandScore(c.pts, rects, straight); if (sc != null && (!best || sc < best.score)) best = Object.assign(c, { score:sc }); };
+    for (const s of Object.values(sa)) for (const e of Object.values(ta)) {
+      const dist = Math.hypot(e.x - s.x, e.y - s.y), k = Math.max(12, dist / 2.6);
+      const c1 = { x:s.x + s.dx * k, y:s.y + s.dy * k }, c2 = { x:e.x + e.dx * k, y:e.y + e.dy * k };
+      consider({ d:`M${s.x} ${s.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${e.x} ${e.y}`, pts:bezierPts(s, c1, c2, e, 40), end:e });
+      /* ett hörn: ut från källan rakt, in i rutan rakt */
+      const corner = s.dx !== 0 ? { x:e.x, y:s.y } : { x:s.x, y:e.y };
+      const straightIn = s.dx !== 0 ? e.dx === 0 : e.dy === 0;
+      if (straightIn && (corner.x - s.x) * (s.dx || 0) >= 0 && (corner.y - s.y) * (s.dy || 0) >= 0) {
+        const la = Math.hypot(corner.x - s.x, corner.y - s.y), lb = Math.hypot(e.x - corner.x, e.y - corner.y), rr = Math.min(8, la / 2, lb / 2);
+        const p1 = { x:corner.x - (corner.x - s.x) * rr / (la || 1), y:corner.y - (corner.y - s.y) * rr / (la || 1) };
+        const p2 = { x:corner.x + (e.x - corner.x) * rr / (lb || 1), y:corner.y + (e.y - corner.y) * rr / (lb || 1) };
+        consider({ d:`M${s.x} ${s.y} L ${p1.x} ${p1.y} Q ${corner.x} ${corner.y}, ${p2.x} ${p2.y} L ${e.x} ${e.y}`, pts:polyPts([s, corner, e]), end:e });
+      }
+    }
+    return best;
+  }
+
+
+
   /* ── Frågan om rutan med fokus (Med hjälp), dess ledtråd och kvittens ──
      lit: det som lyser när frågan står (n = täljaren, d = nämnaren, grp = grupperna/barnen i bilden,
      pile = högen som ska delas ut, rest = det som blir över, box:i = ruta i, x:g = täljarsiffran i
@@ -1770,7 +1838,7 @@
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     /* D44 ✎: övningsbladen */
     DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D,
+    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore,
     genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };

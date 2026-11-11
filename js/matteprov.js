@@ -417,7 +417,7 @@ const MatteProv = (() => {
 #mp-root .mp-dr .mp-rl{font-size:.72em;color:var(--ink-soft);margin-left:-2px}
 #mp-root .mp-dr .mp-kl{font-size:.74em;gap:5px}
 #mp-root .mp-dr .mp-kl .mp-ans.sm{font-size:1em;min-width:1.9em;height:max(44px,1.35em)}
-#mp-root .mp-klbl{font-family:var(--font-body);font-size:13px;font-weight:900;color:var(--ink-soft);width:100%}
+#mp-root .mp-klbl{font-family:var(--font-body);font-size:12px;font-weight:900;color:var(--ink-soft);line-height:1.1;max-width:64px;margin-right:2px}   /* till vänster på raden, inte i bandets väg */
 #mp-root .mp-kd{border-radius:8px;padding:0 3px}
 #mp-root .mp-kd.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
 #mp-root .mp-pic{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;max-width:350px}
@@ -462,9 +462,11 @@ const MatteProv = (() => {
 #mp-root .mp-band{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;background:none!important}
 /* Dennis 11/11: när bandet står tonas bara det som inte hör till steget ned; källan, målrutan och bandet har full styrka
    (mp-keep sitter på dem och på deras föräldrar, så att ingen förälder tonar ned dem) */
-#mp-root .mp-q.mp-fm :is(.mp-ans,.mp-frac>span,.mp-flab,.mp-capw>i,.mp-grp,.mp-kidc,.mp-pile,.mp-kd,.mp-pnum,.mp-ptc,.mp-pth,.pvd,.mp-bc,.mp-bsp,.mp-line,.mp-klbl,.mp-tecol>i):not(.mp-keep){opacity:.38;transition:opacity .25s}
+#mp-root .mp-q.mp-fm :is(.mp-ans,.mp-frac>span,.mp-flab,.mp-capw>i,.mp-grp,.mp-kidc,.mp-pile,.mp-kd,.mp-pnum,.mp-ptc,.mp-pth,.pvd,.mp-bc,.mp-bsp,.mp-line,.mp-klbl,.mp-tecol>i):not(.mp-keep):not(.mp-prompt *){filter:grayscale(1);transition:filter .25s}
 #mp-root .mp-band path{fill:none;stroke:#a855f7;stroke-width:3;stroke-dasharray:5 6;stroke-linecap:round;animation:mp-band 1.2s linear infinite}
-#mp-root .mp-band circle{fill:#a855f7}
+#mp-root .mp-band circle,#mp-root .mp-band polygon{fill:#a855f7}
+#mp-root .mp-bring{box-shadow:0 0 0 3px #a855f7!important;animation:mp-bring 1.1s ease-in-out infinite}
+@keyframes mp-bring{50%{box-shadow:0 0 0 6px rgba(168,85,247,.45)}}
 @keyframes mp-band{to{stroke-dashoffset:-22}}
 .mp-fly{position:fixed;z-index:60;width:44px;height:44px;display:grid;place-items:center;pointer-events:none}
 .mp-fly .mp-tilef{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 6px;border-radius:12px;background:#fff;border:2px solid #c084fc;font:800 24px 'Baloo 2',cursive;box-shadow:0 6px 18px rgba(147,51,234,.3)}
@@ -479,6 +481,9 @@ const MatteProv = (() => {
 #mp-root .mp-sumr .mp-pnum{border-color:#7c3aed}
 #mp-root .mp-pnum.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
 #mp-root .mp-bsn{align-self:center;min-width:30px}
+#mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
+#mp-root .mp-nearcol{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;gap:10px;margin-right:14px}
+#mp-root .mp-nearph{display:block;height:30px}
 #mp-root .mp-mr{font-size:.5em;color:#7c3aed;align-self:flex-start;margin:0 1px 0 3px}
 /* D44 ✎: övningsbladen — rest och minne alltid lila (regel 8), högen att dela ut, barnen, tallinjen, blocken, tabellen */
 #mp-root .mp-ans.rest{border-color:#c4b5fd;color:#6d28d9}
@@ -1239,7 +1244,7 @@ const MatteProv = (() => {
     const frac = `<span class="mp-frac"><span class="nu${litC(lit, 'n')}"${tap ? pk(tap[0]) : ''}>${N}</span><span class="de${litC(lit, 'd')}"${tap ? pk(tap[1]) : ''}>${D}</span></span>`;
     return lab ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span>${frac}` : frac;
   };
-  const capW = (cap, html) => `<span class="mp-capw"><i>${cap}</i>${html}</span>`;
+  const capW = (cap, html) => `<span class="mp-capw">${html}<i>${cap}</i></span>`;   // etiketten under rutan, så att bandet kan gå in uppifrån
   const KID = '<svg class="mp-kid" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4.5"/><path d="M3.5 22c0-5 3.8-8 8.5-8s8.5 3 8.5 8"/></svg>';
   /* Bilden till divisionen. made = varv (dela), grupper (grupp) eller hopp (linje) som barnet har gjort; ringarna,
      barnens antal och hoppen är numrerade (fynd 3) och går att trycka på. */
@@ -1344,7 +1349,7 @@ const MatteProv = (() => {
   function bandSource(q, focus, want) {
     const cands = [...q.querySelectorAll(`[data-act="pick"][data-v="${want}"]`)].filter(e => e !== focus && !focus.contains(e) && !e.closest('.mp-ack'));
     /* bara exakt det tal barnet ska skriva; finns det inte på skärmen blir det inget band */
-    return cands.find(e => e.closest('.lit') || e.classList.contains('lit')) || cands[cands.length - 1] || null;
+    return cands.find(e => e.classList.contains('mp-near')) || cands.find(e => e.closest('.lit') || e.classList.contains('lit')) || cands[cands.length - 1] || null;
   }
   function bandWant(t) {
     if (!IN) return null;
@@ -1353,31 +1358,43 @@ const MatteProv = (() => {
     if (IN.kind === 'prob' && !IN.adv && t.flow[IN.k]) return t.flow[IN.k].ans[IN.f];
     return null;
   }
+  let lastBand = null;          // senaste bandets underlag (för kontrollen i webbläsaren)
   function drawBand() {
     const q = document.getElementById('mp-q'), t = curTask();
     if (!q || !t || !isOv(t) || !helpOn() || locked) return;
     const old = q.querySelector('.mp-band'); if (old) old.remove();
-    q.classList.remove('mp-fm'); q.querySelectorAll('.mp-keep, .mp-bsrc').forEach(e => e.classList.remove('mp-keep', 'mp-bsrc'));
+    q.classList.remove('mp-fm'); q.querySelectorAll('.mp-keep, .mp-bsrc, .mp-bring').forEach(e => e.classList.remove('mp-keep', 'mp-bsrc', 'mp-bring'));
     const want = bandWant(t), focus = q.querySelector('.mp-ans.focus, .mp-nb.focus');
     if (want == null || !focus || (IN.v && IN.v[IN.kind === 'prob' ? IN.f : IN.hb.i])) return;   // bara den aktuella, tomma rutan
     const src = bandSource(q, focus, want);
     if (!src) return;
-    const qr = q.getBoundingClientRect(), a = src.getBoundingClientRect(), z = focus.getBoundingClientRect();
-    const x2 = z.left + z.width / 2 - qr.left;
-    let d, x1, y1;
-    if (src.matches('.mp-frac .nu')) {          // täljaren: bandet går ut åt höger och runt bråket, aldrig genom nämnaren eller etiketterna
-      const fr = src.closest('.mp-frac').getBoundingClientRect();
-      x1 = a.right - qr.left + 2; y1 = a.top + a.height / 2 - qr.top;
-      const y2 = z.top - qr.top, xr = fr.right - qr.left + 16;
-      d = `M${x1} ${y1} C ${xr} ${y1}, ${xr} ${fr.bottom - qr.top + 4}, ${(xr + x2) / 2} ${fr.bottom - qr.top + 6} S ${x2} ${y2 - 14}, ${x2} ${y2}`;
-    } else {
-      const down = z.top >= a.bottom - 4;
-      x1 = a.left + a.width / 2 - qr.left; y1 = (down ? a.bottom : a.top) - qr.top;
-      const y2 = (down ? z.top : z.bottom) - qr.top, my = (y1 + y2) / 2;
-      d = `M${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
+    /* hindren: varje textrad, siffra och etikett (textnodernas rutor) och bilderna, utom källan och målet */
+    const qr = q.getBoundingClientRect(), rel = r => ({ l:r.left - qr.left, t:r.top - qr.top, r:r.right - qr.left, b:r.bottom - qr.top });
+    const mine = e => src.contains(e) || focus.contains(e);
+    const rects = [];
+    const tw = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, { acceptNode:n => n.nodeValue.trim() && !mine(n.parentElement) && !n.parentElement.closest('.mp-band') ? 1 : 2 });
+    /* hårda hinder: siffror och läsbar text (frågan, uppgiften, stegets rad); mjuka: etiketter, tecken och bilder */
+    const READ = '.mp-ask, .mp-text, .mp-prompt, .mp-plabel, .mp-pdone';
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      const hard = /\d/.test(n.nodeValue) || !!n.parentElement.closest(READ), rg = document.createRange(); rg.selectNodeContents(n);
+      const w = n.parentElement.closest('.mp-flab, .mp-capw, .mp-klbl') ? 0.2 : 1;     // att snudda vid en etikett är en liten kostnad
+      for (const r of rg.getClientRects()) if (r.width && r.height) rects.push(Object.assign(rel(r), { hard, w }));
     }
-    q.insertAdjacentHTML('beforeend', `<svg class="mp-band" aria-hidden="true"><path d="${d}"/><circle cx="${x1}" cy="${y1}" r="3.5"/></svg>`);
-    src.classList.add('mp-bsrc');                                        // bandets start (också för testet i webbläsaren)
+    q.querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc, .mp-ans, .mp-nb').forEach(e => {
+      if (!mine(e) && !e.contains(src) && !e.contains(focus)) rects.push(Object.assign(rel(e.getBoundingClientRect()), { hard:false }));
+    });
+    lastBand = { S:rel(src.getBoundingClientRect()), T:rel(focus.getBoundingClientRect()), rects, box:{ l:2, t:2, r:qr.width - 2, b:qr.height - 2 } };
+    const route = L.bandRoute(lastBand.S, lastBand.T, rects, lastBand.box);
+    src.classList.add('mp-bsrc');
+    if (!route) {                                   // ingen fri väg: ingen linje, källan får samma lila ring som pulserar
+      src.classList.add('mp-bring'); focus.classList.add('mp-bring');
+      for (const e of [src, focus, ...q.querySelectorAll('.lit')]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
+      q.classList.add('mp-fm');
+      return;
+    }
+    const e = route.end, A = 6, tip = { down:[0, 1], up:[0, -1], right:[1, 0], left:[-1, 0] }[e.dir];
+    const tx = e.x + tip[0] * A, ty = e.y + tip[1] * A, px = -tip[1], py = tip[0];
+    q.insertAdjacentHTML('beforeend', `<svg class="mp-band" aria-hidden="true"><path d="${route.d}"/><polygon points="${tx},${ty} ${e.x + px * 5},${e.y + py * 5} ${e.x - px * 5},${e.y - py * 5}"/><circle cx="${route.pts[0].x}" cy="${route.pts[0].y}" r="3.5"/></svg>`);
     for (const e of [src, focus, ...q.querySelectorAll('.lit')]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
     q.classList.add('mp-fm');
   }
@@ -1436,8 +1453,16 @@ const MatteProv = (() => {
       ? `${fracHTML(bx(0), bx(1), null, null, true)}<span class="mp-op">=</span>${capW('kvot', bx(2))}${st.rest ? `<span class="mp-op sm">,</span>${capW('rest', bx(3))}` : ''}`
       : `${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${restBx}`;
     const label = ov && !helpOn() ? (t.flow.length > 1 ? `<div class="mp-plabel">Steg ${IN.k + 1}</div>` : '') : `<div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.q)}</div>`;
-    return shop + head + done + `<div class="mp-pcur">${label}
-      <div class="mp-nl mp-ptmpl">${tmpl}${unit(st)}</div>${msg}</div>`;
+    /* med hjälp: stegets tal ur texten upprepas som brickor på raden ovanför rutorna, så att bandet blir kort */
+    const inText = new Set((t.text.match(/\d+/g) || []).map(Number).concat(t.flow.slice(0, IN.k).map(x => x.ans[2])));   // talen i texten och svaren från förra stegen
+    const near = ov && helpOn() && !fb ? [...new Set(st.ans.filter(v => inText.has(v)))] : [];
+    /* i en division står brickorna i en kolumn till vänster om bråket, i höjd med täljaren och nämnaren de hör till */
+    const nt = v => `<b class="mp-pnum mp-near"${pk(v)}>${pvHTML(v)}</b>`;
+    const divCol = ov && st.op === '/' && near.length && near.every(v => v === st.ans[0] || v === st.ans[1]);
+    const col = divCol ? `<span class="mp-nearcol">${[0, 1].map(i => near.includes(st.ans[i]) ? nt(st.ans[i]) : '<b class="mp-nearph"></b>').join('')}</span>` : '';
+    const nearRow = near.length && !divCol ? `<div class="mp-nearrow">${near.map(nt).join('')}</div>` : '';
+    return shop + head + done + `<div class="mp-pcur">${label}${nearRow}
+      <div class="mp-nl mp-ptmpl">${col}${tmpl}${divCol ? '' : unit(st)}</div>${msg}</div>`;   // enheten står i stegets rad när brickorna tar platsen
   }
 
   /* Tabelltestet: 20 tal i två kolumner. Runda 2: de orange rättas. */
@@ -2311,7 +2336,7 @@ const MatteProv = (() => {
 
   return { open, showList, showProv, upMethod,
            /* bara för test i webbläsaren */
-           _peek:() => ({ S, IN, task:curTask() }),
+           _peek:() => ({ S, IN, task:curTask(), band:lastBand }),
            _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };
 })();
 
