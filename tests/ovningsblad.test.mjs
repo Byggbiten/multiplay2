@@ -232,6 +232,12 @@ describe('fokus i full styrka (Dennis 11/11)', () => {
     const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
     expect(src).toMatch(/\.mp-band\{[^}]*background:none!important/);
     expect(src).toMatch(/\.mp-q\.mp-fm :is\([^)]*\):not\(\.mp-keep\)\{opacity/);
-    expect(src).toMatch(/for \(const e of \[src, focus\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
+    expect(src).toMatch(/for \(const e of \[src, focus, \.\.\.q\.querySelectorAll\('\.lit'\)\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
+  });
+  it('bandet startar bara i exakt det tal barnet ska skriva (Dennis 11/11): ingen reserv i det som lyser', () => {
+    const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    const bs = src.slice(src.indexOf('function bandSource'), src.indexOf('function bandWant'));
+    expect(bs).toMatch(/\[data-act="pick"\]\[data-v="\$\{want\}"\]/);
+    expect(bs).not.toMatch(/\.lit, |querySelectorAll\('\.mp-frac \.lit/);
   });
 });

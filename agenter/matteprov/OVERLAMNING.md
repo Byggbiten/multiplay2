@@ -182,6 +182,21 @@ prov (`genForTag` ger null för divisionens taggar).
   kontrollen under bladet (`mp-skh`). Själv: inget verktyg, inget band, ingen stegtext i problemlösningen.
 - Lättare: 2:an, 5:an och 10:an, tvåsiffrigt (`EASY_D`); `digitClash` i alla generatorer.
 
+**Regel för bandet och fokus (Dennis 11/11, runda 3):** det som är i fokus och bandets start ska vara exakt det tal
+barnet ska skriva, inget annat. `bandSource` tar bara ett tryckbart tal med rutans svar (`[data-act=pick][data-v=svar]`);
+finns det inte på skärmen blir det inget band. Allt som lyser (det som räknas) och deras föräldrar har full styrka
+(`mp-keep`); resten tonas ned. Gruppernas nummer, barnens antal, högen och tallinjens siffror är inte källor; i stället
+står summan under bilden som bricka (`picSum`: "6 grupper", "4 till varje barn", "6 hopp", "2 över"). Per modul, steg
+med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
+- Dela lika, Hur många grupper, Kontrollera, Rest, Ingår: kvoten ← summan "q grupper/till varje/hopp"; resten ← "r över";
+  kontrollens nämnare ← nämnaren i bråket; kvoten och resten i kontrollen ← kvot- och restrutan; svaret ← täljaren
+  (bandet går runt bråket på höger sida); täljare och nämnare när barnet skriver divisionen ← brickorna i frågan.
+- Varje talsort: rutan ← brickan med andelen som visas när blocken delats ("3"); före delningen inget band.
+- 10/100/1000 (kvot): varje ruta ← samma siffra i täljaren; nämnaren och täljaren som saknas: inget band.
+- Pengar: hur många ← "q gånger"; över ← "r kr över".
+- Begrepp, Problemlösning, Slutledning: rutan ← brickan i texten eller svaret från förra steget; tal som inte står som
+  siffra (som "två" eller ett nytt svar) får inget band.
+
 1. En post i `PROVS` i `js/matteprov-logic.js`: `{ id:'prov2', title:'Matteprov 2', sub:'…', moments:[…],
    provCount:{ … } }`. Provlistan och provsidan ritas ur `PROVS`; lagringen är redan per prov-id (`provs[provId]`).
 2. Nya moment: lägg dem i `MOMENTS`, en generator i `GEN`, en typ i `check()`, och UI i `questionHTML`/`padHTML`/

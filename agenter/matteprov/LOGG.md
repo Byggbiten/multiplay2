@@ -164,3 +164,11 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   hör till steget ned (`.mp-fm … :not(.mp-keep)`), och källan, målrutan och deras föräldrar får `mp-keep`. Mätt i alla
   moduler med hjälp: effektiv opacitet 1 på källa, mål och band. **Lärdom:** en blek skärmbild är ett fynd, inte
   panelens fel; mät `getComputedStyle` och vad som ligger överst (`elementFromPoint`) innan man skyller på verktyget.
+
+## 2026-11-11 · Runda 3: bandet startar i svaret
+- Dennis om skärmbilden: "Där pekar ju strecket och det som skall vara i fokus lite missvisande". Bandet gick från grupp
+  6:s prickar och bara den gruppen var stark, fast svaret var antalet grupper. Rättat: summan under bilden som bricka
+  ("6 grupper", "2 över") är källan, allt som räknas är starkt, och bandet tar aldrig ett tal som inte är svaret.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och att fokus var opakt, inte vad bandet pekade
+  ut. **Lärdom:** mät källan mot svaret i varje steg (`mp-bsrc` mot rutans facit); mätningen hittade också att
+  bandstartens närmaste-element-gissning gav falska fel, därför markeras källan nu i DOM.
