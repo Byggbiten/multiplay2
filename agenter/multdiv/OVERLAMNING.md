@@ -96,11 +96,25 @@ siffra framför nästa siffra, bråkstreck, nämnaren under, kvoten efter "=" (r
 - **Falsklarm:** "An unknown error occurred when fetching the script" är panelens service worker, inte appen.
 - **Svårt:** text som är för lång hoppar knappsatsen; alltid mäta bubblan vid nya meningar.
 
+## Motorrundan (nov, gren `motor-runda`, worktree `~/multiplay-wt-motor`)
+- Pillret med gångertalet föds efter svaret i hjälpläget (`divFaktaBorn` i `divHelpCorrect`, inte i `showDivQ`).
+- Fria divisionen: lila mellanrestrutor `.md-remin` framför täljarsiffra 2…L (`exFreeRems`, `exFreeRemWait`,
+  `exFreeRemTap`; rena `remNoteTap`/`remNoteKey` med `focus` orörd). Anteckningarna tas bort när appens rester landar.
+- Klickstyrt: `finishTask` visar Nästa uppgift/Se resultatet (`finishNext`); i host-läget (`runTask`) direkt
+  `hostFinish`. Nivå 4:s platskvittens för gångertal på knapp (`divAckBtn`). Korta kvittenser är kvar automatiska.
+- Lila: `MEM_COLOR = '#7c3aed'`, divisionens restchip `.chip-mem`; hundratalets röda (`COLV`) orört.
+- Inga emojis/konfetti (`smallBurst` gör inget), SVG-ikoner i hubb, lägeskort, kladd (46 px) och livlina;
+  `.md-ntap::after` ≥ 44 px. Tester: describe "motorrundan" i `tests/multdiv.test.mjs`.
+- Uppmätt 390 × 797, ingen scroll: div 72÷3 (nivå 2), 579÷4 (3), 122÷4 (4) och mult 82·68 (4) i Titta och lär och
+  Räkna med hjälp hela vägen till Nästa uppgift; Räkna själv 579÷4 med anteckning, tips vid tom ruta, rätt svar.
+  Minsta canvas i hjälpläget mult nivå 4: 75 px (under rad 2).
+
 ## Kända begränsningar
 - **Kladdens höjd i 390 × 797:** Räkna själv med tvåsiffrig faktor 165 px från början, 108 px med ledtrådsraden,
   95 px när hjälpbiten står i bubblan (matteprovets prov). Hjälpläget: 90 px under rad 2:s tvåradiga fråga.
 - **P14:** skakningar vid fel svar finns kvar, och demon pulserar tiotalssiffran rött i fasen rad 2 (`md-prob`).
-- **P13:** i Räkna själv räknas en siffra följd av Klar som ett försök.
+- **P13 (löst i motorrundan):** Klar med tom svarsruta ger ett tips och fokus i rutan, utan rättning och utan försök
+  (`freeUnfilled`). Matteprovets fria motorläge går samma väg.
 - Dela upp har färgade siffror i förklaringen men ingen ref-puls (mekanismen finns bara i multdiv).
 - Fria läget har ingen minnesinmatning (spalten har ingen plats och ingen väljare; minnessiffrorna landar vid rätt
   svar), så inget fokus byts där. Kontrollerat 21/10 i webbläsaren efter matteprovets D41 ✎ om minnesrutorna.

@@ -70,3 +70,15 @@ Rollens lärdomslogg: en post per runda. Tillståndet nu: `OVERLAMNING.md`.
   pekas ut före "kvoten stämmer". Brieffallet 705 ÷ 5 visade sig ha nollan i täljaren, inte i kvoten (141).
 - **Lärdom:** kontrollera exempeltalen i uppdraget mot motorn innan de blir facit i ett test — två av dem (705 ÷ 5,
   9639 ÷ 3 utan mellanrest) passade inte den typ jag först gav dem.
+
+## Runda 8 · 2026-11-11 · Motorrundan (brainstorm/13, fynd 10 och 12 i brainstorm/11), gren `motor-runda`
+- **Vad som inte fungerade:** pillret visade svaret före frågan, Räkna själv saknade plats för mellanresten, emojis
+  och konfetti fanns kvar, träffytor under 44 px, uppgiften bytte av sig själv, minnet var rött och Klar rättade
+  halvifyllda svar.
+- **Byggt:** pillret som kvittens efter svaret; lila mellanrestrutor i fria divisionen som inte flyttar kvotens fokus;
+  Klar med tom ruta ger tips utan rättning; Nästa uppgift på knapp; lila minne och rest; SVG-ikoner i stället för
+  emojis, ingen konfetti, kladdknappar 46 px och nålrutor 44 px.
+- **Val:** Klar blir kvar som enda knapp; rutorna är redan lika många som svaret, så tipset avslöjar inget nytt.
+  Korta kvittenser ("Rätt! 15", siffran som flyger ner, strykningen) är kvar automatiska eftersom inget försvinner.
+- **Lärdom:** emojistrippning med regex lämnar mellanslag i strängar som annan kod söker efter; byt hela funktioner
+  mellan kända gränser i stället för att leta efter textsnuttar.
