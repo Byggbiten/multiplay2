@@ -654,6 +654,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   aldrig över halva kortet; i övrigt den minst dåliga vägen.
   Svaret står på ett ställe: summabrickan ("9 grupper") flyttas rakt ovanför rutan och bandet går kort rakt ner,
   ingen kopia av talet. Källa: Dennis valde "Flytta '9 grupper'" (11/11) framför kopian ovanför rutan och ett längre band.
+  Fästpunkterna räknas fram exakt: start ett fast avstånd från själva siffrornas kant (inte brickans), mitt på sidan
+  som vetter mot rutan; spetsen ett fast avstånd utanför rutans ram, mitt på sidan som vetter mot källan; handtagen
+  vinkelrätt ut från sidorna; ritas efter att layouten stabiliserats och om vid ändring. Källa: Dennis: "strecket på
+  nästan alla bilder är ganska slarvig … binda den till ett lämpligt ställe på den siffra den refererar till och sedan
+  till den ruta där den skall in. Så att fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär
+  eller uppskattade'".
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text

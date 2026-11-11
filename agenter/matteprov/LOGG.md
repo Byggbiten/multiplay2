@@ -206,3 +206,25 @@ barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knyt
   104 px trots den nya regeln. **Lärdom:** när en regel ersätts, ta bort den gamla; mät beräknad stil
   (`getComputedStyle`) när ett mått inte ändras.
 - Mätt: kladden minst 121 px (Dela lika), inga band genom text eller siffror, kvot och rest cirka 30 px.
+
+## 2026-11-11 · Runda 7: Dennis fall i Hur många grupper, och exakta fästpunkter
+- **Fallet:** Hur många grupper, Svårare med hjälp, 15/3. I nämnarsteget gick bandet från "3" genom grupp 4 och förbi
+  brickan "5 grupper", som lyste orange; Dennis svarade 5 ("är jag dum i huvudet eller?").
+- **Rotorsaken:** (1) bilden var ett mjukt hinder i `bandScore`, så en kort väg genom grupperna vann; gruppernas
+  nummerbrickor passerades på cirka 15 px trots marginalen; (2) summabrickan "5 grupper" visades och lystes
+  (`lit:'grp'` i nämnarsteget) redan innan kvoten var i fokus, och var det närmaste talet på bandets väg; (3)
+  fästpunkterna var ungefärliga (fasta 2 px från brickans ruta, inte från siffrorna).
+- **Rättat:** bilden hård, summabrickan bara i kvot- och reststeget, nämnarsteget lyser inte grupperna, ring i stället
+  för band när ingen fri väg finns. Fästpunkterna mäts exakt (`digitsRect`, 3 px från siffrorna, spetsen 3 px utanför
+  ramen, `scheduleBand` efter typsnitt och layout, `ResizeObserver`), en metod för alla källor. Dennis fall som
+  vitest med uppmätta rutor (rött mot gamla koden, grönt nu).
+- **Varför fångade inte svepet det:** svepet kördes bara på Lättare med hjälp. Svårare med hjälp är ett eget flöde
+  (barnet skriver divisionen själv, med täljar- och nämnarsteg före kvoten), och just där står summabrickan och
+  frågans tal på var sin sida om bilden. Svepet mätte dessutom bara text och siffror som hinder, inte bilden.
+  **Lärdom:** svep varje nivå och läge som är ett eget flöde (samma regel som i CLAUDE.md för samordnarens granskning);
+  ett visuellt hjälpmedel mäts mot allt det ska undvika, också bilden. Svepet ligger nu i repot
+  (`tests/webblasare/band-svep.js`) och körs på båda nivåerna.
+- **Bifynd:** i Ingår, Svårare, kvotsteget låg orden "grupper" och "över" 6 px in i grupperna (två rader grupper).
+  Platsen ovanför två brickor höjdes från 40 till 46 px, bildens radavstånd sänktes från 6 till 4 px och ordens
+  radhöjd till 12 px, så att kladden stannar på 121 px; svepet kontrollerar nu att summabrickan inte ligger på bilden
+  (provat mot de gamla måtten: 6,5 px överlapp).

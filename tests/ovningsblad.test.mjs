@@ -306,3 +306,17 @@ describe('runda 5: bandet vilseleder inte (sidorna vänder sig mot varandra)', (
     expect(r.pts[0].x).toBeGreaterThan(S.r);           // ut åt höger, mot täljaren
   });
 });
+
+describe('runda 7: Dennis fall, Hur många grupper Svårare med hjälp, nämnaren 15/3', () => {
+  /* uppmätt i 390 × 797 (runda 6-koden): källan "3" i "Grupper med 3 i varje", målet nämnarrutan, grupperna och
+     summabrickan emellan. Bilderna (ringarna) märks pic:true. */
+  const R = (l, t, r, b, o) => Object.assign({ l, t, r, b }, o || {});
+  const S = R(191, 56, 221, 86), T = R(123, 244, 176, 288), box = R(2, 2, 360, 400);
+  const rects = [R(95, 58, 190, 78, { hard:true }), R(222, 58, 271, 78, { hard:true }),
+    R(156, 87, 163, 106, { hard:true, pad:10 }), R(221, 87, 228, 106, { hard:true, pad:10 }),
+    R(155, 92, 212, 117, { pic:true }), R(220, 92, 277, 117, { pic:true }), R(90, 92, 147, 117, { pic:true }),
+    R(229, 157, 241, 192, { hard:true, pad:10 }), R(210, 232, 263, 276, {})];
+  it('ingen väg genom grupperna: ringen i stället för band', () => {
+    expect(L.bandRoute(S, T, rects, box)).toBeNull();
+  });
+});
