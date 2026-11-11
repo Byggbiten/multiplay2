@@ -1218,7 +1218,7 @@
     const q = Math.floor(n / d), r = n % d;
     return dprob('dproblem', 'rest', `${name} lägger ${n} ${th.many} i ${co.many}, ${d} i varje. Hur många ${co.many} blir fulla, och hur många ${th.many} blir över?`,
       [{ q:'Dela, och skriv resten.', op:'/', ans:[n, d, q, r], rest:true }], q,
-      `${n}/${d} = ${q}, rest ${r}. ${q} ${co.many} blir fulla och ${r} ${th.many} blir över.`, `pr${n}/${d}`);
+      `${n}/${d} = ${q}, rest ${r}. ${q} ${co.many} blir fulla och ${r} ${r === 1 ? th.one : th.many} blir över.`, `pr${n}/${d}`);
   }
   function makeDbehovs(name, th, co, n, d) {
     const q = Math.floor(n / d), r = n % d;

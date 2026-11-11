@@ -211,3 +211,18 @@ describe('snällt och utan emojis', () => {
     expect(ov).not.toMatch(/\p{Extended_Pictographic}/u);
   });
 });
+
+describe('runda 2 (brainstorm/13): Lättare för åk 2 och täljarens siffror', () => {
+  it('Lättare håller sig till 2:an, 5:an och 10:an, med tvåsiffriga tal', () => {
+    for (const m of ['dela', 'grupper', 'dkontroll', 'drest', 'ingar', 'kortdiv', 'dtabell'])
+      for (let s = 1; s <= 30; s++) for (const t of all(m, 'latt', s)) {
+        const d = t.d != null ? t.d : t.y, n = t.n != null ? t.n : t.x;
+        expect(L.EASY_D).toContain(d);
+        expect(n).toBeLessThanOrEqual(100);
+      }
+  });
+  it('täljarens siffror är aldrig nämnaren (505/5, 24/2)', () => {
+    for (const m of ['dela', 'grupper', 'dkontroll', 'drest', 'ingar', 'kortdiv', 'talsort']) for (const lv of LEVELS)
+      for (let s = 1; s <= 30; s++) for (const t of all(m, lv, s)) expect(L.digitClash(t.n, t.d)).toBe(false);
+  });
+});

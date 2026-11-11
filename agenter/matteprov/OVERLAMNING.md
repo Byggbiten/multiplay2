@@ -168,7 +168,20 @@ prov (`genForTag` ger null för divisionens taggar).
   kontrollen som mall, inga lika tal i olika roller eller dubbelsiffror (`distinct`, `twinDigits`).
 - Tester: `tests/ovningsblad.test.mjs` (48).
 
-## Så läggs Matteprov 2 till
+### Runda 2: stil C · Brickor (D44 ✎, 2026-11-11, gren `ovningsblad-runda2`, ej mergad)
+- Stilen ligger i de delade renderarna för övningsbladen (`isOv(t)` släpper inte in Matteprov 1): `pvHTML`/`pvText`
+  (siffror i platsvärdesfärg i rutor, bråk, frågor och brickor; rest lila), `fracHTML(…, lab)` med etiketterna
+  täljare/nämnare och `capW` (kvot, rest), `tileText` (talen i texten är brickor att trycka på).
+- **Bandet** (`drawBand`, `bandSource`, `bandWant`): bara Med hjälp och bara den aktuella tomma rutan; källan är det
+  tryckbara tal som är svaret (gruppens nummer, kvoten, resten, täljaren, priset), annars det som lyser. Från täljaren
+  går bandet ut åt höger runt bråket. **Flygningen** (`flyTo`): vid tryck på ett tal och när hjälpen visar svaret;
+  `animateDeal` låter bollarna och hoppet röra sig från högen.
+- **Verktyget är hjälpen** (`toolOf`, `prepTool`, `IN.tool`/`toolKey`; nötloopen ger nya kopior av uppgiften, därför
+  läggs verktyget på i `curTask`): Kontrollera och Ingår får högen (eller tallinjen över 40), Pengar tallinjen i kronor,
+  10/100/1000 nollor att stryka med ett tryck, Varje talsort block som delas med ett tryck (`split`), divisionstestet
+  kontrollen under bladet (`mp-skh`). Själv: inget verktyg, inget band, ingen stegtext i problemlösningen.
+- Lättare: 2:an, 5:an och 10:an, tvåsiffrigt (`EASY_D`); `digitClash` i alla generatorer.
+
 1. En post i `PROVS` i `js/matteprov-logic.js`: `{ id:'prov2', title:'Matteprov 2', sub:'…', moments:[…],
    provCount:{ … } }`. Provlistan och provsidan ritas ur `PROVS`; lagringen är redan per prov-id (`provs[provId]`).
 2. Nya moment: lägg dem i `MOMENTS`, en generator i `GEN`, en typ i `check()`, och UI i `questionHTML`/`padHTML`/

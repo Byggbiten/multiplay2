@@ -467,6 +467,10 @@ const MatteProv = (() => {
 .mp-fly .mp-tilef{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 6px;border-radius:12px;background:#fff;border:2px solid #c084fc;font:800 24px 'Baloo 2',cursive;box-shadow:0 6px 18px rgba(147,51,234,.3)}
 .mp-fly .pvE{color:#16a34a}.mp-fly .pvT{color:#2563eb}.mp-fly .pvH{color:#dc2626}.mp-fly .pvTu{color:#9333ea}.mp-fly .pvTT{color:#d97706}
 @media (prefers-reduced-motion:reduce){#mp-root .mp-band path{animation:none}}
+#mp-root .mp-skh{margin:6px 0 0;text-align:center;font-weight:900;font-size:15px;color:var(--ink)}
+#mp-root .mp-skok{font-size:12px;color:#15803d}
+#mp-root .mp-bsp{display:inline-flex;gap:6px;padding:2px;border-radius:8px;border:1.5px dashed #c084fc}
+#mp-root .mp-bc.tap{cursor:pointer}
 #mp-root .mp-mr{font-size:.5em;color:#7c3aed;align-self:flex-start;margin:0 1px 0 3px}
 /* D44 ✎: övningsbladen — rest och minne alltid lila (regel 8), högen att dela ut, barnen, tallinjen, blocken, tabellen */
 #mp-root .mp-ans.rest{border-color:#c4b5fd;color:#6d28d9}
@@ -1277,14 +1281,20 @@ const MatteProv = (() => {
   }
   /* Hundraplattor, tiostavar och ental (K_S 67): ett kluster per talsort, i talsortens färg */
   function blocksHTML(t, lit) {
-    return `<div class="mp-blk">${t.fields.map(f => f.dig ? `<span class="mp-bc p${f.place}${litC(lit, 'blk:' + f.place)}">${`<i class="b${f.place}"></i>`.repeat(f.dig)}</span>` : '').join('')}</div>`;
+    const sp = (IN && IN.split) || {};
+    return `<div class="mp-blk">${t.fields.map(f => {
+      if (!f.dig) return '';
+      const on = lit && lit.has('blk:' + f.place), b = `<i class="b${f.place}"></i>`;
+      if (sp[f.place]) return `<span class="mp-bsp">${Array(t.d).fill(`<span class="mp-bc p${f.place}${on ? ' lit' : ''}">${b.repeat(f.dig / t.d)}</span>`).join('')}</span>`;
+      return `<span class="mp-bc p${f.place}${on ? ' lit tap' : ''}"${on ? ` data-act="split" data-p="${f.place}" role="button" aria-label="Dela i ${t.d}"` : ''}>${b.repeat(f.dig)}</span>`;
+    }).join('')}</div>`;
   }
   /* Dela varje talsort: täljarens siffror under sina talsorter, kvoten en ruta per talsort i samma färg */
   function tsHTML(t, fb, lit) {
     const HB = !fb && IN.hb;
     const nu = t.fields.map(f => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i><b class="pvd pv${L.PLACE_ID[f.place]}${litC(lit, 'x:' + f.place)}"${pk(f.dig)}>${f.dig}</b></span>`).join('');
     const qs = t.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${fbox(t, i, fb, f.ans)}</span>`).join('');
-    return (HB ? askHTML(t) : '') + blocksHTML(t, lit) + `<div class="mp-te mp-ts"><div class="ln">${fracHTML(nu, t.d, lit, null)}<span>=</span>${qs}</div></div>`;
+    return (HB ? askHTML(t) : '') + (HB || (fb && fb.showAns) ? blocksHTML(t, lit) : '') + `<div class="mp-te mp-ts"><div class="ln">${fracHTML(nu, t.d, lit, null)}<span>=</span>${qs}</div></div>`;
   }
   /* Med 10, 100 och 1000 som bråk. Med hjälp stryker barnet nollorna med ett tryck (fynd 9): en i nämnaren och en i
      täljaren åt gången. Täljarens siffror går att trycka på. */
@@ -1335,10 +1345,11 @@ const MatteProv = (() => {
     const qr = q.getBoundingClientRect(), a = src.getBoundingClientRect(), z = focus.getBoundingClientRect();
     const x2 = z.left + z.width / 2 - qr.left;
     let d, x1, y1;
-    if (src.closest('.mp-frac .nu')) {          // täljaren: bandet går ut åt vänster, runt bråket, så att det inte ser ut att komma från nämnaren
-      x1 = a.left - qr.left - 2; y1 = a.top + a.height / 2 - qr.top;
-      const y2 = z.top - qr.top, xl = Math.min(x1, z.left - qr.left) - 26;
-      d = `M${x1} ${y1} C ${xl} ${y1}, ${xl} ${y2 - 18}, ${x2} ${y2}`;
+    if (src.matches('.mp-frac .nu')) {          // täljaren: bandet går ut åt höger och runt bråket, aldrig genom nämnaren eller etiketterna
+      const fr = src.closest('.mp-frac').getBoundingClientRect();
+      x1 = a.right - qr.left + 2; y1 = a.top + a.height / 2 - qr.top;
+      const y2 = z.top - qr.top, xr = fr.right - qr.left + 16;
+      d = `M${x1} ${y1} C ${xr} ${y1}, ${xr} ${fr.bottom - qr.top + 4}, ${(xr + x2) / 2} ${fr.bottom - qr.top + 6} S ${x2} ${y2 - 14}, ${x2} ${y2}`;
     } else {
       const down = z.top >= a.bottom - 4;
       x1 = a.left + a.width / 2 - qr.left; y1 = (down ? a.bottom : a.top) - qr.top;
@@ -1423,6 +1434,10 @@ const MatteProv = (() => {
       return `<button class="${cls}" ${act}><span class="ex">${esc(it.text)} =</span><span class="mp-ans xs">${esc(IN.v[i] || '')}</span>${fix}</button>`;
     };
     const half = Math.ceil(t.items.length / 2);
+    const it = t.items[IN.f], kh = isOv(t) && helpOn() && !fb && it && !out[IN.f]
+      ? `<p class="mp-skh">Kontrollera: <b class="mp-pnum">${pvHTML(it.y)}</b> · <b class="mp-pnum">${IN.v[IN.f] ? pvHTML(IN.v[IN.f]) : '?'}</b> = ${IN.v[IN.f] ? `<b class="mp-pnum">${pvHTML(it.y * +IN.v[IN.f])}</b>${it.y * +IN.v[IN.f] === it.x ? ' <span class="mp-skok">som täljaren</span>' : ''}` : `<b class="mp-pnum">${pvHTML(it.x)}</b>?`}</p>` : '';
+    if (kh) return `<div class="mp-sheet">${''}<div class="col">${t.items.slice(0, half).map((it, i) => cell(it, i)).join('')}</div>
+      <div class="col">${t.items.slice(half).map((it, i) => cell(it, i + half)).join('')}</div></div>${kh}`;
     return `<div class="mp-sheet"><div class="col">${t.items.slice(0, half).map((it, i) => cell(it, i)).join('')}</div>
       <div class="col">${t.items.slice(half).map((it, i) => cell(it, i + half)).join('')}</div></div>`;
   }
@@ -2229,6 +2244,7 @@ const MatteProv = (() => {
                             if (IN.made >= L.picMax(t) && IN.dealPending) { IN.dealPending = false; if (IN.hb) IN.hb.ack = L.dealDone(t); }
                             refreshQ(t); animateDeal(t, pr); }
                         } break;
+      case 'split':     if (!locked && IN && IN.kind === 'boxes') { IN.split = IN.split || {}; IN.split[el.dataset.p] = true; snd('click'); refreshQ(curTask()); } break;   // varje verb är en gest
       case 'padv':      if (IN && IN.kind === 'prob' && IN.adv) { snd('click'); probAdvance(curTask()); } break;
       case 'svarnext':  snd('click'); afterSvar(); break;
       case 'scpen':     scTool(false); break;
