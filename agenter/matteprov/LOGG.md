@@ -247,3 +247,15 @@ barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knyt
 - **Fel under bygget:** `.mp-bc .b0` fanns i två regler och den senare (7 px) vann över den nya; en rad med fyra
   talsorter radbröts när texten växte. Mätt i webbläsaren, rättat.
 - Vitest: tre nya test (A2, B7/8008, B2), röda mot den gamla logiken, gröna nu; 594 gröna.
+
+## 2026-11-11 · Runda 8b: nummerbrickan täckte en prick
+- **Fyndet (samordnarens granskning):** i Slutledning, Lättare, låg gruppens nummerbricka helt över första pricken, så
+  att en grupp om 5 såg ut att ha 4. Samma överlapp i Hur många grupper (8 av 8) och Rest (2 av 2). Det lär barnet fel.
+- **Varför fångade inte svepet det:** svepet mätte vad bandet korsade och var summabrickan stod, aldrig vad en bricka
+  täckte i bilden. Brickan i ramens hörn var ett beslut från runda 2 som ingen mätte när prickarna växte. **Lärdom:**
+  allt som läggs ovanpå en bild ska mätas mot det som ska räknas i bilden; ett räknebart föremål som täcks ändrar
+  svaret. Kontrollen ligger nu i svepet och slog till mot den gamla koden i Grupper, Kontrollera, Rest, Ingår och
+  Slutledning (264 träffar på Lättare), noll efter rättelsen.
+- **Kostnad:** 12 px prickar och brickan i egen plats tog cirka 40 px i Ingår, Svårare (kladden 82 px). Återtagen med
+  grupper i två rader i stora tal, resten i gruppernas rad, tätare kort när barnet skriver divisionen och ett kortare
+  band (cirka 28 px).

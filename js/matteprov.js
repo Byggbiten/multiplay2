@@ -420,15 +420,15 @@ const MatteProv = (() => {
 #mp-root .mp-klbl{font-family:var(--font-body);font-size:12px;font-weight:900;color:var(--ink-soft);line-height:1.1;max-width:64px;margin-right:2px}   /* till vänster på raden, inte i bandets väg */
 #mp-root .mp-kd{border-radius:8px;padding:0 3px}
 #mp-root .mp-kd.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
-#mp-root .mp-pic{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;max-width:350px}
-#mp-root .mp-grp{display:inline-grid;gap:3px;padding:4px;border:2px dashed #94a3b8;border-radius:12px}
-#mp-root .mp-grp.box{border-style:solid;border-color:#b45309;background:#fef3c7;border-radius:5px}
+#mp-root .mp-pic{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;max-width:100%}
+#mp-root .mp-grp{display:inline-grid;gap:3px;padding:9px 4px 4px;border:2px dashed #94a3b8;border-radius:12px}   /* runda 8b: plats överst för nummerbrickan */
+#mp-root .mp-grp.box,#mp-root .mp-pic.sm .mp-grp.box{border-style:solid;border-color:#b45309;background:#fef3c7;border-radius:5px;padding:4px}   /* barnens lådor har ingen nummerbricka */
 #mp-root .mp-loose{display:inline-flex;gap:3px;padding:4px}
 #mp-root .mp-ball{width:13px;height:13px;border-radius:50%;background:#475569;display:inline-block}
-#mp-root .mp-pic.sm .mp-ball{width:8px;height:8px}
+#mp-root .mp-pic.sm .mp-ball{width:12px;height:12px}   /* runda 8b: golv 12 px */
 #mp-root .mp-intro .mp-ball{width:22px;height:22px}
 #mp-root .mp-intro .mp-pic{gap:10px 12px}
-#mp-root .mp-pic.sm .mp-grp{gap:2px;padding:3px}
+#mp-root .mp-pic.sm .mp-grp{gap:2px;padding:8px 3px 3px}
 #mp-root .mp-grp.lit,#mp-root .mp-loose.lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.5);border-color:#fb923c;border-radius:12px}
 #mp-root .mp-loose.lit .mp-ball{background:#ea580c}
 #mp-root .mp-ts .ln{align-items:center;gap:4px}
@@ -454,8 +454,8 @@ const MatteProv = (() => {
 #mp-root .mp-pnum,#mp-root .mp-kd{display:inline-flex;align-items:center;justify-content:center;min-width:34px;min-height:30px;padding:1px 7px;margin:0 2px;border-radius:11px;background:#fff;border:2px solid #c084fc;font-family:var(--font-head);font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(147,51,234,.15)}
 #mp-root .mp-ptc .mp-pnum{font-size:24px}
 #mp-root .mp-q1 .mp-n{font-family:var(--font-head)}
-#mp-root .mp-gn{position:absolute;top:-8px;left:-6px;min-width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #c084fc;font:800 12px var(--font-head);display:grid;place-items:center;cursor:pointer}
-#mp-root .mp-gn.mp-run{display:inline-flex;align-items:center;white-space:nowrap;padding:0 4px;border-color:#fb923c;left:-10px}
+#mp-root .mp-gn{box-sizing:border-box;position:absolute;top:-11px;left:50%;transform:translateX(-50%);min-width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #c084fc;font:800 12px var(--font-head);display:grid;place-items:center;cursor:pointer}
+#mp-root .mp-gn.mp-run{display:inline-flex;align-items:center;white-space:nowrap;padding:0 4px;border-color:#fb923c}
 #mp-root .mp-grp{position:relative}
 #mp-root .mp-gc{font:800 13px var(--font-head);min-height:14px;line-height:1}
 #mp-root .mp-line .jn{font:800 12px var(--font-head);fill:#2563eb;text-anchor:middle;cursor:pointer}
@@ -503,8 +503,9 @@ const MatteProv = (() => {
 #mp-root .mp-capw>i.rest{color:#6d28d9}
 #mp-root .mp-dr.sum1 .ln:first-child{padding-top:74px}
 #mp-root .mp-dr.sum2 .ln:first-child{padding-top:84px}
-#mp-root .mp-dr.sum1.w .ln:first-child{padding-top:30px}
-#mp-root .mp-dr.sum2.w .ln:first-child{padding-top:46px}
+#mp-root .mp-dr.sum1.w .ln:first-child{padding-top:36px}
+#mp-root .mp-dr.sum2.w .ln:first-child{padding-top:34px}
+#mp-root .mp-dr.sum2.w .mp-sumov{top:-73px}   /* runda 8b: bandet ca 28 px, kladden får platsen */
 #mp-root .mp-dr.sum2 .mp-sumov{flex-direction:column-reverse;align-items:flex-start;top:-85px}
 #mp-root .mp-dr.sum2 .mp-sumov>i{margin:0 0 1px;line-height:12px;transform:translateX(-50%)}
 #mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
@@ -522,7 +523,7 @@ const MatteProv = (() => {
 #mp-root .mp-tile .mp-tt{font-weight:900;font-size:14px;line-height:1.15;color:var(--deep);flex:1}
 #mp-root .mp-tile .mp-badge{position:absolute;top:-7px;right:6px;font-size:10.5px;padding:1px 6px}
 #mp-root .mp-pic{flex-direction:column;gap:4px}
-#mp-root .mp-grps{display:flex;flex-wrap:wrap;gap:10px 12px;justify-content:center;min-height:8px;padding:0 6px}   /* runda 8 (B4): nummerbrickan får plats mellan grupperna */
+#mp-root .mp-grps{display:flex;flex-wrap:wrap;gap:12px 6px;align-items:center;justify-content:center;min-height:8px;padding:0 6px}   /* runda 8 (B4): nummerbrickan får plats mellan grupperna */
 #mp-root .mp-pile{display:inline-grid;gap:3px;padding:6px;border-radius:14px;border:2px dashed transparent}
 #mp-root .mp-pile.tap{cursor:pointer;border-color:#94a3b8;background:#fff}
 #mp-root .mp-pile.lit{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.35);animation:mp-pl 1.1s ease-in-out infinite}
@@ -565,9 +566,10 @@ const MatteProv = (() => {
 #mp-root .mp-dzx .mp-ans.sm{min-width:38px;height:46px;padding:0;font-size:26px}
 #mp-root .mp-dzx .mp-tecol i{font-size:.36em}
 #mp-root .mp-q.grow{gap:14px;padding-bottom:14px}
+#mp-root .mp-q:has(.mp-dr.w){gap:4px}   /* runda 8b: barnet skriver divisionen (två rutor i bråket) och bilden har 12 px prickar: tätare kort, kladden ≥ 120 px */
 #mp-root .mp-q.grow .mp-dzx .mp-frac{line-height:1}
-#mp-root .mp-slpic .mp-ball{width:14px;height:14px}
-#mp-root .mp-slpic .mp-grps{gap:10px 12px}
+#mp-root .mp-slpic .mp-pic .mp-ball{width:14px;height:14px}
+#mp-root .mp-slpic .mp-grps{gap:14px 10px}
 #mp-root .mp-slpic .mp-pic{flex-direction:row;align-items:center}
 #mp-root .mp-q0{font:800 22px var(--font-head);color:var(--deep);font-variant-numeric:tabular-nums}   /* runda 8: hela uppgiften står alltid överst */
 #mp-root .mp-q.grow .mp-te.mp-ts{font-size:clamp(28px,8.4vw,40px)}
@@ -1329,7 +1331,7 @@ const MatteProv = (() => {
   function drPic(t, lit, made, tapOn, run) {
     if (t.pic === 'linje') return lineSVG(t, lit, made, tapOn);
     const ball = '<i class="mp-ball"></i>', left = L.picLeft(t, made), done = made >= L.picMax(t);
-    const cols = k => k <= 5 ? k : Math.ceil(k / 2);
+    const sm = t.n > 24, cols = k => (sm ? k <= 3 : k <= 5) ? k : Math.ceil(k / 2);   // runda 8b: med 12 px prickar står stora tal i två rader per grupp
     let groups = '';
     if (t.pic === 'grupp') for (let g = 0; g < made; g++)
       groups += `<span class="mp-grp${litC(lit, 'grp')}" style="grid-template-columns:repeat(${cols(t.d)},auto)">${run ? `<b class="mp-gn mp-run"${g === made - 1 ? pk((g + 1) * t.d) : ''}>${pvHTML((g + 1) * t.d)}</b>` : `<b class="mp-gn">${pvHTML(g + 1)}</b>`}${ball.repeat(t.d)}</span>`;   // runda 8 (B2): hoppräkning i täljarens steg
@@ -1338,6 +1340,8 @@ const MatteProv = (() => {
     const pileLit = done ? litC(lit, 'rest') : litC(lit, 'pile');
     const tap = tapOn && !done;
     const pile = left > 0 ? `<span class="mp-pile${done ? ' rest' : ''}${pileLit}${tap ? ' tap' : ''}" style="grid-template-columns:repeat(${Math.min(10, left)},auto)"${tap ? ' data-act="deal" role="button" aria-label="Dela ut"' : ''}>${ball.repeat(left)}</span>` : '';
+    /* runda 8b: när allt är utdelat står resten sist i gruppernas rad, inte på en egen rad (platsen går till prickarna) */
+    if (done && t.pic === 'grupp') return `<div class="mp-pic${t.n > 24 ? ' sm' : ''}"><div class="mp-grps">${groups}${pile}</div></div>`;
     return `<div class="mp-pic${t.n > 24 ? ' sm' : ''}">${pile}<div class="mp-grps">${groups}</div></div>`;
   }
   /* Tallinjen (27b): numrerade hopp om d från 0; resten (lila) är biten som är kvar till n */

@@ -7,7 +7,8 @@
      - det är inte längre än 2 gånger det raka avståndet,
      - startpunkten ligger BAND_START (3) ± 1 px från siffrornas egen kant, pilspetsen BAND_TIP (3) ± 1 px utanför rutans
        ram, också efter en storleksändring av kortet,
-     - summabrickorna ligger inte på bilden,
+     - summabrickorna ligger inte på bilden, och ingen nummerbricka eller bricka ligger över en prick eller ett block;
+       prickarna är minst 12 px,
      - inget meddelande ligger över annan text och inget rinner ut ur kortet (också divisionstestet efter Klar),
      - stegets text i en division pekar på rutan i fokus (täljaren eller nämnaren),
      - kladden är minst 120 px.
@@ -46,6 +47,12 @@ window.bandSvep = async function (o) {
     const qq = q('#mp-q'), path = q('.mp-band path'), tipEl = q('.mp-band polygon');
     const kh = Math.round(q('#mp-canvas').getBoundingClientRect().height);
     if (!efterAndring && kh < res.kladdMin) { res.kladdMin = kh; res.kladdVar = `${id} steg ${steg}`; }
+    /* runda 8b: ingen nummerbricka eller bricka får ligga över en prick eller ett block (en grupp om 5 såg ut att ha 4) */
+    const prickar = [...q('#mp-q').querySelectorAll('.mp-ball, .mp-bc > i')].map(e => e.getBoundingClientRect()).filter(r => r.width);
+    q('#mp-q').querySelectorAll('.mp-gn, .mp-pnum, .mp-sumov, .mp-ptp').forEach(e => { const s = e.getBoundingClientRect(); if (!s.width) return;
+      if (prickar.some(b => s.left < b.right - 0.5 && s.right > b.left + 0.5 && s.top < b.bottom - 0.5 && s.bottom > b.top + 0.5)) fel.push(`${id} steg ${steg}: brickan "${e.textContent.trim()}" ligger över en prick`); });
+    const bollar = [...q('#mp-q').querySelectorAll('.mp-ball:not(.ghost), .mp-bc .b0')].map(e => e.getBoundingClientRect().width).filter(Boolean);
+    if (bollar.length && Math.min(...bollar) < 11.5) fel.push(`${id} steg ${steg}: prickarna är ${Math.min(...bollar).toFixed(0)} px`);
     /* summabrickorna får inte ligga på bilden */
     const bilder = [...q('#mp-q').querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc')].map(e => e.getBoundingClientRect());
     q('#mp-q').querySelectorAll('.mp-sumov').forEach(e => { const s = e.getBoundingClientRect();

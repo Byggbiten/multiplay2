@@ -13,7 +13,8 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 (merge `34b4bfa`). Runda 8 ligger på grenen `ovningsblad-runda8` (pushad, ej mergad): A1–A5 ur
 `brainstorm/14-2026-11-11-ovningsblad-vd-genomspelning.md`, Dennis val B1–B4, B6–B8 och hans fall 8008/4. Kort
 division (A6, B5) ingår inte i uppdraget och rörs inte (multdiv-motorn). Etiketterna T H T E behålls (Dennis: färgen
-skiljer de två T:na). Hela sviten 594 gröna; svepet `tests/webblasare/band-svep.js` körs i båda nivåerna.
+skiljer de två T:na). Runda 8b (nummerbrickorna och 12 px prickar) på samma gren. Hela sviten 594 gröna; svepet
+`tests/webblasare/band-svep.js` körs i båda nivåerna.
 
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
@@ -297,7 +298,13 @@ som funkar oavsett vilken siffra det gäller". En metod för alla källor och m�
   kontrollen ifylld med "täljaren" sist.
 - **Slutledning Lättare (B8):** "Vilket tal tänker jag på?" med rest får en bild: kvoten som grupper om nämnaren och
   resten (`slPic`).
-- **Svepet** kontrollerar nu också: rubriker och etiketter som text, meddelanden som ligger över annan text eller
+- **Runda 8b (samordnaren: en grupp om 5 såg ut att ha 4):** gruppens nummerbricka (`.mp-gn`) står mitt ovanför
+  ramen, i en egen plats överst i ramen (padding-top), aldrig över en prick. Prickarna är minst 12 px (`.mp-pic.sm`);
+  i stora tal står en grupp i två rader (`cols` i `drPic`), och resten står sist i gruppernas rad när allt är utdelat.
+  Barnens lådor (`.mp-grp.box`) har ingen bricka och behåller sin padding. När barnet skriver divisionen själv är
+  kortet tätare (`:has(.mp-dr.w)`, gap 4 px) och bandet från summan cirka 28 px, så att kladden håller 120 px.
+- **Svepet** kontrollerar nu också: ingen nummerbricka eller bricka över en prick eller ett block, prickarna ≥ 12 px,
+  rubriker och etiketter som text, meddelanden som ligger över annan text eller
   innehåll som rinner ut ur kortet (`overlapp`), stegtext mot fokus i en division (`stegtext`), och divisionstestet
   efter Klar (räknaren och meddelandet).
 
