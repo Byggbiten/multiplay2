@@ -2,7 +2,6 @@
 
 ## Öppet
 
-- [ ] Övningsblad, puts: "och resten 4" bryts inte ensamt på raden; summabrickan och rutan har inte båda orange ram (rutan i fokus ensam).
 - [ ] Övningsblad, småputs efter runda 6: pilspetsen strax utanför rutans kant; kontrollraden luftigare ("Kontrollera med gånger" på en rad); knyt "över" och "rest" tydligare.
 - [ ] Övningsblad division runda 2 (stil C, fynden i `brainstorm/13`), sedan genomspelning, Dennis prov, v76.
 - [ ] iPad-planen (D45 ✎, `brainstorm/12`) efter v76.
