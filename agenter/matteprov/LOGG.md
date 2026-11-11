@@ -139,3 +139,123 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Lärdom:** frågor ska testas mot vad ett barn skulle svara, inte bara mot förväntad text. Läs frågan bokstavligt,
   lista de rimliga svaren och kontrollera att bara rutans svar passar; "hur många" frågar efter ett antal, "vad är …
   värd" efter ett värde.
+
+
+## 2026-11-11 · Övningsblad · Division (D44 ✎)
+- Matteprov 2 byggdes om till övningsblad efter Dennis kursändring: tretton moduler, inget prov. Dev (v75) mergad in;
+  den lånade korta divisionen går nu på multdivs nivå 3 (nivå 4 är decimaler sedan v75).
+- **Fel:** Lättare "Ingår hur många gånger?" ritades inte (kontrollens första ruta byggdes även när modulen saknar
+  kontroll). **Varför fångade inte testerna det:** vitest kör bara logiken; rendreringen prövades först i svepet i
+  webbläsaren (alla moduler × nivå × läge). **Lärdom:** svep varje modul i båda nivåerna och lägena i webbläsaren
+  innan rapport; ett modulval som stänger av en del av mallen ska prövas i rendreringen.
+
+## 2026-11-11 · Runda 2: stil C på alla tretton moduler
+- Dennis valde C · Brickor ("C - Brickor är bäst. men glöm inte bort att vi färgkodar siffrorna …"), bandet ("exakt
+  sådana där små visuella hjälpmedel") och flygningen; först Kontrollera som provmodul ("toppen, då kör vi"), sedan resten.
+- **Fel:** verktyget försvann efter första tryck på högen, och fanns kvar i Själv. Nötloopen lämnar en ny kopia av
+  uppgiften vid varje anrop, så `t.pic` som sattes i `freshInput` levde inte kvar, och förra uppgiftens verktyg följde
+  med till nästa. **Lösning:** verktyget sparas i `IN` med uppgiftens nyckel och läggs på i `curTask`.
+  **Lärdom:** muterar man uppgiften i UI:t, kontrollera att det är samma objekt nästa gång.
+- Genomspelning (Lättare med hjälp, Svårare själv, alla moduler utom motorn): inga fel, ingen skroll i 390 × 797,
+  bandet i varje ruta med hjälp, inget band eller verktyg i Själv. Rättat under svepet: bandet från en täljarsiffra tog
+  vägen runt bråket ("1 klistermärken" blev singular).
+- **Fel (Dennis):** när bandet stod blev hela kortet blekt, även det i fokus. Orsak: bandets SVG fick en vit, halvgenomskinlig
+  bakgrund av en allmän regel och låg över allt. **Lösning:** ingen bakgrund på bandet; i stället tonas bara det som inte
+  hör till steget ned (`.mp-fm … :not(.mp-keep)`), och källan, målrutan och deras föräldrar får `mp-keep`. Mätt i alla
+  moduler med hjälp: effektiv opacitet 1 på källa, mål och band. **Lärdom:** en blek skärmbild är ett fynd, inte
+  panelens fel; mät `getComputedStyle` och vad som ligger överst (`elementFromPoint`) innan man skyller på verktyget.
+
+## 2026-11-11 · Runda 3: bandet startar i svaret
+- Dennis om skärmbilden: "Där pekar ju strecket och det som skall vara i fokus lite missvisande". Bandet gick från grupp
+  6:s prickar och bara den gruppen var stark, fast svaret var antalet grupper. Rättat: summan under bilden som bricka
+  ("6 grupper", "2 över") är källan, allt som räknas är starkt, och bandet tar aldrig ett tal som inte är svaret.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och att fokus var opakt, inte vad bandet pekade
+  ut. **Lärdom:** mät källan mot svaret i varje steg (`mp-bsrc` mot rutans facit); mätningen hittade också att
+  bandstartens närmaste-element-gissning gav falska fel, därför markeras källan nu i DOM.
+
+## 2026-11-11 · Runda 4: bandet går aldrig genom text, och det är kort
+- Samordnarens granskning: bandet gick genom "kvot", genom frågan, genom nämnaren och genom stegets text; talen i
+  frågan var för nedtonade. Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång" och
+  "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'".
+- Byggt: poängsatt väg (`bandRoute`, `bandScore`), hårda hinder (siffror, läsbar text) och mjuka (etiketter, bilder),
+  ring i stället för band när ingen väg duger, etiketterna under rutan, brickorna nära mallen, nedtoning i gråskala.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och var opakt, aldrig vad det korsade eller hur
+  långt det var. **Lärdom:** ett visuellt hjälpmedel ska mätas mot det det ska undvika; svepet räknar nu korsad text
+  och längd mot det raka avståndet i varje steg (alla moduler: ingen korsning, inget över 2 gånger).
+- Första försöket, en väg runt hindren i ett rutnät, gav fria men långa och slingriga band; det togs bort när Dennis
+  satte längdgränsen.
+
+## 2026-11-11 · Runda 5: bandet pekar inte fel
+- Samordnaren mätte två vilseledande vägar: ut åt höger genom "grupper" och in i kvotrutan underifrån (såg ut att gå
+  till kontrollen), och ut från botten av "54" förbi "2" (såg ut att komma från nämnaren).
+- **Varför fångade inte testerna det:** poängen såg bara korsad text och längd, inte riktning eller närhet till andra
+  tal. **Lärdom:** ett band läses som en pil från det närmaste talet till det den pekar på; mät sidorna, närheten och
+  att vägen inte går genom ändarnas egna rutor. Test för de två uppmätta vägarna.
+
+## 2026-11-11 · VD:ns granskning efter runda 5
+Kontextfri granskare: bandet på ≈17 px från en kopierad svarsbricka visar inte längre kopplingen från bilden
+("9 grupper") till rutan, och samma tal står tre gånger. Lärdom: ett kort band är inte målet i sig; målet är att
+barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knytas ihop i ordvalet.
+
+
+## 2026-11-11 · Runda 6: summan ovanför sin ruta
+- Dennis valde "Flytta '9 grupper'": en kontextfri granskare såg inte att bandet på 17 px från kopian kom från grupperna,
+  och talet stod tre gånger. Summan står nu ovanför sin ruta, bandet går cirka 30 px rakt ner, "över" och "rest" i samma
+  lila. Problemlösningens etiketter står till vänster om brickorna.
+- **Fel under bygget:** gamla CSS-regler (`sum2` 108 px, `.hi`) låg kvar längre ned i filen och vann, så kladden blev
+  104 px trots den nya regeln. **Lärdom:** när en regel ersätts, ta bort den gamla; mät beräknad stil
+  (`getComputedStyle`) när ett mått inte ändras.
+- Mätt: kladden minst 121 px (Dela lika), inga band genom text eller siffror, kvot och rest cirka 30 px.
+
+## 2026-11-11 · Runda 7: Dennis fall i Hur många grupper, och exakta fästpunkter
+- **Fallet:** Hur många grupper, Svårare med hjälp, 15/3. I nämnarsteget gick bandet från "3" genom grupp 4 och förbi
+  brickan "5 grupper", som lyste orange; Dennis svarade 5 ("är jag dum i huvudet eller?").
+- **Rotorsaken:** (1) bilden var ett mjukt hinder i `bandScore`, så en kort väg genom grupperna vann; gruppernas
+  nummerbrickor passerades på cirka 15 px trots marginalen; (2) summabrickan "5 grupper" visades och lystes
+  (`lit:'grp'` i nämnarsteget) redan innan kvoten var i fokus, och var det närmaste talet på bandets väg; (3)
+  fästpunkterna var ungefärliga (fasta 2 px från brickans ruta, inte från siffrorna).
+- **Rättat:** bilden hård, summabrickan bara i kvot- och reststeget, nämnarsteget lyser inte grupperna, ring i stället
+  för band när ingen fri väg finns. Fästpunkterna mäts exakt (`digitsRect`, 3 px från siffrorna, spetsen 3 px utanför
+  ramen, `scheduleBand` efter typsnitt och layout, `ResizeObserver`), en metod för alla källor. Dennis fall som
+  vitest med uppmätta rutor (rött mot gamla koden, grönt nu).
+- **Varför fångade inte svepet det:** svepet kördes bara på Lättare med hjälp. Svårare med hjälp är ett eget flöde
+  (barnet skriver divisionen själv, med täljar- och nämnarsteg före kvoten), och just där står summabrickan och
+  frågans tal på var sin sida om bilden. Svepet mätte dessutom bara text och siffror som hinder, inte bilden.
+  **Lärdom:** svep varje nivå och läge som är ett eget flöde (samma regel som i CLAUDE.md för samordnarens granskning);
+  ett visuellt hjälpmedel mäts mot allt det ska undvika, också bilden. Svepet ligger nu i repot
+  (`tests/webblasare/band-svep.js`) och körs på båda nivåerna.
+- **Bifynd:** i Ingår, Svårare, kvotsteget låg orden "grupper" och "över" 6 px in i grupperna (två rader grupper).
+  Platsen ovanför två brickor höjdes från 40 till 46 px, bildens radavstånd sänktes från 6 till 4 px och ordens
+  radhöjd till 12 px, så att kladden stannar på 121 px; svepet kontrollerar nu att summabrickan inte ligger på bilden
+  (provat mot de gamla måtten: 6,5 px överlapp).
+
+## 2026-11-11 · Runda 8: VD:ns genomspelning (brainstorm/14) och Dennis 8008/4
+- **A1–A5 rättade:** Pengar-summan stod inte ovanför sin ruta och bandet gick genom rubrikerna; Begreppens stegtext
+  sa "under strecket" när täljaren var i fokus; divisionstestets kontrollrad låg över "Du har 19 klara" och räknaren
+  visade bara "/20"; slutledningens använda bricka svävade kvar och "fem" saknade källa; kontrollens band gick genom
+  "kvot". B1–B4, B6–B8 (Dennis val) byggda. Kort division (A6, B5) utgick ur uppdraget.
+- **Varför fångade inte svepet A1, A2, A3, A5:** svepet räknade bara siffror och frågetext som hinder, inte rubriker och
+  etiketter (A1, A5), det läste aldrig stegtexten mot rutan i fokus (A2), och det spelade inte divisionstestet eller
+  tittade efter meddelanden som ligger över annat (A3). **Lärdom:** ett svep ska mäta varje sorts text på skärmen
+  (fråga, steg, rubrik, etikett, meddelande) och varje modul, också bladen som inte har band. Allt det ligger nu i
+  `tests/webblasare/band-svep.js`.
+- **Dennis 8008/4:** "det står vad är 8 tusental delat med 4. men det står 8008?" och "jag såg inte de små gröna
+  prickarna". En stegfråga som bara gäller en del av talet ser ut att motsäga uppgiften: hela uppgiften står nu alltid
+  överst, och stegfrågan säger att den är en del ("Börja med tusentalen"). Bilden visar alla talsorter som lika
+  tydliga ramar, nollorna som tomma ramar. **Lärdom:** det som är litet nog att en vuxen missar det finns inte för ett
+  barn; mät storleken på det som ska räknas, inte bara att det finns.
+- **Fel under bygget:** `.mp-bc .b0` fanns i två regler och den senare (7 px) vann över den nya; en rad med fyra
+  talsorter radbröts när texten växte. Mätt i webbläsaren, rättat.
+- Vitest: tre nya test (A2, B7/8008, B2), röda mot den gamla logiken, gröna nu; 594 gröna.
+
+## 2026-11-11 · Runda 8b: nummerbrickan täckte en prick
+- **Fyndet (samordnarens granskning):** i Slutledning, Lättare, låg gruppens nummerbricka helt över första pricken, så
+  att en grupp om 5 såg ut att ha 4. Samma överlapp i Hur många grupper (8 av 8) och Rest (2 av 2). Det lär barnet fel.
+- **Varför fångade inte svepet det:** svepet mätte vad bandet korsade och var summabrickan stod, aldrig vad en bricka
+  täckte i bilden. Brickan i ramens hörn var ett beslut från runda 2 som ingen mätte när prickarna växte. **Lärdom:**
+  allt som läggs ovanpå en bild ska mätas mot det som ska räknas i bilden; ett räknebart föremål som täcks ändrar
+  svaret. Kontrollen ligger nu i svepet och slog till mot den gamla koden i Grupper, Kontrollera, Rest, Ingår och
+  Slutledning (264 träffar på Lättare), noll efter rättelsen.
+- **Kostnad:** 12 px prickar och brickan i egen plats tog cirka 40 px i Ingår, Svårare (kladden 82 px). Återtagen med
+  grupper i två rader i stora tal, resten i gruppernas rad, tätare kort när barnet skriver divisionen och ett kortare
+  band (cirka 28 px).

@@ -9,6 +9,13 @@ och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sam
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
 Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
 
+**Läget nu (2026-11-11, övningsbladen):** Övningsblad · Division (D44 ✎) ligger på `dev` till och med runda 7
+(merge `34b4bfa`). Runda 8 ligger på grenen `ovningsblad-runda8` (pushad, ej mergad): A1–A5 ur
+`brainstorm/14-2026-11-11-ovningsblad-vd-genomspelning.md`, Dennis val B1–B4, B6–B8 och hans fall 8008/4. Kort
+division (A6, B5) ingår inte i uppdraget och rörs inte (multdiv-motorn). Etiketterna T H T E behålls (Dennis: färgen
+skiljer de två T:na). Runda 8b (nummerbrickorna och 12 px prickar) på samma gren. Hela sviten 594 gröna; svepet
+`tests/webblasare/band-svep.js` körs i båda nivåerna.
+
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
 2. `.project-context/DECISIONS.md`:
@@ -147,7 +154,56 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 - Gamla poster i `matteprov_{id}.provs.prov1.hard` kan ha taggar som inte längre skapas (`upp:plats`, `upp:rader`,
   `upp:minne`, `prob:uttryck`); de ger en uppgift av närmaste typ och glöms efter tre rätt.
 
-## Så läggs Matteprov 2 till
+## Övningsblad · Division (D44 ✎, 2026-11-11, gren `matteprov2`, ej mergad)
+Inget prov: posten `ovdiv` (`kind:'ovning'`) i `PROVS` med tretton moduler (`DIV_IDS`). Nås från kortet
+**Övningsblad** i Kort divisions lägesvy (`openProv` → `MatteProv.open(p, back, 'ovdiv')`); provlistan visar den
+inte. Sidan är `showOvning`: nivå och Med hjälp/Själv, modulerna i ett rutnät, märket "Öva mer på" (`hardFor`) eller
+"Klart". Varje modul: Så här gör du (`divIntroSteps`) → nötloopen → "Bra nött!"-kvittot. Ingen Gör provet, inget Mitt
+prov (`genForTag` ger null för divisionens taggar).
+- **Typen `dr`** (`makeDr`, moduler dela, grupper, dkontroll, drest, ingar): mallen `[n]/[d] = [kvot], rest [rest]` och
+  `Kontrollera: [d] · [kvot] + [rest] = [n]`; `write` = barnet skriver täljare och nämnare; `kGiven` = nämnaren står i
+  kontrollen (Lättare). `pic` 'dela'/'grupp'/'linje' är interaktiv: varje tryck på högen (eller tallinjen) delar ut ett
+  varv, ringar in en grupp eller tar ett hopp (`IN.made`, `picMax`, `picLeft`); med hjälp först (`IN.dealPending`,
+  `dealAsk`, `dealDone`), sedan rutorna. Rättning `checkDrest`: kontrollen i valfri ordning, och den rättas först när
+  divisionen stämmer; felklasser kvot/stor/kontroll/skriv.
+- **ts** (talsort, block i talsortens färg), **dz** (10/100/1000, en ruta per siffra, kvot/nämnare/täljare saknas),
+  **pt** (pengar, 33b-tabellens rad), **kd** (kort division i motorn, `runTask({ kind:'div' })` på multdivs nivå 3),
+  **sheet** för divisionstabellen, **prob** för begrepp, problemlösning och slutledning (steg med `op:'/'` och
+  `rest:true` ger ", rest [ ]").
+- Designreglerna (brainstorm/11) som är inbyggda: fel ruta töms och får fokus (`markBad` för `DIVBOX`), rest lila
+  (`.mp-ans.rest`, högen som blir över), talen i bråket, frågan och tidigare svar går att trycka på (`pick` för rutor),
+  kontrollen som mall, inga lika tal i olika roller eller dubbelsiffror (`distinct`, `twinDigits`).
+- Tester: `tests/ovningsblad.test.mjs` (48).
+
+### Runda 2: stil C · Brickor (D44 ✎, 2026-11-11, gren `ovningsblad-runda2`, ej mergad)
+- Stilen ligger i de delade renderarna för övningsbladen (`isOv(t)` släpper inte in Matteprov 1): `pvHTML`/`pvText`
+  (siffror i platsvärdesfärg i rutor, bråk, frågor och brickor; rest lila), `fracHTML(…, lab)` med etiketterna
+  täljare/nämnare och `capW` (kvot, rest), `tileText` (talen i texten är brickor att trycka på).
+- **Bandet** (`drawBand`, `bandSource`, `bandWant`): bara Med hjälp och bara den aktuella tomma rutan; källan är det
+  tryckbara tal som är svaret (gruppens nummer, kvoten, resten, täljaren, priset), annars det som lyser. Från täljaren
+  går bandet ut åt höger runt bråket. **Flygningen** (`flyTo`): vid tryck på ett tal och när hjälpen visar svaret;
+  `animateDeal` låter bollarna och hoppet röra sig från högen.
+- **Verktyget är hjälpen** (`toolOf`, `prepTool`, `IN.tool`/`toolKey`; nötloopen ger nya kopior av uppgiften, därför
+  läggs verktyget på i `curTask`): Kontrollera och Ingår får högen (eller tallinjen över 40), Pengar tallinjen i kronor,
+  10/100/1000 nollor att stryka med ett tryck, Varje talsort block som delas med ett tryck (`split`), divisionstestet
+  kontrollen under bladet (`mp-skh`). Själv: inget verktyg, inget band, ingen stegtext i problemlösningen.
+- Lättare: 2:an, 5:an och 10:an, tvåsiffrigt (`EASY_D`); `digitClash` i alla generatorer.
+
+**Regel för bandet och fokus (Dennis 11/11, runda 3):** det som är i fokus och bandets start ska vara exakt det tal
+barnet ska skriva, inget annat. `bandSource` tar bara ett tryckbart tal med rutans svar (`[data-act=pick][data-v=svar]`);
+finns det inte på skärmen blir det inget band. Allt som lyser (det som räknas) och deras föräldrar har full styrka
+(`mp-keep`); resten tonas ned. Gruppernas nummer, barnens antal, högen och tallinjens siffror är inte källor; i stället
+står summan under bilden som bricka (`picSum`: "6 grupper", "4 till varje barn", "6 hopp", "2 över"). Per modul, steg
+med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
+- Dela lika, Hur många grupper, Kontrollera, Rest, Ingår: kvoten ← summan "q grupper/till varje/hopp"; resten ← "r över";
+  kontrollens nämnare ← nämnaren i bråket; kvoten och resten i kontrollen ← kvot- och restrutan; svaret ← täljaren
+  (bandet går runt bråket på höger sida); täljare och nämnare när barnet skriver divisionen ← brickorna i frågan.
+- Varje talsort: rutan ← brickan med andelen som visas när blocken delats ("3"); före delningen inget band.
+- 10/100/1000 (kvot): varje ruta ← samma siffra i täljaren; nämnaren och täljaren som saknas: inget band.
+- Pengar: hur många ← "q gånger"; över ← "r kr över".
+- Begrepp, Problemlösning, Slutledning: rutan ← brickan i texten eller svaret från förra steget; tal som inte står som
+  siffra (som "två" eller ett nytt svar) får inget band.
+
 1. En post i `PROVS` i `js/matteprov-logic.js`: `{ id:'prov2', title:'Matteprov 2', sub:'…', moments:[…],
    provCount:{ … } }`. Provlistan och provsidan ritas ur `PROVS`; lagringen är redan per prov-id (`provs[provId]`).
 2. Nya moment: lägg dem i `MOMENTS`, en generator i `GEN`, en typ i `check()`, och UI i `questionHTML`/`padHTML`/
@@ -156,7 +212,107 @@ Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`
 4. Nivågolv som vitest (mönstret "provet är aldrig lättare än underlaget"), och lägg de nya texterna i svepet.
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
 
+**Regler för bandet (runda 4, Dennis 11/11): fri väg och kort band, som bästa möjliga kompromiss.**
+- Fri väg: bandet går aldrig genom läsbar text eller siffror (frågan, uppgiften, stegets rad, alla tal). Att snudda vid
+  en etikett (täljare, nämnare, kvot, Kontrollera) eller en bild kostar lite i poängen men är tillåtet.
+- Kort band: helst högst 1,5 gånger det raka avståndet och 160 px, aldrig över 2 gånger eller 220 px, högst ett hörn.
+- `L.bandRoute` poängsätter kurvor mellan alla par av sidor och vägar med ett rundat hörn (längd mot rakt avstånd,
+  straff för etiketter och bilder och för att gå över 1,5 gånger); bästa poäng vinner. Ingen godkänd väg: inget band,
+  källan och rutan får den lila ringen (`mp-bring`), och talet flyger som förut när det trycks.
+- Hellre flytta källan än dra långt: etiketterna kvot och rest står under rutan; Kontrollera står till vänster på raden;
+  i problemlösning, begrepp och slutledning upprepas stegets tal (ur texten och svaren från förra stegen) som brickor
+  nära mallen, i en division i höjd med täljaren och nämnaren.
+- Kompromisser som valts: bandet får snudda vid etiketter (en kort väg som tydligt visar kopplingen väger tyngre);
+  kontrollens sista ruta (svaret = täljaren) och Ingår:s första steg (täljaren ur frågan) får oftast ringen, för att
+  vägen skulle gå genom siffror; i 10/100/1000 får rutorna ringen, för att täljarens siffror står tätt intill.
+- Runda 5 (samordnarens mätning: vägar som pekade fel): hårda spärrar i `bandRoute` utöver text och längd:
+  sidorna vänder sig mot varandra (`sidesFace`: källan ovanför målet ⇒ aldrig in underifrån), bandet går aldrig in i
+  källans eller målets egen ruta (`entersRect`), andra tal har 10 px marginal (också startpricken), och orden i
+  summabrickan räknas som text. Med hjälp står svaret ur bilden som bricka mitt ovanför kvot- eller restrutan
+  (`.mp-above`, plats reserverad med `has-above`), så att bandet blir ett kort lodrätt fall. Kostnad: kladden blir
+  ungefär 55 px lägre i de stegen (Svårare, Hur många grupper: cirka 70 px kvar).
+- Runda 6 (Dennis: "Flytta '9 grupper'"): kopian ovanför rutan är borta. Summan ur bilden står ovanför sin ruta
+  (`pill` i `drHTML`, `.mp-sumov`): talbrickan med mittlinjen rakt ovanför kvot- eller restrutan, bandet cirka 30 px
+  rakt ner. Utan rest: "9 grupper" / "4 i varje" / "6 hopp" med ordet till höger (`sum1`). Med rest står båda på samma
+  rad med orden ovanför talen (`sum2`), "över" och restrutans etikett "rest" i samma lila. I problemlösning står
+  etiketterna täljare/nämnare till vänster om brickorna, så att bandet går fritt. Kladden är minst 121 px (Dela lika,
+  Lättare med hjälp); kulorna är 13 px och barnens ikon 18 px för att det ska rymmas.
+- Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
+  aldrig ned. Pilspetsen slutar 3 px utanför rutans ram (runda 7, nedan).
+
+**Runda 7 (gren `ovningsblad-runda7`, ej mergad): standardmetoden för alla band.**
+Dennis: "fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär eller uppskattade'" och "nånting
+som funkar oavsett vilken siffra det gäller". En metod för alla källor och mål, inga specialvägar:
+- **Källan mäts på siffrornas egen ruta:** `digitsRect(el)` i `js/matteprov.js` är en `Range` över elementets text
+  (`getBoundingClientRect` på rangen), inte brickans eller radens ruta. Det fungerar lika för en- och flersiffriga tal,
+  decimaltal med komma, platsvärdesfärgade spann, bråkets täljare och nämnare, en siffra i ett flersiffrigt tal,
+  tallinjens siffror, kvot- och restrutan och pengar. Ett element utan siffror mäts med sin ram. `anchorRect(el, källa)`
+  väljer: källa ⇒ siffrorna, mål ⇒ rutans ram (ramen ingår). `anchorOf(el, sida, avstånd, källa)` ger punkten mitt på
+  en sida med avståndet utanför.
+- **Konstanterna** i `js/matteprov-logic.js`: `BAND_START = 3` (starten 3 px från siffrornas kant, mitt på sidan mot
+  målet), `BAND_TIP = 3` (pilspetsen 3 px utanför rutans ram, rör den aldrig), `BAND_ARROW = 6` (pilens längd; kurvan
+  slutar `BAND_GAP = 9` px från ramen). `bandRoute` lägger handtagen vinkelrätt ut från sidorna (fast andel av
+  avståndet) och ritar rakt när start och mål står i linje.
+- **Ritas när layouten är stabil:** `scheduleBand()` väntar på `document.fonts.ready` och två bildrutor, och ritar om
+  vid storleksändring (`ResizeObserver` på `#mp-q`, 60 ms). Rita aldrig bandet direkt i `renderTask`.
+- **Bilden är hård:** grupperingarna, barnen, högen, tallinjen och blocken (`pic` i hindren) får aldrig korsas; finns
+  ingen kort väg blir det ringen på källan och rutan.
+- **Summabrickan bara i kvot- och reststeget** med hjälp: i täljar- och nämnarstegen syns inte "5 grupper", och
+  nämnarstegen lyser bara frågan och nämnarrutan, inte grupperna. Nämnarens källa är talet i frågan ("3" i "Grupper med
+  3 i varje"); finns ingen fri kort väg dit får "3" och rutan den lila ringen.
+- **Svepet i webbläsaren:** `tests/webblasare/band-svep.js`. Synka dev-spegeln, öppna `localhost:5312` i 390 × 797,
+  ladda filen med en `<script>`-tagg och kör `await bandSvep({ niva:'latt' })` och `({ niva:'svar' })` (kör den i
+  bakgrunden i sidan och läs resultatet efteråt; ett svep tar över 45 s). Det spelar alla moduler med hjälp i riktiga
+  flöden ur generatorn och kontrollerar i varje steg: inget genom siffror, text eller bild; inte över 2 gånger det raka
+  eller 220 px; starten 3 ± 1 px från siffrorna och spetsen 3 ± 1 px utanför ramen, också efter en storleksändring;
+  summabrickan inte på bilden; kladden minst 120 px. `res.sorter` räknar källornas sorter. **Båda nivåerna ska svepas.**
+
+**Runda 8 (gren `ovningsblad-runda8`, ej mergad): vad som gäller nu.**
+- **Etiketter och rubriker är hårda hinder** för bandet (`LABEL` i `paintBand`: täljare/nämnare, kvot/rest,
+  Kontrollera, tabellrubrikerna i Pengar, summabrickornas ord, enheten kr, talsortsbokstäverna). Finns ingen fri kort
+  väg blir det ringen. Kontrollens nämnare och kvot får därför oftast ringen (A5).
+- **Pengar:** summan ur tallinjen står i en egen rad i tabellen, rakt ovanför sin ruta, ordet ovanför talet
+  (`.mp-ptp`), med cirka 26 px fritt ner till rutan för bandet (A1).
+- **Begrepp, nämnaren:** stegets text följer rutan i fokus med hjälp (`fq` per ruta i flödet; `st.fq[IN.f]` i
+  etiketten "Steg 1: …") (A2). Samma mönster kan användas i andra steg där texten bara gäller en ruta.
+- **Divisionstestet:** räknaren visar antalet ifyllda (`sheetFilled`, `updScore`), aldrig bara "/20"; efter Klar
+  står kontrollraden i meddelandet (`IN.khHtml` i `paintHelp`), inte under bladet (A3).
+- **Problemlösning, begrepp, slutledning:** en bricka försvinner när dess ruta är ifylld men lämnar en osynlig plats
+  (`mp-nearhid`), så att inget hoppar; ett tal som står som ord efter "med" ("med fem") får med hjälp en bricka vid
+  ordet och räknas som tal i texten (`ORDW`, `ordTiles`) (A4).
+- **Kontrollen (B1):** i kontrollens sista ruta finns inget band (`bandWant` ger null för `k4`): faktorerna lyser, och
+  "täljaren" med en bock står under rutan först när den är rätt (`k4ok`, `.mp-ktal`).
+- **Hur många grupper, täljarens steg (B2):** med hjälp visar gruppernas brickor en löpande summa (3, 6, 9 …,
+  `drPic(…, run)`), den sista är källan till täljarens ruta; frågan "Räkna i hopp om d: hur många från början?".
+- **Plats (B3):** `growQ(t)` ger `#mp-q` klassen `grow` i Varje talsort, 10/100/1000, Problemlösning och Begrepp:
+  större text, rutor och block. Mätt kladd i 390 × 797 före → efter (lägsta över tre steg): talsort Lättare 305 → 260,
+  Svårare 305 → 199 (efter talsortsramarna); 10/100/1000 362 → 326; Problemlösning 296/273 → 261/166; Begrepp
+  289/249 → 231/190.
+- **Varje talsort (Dennis 8008/4, B7):** hela uppgiften står alltid överst (`.mp-q0`, också i 10/100/1000), stegfrågan
+  säger att den är en del: "Börja med tusentalen: 8 tusental delat med 4." / "Sedan hundratalen: …". Bilden visar
+  varje talsort som en egen ram i sin färg med sin bokstav (`.mp-bgrp`), nollorna som tomma ramar med 0, entalen
+  som prickar på 13–14 px i ett rutnät om fem.
+- **Grupperna (B4):** 10/12 px luft mellan grupperna och mindre nummerbrickor (18 px), prickarna 8 px i stora tal.
+- **Introt (B6):** Dela lika och Hur många grupper visar uppgiftens egen vy (`introDr` ritar `drHTML` i ett lånat
+  tillstånd, `introView` stänger av frågan och trycken), med bandet (`paintBand` i `.mp-iq`) i kvotens steg och
+  kontrollen ifylld med "täljaren" sist.
+- **Slutledning Lättare (B8):** "Vilket tal tänker jag på?" med rest får en bild: kvoten som grupper om nämnaren och
+  resten (`slPic`).
+- **Runda 8b (samordnaren: en grupp om 5 såg ut att ha 4):** gruppens nummerbricka (`.mp-gn`) står mitt ovanför
+  ramen, i en egen plats överst i ramen (padding-top), aldrig över en prick. Prickarna är minst 12 px (`.mp-pic.sm`);
+  i stora tal står en grupp i två rader (`cols` i `drPic`), och resten står sist i gruppernas rad när allt är utdelat.
+  Barnens lådor (`.mp-grp.box`) har ingen bricka och behåller sin padding. När barnet skriver divisionen själv är
+  kortet tätare (`:has(.mp-dr.w)`, gap 4 px) och bandet från summan cirka 28 px, så att kladden håller 120 px.
+- **Svepet** kontrollerar nu också: ingen nummerbricka eller bricka över en prick eller ett block, prickarna ≥ 12 px,
+  rubriker och etiketter som text, meddelanden som ligger över annan text eller
+  innehåll som rinner ut ur kortet (`overlapp`), stegtext mot fokus i en division (`stegtext`), och divisionstestet
+  efter Klar (räknaren och meddelandet).
+
 ## Nästa steg
+- Övningsbladen: samordnaren granskar runda 8 (`ovningsblad-runda8`) och mergar; Dennis provar i dev-spegeln.
+  Återstår ur brainstorm/14: B5 och A6 hör till kort division (multdiv-rollen). Återstår sedan tidigare: slutledning med
+  figurer (26b/35c) och tabellformen i 36a. Introt i bladets egen vy finns bara i Dela lika och Hur många grupper;
+  resten av modulerna kan få det på samma sätt (`introDr`).
 - Vänta på Dennis synpunkter på D42 (live i v73).
 - Möjligt nästa: Med hjälp även i Dela upp och tabelltestet om Dennis vill (nu: Dela upp är alltid ledd, tabelltestet
   har ingen extra hjälp).

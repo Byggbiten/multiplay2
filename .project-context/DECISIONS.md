@@ -65,8 +65,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte ✎ enklare förklaring ✎ nollan först, sedan bara siffran
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
-- D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
-- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven)
+- D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten ✎ nivå 3 med rest, nivå 4 med decimaler
+- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
+- D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
+- D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
 
 ---
 
@@ -628,3 +630,96 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   resten: 122 / 4 = 30,5; högst två decimaler). Källa: Dennis: "I sånna fall tycker jag att räkna med rest borde vara
   svårighetsgrad 3, och att svårighetsgrad 4 är hela sättet. vet inte vad det kallas? är det att räkna med decimal?
   som i mitt exempel. att 122/4 = 30,5?"
+
+- ✎ **2026-11-11, stilen för övningsbladen: C · Brickor, siffrorna i platsvärdesfärg:** av tre riktningar i
+  `design-lab/ovningsblad-division-stil.html` valdes C (appens glas, talen som brickor, ett streckat band från talet
+  till rutan det ska in i). Siffrorna har alltid sin platsvärdesfärg (ental grön, tiotal blå, hundratal röd …) i
+  brickor, rutor, bråk och text; brickans ram får vara appens lila. Rest och mellanrest är lila. Källa: Dennis: "C -
+  Brickor är bäst. men glöm inte bort att vi färgkodar siffrorna för att hålla koll på ental, tiotal, hundratal mm."
+- ✎ **2026-11-11, bandet från talet till rutan:** varje gång ett tal ska flytta någonstans går ett streckat band från
+  talets källa (texten, bråket, kvoten, resten, tallinjen, priset) till rutan där det hör hemma, bara för den aktuella
+  rutan. Brickorna är ljusa med lila kant, så att platsvärdesfärgen syns. Källa: Dennis: "den där streckade linjen
+  mellan 42 till täljaren var riktigt bra, och det är exakt sådana där små visuella hjälpmedel som gör supermycket
+  för barnen".
+- ✎ **2026-11-11, fokus och bandet ska betyda något:** när bandet står tonas bara det ned som inte hör till steget;
+  det i fokus är i full styrka. Fokus och bandets start är exakt det tal barnet ska skriva (alla grupper och
+  summabrickan "6 grupper", inte grupp 6:s prickar). Bandet korsar aldrig text, siffror, etiketter eller bilder;
+  finns ingen fri väg ritas inget band och källan får en lila ring. Nedtonad text ska gå att läsa; frågan tonas
+  aldrig ned. Källa: Dennis: "när det dyker upp sånna där pilar och streck så blir resten/hela skärmen transparant.
+  Se till att det som skall vara i fokus inte är transparant så att den effekten får mening" och "Där pekar ju
+  strecket och det som skall vara i fokus lite missvisande". Att bandet inte korsar text: min egen granskning 11/11
+  (runda 4). Bandet ska också vara kort, utan omvägar; hellre flyttas källan närmare rutan, annars lila ring utan
+  band. Källa: Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång". Reglerna vägs mot varandra: "det får
+  bli en slags 'bästa möjliga kompromiss i vissa lägen'" (Dennis) – aldrig genom frågan eller siffror barnet ska läsa,
+  aldrig över halva kortet; i övrigt den minst dåliga vägen.
+  Svaret står på ett ställe: summabrickan ("9 grupper") flyttas rakt ovanför rutan och bandet går kort rakt ner,
+  ingen kopia av talet. Källa: Dennis valde "Flytta '9 grupper'" (11/11) framför kopian ovanför rutan och ett längre band.
+  Fästpunkterna räknas fram exakt: start ett fast avstånd från själva siffrornas kant (inte brickans), mitt på sidan
+  som vetter mot rutan; spetsen ett fast avstånd utanför rutans ram, mitt på sidan som vetter mot källan; handtagen
+  vinkelrätt ut från sidorna; ritas efter att layouten stabiliserats och om vid ändring. Källa: Dennis: "strecket på
+  nästan alla bilder är ganska slarvig … binda den till ett lämpligt ställe på den siffra den refererar till och sedan
+  till den ruta där den skall in. Så att fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär
+  eller uppskattade'".
+- ✎ **2026-11-11, förbättringarna efter VD:ns genomspelning (`brainstorm/14`):** B1 (kontrollen lyser faktorerna,
+  kopplingen till täljaren efter svaret), B2 (hoppräkning med löpande summa), B3–B4 (större bilder, mindre kladd, luft
+  i grupperna), B6–B8 (introt visar uppgiftens egen vy med bandet, talsortsord, bild i Slutledning). Kort division
+  hör inte till uppdraget (A6, B5 utgår). Källa: Dennis valde "Kontrollen och hoppräkning, Större bilder, mindre
+  kladd, Introt, ord och bild" och "Gällande kort division. Den va inte med i just detta uppdrag."
+- ✎ **2026-11-11, hela uppgiften syns och T H T E behålls:** när en stegfråga bara gäller en del av talet står hela
+  uppgiften som rubrik ("8008 / 4", sedan "Börja med tusentalen …"), och nollornas platser syns i bilden. Kolumnerna
+  heter T H T E i hela appen; färgen skiljer tusental (lila) från tiotal (blå). Källa: Dennis: "det står vad är 8
+  tusental delat med 4. men det står 8008?" och valet "Behåll T H T E".
+
+## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
+- **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
+  (ingen transform:scale; se minnet om iPad-PWA). iPhone-layouten (390 × 844) förblir måttstocken och ändras inte.
+  Först en mätning per skärm på iPad-storlekar och ett förslag, sedan bygget efter Matteprov 2.
+- **Källa:** Dennis 2026-11-05: "Du får gärna också se över hur formatet är för multiplay på iphone kontra ipad. på
+  ipaden så tycker jag att den inte fullt ut utnyttjar skärmens yta i portätt och liggande läge" och "det gäller
+  generellt sätt för hela appen".
+- ✎ **2026-11-05, övningsblad i stället för prov:** divisionen får inget prov utan övningsblad/övningsmoduler som
+  kopieringsunderlaget för kapitel 3 – olika problembeskrivningar och övningssätt (dela lika, grupper, tabell, rest
+  med bilder, talsorter, 10/100/1000, kort division, pengar, begrepp, problemlösning, slutledning). Nås som kortet
+  "Övningsblad" i divisionens lägesvy. Källa: Dennis: "gällande matteprovet för division. Det skall som sagt inte vara
+  ett prov. Det skall vara övningsblad/övningsmoduler. Precis som den där kopieringsunderlag_kap3. Så de får träna på
+  de olika delarna för att bygga upp en intuitiv förståelse runt om division med olika problembeskrivningar och
+  övningssätt".
+- ✎ **2026-11-11, det visuella först, och hjälpen ska lära:** barnen ska inte fastna för att de inte förstår.
+  Problemet löses i första hand med uppställning, animation, bilder och UI, inte med berättande text (förklaringar är
+  inte förbjudna). Med hjälp och Själv ska göra verklig skillnad, så att hjälpen lär. Övningsbladen spelas igenom ur
+  ett barns perspektiv (åk 4 och åk 2) innan de släpps. Källa: Dennis: "När divisionsprovet är klart vill jag att du
+  spelar igenom det ur [barnens] perspektiv. De skall förstå vad de skall göra. Och att köra med och utan hjälp ska göra
+  skillnad. Så att de kan träna och förstå. Jag strävar efter kvalitet för barnen så att de inte fastnar vid en fråga
+  för att de inte förstår. Och det löser man inte så mycket med berättande texter eller förklaringar, utan det gör man
+  bäst med det visuella och UI och annat. Förklaringar är inte förbjudet, men man skall i första hand tackla problemet
+  med hur animeringar/uppställningar ser ut".
+- ✎ **2026-11-11, plan och ordning:** iPad-planen i `brainstorm/12` körs i sin helhet: en agent gör förstoringsmotorn,
+  mätverktyget, iPhone-facit och `app.css` med rivningen; sedan 5–6 Sonnet-agenter parallellt per modulgrupp i egna
+  arbetskopior; sist en granskare (mätning i sju storlekar, iPhone pixelidentisk); därefter två spalter i liggande
+  läge som alternativ till Dennis. Först ska divisionens övningsblad vara färdiga, granskade, godkända och
+  publicerade. Källa: Dennis: "Hela planen låter bra!", "Och om du använder flera sonnetagenter då?" och "Kör på den
+  planen. Men jag skulle först vilja att divisionsprovet blev färdigt, granskat, godkänt och publicerat innan vi gör
+  det".
+
+## D46 · 2026-11-11 · Arbetssättet: granska själv, kontoren, ordning och reda som rutin
+- **Beslut:** (1) UI som en subagent levererar granskas av VD:n själv innan det går till Dennis: egna skärmbilder i
+  390 × 797 av varje ändrat steg och förklaringsprov av en granskare utan kontext (skillen ui-skolan, steg 5);
+  agentens egen mätning räknas inte som bevis. (2) Varje byggande roll har ett kontor i `agenter/<roll>/`
+  (överlämning + lärdomslogg) som håller rollen levande mellan sessioner; parallella arbetare delar kontor,
+  kontextfria granskare får inget. (3) Ordning och reda är projektets rutin, så att beslut och metoder överlever
+  långa pass och många kontextkomprimeringar: beslut blir D-poster med Dennis ord samma stund, metoder står i
+  `CLAUDE.md` (som läses först efter varje komprimering), och loggens "Läget nu"/"Nästa steg" hålls aktuella.
+- **Källa:** Dennis 2026-11-11: "kolla UI-skolan-skillen. Du behöver inte följa den helt ut, men den har en bra
+  arbetsmetod för att bättre kontrollera istället för att bara förlita sig på vad subagenter berättar", "kör du också
+  ordning och reda på dina subagenter? Så att de hålls levande? att de har ett eget 'kontor'", "se till att ordning
+  och reda regeln blir en bra rutin för hela projektet" och "Så att vi loggar beslut och inte glömmer bort våra
+  metoder och tänk efter långa pass med många kontextkompressioner".
+- ✎ **2026-11-11, repot är minnet, mät kontexten, konsekvent design:** varje agent loggar så att vem som helst kan ta
+  över; kontexten mäts vid varje delmål och passet + komprimering görs långt före gränsen; varje vy jämförs med appens
+  övriga, och en avvikelse kräver ett beslut. Källa: Dennis: "att du upplever kort division som en helt annan app är
+  ett tecken på att ordning och reda inte skötts på alla beslut och inriktningar och bestämmelser vi tagit med
+  konsekvent design och ordnade levande subagenter", "Jag rekomenderar att du mäter tokens när du gjort ett delmål för
+  att se att du kör ordning och reda och kontextkomprimering innan du når 95%" och "att de loggar och antecknar så vem
+  som helst kan hoppa in och ta över deras arbete när som. Dvs. Repot = minnet".
+- **Var det bor:** `CLAUDE.md` (tabellen under Ordning och reda, stycket Kontoren), `agenter/README.md` (Rutinen).
+

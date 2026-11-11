@@ -407,6 +407,200 @@ const MatteProv = (() => {
 #mp-root .mp-ovc{background:#fff;border-radius:22px;padding:18px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
 #mp-root .mp-ovc p{margin:0;font-weight:800;font-size:17px;color:var(--ink);text-align:center}
 #mp-root .mp-ovc .mp-navrow .mp-cta{flex:1}
+
+/* D44 ✎: Övningsblad · Division — bråket, bollarna i grupper, varje talsort, nollorna */
+#mp-root .mp-frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.02;vertical-align:middle}
+#mp-root .mp-frac>span{border-radius:8px;padding:0 7px;display:inline-flex;align-items:flex-end;gap:2px}
+#mp-root .mp-frac .nu{border-bottom:3px solid var(--deep);border-radius:8px 8px 0 0}
+#mp-root .mp-frac .lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.55);background:#fff7ed}
+#mp-root .mp-dr .ln{gap:6px}
+#mp-root .mp-dr .mp-rl{font-size:.72em;color:var(--ink-soft);margin-left:-2px}
+#mp-root .mp-dr .mp-kl{font-size:.74em;gap:5px}
+#mp-root .mp-dr .mp-kl .mp-ans.sm{font-size:1em;min-width:1.9em;height:max(44px,1.35em)}
+#mp-root .mp-klbl{font-family:var(--font-body);font-size:12px;font-weight:900;color:var(--ink-soft);line-height:1.1;max-width:64px;margin-right:2px}   /* till vänster på raden, inte i bandets väg */
+#mp-root .mp-kd{border-radius:8px;padding:0 3px}
+#mp-root .mp-kd.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-pic{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;max-width:100%}
+#mp-root .mp-grp{display:inline-grid;gap:3px;padding:9px 4px 4px;border:2px dashed #94a3b8;border-radius:12px}   /* runda 8b: plats överst för nummerbrickan */
+#mp-root .mp-grp.box,#mp-root .mp-pic.sm .mp-grp.box{border-style:solid;border-color:#b45309;background:#fef3c7;border-radius:5px;padding:4px}   /* barnens lådor har ingen nummerbricka */
+#mp-root .mp-loose{display:inline-flex;gap:3px;padding:4px}
+#mp-root .mp-ball{width:13px;height:13px;border-radius:50%;background:#475569;display:inline-block}
+#mp-root .mp-pic.sm .mp-ball{width:12px;height:12px}   /* runda 8b: golv 12 px */
+#mp-root .mp-intro .mp-ball{width:22px;height:22px}
+#mp-root .mp-intro .mp-pic{gap:10px 12px}
+#mp-root .mp-pic.sm .mp-grp{gap:2px;padding:8px 3px 3px}
+#mp-root .mp-grp.lit,#mp-root .mp-loose.lit{box-shadow:0 0 0 3px #fb923c,0 0 10px rgba(251,146,60,.5);border-color:#fb923c;border-radius:12px}
+#mp-root .mp-loose.lit .mp-ball{background:#ea580c}
+#mp-root .mp-ts .ln{align-items:center;gap:4px}
+#mp-root .mp-ts .mp-frac .nu{gap:6px}
+#mp-root .mp-ts .mp-ans.sm{min-width:1.45em;padding:0}
+#mp-root .mp-ts .mp-tecol i{font-size:.42em;margin-bottom:1px}
+#mp-root .mp-z{border-radius:6px}
+#mp-root .mp-z.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-op.sm{font-size:16px;color:var(--ink-soft)}
+#mp-root .mp-intro .mp-te{font-size:clamp(24px,7vw,32px)}
+#mp-root .mp-vis:has(> .mp-iq){background:none;border:0;box-shadow:none;padding:0}
+#mp-root .mp-iq{width:100%;flex:1;justify-content:center}
+#mp-root .mp-intro .mp-iq .mp-ball{width:16px;height:16px}
+/* D44 ✎ stil C · Brickor (Dennis 11/11): ljusa brickor med lila kant, siffrorna i platsvärdesfärg, bandet och flygningen */
+#mp-root .mp-frac>span{background:#f5f3ff}
+#mp-root .mp-frac .nu{border-bottom-color:#7c3aed}
+#mp-root .mp-flab{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;font:800 10.5px var(--font-body);color:var(--ink-soft);text-align:right;margin-right:-2px;gap:14px}
+#mp-root .mp-flab i,#mp-root .mp-capw>i{font-style:normal}
+#mp-root .mp-capw{display:inline-flex;flex-direction:column;align-items:center;gap:1px}
+#mp-root .mp-capw>i.mp-ktal{display:inline-flex;align-items:center;gap:2px;color:#15803d}
+#mp-root .mp-capw>i.mp-ktal svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:3}
+#mp-root .mp-capw>i{font:800 10.5px var(--font-body);color:var(--ink-soft);line-height:1}
+#mp-root .mp-pnum,#mp-root .mp-kd{display:inline-flex;align-items:center;justify-content:center;min-width:34px;min-height:30px;padding:1px 7px;margin:0 2px;border-radius:11px;background:#fff;border:2px solid #c084fc;font-family:var(--font-head);font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(147,51,234,.15)}
+#mp-root .mp-ptc .mp-pnum{font-size:24px}
+#mp-root .mp-q1 .mp-n{font-family:var(--font-head)}
+#mp-root .mp-gn{box-sizing:border-box;position:absolute;top:-11px;left:50%;transform:translateX(-50%);min-width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #c084fc;font:800 12px var(--font-head);display:grid;place-items:center;cursor:pointer}
+#mp-root .mp-gn.mp-run{display:inline-flex;align-items:center;white-space:nowrap;padding:0 4px;border-color:#fb923c}
+#mp-root .mp-grp{position:relative}
+#mp-root .mp-gc{font:800 13px var(--font-head);min-height:14px;line-height:1}
+#mp-root .mp-line .jn{font:800 12px var(--font-head);fill:#2563eb;text-anchor:middle;cursor:pointer}
+#mp-root .mp-line .rl{font:800 13px var(--font-head);fill:#7c3aed;text-anchor:middle;cursor:pointer}
+#mp-root .mp-z.struck{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#7c3aed;opacity:.45}
+#mp-root .mp-z[data-act="deal"]{cursor:pointer;border-radius:6px;box-shadow:0 0 0 2px #fb923c}
+#mp-root .mp-dzx .ln{align-items:center;gap:6px;font-size:clamp(26px,7.6vw,34px)}
+#mp-root .mp-nb.rest{border-color:#c4b5fd;color:#6d28d9}
+#mp-root .mp-q{position:relative}
+#mp-root .mp-band{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;background:none!important}
+/* Dennis 11/11: när bandet står tonas bara det som inte hör till steget ned; källan, målrutan och bandet har full styrka
+   (mp-keep sitter på dem och på deras föräldrar, så att ingen förälder tonar ned dem) */
+#mp-root .mp-q.mp-fm :is(.mp-ans,.mp-frac>span,.mp-flab,.mp-capw>i,.mp-grp,.mp-kidc,.mp-pile,.mp-kd,.mp-pnum,.mp-ptc,.mp-pth,.pvd,.mp-bc,.mp-bsp,.mp-line,.mp-klbl,.mp-tecol>i):not(.mp-keep):not(.mp-prompt *){filter:grayscale(1);transition:filter .25s}
+#mp-root .mp-band path{fill:none;stroke:#a855f7;stroke-width:3;stroke-dasharray:5 6;stroke-linecap:round;animation:mp-band 1.2s linear infinite}
+#mp-root .mp-band circle,#mp-root .mp-band polygon{fill:#a855f7}
+#mp-root .mp-bring{box-shadow:0 0 0 3px #a855f7!important;animation:mp-bring 1.1s ease-in-out infinite}
+@keyframes mp-bring{50%{box-shadow:0 0 0 6px rgba(168,85,247,.45)}}
+@keyframes mp-band{to{stroke-dashoffset:-22}}
+.mp-fly{position:fixed;z-index:60;width:44px;height:44px;display:grid;place-items:center;pointer-events:none}
+.mp-fly .mp-tilef{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 6px;border-radius:12px;background:#fff;border:2px solid #c084fc;font:800 24px 'Baloo 2',cursive;box-shadow:0 6px 18px rgba(147,51,234,.3)}
+.mp-fly .pvE{color:#16a34a}.mp-fly .pvT{color:#2563eb}.mp-fly .pvH{color:#dc2626}.mp-fly .pvTu{color:#9333ea}.mp-fly .pvTT{color:#d97706}
+@media (prefers-reduced-motion:reduce){#mp-root .mp-band path{animation:none}}
+#mp-root .mp-skh{margin:6px 0 0;text-align:center;font-weight:900;font-size:15px;color:var(--ink)}
+#mp-root .mp-skh.in{margin:0;display:flex;align-items:center;gap:4px;font-size:14px;color:var(--ink)}
+#mp-root .mp-help .mp-skh.in b.mp-pnum{display:inline-flex;font-size:15px;min-height:22px;padding:0 6px;margin:0}
+#mp-root .mp-help.has-kh{padding:5px 12px}
+#mp-root .mp-skok{font-size:12px;color:#15803d}
+#mp-root .mp-bsp{display:inline-flex;gap:6px;padding:2px;border-radius:8px;border:1.5px dashed #c084fc}
+#mp-root .mp-bc.tap{cursor:pointer}
+#mp-root .mp-sum{margin:0;display:flex;gap:10px;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:var(--ink)}
+#mp-root .mp-sumr{display:inline-flex;align-items:center;gap:2px;color:#6d28d9}
+#mp-root .mp-sumr .mp-pnum{border-color:#7c3aed}
+#mp-root .mp-pnum.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-nw{white-space:nowrap}
+/* summabrickan är bandets källa: lila som bandet, så att bara rutan i fokus har orange ram */
+#mp-root .mp-sumov>.mp-pnum.lit{box-shadow:0 0 0 2px #a855f7;background:#faf5ff}
+#mp-root .mp-bsn{align-self:center;min-width:30px}
+#mp-root .mp-capw{position:relative}
+/* runda 6 (Dennis: "Flytta '9 grupper'"): summan står ovanför sin ruta, talbrickan med mittlinjen rakt ovanför rutan,
+   ordet till höger, kort ("grupper", "i varje", "hopp", "över"), så att kvotens och restens summa ryms på samma rad. */
+#mp-root .mp-capw{position:relative}
+#mp-root .mp-sumov{position:absolute;left:50%;display:flex;align-items:center;white-space:nowrap;font:900 12.5px var(--font-body);color:var(--ink)}
+#mp-root .mp-sumov>.mp-pnum{transform:translateX(-50%);margin:0;font-size:22px;min-height:32px;line-height:1}
+#mp-root .mp-sumov>i{font-style:normal;margin-left:-12px;padding-left:2px}
+#mp-root .mp-sumov.lo{top:-72px}
+#mp-root .mp-sumov.rest{color:#6d28d9}
+#mp-root .mp-sumov.rest>.mp-pnum{border-color:#7c3aed}
+#mp-root .mp-capw>i.rest{color:#6d28d9}
+#mp-root .mp-dr.sum1 .ln:first-child{padding-top:74px}
+#mp-root .mp-dr.sum2 .ln:first-child{padding-top:84px}
+#mp-root .mp-dr.sum1.w .ln:first-child{padding-top:36px}
+#mp-root .mp-dr.sum2.w .ln:first-child{padding-top:34px}
+#mp-root .mp-dr.sum2.w .mp-sumov{top:-73px}   /* runda 8b: bandet ca 28 px, kladden får platsen */
+#mp-root .mp-dr.sum2 .mp-sumov{flex-direction:column-reverse;align-items:flex-start;top:-85px}
+#mp-root .mp-dr.sum2 .mp-sumov>i{margin:0 0 1px;line-height:12px;transform:translateX(-50%)}
+#mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
+#mp-root .mp-nearcol{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;gap:10px;margin-right:14px}
+#mp-root .mp-nearph{display:block;height:30px}
+#mp-root .mp-nearhid{visibility:hidden}
+#mp-root .mp-mr{font-size:.5em;color:#7c3aed;align-self:flex-start;margin:0 1px 0 3px}
+/* D44 ✎: övningsbladen — rest och minne alltid lila (regel 8), högen att dela ut, barnen, tallinjen, blocken, tabellen */
+#mp-root .mp-ans.rest{border-color:#c4b5fd;color:#6d28d9}
+#mp-root .mp-ans.rest.focus{border-color:#7c3aed;box-shadow:0 0 0 4px rgba(124,58,237,.18)}
+#mp-root .mp-ans.rest.done{border-color:#c4b5fd;background:#f5f3ff;color:#6d28d9}
+#mp-root .mp-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+#mp-root .mp-tile{display:flex;align-items:center;gap:8px;min-height:52px;padding:6px 8px;border-radius:16px;border:1px solid var(--glass-line);background:var(--glass-strong);box-shadow:var(--shadow-panel);text-align:left;cursor:pointer;position:relative}
+#mp-root .mp-tile .mp-nr{width:30px;height:30px;font-size:15px;flex-shrink:0}
+#mp-root .mp-tile .mp-tt{font-weight:900;font-size:14px;line-height:1.15;color:var(--deep);flex:1}
+#mp-root .mp-tile .mp-badge{position:absolute;top:-7px;right:6px;font-size:10.5px;padding:1px 6px}
+#mp-root .mp-pic{flex-direction:column;gap:4px}
+#mp-root .mp-grps{display:flex;flex-wrap:wrap;gap:12px 6px;align-items:center;justify-content:center;min-height:8px;padding:0 6px}   /* runda 8 (B4): nummerbrickan får plats mellan grupperna */
+#mp-root .mp-pile{display:inline-grid;gap:3px;padding:6px;border-radius:14px;border:2px dashed transparent}
+#mp-root .mp-pile.tap{cursor:pointer;border-color:#94a3b8;background:#fff}
+#mp-root .mp-pile.lit{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.35);animation:mp-pl 1.1s ease-in-out infinite}
+@keyframes mp-pl{50%{box-shadow:0 0 0 5px rgba(251,146,60,.55)}}
+#mp-root .mp-pile.rest .mp-ball{background:#7c3aed}
+#mp-root .mp-pile.rest.lit{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.3);animation:none}
+#mp-root .mp-ball.ghost{background:transparent;border:1.5px dashed #cbd5e1}
+#mp-root .mp-kidc{display:inline-flex;flex-direction:column;align-items:center;gap:1px;border-radius:10px;padding:2px}
+#mp-root .mp-kidc.lit{box-shadow:0 0 0 3px #fb923c}
+#mp-root .mp-kid{width:16px;height:16px;fill:#e2e8f0;stroke:#475569;stroke-width:1.6}
+#mp-root .mp-line{width:100%;max-width:350px;height:auto}
+#mp-root .mp-line.tap{cursor:pointer}
+#mp-root .mp-line .ax{stroke:#334155;stroke-width:2}
+#mp-root .mp-line .tk{stroke:#64748b;stroke-width:1.2}
+#mp-root .mp-line .jump{fill:none;stroke:#2563eb;stroke-width:2.4}
+#mp-root .mp-line .jump.lit{stroke:#ea580c}
+#mp-root .mp-line .restseg{stroke:#7c3aed;stroke-width:6;stroke-linecap:round;opacity:.75}
+#mp-root .mp-line .restseg.lit{opacity:1}
+#mp-root .mp-line .lb{font:800 12px var(--font-head);fill:#334155;text-anchor:middle}
+#mp-root .mp-line .lb.n{fill:var(--deep)}
+#mp-root .mp-line.lit .ax{stroke:#ea580c;stroke-width:3}
+#mp-root .mp-prompt{margin:0}
+#mp-root .mp-pnum{display:inline-block;min-width:30px;padding:2px 6px;margin:0 1px;border-radius:8px;background:#fff;border:1.5px solid var(--glass-line);cursor:pointer;color:var(--deep)}
+#mp-root .mp-prompt.lit{color:var(--deep);background:#fff7ed;border-radius:8px;padding:0 6px}
+#mp-root .mp-blk{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:flex-end}
+#mp-root .mp-bc{display:inline-flex;flex-wrap:wrap;gap:2px;max-width:96px;align-items:flex-end;padding:3px;border-radius:8px}
+#mp-root .mp-bc.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-bc i{display:inline-block}
+#mp-root .mp-bc.zero{min-width:30px;min-height:30px;justify-content:center;align-items:center;font:800 18px var(--font-head)}
+#mp-root .mp-bgrp{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:2px 5px 5px;border:2px solid;border-radius:10px;background:#fff}
+#mp-root .mp-bgrp>i{font:800 12px var(--font-head);font-style:normal;line-height:1}
+#mp-root .mp-bgrp.q3{border-color:#c084fc} #mp-root .mp-bgrp.q2{border-color:#fca5a5} #mp-root .mp-bgrp.q1{border-color:#93c5fd} #mp-root .mp-bgrp.q0{border-color:#86efac}
+#mp-root .mp-bc.p0{display:inline-grid;grid-template-columns:repeat(5,auto);gap:3px;max-width:none}
+#mp-root .mp-bc .b3{width:18px;height:18px;background:#e9d5ff;border:2px solid #9333ea;border-radius:3px;box-shadow:3px -3px 0 #c084fc}
+#mp-root .mp-bc .b2{width:18px;height:18px;border:1.5px solid #dc2626;background:repeating-linear-gradient(0deg,#fee2e2 0 3px,#fca5a5 3px 3.6px),#fee2e2}
+#mp-root .mp-bc .b1{width:4px;height:18px;background:#93c5fd;border:1px solid #2563eb}
+#mp-root .mp-bc .b0{width:13px;height:13px;border-radius:50%;background:#16a34a}
+#mp-root .mp-dzx{font-size:clamp(28px,8.4vw,40px);align-items:flex-end}
+#mp-root .mp-cells{display:inline-flex;gap:3px}
+#mp-root .mp-dzx .mp-ans.sm{min-width:38px;height:46px;padding:0;font-size:26px}
+#mp-root .mp-dzx .mp-tecol i{font-size:.36em}
+#mp-root .mp-q.grow{gap:14px;padding-bottom:14px}
+#mp-root .mp-q:has(.mp-dr.w){gap:4px}   /* runda 8b: barnet skriver divisionen (två rutor i bråket) och bilden har 12 px prickar: tätare kort, kladden ≥ 120 px */
+#mp-root .mp-q.grow .mp-dzx .mp-frac{line-height:1}
+#mp-root .mp-slpic .mp-pic .mp-ball{width:14px;height:14px}
+#mp-root .mp-slpic .mp-grps{gap:14px 10px}
+#mp-root .mp-slpic .mp-pic{flex-direction:row;align-items:center}
+#mp-root .mp-q0{font:800 22px var(--font-head);color:var(--deep);font-variant-numeric:tabular-nums}   /* runda 8: hela uppgiften står alltid överst */
+#mp-root .mp-q.grow .mp-te.mp-ts{font-size:clamp(28px,8.4vw,40px)}
+#mp-root .mp-q.grow .mp-ts .ln{flex-wrap:nowrap}
+#mp-root .mp-q.grow .mp-ts .mp-ans.sm{height:max(52px,1.3em)}
+#mp-root .mp-q.grow .mp-bc{max-width:100px;gap:3px}
+#mp-root .mp-q.grow .mp-blk{flex-wrap:nowrap;gap:6px}
+#mp-root .mp-q.grow .mp-bc .b3,#mp-root .mp-q.grow .mp-bc .b2{width:20px;height:20px}
+#mp-root .mp-q.grow .mp-bc .b1{width:5px;height:20px}
+#mp-root .mp-q.grow .mp-bc .b0{width:14px;height:14px}
+#mp-root .mp-q.grow .mp-dzx,#mp-root .mp-q.grow .mp-dzx .ln{font-size:clamp(36px,10.5vw,48px)}
+#mp-root .mp-q.grow .mp-dzx .mp-ans.sm{min-width:46px;height:58px;font-size:34px}
+#mp-root .mp-q.grow .mp-text{font-size:19px}
+#mp-root .mp-q.grow .mp-plabel{font-size:17px}
+#mp-root .mp-q.grow .mp-ptmpl{font-size:28px}
+#mp-root .mp-q.grow .mp-nb{min-width:58px;height:54px;font-size:25px}
+#mp-root .mp-q.grow .mp-ask .mp-q1{font-size:19px}
+#mp-root .mp-pt{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;align-items:center;text-align:center}
+#mp-root .mp-ptp{display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:1px;white-space:nowrap;font:900 12px var(--font-body);color:var(--ink);margin:2px 0 26px}   /* talet mitt över rutan, bandet rakt ner */
+#mp-root .mp-ptp i{line-height:12px}
+#mp-root .mp-ptp .mp-pnum{margin:0;font-size:20px;min-height:30px;line-height:1}
+#mp-root .mp-ptp i{font-style:normal}
+#mp-root .mp-ptp.rest{color:#6d28d9}
+#mp-root .mp-ptp.rest .mp-pnum{border-color:#7c3aed}
+#mp-root .mp-pth{font-size:12px;font-weight:900;color:var(--ink-soft);line-height:1.15;align-self:end}
+#mp-root .mp-ptc{display:flex;align-items:center;justify-content:center;gap:2px;font-family:var(--font-head);font-weight:800;font-size:24px;color:var(--deep);border-radius:10px;padding:4px 0;min-height:52px}
+#mp-root .mp-ptc.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-ptc .mp-ans.sm{font-size:22px;min-width:52px;height:44px}
 `;
 
   /* ══════════════════════════════════════════════════════════
@@ -427,7 +621,7 @@ const MatteProv = (() => {
   /* ══════════════════════════════════════════════════════════
      PROVLISTAN OCH PROVSIDAN
   ══════════════════════════════════════════════════════════ */
-  function open(p, back) {
+  function open(p, back, pid) {
     profile = p; onBack = back || null;
     const r = root();
     if (r && !r._mpBound) {
@@ -435,7 +629,8 @@ const MatteProv = (() => {
       r._mpBound = true;
       document.addEventListener('keydown', onKey);
     }
-    showList();
+    if (pid && L.PROVS.some(x => x.id === pid)) { provId = pid; showProv(); }   // D44 ✎: från Kort division direkt till övningsbladen
+    else showList();
     show();
   }
 
@@ -450,7 +645,7 @@ const MatteProv = (() => {
     frame('Matteprov 4:an', 'back', 'Tillbaka', '', `
       <p class="mp-note" style="margin-top:6px">Prov om multiplikation. Nya prov läggs ut här efter hand.</p>
       <div class="mp-list">
-        ${L.PROVS.map((p, i) => `<button class="mp-row" data-act="prov" data-id="${p.id}">
+        ${L.PROVS.filter(p => p.kind !== 'ovning').map((p, i) => `<button class="mp-row" data-act="prov" data-id="${p.id}">
           <span class="mp-nr">${i + 1}</span>
           <span class="mp-tx"><b>${esc(p.title)} · ${esc(p.sub)}</b><small>${esc(lastTestTxt(p.id))}</small></span>
           ${svg('chev', 'chev')}</button>`).join('')}
@@ -459,6 +654,7 @@ const MatteProv = (() => {
 
   function showProv() {
     stopSprint(); S = null;
+    if (prov().kind === 'ovning') return showOvning();
     const P = prov(), lv = level(), ps = provSt(readSt());
     const ovaBadge = id => {
       const o = ps.ova[id];
@@ -467,6 +663,7 @@ const MatteProv = (() => {
       return `<span class="mp-badge ${green ? 'g' : 'y'}">${o.ok}/${o.total}</span>`;
     };
     const total = Object.values(P.provCount).reduce((a, b) => a + b, 0);
+    const sheetM = P.moments.find(L.isSheetMoment), sheetName = momentOf(sheetM).sheet;
     frame(esc(P.title), 'list', 'Tillbaka', '', `
       <div class="mp-segrow">
         <div class="mp-seg" role="group" aria-label="Nivå">
@@ -481,17 +678,38 @@ const MatteProv = (() => {
       <div class="mp-list">
         ${P.moments.map(id => { const m = momentOf(id); return `<button class="mp-row" data-act="ova" data-id="${id}">
           <span class="mp-nr">${m.nr}</span>
-          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(id === 'tabell' ? 'Tabelltest med 20 tal' : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
+          <span class="mp-tx"><b>${esc(m.title)}</b><small>${esc(m.sheet ? `${m.sheet} med 20 tal` : id === 'uppstallning' ? methodNote() : m.desc)}</small></span>
           ${ovaBadge(id)}${svg('chev', 'chev')}</button>`; }).join('')}
-        <button class="mp-row" data-act="sprint" style="min-height:54px">
+        ${P.sprint ? `<button class="mp-row" data-act="sprint" style="min-height:54px">
           <span class="mp-nr alt">${svg('timer')}</span>
           <span class="mp-tx"><b>Tabellsprint</b><small>Så många du hinner på 4 minuter${ps.sprint.best ? ' · bäst ' + ps.sprint.best : ''}</small></span>
-          ${svg('chev', 'chev')}</button>
+          ${svg('chev', 'chev')}</button>` : ''}
       </div>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
         ${mittCard(ps)}
         <button class="mp-cta" data-act="startprov">${svg('paper')}Gör provet</button>
-        <p class="mp-note">Tabelltestet och ${total - P.provCount.tabell} uppgifter till, utan klocka. ${esc(lastTestTxt(provId))}.</p>
+        <p class="mp-note">${esc(sheetName)}et och ${total - P.provCount[sheetM]} uppgifter till, utan klocka. ${esc(lastTestTxt(provId))}.</p>
+      </div>`);
+  }
+
+  /* D44 ✎: Övningsblad · Division. Inget prov: modulerna i ett rutnät (13 blad ryms i 390 × 797), nivå och
+     hjälp överst. En modul med något som var svårt märks "Öva mer på"; en avslutad omgång märks "Klart". */
+  function showOvning() {
+    const P = prov(), lv = level(), ps = provSt(readSt());
+    const badge = id => L.hardFor(ps.hard, id).length ? '<span class="mp-badge y">Öva mer på</span>'
+      : ps.ova[id] && ps.ova[id].level === lv ? '<span class="mp-badge g">Klart</span>' : '';
+    frame(`${esc(P.title)}`, 'back', 'Tillbaka', '', `
+      <div class="mp-segrow">
+        <div class="mp-seg" role="group" aria-label="Nivå">
+          ${L.LEVELS.map(l => `<button class="${l.id === lv ? 'on' : ''}" data-act="level" data-id="${l.id}" aria-pressed="${l.id === lv}">${l.name}</button>`).join('')}
+        </div>
+        <div class="mp-seg" role="group" aria-label="Räkna med hjälp eller själv">
+          ${L.OVA_MODES.map(m => `<button class="${m.id === ovaModeNow() ? 'on' : ''}" data-act="ovamode" data-id="${m.id}" aria-pressed="${m.id === ovaModeNow()}">${m.name}</button>`).join('')}
+        </div>
+      </div>
+      <div class="mp-tiles">
+        ${P.moments.map(id => { const m = momentOf(id); return `<button class="mp-tile" data-act="ova" data-id="${id}">
+          <span class="mp-nr">${m.nr}</span><span class="mp-tt">${esc(m.short)}</span>${badge(id)}</button>`; }).join('')}
       </div>`);
   }
 
@@ -526,11 +744,13 @@ const MatteProv = (() => {
   /* D42: frågeraden över rutorna i Räkna med hjälp: kvittensen efter förra rutan, frågan om rutan med fokus,
      och hjälpens rad efter fel */
   function askHTML(t) {
-    const hb = IN.hb, q = L.boxAsk(t, hb.i);
-    return `<div class="mp-ask">${hb.ack ? `<div class="mp-ack">${svg('check')}${esc(hb.ack)}</div>` : ''}
-      <div class="mp-q1">${tokHTML(q.text)}</div>${hb.msg ? `<div class="mp-rqmsg ${hb.msg.kind}">${esc(hb.msg.text)}</div>` : ''}</div>`;
+    const hb = IN.hb, q = IN.dealPending ? L.dealAsk(t) : L.boxAsk(t, hb.i), T = isOv(t) ? pvText : x => esc(x);
+    return `<div class="mp-ask">${hb.ack ? `<div class="mp-ack">${svg('check')}${T(hb.ack)}</div>` : ''}
+      ${(t.type === 'ts' || t.type === 'dz') && !IN.dealPending ? `<div class="mp-q0">${pvHTML(t.n)} / ${pvHTML(t.d)}</div>` : ''}<div class="mp-q1">${isOv(t) ? pvText(q.text) : tokHTML(q.text)}</div>${hb.msg ? `<div class="mp-rqmsg ${hb.msg.kind}">${T(hb.msg.text)}</div>` : ''}</div>`;
   }
   function introSteps(moment, lv) {
+    const dv = divIntroSteps(moment);
+    if (dv) return dv;
     if (moment === 'tabell') return [
       { v:sheetDemo(), t:'Det här är ett tabelltest: 20 gångertal i två kolumner. Du skriver svaret i rutan efter varje tal.' },
       { v:big('6 · 7 = ' + box(42, 'focus')), t:'Skriv svaret med knapparna. Knappen Nästa hoppar till nästa ruta.' },
@@ -616,6 +836,117 @@ const MatteProv = (() => {
       { v:big('6 · 7 + 34') + tm(6, '·', 7, 42) + tm(42, '+', 34, 76), t:'Utan prislista gäller samma sak: gånger först, sedan plus.' },
     ];
   }
+  /* runda 8 (B6, Dennis): introt visar uppgiftens egen vy (samma bild, bråket med etiketter, bandet), ett steg i taget.
+     Vyn ritas med drHTML i ett lånat tillstånd: i rutor ifyllda till och med "upto", fokus på rutan "focus". */
+  let introView = false;
+  function introDr(t, made, focus, upto, litKeys) {
+    const keep = IN; introView = true;
+    const v = t.fields.map((f, i) => i < upto ? String(f.ans) : '');
+    IN = { kind:'boxes', made, v, f:focus, bad:new Set(), given:new Set(), dealPending:focus === -1,   // -1: högen först, -2: allt ifyllt
+           hb:{ i:focus === -1 ? 0 : focus === -2 ? t.fields.length - 1 : focus, outc:Object.fromEntries(t.fields.map((_, i) => [i, i < upto ? 'direkt' : null]).filter(x => x[1])), adv:focus === -2, ack:null, msg:null } };
+    let h; try { h = drHTML(t, null, new Set(litKeys || (focus >= 0 ? L.boxAsk(t, focus).lit : focus === -1 ? ['pile'] : []))); } finally { IN = keep; introView = false; }
+    return { v:`<div class="mp-q mp-iq">${h}</div>`, band:focus >= 0 ? t.fields[focus].ans : null };
+  }
+  /* D44 ✎: "Så här gör du" i övningsbladen. Ett steg är en idé; bilden och rutorna visar, texten säger det kort. */
+  function divIntroSteps(moment) {
+    if (!L.DIV_IDS.includes(moment)) return null;
+    const fr = (n, d) => fracHTML(n, d, null);
+    const S2 = new Set();
+    const form = (n, d, q, r, k, rest) => `<div class="mp-te mp-dr"><div class="ln">${fr(n, d)}<span>=</span>${box(q)}${rest ? `<span class="mp-rl">, rest</span>${box(r, 'rest')}` : ''}</div>` +
+      (k ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera:</span>${box(d)}<span>·</span>${box(q)}${rest ? `<span>+</span>${box(r, 'rest')}` : ''}<span>=</span>${box(n)}</div>` : '') + '</div>';
+    const P = (t, made, lit) => drPic(t, new Set(lit || []), made, false);
+    const done = `<div style="color:var(--accent)">${svg('target')}</div>`;
+    if (moment === 'dela') {
+      const t = L.makeDr({ n:12, d:3, moment, pic:'dela', kontroll:true }), q = L.drField(t, 'q');
+      return [
+        Object.assign(introDr(t, 0, -1, q), { t:'12 bollar ska delas lika mellan 3 barn. I uppgiften trycker du på högen: varje tryck ger en boll till varje barn.' }),
+        Object.assign(introDr(t, 2, -1, q), { t:'Du trycker tills högen är slut.' }),
+        Object.assign(introDr(t, 4, q, q), { t:'Varje barn fick 4. Strecket visar var 4 ska stå: i kvoten. 12/3 = 4.' }),
+        Object.assign(introDr(t, 4, -2, t.fields.length), { t:'Kontrollera med gånger: 3 barn får 4 var. 3 · 4 = 12, samma som täljaren.' }),
+      ];
+    }
+    if (moment === 'grupper') {
+      const t = L.makeDr({ n:15, d:3, moment, pic:'grupp', kontroll:true }), q = L.drField(t, 'q');
+      return [
+        Object.assign(introDr(t, 0, -1, q), { t:'15 bollar, 3 i varje grupp. I uppgiften trycker du på högen: varje tryck ringar in en grupp.' }),
+        Object.assign(introDr(t, 5, q, q), { t:'Det blev 5 grupper. Strecket visar var 5 ska stå: i kvoten. 15/3 = 5.' }),
+        Object.assign(introDr(t, 5, -2, t.fields.length), { t:'Kontrollera: 3 · 5 = 15. Det blir täljaren, så det stämmer.' }),
+      ];
+    }
+    if (moment === 'dtabell') {
+      const ex = [[56, 8], [24, 3], [36, 9], [42, 6], [20, 5]], ex2 = [[63, 7], [32, 4], [18, 2], [45, 9], [28, 7]];
+      const col = E => E.map(([a, b]) => `<div class="mp-sr"><span class="ex">${a}/${b} =</span>${box('')}</div>`).join('');
+      return [
+        { v:`<div class="mp-sheet demo"><div class="col">${col(ex)}</div><div class="col">${col(ex2)}</div></div>`, t:'Ett divisionstest: 20 divisioner i två kolumner. Du skriver svaret i rutan efter varje tal.' },
+        { v:big('56/8 = ' + box(7, 'focus')), t:'56/8 betyder 56 delat med 8. Hur många 8:or ryms i 56?' },
+        { v:big('8 · 7 = 56'), t:'Kontrollera med gånger: 8 · 7 = 56. Då stämmer det.' },
+        { v:big('<span class="mp-score">17<small>/20</small></span>'), t:'När alla 20 är ifyllda trycker du Klar. Det som blev fel kan du sedan nöta.' },
+      ];
+    }
+    if (moment === 'dkontroll') return [
+      { v:form(28, 4, 7, 0, false), t:'Dela: 28/4 = 7.' },
+      { v:form(28, 4, 7, 0, true), t:'Kontrollera med gånger: nämnaren gånger kvoten ska bli täljaren. 4 · 7 = 28.' },
+    ];
+    if (moment === 'drest') {
+      const g = L.makeDr({ n:14, d:3, moment, pic:'grupp', rest:true }), ln = L.makeDr({ n:14, d:3, moment, pic:'linje', rest:true });
+      return [
+        { v:P(g, 4, ['grp']), t:'14 bollar i grupper med 3. Det blir 4 hela grupper.' },
+        { v:P(g, 4, ['rest']), t:'2 bollar blir över. De räcker inte till en grupp till. Det är resten.' },
+        { v:form(14, 3, 4, 2, true, true), t:'14/3 = 4, rest 2. Kontrollera: 3 · 4 + 2 = 14.' },
+        { v:P(ln, 4, ['rest']), t:'På tallinjen: 4 hopp om 3 når 12. Biten som är kvar till 14 är resten, 2.' },
+        { v:big('rest 2 &lt; 3'), t:'Resten är alltid mindre än nämnaren. Annars ryms en grupp till.' },
+      ];
+    }
+    if (moment === 'ingar') return [
+      { v:'<p class="mp-text">Hur många gånger ingår 4 i 23?</p>', t:'Frågan är en division: 23 delat med 4.' },
+      { v:'<p class="mp-text">Hur många gånger ingår 4 i 23?</p>' + form(23, 4, 5, 3, false, true), t:'Skriv divisionen själv: 23 överst, 4 under strecket. 4 ingår 5 gånger, och 3 blir över.' },
+    ];
+    if (moment === 'talsort') {
+      const ts = L.makeTs(684, 2);
+      const v = q => blocksHTML(ts, new Set(q < ts.fields.length ? ['blk:' + ts.fields[q].place] : [])) +
+        `<div class="mp-te mp-ts"><div class="ln">${fr(ts.fields.map(f => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i><b class="pv${L.PLACE_ID[f.place]}">${f.dig}</b></span>`).join(''), 2)}<span>=</span>${ts.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${box(i < q ? f.ans : '')}</span>`).join('')}</div></div>`;
+      return [
+        { v:v(0), t:'684 är 6 hundraplattor, 8 tiostavar och 4 ental. Varje talsort delas för sig.' },
+        { v:v(1), t:'6 hundratal delat med 2 är 3 hundratal.' },
+        { v:v(3), t:'Sedan tiotalen och entalen: 684/2 = 342.' },
+      ];
+    }
+    if (moment === 'dz') return [
+      { v:big(`65<span class="mp-z lit">00</span>/1<span class="mp-z lit">00</span> = 65`), t:'Dela med 100: 100 har två nollor. Lika många nollor försvinner från täljaren.' },
+      { v:big(`6000/${box(100, 'focus')} = 60`), t:'Ibland saknas nämnaren eller täljaren. Rutans plats visar vad du ska skriva.' },
+    ];
+    if (moment === 'kortdiv') {
+      const mr = v => `<small class="mp-mr">${v}</small>`, num = h => `<span style="display:inline-flex;align-items:flex-start">${h}</span>`;
+      const K = (h, q) => `<div class="mp-te"><div class="ln">${fr(num(h), 3)}<span>=</span><span>${q}</span></div></div>`;
+      return [
+        { v:K('586', ''), t:'Kort division: du delar en siffra i taget, från vänster. Kvoten skrivs efter likhetstecknet.' },
+        { v:K('5' + mr(2) + '86', '1'), t:'5/3 = 1, och 2 blir över. Skriv 1 i kvoten. Resten 2 skrivs litet framför 8:an.' },
+        { v:K('5' + mr(2) + '8' + mr(1) + '6', '19'), t:'Nu är det 28. 28/3 = 9, och 1 blir över. Resten 1 skrivs framför 6:an.' },
+        { v:K('5' + mr(2) + '8' + mr(1) + '6', '195, rest 1'), t:'Nu är det 16. 16/3 = 5, och det som blir över är resten: 195, rest 1.' },
+        { v:big('3 · 195 + 1 = 586'), t:'Kontrollera med gånger: 3 · 195 + 1 = 586.' },
+      ];
+    }
+    if (moment === 'pengar') return [
+      { v:ptHTML(L.makePt('antal', 17, 5), { showAns:true }, null), t:'Du har 17 kr, och en sak kostar 5 kr. Du får 3, och 2 kr blir över: 17/5 = 3, rest 2.' },
+    ];
+    const tm = (a, op, b, c, r, u) => `<div class="mp-nl mp-ptmpl">${box(a)}<span class="mp-op">${op}</span>${box(b)}<span class="mp-op">=</span>${box(c)}${r != null ? `<span class="mp-op sm">, rest</span>${box(r, 'rest')}` : ''}${u ? ` <span class="mp-unit sm">${u}</span>` : ''}</div>`;
+    const lab = t => `<div class="mp-plabel">${t}</div>`;
+    if (moment === 'begrepp') return [
+      { v:big(fr('täljare', 'nämnare') + ' = kvot'), t:'Täljaren står överst och nämnaren under strecket. Kvoten är svaret, och resten är det som blir över.' },
+      { v:'<p class="mp-text">Vad är nämnaren om täljaren är 42 och kvoten är 6?</p>' + tm(42, '/', 7, 6), t:'Skriv divisionen med det du vet. Rutan som saknas är svaret: 42/7 = 6.' },
+    ];
+    if (moment === 'slutled') return [
+      { v:'<p class="mp-text">Vilket tal tänker jag på? Om jag delar det med fem blir kvoten 3 och resten 4.</p>', t:'Räkna baklänges, som kontrollen.' },
+      { v:tm(5, '·', 3, 15) + tm(15, '+', 4, 19), t:'Nämnaren gånger kvoten, och lägg till resten: talet är 19.' },
+    ];
+    const q1 = '<p class="mp-text">Leo delar 84 kulor lika i 4 burkar. Hur många kulor blir det i varje burk?</p>';
+    const q2 = '<p class="mp-text">Alva lägger 38 kakor i askar, 5 i varje. Hur många askar blir fulla, och hur många kakor blir över?</p>';
+    return [
+      { v:q1 + lab('Steg 1: Hur många kulor i varje burk?') + tm(84, '/', 4, 21, null, 'kulor'), t:'Dela lika: det totala delat med antalet burkar. 84/4 = 21.' },
+      { v:q2 + lab('Steg 1: Dela, och skriv resten.') + tm(38, '/', 5, 7, 3), t:'Blir det något över skriver du det i restrutan. 7 askar blir fulla och 3 kakor blir över.' },
+      { v:lab('Steg 2: De 3 som blir över behöver också en ask.') + tm(7, '+', 1, 8, null, 'askar'), t:'Ibland behöver resten också en plats. Då behövs en ask till.' },
+    ];
+  }
   /* D41: "Så här gör du" med minnessiffra — samma metodik som Multiplikation nivå 4: en kolumn i taget,
      minnessiffran i spalten till höger (struken när den är använd), rad 2 med den osynliga nollan. */
   function minnePaper(top, bot, o) {
@@ -674,6 +1005,10 @@ const MatteProv = (() => {
           <button class="mp-cta" data-act="${last ? 'introskip' : 'intronext'}">${last ? 'Börja öva' : 'Nästa'} ${svg('next')}</button>
         </div>
       </div>`);
+    if (s.band != null) requestAnimationFrame(() => requestAnimationFrame(() => {   // runda 8 (B6): bandet också i introt
+      const iq = document.querySelector('#mp-root .mp-iq'), focus = iq && iq.querySelector('.mp-ans.focus'), src = focus && bandSource(iq, focus, s.band);
+      if (src) paintBand(iq, src, focus);
+    }));
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -684,7 +1019,7 @@ const MatteProv = (() => {
   const today = () => MP.spaced.fmtDay(new Date());
   function startOva(moment) {
     const lv = level();
-    if (moment === 'tabell') return startSheet();
+    if (L.isSheetMoment(moment)) return startSheet(moment);
     startDrill('ova', L.genMoment(moment, lv, L.ovaCount(moment, lv)), moment);
   }
   function startDrill(mode, items, moment) {
@@ -692,9 +1027,10 @@ const MatteProv = (() => {
     S = { mode, moment, lv:level(), drill:MP.createDrill(items), start:Date.now(), touched:false, outc:{ direkt:0, hjalp:0, svar:0 } };
     renderTask();
   }
-  function startSheet() {
+  function startSheet(moment) {
     stopSprint();
-    S = { mode:'sheet', moment:'tabell', lv:level(), task:L.makeSheet(level()), start:Date.now(), touched:false };
+    const m = moment || 'tabell';
+    S = { mode:'sheet', moment:m, lv:level(), task:L.makeSheet(level(), null, m), start:Date.now(), touched:false };
     renderTask();
   }
   function startProv(mitt) {
@@ -704,6 +1040,11 @@ const MatteProv = (() => {
     renderTask();
   }
   function curTask() {
+    const t = curTask0();
+    if (t && IN && IN.tool && IN.toolKey === t.key && !t.pic) t.pic = IN.tool;
+    return t;
+  }
+  function curTask0() {
     if (!S) return null;
     if (S.mode === 'prov' || S.mode === 'sprint') return S.items[S.idx] || null;
     if (S.mode === 'sheet') return S.done ? null : S.task;
@@ -711,16 +1052,19 @@ const MatteProv = (() => {
   }
   const isDrill = () => S && (S.mode === 'ova' || S.mode === 'svag' || S.mode === 'not');
 
+  /* runda 8 (B3, Dennis): i Varje talsort, 10/100/1000, Problemlösning och Begrepp växer bilden, bråket och rutorna;
+     kladden får det som blir över (golv 120 px) */
+  const growQ = t => t && (t.type === 'ts' || t.type === 'dz' || (t.type === 'prob' && (t.moment === 'begrepp' || t.moment === 'dproblem')));
   function header(t) {
     let right;
     if (S.mode === 'sprint') right = `<span class="mp-timer" id="mp-timer">${svg('timer')}<span id="mp-tt">${clock(S.left)}</span></span>`;
-    else if (S.mode === 'sheet') right = `<span class="mp-timer mp-score" id="mp-score">&nbsp;&nbsp;<small>/${t.items.length}</small></span>`;
+    else if (S.mode === 'sheet') right = `<span class="mp-timer mp-score" id="mp-score">${sheetFilled(t)}<small>/${t.items.length}</small></span>`;
     else {
       const done = S.mode === 'prov' ? S.idx : S.drill.progress().done;
       const tot  = S.mode === 'prov' ? S.items.length : S.drill.progress().total;
       right = `<span class="header-progress"><span class="progress-bar"><i style="width:${Math.round(100 * done / tot)}%"></i></span><span class="hp-label num">${Math.min(done + 1, tot)}/${tot}</span></span>`;
     }
-    let title = S.mode === 'prov' ? (S.mitt ? 'Mitt prov' : 'Provet') : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? 'Tabelltest' : 'Öva';
+    let title = S.mode === 'prov' ? (S.mitt ? 'Mitt prov' : 'Provet') : S.mode === 'sprint' ? 'Tabellsprint' : S.mode === 'sheet' ? ((momentOf(t.moment) || {}).sheet || 'Tabelltest') : 'Öva';
     if (t.type === 'upp') title = esc(t.text);          // uppställningen: uppgiften i rubriken, så att kladden får plats
     return { title, right };
   }
@@ -731,11 +1075,11 @@ const MatteProv = (() => {
     const blanks = n => Array(n).fill('');
     const H = { wrong:0, cls0:null, bits:null, msg:null };
     if (t.type === 'num') return { kind:'num', v:'', H };
-    if (t.type === 'tio' || t.type === 'te') return { kind:'boxes', v:blanks(t.fields.length), f:0, given:new Set(), bad:new Set(), H,
+    if (t.type === 'tio' || t.type === 'te' || DIVBOX(t)) return { kind:'boxes', v:blanks(t.fields.length), f:0, given:new Set(), bad:new Set(), H, made:0, tool:toolOf(t), toolKey:t.key, dealPending:!!(prepTool(t) && helpOn()),
       hb:helpOn() ? { i:0, sw:0, outc:[], ack:null, msg:null, adv:false } : null };     // D42: med hjälp, ruta för ruta
     if (t.type === 'sheet') return { kind:'sheet', v:blanks(t.items.length), f:0, round:1, out:Array(t.items.length).fill(null), bad:new Set(), H };
     if (t.type === 'prob')                                  // D39 ✎: steg för steg, mallen [ ] op [ ] = [ ]
-      return { kind:'prob', k:0, v:blanks(3), f:0, given:new Set(), bad:new Set(), sw:0, outc:[], msg:null, H };
+      return { kind:'prob', k:0, v:blanks(t.flow[0].rest ? 4 : 3), f:0, given:new Set(), bad:new Set(), sw:0, outc:[], msg:null, H };
     const W = t.width, blank = () => Array(W).fill(null);
     const rws = t.two ? ['p1', 'p2', 's'] : t.parts.map(p => 'r' + p.i).concat(['s']);   // ensiffrig: en rad per delprodukt
     const vals = { m:blank() }; rws.forEach(r => vals[r] = blank());
@@ -746,6 +1090,23 @@ const MatteProv = (() => {
     const rq = { k:0, phase:'ask', ans:'', wrong:0, msg:null, outc:{}, greyWrong:0, busy:false };
     return { kind:'upp', rows:rws, vals, notes, rq, booked:new Set(), f:{ row:rws[0], col:0, note:notes ? 0 : null }, mw:null, given:new Set(), pulse:false, H };
   }
+  /* Verktyget är hjälpen (fynd 1): med hjälp får Kontrollera och Ingår hur många högen (eller tallinjen), Pengar
+     tallinjen i kronor och 10/100/1000 nollorna att stryka. Själv är verkligen själv: inget verktyg. Ger true när
+     uppgiften har något att göra före rutorna. */
+  function toolOf(t) {
+    if (!isOv(t)) return null;
+    if (t.type === 'dr' && (t.moment === 'dkontroll' || t.moment === 'ingar')) return helpOn() ? (t.n <= 40 ? 'grupp' : 'linje') : null;
+    if (t.type === 'pt') return helpOn() && t.form === 'antal' ? 'linje' : null;
+    return null;
+  }
+  /* nötloopen lämnar en ny kopia av uppgiften vid varje anrop: verktyget sparas i IN och läggs på i curTask */
+  function prepTool(t) {
+    const tool = toolOf(t);
+    if (tool) t.pic = tool;
+    if (t.type === 'dz') return t.form === 'kvot';
+    return !!t.pic;
+  }
+  const DIVBOX = t => t.type === 'dr' || t.type === 'ts' || t.type === 'dz' || t.type === 'pt';     // D44 ✎: rutorna i övningsbladen
   const needsScratch = t => t.type !== 'sheet' && S.mode !== 'sprint';
 
   /* Ritar uppgiften. Ny uppgift ⇒ hela ramen (och en tom kladd). keep ⇒ bara frågekortet,
@@ -756,32 +1117,37 @@ const MatteProv = (() => {
     /* D41: uppställning med minnessiffra räknas av multiplikationens motor (MultDivGame.runTask) */
     const eng = t.type === 'upp' && !fb && !keep ? L.uppEngineMode(upMethod(), S.mode, ovaModeNow()) : null;
     if (eng && typeof MultDivGame !== 'undefined' && MultDivGame.runTask) return runMinne(t, eng);
+    /* D44: kort division räknas alltid av divisionens motor (Med hjälp = hjälpläget, Själv och provet = fria läget) */
+    if (t.type === 'kd' && !fb && !keep && typeof MultDivGame !== 'undefined' && MultDivGame.runTask)
+      return runMinne(t, L.passHelp(ovaModeNow(), S.mode) ? 'help' : 'free');
     if (!fb && !keep) { IN = freshInput(t); locked = false; }
     const q = document.getElementById('mp-q');
     if (keep && q) {
       q.innerHTML = questionHTML(t, fb);
-      paintHelp();
+      paintHelp(); updScore(t);
       document.getElementById('mp-ctrl').innerHTML = fb ? fb.html : padHTML(t);
       updKlar();
+      if (!fb) scheduleBand();
       return;
     }
     const H = header(t);
     const leftAct = S.mode === 'sprint' ? 'sprintstop' : 'avsluta';
     frame(H.title, leftAct, 'Avsluta', H.right, `
-      <div class="mp-q${t.type === 'sheet' ? ' top' : ''}${needsScratch(t) ? ' fit' : ''}" id="mp-q">${questionHTML(t, fb)}</div>
+      <div class="mp-q${t.type === 'sheet' ? ' top' : ''}${needsScratch(t) ? ' fit' : ''}${growQ(t) ? ' grow' : ''}" id="mp-q">${questionHTML(t, fb)}</div>
       <div class="mp-help" id="mp-help"></div>
       <div id="mp-ctrl" style="flex-shrink:0">${fb ? fb.html : padHTML(t)}</div>
       ${needsScratch(t) ? scratchHTML() : ''}`);
     paintHelp();
     if (needsScratch(t)) scSetup();
     updKlar();
+    if (!fb) scheduleBand();
   }
   function paintHelp() {
     const el = document.getElementById('mp-help');
     if (!el) return;
     const m = IN && IN.H && IN.H.msg && IN.kind !== 'upp' ? IN.H.msg : null;
-    el.innerHTML = m ? (m.title ? `<b>${svg(m.kind === 'retry' ? 'again' : m.kind === 'info' ? 'next' : 'bulb')}${esc(m.title)}</b>` : '') + `<span>${esc(m.text)}</span>` : '';
-    el.className = 'mp-help' + (m ? ' on ' + m.kind : '');
+    el.innerHTML = m ? (m.title ? `<b>${svg(m.kind === 'retry' ? 'again' : m.kind === 'info' ? 'next' : 'bulb')}${esc(m.title)}</b>` : '') + `<span>${esc(m.text)}</span>` + (IN.khHtml || '') : '';
+    el.className = 'mp-help' + (m ? ' on ' + m.kind : '') + (m && IN.khHtml ? ' has-kh' : '');
   }
 
   /* ── Kladden: appens kladdyta (samma ritkod som multdiv:s setupCanvas/mdSyncBitmap/mdPD/mdPM,
@@ -876,19 +1242,23 @@ const MatteProv = (() => {
   }
   function ansBox(v, cls) { return `<span class="mp-ans ${cls || ''}" id="mp-a">${esc(v || '')}</span>`; }
   /* En ruta i rutsystemet: index i, med facit när svaret visas */
-  function fbox(t, i, fb, facit, row) {
+  function fbox(t, i, fb, facit, row, xc) {
+    const X = xc ? ' ' + xc : '';                               // D44 ✎: 'rest' = restens lila ruta
+    const V = v => isOv(t) && xc !== 'rest' ? pvHTML(v == null ? '' : v) : esc(v == null ? '' : v);   // platsvärdesfärg (D44 ✎ C)
     if (fb && fb.showAns) return row != null && fb.reveal != null && row > fb.reveal
-      ? '<span class="mp-ans sm"></span>'                       // raden visas när förklaringen kommer dit
-      : `<span class="mp-ans sm ok">${esc(L.fmt(facit))}</span>`;
+      ? '<span data-bi="${i}" class="mp-ans sm"></span>'                       // raden visas när förklaringen kommer dit
+      : `<span data-bi="${i}" class="mp-ans sm ok${X}">${isOv(t) ? V(facit) : esc(L.fmt(facit))}</span>`;
     if (IN.hb && !fb) {                                         // D42: med hjälp, ruta för ruta
+      if (IN.dealPending) return `<span data-bi="${i}" class="mp-ans sm lk${X}"></span>`;   // D44 ✎: bilden först
       const hb = IN.hb, lit = new Set(L.boxAsk(t, hb.i).lit).has('box:' + i) ? ' lit' : '';
-      if (i < hb.i || (i === hb.i && hb.adv)) return `<span class="mp-ans sm ${hb.outc[i] === 'svar' ? 'given' : 'done'}${lit}">${esc(IN.v[i])}</span>`;
-      if (i > hb.i) return `<span class="mp-ans sm lk"></span>`;
-      return `<span class="mp-ans sm focus${lit}" data-act="bx" data-i="${i}">${esc(IN.v[i])}</span>`;
+      const tap = DIVBOX(t) ? ` data-act="pick" data-v="${esc(IN.v[i])}" role="button"` : '';   // regel 5: det skrivna går att trycka på
+      if (i < hb.i || (i === hb.i && hb.adv)) return `<span data-bi="${i}" class="mp-ans sm ${hb.outc[i] === 'svar' ? 'given' : 'done'}${lit}${X}"${tap}>${V(IN.v[i])}</span>`;
+      if (i > hb.i) return `<span data-bi="${i}" class="mp-ans sm lk${X}"></span>`;
+      return `<span data-bi="${i}" class="mp-ans sm focus${lit}${X}" data-act="bx" data-i="${i}">${V(IN.v[i])}</span>`;
     }
-    if (IN.given && IN.given.has(i)) return `<span class="mp-ans sm given">${esc(IN.v[i])}</span>`;
-    const cls = (!fb && IN.f === i ? ' focus' : '') + (IN.bad && IN.bad.has(i) ? ' bad' : '') + (fb && fb.ok ? ' ok' : '');
-    return `<span class="mp-ans sm${cls}" data-act="bx" data-i="${i}">${esc(IN.v[i] || '')}</span>`;
+    if (IN.given && IN.given.has(i)) return `<span data-bi="${i}" class="mp-ans sm given${X}">${V(IN.v[i])}</span>`;
+    const cls = (!fb && IN.f === i ? ' focus' : '') + (IN.bad && IN.bad.has(i) ? ' bad' : '') + (fb && fb.ok ? ' ok' : '') + X;
+    return `<span data-bi="${i}" class="mp-ans sm${cls}" data-act="bx" data-i="${i}">${V(IN.v[i] || '')}</span>`;
   }
   function questionHTML(t, fb) {
     const show = fb && fb.showAns;
@@ -896,7 +1266,7 @@ const MatteProv = (() => {
       const v = show ? String(t.answer) : IN.v, cls = fb ? (fb.ok ? 'ok' : 'bad') : 'focus';
       return big(`${esc(t.text)} = ${ansBox(v, show ? 'ok' : cls)}`);
     }
-    const HB = !fb && IN.hb, lit = HB ? new Set(L.boxAsk(t, IN.hb.i).lit) : null;
+    const HB = !fb && IN.hb, lit = HB ? new Set((IN.dealPending ? L.dealAsk(t) : L.boxAsk(t, IN.hb.i)).lit) : null;
     if (t.type === 'tio') {
       const xy = HB ? `${pvRef(t.x, 'x', lit)} · ${pvRef(t.y, 'y', lit)}` : esc(t.text);
       return (HB ? askHTML(t) : `<p class="mp-text sm">Räkna. Skriv i rutorna.</p>`) + rows([
@@ -914,6 +1284,10 @@ const MatteProv = (() => {
     }
     if (t.type === 'prob') return probHTML(t, fb);
     if (t.type === 'sheet') return sheetHTML(t, fb);
+    if (t.type === 'dr') return drHTML(t, fb, lit);
+    if (t.type === 'ts') return tsHTML(t, fb, lit);
+    if (t.type === 'dz') return dzHTML(t, fb, lit);
+    if (t.type === 'pt') return ptHTML(t, fb, lit);
     /* upp */
     let vals = show ? Object.assign({ m:fb.mem || Array(t.width).fill(null) }, L.uppFacitRows(t)) : IN.vals;
     if (show && fb.reveal != null) {                     // förklaringen visar en rad i taget
@@ -932,24 +1306,318 @@ const MatteProv = (() => {
       zlit:fb ? null : IN.zlit, zin:fb ? null : IN.zin, mwait:fb ? null : IN.mw })}`;
   }
 
+  /* ── D44 ✎: Övningsblad · Division, stil C · Brickor (Dennis 11/11) ──
+     Siffrorna har alltid sin platsvärdesfärg (brickor, rutor, bråk, text); brickorna är ljusa med lila kant; rest lila.
+     Med hjälp: ett streckat band går från talets källa till rutan med fokus (vägvisaren), och när ett tal används
+     flyger det dit (flyTo). Själv är verkligen själv: inget band, ingen bild som hjälp. */
+  const LBLP = ['E', 'T', 'H', 'T', 'TT'];
+  const litC = (lit, k) => lit && lit.has(k) ? ' lit' : '';
+  const pk = v => ` data-act="pick" data-v="${v}" role="button"`;
+  const isOv = t => !!t && L.DIV_IDS.includes(t.moment);
+  /* ett tal med varje siffra i sin platsvärdesfärg */
+  const pvHTML = v => { const s = String(v); if (!/^\d+$/.test(s)) return esc(s); const k = s.length; return s.split('').map((c, j) => `<span class="pv${L.PLACE_ID[k - 1 - j]}">${c}</span>`).join(''); };
+  /* text där talen blir färgade (och tokens [[siffra:plats]] som förut) */
+  const pvText = text => String(text).split(/(\[\[\d+:[A-Za-z]+\]\])/).map(p => /^\[\[/.test(p) ? p.replace(/\[\[(\d+):([A-Za-z]+)\]\]/, '<b class="pv$2">$1</b>') : esc(p).replace(/\d+/g, m => `<b class="mp-n">${pvHTML(m)}</b>`)).join('');
+  /* talen i en uppgiftstext som brickor att trycka på (regel 7) */
+  const ORDW = ['två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio'];
+  /* talet hålls ihop med ordet före och skiljetecknet efter, så att "resten 4." aldrig bryts ensamt på en rad */
+  const tileText = text => esc(text).replace(/(\S+ )?(\d+)([.,?!:]?)/g, (_, w, m, p) => `<span class="mp-nw">${w || ''}<b class="mp-pnum"${pk(m)}>${pvHTML(m)}</b>${p}</span>`);
+  const labOn = () => true;
+  const fracHTML = (nu, de, lit, tap, lab) => {
+    const N = typeof nu === 'number' ? pvHTML(nu) : nu, D = typeof de === 'number' ? pvHTML(de) : de;
+    const frac = `<span class="mp-frac"><span class="nu${litC(lit, 'n')}"${tap ? pk(tap[0]) : ''}>${N}</span><span class="de${litC(lit, 'd')}"${tap ? pk(tap[1]) : ''}>${D}</span></span>`;
+    return lab ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span>${frac}` : frac;
+  };
+  const capW = (cap, html) => `<span class="mp-capw">${html}<i>${cap}</i></span>`;   // etiketten under rutan, så att bandet kan gå in uppifrån
+  const KID = '<svg class="mp-kid" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4.5"/><path d="M3.5 22c0-5 3.8-8 8.5-8s8.5 3 8.5 8"/></svg>';
+  /* Bilden till divisionen. made = varv (dela), grupper (grupp) eller hopp (linje) som barnet har gjort; ringarna,
+     barnens antal och hoppen är numrerade (fynd 3) och går att trycka på. */
+  function drPic(t, lit, made, tapOn, run) {
+    if (t.pic === 'linje') return lineSVG(t, lit, made, tapOn);
+    const ball = '<i class="mp-ball"></i>', left = L.picLeft(t, made), done = made >= L.picMax(t);
+    const sm = t.n > 24, cols = k => (sm ? k <= 3 : k <= 5) ? k : Math.ceil(k / 2);   // runda 8b: med 12 px prickar står stora tal i två rader per grupp
+    let groups = '';
+    if (t.pic === 'grupp') for (let g = 0; g < made; g++)
+      groups += `<span class="mp-grp${litC(lit, 'grp')}" style="grid-template-columns:repeat(${cols(t.d)},auto)">${run ? `<b class="mp-gn mp-run"${g === made - 1 ? pk((g + 1) * t.d) : ''}>${pvHTML((g + 1) * t.d)}</b>` : `<b class="mp-gn">${pvHTML(g + 1)}</b>`}${ball.repeat(t.d)}</span>`;   // runda 8 (B2): hoppräkning i täljarens steg
+    else for (let g = 0; g < t.d; g++)
+      groups += `<span class="mp-kidc${litC(lit, 'grp')}">${KID}<span class="mp-grp box" style="grid-template-columns:repeat(${Math.max(1, t.d >= 4 ? Math.min(3, made) : cols(made))},auto)">${made ? ball.repeat(made) : '<i class="mp-ball ghost"></i>'}</span><b class="mp-gc">${made ? pvHTML(made) : ''}</b></span>`;
+    const pileLit = done ? litC(lit, 'rest') : litC(lit, 'pile');
+    const tap = tapOn && !done;
+    const pile = left > 0 ? `<span class="mp-pile${done ? ' rest' : ''}${pileLit}${tap ? ' tap' : ''}" style="grid-template-columns:repeat(${Math.min(10, left)},auto)"${tap ? ' data-act="deal" role="button" aria-label="Dela ut"' : ''}>${ball.repeat(left)}</span>` : '';
+    /* runda 8b: när allt är utdelat står resten sist i gruppernas rad, inte på en egen rad (platsen går till prickarna) */
+    if (done && t.pic === 'grupp') return `<div class="mp-pic${t.n > 24 ? ' sm' : ''}"><div class="mp-grps">${groups}${pile}</div></div>`;
+    return `<div class="mp-pic${t.n > 24 ? ' sm' : ''}">${pile}<div class="mp-grps">${groups}</div></div>`;
+  }
+  /* Tallinjen (27b): numrerade hopp om d från 0; resten (lila) är biten som är kvar till n */
+  function lineSVG(t, lit, made, tapOn) {
+    const W = 340, x0 = 12, x1 = W - 12, X = v => x0 + (x1 - x0) * v / t.n, y = 46, done = made >= L.picMax(t);   // låg tallinje: kladden ska ha plats
+    let h = `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="ax"/>`;
+    for (let v = 0; v <= t.n; v++) h += `<line x1="${X(v)}" y1="${y - (v % t.d === 0 ? 6 : 3)}" x2="${X(v)}" y2="${y + (v % t.d === 0 ? 6 : 3)}" class="tk"/>`;
+    for (let k = 0; k < made; k++) {
+      const a = X(k * t.d), b = X((k + 1) * t.d);
+      h += `<path d="M${a} ${y - 4} Q${(a + b) / 2} ${y - 32} ${b} ${y - 4}" class="jump${litC(lit, 'grp')}${k === made - 1 ? ' new' : ''}"/>` +
+        `<text x="${(a + b) / 2}" y="${y - 21}" class="jn">${k + 1}</text>`;
+    }
+    if (done && t.r) {
+      const a = X(made * t.d), b = X(t.n);
+      h += `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" class="restseg${litC(lit, 'rest')}"/><text x="${(a + b) / 2}" y="${y - 10}" class="rl">${t.r}</text>`;
+    }
+    const lab = new Set([0, t.n]); for (let k = 1; k <= made; k++) lab.add(k * t.d);
+    for (const v of lab) h += `<text x="${X(v)}" y="${y + 18}" class="lb${v === t.n ? ' n' : ''}">${v}</text>`;
+    const tap = tapOn && !done;
+    return `<svg class="mp-line${tap ? ' tap' : ''}${!done ? litC(lit, 'pile') : ''}" viewBox="0 0 ${W} 66"${tap ? ' data-act="deal" role="button" aria-label="Hoppa"' : ''}>${h}</svg>`;
+  }
+  /* Summan under bilden när allt är utdelat: talet barnet ska skriva, som bricka ("6 grupper", "2 över").
+     Regel (brainstorm/13, Dennis 11/11): det som är i fokus och bandets start är exakt det tal barnet ska skriva. */
+  function picSum(t, made, lit) {
+    if (made < L.picMax(t)) return '';
+    const T = (v, k) => `<b class="mp-pnum${litC(lit, k)}"${pk(v)}>${pvHTML(v)}</b>`;
+    const what = t.pic === 'dela' ? 'till varje barn' : t.pic === 'linje' ? (t.type === 'pt' ? 'gånger' : 'hopp') : 'grupper';
+    return `<p class="mp-sum${litC(lit, 'grp')}">${T(t.q, 'grp')} ${what}${t.r ? `<span class="mp-sumr${litC(lit, 'rest')}">${T(t.r, 'rest')} ${t.type === 'pt' ? 'kr ' : ''}över</span>` : ''}</p>`;
+  }
+  function drHTML(t, fb, lit) {
+    const HB = !fb && IN.hb, show = fb && fb.showAns;
+    const B = role => { const i = L.drField(t, role); return fbox(t, i, fb, t.fields[i].ans, null, role === 'r' || role === 'k3' ? 'rest' : ''); };
+    /* summan ur bilden ("9 grupper", "4 över") står ovanför sin ruta när allt är utdelat */
+    /* summan visas med hjälp bara när kvoten eller resten är i fokus; i Själv när allt är utdelat */
+    const qIdx = L.drField(t, 'q'), lastIdx = t.rest ? L.drField(t, 'r') : qIdx;
+    const stepOk = !HB || (IN.hb.i >= qIdx && IN.hb.i <= lastIdx);   // med hjälp bara i kvotens och restens steg; i kontrollen är källorna rutorna
+    const made = show ? L.picMax(t) : IN.made, sumOn = t.pic && made >= L.picMax(t) && stepOk;
+    const what = t.pic === 'dela' ? 'i varje' : t.pic === 'linje' ? 'hopp' : 'grupper';
+    const pill = (v, word, cls, k) => `<span class="mp-sumov ${cls}${litC(lit, k)}"><b class="mp-pnum mp-near${litC(lit, k)}"${pk(v)}>${pvHTML(v)}</b><i>${word}</i></span>`;
+    /* runda 8 (B1, Dennis): kopplingen till täljaren visas först efter svaret, med en bock under rutan */
+    const k4i = t.kontroll ? L.drField(t, 'k4') : -1;
+    const k4ok = t.kontroll && ((IN.hb && IN.hb.outc && IN.hb.outc[k4i]) || (fb && (show || +IN.v[k4i] === t.n)));
+    const k4col = !t.kontroll ? '' : k4ok ? `<span class="mp-capw">${B('k4')}<i class="mp-ktal">${svg('check')}täljaren</i></span>` : B('k4');
+    const k1 = !t.kontroll ? '' : t.kGiven ? `<span class="mp-kd${litC(lit, 'kd')}"${pk(t.d)}>${pvHTML(t.d)}</span>` : B('k1');
+    /* runda 8 (B2, Dennis): i täljarens steg i Hur många grupper får grupperna en löpande summa; den sista är källan */
+    const run = HB && t.moment === 'grupper' && !t.r && t.fields[IN.hb.i] && t.fields[IN.hb.i].role === 'n';
+    const pic = t.pic ? drPic(t, lit, made, !fb && !locked && !introView, run) : '';
+    const prompt = t.prompt ? `<p class="mp-text sm mp-prompt${litC(lit, 'prompt')}">${tileText(t.prompt)}</p>` : '';
+    const frac = t.write ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span><span class="mp-frac"><span class="nu">${B('n')}</span><span class="de">${B('d')}</span></span>` : fracHTML(t.n, t.d, lit, [t.n, t.d], true);
+    const kontroll = t.kontroll ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera med gånger</span>${k1}<span>·</span>${B('k2')}${t.rest ? `<span>+</span>${B('k3')}` : ''}<span>=</span>${k4col}</div>` : '';
+    const qcol = `<span class="mp-capw">${sumOn ? pill(t.q, what, 'lo', 'grp') : ''}${B('q')}<i>kvot</i></span>`;
+    const rcol = t.rest ? `<span class="mp-rl">,</span><span class="mp-capw">${sumOn && t.r ? pill(t.r, 'över', 'lo rest', 'rest') : ''}${B('r')}<i class="rest">rest</i></span>` : '';
+    const sumCls = sumOn ? (t.r ? ' sum2' : ' sum1') + (t.write ? ' w' : '') : '';   // w: bråket med två rutor är högt, så summan behöver mindre extra plats   // med rest står orden ovanför talen, så att de två summorna inte krockar
+    return (HB && !introView ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr${sumCls}"><div class="ln">${frac}<span>=</span>${qcol}${rcol}</div>${kontroll}</div>`;
+  }
+  /* Hundraplattor, tiostavar och ental (K_S 67): ett kluster per talsort, i talsortens färg */
+  function blocksHTML(t, lit) {
+    const sp = (IN && IN.split) || {};
+    /* runda 8 (Dennis: "jag såg inte de små gröna prickarna"): varje talsort är en lika tydlig grupp i en egen ram med sin
+       färg och bokstav, i ordningen T H T E; nollan är en tom ram */
+    const fr = (f, h) => `<span class="mp-bgrp q${f.place}"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${h}</span>`;
+    return `<div class="mp-blk">${t.fields.map(f => fr(f, (() => {
+      if (!f.dig) return `<span class="mp-bc p${f.place} zero" aria-label="0 ${['ental', 'tiotal', 'hundratal', 'tusental'][f.place]}"><b class="pv${L.PLACE_ID[f.place]}">0</b></span>`;
+      const on = lit && lit.has('blk:' + f.place), b = `<i class="b${f.place}"></i>`;
+      if (sp[f.place]) return `<span class="mp-bsp">${Array(t.d).fill(`<span class="mp-bc p${f.place}${on ? ' lit' : ''}">${b.repeat(f.dig / t.d)}</span>`).join('')}<b class="mp-pnum mp-bsn${on ? ' lit' : ''}"${pk(f.dig / t.d)}>${pvHTML(f.dig / t.d)}</b></span>`;
+      return `<span class="mp-bc p${f.place}${on ? ' lit tap' : ''}"${on ? ` data-act="split" data-p="${f.place}" role="button" aria-label="Dela i ${t.d}"` : ''}>${b.repeat(f.dig)}</span>`;
+    })())).join('')}</div>`;
+  }
+  /* Dela varje talsort: täljarens siffror under sina talsorter, kvoten en ruta per talsort i samma färg */
+  function tsHTML(t, fb, lit) {
+    const HB = !fb && IN.hb;
+    const nu = t.fields.map(f => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i><b class="pvd pv${L.PLACE_ID[f.place]}${litC(lit, 'x:' + f.place)}"${pk(f.dig)}>${f.dig}</b></span>`).join('');
+    const qs = t.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${fbox(t, i, fb, f.ans)}</span>`).join('');
+    return (HB ? askHTML(t) : '') + (HB || (fb && fb.showAns) ? blocksHTML(t, lit) : '') + `<div class="mp-te mp-ts"><div class="ln">${fracHTML(nu, t.d, lit, null)}<span>=</span>${qs}</div></div>`;
+  }
+  /* Med 10, 100 och 1000 som bråk. Med hjälp stryker barnet nollorna med ett tryck (fynd 9): en i nämnaren och en i
+     täljaren åt gången. Täljarens siffror går att trycka på. */
+  function dzHTML(t, fb, lit) {
+    const HB = !fb && IN.hb, struck = fb ? 0 : (IN.made || 0), strikeOn = HB && IN.dealPending;
+    const num = (n, key, tapZ) => { const s = String(n), k = s.length;
+      return s.split('').map((c, j) => { const tail = j >= k - t.z, sk = tail && j >= k - struck;
+        return `<span class="pv${L.PLACE_ID[k - 1 - j]}${tail ? ' mp-z' + litC(lit, key) : ''}${sk ? ' struck' : ''}"${tail && tapZ && strikeOn && !sk ? ' data-act="deal" role="button"' : !tail && !tapZ ? pk(c) : ''}>${c}</span>`; }).join(''); };
+    const N = num(t.n, 'nz', false), D = num(t.d, 'dz', true);
+    const bx = `<span class="mp-cells">${t.fields.map((f, i) => `<span class="mp-tecol"><i class="pv${L.PLACE_ID[f.place]}">${LBLP[f.place]}</i>${fbox(t, i, fb, f.ans)}</span>`).join('')}</span>`;
+    const Q = `<span${pk(t.q)}>${pvHTML(t.q)}</span>`;
+    const expr = t.form === 'kvot' ? `${fracHTML(N, D, null, null, true)}<span>=</span>${bx}` : t.form === 'namnare' ? `${fracHTML(N, bx, null, null, true)}<span>=</span>${Q}` : `${fracHTML(bx, D, null, null, true)}<span>=</span>${Q}`;
+    return (HB ? askHTML(t) : '') + `<div class="mp-te mp-dzx"><div class="ln">${expr}</div></div>`;
+  }
+  /* Pengar och tabeller (33b): en rad i tabellen; med hjälp är tallinjen i kronor verktyget (hopp om priset) */
+  function ptHTML(t, fb, lit) {
+    const HB = !fb && IN.hb;
+    const cell = (k, html) => `<div class="mp-ptc${litC(lit, k)}">${html}</div>`;
+    const B = role => fbox(t, t.fields.findIndex(f => f.role === role), fb, t.fields.find(f => f.role === role).ans, null, role === 'r' ? 'rest' : '');
+    const kr = h => `${h}<span class="mp-unit sm">kr</span>`, T = v => `<b class="mp-pnum"${pk(v)}>${pvHTML(v)}</b>`;
+    const row = t.form === 'pris'
+      ? [cell('sum', kr(T(t.sum))), cell('price', kr(B('pris'))), cell('q', T(t.q)), cell('r', kr(T(t.r)))]
+      : [cell('sum', kr(T(t.sum))), cell('price', kr(T(t.price))), cell('q', B('q')), cell('r', kr(B('r')))];
+    const pm = fb && fb.showAns ? L.picMax(t) : IN.made;
+    const pic = t.pic === 'linje' ? lineSVG(t, lit, pm, !fb && !locked) : '';
+    /* runda 8 (A1): summan ur tallinjen står rakt ovanför sin ruta, under rubriken, som i de andra modulerna */
+    const sumOn = t.pic === 'linje' && pm >= L.picMax(t) && t.form !== 'pris';
+    const pp = (v, word, k, cls) => `<div class="mp-ptp${cls ? ' ' + cls : ''}"><b class="mp-pnum mp-near${litC(lit, k)}"${pk(v)}>${pvHTML(v)}</b><i>${word}</i></div>`;
+    const prow = sumOn ? `<div></div><div></div>${pp(t.q, 'gånger', 'grp')}${t.r ? pp(t.r, 'kr över', 'rest', 'rest') : '<div></div>'}` : '';
+    return (HB ? askHTML(t) : '') + pic + `<div class="mp-pt"><div class="mp-pth">Summa pengar</div><div class="mp-pth">Priset på ett</div><div class="mp-pth">Hur många får du?</div><div class="mp-pth">Pengar över</div>${prow}${row.join('')}</div>`;
+  }
+  /* ── Bandet och flygningen ── */
+  /* Källan till rutan med fokus: det tryckbara tal som är svaret, annars det som lyser */
+  function bandSource(q, focus, want) {
+    const cands = [...q.querySelectorAll(`[data-act="pick"][data-v="${want}"]`)].filter(e => e !== focus && !focus.contains(e) && !e.closest('.mp-ack'));
+    /* bara exakt det tal barnet ska skriva; finns det inte på skärmen blir det inget band */
+    /* det som lyser för steget först (kvotrutan till kontrollen), sedan brickan nära rutan */
+    return cands.find(e => e.classList.contains('mp-ans') && e.classList.contains('lit')) || cands.find(e => e.classList.contains('mp-near')) || cands.find(e => e.closest('.lit') || e.classList.contains('lit')) || cands[cands.length - 1] || null;
+  }
+  function bandWant(t) {
+    if (!IN) return null;
+    /* runda 8 (B1): i kontrollens sista ruta räknar barnet gångertalet; täljaren är inte källan (då skrivs den bara av) */
+    if (t.type === 'dr' && IN.kind === 'boxes' && IN.hb && t.fields[IN.hb.i] && t.fields[IN.hb.i].role === 'k4') return null;
+    if (t.type === 'dz' && t.form !== 'kvot') return null;             // nämnaren och täljaren finns inte som tal på skärmen
+    if (IN.kind === 'boxes' && IN.hb && !IN.dealPending && !IN.hb.adv && t.fields[IN.hb.i]) return t.fields[IN.hb.i].ans;
+    if (IN.kind === 'prob' && !IN.adv && t.flow[IN.k]) return t.flow[IN.k].ans[IN.f];
+    return null;
+  }
+  let lastBand = null;
+  /* Siffrornas egen ruta (runda 7): en Range över elementets text, inte brickans eller radens ruta. Ett element utan
+     text (en tom ruta) mäts med sin egen ram. */
+  function digitsRect(el) {
+    if (el && /\d/.test(el.textContent)) { const rg = document.createRange(); rg.selectNodeContents(el); const r = rg.getBoundingClientRect(); if (r.width && r.height) return r; }
+    return el.getBoundingClientRect();
+  }
+  /* Samma regel för alla källor och mål: en källa mäts med siffrornas egen ruta (ensiffrigt, flersiffrigt, decimaltal,
+     siffror i platsvärdesfärg i egna <span>, bråkets täljare och nämnare, brickor, rutor med ett tal), ett mål med
+     rutans ram. anchorOf ger den exakta punkten mitt på en sida, med avståndet utanför; bandRoute räknar med samma
+     sidmitt och samma avstånd (BAND_START från källan, BAND_TIP utanför målets ram). */
+  const anchorRect = (el, source) => source ? digitsRect(el) : el.getBoundingClientRect();
+  function anchorOf(el, side, gap, digits) {
+    const r = anchorRect(el, digits), g = gap || 0;
+    return { t:{ x:(r.left + r.right) / 2, y:r.top - g }, b:{ x:(r.left + r.right) / 2, y:r.bottom + g },
+             l:{ x:r.left - g, y:(r.top + r.bottom) / 2 }, r:{ x:r.right + g, y:(r.top + r.bottom) / 2 } }[side];
+  }          // senaste bandets underlag (för kontrollen i webbläsaren)
+  /* Ritas när layouten stabiliserats: typsnitten klara och två bildrutor senare; och om vid storleksändring */
+  let bandObs = null, bandTimer = 0;
+  function scheduleBand() {
+    const go = () => requestAnimationFrame(() => requestAnimationFrame(drawBand));
+    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(go); else go();
+    const q = document.getElementById('mp-q');
+    if (q && typeof ResizeObserver !== 'undefined' && (!bandObs || bandObs._q !== q)) {
+      if (bandObs) bandObs.disconnect();
+      bandObs = new ResizeObserver(() => { clearTimeout(bandTimer); bandTimer = setTimeout(go, 60); });
+      bandObs._q = q; bandObs.observe(q);
+    }
+  }
+  function drawBand() {
+    const q = document.getElementById('mp-q'), t = curTask();
+    if (!q || !t || !isOv(t) || !helpOn() || locked) return;
+    const old = q.querySelector('.mp-band'); if (old) old.remove();
+    q.classList.remove('mp-fm'); q.querySelectorAll('.mp-keep, .mp-bsrc, .mp-bring').forEach(e => e.classList.remove('mp-keep', 'mp-bsrc', 'mp-bring'));
+    const want = bandWant(t), focus = q.querySelector('.mp-ans.focus, .mp-nb.focus');
+    if (want == null || !focus || (IN.v && IN.v[IN.kind === 'prob' ? IN.f : IN.hb.i])) return;   // bara den aktuella, tomma rutan
+    const src = bandSource(q, focus, want);
+    if (!src) return;
+    paintBand(q, src, focus);
+  }
+  /* Bandet (eller ringen) från källan till rutan i fokus, i en behållare: uppgiftens kort eller introts vy (runda 8, B6) */
+  function paintBand(q, src, focus) {
+    /* hindren: varje textrad, siffra och etikett (textnodernas rutor) och bilderna, utom källan och målet */
+    const qr = q.getBoundingClientRect(), rel = r => ({ l:r.left - qr.left, t:r.top - qr.top, r:r.right - qr.left, b:r.bottom - qr.top });
+    const mine = e => src.contains(e) || focus.contains(e);
+    const rects = [];
+    const tw = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, { acceptNode:n => n.nodeValue.trim() && !mine(n.parentElement) && !n.parentElement.closest('.mp-band, .mp-nearhid') ? 1 : 2 });
+    /* hårda hinder: siffror, läsbar text och etiketter; mjuka: tecken (=, ·, +) och tomma rutor; bilderna hårda */
+    const READ = '.mp-ask, .mp-text, .mp-prompt, .mp-plabel, .mp-pdone, .mp-sum';
+    /* runda 8 (A1, A5): rubriker och etiketter är också läsbar text; bandet går aldrig genom "kvot" eller "Priset på ett" */
+    const LABEL = '.mp-flab, .mp-capw, .mp-klbl, .mp-pth, .mp-ptp, .mp-sumov, .mp-unit, .mp-tecol > i';
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      const hard = /\d/.test(n.nodeValue) || !!n.parentElement.closest(READ) || !!n.parentElement.closest(LABEL), rg = document.createRange(); rg.selectNodeContents(n);
+      const w = 1;
+      const pad = /\d/.test(n.nodeValue) ? 10 : 2;
+      for (const r of rg.getClientRects()) if (r.width && r.height) rects.push(Object.assign(rel(r), { hard, w, pad }));
+    }
+    /* bilderna är hårda hinder (runda 7: ett band genom grupperna lästes som "skriv antalet grupper"); tomma rutor mjuka */
+    q.querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc, .mp-ans, .mp-nb, .mp-sumov, .mp-ptp').forEach(e => {
+      if (!mine(e) && !e.contains(src) && !e.contains(focus)) rects.push(Object.assign(rel(e.getBoundingClientRect()), { hard:false, pic:!e.matches('.mp-ans, .mp-nb') }));
+    });
+    lastBand = { S:rel(anchorRect(src, true)), T:rel(anchorRect(focus, false)), rects, box:{ l:2, t:2, r:qr.width - 2, b:qr.height - 2 } };
+    const route = L.bandRoute(lastBand.S, lastBand.T, rects, lastBand.box);
+    src.classList.add('mp-bsrc');
+    if (!route) {                                   // ingen fri väg: ingen linje, källan får samma lila ring som pulserar
+      src.classList.add('mp-bring'); focus.classList.add('mp-bring');
+      for (const e of [src, focus, ...q.querySelectorAll('.lit')]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
+      q.classList.add('mp-fm');
+      return;
+    }
+    const e = route.end, A = L.BAND_ARROW, tip = { down:[0, 1], up:[0, -1], right:[1, 0], left:[-1, 0] }[e.dir];
+    const tx = e.x + tip[0] * A, ty = e.y + tip[1] * A, px = -tip[1], py = tip[0];
+    q.insertAdjacentHTML('beforeend', `<svg class="mp-band" aria-hidden="true"><path d="${route.d}"/><polygon points="${tx},${ty} ${e.x + px * 5},${e.y + py * 5} ${e.x - px * 5},${e.y - py * 5}"/><circle cx="${route.pts[0].x}" cy="${route.pts[0].y}" r="3.5"/></svg>`);
+    for (const e of [src, focus, ...q.querySelectorAll('.lit')]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
+    q.classList.add('mp-fm');
+  }
+  /* Ett tal flyger från där det står till sin ruta (samma känsla som multdivs brickor): texten står först, sedan rörelsen */
+  function flyTo(fromEl, toEl, html, done) {
+    if (!fromEl || !toEl || matchMedia('(prefers-reduced-motion: reduce)').matches) { done && done(); return; }
+    const a = fromEl.getBoundingClientRect(), z = toEl.getBoundingClientRect();
+    const f = document.createElement('div');
+    f.className = 'mp-fly'; f.innerHTML = html;
+    Object.assign(f.style, { left:a.left + a.width / 2 - 22 + 'px', top:a.top + a.height / 2 - 22 + 'px' });
+    document.body.appendChild(f);
+    f.animate([{ transform:'translate(0,0) scale(1)' }, { transform:`translate(${(z.left + z.width / 2) - (a.left + a.width / 2)}px,${(z.top + z.height / 2) - (a.top + a.height / 2)}px) scale(1.05)` }],
+      { duration:460, easing:'cubic-bezier(.34,1.3,.4,1)', fill:'forwards' }).onfinish = () => { f.remove(); done && done(); };
+  }
+  /* Utdelningen: de nya bollarna (eller hoppet) rör sig från högen till sin plats */
+  function animateDeal(t, pileRect) {
+    const q = document.getElementById('mp-q'); if (!q || !pileRect || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let balls = [];
+    if (t.pic === 'dela') balls = [...q.querySelectorAll('.mp-kidc .mp-grp.box')].map(b => b.querySelector('.mp-ball:last-of-type'));
+    else if (t.pic === 'grupp') { const g = [...q.querySelectorAll('.mp-grps .mp-grp')].pop(); balls = g ? [...g.querySelectorAll('.mp-ball')] : []; }
+    balls.filter(Boolean).forEach((b, k) => { const r = b.getBoundingClientRect();
+      b.animate([{ transform:`translate(${pileRect.left + pileRect.width / 2 - r.left}px,${pileRect.top + pileRect.height / 2 - r.top}px)` }, { transform:'none' }],
+        { duration:420, delay:k * 90, easing:'cubic-bezier(.34,1.3,.4,1)', fill:'backwards' }); });
+    const j = q.querySelector('.mp-line .jump.new'); if (j) { const L2 = j.getTotalLength(); j.style.strokeDasharray = L2; j.animate([{ strokeDashoffset:L2 }, { strokeDashoffset:0 }], { duration:420, easing:'ease-out' }); }
+  }
+  /* Slutsatsen efter sista rutan */
+  function conclText(t) {
+    if (t.type === 'dr') return t.rest ? `${t.n}/${t.d} = ${t.q}, rest ${t.r}. Kontroll: ${t.d} · ${t.q} + ${t.r} = ${t.n}.`
+      : `${t.n}/${t.d} = ${t.q}.${t.kontroll ? ` Kontroll: ${t.d} · ${t.q} = ${t.n}.` : ''}`;
+    if (t.type === 'pt') return t.form === 'pris' ? `${t.sum} − ${t.r} = ${t.sum - t.r} kr, och ${t.sum - t.r}/${t.q} = ${t.price} kr.` : `${t.sum}/${t.price} = ${t.q}, rest ${t.r}. Du får ${t.q} och har ${t.r} kr över.`;
+    if (t.type === 'dz' || t.type === 'ts') return `${L.fmt(t.n)}/${L.fmt(t.d)} = ${L.fmt(t.n / t.d)}`;
+    return `${t.text} = ${L.fmt(t.answer)}`;
+  }
+
   /* Problemlösningen: skriv uttrycket (fas 1), räkna gånger först rad för rad (fas 2) */
   function probHTML(t, fb) {
     /* Prislistan går att trycka på: priset skrivs i rutan med fokus. Tidigare stegs svar går också att trycka på. */
     const litPrice = !fb && helpOn() && t.shop && t.flow[IN.k] && t.flow[IN.k].op === '·' ? t.flow[IN.k].ans[1] : null;   // D42
     const shop = t.shop ? `<div class="mp-shop">${L.SHOP.map(x => `<div class="pick${x.price === litPrice ? ' lit' : ''}" data-act="pick" data-v="${x.price}" role="button" aria-label="${esc(x.one)} ${x.price} kr">${shopIcon(x.id)}<span>${esc(x.one)}<b>${x.price} kr</b></span></div>`).join('')}</div>` : '';
-    const head = t.kind === 'ordning' ? `<p class="mp-text">${esc(t.text)}</p>${big(esc(t.expr))}` : `<p class="mp-text">${esc(t.text)}</p>`;
+    const ov = isOv(t), V = v => ov ? pvHTML(v) : esc(v);
+    /* runda 8 (A4): ett tal som står som ord ("med fem") får med hjälp en bricka vid ordet, så att rutan har en källa */
+    const ordOn = ov && helpOn() && !fb, ordV = [];
+    const ordTiles = h => !ordOn ? h : h.replace(/med (två|tre|fyra|fem|sex|sju|åtta|nio)(?=[ .,?])/g, (m, w) => { const v = ORDW.indexOf(w) + 2; ordV.push(v); return `${m} <b class="mp-pnum mp-ord"${pk(v)}>${pvHTML(v)}</b>`; });
+    const head = t.kind === 'ordning' ? `<p class="mp-text">${esc(t.text)}</p>${big(esc(t.expr))}` : `<p class="mp-text">${ov ? ordTiles(tileText(t.text)) : esc(t.text)}</p>`;
+    /* runda 8 (B8, Dennis): på Lättare får "Vilket tal tänker jag på?" med rest en bild, grupperna och resten som i Rest */
+    const slPic = t.kind === 'tankerrest' && S.lv === 'latt' ? (() => { const st0 = t.flow[0], tq = { pic:'grupp', d:st0.ans[0], q:st0.ans[1], n:t.answer, r:t.answer - st0.ans[2], moment:'slutled' };
+      return `<div class="mp-slpic">${drPic(tq, null, tq.q, false)}</div>`; })() : '';
     const unit = st => st.unit ? ` <span class="mp-unit sm">${esc(st.unit)}</span>` : '';
-    const done = t.flow.slice(0, fb && fb.final ? t.flow.length : IN.k).map((st, j) => `<div class="mp-pdone"><span class="mp-pst">Steg ${j + 1}</span>${st.ans[0]} ${st.op} ${st.ans[1]} = <span class="mp-pchip" data-act="pick" data-v="${st.ans[2]}" role="button" aria-label="${st.ans[2]}">${st.ans[2]}</span>${unit(st)}</div>`).join('');
-    if (fb && fb.final) return shop + head + done;
+    const done = t.flow.slice(0, fb && fb.final ? t.flow.length : IN.k).map((st, j) => `<div class="mp-pdone"><span class="mp-pst">Steg ${j + 1}</span>${st.ans[0]} ${st.op} ${st.ans[1]} = <span class="mp-pchip" data-act="pick" data-v="${st.ans[2]}" role="button" aria-label="${st.ans[2]}">${st.ans[2]}</span>${st.rest ? `, rest <span class="mp-pchip" data-act="pick" data-v="${st.ans[3]}" role="button" aria-label="rest ${st.ans[3]}">${st.ans[3]}</span>` : ''}${unit(st)}</div>`).join('');
+    if (fb && fb.final) return shop + head + slPic + done;
     const st = t.flow[IN.k], show = fb && fb.showAns;
     const bx = i => {
-      if (show || IN.given.has(i)) return `<span class="mp-nb given">${esc(show ? String(st.ans[i]) : IN.v[i])}</span>`;
-      const cls = (IN.f === i && !fb ? ' focus' : '') + (IN.bad.has(i) ? ' bad' : '');
-      return `<span class="mp-nb${cls}" data-act="bx" data-i="${i}">${esc(IN.v[i])}</span>`;
+      const R = i === 3 ? ' rest' : '';
+      if (show || IN.given.has(i)) return `<span class="mp-nb given${R}">${V(show ? String(st.ans[i]) : IN.v[i])}</span>`;
+      const cls = (IN.f === i && !fb ? ' focus' : '') + (IN.bad.has(i) ? ' bad' : '') + R;
+      return `<span class="mp-nb${cls}" data-act="bx" data-i="${i}">${R ? esc(IN.v[i]) : V(IN.v[i])}</span>`;
     };
     const msg = IN.msg ? `<div class="mp-rqmsg ${IN.msg.kind}">${esc(IN.msg.text)}</div>` : '';
-    return shop + head + done + `<div class="mp-pcur"><div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.q)}</div>
-      <div class="mp-nl mp-ptmpl">${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${unit(st)}</div>${msg}</div>`;
+    const restBx = st.rest ? `<span class="mp-op sm">, rest</span>${bx(3)}` : '';          // D44: ", rest [ ]"
+    /* med hjälp: stegets tal ur texten upprepas som brickor på raden ovanför rutorna, så att bandet blir kort */
+    const inText = new Set((t.text.match(/\d+/g) || []).map(Number).concat(ordV, t.flow.slice(0, IN.k).map(x => x.ans[2])));   // talen i texten (också som ord) och svaren från förra stegen
+    /* runda 8 (A4): en bricka försvinner när dess ruta är ifylld; den svävar inte kvar över rutorna */
+    const open = i => !IN.v[i] && !IN.given.has(i);
+    const nearAll = ov && helpOn() && !fb ? [...new Set(st.ans.filter(v => inText.has(v)))] : [];
+    const near = nearAll.filter(v => st.ans.some((x, i) => x === v && open(i)));   // använda brickor lämnar en tom plats, så att inget hoppar
+    /* i en division står brickorna i en kolumn till vänster om bråket, i höjd med täljaren och nämnaren de hör till */
+    const nt = v => `<b class="mp-pnum mp-near"${pk(v)}>${pvHTML(v)}</b>`;
+    const divCol = ov && st.op === '/' && nearAll.length && nearAll.every(v => v === st.ans[0] || v === st.ans[1]);
+    /* övningsbladen: division som bråk med etiketter (fynd 7); Själv visar bara uppgiften, utan stegets metodtext (fynd 2) */
+    const tmpl = ov && st.op === '/'
+      ? `${fracHTML(bx(0), bx(1), null, null, !divCol)}<span class="mp-op">=</span>${capW('kvot', bx(2))}${st.rest ? `<span class="mp-op sm">,</span>${capW('rest', bx(3))}` : ''}`
+      : `${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${restBx}`;
+    const label = ov && !helpOn() ? (t.flow.length > 1 ? `<div class="mp-plabel">Steg ${IN.k + 1}</div>` : '') : `<div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.fq && ov && helpOn() && !fb && st.fq[IN.f] ? st.fq[IN.f] : st.q)}</div>`;
+    const col = divCol ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span><span class="mp-nearcol">${[0, 1].map(i => near.includes(st.ans[i]) ? nt(st.ans[i]) : '<b class="mp-nearph"></b>').join('')}</span>` : '';
+    const nearRow = nearAll.length && !divCol ? `<div class="mp-nearrow">${nearAll.map(v => near.includes(v) ? nt(v) : `<b class="mp-pnum mp-nearhid" aria-hidden="true">${pvHTML(v)}</b>`).join('')}</div>` : '';
+    return shop + head + slPic + done + `<div class="mp-pcur">${label}${nearRow}
+      <div class="mp-nl mp-ptmpl">${col}${tmpl}${divCol ? '' : unit(st)}</div>${msg}</div>`;   // enheten står i stegets rad när brickorna tar platsen
   }
 
   /* Tabelltestet: 20 tal i två kolumner. Runda 2: de orange rättas. */
@@ -969,6 +1637,12 @@ const MatteProv = (() => {
       return `<button class="${cls}" ${act}><span class="ex">${esc(it.text)} =</span><span class="mp-ans xs">${esc(IN.v[i] || '')}</span>${fix}</button>`;
     };
     const half = Math.ceil(t.items.length / 2);
+    const it = t.items[IN.f], kh = isOv(t) && helpOn() && !fb && it && !out[IN.f]
+      ? `<p class="mp-skh">Kontrollera: <b class="mp-pnum">${pvHTML(it.y)}</b> · <b class="mp-pnum">${IN.v[IN.f] ? pvHTML(IN.v[IN.f]) : '?'}</b> = ${IN.v[IN.f] ? `<b class="mp-pnum">${pvHTML(it.y * +IN.v[IN.f])}</b>${it.y * +IN.v[IN.f] === it.x ? ' <span class="mp-skok">som täljaren</span>' : ''}` : `<b class="mp-pnum">${pvHTML(it.x)}</b>?`}</p>` : '';
+    /* runda 8 (A3): efter Klar står kontrollraden i meddelandet, inte under bladet där den låg över "Du har 19 klara" */
+    IN.khHtml = kh && IN.H && IN.H.msg ? kh.replace('<p class="mp-skh">', '<p class="mp-skh in">') : '';
+    if (kh && !IN.khHtml) return `<div class="mp-sheet">${''}<div class="col">${t.items.slice(0, half).map((it, i) => cell(it, i)).join('')}</div>
+      <div class="col">${t.items.slice(half).map((it, i) => cell(it, i + half)).join('')}</div></div>${kh}`;
     return `<div class="mp-sheet"><div class="col">${t.items.slice(0, half).map((it, i) => cell(it, i)).join('')}</div>
       <div class="col">${t.items.slice(half).map((it, i) => cell(it, i + half)).join('')}</div></div>`;
   }
@@ -1123,7 +1797,7 @@ const MatteProv = (() => {
       if (k === 'erase') IN.v = IN.v.slice(0, -1);
       else if (/^\d$/.test(k) && IN.v.length < 6) IN.v = (IN.v === '0' ? '' : IN.v) + k;
     } else if (IN.kind === 'boxes' && IN.hb) {              // med hjälp: bara den aktuella rutan
-      if (IN.hb.adv) return;
+      if (IN.hb.adv || IN.dealPending) return;
       IN.f = IN.hb.i;
       if (k === 'next') return helpBoxAnswer(t);
       if (k === 'erase') IN.v[IN.f] = IN.v[IN.f].slice(0, -1);
@@ -1289,18 +1963,24 @@ const MatteProv = (() => {
       setTimeout(() => { fly.remove(); land(); }, 520);
     }, 700);
   }
+  /* runda 8 (A3): räknaren visar hur många som är ifyllda (klara eller skrivna), aldrig bara "/20" */
+  function updScore(t) { if (t && t.type === 'sheet' && !locked) { const sc = document.getElementById('mp-score'); if (sc) sc.innerHTML = `${sheetFilled(t)}<small>/${t.items.length}</small>`; } }
+  function sheetFilled(t) { return !IN || !IN.v ? 0 : t.items.filter((x, i) => (IN.out && IN.out[i]) || (IN.v[i] != null && IN.v[i] !== '')).length; }
   function refreshQ(t) {
     if (IN && IN.kind === 'upp') uppFixFocus(t);
+    updScore(t);
     const q = document.getElementById('mp-q');
     if (q) q.innerHTML = questionHTML(t);
+    if (t && t.type === 'sheet') paintHelp();
     if (IN && IN.kind !== 'num') { const c = document.getElementById('mp-ctrl'); if (c && !c.querySelector('.mp-fb')) c.innerHTML = padHTML(t); }
     updKlar();
+    scheduleBand();
   }
 
   const num = x => x === '' ? null : +x;
   function readResp(t) {
     if (t.type === 'num') return num(IN.v);
-    if (t.type === 'tio' || t.type === 'te' || t.type === 'sheet') return IN.v.map(num);
+    if (t.type === 'tio' || t.type === 'te' || t.type === 'sheet' || DIVBOX(t)) return IN.v.map(num);
     if (t.type === 'prob') return IN.v.slice();
     return Object.assign({}, IN.vals);                 // alla rader: p1/p2 eller r0 … r{k-1}, och s
   }
@@ -1328,7 +2008,11 @@ const MatteProv = (() => {
     const st = L.boxHelpStep(hb.sw);
     if (st === 'retry') { hb.msg = { kind:'retry', text:'Inte riktigt – försök igen.' }; IN.v[i] = ''; }
     else if (st === 'hint') { hb.msg = { kind:'bit', text:L.boxHint(t, i) }; IN.v[i] = ''; }
-    else { IN.v[i] = String(want); hb.outc[i] = 'svar'; hb.msg = { kind:'bit', text:`Svaret är ${want}.` }; hb.adv = true; }
+    else {
+      const q = document.getElementById('mp-q'), focus = q && q.querySelector('.mp-ans.focus'), src = isOv(t) && focus ? bandSource(q, focus, want) : null;
+      IN.v[i] = String(want); hb.outc[i] = 'svar'; hb.msg = { kind:'bit', text:`Svaret är ${want}.` }; hb.adv = true;
+      if (src) { refreshQ(t); const to = document.querySelector(`#mp-q [data-bi="${i}"]`); if (to) { to.style.visibility = 'hidden'; flyTo(src, to, `<b class="mp-tilef">${pvHTML(want)}</b>`, () => { to.style.visibility = ''; }); } return; }
+    }
     refreshQ(t);
   }
   function hbAdvance(t) {
@@ -1337,11 +2021,11 @@ const MatteProv = (() => {
     if (hb.i < t.fields.length - 1) { hb.i++; IN.f = hb.i; return refreshQ(t); }
     locked = true;
     const outcome = hb.outc[hb.outc.length - 1] === 'svar' ? 'svar' : hb.outc.some(o => o !== 'direkt') ? 'hjalp' : 'direkt';
-    taskDone(t, outcome, null);
+    taskDone(t, outcome, L.hbClass(t, hb.outc));
     const title = outcome === 'svar' ? 'Så här blir det' : `Rätt!${outcome === 'hjalp' ? '<small>med hjälp</small>' : ''}`;
     hb.i = t.fields.length; hb.ack = null;
     renderTask({ ok:true, hbDone:true, html:`<div class="mp-fb good"><h3>${svg('check')}${title}</h3>
-      <p class="mp-concl">${esc(t.text)} = ${esc(L.fmt(t.answer))}</p>
+      <p class="mp-concl">${esc(conclText(t))}</p>
       <button class="mp-cta" data-act="${outcome === 'svar' ? 'svarnext' : 'next'}">Nästa ${svg('next')}</button></div>` }, true, t);
   }
 
@@ -1364,7 +2048,7 @@ const MatteProv = (() => {
     } else {
       st.ans.forEach((v, i) => { IN.v[i] = String(v); IN.given.add(i); });
       IN.bad = new Set(); IN.outc[IN.k] = 'svar';
-      IN.msg = { kind:'bit', text:`Så här blir det: ${st.ans[0]} ${st.op} ${st.ans[1]} = ${st.ans[2]}.` };
+      IN.msg = { kind:'bit', text:`Så här blir det: ${st.ans[0]} ${st.op} ${st.ans[1]} = ${st.ans[2]}${st.rest ? `, rest ${st.ans[3]}` : ''}.` };
       IN.adv = true;
     }
     refreshQ(t);
@@ -1372,7 +2056,7 @@ const MatteProv = (() => {
   function probAdvance(t) {
     IN.adv = false; IN.msg = null;
     if (IN.k < t.flow.length - 1) {
-      IN.k++; IN.v = ['', '', '']; IN.f = 0; IN.given = new Set(); IN.bad = new Set(); IN.sw = 0;
+      IN.k++; IN.v = Array(t.flow[IN.k].rest ? 4 : 3).fill(''); IN.f = 0; IN.given = new Set(); IN.bad = new Set(); IN.sw = 0;
       return refreshQ(t);
     }
     /* slutsatsen sist, i ett eget steg: uttrycket som läraren vill se */
@@ -1419,10 +2103,12 @@ const MatteProv = (() => {
     if (!IN.bad || !res.wrong) return;
     IN.bad = new Set(res.wrong.map((w, i) => w ? i : -1).filter(i => i >= 0 && openBox(i)));
     if (IN.bad.size) IN.f = [...IN.bad][0];
+    if (DIVBOX(t)) for (const i of IN.bad) IN.v[i] = '';         // D44 ✎ regel 7: fel ruta töms och får fokus
   }
   /* Hjälpens bit skrivs in åt barnet och låses */
   function applyFill(t, fill) {
     if (!fill) return;
+    if (fill.pic && IN) { IN.made = L.picMax(t); IN.dealPending = false; }   // D44 ✎: bilden färdigdelad är hjälpen
     if (fill.boxes && IN.v) {
       for (const [i, v] of Object.entries(fill.boxes)) { IN.v[+i] = String(v); IN.given.add(+i); IN.bad.delete(+i); }
       IN.f = nextOpen(-1);
@@ -1442,7 +2128,8 @@ const MatteProv = (() => {
     const H = header(t);
     const exitMsg = S.mode === 'prov' ? `Avsluta provet? Du är på uppgift ${S.idx + 1} av ${S.items.length}, och provet sparas inte.` : 'Avsluta passet?';
     const back = () => Router.silent(() => Router.show('screen-matteprov'));
-    MultDivGame.runTask({ a:t.top, b:t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
+    const kd = t.type === 'kd';
+    MultDivGame.runTask({ kind:kd ? 'div' : 'mult', a:kd ? t.n : t.top, b:kd ? t.d : t.bot, mode, profile, title:H.title, right:H.right, exitMsg, exitAsk:!!S.touched,
       onDone:res => { back(); minneDone(t, res); },
       onExit:() => { back(); showProv(); } });
   }
@@ -1482,7 +2169,7 @@ const MatteProv = (() => {
       if (res.ok) return sheetDone(t);
       IN.round = 2; IN.bad = new Set(res.per.map((ok, i) => ok ? -1 : i).filter(i => i >= 0)); IN.f = [...IN.bad][0];
       IN.old = {}; for (const i of IN.bad) { IN.old[i] = IN.v[i]; IN.v[i] = ''; }   // de orange töms; det gamla svaret syns svagt
-      IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:'Titta en gång till på de orange.' };
+      IN.H.msg = { kind:'retry', title:`Du har ${res.okCount} klara.`, text:t.moment === 'dtabell' && !(isOv(t) && helpOn()) ? 'Titta en gång till på de orange. Kontrollera med gånger.' : 'Titta en gång till på de orange.' };
       return renderTask(null, true, t);
     }
     res.per.forEach((ok, i) => { if (!IN.out[i]) IN.out[i] = ok ? 'hjalp' : 'svar'; });
@@ -1493,14 +2180,14 @@ const MatteProv = (() => {
     const s = readSt(), p = provSt(s), day = today();
     t.items.forEach((it, i) => { p.hard = L.recordOutcome(p.hard, it, IN.out[i], 'tabell', day); });
     const c = { direkt:0, hjalp:0, svar:0 }; IN.out.forEach(o => c[o]++);
-    if (S.mode === 'sheet') p.ova.tabell = { date:new Date().toISOString(), ok:c.direkt, total:t.items.length, level:S.lv };
+    if (S.mode === 'sheet') p.ova[t.moment] = { date:new Date().toISOString(), ok:c.direkt, total:t.items.length, level:S.lv };
     writeSt(s);
     snd(c.direkt === t.items.length ? 'fanfare' : 'correct');
     const sc = document.getElementById('mp-score'); if (sc) sc.innerHTML = `${c.direkt}<small>/${t.items.length}</small>`;
     const sum = `<p class="mp-k3l">${k3(c.direkt, c.hjalp, c.svar)}</p>`;
     let html;
     if (S.mode === 'prov') {
-      t.items.forEach((it, i) => S.results.push({ moment:'tabell', ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
+      t.items.forEach((it, i) => S.results.push({ moment:t.moment, ok:IN.out[i] === 'direkt', outcome:IN.out[i], mitt:S.mitt }));
       S.idx++;
       html = `${resHead(c.direkt, t.items.length)}${sum}
         <button class="mp-cta" data-act="next">Nästa ${svg('next')}</button></div>`;
@@ -1525,6 +2212,11 @@ const MatteProv = (() => {
 
   /* Hela svaret (trappans sista steg): förklaringen i steg, sedan Nästa */
   function explainSteps(t, res) {
+    if (t.type === 'dr') return [`Det ryms ${t.q} hela ${t.d}:or i ${t.n}: ${t.d} · ${t.q} = ${t.d * t.q}.`,
+      `${t.n} − ${t.d * t.q} = ${t.r}. Det som blir över är resten.`, `Kontrollera: ${t.d} · ${t.q} + ${t.r} = ${t.n}.`];
+    if (t.type === 'ts') return [`Dela varje talsort: ${t.fields.map(f => `${f.dig}/${t.d} = ${f.ans}`).join(', ')}.`, `${L.fmt(t.n)}/${t.d} = ${L.fmt(t.answer)}.`];
+    if (t.type === 'dz') return [L.divHint(t, 0), `${L.fmt(t.n)}/${L.fmt(t.d)} = ${L.fmt(t.q)}, för ${L.fmt(t.q)} · ${L.fmt(t.d)} = ${L.fmt(t.n)}.`];
+    if (t.type === 'num' && t.op === '/') return [`${t.text} = ${t.answer}, för ${t.y} · ${t.answer} = ${t.x}.`];
     if (t.moment === 'tiotal') return L.explainTiotal(t).map(s => s.text);
     if (t.moment === 'problem') {
       const st = t.steps.map(s => s.text);
@@ -1595,7 +2287,7 @@ const MatteProv = (() => {
       </div>
       <p class="mp-note" style="font-size:15px">${esc(MP.praiseFor(R.pct))}</p>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
-        ${again}<button class="mp-cta" data-act="prov">Till provet ${svg('next')}</button></div>`);
+        ${again}<button class="mp-cta" data-act="prov">${prov().kind === 'ovning' ? 'Till övningsbladen' : 'Till provet'} ${svg('next')}</button></div>`);
     S = null;
   }
 
@@ -1736,11 +2428,33 @@ const MatteProv = (() => {
       case 'introskip': snd('click'); startOva(S.moment); break;
       case 'startprov': snd('click'); startProv(false); break;
       case 'mitt':      snd('click'); startProv(true); break;
-      case 'pick':      if (!locked && IN && IN.kind === 'prob' && !IN.adv && !IN.given.has(IN.f)) {
+      case 'pick':      if (!locked && IN && IN.kind === 'boxes' && !IN.dealPending && el.dataset.v !== '') {   // D44 ✎ regel 5
+                          const i = IN.hb ? IN.hb.i : IN.f;
+                          if (IN.hb && IN.hb.adv) break;
+                          if (!IN.given.has(i)) {
+                            const t = curTask(), v = String(el.dataset.v), to = document.querySelector('#mp-q .mp-ans.focus');
+                            snd('click');
+                            const put = () => { IN.v[i] = v; IN.f = i; IN.bad.delete(i); refreshQ(t); };
+                            if (isOv(t) && to) { locked = true; flyTo(el, to, `<b class="mp-tilef">${pvHTML(v)}</b>`, () => { locked = false; put(); }); } else put();
+                          }
+                          break;
+                        }
+                        if (!locked && IN && IN.kind === 'prob' && !IN.adv && !IN.given.has(IN.f)) {
+                          const to = isOv(curTask()) && document.querySelector('#mp-q .mp-nb.focus');
+                          if (to) flyTo(el, to, `<b class="mp-tilef">${pvHTML(el.dataset.v)}</b>`);
                           IN.v[IN.f] = String(el.dataset.v); IN.bad.delete(IN.f);
                           const j = L.nextEmpty(IN.v, IN.f, openIdx()); if (j >= 0) IN.f = j;
                           snd('click'); refreshQ(curTask());
                         } break;
+      case 'deal':      if (!locked && IN && IN.kind === 'boxes') {          // D44 ✎: ett varv, en grupp eller ett hopp
+                          const t = curTask();
+                          if (IN.made < L.picMax(t)) { const pile = document.querySelector('#mp-q .mp-pile');
+                            const pr = pile ? pile.getBoundingClientRect() : null;
+                            IN.made++; snd('click'); S.touched = true;
+                            if (IN.made >= L.picMax(t) && IN.dealPending) { IN.dealPending = false; if (IN.hb) IN.hb.ack = L.dealDone(t); }
+                            refreshQ(t); animateDeal(t, pr); }
+                        } break;
+      case 'split':     if (!locked && IN && IN.kind === 'boxes') { IN.split = IN.split || {}; IN.split[el.dataset.p] = true; snd('click'); refreshQ(curTask()); } break;   // varje verb är en gest
       case 'padv':      if (IN && IN.kind === 'prob' && IN.adv) { snd('click'); probAdvance(curTask()); } break;
       case 'svarnext':  snd('click'); afterSvar(); break;
       case 'scpen':     scTool(false); break;
@@ -1759,7 +2473,7 @@ const MatteProv = (() => {
       case 'avsluta':   avsluta(); break;
       case 'ovno':      { const o = document.getElementById('mp-ov'); if (o) o.remove(); break; }
       case 'bx':        if (!locked && IN && IN.v && el.dataset.i != null && !(IN.hb && +el.dataset.i !== IN.hb.i)) { IN.f = +el.dataset.i; refreshQ(curTask()); } break;
-      case 'sheetnot':  snd('click'); startDrill('not', S.wrongItems, 'tabell'); break;
+      case 'sheetnot':  snd('click'); startDrill('not', S.wrongItems, S.moment || 'tabell'); break;
       case 'note':      if (!locked && IN && IN.notes && !IN.rq.busy && IN.rq.phase === 'ask' && L.uppRowsOrder(curTask())[IN.rq.k] === el.dataset.row) {
                           IN.f = { row:el.dataset.row, col:0, note:+el.dataset.j }; refreshQ(curTask());
                         } break;
@@ -1784,7 +2498,7 @@ const MatteProv = (() => {
 
   return { open, showList, showProv, upMethod,
            /* bara för test i webbläsaren */
-           _peek:() => ({ S, IN, task:curTask() }),
+           _peek:() => ({ S, IN, task:curTask(), band:lastBand }), _digitsRect:el => digitsRect(el), _anchorOf:(el, side, gap, digits) => anchorOf(el, side, gap, digits),
            _force:(items, prov) => { if (prov) { S = { mode:'prov', mitt:false, lv:L.PROV_LEVEL, items, idx:0, results:[], start:Date.now(), touched:false }; renderTask(); } else startDrill('ova', items, items[0].moment); } };
 })();
 

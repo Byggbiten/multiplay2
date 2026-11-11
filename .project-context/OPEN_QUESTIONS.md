@@ -35,9 +35,6 @@ aldrig. Nya frågor får nästa P-nummer.
 
 ### Snällare app (D39)
 
-- **P13 Klar efter en enda siffra i fria lägen.** I Räkna själv i multdiv och uppställningen räknas en siffra följd
-  av Klar som ett försök. En spärr (Klar först när alla rutor är ifyllda) skulle avslöja svarets längd. Öppet: spärr,
-  bekräftelse eller som nu?
 - **P14 Skakningar och röd puls.** Skak-animationerna vid fel svar finns kvar i flera moduler, och demon pulserar rött
   vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
 
@@ -48,8 +45,17 @@ aldrig. Nya frågor får nästa P-nummer.
   tusentalsrad (värdet, varför så många nollor, nollorna). Öppet: lagom, eller kortare efter några uppgifter?
 - **P17 Tvåsiffrig faktors nolla i Dela upp.** Barnet skriver själv nollan i den grå rutan (D38 ✎), medan appen sätter
   nollorna vid ensiffrig faktor. Öppet: ska appen sätta den också?
+- **P18 En design för knappsats, svarsknapp och kladd.** Matteprovet och övningsbladen har en egen kompakt knappsats,
+  en svarsknapp och kladd med ikoner (D37/D38: "det vi gör nu om det avviker … skall bara ske isolerat i detta
+  matteprov"), medan multdiv (kort division, uppställd multiplikation) har runda knappar, svarsfält, Livlina och
+  kladd med textknappar. I övningsbladen ligger de nu sida vid sida och känns som två appar. Dennis 11/11: "att du
+  upplever kort division som en helt annan app är ett tecken på att ordning och reda inte skötts på alla beslut och
+  inriktningar och bestämmelser vi tagit med konsekvent design". Öppet: vilken blir appens standard, och när görs
+  bytet (inte i övningsbladens uppdrag)?
 
 ## Besvarade
+
+- ~~P13 Klar efter en enda siffra i fria lägen~~ → motorrundan 2026-11-11: Klar med tom ruta ger ett tips, ingen rättning.
 
 - ~~P15 Delrader i Räkna själv?~~ → D41 ✎ (rad 1, rad 2 med den grå nollan och summan även i Räkna själv vid tvåsiffrig faktor).
 
