@@ -2,9 +2,11 @@
 
 ## Öppet
 
+- [ ] Övningsblad division runda 2 (stil C, fynden i `brainstorm/13`), sedan genomspelning, Dennis prov, v76.
+- [ ] iPad-planen (D45 ✎, `brainstorm/12`) efter v76.
 - [ ] Matteprov 1: rätta de 15 fynden i `brainstorm/11` (D44), efter divisionens övningsblad.
 - [ ] P16, P17 (uppställningen): ta upp med Dennis.
-- [ ] P13, P14 (snällare app): ta upp med Dennis.
+- [ ] P14 (skakningar, röd puls): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
 - [ ] Matteprovet: test som jämför "Så här gör du" med nivåns uppgiftstyper (rotorsaken till att Svårare-genomgången saknades 19/10).
 - [ ] P7: byt emoji-medaljen i Klocktestets resultatvy (`showTestResult` i `js/clock.js`) och 🎲-ikonen för gamla

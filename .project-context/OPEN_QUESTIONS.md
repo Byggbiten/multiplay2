@@ -35,9 +35,6 @@ aldrig. Nya frågor får nästa P-nummer.
 
 ### Snällare app (D39)
 
-- **P13 Klar efter en enda siffra i fria lägen.** I Räkna själv i multdiv och uppställningen räknas en siffra följd
-  av Klar som ett försök. En spärr (Klar först när alla rutor är ifyllda) skulle avslöja svarets längd. Öppet: spärr,
-  bekräftelse eller som nu?
 - **P14 Skakningar och röd puls.** Skak-animationerna vid fel svar finns kvar i flera moduler, och demon pulserar rött
   vid "kan inte dra ifrån" (multdiv `md-prob`, uppstallning `problem-cell`). Öppet: mjukare eller bort?
 
@@ -50,6 +47,8 @@ aldrig. Nya frågor får nästa P-nummer.
   nollorna vid ensiffrig faktor. Öppet: ska appen sätta den också?
 
 ## Besvarade
+
+- ~~P13 Klar efter en enda siffra i fria lägen~~ → motorrundan 2026-11-11: Klar med tom ruta ger ett tips, ingen rättning.
 
 - ~~P15 Delrader i Räkna själv?~~ → D41 ✎ (rad 1, rad 2 med den grå nollan och summan även i Räkna själv vid tvåsiffrig faktor).
 
