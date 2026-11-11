@@ -9,6 +9,8 @@ och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sam
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
 Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
 
+**LIVE v76 (2026-11-11):** övningsbladen till och med runda 8b + VD:ns puts (`tileText` håller ihop tal med ordet före, summabrickan lila) gick live i v76 (`main` = `a5344ea`). Kvar: TODO (kontrollraden, Själv i alla moduler genomspelat).
+
 **Läget nu (2026-11-11, övningsbladen):** Övningsblad · Division (D44 ✎) ligger på `dev` till och med runda 7
 (merge `34b4bfa`). Runda 8 ligger på grenen `ovningsblad-runda8` (pushad, ej mergad): A1–A5 ur
 `brainstorm/14-2026-11-11-ovningsblad-vd-genomspelning.md`, Dennis val B1–B4, B6–B8 och hans fall 8008/4. Kort

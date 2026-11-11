@@ -2,9 +2,8 @@
 
 ## Öppet
 
-- [ ] Övningsblad, småputs efter runda 6: pilspetsen strax utanför rutans kant; kontrollraden luftigare ("Kontrollera med gånger" på en rad); knyt "över" och "rest" tydligare.
-- [ ] Övningsblad division runda 2 (stil C, fynden i `brainstorm/13`), sedan genomspelning, Dennis prov, v76.
-- [ ] iPad-planen (D45 ✎, `brainstorm/12`) efter v76.
+- [ ] Övningsblad, småputs: kontrollraden luftigare ("Kontrollera med gånger" på en rad); Själv i alla tretton moduler genomspelat av VD:n (gjort: Dela, Ingår, Talsort).
+- [ ] iPad-planen (D45 ✎, `brainstorm/12`) – nu när v76 är live.
 - [ ] Matteprov 1: rätta de 15 fynden i `brainstorm/11` (D44), efter divisionens övningsblad.
 - [ ] P16, P17 (uppställningen): ta upp med Dennis.
 - [ ] P14 (skakningar, röd puls): ta upp med Dennis.

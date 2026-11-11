@@ -259,3 +259,9 @@ barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knyt
 - **Kostnad:** 12 px prickar och brickan i egen plats tog cirka 40 px i Ingår, Svårare (kladden 82 px). Återtagen med
   grupper i två rader i stora tal, resten i gruppernas rad, tätare kort när barnet skriver divisionen och ett kortare
   band (cirka 28 px).
+
+## 2026-11-11 · v76 live, VD:ns puts
+VD:n rättade själv två fynd från den kontextfria granskaren: "resten 2." bröts ensamt på raden (`tileText` håller nu
+ihop ordet före, talet och skiljetecknet, `.mp-nw`), och summabrickan hade orange ram som rutan i fokus (nu lila som
+bandet). Lärdom: färgen ska betyda samma sak överallt – lila "härifrån", orange "hit".
+

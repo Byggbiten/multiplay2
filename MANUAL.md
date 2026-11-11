@@ -410,7 +410,7 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
-## Övningsblad · Division (D44 ✎, grenen matteprov2)
+## Övningsblad · Division (v76, D44 ✎)
 
 I Kort divisions lägesvy finns kortet **Övningsblad**. Det öppnar tretton moduler i kapitel 3:s olika sorters blad,
 med egna tal: Dela lika, Hur många grupper?, Divisionstabellen (20 tal, /20), Kontrollera med gånger, Division med
@@ -421,6 +421,16 @@ slutar med kvittot "Bra nött!". En modul där något var svårt märks **Öva m
 Bilderna går att trycka på: högen delar ut ett varv till barnen eller ringar in en grupp, tallinjen tar ett hopp.
 Med hjälp delar barnet ut först, sedan frågar appen en ruta i taget. Talen i bråket och i frågan går att trycka på.
 En ruta som inte stämmer töms och får fokus. Resten är alltid lila.
+
+**Så hjälper det (v76).** Siffrorna har platsvärdets färg (tusental lila, hundratal röd, tiotal blå, ental grön); hela
+uppgiften står alltid överst, och en stegfråga säger vilken del den gäller ("Börja med tusentalen: 8 tusental delat
+med 4"). Med hjälp går ett lila streckat band från talet barnet ska skriva till rutan där det hör hemma; bandet börjar
+precis vid siffrorna, slutar strax utanför rutan och korsar aldrig text, siffror eller bilden. Finns ingen kort fri
+väg får talet och rutan en lila ring i stället. När bandet visas tonas det som inte hör till steget ned i grått; det i
+fokus syns i full styrka. Lila betyder "härifrån", orange "hit". Summan ur bilden ("8 grupper", "3 över") står rakt
+ovanför sin ruta. Grupperna visar hoppräkning (6, 12, 18 …) när barnet själv skriver divisionen; i kontrollen
+"Vad blir 2 · 7?" lyser faktorerna, och "täljaren ✓" visas först efter svaret. Varje talsort har en egen ram (nollan
+som tom ram). Själv har ingen bild, inget band och ingen stegtext. Divisionstestet räknar ifyllda (19/20).
 
 ## Matteprov 4:an (v67–v68, D37, D38)
 
