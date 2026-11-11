@@ -1127,8 +1127,29 @@
     const len = ptsLen(pts);
     if (len > Math.min(BAND_HARD_MAX, BAND_HARD_RATIO * straight)) return null;
     let soft = 0;
-    for (const q of pts) for (const r of rects) if (q.x > r.l - 2 && q.x < r.r + 2 && q.y > r.t - 2 && q.y < r.b + 2) { if (r.hard) return null; soft += r.w == null ? 1 : r.w; }
+    for (const q of pts) for (const r of rects) {
+      const p = r.pad == null ? 2 : r.pad;                 // andra tal har marginal (runda 5): nära ett tal läses som "därifrån"
+      if (q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p) { if (r.hard) return null; soft += r.w == null ? 1 : r.w; }
+    }
     return len / straight + soft * 0.15 + (len > Math.min(BAND_MAX, BAND_RATIO * straight) ? 0.5 : 0);
+  }
+  /* Runda 5 (samordnarens mätning: vägar som gick ut åt fel håll och in i målet underifrån): sidorna vänder sig mot
+     varandra. Källans utgång pekar inte bort från målet, och målets ingång vetter mot källan; är källan ovanför går man
+     aldrig in underifrån. */
+  const SIDE = { b:[0, 1], t:[0, -1], r:[1, 0], l:[-1, 0] };
+  function sidesFace(S, T, sideS, sideT) {
+    const sc = { x:(S.l + S.r) / 2, y:(S.t + S.b) / 2 }, tc = { x:(T.l + T.r) / 2, y:(T.t + T.b) / 2 };
+    const dx = tc.x - sc.x, dy = tc.y - sc.y, [ax, ay] = SIDE[sideS], [bx, by] = SIDE[sideT];
+    const above = S.b <= T.t + 4, below = S.t >= T.b - 4;
+    if (above && sideT === 'b') return false;
+    if (below && sideT === 't') return false;
+    if (above && sideS === 't') return false;
+    if (below && sideS === 'b') return false;
+    return ax * dx + ay * dy >= -4 && -(bx * dx + by * dy) >= -4;
+  }
+  /* bandet går aldrig in i källans eller målets egen ruta, utom vid ändarna */
+  function entersRect(pts, R) {
+    return pts.slice(2, -2).some(q => q.x > R.l && q.x < R.r && q.y > R.t && q.y < R.b);
   }
   function bandRoute(S, T, rects, box) {
     const cx = R => (R.l + R.r) / 2, cy = R => (R.t + R.b) / 2;
@@ -1138,8 +1159,9 @@
     const straight = Math.max(20, Math.hypot(cx(T) - cx(S), cy(T) - cy(S)));
     const inBox = pts => pts.every(q => q.x >= box.l && q.x <= box.r && q.y >= box.t && q.y <= box.b);
     let best = null;
-    const consider = c => { if (!inBox(c.pts)) return; const sc = bandScore(c.pts, rects, straight); if (sc != null && (!best || sc < best.score)) best = Object.assign(c, { score:sc }); };
-    for (const s of Object.values(sa)) for (const e of Object.values(ta)) {
+    const consider = c => { if (!inBox(c.pts) || entersRect(c.pts, S) || entersRect(c.pts, T)) return; const sc = bandScore(c.pts, rects, straight); if (sc != null && (!best || sc < best.score)) best = Object.assign(c, { score:sc }); };
+    for (const [ks, s] of Object.entries(sa)) for (const [kt, e] of Object.entries(ta)) {
+      if (!sidesFace(S, T, ks, kt)) continue;
       const dist = Math.hypot(e.x - s.x, e.y - s.y), k = Math.max(12, dist / 2.6);
       const c1 = { x:s.x + s.dx * k, y:s.y + s.dy * k }, c2 = { x:e.x + e.dx * k, y:e.y + e.dy * k };
       consider({ d:`M${s.x} ${s.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${e.x} ${e.y}`, pts:bezierPts(s, c1, c2, e, 40), end:e });
@@ -1838,7 +1860,7 @@
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     /* D44 ✎: övningsbladen */
     DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore,
+    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
     genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };

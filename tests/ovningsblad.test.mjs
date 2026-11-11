@@ -283,3 +283,26 @@ describe('runda 4: bandet korsar aldrig text, siffror, etiketter eller bilder', 
     expect(src2).toMatch(/mp-bring/);
   });
 });
+
+describe('runda 5: bandet vilseleder inte (sidorna vänder sig mot varandra)', () => {
+  /* de två vägarna samordnaren mätte i 390 × 797 */
+  const cub = d => { const n = d.match(/-?\d+(\.\d+)?/g).map(Number); return L.bezierPts({ x:n[0], y:n[1] }, { x:n[2], y:n[3] }, { x:n[4], y:n[5] }, { x:n[6], y:n[7] }, 40); };
+  it('Hur många grupper: ut åt höger, ner genom kvotrutan och in underifrån – underkänns', () => {
+    const S = { l:135, t:160, r:163.8, b:190 }, T = { l:195, t:202, r:248, b:246.3 };   // brickan "8" och kvotrutan
+    const pts = cub('M165.8 174.8 C 202.9 174.8, 221.7 290.3, 221.7 253.3');
+    expect(L.sidesFace(S, T, 'r', 'b')).toBe(false);
+    expect(L.entersRect(pts, T)).toBe(true);
+    const r = L.bandRoute(S, T, [], { l:0, t:0, r:360, b:330 });
+    expect(r === null || L.entersRect(r.pts, T) === false).toBe(true);
+    if (r) expect(r.end.dir).not.toBe('up');
+  });
+  it('Problemlösning: ut från botten av "54" förbi "2" till täljaren – underkänns', () => {
+    const S = { l:18, t:112, r:48, b:134.4 }, T = { l:125.2, t:96, r:171, b:136 }, two = { l:18, t:150, r:48, b:175, hard:true, pad:10 };
+    const pts = cub('M32.8 136.4 C 32.8 170.2, 84.4 115.9, 118.2 115.9');
+    expect(L.sidesFace(S, T, 'b', 'l')).toBe(false);
+    expect(L.bandScore(pts, [two], 90)).toBeNull();
+    const r = L.bandRoute(S, T, [two], { l:0, t:0, r:360, b:330 });
+    expect(r).toBeTruthy();
+    expect(r.pts[0].x).toBeGreaterThan(S.r);           // ut åt höger, mot täljaren
+  });
+});

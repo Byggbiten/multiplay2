@@ -218,6 +218,12 @@ med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
 - Kompromisser som valts: bandet får snudda vid etiketter (en kort väg som tydligt visar kopplingen väger tyngre);
   kontrollens sista ruta (svaret = täljaren) och Ingår:s första steg (täljaren ur frågan) får oftast ringen, för att
   vägen skulle gå genom siffror; i 10/100/1000 får rutorna ringen, för att täljarens siffror står tätt intill.
+- Runda 5 (samordnarens mätning: vägar som pekade fel): hårda spärrar i `bandRoute` utöver text och längd:
+  sidorna vänder sig mot varandra (`sidesFace`: källan ovanför målet ⇒ aldrig in underifrån), bandet går aldrig in i
+  källans eller målets egen ruta (`entersRect`), andra tal har 10 px marginal (också startpricken), och orden i
+  summabrickan räknas som text. Med hjälp står svaret ur bilden som bricka mitt ovanför kvot- eller restrutan
+  (`.mp-above`, plats reserverad med `has-above`), så att bandet blir ett kort lodrätt fall. Kostnad: kladden blir
+  ungefär 55 px lägre i de stegen (Svårare, Hur många grupper: cirka 70 px kvar).
 - Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
   aldrig ned. Pilspetsen slutar 1 px utanför rutans kant.
 

@@ -184,3 +184,10 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   och längd mot det raka avståndet i varje steg (alla moduler: ingen korsning, inget över 2 gånger).
 - Första försöket, en väg runt hindren i ett rutnät, gav fria men långa och slingriga band; det togs bort när Dennis
   satte längdgränsen.
+
+## 2026-11-11 · Runda 5: bandet pekar inte fel
+- Samordnaren mätte två vilseledande vägar: ut åt höger genom "grupper" och in i kvotrutan underifrån (såg ut att gå
+  till kontrollen), och ut från botten av "54" förbi "2" (såg ut att komma från nämnaren).
+- **Varför fångade inte testerna det:** poängen såg bara korsad text och längd, inte riktning eller närhet till andra
+  tal. **Lärdom:** ett band läses som en pil från det närmaste talet till det den pekar på; mät sidorna, närheten och
+  att vägen inte går genom ändarnas egna rutor. Test för de två uppmätta vägarna.

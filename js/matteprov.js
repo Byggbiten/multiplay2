@@ -481,6 +481,11 @@ const MatteProv = (() => {
 #mp-root .mp-sumr .mp-pnum{border-color:#7c3aed}
 #mp-root .mp-pnum.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
 #mp-root .mp-bsn{align-self:center;min-width:30px}
+#mp-root .mp-capw{position:relative}
+#mp-root .mp-above{position:absolute;top:-58px;left:50%;transform:translateX(-50%);margin:0;font-size:22px;min-height:32px;line-height:1}   /* mitt ovanför rutan, utanför flödet */
+#mp-root .mp-dr.has-above .ln:first-child{padding-top:56px}                                         /* plats för brickan, så att inget annat skyms */
+#mp-root .mp-above.rest{border-color:#7c3aed}
+#mp-root .mp-above-ph{display:none}
 #mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
 #mp-root .mp-nearcol{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;gap:10px;margin-right:14px}
 #mp-root .mp-nearph{display:block;height:30px}
@@ -1292,14 +1297,20 @@ const MatteProv = (() => {
   function drHTML(t, fb, lit) {
     const HB = !fb && IN.hb, show = fb && fb.showAns;
     const B = role => { const i = L.drField(t, role); return fbox(t, i, fb, t.fields[i].ans, null, role === 'r' || role === 'k3' ? 'rest' : ''); };
+    /* med hjälp: svaret från bilden som bricka mitt ovanför den aktuella rutan (kvot eller rest), så att bandet blir ett kort fall */
+    const cur = HB && !IN.dealPending && t.fields[IN.hb.i] ? t.fields[IN.hb.i].role : null;
+    const above = role => t.pic && cur === role && (role === 'q' || role === 'r') && IN.made >= L.picMax(t) && !IN.hb.adv
+      ? `<b class="mp-pnum mp-near mp-above${role === 'r' ? ' rest' : ''}"${pk(role === 'q' ? t.q : t.r)}>${pvHTML(role === 'q' ? t.q : t.r)}</b>` : '<b class="mp-above-ph"></b>';
     const k1 = !t.kontroll ? '' : t.kGiven ? `<span class="mp-kd${litC(lit, 'kd')}"${pk(t.d)}>${pvHTML(t.d)}</span>` : B('k1');
     const made = show ? L.picMax(t) : IN.made;
     const pic = t.pic ? drPic(t, lit, made, !fb && !locked) + picSum(t, made, lit) : '';
     const prompt = t.prompt ? `<p class="mp-text sm mp-prompt${litC(lit, 'prompt')}">${tileText(t.prompt)}</p>` : '';
     const frac = t.write ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span><span class="mp-frac"><span class="nu">${B('n')}</span><span class="de">${B('d')}</span></span>` : fracHTML(t.n, t.d, lit, [t.n, t.d], true);
-    const rest = t.rest ? `<span class="mp-rl">,</span>${capW('rest', B('r'))}` : '';
     const kontroll = t.kontroll ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera med gånger</span>${k1}<span>·</span>${B('k2')}${t.rest ? `<span>+</span>${B('k3')}` : ''}<span>=</span>${B('k4')}</div>` : '';
-    return (HB ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr"><div class="ln">${frac}<span>=</span>${capW('kvot', B('q'))}${rest}</div>${kontroll}</div>`;
+    const qcol = `<span class="mp-capw">${HB && t.pic ? above('q') : ''}${B('q')}<i>kvot</i></span>`;
+    const rcol = t.rest ? `<span class="mp-rl">,</span><span class="mp-capw">${HB && t.pic ? above('r') : ''}${B('r')}<i>rest</i></span>` : '';
+    const hasAbove = HB && t.pic && (cur === 'q' || cur === 'r') && IN.made >= L.picMax(t) && !IN.hb.adv;
+    return (HB ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr${hasAbove ? ' has-above' : ''}"><div class="ln">${frac}<span>=</span>${qcol}${rcol}</div>${kontroll}</div>`;
   }
   /* Hundraplattor, tiostavar och ental (K_S 67): ett kluster per talsort, i talsortens färg */
   function blocksHTML(t, lit) {
@@ -1374,11 +1385,12 @@ const MatteProv = (() => {
     const rects = [];
     const tw = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, { acceptNode:n => n.nodeValue.trim() && !mine(n.parentElement) && !n.parentElement.closest('.mp-band') ? 1 : 2 });
     /* hårda hinder: siffror och läsbar text (frågan, uppgiften, stegets rad); mjuka: etiketter, tecken och bilder */
-    const READ = '.mp-ask, .mp-text, .mp-prompt, .mp-plabel, .mp-pdone';
+    const READ = '.mp-ask, .mp-text, .mp-prompt, .mp-plabel, .mp-pdone, .mp-sum';
     for (let n = tw.nextNode(); n; n = tw.nextNode()) {
       const hard = /\d/.test(n.nodeValue) || !!n.parentElement.closest(READ), rg = document.createRange(); rg.selectNodeContents(n);
       const w = n.parentElement.closest('.mp-flab, .mp-capw, .mp-klbl') ? 0.2 : 1;     // att snudda vid en etikett är en liten kostnad
-      for (const r of rg.getClientRects()) if (r.width && r.height) rects.push(Object.assign(rel(r), { hard, w }));
+      const pad = /\d/.test(n.nodeValue) ? 10 : 2;
+      for (const r of rg.getClientRects()) if (r.width && r.height) rects.push(Object.assign(rel(r), { hard, w, pad }));
     }
     q.querySelectorAll('.mp-grp, .mp-kidc, .mp-pile, .mp-line, .mp-bc, .mp-ans, .mp-nb').forEach(e => {
       if (!mine(e) && !e.contains(src) && !e.contains(focus)) rects.push(Object.assign(rel(e.getBoundingClientRect()), { hard:false }));
