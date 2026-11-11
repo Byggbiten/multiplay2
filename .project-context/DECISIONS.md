@@ -665,6 +665,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   i grupperna), B6–B8 (introt visar uppgiftens egen vy med bandet, talsortsord, bild i Slutledning). Kort division
   hör inte till uppdraget (A6, B5 utgår). Källa: Dennis valde "Kontrollen och hoppräkning, Större bilder, mindre
   kladd, Introt, ord och bild" och "Gällande kort division. Den va inte med i just detta uppdrag."
+- ✎ **2026-11-11, hela uppgiften syns och T H T E behålls:** när en stegfråga bara gäller en del av talet står hela
+  uppgiften som rubrik ("8008 / 4", sedan "Börja med tusentalen …"), och nollornas platser syns i bilden. Kolumnerna
+  heter T H T E i hela appen; färgen skiljer tusental (lila) från tiotal (blå). Källa: Dennis: "det står vad är 8
+  tusental delat med 4. men det står 8008?" och valet "Behåll T H T E".
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text

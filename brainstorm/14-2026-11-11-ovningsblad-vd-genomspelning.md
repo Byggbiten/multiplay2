@@ -22,7 +22,7 @@ i kvotens steg.
 | A3 | Divisionstestet | Efter Klar ligger raden "Kontrollera: 10 · ? = 30 ?" över rutan "Du har 19 klara". Räknaren uppe till höger visar "/20" utan tal. |
 | A4 | Slutledning | Brickan "6" står kvar och svävar över rutorna när den redan är använd. "fem" står bara som ord, så nämnarens ruta saknar både källa och hjälp. |
 | A5 | Dela lika, Rest (kontrollen) | Det korta bandet från kvoten till kontrollens ruta går genom etiketten "kvot". |
-| A6 | Kort division | Kolumnerna heter T H T E: både tusental och tiotal heter "T". |
+| A6 | Kort division | Kolumnerna heter T H T E: både tusental och tiotal heter "T". Utgår: Dennis valde "Behåll T H T E". |
 
 ## B · Förbättringar (pedagogik och form)
 
