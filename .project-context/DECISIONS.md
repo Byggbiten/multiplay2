@@ -648,7 +648,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   aldrig ned. Källa: Dennis: "när det dyker upp sånna där pilar och streck så blir resten/hela skärmen transparant.
   Se till att det som skall vara i fokus inte är transparant så att den effekten får mening" och "Där pekar ju
   strecket och det som skall vara i fokus lite missvisande". Att bandet inte korsar text: min egen granskning 11/11
-  (runda 4).
+  (runda 4). Bandet ska också vara kort, utan omvägar; hellre flyttas källan närmare rutan, annars lila ring utan
+  band. Källa: Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång".
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
