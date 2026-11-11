@@ -832,6 +832,10 @@
   const distinct = (...xs) => new Set(xs).size === xs.length;
   /* Ett tal med samma siffra två gånger i rad (22, 344) undviks i de små uppgifterna (designregel 9) */
   const twinDigits = n => /(\d)\1/.test(String(n));
+  /* brainstorm/13 fynd 8: täljarens siffror får inte vara nämnaren (505/5, 24/2) */
+  const digitClash = (n, d) => d < 10 && String(n).includes(String(d));
+  /* brainstorm/13 fynd 6: Lättare håller sig till 2:an, 5:an och 10:an, med tvåsiffriga tal */
+  const EASY_D = [2, 5, 10];
 
   /* ── 3. Divisionstabellen (26a): 20 tal, /20 ── */
   function makeDtab(n, d) {
@@ -839,13 +843,13 @@
   }
   function genDtabell(level, n, r) {
     r = r || Math.random;
-    const D = level === 'svar' ? [3, 4, 6, 7, 8, 9, 6, 7, 8, 9] : [2, 3, 4, 5, 10, 2, 3, 4, 5];
+    const D = level === 'svar' ? [3, 4, 6, 7, 8, 9, 6, 7, 8, 9] : EASY_D;
     const out = [], seen = new Set();
     let guard = 0;
     while (out.length < n && guard++ < 2000) {
       const d = pick(r, D), q = rint(r, 2, 10);
       const t = makeDtab(d * q, d);
-      if (seen.has(t.key) && guard < 1500) continue;
+      if ((seen.has(t.key) || digitClash(d * q, d)) && guard < 1500) continue;
       seen.add(t.key); out.push(t);
     }
     return out;
@@ -869,9 +873,9 @@
   /* Talen: n, d, kvot, rest och d · kvot är olika tal; inga dubbelsiffror */
   function drNums(r, o) {
     for (let g = 0; g < 2000; g++) {
-      const d = rint(r, o.d[0], o.d[1]), q = rint(r, o.q[0], o.q[1]);
+      const d = o.ds ? pick(r, o.ds) : rint(r, o.d[0], o.d[1]), q = rint(r, o.q[0], o.q[1]);
       const rest = o.rest ? rint(r, 1, d - 1) : 0, n = q * d + rest;
-      if (n < o.n[0] || n > o.n[1] || twinDigits(n)) continue;
+      if (n < o.n[0] || n > o.n[1] || twinDigits(n) || digitClash(n, d)) continue;
       if (o.rest ? !distinct(n, d, q, rest, d * q) : !distinct(n, d, q)) continue;
       return { n, d };
     }
@@ -892,18 +896,18 @@
       let o;
       if (moment === 'dela' || moment === 'grupper') {
         const pic = moment === 'dela' ? 'dela' : 'grupp';
-        o = Object.assign(drNums(r, { d:sv ? [2, 6] : [2, 4], q:sv ? [2, 6] : [2, 5], n:sv ? [10, 36] : [6, 20], rest:false }),
+        o = Object.assign(drNums(r, sv ? { d:[2, 6], q:[2, 6], n:[10, 36], rest:false } : { ds:moment === 'dela' ? [2, 5] : EASY_D, q:[2, 9], n:[10, 40], rest:false }),
           { moment, pic, write:sv, kGiven:!sv, prompt:pic });
       } else if (moment === 'dkontroll') {
         const big = sv && k % 3 === 2;                         // Svårare: ibland tvåsiffrigt, som 84/4
-        o = Object.assign(big ? drNums(r, { d:[2, 4], q:[11, 24], n:[24, 96], rest:false }) : drNums(r, { d:sv ? [3, 9] : [2, 5], q:sv ? [3, 9] : [2, 9], n:[6, 81], rest:false }),
+        o = Object.assign(big ? drNums(r, { d:[2, 4], q:[11, 24], n:[24, 96], rest:false }) : drNums(r, sv ? { d:[3, 9], q:[3, 9], n:[6, 81], rest:false } : { ds:EASY_D, q:[2, 9], n:[10, 90], rest:false }),
           { moment, kGiven:!sv });
       } else if (moment === 'drest') {
         const pic = sv ? ['linje', 'grupp', 'linje', 'dela'][k % 4] : ['grupp', 'dela'][k % 2];
-        o = Object.assign(drNums(r, sv ? { d:[3, 7], q:[3, 8], n:[20, 60], rest:true } : { d:[2, 5], q:[2, 6], n:[10, 30], rest:true }),
+        o = Object.assign(drNums(r, sv ? { d:[3, 7], q:[3, 8], n:[20, 60], rest:true } : { ds:[2, 5], q:[2, 6], n:[10, 30], rest:true }),
           { moment, pic, rest:true, kGiven:!sv, prompt:pic });
       } else {                                                    // ingar: "Hur många gånger ingår 5 i 23?"
-        o = Object.assign(drNums(r, sv ? { d:[3, 9], q:[3, 9], n:[20, 89], rest:true } : { d:[2, 5], q:[2, 6], n:[10, 30], rest:true }),
+        o = Object.assign(drNums(r, sv ? { d:[3, 9], q:[3, 9], n:[20, 89], rest:true } : { ds:[2, 5], q:[2, 9], n:[10, 49], rest:true }),
           { moment, rest:true, write:true, kontroll:sv, prompt:'ingar' });
       }
       const t = makeDr(o);
@@ -938,7 +942,7 @@
     return { ok:false, cls, wrong };
   }
   /* Bilden: hur långt barnet har kommit (made = varv, grupper eller hopp) och om det går att fortsätta */
-  const picMax = t => t.q;
+  const picMax = t => t.type === 'dz' ? t.z : t.q;       // dz: nollorna som stryks (fynd 9: varje verb är en gest)
   const picLeft = (t, made) => t.n - made * t.d;
 
   /* ── 7. Dividera varje talsort (K_S 67, 83): varje siffra går jämnt att dela ── */
@@ -948,17 +952,17 @@
     return { moment:'talsort', type:'ts', n, d, answer:n / d, key:`ts${n}/${d}`, text:`${n}/${d}`, fields };
   }
   /* Siffrorna som går jämnt med d: 0, d, 2d, …; d · d undviks (9/3 = 3 ger 3:an två roller) */
-  const tsDigits = d => [0, 1, 2, 3, 4].map(k => k * d).filter(x => x <= 9 && x !== d * d);
+  const tsDigits = d => [0, 1, 2, 3, 4].map(k => k * d).filter(x => x <= 9 && x !== d * d && x !== d);   // inte nämnaren själv (fynd 8)
   function genTsOne(level, r) {
     for (let g = 0; g < 500; g++) {
-      const d = level === 'svar' ? pick(r, [2, 3, 4, 2, 3, 4, 5]) : pick(r, [2, 3, 2, 4]);
+      const d = level === 'svar' ? pick(r, [2, 3, 4, 2, 3, 4]) : 2;
       const len = level === 'svar' ? rint(r, 3, 4) : rint(r, 2, 3);
       const D = tsDigits(d), first = D.filter(x => x >= d);
       if (!first.length) continue;
       const digs = [pick(r, first)];
       for (let i = 1; i < len; i++) digs.push(pick(r, D));
       if (level === 'svar' && !digs.slice(1).includes(0)) digs[rint(r, 1, len - 1)] = 0;   // Svårare: minst en nolla i kvoten
-      if (digs.slice(1).every(x => x === 0)) continue;                                      // inte bara "6000/3"
+      if (len > 2 && digs.slice(1).every(x => x === 0)) continue;                           // inte bara "6000/3"
       const n = +digs.join('');
       if (twinDigits(n) && !/00/.test(String(n))) continue;
       return makeTs(n, d);
@@ -1019,7 +1023,7 @@
     'noll-rest': { len:3, d:[3, 9], rest:true,  ok:p => !p.skip && p.midZero },
     'fyra-noll': { len:4, d:[2, 9], rest:null,  ok:p => p.midZero || p.skip },
   };
-  const KD_BAG = { latt:['tva-utan', 'tva-med', 'tre-jamn', 'noll-mitt', 'tva-med', 'noll-forst'],
+  const KD_BAG = { latt:['tva-utan', 'tva-med', 'tva-utan', 'tva-med'],
                    svar:['tre-rest', 'fyra', 'noll-mitt', 'fyra-rest', 'noll-forst', 'noll-rest', 'fyra-noll'] };
   const KD_LABEL = { 'tva-utan':'Tvåsiffrigt', 'tva-med':'Tvåsiffrigt med minnessiffra', 'tre-jamn':'Tresiffrigt', 'tre-rest':'Tresiffrigt med rest',
     'fyra':'Fyrsiffrigt', 'fyra-rest':'Fyrsiffrigt med rest', 'noll-mitt':'En nolla i kvoten', 'noll-forst':'En nolla i början av kvoten',
@@ -1028,15 +1032,15 @@
     const p = dPass(n, d);
     return { moment:'kortdiv', type:'kd', ktype, n, d, q:p.q, r:p.r, mid:p.mid, skip:p.skip, qzero:p.qzero, answer:p.q, key:`kd${n}/${d}`, text:`${n}/${d}` };
   }
-  function genKdType(ktype, r) {
+  function genKdType(ktype, r, ds) {
     const T = KD_TYPES[ktype], lo = Math.pow(10, T.len - 1), hi = Math.pow(10, T.len) - 1;
     for (let g = 0; g < 4000; g++) {
-      const d = rint(r, T.d[0], T.d[1]);
+      const d = ds ? pick(r, ds) : rint(r, T.d[0], T.d[1]);
       const rest = T.rest === true || (T.rest === null && r() < 0.5) ? rint(r, 1, d - 1) : 0;
       const qlo = Math.ceil((lo - rest) / d), qhi = Math.floor((hi - rest) / d);
       if (qhi < qlo) continue;
       const q = rint(r, qlo, qhi), n = q * d + rest, p = dPass(n, d);
-      if (twinDigits(n) && T.len < 4) continue;
+      if ((twinDigits(n) && T.len < 4) || digitClash(n, d)) continue;
       if (T.ok(p) && (T.rest === null || (p.r > 0) === (rest > 0)) && distinct(n, d, q)) return makeKd(n, d, ktype);
     }
     const fall = { 'tva-utan':[48, 4], 'tva-med':[54, 2], 'tre-jamn':[256, 2], 'tre-rest':[586, 3], 'fyra':[5976, 3], 'fyra-rest':[7405, 3],
@@ -1048,7 +1052,7 @@
     const bag = shuffle(r, KD_BAG[level === 'svar' ? 'svar' : 'latt']), out = [], seen = new Set();
     let guard = 0;
     while (out.length < n && guard++ < 500) {
-      const t = genKdType(bag[out.length % bag.length], r);
+      const t = genKdType(bag[out.length % bag.length], r, level === 'svar' ? null : [2, 5]);
       if (seen.has(t.key) && guard < 400) continue;
       seen.add(t.key); out.push(t);
     }
@@ -1067,7 +1071,7 @@
   function makePt(form, sum, price) {
     const q = Math.floor(sum / price), r = sum % price;
     const fields = form === 'pris' ? [{ role:'pris', ans:price }] : [{ role:'q', ans:q }, { role:'r', ans:r }];
-    return { moment:'pengar', type:'pt', form, sum, price, q, r, answer:form === 'pris' ? price : q, key:`pt${form}${sum}/${price}`, text:`${sum} kr`, fields };
+    return { moment:'pengar', type:'pt', form, sum, price, n:sum, d:price, q, r, answer:form === 'pris' ? price : q, key:`pt${form}${sum}/${price}`, text:`${sum} kr`, fields };
   }
   function genPengar(level, n, r) {
     r = r || Math.random;
@@ -1075,10 +1079,10 @@
     let guard = 0;
     while (out.length < n && guard++ < 2000) {
       const form = sv && out.length % 3 === 2 ? 'pris' : 'antal';
-      const price = sv ? pick(r, [rint(r, 3, 9), rint(r, 11, 25), pick(r, [10, 20, 50])]) : rint(r, 2, 9);
+      const price = sv ? pick(r, [rint(r, 3, 9), rint(r, 11, 25), pick(r, [10, 20, 50])]) : pick(r, EASY_D);
       const q = sv ? rint(r, 2, 9) : rint(r, 2, 6), rest = rint(r, form === 'pris' ? 1 : 0, Math.min(price - 1, 9));
       const sum = q * price + rest;
-      if (sum > (sv ? 300 : 60) || !distinct(sum, price, q) || (rest && !distinct(sum, price, q, rest)) || twinDigits(sum)) continue;
+      if (sum > (sv ? 300 : 60) || !distinct(sum, price, q) || (rest && !distinct(sum, price, q, rest)) || twinDigits(sum) || digitClash(sum, price)) continue;
       const t = makePt(form, sum, price);
       if (seen.has(t.key)) continue;
       seen.add(t.key); out.push(t);
@@ -1129,11 +1133,13 @@
   }
   /* Frågan innan rutorna, när bilden ska delas ut först (Med hjälp) */
   function dealAsk(t) {
+    if (t.type === 'dz') return { text:`Tryck på en nolla i ${fmt(t.d)}. Den stryks, och en nolla i ${fmt(t.n)} med den.`, lit:['dz', 'nz'] };
     if (t.pic === 'dela') return { text:'Tryck på högen. Varje tryck ger en till varje barn.', lit:['pile'] };
     if (t.pic === 'linje') return { text:`Tryck på tallinjen. Varje tryck hoppar ${t.d} steg.`, lit:['pile'] };
     return { text:`Tryck på högen. Varje tryck ringar in en grupp med ${t.d}.`, lit:['pile'] };
   }
   function dealDone(t) {
+    if (t.type === 'dz') return 'Nu är nollorna strukna.';
     if (t.pic === 'dela') return t.r ? 'Nu räcker det inte till ett varv till.' : 'Nu är allt utdelat.';
     if (t.pic === 'linje') return t.r ? 'Nu räcker det inte till ett hopp till.' : `Nu är du framme vid ${t.n}.`;
     return t.r ? 'Nu räcker det inte till en grupp till.' : 'Nu är alla i grupper.';
@@ -1212,7 +1218,7 @@
     const q = Math.floor(n / d), r = n % d;
     return dprob('dproblem', 'rest', `${name} lägger ${n} ${th.many} i ${co.many}, ${d} i varje. Hur många ${co.many} blir fulla, och hur många ${th.many} blir över?`,
       [{ q:'Dela, och skriv resten.', op:'/', ans:[n, d, q, r], rest:true }], q,
-      `${n}/${d} = ${q}, rest ${r}. ${q} ${co.many} blir fulla och ${r} ${th.many} blir över.`, `pr${n}/${d}`);
+      `${n}/${d} = ${q}, rest ${r}. ${q} ${co.many} blir fulla och ${r} ${r === 1 ? th.one : th.many} blir över.`, `pr${n}/${d}`);
   }
   function makeDbehovs(name, th, co, n, d) {
     const q = Math.floor(n / d), r = n % d;
@@ -1269,11 +1275,11 @@
   function genDprobOne(level, kind, r) {
     const sv = level === 'svar', name = pick(r, NAMES), th = pick(r, THINGS), co = pick(r, CONTS);
     for (let g = 0; g < 1000; g++) {
-      const d = sv ? rint(r, 3, 9) : rint(r, 2, 5);
+      const d = sv ? rint(r, 3, 9) : pick(r, EASY_D);
       if (kind === 'dela' || kind === 'grupp' || kind === 'tva') {
-        const q = sv ? rint(r, 21, kind === 'tva' ? 199 : 999) : rint(r, 11, 49);
+        const q = sv ? rint(r, 21, kind === 'tva' ? 199 : 999) : rint(r, 3, 49);
         const n = q * d;
-        if (n < (sv ? 100 : 30) || n > (sv ? 9999 : 250) || !distinct(n, d, q) || twinDigits(n)) continue;
+        if (n < (sv ? 100 : 20) || n > (sv ? 9999 : 99) || !distinct(n, d, q) || twinDigits(n) || digitClash(n, d)) continue;
         if (kind === 'tva') {
           const k = rint(r, 2, 9), plus = r() < 0.5;
           if (!distinct(n, d, q, k, plus ? q + k : q - k) || (!plus && q - k < 2)) continue;
@@ -1282,8 +1288,10 @@
         return kind === 'dela' ? makeDdela(name, th, co, n, d) : makeDgrupp(name, th, co, n, d);
       }
       /* rest och behovs */
-      const q = sv ? rint(r, 11, 199) : rint(r, 4, 19), rest = rint(r, kind === 'behovs' ? 2 : 1, d - 1), n = q * d + rest;
-      if (n > (sv ? 2000 : 99) || twinDigits(n)) continue;
+      const dd = !sv && d === 2 && kind === 'behovs' ? 5 : d;      // behövs: resten minst 2
+      const q = sv ? rint(r, 11, 199) : rint(r, 4, 19), rest = rint(r, kind === 'behovs' ? 2 : 1, dd - 1), n = q * dd + rest;
+      if (n > (sv ? 2000 : 99) || twinDigits(n) || digitClash(n, dd)) continue;
+      if (dd !== d) return kind === 'rest' ? makeDrestP(name, th, co, n, dd) : makeDbehovs(name, th, co, n, dd);
       if (!distinct(n, d, q, rest) || (kind === 'behovs' && !distinct(n, d, q, rest, q + 1, 1))) continue;
       return kind === 'rest' ? makeDrestP(name, th, co, n, d) : makeDbehovs(name, th, co, n, d);
     }
@@ -1292,8 +1300,8 @@
   function genBegreppOne(level, kind, r) {
     const sv = level === 'svar';
     for (let g = 0; g < 1000; g++) {
-      const d = sv ? rint(r, 3, 9) : rint(r, 2, 6), q = sv ? rint(r, 6, 19) : rint(r, 3, 10), rest = sv && kind === 'taljare' && r() < 0.6 ? rint(r, 1, d - 1) : 0;
-      if (!distinct(d, q, d * q + rest) || (rest && !distinct(d, q, rest, d * q, d * q + rest)) || twinDigits(d * q + rest)) continue;
+      const d = sv ? rint(r, 3, 9) : pick(r, EASY_D), q = sv ? rint(r, 6, 19) : rint(r, 2, 9), rest = sv && kind === 'taljare' && r() < 0.6 ? rint(r, 1, d - 1) : 0;
+      if (!distinct(d, q, d * q + rest) || (rest && !distinct(d, q, rest, d * q, d * q + rest)) || twinDigits(d * q + rest) || digitClash(d * q + rest, d)) continue;
       if (kind === 'kvot') return makeBkvot(d * q, d);
       if (kind === 'namnare') return makeBnamnare(d * q, q);
       return makeDtaljare(d, q, rest);
@@ -1303,7 +1311,7 @@
   function genTankerOne(level, r) {
     for (let g = 0; g < 500; g++) {
       if (level !== 'svar' || r() < 0.4) {
-        const d = rint(r, 2, level === 'svar' ? 9 : 5), q = rint(r, 3, 9), rest = rint(r, 1, d - 1);
+        const d = level === 'svar' ? rint(r, 2, 9) : pick(r, [2, 5]), q = rint(r, 3, 9), rest = rint(r, 1, d - 1);
         if (distinct(d, q, rest, d * q, d * q + rest)) return makeTankerRest(d, q, rest);
         continue;
       }
@@ -1762,7 +1770,7 @@
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     /* D44 ✎: övningsbladen */
     DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits,
+    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D,
     genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };

@@ -206,8 +206,32 @@ describe('snällt och utan emojis', () => {
     }
     for (const x of texts) expect(x).not.toMatch(/Fel!|Fel svar|Tyvärr/);
     const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
-    const ov = src.slice(src.indexOf('D44 ✎: Övningsblad · Division ── rutornas'), src.indexOf('/* Slutsatsen efter sista rutan */'));
+    const ov = src.slice(src.indexOf('D44 ✎: Övningsblad · Division, stil C'), src.indexOf('/* Slutsatsen efter sista rutan */'));
     expect(ov.length).toBeGreaterThan(1000);
     expect(ov).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+});
+
+describe('runda 2 (brainstorm/13): Lättare för åk 2 och täljarens siffror', () => {
+  it('Lättare håller sig till 2:an, 5:an och 10:an, med tvåsiffriga tal', () => {
+    for (const m of ['dela', 'grupper', 'dkontroll', 'drest', 'ingar', 'kortdiv', 'dtabell'])
+      for (let s = 1; s <= 30; s++) for (const t of all(m, 'latt', s)) {
+        const d = t.d != null ? t.d : t.y, n = t.n != null ? t.n : t.x;
+        expect(L.EASY_D).toContain(d);
+        expect(n).toBeLessThanOrEqual(100);
+      }
+  });
+  it('täljarens siffror är aldrig nämnaren (505/5, 24/2)', () => {
+    for (const m of ['dela', 'grupper', 'dkontroll', 'drest', 'ingar', 'kortdiv', 'talsort']) for (const lv of LEVELS)
+      for (let s = 1; s <= 30; s++) for (const t of all(m, lv, s)) expect(L.digitClash(t.n, t.d)).toBe(false);
+  });
+});
+
+describe('fokus i full styrka (Dennis 11/11)', () => {
+  it('bandet har ingen bakgrund, och nedtoningen undantar källan, målrutan och deras föräldrar', () => {
+    const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/\.mp-band\{[^}]*background:none!important/);
+    expect(src).toMatch(/\.mp-q\.mp-fm :is\([^)]*\):not\(\.mp-keep\)\{opacity/);
+    expect(src).toMatch(/for \(const e of \[src, focus\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
   });
 });

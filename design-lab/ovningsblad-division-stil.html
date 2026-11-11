@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Övningsblad – stil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* Mockup: tre stilriktningar för divisionens övningsblad (D44 ✎, brainstorm/13).
+   A Bladet: ett rutat matteblad som i boken. B Lekhyllan: illustrerade påsar och spelbrickor.
+   C Brickor: appens glas med siffror som brickor och band som binder ruta och tal. Samma tre moduler i alla. */
+:root{--ink:#3b1d6e;--soft:#6d5a96;--acc:#9333ea;--accl:#c084fc;--deep:#4c1d95;--lila:#7c3aed;--org:#fb923c;
+  --pvE:#16a34a;--pvT:#2563eb;--pvH:#dc2626;--bg:linear-gradient(160deg,#fdf4ff 0%,#fce7f3 34%,#eff6ff 68%,#f0fdf4 100%)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:var(--bg);display:flex;justify-content:center}
+.app{width:100%;max-width:390px;height:100vh;max-height:844px;display:flex;flex-direction:column;padding:8px 12px 10px;gap:8px;overflow:hidden}
+.bar{display:flex;gap:6px}
+.seg{display:flex;flex:1;background:rgba(255,255,255,.72);border-radius:14px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:44px;border:0;border-radius:11px;background:transparent;font:800 13px Nunito;color:var(--soft);cursor:pointer;line-height:1.1}
+.seg button.on{background:var(--acc);color:#fff}
+.seg.mod button.on{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(93,63,158,.18)}
+.card{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;border-radius:24px;position:relative}
+.ask{align-self:stretch;font-weight:900;font-size:15.5px;line-height:1.3;min-height:22px}
+.ask b{font-family:'Baloo 2';font-size:17px}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pad button{min-height:46px;border:0;border-radius:14px;background:rgba(255,255,255,.9);font:800 22px 'Baloo 2';color:var(--deep);cursor:pointer;box-shadow:0 2px 6px rgba(93,63,158,.1)}
+.pad .wide{grid-column:span 4;background:var(--acc);color:#fff;font:900 17px Nunito}
+.pad .er{font-size:17px}
+.pad button:disabled{opacity:.4}
+.hint{font-size:12.5px;color:var(--soft);text-align:center;margin:0}
+
+/* ── gemensam uppställning: bråket ── */
+.sheet{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.eq{display:flex;align-items:center;gap:8px;font:800 34px 'Baloo 2';color:var(--deep)}
+.frac{display:inline-grid;grid-template-columns:auto auto;align-items:center;column-gap:6px}
+.frac .lab{font:800 11px Nunito;color:var(--soft);text-align:right;letter-spacing:.02em}
+.frac .num,.frac .den{text-align:center;min-width:56px;padding:0 6px;border-radius:10px;line-height:1.05}
+.frac .num{border-bottom:3.5px solid var(--deep);border-radius:10px 10px 0 0}
+.slot{min-width:56px;height:52px;border-radius:14px;border:3px dashed #d8b4fe;background:#fff;display:inline-flex;align-items:center;justify-content:center;font:800 30px 'Baloo 2';color:var(--deep);cursor:pointer;position:relative;transition:transform .3s var(--sp,ease)}
+.slot.focus{border-style:solid;border-color:var(--acc);box-shadow:0 0 0 4px rgba(147,51,234,.16)}
+.slot.ok{border-style:solid;border-color:#86efac;background:#f0fdf4;color:#15803d}
+.slot.rest{border-color:#c4b5fd;color:var(--lila)}
+.slot .cap{position:absolute;top:-17px;left:0;right:0;text-align:center;font:800 10.5px Nunito;color:var(--soft)}
+.lit{box-shadow:0 0 0 3px var(--org),0 0 14px rgba(251,146,60,.55)!important;background:#fff7ed!important}
+.tile{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:42px;padding:0 8px;border-radius:12px;font:800 24px 'Baloo 2';cursor:pointer;user-select:none}
+.fly{position:fixed;z-index:20;pointer-events:none;transition:transform .45s cubic-bezier(.34,1.3,.4,1),opacity .2s}
+.kl{display:flex;align-items:center;gap:6px;font:800 26px 'Baloo 2';color:var(--deep)}
+.kl .slot{min-width:48px;height:46px;font-size:26px}
+.kltitle{font:900 12px Nunito;color:var(--soft);align-self:flex-start;margin-left:6px}
+
+/* ── Dela lika: hög och barn ── */
+.scene{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;margin-top:6px}
+.pile{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:250px;padding:8px;border-radius:16px;cursor:pointer;min-height:40px}
+.kids{display:flex;gap:10px;justify-content:center}
+.kid{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bag{position:relative;width:88px;height:92px;display:flex;align-items:flex-end;justify-content:center}
+.bag svg.shape{position:absolute;inset:0;width:100%;height:100%}
+.bag .in{position:relative;display:grid;grid-template-columns:repeat(3,auto);gap:3px;padding:0 0 12px;z-index:1}
+.kids.small .bag{width:70px;height:78px}.kids.small .ball{width:12px;height:12px}.kids.small .in{grid-template-columns:repeat(4,auto);gap:2px}
+.cnt{font:800 15px 'Baloo 2';min-width:26px;height:24px;border-radius:12px;display:grid;place-items:center}
+.ball{width:18px;height:18px;border-radius:50%;display:inline-block}
+
+/* ═════ A · Bladet: rutat papper, blyertsblått, linjeteckningar ═════ */
+.A .card{background:#fffdf7;background-image:linear-gradient(#e7eefc 1px,transparent 1px),linear-gradient(90deg,#e7eefc 1px,transparent 1px);background-size:22px 22px;border:1px solid #e9e1cf;box-shadow:0 10px 30px rgba(93,63,158,.10),inset 0 0 0 6px rgba(255,253,247,.6)}
+.A .ask{background:rgba(255,253,247,.92);border-radius:10px;padding:2px 6px}
+.A .ball{background:#fff;border:2.2px solid #334155}
+.A .ball.f{background:#334155}
+.A .pile{border:2px dashed #94a3b8;background:rgba(255,255,255,.7)}
+.A .cnt{color:#334155;border:1.6px solid #334155;background:#fff}
+.A .slot{border-color:#94a3b8;border-radius:6px;background:#fff}
+.A .slot.focus{border-color:#1e3a8a;box-shadow:0 0 0 3px rgba(30,58,138,.15)}
+.A .tile{background:#fff;border:1.6px solid #334155;color:#1e293b;border-radius:6px}
+.A .frac .num{border-bottom-color:#1e293b}
+.A .eq,.A .kl{color:#1e293b}
+
+/* ═════ B · Lekhyllan: illustrerade påsar, blanka kulor, spelbrickor ═════ */
+.B .card{background:linear-gradient(180deg,#fff 0%,#fff7ed 100%);box-shadow:0 12px 34px rgba(249,115,22,.12),0 2px 6px rgba(93,63,158,.06)}
+.B .ball{background:radial-gradient(circle at 35% 30%,#fff 0 14%,#a855f7 15% 60%,#6b21a8 100%)}
+.B .pile{background:radial-gradient(ellipse at 50% 90%,#fde68a 0 55%,transparent 56%);padding-bottom:18px}
+.B .cnt{background:#f97316;color:#fff}
+.B .slot{border:0;border-radius:14px;background:#fff;box-shadow:inset 0 3px 0 rgba(0,0,0,.06),0 0 0 2.5px #fdba74}
+.B .slot.focus{box-shadow:0 0 0 3.5px #f97316,0 6px 14px rgba(249,115,22,.25)}
+.B .slot.ok{box-shadow:0 0 0 2.5px #4ade80}
+.B .tile{background:#fef3c7;color:#7c4a03;box-shadow:0 4px 0 #f59e0b;border-radius:12px;transform:translateY(-2px)}
+.B .tile:active{transform:translateY(1px);box-shadow:0 1px 0 #f59e0b}
+.B .frac .num{border-bottom-color:#f97316}
+.B .pad button{box-shadow:0 3px 0 #e9d5ff}
+
+/* ═════ C · Brickor: appens glas, talen som färgade brickor, ett band binder ruta och tal ═════ */
+.C .card{background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 34px rgba(93,63,158,.10)}
+.C .ball{background:linear-gradient(135deg,#c084fc,#9333ea)}
+.C .pile{background:rgba(243,232,255,.8);border:2px solid #e9d5ff}
+.C .cnt{background:#ede9fe;color:var(--deep)}
+.C .slot{border-radius:16px}
+.C .tile{background:linear-gradient(135deg,#9333ea,#c084fc);color:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(147,51,234,.3)}
+.C .frac .num,.C .frac .den{background:#f5f3ff}
+.C .bond{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.C .bond path{fill:none;stroke:#c084fc;stroke-width:3;stroke-dasharray:4 5;opacity:.85}
+.done{animation:pop .5s cubic-bezier(.34,1.3,.4,1)}
+@keyframes pop{40%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.fly,.slot{transition:none}.done{animation:none}}
+</style>
+</head>
+<body>
+<div class="app A" id="app">
+  <div class="bar"><div class="seg" id="style">
+    <button data-s="A" class="on">A · Bladet</button><button data-s="B">B · Lekhyllan</button><button data-s="C">C · Brickor</button></div></div>
+  <div class="bar"><div class="seg mod" id="mod">
+    <button data-m="dela" class="on">Dela lika</button><button data-m="kontroll">Kontrollera</button><button data-m="begrepp">Begrepp</button></div></div>
+  <div class="card" id="card"></div>
+  <div class="pad" id="pad"></div>
+</div>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+let S = 'A', M = 'dela', st = null;
+const BAG = {
+  A:'<svg class="shape" viewBox="0 0 70 74"><path d="M10 22h50l-4 48H14z" fill="#fff" stroke="#334155" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 22c0-10 26-10 26 0" fill="none" stroke="#334155" stroke-width="2.2"/></svg>',
+  B:'<svg class="shape" viewBox="0 0 70 74"><path d="M8 24h54l-5 46H13z" fill="#fdba74"/><path d="M8 24h54l-2 8H10z" fill="#fb923c"/><path d="M21 24c0-12 28-12 28 0" fill="none" stroke="#c2410c" stroke-width="3.5" stroke-linecap="round"/></svg>',
+  C:'<svg class="shape" viewBox="0 0 70 74"><rect x="6" y="20" width="58" height="50" rx="14" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/></svg>' };
+const KID = c => `<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="7" r="4.5" fill="${c}"/><path d="M3.5 22c0-5 3.8-8 8.5-8s8.5 3 8.5 8" fill="${c}"/></svg>`;
+const KIDC = { A:'#cbd5e1', B:'#fbbf24', C:'#c4b5fd' };
+
+/* Tre moduler, samma uppgift i alla stilar. Dela lika: 12 bollar mellan 3 barn. Kontrollera: 28/4. Begrepp: nämnaren ur 42 och 6. */
+function reset() {
+  if (M === 'dela') st = { n:12, d:3, made:0, slots:[{ k:'q', ans:4, v:'' }, { k:'k2', ans:4, v:'' }, { k:'k4', ans:12, v:'' }], i:-1 };
+  if (M === 'kontroll') st = { n:28, d:4, q:7, slots:[{ k:'q', ans:7, v:'' }, { k:'k1', ans:4, v:'', src:'den' }, { k:'k2', ans:7, v:'', src:'q' }, { k:'k4', ans:28, v:'' }], i:0 };
+  if (M === 'begrepp') st = { slots:[{ k:'num', ans:42, v:'', src:'t42' }, { k:'den', ans:7, v:'' }, { k:'q', ans:6, v:'', src:'t6' }], i:0 };
+  render();
+}
+const cur = () => st.slots[st.i];
+function slot(i, cls, cap) {
+  const s = st.slots[i], f = i === st.i ? ' focus' : '', ok = s.done ? ' ok' : '';
+  return `<span class="slot${f}${ok}${cls ? ' ' + cls : ''}" id="s${i}" data-i="${i}">${cap ? `<span class="cap">${cap}</span>` : ''}${s.v}</span>`;
+}
+const labels = () => S !== 'B';                  // A och C sätter etiketter vid bråket; B håller bladet rent
+function frac(num, den, o = {}) {
+  return `<span class="frac">${labels() ? '<span class="lab">täljare</span>' : '<span></span>'}<span class="num" id="${o.nid || ''}"${o.ntap ? ` data-t="${o.ntap}"` : ''}>${num}</span>` +
+    `${labels() ? '<span class="lab">nämnare</span>' : '<span></span>'}<span class="den" id="${o.did || 'den'}"${o.dtap ? ` data-t="${o.dtap}"` : ''}>${den}</span></span>`;
+}
+function render() {
+  const c = $('#card'); let h = '', ask = '';
+  if (M === 'dela') {
+    const left = st.n - st.made * st.d;
+    if (st.i < 0) ask = left ? 'Tryck på högen. Varje tryck ger en boll till varje barn.' : '';
+    else ask = ['Hur många fick varje barn?', 'Kontrollera: 3 barn, med hur många var?', 'Vad blir 3 · 4?'][st.i];
+    const balls = Array.from({ length:left }, (_, k) => `<i class="ball f" data-b="${k}"></i>`).join('');
+    const kids = Array.from({ length:st.d }, (_, g) => `<div class="kid">${KID(KIDC[S])}<div class="bag" id="bag${g}">${BAG[S]}<span class="in">${'<i class="ball f"></i>'.repeat(st.made)}</span></div><span class="cnt">${st.made || ''}</span></div>`).join('');
+    h = `<div class="scene">${left ? `<div class="pile${st.i < 0 ? ' lit' : ''}" id="pile" role="button" aria-label="Dela ut">${balls}</div>` : '<div style="height:8px"></div>'}<div class="kids">${kids}</div></div>`;
+    if (!left) h += `<div class="sheet"><div class="eq">${frac(12, 3)}<span>=</span>${slot(0, '', labels() ? 'kvot' : '')}</div>
+      <span class="kltitle">Kontrollera</span><div class="kl"><span class="tile" data-t="3">3</span><span>·</span>${slot(1)}<span>=</span>${slot(2)}</div></div>`;
+  }
+  if (M === 'kontroll') {
+    ask = ['28 delat med 4. Hur många 4:or ryms i 28?', 'Tryck på nämnaren, så hoppar den ner i kontrollen.', 'Tryck på kvoten.', 'Vad blir 4 · 7?', ''][st.i];
+    const L1 = id => cur() && !cur().v && ((st.i === 1 && id === 'den') || (st.i === 2 && id === 's0')) ? ' lit' : '';
+    h = `<div class="sheet"><div class="eq">${frac(28, `<span class="${L1('den')}" style="border-radius:8px;padding:0 4px">4</span>`, { dtap:'den' })}<span>=</span>${slot(0, L1('s0'), labels() ? 'kvot' : '')}</div>
+      <span class="kltitle">Kontrollera med gånger</span>
+      <div class="kl">${slot(1)}<span>·</span>${slot(2)}<span>=</span>${slot(3)}</div>
+      ${st.i >= 4 ? '<p class="hint">Det blev täljaren, 28. Divisionen stämmer.</p>' : ''}</div>`;
+    /* bilden till kontrollen: 4 påsar med 7 i varje, numrerade, när kvoten är skriven */
+    if (st.i >= 1) h += `<div class="kids small">${Array.from({ length:4 }, (_, g) => `<div class="kid"><div class="bag">${BAG[S]}<span class="in">${'<i class="ball f"></i>'.repeat(7)}</span></div><span class="cnt">${7 * (g + 1)}</span></div>`).join('')}</div>`;
+  }
+  if (M === 'begrepp') {
+    ask = ['Vad är nämnaren om täljaren är <span class="tile" data-t="t42" id="t42">42</span> och kvoten är <span class="tile" data-t="t6" id="t6">6</span>?'][0];
+    const pos = ['Lägg täljaren överst.', 'Vilket tal ska stå under strecket?', 'Lägg kvoten efter likhetstecknet.', 'Rätt! Nämnaren är 7, för 42/7 = 6.'][st.i];
+    h = `<div class="sheet"><p class="hint" style="font-size:14px;color:var(--ink)">${pos}</p>
+      <div class="eq"><span class="frac">${labels() ? '<span class="lab">täljare</span>' : '<span></span>'}<span class="num" style="border:0;padding:0">${slot(0)}</span>
+      ${labels() ? '<span class="lab">nämnare</span>' : '<span></span>'}<span class="den" style="padding:4px 0 0;border-top:3.5px solid currentColor;border-radius:0">${slot(1)}</span></span>
+      <span>=</span>${slot(2, '', labels() ? 'kvot' : '')}</div></div>`;
+  }
+  c.innerHTML = `<div class="ask">${ask}</div>${h}${S === 'C' ? '<svg class="bond" id="bond"></svg>' : ''}`;
+  pad();
+  if (S === 'C') requestAnimationFrame(bond);
+}
+/* C: ett streckat band från talet som rutan hör ihop med till rutan med fokus */
+function bond() {
+  const b = $('#bond'); if (!b || !st || st.i < 0 || !cur()) return;
+  const s = cur(), from = s.src && document.querySelector(s.src === 'den' ? '#den' : s.src === 'q' ? '#s0' : '#' + s.src), to = $('#s' + st.i);
+  if (!from || !to) { b.innerHTML = ''; return; }
+  const cr = $('#card').getBoundingClientRect(), a = from.getBoundingClientRect(), z = to.getBoundingClientRect();
+  const x1 = a.left + a.width / 2 - cr.left, y1 = a.bottom - cr.top, x2 = z.left + z.width / 2 - cr.left, y2 = z.top - cr.top;
+  b.innerHTML = `<path d="M${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}"/>`;
+}
+function pad() {
+  const p = $('#pad'), s = st.i >= 0 && cur();
+  const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(k => `<button data-k="${k}"${s ? '' : ' disabled'}>${k}</button>`).join('');
+  p.innerHTML = keys + `<button class="er" data-k="x"${s ? '' : ' disabled'} aria-label="Sudda">&#9003;</button><button class="wide" data-k="ok"${s && s.v ? '' : ' disabled'}>${s ? 'Svara' : 'Nästa uppgift'}</button>`;
+  if (!s && st.i >= st.slots.length) p.querySelector('.wide').disabled = false;   // en knapp: Nästa uppgift först när allt är klart
+}
+/* Ett tal flyger från där det står till rutan (FLIP) */
+function flyTo(fromEl, toEl, text, done) {
+  const a = fromEl.getBoundingClientRect(), z = toEl.getBoundingClientRect();
+  const f = fromEl.cloneNode(true); f.classList.add('fly'); f.removeAttribute('id');
+  Object.assign(f.style, { left:a.left + 'px', top:a.top + 'px', width:a.width + 'px', height:a.height + 'px', margin:0 });
+  if (text != null) f.textContent = text;
+  document.body.appendChild(f);
+  requestAnimationFrame(() => { f.style.transform = `translate(${z.left + z.width / 2 - a.left - a.width / 2}px,${z.top + z.height / 2 - a.top - a.height / 2}px)`; });
+  setTimeout(() => { f.remove(); done && done(); }, 470);
+}
+function answer() {
+  const s = cur(); if (!s || !s.v) return;
+  if (+s.v !== s.ans) { s.v = ''; const el = $('#s' + st.i); el.animate([{ transform:'translateX(0)' }, { transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], 260); render(); return; }
+  s.done = true; st.i = st.i + 1 < st.slots.length ? st.i + 1 : st.slots.length; render();
+  const el = $('#s' + (st.i - 1)); if (el) el.classList.add('done');
+}
+document.addEventListener('click', e => {
+  const sb = e.target.closest('#style button'); if (sb) { S = sb.dataset.s; $('#app').className = 'app ' + S; document.querySelectorAll('#style button').forEach(b => b.classList.toggle('on', b === sb)); render(); return; }
+  const mb = e.target.closest('#mod button'); if (mb) { M = mb.dataset.m; document.querySelectorAll('#mod button').forEach(b => b.classList.toggle('on', b === mb)); reset(); return; }
+  const pile = e.target.closest('#pile');
+  if (pile && M === 'dela' && !st.busy) {                 // ett varv: en boll flyger till varje påse, en i taget
+    st.busy = true; const balls = [...pile.querySelectorAll('.ball')];
+    for (let g = 0; g < st.d; g++) setTimeout(() => {
+      const b = balls[balls.length - 1 - g], bag = $('#bag' + g + ' .in');
+      flyTo(b, bag, null); b.style.visibility = 'hidden';
+      if (g === st.d - 1) setTimeout(() => { st.made++; st.busy = false; if (st.made * st.d >= st.n) st.i = 0; render(); }, 480);
+    }, g * 140);
+    return;
+  }
+  const t = e.target.closest('[data-t]');                 // ett tal att trycka på: det hoppar till rutan med fokus
+  if (t && cur()) {
+    const s = cur(), val = t.dataset.t === 'den' ? '4' : t.dataset.t === 'q' ? '7' : t.textContent.trim();
+    flyTo(t, $('#s' + st.i), val, () => { s.v = val; render(); });
+    return;
+  }
+  const sl = e.target.closest('.slot');
+  if (sl && M === 'kontroll' && st.i === 2 && sl.id === 's0') { flyTo(sl, $('#s2'), '7', () => { st.slots[2].v = '7'; render(); }); return; }
+  const k = e.target.closest('#pad button'); if (!k) return;
+  const s = cur();
+  if (k.dataset.k === 'ok') { if (s) answer(); else reset(); return; }
+  if (!s) return;
+  if (k.dataset.k === 'x') s.v = s.v.slice(0, -1); else if (s.v.length < 3) s.v += k.dataset.k;
+  render();
+});
+reset();
+</script>
+</body>
+</html>
