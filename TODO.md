@@ -2,7 +2,7 @@
 
 ## Öppet
 
-- [ ] Övningsblad runda 8: A1–A5 + B1–B4, B6–B8 i `brainstorm/14` (matteprov-agenten); A6/B5 (kort division) utgår.
+- [ ] Övningsblad, puts: "och resten 4" bryts inte ensamt på raden; summabrickan och rutan har inte båda orange ram (rutan i fokus ensam).
 - [ ] Övningsblad, småputs efter runda 6: pilspetsen strax utanför rutans kant; kontrollraden luftigare ("Kontrollera med gånger" på en rad); knyt "över" och "rest" tydligare.
 - [ ] Övningsblad division runda 2 (stil C, fynden i `brainstorm/13`), sedan genomspelning, Dennis prov, v76.
 - [ ] iPad-planen (D45 ✎, `brainstorm/12`) efter v76.
