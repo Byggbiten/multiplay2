@@ -159,3 +159,8 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - Genomspelning (Lättare med hjälp, Svårare själv, alla moduler utom motorn): inga fel, ingen skroll i 390 × 797,
   bandet i varje ruta med hjälp, inget band eller verktyg i Själv. Rättat under svepet: bandet från en täljarsiffra tog
   vägen runt bråket ("1 klistermärken" blev singular).
+- **Fel (Dennis):** när bandet stod blev hela kortet blekt, även det i fokus. Orsak: bandets SVG fick en vit, halvgenomskinlig
+  bakgrund av en allmän regel och låg över allt. **Lösning:** ingen bakgrund på bandet; i stället tonas bara det som inte
+  hör till steget ned (`.mp-fm … :not(.mp-keep)`), och källan, målrutan och deras föräldrar får `mp-keep`. Mätt i alla
+  moduler med hjälp: effektiv opacitet 1 på källa, mål och band. **Lärdom:** en blek skärmbild är ett fynd, inte
+  panelens fel; mät `getComputedStyle` och vad som ligger överst (`elementFromPoint`) innan man skyller på verktyget.

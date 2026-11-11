@@ -459,7 +459,10 @@ const MatteProv = (() => {
 #mp-root .mp-dzx .ln{align-items:center;gap:6px;font-size:clamp(26px,7.6vw,34px)}
 #mp-root .mp-nb.rest{border-color:#c4b5fd;color:#6d28d9}
 #mp-root .mp-q{position:relative}
-#mp-root .mp-band{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2}
+#mp-root .mp-band{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;background:none!important}
+/* Dennis 11/11: när bandet står tonas bara det som inte hör till steget ned; källan, målrutan och bandet har full styrka
+   (mp-keep sitter på dem och på deras föräldrar, så att ingen förälder tonar ned dem) */
+#mp-root .mp-q.mp-fm :is(.mp-ans,.mp-frac>span,.mp-flab,.mp-capw>i,.mp-grp,.mp-kidc,.mp-pile,.mp-kd,.mp-pnum,.mp-ptc,.mp-pth,.pvd,.mp-bc,.mp-bsp,.mp-line,.mp-klbl,.mp-tecol>i):not(.mp-keep){opacity:.38;transition:opacity .25s}
 #mp-root .mp-band path{fill:none;stroke:#a855f7;stroke-width:3;stroke-dasharray:5 6;stroke-linecap:round;animation:mp-band 1.2s linear infinite}
 #mp-root .mp-band circle{fill:#a855f7}
 @keyframes mp-band{to{stroke-dashoffset:-22}}
@@ -1338,6 +1341,7 @@ const MatteProv = (() => {
     const q = document.getElementById('mp-q'), t = curTask();
     if (!q || !t || !isOv(t) || !helpOn() || locked) return;
     const old = q.querySelector('.mp-band'); if (old) old.remove();
+    q.classList.remove('mp-fm'); q.querySelectorAll('.mp-keep').forEach(e => e.classList.remove('mp-keep'));
     const want = bandWant(t), focus = q.querySelector('.mp-ans.focus, .mp-nb.focus');
     if (want == null || !focus || (IN.v && IN.v[IN.kind === 'prob' ? IN.f : IN.hb.i])) return;   // bara den aktuella, tomma rutan
     const src = bandSource(q, focus, want);
@@ -1357,6 +1361,8 @@ const MatteProv = (() => {
       d = `M${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
     }
     q.insertAdjacentHTML('beforeend', `<svg class="mp-band" aria-hidden="true"><path d="${d}"/><circle cx="${x1}" cy="${y1}" r="3.5"/></svg>`);
+    for (const e of [src, focus]) for (let x = e; x && x !== q; x = x.parentElement) x.classList.add('mp-keep');
+    q.classList.add('mp-fm');
   }
   /* Ett tal flyger från där det står till sin ruta (samma känsla som multdivs brickor): texten står först, sedan rörelsen */
   function flyTo(fromEl, toEl, html, done) {

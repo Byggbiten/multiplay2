@@ -226,3 +226,12 @@ describe('runda 2 (brainstorm/13): Lättare för åk 2 och täljarens siffror', 
       for (let s = 1; s <= 30; s++) for (const t of all(m, lv, s)) expect(L.digitClash(t.n, t.d)).toBe(false);
   });
 });
+
+describe('fokus i full styrka (Dennis 11/11)', () => {
+  it('bandet har ingen bakgrund, och nedtoningen undantar källan, målrutan och deras föräldrar', () => {
+    const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    expect(src).toMatch(/\.mp-band\{[^}]*background:none!important/);
+    expect(src).toMatch(/\.mp-q\.mp-fm :is\([^)]*\):not\(\.mp-keep\)\{opacity/);
+    expect(src).toMatch(/for \(const e of \[src, focus\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
+  });
+});
