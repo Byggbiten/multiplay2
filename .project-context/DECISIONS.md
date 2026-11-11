@@ -644,3 +644,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ett prov. Det skall vara övningsblad/övningsmoduler. Precis som den där kopieringsunderlag_kap3. Så de får träna på
   de olika delarna för att bygga upp en intuitiv förståelse runt om division med olika problembeskrivningar och
   övningssätt".
+- ✎ **2026-11-11, det visuella först, och hjälpen ska lära:** barnen ska inte fastna för att de inte förstår.
+  Problemet löses i första hand med uppställning, animation, bilder och UI, inte med berättande text (förklaringar är
+  inte förbjudna). Med hjälp och Själv ska göra verklig skillnad, så att hjälpen lär. Övningsbladen spelas igenom ur
+  ett barns perspektiv (åk 4 och åk 2) innan de släpps. Källa: Dennis: "När divisionsprovet är klart vill jag att du
+  spelar igenom det ur [barnens] perspektiv. De skall förstå vad de skall göra. Och att köra med och utan hjälp ska göra
+  skillnad. Så att de kan träna och förstå. Jag strävar efter kvalitet för barnen så att de inte fastnar vid en fråga
+  för att de inte förstår. Och det löser man inte så mycket med berättande texter eller förklaringar, utan det gör man
+  bäst med det visuella och UI och annat. Förklaringar är inte förbjudet, men man skall i första hand tackla problemet
+  med hur animeringar/uppställningar ser ut".
