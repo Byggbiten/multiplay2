@@ -489,6 +489,9 @@ const MatteProv = (() => {
 #mp-root .mp-sumr{display:inline-flex;align-items:center;gap:2px;color:#6d28d9}
 #mp-root .mp-sumr .mp-pnum{border-color:#7c3aed}
 #mp-root .mp-pnum.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
+#mp-root .mp-nw{white-space:nowrap}
+/* summabrickan är bandets källa: lila som bandet, så att bara rutan i fokus har orange ram */
+#mp-root .mp-sumov>.mp-pnum.lit{box-shadow:0 0 0 2px #a855f7;background:#faf5ff}
 #mp-root .mp-bsn{align-self:center;min-width:30px}
 #mp-root .mp-capw{position:relative}
 /* runda 6 (Dennis: "Flytta '9 grupper'"): summan står ovanför sin ruta, talbrickan med mittlinjen rakt ovanför rutan,
@@ -1317,7 +1320,8 @@ const MatteProv = (() => {
   const pvText = text => String(text).split(/(\[\[\d+:[A-Za-z]+\]\])/).map(p => /^\[\[/.test(p) ? p.replace(/\[\[(\d+):([A-Za-z]+)\]\]/, '<b class="pv$2">$1</b>') : esc(p).replace(/\d+/g, m => `<b class="mp-n">${pvHTML(m)}</b>`)).join('');
   /* talen i en uppgiftstext som brickor att trycka på (regel 7) */
   const ORDW = ['två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio'];
-  const tileText = text => esc(text).replace(/\d+/g, m => `<b class="mp-pnum"${pk(m)}>${pvHTML(m)}</b>`);
+  /* talet hålls ihop med ordet före och skiljetecknet efter, så att "resten 4." aldrig bryts ensamt på en rad */
+  const tileText = text => esc(text).replace(/(\S+ )?(\d+)([.,?!:]?)/g, (_, w, m, p) => `<span class="mp-nw">${w || ''}<b class="mp-pnum"${pk(m)}>${pvHTML(m)}</b>${p}</span>`);
   const labOn = () => true;
   const fracHTML = (nu, de, lit, tap, lab) => {
     const N = typeof nu === 'number' ? pvHTML(nu) : nu, D = typeof de === 'number' ? pvHTML(de) : de;
