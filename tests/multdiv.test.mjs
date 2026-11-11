@@ -737,9 +737,9 @@ describe('D40: den osynliga nollan och pekningen', () => {
 
   it('nivå 1–3 behåller sina texter ordagrant', () => {
     const t = (a, b, lv) => planMultSteps(buildPlan(a, b, lv)).filter(s => s.t !== 'done').map(s => strip(multStepText(s, buildPlan(a, b, lv))));
-    expect(t(28, 8, 2)).toEqual(['8 · 8 är 64', '6:an åker upp som minne. 👉', '4:an åker ner i svaret. ✅',
-      '2 · 8 är 16', 'Minnessiffran 6 gör 16 till 22.', 'Sista kolumnen — hela 22 får plats! ✅']);
-    expect(t(32, 3, 1)).toEqual(['2 · 3 är 6', '6:an åker ner i svaret. ✅', '3 · 3 är 9', '9:an åker ner i svaret. ✅']);
+    expect(t(28, 8, 2)).toEqual(['8 · 8 är 64', '6:an åker upp som minne.', '4:an åker ner i svaret.',
+      '2 · 8 är 16', 'Minnessiffran 6 gör 16 till 22.', 'Sista kolumnen — hela 22 får plats!']);
+    expect(t(32, 3, 1)).toEqual(['2 · 3 är 6', '6:an åker ner i svaret.', '3 · 3 är 9', '9:an åker ner i svaret.']);
   });
 
   it('texterna säger aldrig samma tal i två roller och inga jämförelseord', () => {
@@ -788,10 +788,10 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
       if (r.where.startsWith('md-')) {
         const v = cellVal(r.where, pl);
         if (v !== r.val) fel.push(`${ctx}: ${r.where} bär ${v}, texten säger ${r.val}`);
-        const want = r.where === 'md-rest' ? '#dc2626' : r.where === 'md-d-0' && pl.kind === 'division' ? '#475569' : COLV[+r.where.split('-').pop()];
+        const want = r.where === 'md-rest' ? '#7c3aed' : r.where === 'md-d-0' && pl.kind === 'division' ? '#475569' : COLV[+(r.where.match(/-(-?\d+)$/) || [0, 0])[1]];
         if (r.color !== want) fel.push(`${ctx}: ${r.where} fel färg`);
       } else {
-        if (r.color !== '#dc2626') fel.push(`${ctx}: minnets färg`);
+        if (r.color !== '#7c3aed') fel.push(`${ctx}: minnets färg`);
         if (r.where === 'mem:cur' && r.val !== opt.mem) fel.push(`${ctx}: mem:cur ${r.val} ≠ ${opt.mem}`);
         if (r.where === 'chip:0' && r.val !== opt.chip) fel.push(`${ctx}: chip:0 ${r.val} ≠ ${opt.chip}`);
         if (!['mem:cur', 'chip:0'].includes(r.where)) fel.push(`${ctx}: okänd plats ${r.where}`);
@@ -869,7 +869,7 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
     expect(refsOf(h)).toEqual([
       { where: 'md-b-0', color: '#22c55e', val: 5 },
       { where: 'md-b-0', color: '#22c55e', val: 5 }]);
-    expect(h.replace(/<[^>]+>/g, '')).toBe('Först räknar vi 98 · 5 — entalssiffran i 65! 👇');
+    expect(h.replace(/<[^>]+>/g, '')).toBe('Först räknar vi 98 · 5 — entalssiffran i 65!');
     expect(h).toMatch(/i 6<strong class="md-ref" data-ref="md-b-0"/);
     // produkten är ingen cell och färgas inte
     const calc = planMultSteps(pl).find(s => s.t === 'calc');
@@ -1211,5 +1211,57 @@ describe('D43 ✎: nivå 4, division med decimaler', () => {
     for (const t of DEC_TYPES) expect(genDivType(t).type).toBe(t);
     expect(buildDivPlan(579, 4, 2, { rest: true }).restLevel).toBe(true);
     expect(buildDivPlan(122, 4, 1, { dec: true }).qText).toBe('30,5');
+  });
+});
+
+/* ── Motorrundan (2026-11-11, brainstorm/11 fynd 10 och 12, brainstorm/13 fynd 3 och 4) ── */
+describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emojis, klick', () => {
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+  const { freeUnfilled, remNoteTap, remNoteKey } = MD.__test;
+  it('kort division med hjälp: faktabrickan föds först efter svaret (svar aldrig före fråga)', () => {
+    const showDivQ = src.slice(src.indexOf('  function showDivQ(item)'), src.indexOf('  function showDivAsk(item)'));
+    expect(showDivQ).not.toMatch(/divFaktaBorn/);
+    expect(src).toMatch(/divFaktaBorn\(item\.fakta, \(\) => divDigitToQuot\(item\.skriv, done\)\)/);
+  });
+  it('mellanrestens plats i Räkna själv: väntar på en siffra utan att flytta fokus; ⌫ tömmer bara den', () => {
+    let st = remNoteTap({ wait: null, vals: {}, focus: 2 }, 1);
+    expect(st).toEqual({ wait: 1, vals: {}, focus: 2 });
+    st = remNoteKey(st, '3');
+    expect(st).toEqual({ wait: null, vals: { 1: 3 }, focus: 2 });
+    expect(remNoteKey(st, '4')).toBe(null);                                  // ingen väntar: siffran gäller kvoten
+    expect(remNoteKey({ wait: 1, vals: { 1: 3, 0: 2 }, focus: 0 }, 'erase')).toEqual({ wait: null, vals: { 0: 2 }, focus: 0 });
+    expect(remNoteTap({ wait: 1, vals: { 1: 3 }, focus: 0 }, 1)).toEqual({ wait: null, vals: {}, focus: 0 });   // andra trycket tömmer
+    expect(src).toMatch(/freeMode && g >= 0 && g < L - 1\n\s+\? `<span class="md-remin"/);                  // framför varje siffra utom den första
+  });
+  it('Klar: rättar först när varje ruta som svaret har är ifylld (rutorna avslöjar inget nytt)', () => {
+    const pl = buildPlan(687, 8, 3);                                         // 5496: fyra rutor
+    expect(freeUnfilled(pl, { ans: [6, 9, null, null] })).toBe('ans');
+    expect(freeUnfilled(pl, { ans: [6, 9, 4, 5] })).toBe(null);
+    const t2 = buildPlan(82, 68, 4), g = r => Array(t2.width).fill(null).map((_, i) => r[i] ?? null);
+    expect(freeUnfilled(t2, { p1: g([6, 5, 6]), p2: g([null, 2, 9]), ans: g([6, 7, 5, 5]) })).toBe('p2');
+    expect(freeUnfilled(t2, { p1: g([6, 5, 6]), p2: g([null, 2, 9, 4]), ans: g([6, 7, 5, 5]) })).toBe(null);
+    const d = buildDivPlan(612, 6, 3);
+    expect(freeUnfilled(d, { ans: [2, null, 1] })).toBe('ans');
+    expect(src).toMatch(/freeTip\('Fyll i alla rutor du behöver – sedan trycker du Klar\.'\);/);
+  });
+  it('minne och rest är lila, rött betyder bara hundratalet', () => {
+    expect(src).not.toMatch(/#dc2626|rgba\(220,38,38/);
+    expect(src).toMatch(/const MEM_COLOR = '#7c3aed';/);
+    expect(src).toMatch(/divChipEl\('md-rest md-chip-sm chip-mem'/);
+  });
+  it('inga emojis, ingen konfetti; träffytor minst 44 px', () => {
+    const emoji = src.match(/[☀-➿\u{1F300}-\u{1FAFF}]/gu) || [];
+    expect(emoji.filter(c => c !== '✎' && c !== '✓')).toEqual([]);
+    expect(src).not.toMatch(/App\.Confetti/);
+    expect(src).toMatch(/\.md-cell\.md-ntap::after \{[^}]*width:max\(44px/);
+    expect(src).toMatch(/\.md-cell \.md-remin::after \{[^}]*\n?\s*width:44px; height:44px;/);
+    expect(src).toMatch(/width:max\(44px,140%\); height:max\(44px,140%\)/);              // minnesspalten
+    expect((src.match(/height:46px;border-radius:12px;font-weight:800;font-size:12px/g) || []).length).toBe(3);   // Rita, Sudd, Rensa
+  });
+  it('klickstyrt (D3): uppgiften byts på knapp, kvittensen med platsord står kvar tills Nästa', () => {
+    const ft = src.slice(src.indexOf('  function finishTask(correct)'), src.indexOf('  function finishNext()'));
+    expect(ft).not.toMatch(/setTimeout|newExProblem/);
+    expect(src).toMatch(/if \(isD40\(plan\) && item\.kind === 'mult'\) divAckBtn\(item\);/);
+    expect(src).toMatch(/if \(item\.which === 3\) doHighlight\(\{ phase: 'add', g: -1 \}\);/);
   });
 });
