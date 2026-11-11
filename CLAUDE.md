@@ -52,7 +52,7 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | En fil skapas | rätt mapp + rad i registret |
 | Ett fel rättas | loggraden "Varför fångade inte motorn detta?" + testet som fångar feltypen, provat mot felet först (15 § 5–6) |
 | En subagent rapporterar | fynden in i TODO med id; rapporten sparad i projektet (`brainstorm/`) |
-| En subagent levererar UI | granska själv innan det går till Dennis: egna skärmbilder i 390 × 797 av varje steg som ändrats + förklaringsprov av en granskare utan kontext (ui-skolan steg 5); agentens egen mätning räknas inte som bevis |
+| En subagent levererar UI | granska själv innan det går till Dennis: egna skärmbilder i 390 × 797 av varje steg som ändrats, i alla nivåer (Lättare och Svårare är olika flöden) + förklaringsprov av en granskare utan kontext (ui-skolan steg 5); agentens egen mätning räknas inte som bevis |
 | En agentroll startas | kontor `agenter/<roll>/` med `OVERLAMNING.md` + `LOGG.md`, rad i `agenter/README.md`, id i tabellen Agenter nedan |
 | En agentrunda är klar | överlämningen beskriver läget nu, ny lärdom står i rollens `LOGG.md` (också det granskningen hittade), id:t i tabellen stämmer |
 | Milstolpe (release), före komprimering, sessionens slut | hela passet (15 § 3a), städkontrollen tills Rent |
