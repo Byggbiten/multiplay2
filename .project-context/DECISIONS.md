@@ -653,3 +653,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   för att de inte förstår. Och det löser man inte så mycket med berättande texter eller förklaringar, utan det gör man
   bäst med det visuella och UI och annat. Förklaringar är inte förbjudet, men man skall i första hand tackla problemet
   med hur animeringar/uppställningar ser ut".
+- ✎ **2026-11-11, plan och ordning:** iPad-planen i `brainstorm/12` körs i sin helhet: en agent gör förstoringsmotorn,
+  mätverktyget, iPhone-facit och `app.css` med rivningen; sedan 5–6 Sonnet-agenter parallellt per modulgrupp i egna
+  arbetskopior; sist en granskare (mätning i sju storlekar, iPhone pixelidentisk); därefter två spalter i liggande
+  läge som alternativ till Dennis. Först ska divisionens övningsblad vara färdiga, granskade, godkända och
+  publicerade. Källa: Dennis: "Hela planen låter bra!", "Och om du använder flera sonnetagenter då?" och "Kör på den
+  planen. Men jag skulle först vilja att divisionsprovet blev färdigt, granskat, godkänt och publicerat innan vi gör
+  det".
