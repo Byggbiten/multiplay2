@@ -652,6 +652,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   band. Källa: Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång". Reglerna vägs mot varandra: "det får
   bli en slags 'bästa möjliga kompromiss i vissa lägen'" (Dennis) – aldrig genom frågan eller siffror barnet ska läsa,
   aldrig över halva kortet; i övrigt den minst dåliga vägen.
+  Svaret står på ett ställe: summabrickan ("9 grupper") flyttas rakt ovanför rutan och bandet går kort rakt ner,
+  ingen kopia av talet. Källa: Dennis valde "Flytta '9 grupper'" (11/11) framför kopian ovanför rutan och ett längre band.
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
