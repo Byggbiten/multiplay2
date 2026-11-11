@@ -649,7 +649,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   Se till att det som skall vara i fokus inte är transparant så att den effekten får mening" och "Där pekar ju
   strecket och det som skall vara i fokus lite missvisande". Att bandet inte korsar text: min egen granskning 11/11
   (runda 4). Bandet ska också vara kort, utan omvägar; hellre flyttas källan närmare rutan, annars lila ring utan
-  band. Källa: Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång".
+  band. Källa: Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång". Reglerna vägs mot varandra: "det får
+  bli en slags 'bästa möjliga kompromiss i vissa lägen'" (Dennis) – aldrig genom frågan eller siffror barnet ska läsa,
+  aldrig över halva kortet; i övrigt den minst dåliga vägen.
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
