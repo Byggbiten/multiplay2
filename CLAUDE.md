@@ -24,7 +24,7 @@ namn i uppgifterna.
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D45) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D46) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |
@@ -57,6 +57,8 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | En agentrunda är klar | överlämningen beskriver läget nu, ny lärdom står i rollens `LOGG.md` (också det granskningen hittade), id:t i tabellen stämmer |
 | Milstolpe (release), före komprimering, sessionens slut | hela passet (15 § 3a), städkontrollen tills Rent |
 | Ny dag | ny loggfil; första avsnittet pekar på gårdagens "Nästa steg" |
+| Efter en kontextkomprimering | läs om den här filen och loggens "Läget nu"/"Nästa steg" innan något annat; arbetssättet (D46) gäller oavsett vad sammanfattningen säger |
+| Före en komprimering | beslut från passet som D-poster, metoder i den här filen, loggen aktuell, städkontrollen Rent |
 
 Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verktyg/snippets/stadkontroll.py .`
 

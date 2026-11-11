@@ -66,8 +66,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte ✎ enklare förklaring ✎ nollan först, sedan bara siffran
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
 - D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten ✎ nivå 3 med rest, nivå 4 med decimaler
-- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära
+- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
+- D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar
 
 ---
 
@@ -640,6 +641,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   rutan. Brickorna är ljusa med lila kant, så att platsvärdesfärgen syns. Källa: Dennis: "den där streckade linjen
   mellan 42 till täljaren var riktigt bra, och det är exakt sådana där små visuella hjälpmedel som gör supermycket
   för barnen".
+- ✎ **2026-11-11, fokus och bandet ska betyda något:** när bandet står tonas bara det ned som inte hör till steget;
+  det i fokus är i full styrka. Fokus och bandets start är exakt det tal barnet ska skriva (alla grupper och
+  summabrickan "6 grupper", inte grupp 6:s prickar). Bandet korsar aldrig text, siffror, etiketter eller bilder;
+  finns ingen fri väg ritas inget band och källan får en lila ring. Nedtonad text ska gå att läsa; frågan tonas
+  aldrig ned. Källa: Dennis: "när det dyker upp sånna där pilar och streck så blir resten/hela skärmen transparant.
+  Se till att det som skall vara i fokus inte är transparant så att den effekten får mening" och "Där pekar ju
+  strecket och det som skall vara i fokus lite missvisande". Att bandet inte korsar text: min egen granskning 11/11
+  (runda 4).
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
@@ -671,3 +680,19 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   publicerade. Källa: Dennis: "Hela planen låter bra!", "Och om du använder flera sonnetagenter då?" och "Kör på den
   planen. Men jag skulle först vilja att divisionsprovet blev färdigt, granskat, godkänt och publicerat innan vi gör
   det".
+
+## D46 · 2026-11-11 · Arbetssättet: granska själv, kontoren, ordning och reda som rutin
+- **Beslut:** (1) UI som en subagent levererar granskas av VD:n själv innan det går till Dennis: egna skärmbilder i
+  390 × 797 av varje ändrat steg och förklaringsprov av en granskare utan kontext (skillen ui-skolan, steg 5);
+  agentens egen mätning räknas inte som bevis. (2) Varje byggande roll har ett kontor i `agenter/<roll>/`
+  (överlämning + lärdomslogg) som håller rollen levande mellan sessioner; parallella arbetare delar kontor,
+  kontextfria granskare får inget. (3) Ordning och reda är projektets rutin, så att beslut och metoder överlever
+  långa pass och många kontextkomprimeringar: beslut blir D-poster med Dennis ord samma stund, metoder står i
+  `CLAUDE.md` (som läses först efter varje komprimering), och loggens "Läget nu"/"Nästa steg" hålls aktuella.
+- **Källa:** Dennis 2026-11-11: "kolla UI-skolan-skillen. Du behöver inte följa den helt ut, men den har en bra
+  arbetsmetod för att bättre kontrollera istället för att bara förlita sig på vad subagenter berättar", "kör du också
+  ordning och reda på dina subagenter? Så att de hålls levande? att de har ett eget 'kontor'", "se till att ordning
+  och reda regeln blir en bra rutin för hela projektet" och "Så att vi loggar beslut och inte glömmer bort våra
+  metoder och tänk efter långa pass med många kontextkompressioner".
+- **Var det bor:** `CLAUDE.md` (tabellen under Ordning och reda, stycket Kontoren), `agenter/README.md` (Rutinen).
+
