@@ -71,6 +71,8 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 | Matteprov (Matteprov 4:an D37–D42, övningsblad för division D44) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
 | Uppställd multiplikation och kort division (multdiv, D40–D43, motorrundan) | `a566d8b8d8411628d` | dagens logg | `agenter/multdiv/OVERLAMNING.md`, `LOGG.md` |
 
+VD:n skriver sina dokument i en egen arbetskopia (`git worktree add ~/multiplay-wt-docs origin/dev -b docs-tmp`,
+push `HEAD:dev`) när en agent arbetar i huvudkopian – annars hamnar commits på agentens gren (hände 11/11).
 Väck en levande expert med SendMessage till id:t. Ny session: agenterna finns inte längre – starta rollen (samma
 agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in det nya id:t här.
 
