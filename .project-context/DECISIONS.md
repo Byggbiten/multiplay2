@@ -68,7 +68,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten ✎ nivå 3 med rest, nivå 4 med decimaler
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
-- D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar
+- D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
 
 ---
 
@@ -710,5 +710,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   ordning och reda på dina subagenter? Så att de hålls levande? att de har ett eget 'kontor'", "se till att ordning
   och reda regeln blir en bra rutin för hela projektet" och "Så att vi loggar beslut och inte glömmer bort våra
   metoder och tänk efter långa pass med många kontextkompressioner".
+- ✎ **2026-11-11, repot är minnet, mät kontexten, konsekvent design:** varje agent loggar så att vem som helst kan ta
+  över; kontexten mäts vid varje delmål och passet + komprimering görs långt före gränsen; varje vy jämförs med appens
+  övriga, och en avvikelse kräver ett beslut. Källa: Dennis: "att du upplever kort division som en helt annan app är
+  ett tecken på att ordning och reda inte skötts på alla beslut och inriktningar och bestämmelser vi tagit med
+  konsekvent design och ordnade levande subagenter", "Jag rekomenderar att du mäter tokens när du gjort ett delmål för
+  att se att du kör ordning och reda och kontextkomprimering innan du når 95%" och "att de loggar och antecknar så vem
+  som helst kan hoppa in och ta över deras arbete när som. Dvs. Repot = minnet".
 - **Var det bor:** `CLAUDE.md` (tabellen under Ordning och reda, stycket Kontoren), `agenter/README.md` (Rutinen).
 
