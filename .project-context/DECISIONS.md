@@ -624,6 +624,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   som för multiplikation fast inspirerat ur bladen du fick nu. Jag är inte helt nöjd med multiplikationsprovet. jag
   tycker att vissa frågor som kommer, att jag inte direkt förstår vad man skall göra. en bra pedagogisk app så skall
   man intuitivt förstå vad man skall fylla i och räkna ut. Texten är bara till för om man verkligen inte förstår."
+- ✎ **2026-11-05, nivå 3 med rest, nivå 4 med decimaler (gäller D43):** Kort division nivå 3 "Med rest" (allt kapitel
+  3 kräver: tre- och fyrsiffrigt, nämnare 2–9, nollor, rest, kontroll), nivå 4 "Med decimaler" (man stannar inte vid
+  resten: 122 / 4 = 30,5; högst två decimaler). Källa: Dennis: "I sånna fall tycker jag att räkna med rest borde vara
+  svårighetsgrad 3, och att svårighetsgrad 4 är hela sättet. vet inte vad det kallas? är det att räkna med decimal?
+  som i mitt exempel. att 122/4 = 30,5?"
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text

@@ -18,10 +18,10 @@ function* multSpace() {
 }
 function* divSpace() {
   for (let d = 2; d <= 5; d++) for (let q = 10; q <= Math.floor(99 / d); q++) yield [q * d, d, 2];
-  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(100 / d); q <= Math.floor(999 / d); q++) yield [q * d, d, 4];
+  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(100 / d); q <= Math.floor(999 / d); q++) yield [q * d, d, 3];
   // D43: med rest på slutet (n = q · d + r) och fyrsiffriga täljare
-  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(100 / d); q * d + d - 1 <= 999; q += 3) for (let r = 1; r < d; r++) yield [q * d + r, d, 4];
-  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(1000 / d); q * d + d - 1 <= 9999; q += 41) for (let r = 0; r < d; r += 2) yield [q * d + r, d, 4];
+  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(100 / d); q * d + d - 1 <= 999; q += 3) for (let r = 1; r < d; r++) yield [q * d + r, d, 3];
+  for (let d = 2; d <= 9; d++) for (let q = Math.ceil(1000 / d); q * d + d - 1 <= 9999; q += 41) for (let r = 0; r < d; r += 2) yield [q * d + r, d, 3];
 }
 
 function refPassInto(steps, pass, rowKey, shift, finalPass) {
@@ -269,8 +269,8 @@ describe('fria lagets rester landar pa pappret vid ratt svar', () => {
   it('planRests: resten hamnar framfor NASTA siffra (g-1), aldrig efter sista', () => {
     expect(planRests(buildDivPlan(96, 4, 2))).toEqual({ 0: 1 });
     expect(planRests(buildDivPlan(738, 3, 3))).toEqual({ 1: 1, 0: 1 });
-    expect(planRests(buildDivPlan(336, 6, 4))).toEqual({ 0: 3 });
-    expect(planRests(buildDivPlan(612, 6, 4))).toEqual({ 0: 1 });
+    expect(planRests(buildDivPlan(336, 6, 3))).toEqual({ 0: 3 });
+    expect(planRests(buildDivPlan(612, 6, 3))).toEqual({ 0: 1 });
     expect(planRests(buildDivPlan(84, 4, 1))).toEqual({});
   });
 });
@@ -337,7 +337,7 @@ describe('kort division — stegkedjan ur modellen', () => {
     expect(fel).toEqual([]);
   });
 
-  const kedja = (n, d) => planDivSteps(buildDivPlan(n, d, 4)).filter(s => s.t !== 'klart').map(s => ord(divStepText(s)));
+  const kedja = (n, d) => planDivSteps(buildDivPlan(n, d, 3)).filter(s => s.t !== 'klart').map(s => ord(divStepText(s)));
   // D43: nivå 4 slutar med resten (här 0) och kontrollen med multiplikation
   let slut = [];
   const medSlut = (n, d) => { slut = ['Det blir inget kvar – resten är 0.', `Kontrollera: ${d} · ${n / d} = ${n}.`]; return kedja(n, d); };
@@ -438,7 +438,7 @@ describe('kort division — hjälpkön', () => {
     expect(fel).toEqual([]);
   });
   it('420 ÷ 6: frågor, tryck och kvittenser ordagrant', () => {
-    const q = planDivHelpQueue(buildDivPlan(420, 6, 4));
+    const q = planDivHelpQueue(buildDivPlan(420, 6, 3));
     expect(q.map(i => [i.kind, ord(divHelpAsk(i)), ord(divHelpAck(i))])).toEqual([
       ['divq', 'Hur många 6:or ryms i 4?', 'Rätt — ingen. En nolla först skriver vi inte. Vi tar med 2:an i tiotalet — nu har vi 42.'],
       ['divq', 'Hur många 6:or ryms i 42?', 'Rätt — vi skriver 7 i tiotalet.'],
@@ -450,7 +450,7 @@ describe('kort division — hjälpkön', () => {
     ]);
   });
   it('612 ÷ 6: fall B frågar "Hur mycket blir rest?" och placerar resten', () => {
-    const q = planDivHelpQueue(buildDivPlan(612, 6, 4));
+    const q = planDivHelpQueue(buildDivPlan(612, 6, 3));
     expect(q.map(i => [i.kind, ord(divHelpAsk(i)), ord(divHelpAck(i))])).toEqual([
       ['divq', 'Hur många 6:or ryms i 6?', 'Rätt — vi skriver 1 i hundratalet.'],
       ['divstrike', 'Hundratalet är klart — tryck på det, så stryker vi det.', ''],
@@ -465,14 +465,14 @@ describe('kort division — hjälpkön', () => {
     ]);
   });
   it('444 ÷ 6: restfrågan "44 − 42 = ?" och platsen', () => {
-    const q = planDivHelpQueue(buildDivPlan(444, 6, 4));
+    const q = planDivHelpQueue(buildDivPlan(444, 6, 3));
     expect(q.map(i => i.kind)).toEqual(['divq', 'divq', 'divrest', 'divplace', 'divstrike', 'divq', 'divstrike', 'divrest0', 'divkontroll']);
     expect(divHelpAsk(q[2])).toBe('44 − 42 = ?');
     expect(divHelpAck(q[2])).toBe('Rätt — 44 − 42 = 2. Resten är 2.');
     expect(divHelpAck(q[3])).toBe('Rätt — resten 2 ställer sig framför 4:an i entalet — nu står det 24.');
   });
   it('klick i hjälpläget (svar/tryck + Nästa, strykning per kolumn): 9 / 13 / 13 / 10', () => {
-    const k = (n, d) => cost(planDivHelpQueue(buildDivPlan(n, d, 4)));
+    const k = (n, d) => cost(planDivHelpQueue(buildDivPlan(n, d, 3)));
     expect([k(420, 6), k(444, 6), k(612, 6), k(72, 6)]).toEqual([13, 17, 17, 14]);   // D43: + restfrågan och kontrollen
   });
   it('livlinans tabellrad (spec §6)', () => {
@@ -879,7 +879,7 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
   it('kort division: täljarsiffran och kvotsiffran pekar rätt; rest-texterna är orörda', () => {
     const fel = [];
     for (let d = 2; d <= 9; d++) for (let q = Math.ceil(10 / d); q <= Math.floor(999 / d); q++) {
-      const n = q * d, pl = buildDivPlan(n, d, 4), ctx = `${n}÷${d}`;
+      const n = q * d, pl = buildDivPlan(n, d, 3), ctx = `${n}÷${d}`;
       for (const s of planDivSteps(pl)) if (s.t !== 'klart') {
         const refs = kolla(divStepText(s), pl, `${ctx} ${s.t}`, fel);
         if (['rest', 'flytta', 'fakta', 'stryk'].includes(s.t) && refs.length) fel.push(`${ctx} ${s.t} fick ref`);
@@ -887,7 +887,7 @@ describe('D40 ✎: siffrorna i texten pekar på rätt cell', () => {
       for (const it of planDivHelpQueue(pl)) { kolla(divHelpAsk(it), pl, `${ctx} ${it.kind}`, fel); kolla(divHelpAck(it), pl, `${ctx} ${it.kind} ack`, fel); }
     }
     expect(fel).toEqual([]);
-    const s612 = planDivSteps(buildDivPlan(612, 6, 4));
+    const s612 = planDivSteps(buildDivPlan(612, 6, 3));
     expect(refsOf(divStepText(s612.find(s => s.t === 'skriv'))).map(r => r.where)).toEqual(['md-q-2']);
     expect(refsOf(divStepText(s612[0])).map(r => r.where)).toEqual(['md-n-2']);
   });
@@ -1048,18 +1048,19 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
     expect(fel).toEqual([]);
   });
 
-  it('nivå 3 och 4: typerna håller sina villkor, och påsen ger jämn fördelning utan tre i rad', () => {
+  it('nivå 3 (Med rest) och 4 (Med decimaler): typerna håller sina villkor, och påsen ger jämn fördelning utan tre i rad', () => {
     const fel = [];
     for (const lv of [3, 4]) {
-      for (const t of DIV_TYPES[lv]) for (let i = 0; i < 600; i++) {
-        const { a, b, type } = genDivType(t), p = divPass(a, b);
+      for (const t of DIV_TYPES[lv]) for (let i = 0; i < 400; i++) {
+        const { a, b, type } = genDivType(t), p = divPass(a, b, lv === 4 ? 2 : 0);
         if (type !== t || !divTypeOk(t, a, b, p)) fel.push(`${t}: ${a}÷${b}`);
-        if (lv === 3 && (len(a) !== 3 || b < 2 || b > 6)) fel.push(`nivå 3 utanför: ${a}÷${b}`);
-        if (lv === 4 && (len(a) < 3 || len(a) > 4 || b < 2 || b > 9)) fel.push(`nivå 4 utanför: ${a}÷${b}`);
+        if (lv === 3 && (len(a) < 3 || len(a) > 4 || b < 2 || b > 9)) fel.push(`nivå 3 utanför: ${a}÷${b}`);
+        if (lv === 4 && (len(a) > 4 || ![2, 4, 5, 6, 8].includes(b))) fel.push(`nivå 4 utanför: ${a}÷${b}`);
       }
       const seq = [];
-      for (let i = 0; i < 2000; i++) seq.push(genDivProblem(lv).type);
-      for (const t of DIV_TYPES[lv]) expect(seq.filter(x => x === t).length).toBeGreaterThanOrEqual(450);
+      for (let i = 0; i < 2400; i++) seq.push(genDivProblem(lv).type);
+      const per = 2400 / DIV_TYPES[lv].length;
+      for (const t of DIV_TYPES[lv]) expect(seq.filter(x => x === t).length).toBeGreaterThanOrEqual(per * 0.9);
       for (let i = 2; i < seq.length; i++) if (seq[i] === seq[i - 1] && seq[i] === seq[i - 2]) fel.push(`${lv}: tre ${seq[i]} i rad`);
     }
     expect(fel).toEqual([]);
@@ -1078,13 +1079,13 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
 
   it('kvot och rest stämmer för många slumpade tal: q · d + r = n och r < d', () => {
     const fel = [];
-    for (let i = 0; i < 3000; i++) for (const lv of [3, 4]) {
+    for (let i = 0; i < 3000; i++) for (const lv of [3]) {
       const { a, b } = genDivProblem(lv), pl = buildDivPlan(a, b, lv);
       if (pl.answer * b + pl.rest !== a || pl.rest >= b || pl.rest < 0) fel.push(`${a}÷${b}`);
       if (pl.answer !== Math.floor(a / b) || pl.rest !== a % b) fel.push(`${a}÷${b} facit`);
     }
     expect(fel).toEqual([]);
-    expect([buildDivPlan(579, 4, 4).answer, buildDivPlan(579, 4, 4).rest]).toEqual([144, 3]);
+    expect([buildDivPlan(579, 4, 3).answer, buildDivPlan(579, 4, 3).rest]).toEqual([144, 3]);
     expect([buildDivPlan(357, 2, 3).answer, buildDivPlan(357, 2, 3).rest]).toEqual([178, 1]);
   });
 
@@ -1095,24 +1096,24 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
       const tail = st.slice(-3).map(s => s.t);
       if (JSON.stringify(tail) !== JSON.stringify(pl.restLevel ? ['restut', 'kontroll', 'klart'] : [st[st.length - 3].t, 'kontroll', 'klart'])) fel.push(`${a}÷${b} ordning`);
       const k = strip(divStepText(st[st.length - 2]));
-      const want = pl.rest > 0 ? `Kontrollera: ${b} · ${pl.answer} + ${pl.rest} = ${a}.` : `Kontrollera: ${b} · ${pl.answer} = ${a}.`;
+      const want = pl.rest > 0 ? `Kontrollera: ${b} · ${pl.answer} + ${pl.rest} = ${a}.` : `Kontrollera: ${b} · ${pl.qText} = ${a}.`;
       if (k !== want) fel.push(`${a}÷${b}: ${k}`);
-      const m = k.match(/(\d+) · (\d+)(?: \+ (\d+))? = (\d+)/);
-      if (+m[1] * +m[2] + (+m[3] || 0) !== +m[4]) fel.push(`${a}÷${b} räknar fel`);
+      const m = k.match(/(\d+) · ([\d,]+)(?: \+ (\d+))? = (\d+)/);
+      if (Math.round(+m[1] * +m[2].replace(',', '.') * 100) + 100 * (+m[3] || 0) !== 100 * +m[4]) fel.push(`${a}÷${b} räknar fel`);
       const q = planDivHelpQueue(pl), qt = q.slice(-2).map(it => it.kind);
       const wantQ = pl.restLevel ? [pl.rest > 0 ? 'divrestut' : 'divrest0', 'divkontroll'] : [q[q.length - 2].kind, 'divkontroll'];
       if (JSON.stringify(qt) !== JSON.stringify(wantQ)) fel.push(`${a}÷${b} hjälp ${qt}`);
       // ett tal har en roll per mening i restens och kontrollens texter
       for (const s of st.slice(-3, -1)) for (const men of strip(divStepText(s)).split(/(?<=[.?!])\s+/)) {
-        const n = men.match(/\d+/g) || []; if (new Set(n).size !== n.length) fel.push(`${a}÷${b}: "${men}"`);
+        const n = men.match(/\d+(?:,\d+)?/g) || []; if (new Set(n).size !== n.length) fel.push(`${a}÷${b}: "${men}"`);
       }
     }
     expect(fel).toEqual([]);
-    expect(strip(divStepText(planDivSteps(buildDivPlan(579, 4, 4)).slice(-3)[0]))).toBe('Allt är delat. Resten 3 skrivs efter kvoten.');
+    expect(strip(divStepText(planDivSteps(buildDivPlan(579, 4, 3)).slice(-3)[0]))).toBe('Allt är delat. Resten 3 skrivs efter kvoten.');
   });
 
   it('fria läget: rättningen med rest, tom restruta = 0, glömd mellanrest och för stor rest', () => {
-    const pl = buildDivPlan(579, 4, 4);
+    const pl = buildDivPlan(579, 4, 3);
     expect(divFreeCheck(pl, 144, 3).ok).toBe(true);
     expect(divFreeCheck(pl, 144, null)).toMatchObject({ ok: false, cls: 'rest' });
     expect(divFreeCheck(pl, 144, 2)).toMatchObject({ ok: false, cls: 'rest' });
@@ -1122,7 +1123,7 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
     expect(divFreeCheck(j, 102, 0).ok).toBe(true);                        // … eller 0
     // glömd mellanrest: kvotsiffra = siffran ÷ nämnaren utan att resten följer med
     const fel = [];
-    for (let i = 0; i < 2000; i++) for (const lv of [3, 4]) {
+    for (let i = 0; i < 2000; i++) for (const lv of [3]) {
       const { a, b } = genDivProblem(lv), p2 = buildDivPlan(a, b, lv), nr = divNoRemAnswer(a, b);
       if (!divFreeCheck(p2, p2.answer, p2.rest).ok) fel.push(`${a}÷${b} facit`);
       if (nr !== p2.answer && divFreeCheck(p2, nr, p2.rest).cls !== 'mellanrest') fel.push(`${a}÷${b} glömd mellanrest`);
@@ -1131,11 +1132,84 @@ describe('D43: kort division med rest, kontroll och nollor', () => {
     expect(divFreeCheck(buildDivPlan(738, 3, 3), divNoRemAnswer(738, 3), 0)).toMatchObject({ cls: 'mellanrest' });
   });
 
-  it('restrutan finns alltid på nivå 3–4 i fria läget (avslöjar inte om det blir rest), aldrig på nivå 1–2', () => {
+  it('restrutan finns alltid på nivå 3 (avslöjar inte om det blir rest), aldrig på nivå 1–2 eller 4 (decimaler)', () => {
     const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
     expect(src).toMatch(/const restPart = plan\.restLevel\n/);
-    expect(src).toMatch(/const divRestLevel = level => level >= 3;/);
+    expect(src).toMatch(/const divRestLevel = level => level === 3;/);
+    expect(buildDivPlan(122, 4, 4).restLevel).toBe(false);
     expect(buildDivPlan(612, 6, 3).restLevel).toBe(true);
     expect(buildDivPlan(84, 4, 2).restLevel).toBe(false);
+  });
+});
+
+/* ── D43 ✎ (Dennis 5/11: "svårighetsgrad 4 är hela sättet … att räkna med decimal? … 122/4 = 30,5") ── */
+describe('D43 ✎: nivå 4, division med decimaler', () => {
+  const { genDivProblem, genDivType, DEC_TYPES, divPass, divDecCheck } = MD._internals;
+  const strip = h => h.replace(/<[^>]+>/g, '');
+  it('decimalfacit för många slumpade tal: q · d = n exakt, högst två decimaler, ingen rest kvar', () => {
+    const fel = [];
+    for (let i = 0; i < 4000; i++) {
+      const { a, b, type } = genDivProblem(4), pl = buildDivPlan(a, b, 4);
+      const q = +pl.qText.replace(',', '.');
+      if (Math.round(q * b * 100) !== a * 100) fel.push(`${a}÷${b} = ${pl.qText}`);
+      if (pl.decimals < 1 || pl.decimals > 2 || pl.rest !== 0) fel.push(`${a}÷${b} ${pl.decimals} dec, rest ${pl.rest}`);
+      if (![2, 4, 5, 6, 8].includes(b) || !DEC_TYPES.includes(type)) fel.push(`${a}÷${b} nämnare/typ`);
+      if (a % b === 0 || pl.answer < 1) fel.push(`${a}÷${b} jämnt eller noll`);
+    }
+    expect(fel).toEqual([]);
+    expect(buildDivPlan(122, 4, 4).qText).toBe('30,5');
+    expect(buildDivPlan(7, 4, 4).qText).toBe('1,75');
+    expect(divPass(345, 8, 2).remainder).toBeGreaterThan(0);              // 43,125 är för långt: rest kvar
+  });
+  it('stegen: kommatecknet och nollan före resten flyttar in, tiondelar och hundradelar, kontrollen "4 · 30,5 = 122"', () => {
+    const st = planDivSteps(buildDivPlan(122, 4, 4)), t = st.map(s => s.t);
+    const k = t.indexOf('komma');
+    expect(k).toBeGreaterThan(0);
+    expect(t[k + 1]).toBe('flytta');
+    expect(strip(divStepText(st[k]))).toBe('Resten är 2. Vi är inte klara – vi sätter ett kommatecken och en nolla efter talet.');
+    expect(strip(divStepText(st[k + 1]))).toBe('Resten 2 ställer sig framför 0:an i tiondelen — nu står det 20.');
+    expect(strip(divStepText(st.find(s => s.t === 'kontroll')))).toBe('Kontrollera: 4 · 30,5 = 122.');
+    expect(st.some(s => s.t === 'restut')).toBe(false);
+    const s7 = planDivSteps(buildDivPlan(7, 4, 4));
+    expect(s7.filter(s => s.t === 'komma').map(s => strip(divStepText(s)))).toEqual([
+      'Resten är 3. Vi är inte klara – vi sätter ett kommatecken och en nolla efter talet.',
+      'Resten är 2. Vi är inte klara – vi sätter en nolla till.']);
+    expect(strip(divStepText(s7.find(s => s.t === 'skriv' && s.g === -2)))).toBe('Vi skriver 5 i hundradelen.');
+    expect(strip(divStepText(s7.find(s => s.t === 'stryk' && s.gs[0] === -1)))).toBe('Tiondelen är klar — vi stryker den.');
+    // hjälpen har samma kedja: kommat som kvittens före platsen för resten
+    const q = planDivHelpQueue(buildDivPlan(7, 4, 4)).map(i => i.kind);
+    expect(q.filter(x => x === 'divkomma').length).toBe(2);
+    expect(q[q.indexOf('divkomma') + 1]).toBe('divplace');
+    // språkregeln över många tal (talet med komma är ett tal)
+    const fel = [];
+    for (let i = 0; i < 1500; i++) {
+      const { a, b } = genDivProblem(4), pl = buildDivPlan(a, b, 4);
+      for (const s of planDivSteps(pl)) if (s.t !== 'klart') for (const men of strip(divStepText(s)).split(/(?<=[.?!])\s+|\s+—\s+/)) {
+        const n = (men.replace(/(\d+):(?:or|an|a)\b/g, ' ').match(/\d+(?:,\d+)?/g) || []);
+        if (['kontroll', 'komma', 'skriv', 'stryk'].includes(s.t) && new Set(n).size !== n.length) fel.push(`${a}÷${b}: "${men}"`);
+      }
+    }
+    expect(fel).toEqual([]);
+  });
+  it('fria läget rättar med kommatecken', () => {
+    const pl = buildDivPlan(122, 4, 4);
+    expect(divDecCheck(pl, '30,5').ok).toBe(true);
+    expect(divDecCheck(pl, '30,50').ok).toBe(true);
+    expect(divDecCheck(pl, '30')).toMatchObject({ ok: false, cls: 'decimal' });
+    expect(divDecCheck(pl, '3,05')).toMatchObject({ ok: false, cls: 'komma' });
+    expect(divDecCheck(pl, '31,5')).toMatchObject({ ok: false, cls: 'fel' });
+    expect(divDecCheck(pl, ',5')).toMatchObject({ ok: false });
+    const fel = [];
+    for (let i = 0; i < 2000; i++) {
+      const { a, b } = genDivProblem(4), p = buildDivPlan(a, b, 4);
+      if (!divDecCheck(p, p.qText).ok) fel.push(`${a}÷${b}`);
+      if (divDecCheck(p, String(p.answer)).cls !== 'decimal') fel.push(`${a}÷${b} heltal`);
+    }
+    expect(fel).toEqual([]);
+  });
+  it('typerna går att begära utan nivånummer (för matteprovet), och planen tar opts', () => {
+    for (const t of DEC_TYPES) expect(genDivType(t).type).toBe(t);
+    expect(buildDivPlan(579, 4, 2, { rest: true }).restLevel).toBe(true);
+    expect(buildDivPlan(122, 4, 1, { dec: true }).qText).toBe('30,5');
   });
 });
