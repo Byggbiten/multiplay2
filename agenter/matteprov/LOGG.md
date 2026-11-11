@@ -191,3 +191,9 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
 - **Varför fångade inte testerna det:** poängen såg bara korsad text och längd, inte riktning eller närhet till andra
   tal. **Lärdom:** ett band läses som en pil från det närmaste talet till det den pekar på; mät sidorna, närheten och
   att vägen inte går genom ändarnas egna rutor. Test för de två uppmätta vägarna.
+
+## 2026-11-11 · VD:ns granskning efter runda 5
+Kontextfri granskare: bandet på ≈17 px från en kopierad svarsbricka visar inte längre kopplingen från bilden
+("9 grupper") till rutan, och samma tal står tre gånger. Lärdom: ett kort band är inte målet i sig; målet är att
+barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knytas ihop i ordvalet.
+
