@@ -52,6 +52,9 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | En fil skapas | rätt mapp + rad i registret |
 | Ett fel rättas | loggraden "Varför fångade inte motorn detta?" + testet som fångar feltypen, provat mot felet först (15 § 5–6) |
 | En subagent rapporterar | fynden in i TODO med id; rapporten sparad i projektet (`brainstorm/`) |
+| En subagent levererar UI | granska själv innan det går till Dennis: egna skärmbilder i 390 × 797 av varje steg som ändrats + förklaringsprov av en granskare utan kontext (ui-skolan steg 5); agentens egen mätning räknas inte som bevis |
+| En agentroll startas | kontor `agenter/<roll>/` med `OVERLAMNING.md` + `LOGG.md`, rad i `agenter/README.md`, id i tabellen Agenter nedan |
+| En agentrunda är klar | överlämningen beskriver läget nu, ny lärdom står i rollens `LOGG.md` (också det granskningen hittade), id:t i tabellen stämmer |
 | Milstolpe (release), före komprimering, sessionens slut | hela passet (15 § 3a), städkontrollen tills Rent |
 | Ny dag | ny loggfil; första avsnittet pekar på gårdagens "Nästa steg" |
 
@@ -66,6 +69,12 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 
 Väck en levande expert med SendMessage till id:t. Ny session: agenterna finns inte längre – starta rollen (samma
 agenttyp, med skrivverktyg) med sin överlämning och logg först och skriv in det nya id:t här.
+
+**Kontoren (`agenter/`).** Varje byggande roll har ett kontor; det är det som håller rollen levande mellan
+sessioner. Parallella arbetare i samma uppdrag delar ett kontor (en överlämning, en loggrad per arbetare).
+Granskare utan kontext får inget kontor – deras fynd skrivs in i den byggande rollens `LOGG.md`. Vid "ordning och
+reda": varje kontor som rörts sedan förra passet ska ha överlämning och logg från samma dag som rollens senaste
+commit (`git log -1 -- agenter/<roll>` mot `git log -1 --author` för rollens kod).
 
 ## Absoluta regler
 
