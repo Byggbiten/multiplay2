@@ -424,7 +424,7 @@ const MatteProv = (() => {
 #mp-root .mp-grp{display:inline-grid;gap:3px;padding:4px;border:2px dashed #94a3b8;border-radius:12px}
 #mp-root .mp-grp.box{border-style:solid;border-color:#b45309;background:#fef3c7;border-radius:5px}
 #mp-root .mp-loose{display:inline-flex;gap:3px;padding:4px}
-#mp-root .mp-ball{width:16px;height:16px;border-radius:50%;background:#475569;display:inline-block}
+#mp-root .mp-ball{width:13px;height:13px;border-radius:50%;background:#475569;display:inline-block}
 #mp-root .mp-pic.sm .mp-ball{width:10px;height:10px}
 #mp-root .mp-intro .mp-ball{width:22px;height:22px}
 #mp-root .mp-intro .mp-pic{gap:10px 12px}
@@ -482,10 +482,20 @@ const MatteProv = (() => {
 #mp-root .mp-pnum.lit{box-shadow:0 0 0 3px #fb923c;background:#fff7ed}
 #mp-root .mp-bsn{align-self:center;min-width:30px}
 #mp-root .mp-capw{position:relative}
-#mp-root .mp-above{position:absolute;top:-58px;left:50%;transform:translateX(-50%);margin:0;font-size:22px;min-height:32px;line-height:1}   /* mitt ovanför rutan, utanför flödet */
-#mp-root .mp-dr.has-above .ln:first-child{padding-top:56px}                                         /* plats för brickan, så att inget annat skyms */
-#mp-root .mp-above.rest{border-color:#7c3aed}
-#mp-root .mp-above-ph{display:none}
+/* runda 6 (Dennis: "Flytta '9 grupper'"): summan står ovanför sin ruta, talbrickan med mittlinjen rakt ovanför rutan,
+   ordet till höger, kort ("grupper", "i varje", "hopp", "över"), så att kvotens och restens summa ryms på samma rad. */
+#mp-root .mp-capw{position:relative}
+#mp-root .mp-sumov{position:absolute;left:50%;display:flex;align-items:center;white-space:nowrap;font:900 12.5px var(--font-body);color:var(--ink)}
+#mp-root .mp-sumov>.mp-pnum{transform:translateX(-50%);margin:0;font-size:22px;min-height:32px;line-height:1}
+#mp-root .mp-sumov>i{font-style:normal;margin-left:-12px;padding-left:2px}
+#mp-root .mp-sumov.lo{top:-72px}
+#mp-root .mp-sumov.rest{color:#6d28d9}
+#mp-root .mp-sumov.rest>.mp-pnum{border-color:#7c3aed}
+#mp-root .mp-capw>i.rest{color:#6d28d9}
+#mp-root .mp-dr.sum1 .ln:first-child{padding-top:74px}
+#mp-root .mp-dr.sum2 .ln:first-child{padding-top:84px}
+#mp-root .mp-dr.sum2 .mp-sumov{flex-direction:column-reverse;align-items:flex-start;top:-88px}
+#mp-root .mp-dr.sum2 .mp-sumov>i{margin:0 0 1px;transform:translateX(-50%)}
 #mp-root .mp-nearrow{display:flex;gap:8px;justify-content:center;margin:2px 0 4px}
 #mp-root .mp-nearcol{display:inline-flex;flex-direction:column;justify-content:space-around;align-self:stretch;gap:10px;margin-right:14px}
 #mp-root .mp-nearph{display:block;height:30px}
@@ -510,7 +520,7 @@ const MatteProv = (() => {
 #mp-root .mp-ball.ghost{background:transparent;border:1.5px dashed #cbd5e1}
 #mp-root .mp-kidc{display:inline-flex;flex-direction:column;align-items:center;gap:2px;border-radius:10px;padding:2px}
 #mp-root .mp-kidc.lit{box-shadow:0 0 0 3px #fb923c}
-#mp-root .mp-kid{width:22px;height:22px;fill:#e2e8f0;stroke:#475569;stroke-width:1.6}
+#mp-root .mp-kid{width:18px;height:18px;fill:#e2e8f0;stroke:#475569;stroke-width:1.6}
 #mp-root .mp-line{width:100%;max-width:350px;height:auto}
 #mp-root .mp-line.tap{cursor:pointer}
 #mp-root .mp-line .ax{stroke:#334155;stroke-width:2}
@@ -1265,7 +1275,7 @@ const MatteProv = (() => {
     const pileLit = done ? litC(lit, 'rest') : litC(lit, 'pile');
     const tap = tapOn && !done;
     const pile = left > 0 ? `<span class="mp-pile${done ? ' rest' : ''}${pileLit}${tap ? ' tap' : ''}" style="grid-template-columns:repeat(${Math.min(10, left)},auto)"${tap ? ' data-act="deal" role="button" aria-label="Dela ut"' : ''}>${ball.repeat(left)}</span>` : '';
-    return `<div class="mp-pic${t.n > 30 ? ' sm' : ''}">${pile}<div class="mp-grps">${groups}</div></div>`;
+    return `<div class="mp-pic${t.n > 24 ? ' sm' : ''}">${pile}<div class="mp-grps">${groups}</div></div>`;
   }
   /* Tallinjen (27b): numrerade hopp om d från 0; resten (lila) är biten som är kvar till n */
   function lineSVG(t, lit, made, tapOn) {
@@ -1297,20 +1307,19 @@ const MatteProv = (() => {
   function drHTML(t, fb, lit) {
     const HB = !fb && IN.hb, show = fb && fb.showAns;
     const B = role => { const i = L.drField(t, role); return fbox(t, i, fb, t.fields[i].ans, null, role === 'r' || role === 'k3' ? 'rest' : ''); };
-    /* med hjälp: svaret från bilden som bricka mitt ovanför den aktuella rutan (kvot eller rest), så att bandet blir ett kort fall */
-    const cur = HB && !IN.dealPending && t.fields[IN.hb.i] ? t.fields[IN.hb.i].role : null;
-    const above = role => t.pic && cur === role && (role === 'q' || role === 'r') && IN.made >= L.picMax(t) && !IN.hb.adv
-      ? `<b class="mp-pnum mp-near mp-above${role === 'r' ? ' rest' : ''}"${pk(role === 'q' ? t.q : t.r)}>${pvHTML(role === 'q' ? t.q : t.r)}</b>` : '<b class="mp-above-ph"></b>';
+    /* summan ur bilden ("9 grupper", "4 över") står ovanför sin ruta när allt är utdelat */
+    const made = show ? L.picMax(t) : IN.made, sumOn = t.pic && made >= L.picMax(t);
+    const what = t.pic === 'dela' ? 'i varje' : t.pic === 'linje' ? 'hopp' : 'grupper';
+    const pill = (v, word, cls, k) => `<span class="mp-sumov ${cls}${litC(lit, k)}"><b class="mp-pnum mp-near${litC(lit, k)}"${pk(v)}>${pvHTML(v)}</b><i>${word}</i></span>`;
     const k1 = !t.kontroll ? '' : t.kGiven ? `<span class="mp-kd${litC(lit, 'kd')}"${pk(t.d)}>${pvHTML(t.d)}</span>` : B('k1');
-    const made = show ? L.picMax(t) : IN.made;
-    const pic = t.pic ? drPic(t, lit, made, !fb && !locked) + picSum(t, made, lit) : '';
+    const pic = t.pic ? drPic(t, lit, made, !fb && !locked) : '';
     const prompt = t.prompt ? `<p class="mp-text sm mp-prompt${litC(lit, 'prompt')}">${tileText(t.prompt)}</p>` : '';
     const frac = t.write ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span><span class="mp-frac"><span class="nu">${B('n')}</span><span class="de">${B('d')}</span></span>` : fracHTML(t.n, t.d, lit, [t.n, t.d], true);
     const kontroll = t.kontroll ? `<div class="ln mp-kl"><span class="mp-klbl">Kontrollera med gånger</span>${k1}<span>·</span>${B('k2')}${t.rest ? `<span>+</span>${B('k3')}` : ''}<span>=</span>${B('k4')}</div>` : '';
-    const qcol = `<span class="mp-capw">${HB && t.pic ? above('q') : ''}${B('q')}<i>kvot</i></span>`;
-    const rcol = t.rest ? `<span class="mp-rl">,</span><span class="mp-capw">${HB && t.pic ? above('r') : ''}${B('r')}<i>rest</i></span>` : '';
-    const hasAbove = HB && t.pic && (cur === 'q' || cur === 'r') && IN.made >= L.picMax(t) && !IN.hb.adv;
-    return (HB ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr${hasAbove ? ' has-above' : ''}"><div class="ln">${frac}<span>=</span>${qcol}${rcol}</div>${kontroll}</div>`;
+    const qcol = `<span class="mp-capw">${sumOn ? pill(t.q, what, 'lo', 'grp') : ''}${B('q')}<i>kvot</i></span>`;
+    const rcol = t.rest ? `<span class="mp-rl">,</span><span class="mp-capw">${sumOn && t.r ? pill(t.r, 'över', 'lo rest', 'rest') : ''}${B('r')}<i class="rest">rest</i></span>` : '';
+    const sumCls = sumOn ? (t.r ? ' sum2' : ' sum1') : '';   // med rest står orden ovanför talen, så att de två summorna inte krockar
+    return (HB ? askHTML(t) : '') + prompt + pic + `<div class="mp-te mp-dr${sumCls}"><div class="ln">${frac}<span>=</span>${qcol}${rcol}</div>${kontroll}</div>`;
   }
   /* Hundraplattor, tiostavar och ental (K_S 67): ett kluster per talsort, i talsortens färg */
   function blocksHTML(t, lit) {
@@ -1360,7 +1369,8 @@ const MatteProv = (() => {
   function bandSource(q, focus, want) {
     const cands = [...q.querySelectorAll(`[data-act="pick"][data-v="${want}"]`)].filter(e => e !== focus && !focus.contains(e) && !e.closest('.mp-ack'));
     /* bara exakt det tal barnet ska skriva; finns det inte på skärmen blir det inget band */
-    return cands.find(e => e.classList.contains('mp-near')) || cands.find(e => e.closest('.lit') || e.classList.contains('lit')) || cands[cands.length - 1] || null;
+    /* det som lyser för steget först (kvotrutan till kontrollen), sedan brickan nära rutan */
+    return cands.find(e => e.classList.contains('mp-ans') && e.classList.contains('lit')) || cands.find(e => e.classList.contains('mp-near')) || cands.find(e => e.closest('.lit') || e.classList.contains('lit')) || cands[cands.length - 1] || null;
   }
   function bandWant(t) {
     if (!IN) return null;
@@ -1460,18 +1470,18 @@ const MatteProv = (() => {
     };
     const msg = IN.msg ? `<div class="mp-rqmsg ${IN.msg.kind}">${esc(IN.msg.text)}</div>` : '';
     const restBx = st.rest ? `<span class="mp-op sm">, rest</span>${bx(3)}` : '';          // D44: ", rest [ ]"
-    /* övningsbladen: division som bråk med etiketter (fynd 7); Själv visar bara uppgiften, utan stegets metodtext (fynd 2) */
-    const tmpl = ov && st.op === '/'
-      ? `${fracHTML(bx(0), bx(1), null, null, true)}<span class="mp-op">=</span>${capW('kvot', bx(2))}${st.rest ? `<span class="mp-op sm">,</span>${capW('rest', bx(3))}` : ''}`
-      : `${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${restBx}`;
-    const label = ov && !helpOn() ? (t.flow.length > 1 ? `<div class="mp-plabel">Steg ${IN.k + 1}</div>` : '') : `<div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.q)}</div>`;
     /* med hjälp: stegets tal ur texten upprepas som brickor på raden ovanför rutorna, så att bandet blir kort */
     const inText = new Set((t.text.match(/\d+/g) || []).map(Number).concat(t.flow.slice(0, IN.k).map(x => x.ans[2])));   // talen i texten och svaren från förra stegen
     const near = ov && helpOn() && !fb ? [...new Set(st.ans.filter(v => inText.has(v)))] : [];
     /* i en division står brickorna i en kolumn till vänster om bråket, i höjd med täljaren och nämnaren de hör till */
     const nt = v => `<b class="mp-pnum mp-near"${pk(v)}>${pvHTML(v)}</b>`;
     const divCol = ov && st.op === '/' && near.length && near.every(v => v === st.ans[0] || v === st.ans[1]);
-    const col = divCol ? `<span class="mp-nearcol">${[0, 1].map(i => near.includes(st.ans[i]) ? nt(st.ans[i]) : '<b class="mp-nearph"></b>').join('')}</span>` : '';
+    /* övningsbladen: division som bråk med etiketter (fynd 7); Själv visar bara uppgiften, utan stegets metodtext (fynd 2) */
+    const tmpl = ov && st.op === '/'
+      ? `${fracHTML(bx(0), bx(1), null, null, !divCol)}<span class="mp-op">=</span>${capW('kvot', bx(2))}${st.rest ? `<span class="mp-op sm">,</span>${capW('rest', bx(3))}` : ''}`
+      : `${bx(0)}<span class="mp-op">${st.op}</span>${bx(1)}<span class="mp-op">=</span>${bx(2)}${restBx}`;
+    const label = ov && !helpOn() ? (t.flow.length > 1 ? `<div class="mp-plabel">Steg ${IN.k + 1}</div>` : '') : `<div class="mp-plabel">Steg ${IN.k + 1}: ${esc(st.q)}</div>`;
+    const col = divCol ? `<span class="mp-flab"><i>täljare</i><i>nämnare</i></span><span class="mp-nearcol">${[0, 1].map(i => near.includes(st.ans[i]) ? nt(st.ans[i]) : '<b class="mp-nearph"></b>').join('')}</span>` : '';
     const nearRow = near.length && !divCol ? `<div class="mp-nearrow">${near.map(nt).join('')}</div>` : '';
     return shop + head + done + `<div class="mp-pcur">${label}${nearRow}
       <div class="mp-nl mp-ptmpl">${col}${tmpl}${divCol ? '' : unit(st)}</div>${msg}</div>`;   // enheten står i stegets rad när brickorna tar platsen

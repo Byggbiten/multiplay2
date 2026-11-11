@@ -224,6 +224,12 @@ med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
   summabrickan räknas som text. Med hjälp står svaret ur bilden som bricka mitt ovanför kvot- eller restrutan
   (`.mp-above`, plats reserverad med `has-above`), så att bandet blir ett kort lodrätt fall. Kostnad: kladden blir
   ungefär 55 px lägre i de stegen (Svårare, Hur många grupper: cirka 70 px kvar).
+- Runda 6 (Dennis: "Flytta '9 grupper'"): kopian ovanför rutan är borta. Summan ur bilden står ovanför sin ruta
+  (`pill` i `drHTML`, `.mp-sumov`): talbrickan med mittlinjen rakt ovanför kvot- eller restrutan, bandet cirka 30 px
+  rakt ner. Utan rest: "9 grupper" / "4 i varje" / "6 hopp" med ordet till höger (`sum1`). Med rest står båda på samma
+  rad med orden ovanför talen (`sum2`), "över" och restrutans etikett "rest" i samma lila. I problemlösning står
+  etiketterna täljare/nämnare till vänster om brickorna, så att bandet går fritt. Kladden är minst 121 px (Dela lika,
+  Lättare med hjälp); kulorna är 13 px och barnens ikon 18 px för att det ska rymmas.
 - Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
   aldrig ned. Pilspetsen slutar 1 px utanför rutans kant.
 

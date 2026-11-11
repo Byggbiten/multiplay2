@@ -197,3 +197,12 @@ Kontextfri granskare: bandet på ≈17 px från en kopierad svarsbricka visar in
 ("9 grupper") till rutan, och samma tal står tre gånger. Lärdom: ett kort band är inte målet i sig; målet är att
 barnet ser varifrån talet kommer. "över" (summan) och "rest" (rutan) bör knytas ihop i ordvalet.
 
+
+## 2026-11-11 · Runda 6: summan ovanför sin ruta
+- Dennis valde "Flytta '9 grupper'": en kontextfri granskare såg inte att bandet på 17 px från kopian kom från grupperna,
+  och talet stod tre gånger. Summan står nu ovanför sin ruta, bandet går cirka 30 px rakt ner, "över" och "rest" i samma
+  lila. Problemlösningens etiketter står till vänster om brickorna.
+- **Fel under bygget:** gamla CSS-regler (`sum2` 108 px, `.hi`) låg kvar längre ned i filen och vann, så kladden blev
+  104 px trots den nya regeln. **Lärdom:** när en regel ersätts, ta bort den gamla; mät beräknad stil
+  (`getComputedStyle`) när ett mått inte ändras.
+- Mätt: kladden minst 121 px (Dela lika), inga band genom text eller siffror, kvot och rest cirka 30 px.
