@@ -67,6 +67,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
 - D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven)
+- D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad)
 
 ---
 
@@ -628,3 +629,18 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   resten: 122 / 4 = 30,5; högst två decimaler). Källa: Dennis: "I sånna fall tycker jag att räkna med rest borde vara
   svårighetsgrad 3, och att svårighetsgrad 4 är hela sättet. vet inte vad det kallas? är det att räkna med decimal?
   som i mitt exempel. att 122/4 = 30,5?"
+
+## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
+- **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
+  (ingen transform:scale; se minnet om iPad-PWA). iPhone-layouten (390 × 844) förblir måttstocken och ändras inte.
+  Först en mätning per skärm på iPad-storlekar och ett förslag, sedan bygget efter Matteprov 2.
+- **Källa:** Dennis 2026-11-05: "Du får gärna också se över hur formatet är för multiplay på iphone kontra ipad. på
+  ipaden så tycker jag att den inte fullt ut utnyttjar skärmens yta i portätt och liggande läge" och "det gäller
+  generellt sätt för hela appen".
+- ✎ **2026-11-05, övningsblad i stället för prov:** divisionen får inget prov utan övningsblad/övningsmoduler som
+  kopieringsunderlaget för kapitel 3 – olika problembeskrivningar och övningssätt (dela lika, grupper, tabell, rest
+  med bilder, talsorter, 10/100/1000, kort division, pengar, begrepp, problemlösning, slutledning). Nås som kortet
+  "Övningsblad" i divisionens lägesvy. Källa: Dennis: "gällande matteprovet för division. Det skall som sagt inte vara
+  ett prov. Det skall vara övningsblad/övningsmoduler. Precis som den där kopieringsunderlag_kap3. Så de får träna på
+  de olika delarna för att bygga upp en intuitiv förståelse runt om division med olika problembeskrivningar och
+  övningssätt".

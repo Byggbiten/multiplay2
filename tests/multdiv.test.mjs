@@ -933,7 +933,7 @@ describe('D41: kroken runTask och dess utfall', () => {
     expect(src).toMatch(/let host = null;/);
     expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
     expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
-    expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk\);\n\s+\} else \{/);
+    expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk, dchk\);\n\s+\} else \{/);
     // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
     expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
     expect(src).toMatch(/\(\{ difficulty, gameKind, helpMode \} = h\.saved\);/);
