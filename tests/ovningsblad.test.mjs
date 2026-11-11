@@ -206,7 +206,7 @@ describe('snällt och utan emojis', () => {
     }
     for (const x of texts) expect(x).not.toMatch(/Fel!|Fel svar|Tyvärr/);
     const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
-    const ov = src.slice(src.indexOf('D44 ✎: Övningsblad · Division ── rutornas'), src.indexOf('/* Slutsatsen efter sista rutan */'));
+    const ov = src.slice(src.indexOf('D44 ✎: Övningsblad · Division, stil C'), src.indexOf('/* Slutsatsen efter sista rutan */'));
     expect(ov.length).toBeGreaterThan(1000);
     expect(ov).not.toMatch(/\p{Extended_Pictographic}/u);
   });

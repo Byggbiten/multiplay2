@@ -630,6 +630,17 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   svårighetsgrad 3, och att svårighetsgrad 4 är hela sättet. vet inte vad det kallas? är det att räkna med decimal?
   som i mitt exempel. att 122/4 = 30,5?"
 
+- ✎ **2026-11-11, stilen för övningsbladen: C · Brickor, siffrorna i platsvärdesfärg:** av tre riktningar i
+  `design-lab/ovningsblad-division-stil.html` valdes C (appens glas, talen som brickor, ett streckat band från talet
+  till rutan det ska in i). Siffrorna har alltid sin platsvärdesfärg (ental grön, tiotal blå, hundratal röd …) i
+  brickor, rutor, bråk och text; brickans ram får vara appens lila. Rest och mellanrest är lila. Källa: Dennis: "C -
+  Brickor är bäst. men glöm inte bort att vi färgkodar siffrorna för att hålla koll på ental, tiotal, hundratal mm."
+- ✎ **2026-11-11, bandet från talet till rutan:** varje gång ett tal ska flytta någonstans går ett streckat band från
+  talets källa (texten, bråket, kvoten, resten, tallinjen, priset) till rutan där det hör hemma, bara för den aktuella
+  rutan. Brickorna är ljusa med lila kant, så att platsvärdesfärgen syns. Källa: Dennis: "den där streckade linjen
+  mellan 42 till täljaren var riktigt bra, och det är exakt sådana där små visuella hjälpmedel som gör supermycket
+  för barnen".
+
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text
   (ingen transform:scale; se minnet om iPad-PWA). iPhone-layouten (390 × 844) förblir måttstocken och ändras inte.
