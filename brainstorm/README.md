@@ -17,3 +17,4 @@ Ett dokument per tankepass, utredning eller granskning: `NN-ÅÅÅÅ-MM-DD-tema.
 | 10 | `10-2026-10-19-snallare-svep.md` | Snällare återkoppling vid fel svar i alla moduler utom matteprovet: ord, färger, ljud | D39 genomförd; P13, P14 |
 | 11 | `11-2026-11-05-matteprov1-barnets-ogon.md` | Matteprov 1 med ett otåligt barns ögon: 15 fynd och 12 designregler (D44) | Reglerna in i divisionens övningsblad; Matteprov 1 rättas i egen runda |
 | 12 | `12-2026-11-11-ipad-matning.md` | iPad: mätning per vy och förslag (--k plus två spalter i liggande läge), plan i skivor, bifynd | Väntar på Dennis (D45) |
+| 13 | `13-2026-11-11-ovningsblad-division-barnen.md` | Övningsblad · Division genomspelat som två barn (åk 4, åk 2): 10 fynd, 10 mönster | Rättas av matteprov- och multdiv-agenterna |
