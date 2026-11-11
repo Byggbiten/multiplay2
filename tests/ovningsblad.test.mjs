@@ -231,7 +231,78 @@ describe('fokus i full styrka (Dennis 11/11)', () => {
   it('bandet har ingen bakgrund, och nedtoningen undantar källan, målrutan och deras föräldrar', () => {
     const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
     expect(src).toMatch(/\.mp-band\{[^}]*background:none!important/);
-    expect(src).toMatch(/\.mp-q\.mp-fm :is\([^)]*\):not\(\.mp-keep\)\{opacity/);
-    expect(src).toMatch(/for \(const e of \[src, focus\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
+    expect(src).toMatch(/\.mp-q\.mp-fm :is\([^)]*\):not\(\.mp-keep\):not\(\.mp-prompt \*\)\{filter/);
+    expect(src).toMatch(/for \(const e of \[src, focus, \.\.\.q\.querySelectorAll\('\.lit'\)\]\) for \(let x = e; x && x !== q; x = x\.parentElement\) x\.classList\.add\('mp-keep'\)/);
+  });
+  it('bandet startar bara i exakt det tal barnet ska skriva (Dennis 11/11): ingen reserv i det som lyser', () => {
+    const src = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    const bs = src.slice(src.indexOf('function bandSource'), src.indexOf('function bandWant'));
+    expect(bs).toMatch(/\[data-act="pick"\]\[data-v="\$\{want\}"\]/);
+    expect(bs).not.toMatch(/\.lit, |querySelectorAll\('\.mp-frac \.lit/);
+  });
+});
+
+describe('runda 4: bandet korsar aldrig text, siffror, etiketter eller bilder', () => {
+  const R = (l, t, w, h) => ({ l, t, r:l + w, b:t + h });
+  /* Dela lika i 390 × 797, förenklat: summan "6 grupper" ovanför, etiketten "kvot" ovanför kvotrutan */
+  const box = R(0, 0, 360, 300), src = R(150, 100, 30, 26), dst = R(160, 170, 46, 46);
+  const H = r => Object.assign(r, { hard:true }), S = r => Object.assign(r, { hard:false });
+  const kvot = S(R(168, 155, 30, 12)), grupper = S(R(184, 104, 60, 18)), tal30 = H(R(100, 160, 40, 30));
+  const rects = [kvot, grupper, tal30];
+  it('dagens raka väg (källans underkant till rutans överkant) fångas av kontrollen: den korsar etiketten', () => {
+    const s = { x:165, y:128 }, e = { x:183, y:168 };
+    const old = L.bezierPts(s, { x:165, y:148 }, { x:183, y:148 }, e, 40);
+    expect(L.pathHits(old, rects)).toBe(true);
+  });
+  it('vägen som väljs är kort, går inte genom siffror eller text och slutar strax utanför rutans kant', () => {
+    const route = L.bandRoute(src, dst, rects, box);
+    expect(route).toBeTruthy();
+    expect(L.pathHits(route.pts, rects.filter(r => r.hard))).toBe(false);
+    const straight = Math.hypot((dst.l + dst.r) / 2 - (src.l + src.r) / 2, (dst.t + dst.b) / 2 - (src.t + src.b) / 2);
+    expect(L.ptsLen(route.pts)).toBeLessThanOrEqual(Math.min(L.BAND_HARD_MAX, L.BAND_HARD_RATIO * straight));
+    const e = route.end, out = e.x < dst.l || e.x > dst.r || e.y < dst.t || e.y > dst.b;
+    expect(out).toBe(true);
+    const gap = Math.min(Math.abs(e.x - dst.l), Math.abs(e.x - dst.r), Math.abs(e.y - dst.t), Math.abs(e.y - dst.b));
+    expect(gap).toBe(L.BAND_GAP);
+  });
+  it('finns ingen fri väg blir det inget band (källan får ringen i stället)', () => {
+    const wall = [R(0, 130, 360, 30), R(0, 0, 140, 300), R(215, 0, 145, 300), R(0, 220, 360, 80), R(0, 0, 360, 95)].map(H);
+    expect(L.bandRoute(src, dst, wall, box)).toBeNull();
+  });
+  it('grova fall larmar: ett band genom frågan eller längre än 2 gånger det raka avståndet blir inget band', () => {
+    const fraga = H(R(0, 127, 360, 42));                     // frågans rad mellan källan och rutan, hela bredden
+    expect(L.bandRoute(src, dst, [fraga], box)).toBeNull();
+    const far = R(10, 10, 30, 26), near = R(300, 260, 46, 30);
+    const r2 = L.bandRoute(far, near, [], box);
+    expect(r2 === null || L.ptsLen(r2.pts) <= L.BAND_HARD_MAX).toBe(true);
+  });
+  it('drawBand använder vägen och tonar ned med gråskala (kontrasten behålls), aldrig frågan', () => {
+    const src2 = readFileSync(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+    expect(src2).toMatch(/L\.bandRoute\(/);
+    expect(src2).toMatch(/:not\(\.mp-keep\):not\(\.mp-prompt \*\)\{filter:grayscale\(1\)/);
+    expect(src2).toMatch(/mp-bring/);
+  });
+});
+
+describe('runda 5: bandet vilseleder inte (sidorna vänder sig mot varandra)', () => {
+  /* de två vägarna samordnaren mätte i 390 × 797 */
+  const cub = d => { const n = d.match(/-?\d+(\.\d+)?/g).map(Number); return L.bezierPts({ x:n[0], y:n[1] }, { x:n[2], y:n[3] }, { x:n[4], y:n[5] }, { x:n[6], y:n[7] }, 40); };
+  it('Hur många grupper: ut åt höger, ner genom kvotrutan och in underifrån – underkänns', () => {
+    const S = { l:135, t:160, r:163.8, b:190 }, T = { l:195, t:202, r:248, b:246.3 };   // brickan "8" och kvotrutan
+    const pts = cub('M165.8 174.8 C 202.9 174.8, 221.7 290.3, 221.7 253.3');
+    expect(L.sidesFace(S, T, 'r', 'b')).toBe(false);
+    expect(L.entersRect(pts, T)).toBe(true);
+    const r = L.bandRoute(S, T, [], { l:0, t:0, r:360, b:330 });
+    expect(r === null || L.entersRect(r.pts, T) === false).toBe(true);
+    if (r) expect(r.end.dir).not.toBe('up');
+  });
+  it('Problemlösning: ut från botten av "54" förbi "2" till täljaren – underkänns', () => {
+    const S = { l:18, t:112, r:48, b:134.4 }, T = { l:125.2, t:96, r:171, b:136 }, two = { l:18, t:150, r:48, b:175, hard:true, pad:10 };
+    const pts = cub('M32.8 136.4 C 32.8 170.2, 84.4 115.9, 118.2 115.9');
+    expect(L.sidesFace(S, T, 'b', 'l')).toBe(false);
+    expect(L.bandScore(pts, [two], 90)).toBeNull();
+    const r = L.bandRoute(S, T, [two], { l:0, t:0, r:360, b:330 });
+    expect(r).toBeTruthy();
+    expect(r.pts[0].x).toBeGreaterThan(S.r);           // ut åt höger, mot täljaren
   });
 });

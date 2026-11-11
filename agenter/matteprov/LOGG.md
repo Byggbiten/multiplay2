@@ -164,3 +164,30 @@ En post per runda: vad som byggdes, vad som rättades och varför, och vad rolle
   hör till steget ned (`.mp-fm … :not(.mp-keep)`), och källan, målrutan och deras föräldrar får `mp-keep`. Mätt i alla
   moduler med hjälp: effektiv opacitet 1 på källa, mål och band. **Lärdom:** en blek skärmbild är ett fynd, inte
   panelens fel; mät `getComputedStyle` och vad som ligger överst (`elementFromPoint`) innan man skyller på verktyget.
+
+## 2026-11-11 · Runda 3: bandet startar i svaret
+- Dennis om skärmbilden: "Där pekar ju strecket och det som skall vara i fokus lite missvisande". Bandet gick från grupp
+  6:s prickar och bara den gruppen var stark, fast svaret var antalet grupper. Rättat: summan under bilden som bricka
+  ("6 grupper", "2 över") är källan, allt som räknas är starkt, och bandet tar aldrig ett tal som inte är svaret.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och att fokus var opakt, inte vad bandet pekade
+  ut. **Lärdom:** mät källan mot svaret i varje steg (`mp-bsrc` mot rutans facit); mätningen hittade också att
+  bandstartens närmaste-element-gissning gav falska fel, därför markeras källan nu i DOM.
+
+## 2026-11-11 · Runda 4: bandet går aldrig genom text, och det är kort
+- Samordnarens granskning: bandet gick genom "kvot", genom frågan, genom nämnaren och genom stegets text; talen i
+  frågan var för nedtonade. Dennis: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång" och
+  "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'".
+- Byggt: poängsatt väg (`bandRoute`, `bandScore`), hårda hinder (siffror, läsbar text) och mjuka (etiketter, bilder),
+  ring i stället för band när ingen väg duger, etiketterna under rutan, brickorna nära mallen, nedtoning i gråskala.
+- **Varför fångade inte testerna det:** svepet mätte att bandet fanns och var opakt, aldrig vad det korsade eller hur
+  långt det var. **Lärdom:** ett visuellt hjälpmedel ska mätas mot det det ska undvika; svepet räknar nu korsad text
+  och längd mot det raka avståndet i varje steg (alla moduler: ingen korsning, inget över 2 gånger).
+- Första försöket, en väg runt hindren i ett rutnät, gav fria men långa och slingriga band; det togs bort när Dennis
+  satte längdgränsen.
+
+## 2026-11-11 · Runda 5: bandet pekar inte fel
+- Samordnaren mätte två vilseledande vägar: ut åt höger genom "grupper" och in i kvotrutan underifrån (såg ut att gå
+  till kontrollen), och ut från botten av "54" förbi "2" (såg ut att komma från nämnaren).
+- **Varför fångade inte testerna det:** poängen såg bara korsad text och längd, inte riktning eller närhet till andra
+  tal. **Lärdom:** ett band läses som en pil från det närmaste talet till det den pekar på; mät sidorna, närheten och
+  att vägen inte går genom ändarnas egna rutor. Test för de två uppmätta vägarna.

@@ -182,6 +182,21 @@ prov (`genForTag` ger null för divisionens taggar).
   kontrollen under bladet (`mp-skh`). Själv: inget verktyg, inget band, ingen stegtext i problemlösningen.
 - Lättare: 2:an, 5:an och 10:an, tvåsiffrigt (`EASY_D`); `digitClash` i alla generatorer.
 
+**Regel för bandet och fokus (Dennis 11/11, runda 3):** det som är i fokus och bandets start ska vara exakt det tal
+barnet ska skriva, inget annat. `bandSource` tar bara ett tryckbart tal med rutans svar (`[data-act=pick][data-v=svar]`);
+finns det inte på skärmen blir det inget band. Allt som lyser (det som räknas) och deras föräldrar har full styrka
+(`mp-keep`); resten tonas ned. Gruppernas nummer, barnens antal, högen och tallinjens siffror är inte källor; i stället
+står summan under bilden som bricka (`picSum`: "6 grupper", "4 till varje barn", "6 hopp", "2 över"). Per modul, steg
+med band (genomgånget i webbläsaren 11/11, källan märks `mp-bsrc`):
+- Dela lika, Hur många grupper, Kontrollera, Rest, Ingår: kvoten ← summan "q grupper/till varje/hopp"; resten ← "r över";
+  kontrollens nämnare ← nämnaren i bråket; kvoten och resten i kontrollen ← kvot- och restrutan; svaret ← täljaren
+  (bandet går runt bråket på höger sida); täljare och nämnare när barnet skriver divisionen ← brickorna i frågan.
+- Varje talsort: rutan ← brickan med andelen som visas när blocken delats ("3"); före delningen inget band.
+- 10/100/1000 (kvot): varje ruta ← samma siffra i täljaren; nämnaren och täljaren som saknas: inget band.
+- Pengar: hur många ← "q gånger"; över ← "r kr över".
+- Begrepp, Problemlösning, Slutledning: rutan ← brickan i texten eller svaret från förra steget; tal som inte står som
+  siffra (som "två" eller ett nytt svar) får inget band.
+
 1. En post i `PROVS` i `js/matteprov-logic.js`: `{ id:'prov2', title:'Matteprov 2', sub:'…', moments:[…],
    provCount:{ … } }`. Provlistan och provsidan ritas ur `PROVS`; lagringen är redan per prov-id (`provs[provId]`).
 2. Nya moment: lägg dem i `MOMENTS`, en generator i `GEN`, en typ i `check()`, och UI i `questionHTML`/`padHTML`/
@@ -189,6 +204,28 @@ prov (`genForTag` ger null för divisionens taggar).
 3. Det som var svårt: taggar i `tagsCovered`/`tagsHard`, etikett i `TAG_LABEL`, uppgift i `genForTag`.
 4. Nivågolv som vitest (mönstret "provet är aldrig lättare än underlaget"), och lägg de nya texterna i svepet.
 5. MANUAL och DESIGN; kontrollera 390 × 844, 797 och 700 med kladden.
+
+**Regler för bandet (runda 4, Dennis 11/11): fri väg och kort band, som bästa möjliga kompromiss.**
+- Fri väg: bandet går aldrig genom läsbar text eller siffror (frågan, uppgiften, stegets rad, alla tal). Att snudda vid
+  en etikett (täljare, nämnare, kvot, Kontrollera) eller en bild kostar lite i poängen men är tillåtet.
+- Kort band: helst högst 1,5 gånger det raka avståndet och 160 px, aldrig över 2 gånger eller 220 px, högst ett hörn.
+- `L.bandRoute` poängsätter kurvor mellan alla par av sidor och vägar med ett rundat hörn (längd mot rakt avstånd,
+  straff för etiketter och bilder och för att gå över 1,5 gånger); bästa poäng vinner. Ingen godkänd väg: inget band,
+  källan och rutan får den lila ringen (`mp-bring`), och talet flyger som förut när det trycks.
+- Hellre flytta källan än dra långt: etiketterna kvot och rest står under rutan; Kontrollera står till vänster på raden;
+  i problemlösning, begrepp och slutledning upprepas stegets tal (ur texten och svaren från förra stegen) som brickor
+  nära mallen, i en division i höjd med täljaren och nämnaren.
+- Kompromisser som valts: bandet får snudda vid etiketter (en kort väg som tydligt visar kopplingen väger tyngre);
+  kontrollens sista ruta (svaret = täljaren) och Ingår:s första steg (täljaren ur frågan) får oftast ringen, för att
+  vägen skulle gå genom siffror; i 10/100/1000 får rutorna ringen, för att täljarens siffror står tätt intill.
+- Runda 5 (samordnarens mätning: vägar som pekade fel): hårda spärrar i `bandRoute` utöver text och längd:
+  sidorna vänder sig mot varandra (`sidesFace`: källan ovanför målet ⇒ aldrig in underifrån), bandet går aldrig in i
+  källans eller målets egen ruta (`entersRect`), andra tal har 10 px marginal (också startpricken), och orden i
+  summabrickan räknas som text. Med hjälp står svaret ur bilden som bricka mitt ovanför kvot- eller restrutan
+  (`.mp-above`, plats reserverad med `has-above`), så att bandet blir ett kort lodrätt fall. Kostnad: kladden blir
+  ungefär 55 px lägre i de stegen (Svårare, Hur många grupper: cirka 70 px kvar).
+- Nedtoningen är gråskala, inte genomskinlighet, så att kontrasten behålls; frågan och brickorna i uppgiften tonas
+  aldrig ned. Pilspetsen slutar 1 px utanför rutans kant.
 
 ## Nästa steg
 - Övningsbladen: Dennis provar grenen `matteprov2`; återstår slutledning med figurer (26b/35c) och tabellformen i 36a.
