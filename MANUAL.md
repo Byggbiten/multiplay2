@@ -359,7 +359,7 @@ hamnar ett steg till vänster eftersom vi räknar tiotal. Nivå 1–3 har samma 
 **Siffrorna i texten (alla nivåer, även kort division).** När bubblan i Titta och lär eller Räkna med hjälp nämner en
 siffra som står i uppställningen, är siffran fet och har samma färg som sin ruta: ental grön, tiotal blå, hundratal
 röd, tusental lila. I "Först räknar vi 98 · 5 — entalssiffran i 65" är 5:an grön på båda ställena, och 6:an har
-vanlig textfärg. Minnessiffror är röda som i minnesspalten. Strax efter att texten visats pulserar de rutorna en gång,
+vanlig textfärg. Minnessiffror är lila som i minnesspalten. Strax efter att texten visats pulserar de rutorna en gång,
 så att barnet ser vilken siffra som menas. Uträkningens svar, till exempel 63, är inte färgat, för det står inte i
 någon ruta. Ett undantag är "3:an skrivs i entalet": där har 3:an samma färg som rutan den hamnar i. I divisionen
 pekas täljarsiffran ("Hur många 6:or ryms i 4?") och kvotsiffran ("Vi skriver 7 i tiotalet") ut på samma sätt.
@@ -367,7 +367,7 @@ pekas täljarsiffran ("Hur många 6:or ryms i 4?") och kvotsiffran ("Vi skriver 
 ### Kort division: nivåerna, resten och kontrollen (D43)
 
 Uppställningen är som i läroboken: täljaren överst, bråkstrecket, nämnaren under, och kvoten efter likhetstecknet.
-En mellanrest står som en liten röd siffra framför nästa siffra ("9 ¹0 8 / 2 = 454"). På smala skärmar hamnar
+En mellanrest står som en liten lila siffra framför nästa siffra ("9 ¹0 8 / 2 = 454"). På smala skärmar hamnar
 "= kvoten" på raden under bråket.
 
 | Nivå | Tal |
@@ -389,6 +389,24 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 - **Räkna själv med rest:** kvot och rest rättas tillsammans. Stämmer kvoten men inte resten: "Kvoten stämmer. Kolla
   resten: hur mycket blir kvar efter sista siffran?". En rest som är lika stor som nämnaren eller större: "Resten ska
   vara mindre än nämnaren. Ryms nämnaren en gång till?". Glömd mellanrest känns igen som förut.
+
+### Samma regler i alla lägen (motorrundan, november)
+
+- **Svaret först, faktan sedan.** I Räkna med hjälp visas pillret med gångertalet (till exempel "6 · 7 = 42") först
+  när barnet har svarat, som en kvittens. Före svaret står bara frågan.
+- **Mellanrestens plats i Räkna själv (kort division).** Framför varje täljarsiffra utom den första finns en liten
+  lila streckad ruta. Barnet trycker på den och skriver mellanresten där, som i boken. Kvotens fokus flyttas inte:
+  nästa siffra på knappsatsen hamnar i kvoten igen. Anteckningarna rättas inte; när svaret är rätt ersätts de av
+  appens mellanrester.
+- **Klar med tomma rutor.** Trycker barnet Klar när en svarsruta är tom säger appen "Fyll i alla rutor du behöver –
+  sedan trycker du Klar." och ställer fokus i den tomma rutan. Det räknas inte som ett försök. Rutorna är lika många
+  som förut, så inget nytt avslöjas om svarets längd.
+- **Klickstyrt.** När uppgiften är klar står knappen **Nästa uppgift** (sista gången **Se resultatet**); appen går
+  inte vidare av sig själv. Korta kvittenser där inget försvinner, som "Rätt! 15" eller en siffra som flyger ner,
+  sker fortfarande av sig själva.
+- **Lila minne.** Minnessiffror, mellanrester och resten är lila överallt. Hundratalets röda färg är kvar.
+- **Inga emojis eller konfetti.** Korten, rubrikerna, kladdens knappar (Rita, Sudd, Rensa) och livlinan har ritade
+  ikoner. Allt man trycker på är minst 44 px.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
