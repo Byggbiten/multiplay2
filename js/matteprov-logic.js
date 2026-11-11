@@ -1198,6 +1198,7 @@
     if (t.type === 'dr') {
       const role = t.fields[i].role, B = k => 'box:' + drField(t, k);
       const kd = t.kGiven ? ['kd'] : [B('k1')];
+      if (role === 'n' && t.moment === 'grupper' && !t.r) return { text:`Skriv divisionen. Räkna i hopp om ${t.d}: hur många från början?`, lit:['prompt', 'grp', B('n')] };   // runda 8 (B2)
       if (role === 'n') return { text:t.pic ? 'Skriv divisionen. Hur många är det från början?' : 'Skriv divisionen. Vilket tal delas?', lit:['prompt', 'pile', B('n')] };
       if (role === 'd') return { text:t.pic === 'dela' ? 'Hur många barn delar?' : t.pic ? `Hur många är det i varje ${t.pic === 'linje' ? 'hopp' : 'grupp'}?` : 'Vad delar du med?', lit:['prompt', B('d')] };   // runda 7: grupperna lyser inte här – svaret är talet i frågan, inte antalet grupper
       if (role === 'q') {
@@ -1214,7 +1215,10 @@
     }
     if (t.type === 'ts') {
       const f = t.fields[i];
-      return { text:`Vad blir ${tok(f.dig, PLACE_ID[f.place])}/${t.d}?`, lit:['x:' + f.place, 'blk:' + f.place, 'd', 'box:' + i] };
+      /* runda 8 (B7, Dennis): talsorten sägs ut, "6 tiotal delat med 2", inte "6/2" */
+      /* runda 8 (Dennis: "det står vad är 8 tusental delat med 4. men det står 8008?"): stegfrågan säger att den är en del */
+      const DEF = ['entalen', 'tiotalen', 'hundratalen', 'tusentalen'], first = t.fields.findIndex(x => x.dig != null) === i;
+      return { text:`${first ? 'Börja med' : 'Sedan'} ${DEF[f.place]}: ${tok(f.dig, PLACE_ID[f.place])} ${UNIT[f.place]} delat med ${t.d}.`, lit:['x:' + f.place, 'blk:' + f.place, 'd', 'box:' + i] };
     }
     if (t.type === 'dz') {
       const all = t.fields.map((_, k) => 'box:' + k);
@@ -1345,7 +1349,8 @@
   function makeBnamnare(n, q) {
     const d = n / q;
     return dprob('begrepp', 'namnare', `Vad är nämnaren om täljaren är ${n} och kvoten är ${q}?`,
-      [{ q:'Skriv divisionen. Vad ska stå under strecket?', op:'/', ans:[n, d, q] }], d, `${n}/${d} = ${q}. Nämnaren är ${d}.`, `bn${n}/${q}`);
+      /* runda 8 (A2): med hjälp följer stegets text rutan i fokus (täljaren först), fq per ruta */
+      [{ q:'Skriv divisionen. Vad ska stå under strecket?', fq:['Skriv divisionen. Täljaren står överst.', 'Vad ska stå under strecket?', 'Och kvoten?'], op:'/', ans:[n, d, q] }], d, `${n}/${d} = ${q}. Nämnaren är ${d}.`, `bn${n}/${q}`);
   }
   function makeDtaljare(d, q, r) {
     const n = d * q + r;

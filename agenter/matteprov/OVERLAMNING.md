@@ -9,6 +9,12 @@ och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sam
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
 Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
 
+**Läget nu (2026-11-11, övningsbladen):** Övningsblad · Division (D44 ✎) ligger på `dev` till och med runda 7
+(merge `34b4bfa`). Runda 8 ligger på grenen `ovningsblad-runda8` (pushad, ej mergad): A1–A5 ur
+`brainstorm/14-2026-11-11-ovningsblad-vd-genomspelning.md`, Dennis val B1–B4, B6–B8 och hans fall 8008/4. Kort
+division (A6, B5) ingår inte i uppdraget och rörs inte (multdiv-motorn). Etiketterna T H T E behålls (Dennis: färgen
+skiljer de två T:na). Hela sviten 594 gröna; svepet `tests/webblasare/band-svep.js` körs i båda nivåerna.
+
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
 2. `.project-context/DECISIONS.md`:
@@ -260,8 +266,46 @@ som funkar oavsett vilken siffra det gäller". En metod för alla källor och m�
   eller 220 px; starten 3 ± 1 px från siffrorna och spetsen 3 ± 1 px utanför ramen, också efter en storleksändring;
   summabrickan inte på bilden; kladden minst 120 px. `res.sorter` räknar källornas sorter. **Båda nivåerna ska svepas.**
 
+**Runda 8 (gren `ovningsblad-runda8`, ej mergad): vad som gäller nu.**
+- **Etiketter och rubriker är hårda hinder** för bandet (`LABEL` i `paintBand`: täljare/nämnare, kvot/rest,
+  Kontrollera, tabellrubrikerna i Pengar, summabrickornas ord, enheten kr, talsortsbokstäverna). Finns ingen fri kort
+  väg blir det ringen. Kontrollens nämnare och kvot får därför oftast ringen (A5).
+- **Pengar:** summan ur tallinjen står i en egen rad i tabellen, rakt ovanför sin ruta, ordet ovanför talet
+  (`.mp-ptp`), med cirka 26 px fritt ner till rutan för bandet (A1).
+- **Begrepp, nämnaren:** stegets text följer rutan i fokus med hjälp (`fq` per ruta i flödet; `st.fq[IN.f]` i
+  etiketten "Steg 1: …") (A2). Samma mönster kan användas i andra steg där texten bara gäller en ruta.
+- **Divisionstestet:** räknaren visar antalet ifyllda (`sheetFilled`, `updScore`), aldrig bara "/20"; efter Klar
+  står kontrollraden i meddelandet (`IN.khHtml` i `paintHelp`), inte under bladet (A3).
+- **Problemlösning, begrepp, slutledning:** en bricka försvinner när dess ruta är ifylld men lämnar en osynlig plats
+  (`mp-nearhid`), så att inget hoppar; ett tal som står som ord efter "med" ("med fem") får med hjälp en bricka vid
+  ordet och räknas som tal i texten (`ORDW`, `ordTiles`) (A4).
+- **Kontrollen (B1):** i kontrollens sista ruta finns inget band (`bandWant` ger null för `k4`): faktorerna lyser, och
+  "täljaren" med en bock står under rutan först när den är rätt (`k4ok`, `.mp-ktal`).
+- **Hur många grupper, täljarens steg (B2):** med hjälp visar gruppernas brickor en löpande summa (3, 6, 9 …,
+  `drPic(…, run)`), den sista är källan till täljarens ruta; frågan "Räkna i hopp om d: hur många från början?".
+- **Plats (B3):** `growQ(t)` ger `#mp-q` klassen `grow` i Varje talsort, 10/100/1000, Problemlösning och Begrepp:
+  större text, rutor och block. Mätt kladd i 390 × 797 före → efter (lägsta över tre steg): talsort Lättare 305 → 260,
+  Svårare 305 → 199 (efter talsortsramarna); 10/100/1000 362 → 326; Problemlösning 296/273 → 261/166; Begrepp
+  289/249 → 231/190.
+- **Varje talsort (Dennis 8008/4, B7):** hela uppgiften står alltid överst (`.mp-q0`, också i 10/100/1000), stegfrågan
+  säger att den är en del: "Börja med tusentalen: 8 tusental delat med 4." / "Sedan hundratalen: …". Bilden visar
+  varje talsort som en egen ram i sin färg med sin bokstav (`.mp-bgrp`), nollorna som tomma ramar med 0, entalen
+  som prickar på 13–14 px i ett rutnät om fem.
+- **Grupperna (B4):** 10/12 px luft mellan grupperna och mindre nummerbrickor (18 px), prickarna 8 px i stora tal.
+- **Introt (B6):** Dela lika och Hur många grupper visar uppgiftens egen vy (`introDr` ritar `drHTML` i ett lånat
+  tillstånd, `introView` stänger av frågan och trycken), med bandet (`paintBand` i `.mp-iq`) i kvotens steg och
+  kontrollen ifylld med "täljaren" sist.
+- **Slutledning Lättare (B8):** "Vilket tal tänker jag på?" med rest får en bild: kvoten som grupper om nämnaren och
+  resten (`slPic`).
+- **Svepet** kontrollerar nu också: rubriker och etiketter som text, meddelanden som ligger över annan text eller
+  innehåll som rinner ut ur kortet (`overlapp`), stegtext mot fokus i en division (`stegtext`), och divisionstestet
+  efter Klar (räknaren och meddelandet).
+
 ## Nästa steg
-- Övningsbladen: Dennis provar grenen `matteprov2`; återstår slutledning med figurer (26b/35c) och tabellformen i 36a.
+- Övningsbladen: samordnaren granskar runda 8 (`ovningsblad-runda8`) och mergar; Dennis provar i dev-spegeln.
+  Återstår ur brainstorm/14: B5 och A6 hör till kort division (multdiv-rollen). Återstår sedan tidigare: slutledning med
+  figurer (26b/35c) och tabellformen i 36a. Introt i bladets egen vy finns bara i Dela lika och Hur många grupper;
+  resten av modulerna kan få det på samma sätt (`introDr`).
 - Vänta på Dennis synpunkter på D42 (live i v73).
 - Möjligt nästa: Med hjälp även i Dela upp och tabelltestet om Dennis vill (nu: Dela upp är alltid ledd, tabelltestet
   har ingen extra hjälp).
