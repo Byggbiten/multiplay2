@@ -65,9 +65,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D40 Multiplikation nivå 4: minnessiffran kvar, den osynliga nollan i en grå ruta, blandat som det svårare bladet (3·1, 4·1, 2·2, 3·2) ✎ förklara nollan och målcellerna ✎ färgade siffror ✎ orange ram
 - D41 Matteprovets uppställning: välj räknesätt – minnessiffra (förval, samma metodik som nivå 4) eller dela upp ✎ delrader i Räkna själv ✎ grå nollor i Dela upp ✎ nollorna före gångertalet ✎ varför så många nollor ✎ minnessiffran utan fokusbyte ✎ enklare förklaring ✎ nollan först, sedan bara siffran
 - D42 Matteprovet: Räkna med hjälp och Räkna själv i Öva; hjälpen leder ruta för ruta under själva körningen
-- D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten
-- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven)
-- D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad)
+- D43 Kort division når lärarens kapitel 3: rest på slutet, kontroll med multiplikation, fyrsiffrig täljare, nämnare 2–9, nollor i kvoten ✎ nivå 3 med rest, nivå 4 med decimaler
+- D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära
+- D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 
 ---
 
