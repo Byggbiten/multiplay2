@@ -660,6 +660,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   nästan alla bilder är ganska slarvig … binda den till ett lämpligt ställe på den siffra den refererar till och sedan
   till den ruta där den skall in. Så att fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär
   eller uppskattade'".
+- ✎ **2026-11-11, förbättringarna efter VD:ns genomspelning (`brainstorm/14`):** B1 (kontrollen lyser faktorerna,
+  kopplingen till täljaren efter svaret), B2 (hoppräkning med löpande summa), B3–B4 (större bilder, mindre kladd, luft
+  i grupperna), B6–B8 (introt visar uppgiftens egen vy med bandet, talsortsord, bild i Slutledning). Kort division
+  hör inte till uppdraget (A6, B5 utgår). Källa: Dennis valde "Kontrollen och hoppräkning, Större bilder, mindre
+  kladd, Introt, ord och bild" och "Gällande kort division. Den va inte med i just detta uppdrag."
 
 ## D45 · 2026-11-05 · iPad: hela appen utnyttjar skärmen
 - **Beslut:** Multiplay ska på iPad fylla skärmen i både stående och liggande läge, i hela appen, med skarp text

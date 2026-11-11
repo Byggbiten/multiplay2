@@ -18,4 +18,4 @@ Ett dokument per tankepass, utredning eller granskning: `NN-ÅÅÅÅ-MM-DD-tema.
 | 11 | `11-2026-11-05-matteprov1-barnets-ogon.md` | Matteprov 1 med ett otåligt barns ögon: 15 fynd och 12 designregler (D44) | Reglerna in i divisionens övningsblad; Matteprov 1 rättas i egen runda |
 | 12 | `12-2026-11-11-ipad-matning.md` | iPad: mätning per vy och förslag (--k plus två spalter i liggande läge), plan i skivor, bifynd | Väntar på Dennis (D45) |
 | 13 | `13-2026-11-11-ovningsblad-division-barnen.md` | Övningsblad · Division genomspelat som två barn (åk 4, åk 2): 10 fynd, 10 mönster | Rättas av matteprov- och multdiv-agenterna |
-| 14 | `14-2026-11-11-ovningsblad-vd-genomspelning.md` | Övningsblad · Division genomspelat av VD:n efter runda 7: 6 fel (A), 8 förbättringar (B) | A till matteprov-agenten; B väntar på Dennis |
+| 14 | `14-2026-11-11-ovningsblad-vd-genomspelning.md` | Övningsblad · Division genomspelat av VD:n efter runda 7: 6 fel (A), 8 förbättringar (B) | Runda 8: A1–A5, B1–B4, B6–B8 (Dennis val); A6/B5 utgår |
