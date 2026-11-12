@@ -787,6 +787,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   pilar mellan raderna. Det är samma knep som i 10/100/1000. Stapeln utgår. Källa: Dennis: "Går det att göra den
   istället så den påminner mer om hur vi normalt multiplicerar och dividerar?" och "ja, gör kluringar som vänd på det".
 
+- ✎ **2026-11-12, mockupen godkänd i sin helhet:** alla åtta moduler i `design-lab/ovningsblad-plan3.html` med hjälp.
+  Nästa är läget Själv med semistöd (`brainstorm/17`). Källa: Dennis: "Jag är supernöjd med detta. Mycket snyggt." och
+  "arbetar igenom dessa i mockupen med att man räknar själv … de behöver ändå nått slags 'semi-stöd' … Men det får
+  inte ge för mycket".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
