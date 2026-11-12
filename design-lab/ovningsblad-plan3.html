@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Övningsblad plan 3 – mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* Mockup för plan 3 (D47, brainstorm/16), byggd av VD:n själv. Steg 1: hubben, kort division med tvåsiffrig
+   nämnare och trappan. Stil C (D44 ✎): platsvärdesfärger, lila = härifrån, orange = hit, ingen felsignal (D39). */
+:root{--ink:#3b1d6e;--soft:#6d5a96;--acc:#0f766e;--deep:#4c1d95;--lila:#7c3aed;--org:#fb923c;--peach:#fff1e6;
+  --pvTu:#7c3aed;--pvH:#dc2626;--pvT:#2563eb;--pvE:#16a34a;
+  --bg:linear-gradient(160deg,#fdf4ff 0%,#fce7f3 34%,#eff6ff 68%,#f0fdf4 100%)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#ece7f5;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;height:auto;min-height:100%}
+.lab{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:390px;font:800 12px Nunito}
+.lab button{border:0;border-radius:10px;padding:6px 10px;background:#fff;color:var(--deep);font:800 12px Nunito;cursor:pointer}
+.lab button.on{background:var(--deep);color:#fff}
+.app{flex:none;width:390px;height:797px;background:var(--bg);border-radius:28px;box-shadow:0 10px 40px rgba(76,29,149,.18);display:flex;flex-direction:column;padding:10px 12px 12px;gap:8px;overflow:hidden;position:relative}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.back{display:flex;align-items:center;gap:4px;border:0;border-radius:22px;background:rgba(255,255,255,.85);padding:0 14px;height:40px;font:800 14px Nunito;color:var(--deep);cursor:pointer}
+.back svg{width:16px;height:16px}
+.ttl{font:800 20px 'Baloo 2';color:#134e4a}
+.prog{min-width:70px;text-align:right;font:800 13px Nunito;color:var(--soft);background:rgba(255,255,255,.85);border-radius:22px;padding:10px 14px}
+.card{flex:none;background:rgba(255,255,255,.72);border-radius:24px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;position:relative}
+.top,.pad,.seg,.tiles,.sec{flex:none}
+.ask{font:900 16px/1.3 Nunito;color:#134e4a;min-height:42px}
+.ask .ok{display:block;font:800 13px Nunito;color:#15803d}
+.ask .soft{display:block;font:800 13px Nunito;color:#b45309}
+.head{font:800 19px 'Baloo 2';letter-spacing:.02em}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pad button{height:46px;border:0;border-radius:14px;background:rgba(255,255,255,.95);font:800 22px 'Baloo 2';color:var(--deep);cursor:pointer;box-shadow:0 2px 6px rgba(93,63,158,.1)}
+.pad .wide{grid-column:span 4;background:#e6f4f1;color:#134e4a;font:900 17px Nunito;border:2px solid #99d5c9}
+.pad .wide.go{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pad .er svg{width:22px;height:22px}
+.kladd{flex:1;min-height:100px;background:rgba(255,255,255,.6);border-radius:20px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.kladd .kt{display:flex;justify-content:space-between;align-items:center;font:900 12px Nunito;color:#134e4a;letter-spacing:.05em}
+.kladd .kt span{display:flex;gap:6px}
+.kladd .kt i{width:34px;height:30px;border-radius:9px;border:2px solid #cfe9e3;display:inline-block;background:#fff}
+.kladd .kt i:first-child{background:#3b8f82;border-color:#3b8f82}
+.kladd .area{flex:1;border:2px dashed #bfe0d9;border-radius:14px}
+/* platsvärdesfärger */
+.Tu{color:var(--pvTu)}.H{color:var(--pvH)}.T{color:var(--pvT)}.E{color:var(--pvE)}
+/* ── hubben ── */
+.seg{display:flex;background:rgba(255,255,255,.72);border-radius:14px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:44px;border:0;border-radius:11px;background:transparent;font:800 14px Nunito;color:var(--soft);cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.sec{font:900 12px Nunito;letter-spacing:.08em;color:var(--soft);margin:6px 4px 0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{display:flex;align-items:center;gap:10px;min-height:58px;border:0;border-radius:16px;background:rgba(255,255,255,.9);padding:8px 10px;text-align:left;font:800 14.5px/1.15 Nunito;color:var(--deep);cursor:pointer;box-shadow:0 2px 8px rgba(93,63,158,.08)}
+.tile b{flex:0 0 30px;height:30px;border-radius:10px;background:#3b8f82;color:#fff;display:flex;align-items:center;justify-content:center;font:800 15px 'Baloo 2'}
+.tile small{display:block;font:700 11.5px Nunito;color:var(--soft);margin-top:2px}
+.tile.later{opacity:.55;cursor:default}
+.tile.new{box-shadow:0 0 0 2px #a78bfa,0 2px 8px rgba(93,63,158,.08)}
+/* ── kort division ── */
+.kd{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-top:4px}
+.fr{display:flex;flex-direction:column;align-items:stretch}
+.numrow{display:flex;align-items:flex-end;gap:12px;padding:0 6px;border-bottom:3.5px solid var(--deep)}
+.dg{position:relative;width:34px;height:52px;display:flex;align-items:flex-end;justify-content:center;font:800 36px/1 'Baloo 2';border-radius:10px;transition:background .25s,box-shadow .25s}
+.dg .cap{position:absolute;top:-2px;left:0;right:0;text-align:center;font:900 10px Nunito}
+.dg.grp{background:#fff7ed;box-shadow:0 0 0 2.5px var(--org)}
+.dg.dim{opacity:.35}
+.rs{position:absolute;left:-21px;top:12px;min-width:24px;height:20px;padding:0 3px;border-radius:7px;font:800 15px/20px 'Baloo 2';color:var(--lila);text-align:center}
+.rs.slot{border:2px dashed #c4b5fd;background:#fff}
+.den{display:flex;justify-content:center;font:800 32px 'Baloo 2';color:var(--deep);padding-top:2px}
+.den span{background:#f3e8ff;border-radius:10px;padding:0 10px}
+.eqs{font:800 34px 'Baloo 2';color:var(--deep);padding-bottom:18px}
+.qbox{display:flex;align-items:flex-end;gap:5px;padding-bottom:12px}
+.box{position:relative;width:40px;height:50px;border-radius:12px;border:3px dashed #a7d8cf;background:#fff;display:flex;align-items:center;justify-content:center;font:800 30px 'Baloo 2'}
+.box .cap{position:absolute;top:-17px;left:0;right:0;text-align:center;font:900 10px Nunito}
+.box.focus{border-style:solid;border-color:#0f766e;box-shadow:0 0 0 3px var(--org)}
+.box.done{border-style:solid;border-color:#86efac;background:#f0fdf4}
+.box.rest{border-color:#c4b5fd;color:var(--lila)}
+.comma{font:800 26px 'Baloo 2';color:var(--deep);padding-bottom:6px}
+.restlab{font:900 12px Nunito;color:var(--lila);align-self:center;margin-bottom:-14px}
+/* tankeraden: nämnarens tabell */
+.think{background:#faf5ff;border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-height:112px}
+.think .tt{font:900 12px Nunito;color:var(--lila);letter-spacing:.04em}
+.row{display:flex;align-items:center;gap:8px;min-height:32px;padding:0 10px;border-radius:10px;font:800 21px 'Baloo 2';color:var(--deep);background:#fff;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,background .25s,box-shadow .25s;cursor:pointer;position:relative}
+.row.in{opacity:1;transform:none}
+.row .cmp{margin-left:auto;font:800 13px Nunito;color:var(--soft)}
+.row.over{color:#a8a29e}
+.row.over::after{content:"";position:absolute;left:8px;right:8px;top:50%;height:2.5px;background:#a8a29e;transform:scaleX(0);transform-origin:left;transition:transform .45s}
+.row.over.struck::after{transform:scaleX(1)}
+.row.pick{box-shadow:0 0 0 2.5px var(--lila);background:#f5f3ff}
+.row.nope{background:var(--peach)}
+.sub{display:flex;align-items:center;justify-content:center;gap:8px;font:800 22px 'Baloo 2';color:var(--deep);min-height:40px}
+.sub .box{width:auto;min-width:56px;height:44px;padding:0 6px}
+/* knappar i kortet */
+.next{align-self:center;border:0;border-radius:16px;background:var(--acc);color:#fff;font:900 16px Nunito;min-height:46px;padding:0 22px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.next svg{width:18px;height:18px}
+.ghost{align-self:center;border:2px solid #c4b5fd;border-radius:14px;background:#fff;color:var(--lila);font:900 14px Nunito;min-height:44px;padding:0 16px;cursor:pointer}
+/* flygning */
+.fly{position:fixed;z-index:50;pointer-events:none;font:800 30px 'Baloo 2';color:var(--lila);transition:transform .7s cubic-bezier(.34,1.2,.4,1)}
+/* ── trappan ── */
+.trap{display:grid;grid-template-columns:repeat(7,30px);grid-auto-rows:32px;justify-content:center;margin-top:2px}
+.c{display:flex;align-items:center;justify-content:center;font:800 24px 'Baloo 2';color:var(--deep);position:relative}
+.c.bt{border-top:3px solid var(--deep)}
+.c.Tu{color:var(--pvTu)}.c.H{color:var(--pvH)}.c.T{color:var(--pvT)}.c.E{color:var(--pvE)}
+.c.bl{border-left:3px solid var(--deep)}
+.c.ul{border-bottom:2.5px solid #94a3b8}
+.c.minus{color:var(--soft);font-size:20px}
+.c.lit{background:#fff7ed;border-radius:8px;box-shadow:0 0 0 2.5px var(--org)}
+.c.src{background:#f5f3ff;border-radius:8px;box-shadow:0 0 0 2.5px var(--lila)}
+.c.ghostc{color:transparent}
+.c.drop{animation:drop .7s cubic-bezier(.34,1.2,.4,1)}
+@keyframes drop{from{transform:translateY(-64px)}to{transform:none}}
+.c.appear{animation:fade .5s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.mirror{display:flex;gap:10px;align-items:stretch;justify-content:center}
+.mirror .mini{background:#fff;border-radius:14px;padding:6px 10px;font:800 22px 'Baloo 2';color:var(--deep);display:flex;flex-direction:column;align-items:center;gap:2px}
+.mirror .mini small{font:900 11px Nunito;color:var(--soft)}
+.hl{background:#f5f3ff;border-radius:6px;box-shadow:0 0 0 2px var(--lila);color:var(--lila);padding:0 2px}
+.note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
+</style>
+</head>
+<body>
+<div class="lab" id="lab">
+  <button data-go="hub">Hubben</button>
+  <button data-go="kd">Kort division · tvåsiffrig nämnare</button>
+  <button data-go="trap">Trappan</button>
+  <button data-go="restart">Börja om vyn</button>
+</div>
+<div class="app" id="app"></div>
+<p class="note" style="max-width:390px">Steg 1 av mockupen: hubben, kort division och trappan med samma tal. Grunder och Tänka byggs i nästa steg.</p>
+
+<script>
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const app = $('#app');
+const W = ms => new Promise(r => setTimeout(r, ms));
+const PACE = 700; /* barnets takt: en förflyttning åt gången (Dennis: "för fort och osynkat") */
+const ic = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  erase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M8 5h12v14H8l-6-7z"/><path d="M11 9l6 6M17 9l-6 6" stroke-linecap="round"/></svg>'
+};
+let view = 'hub';
+
+/* ── gemensamt: knappsats och kladd (övningsbladens, D48) ── */
+let padHandler = null, typed = '';
+function padHTML(label = 'Svara') {
+  const k = [1,2,3,4,5,6,7,8,9,0].map(n => `<button data-k="${n}">${n}</button>`).join('');
+  return `<div class="pad" id="pad">${k}<button class="er" data-k="e" aria-label="Sudda">${ic.erase}</button><button class="wide" data-k="ok">${ic.check} ${label}</button></div>`;
+}
+function kladdHTML() { return `<div class="kladd"><div class="kt">KLADD<span><i></i><i></i><i></i><i></i></span></div><div class="area"></div></div>`; }
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-k]'); if (!b || !padHandler) return;
+  const k = b.dataset.k;
+  if (k === 'e') typed = typed.slice(0, -1);
+  else if (k === 'ok') { padHandler(typed); return; }
+  else if (typed.length < 3) typed += k;
+  const f = $('.box.focus'); if (f) f.textContent = typed;
+  const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0);
+});
+
+/* flyg ett känt tal från ett element till ett annat (bandet/flygningen flyttar bara kända tal) */
+async function fly(from, to, text) {
+  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+  const f = document.createElement('div'); f.className = 'fly'; f.textContent = text;
+  document.body.appendChild(f);
+  const fw = f.getBoundingClientRect();
+  f.style.left = (a.left + a.width / 2 - fw.width / 2) + 'px'; f.style.top = (a.top + a.height / 2 - fw.height / 2) + 'px';
+  await W(30);
+  f.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px,${b.top + b.height / 2 - (a.top + a.height / 2)}px)`;
+  await W(PACE + 50); f.remove();
+}
+
+/* ── hubben ── */
+function hub() {
+  view = 'hub'; padHandler = null;
+  const t = (n, name, sub, go, cls = '') => `<button class="tile ${cls}" ${go ? `data-open="${go}"` : ''}><b>${n}</b><span>${name}<small>${sub}</small></span></button>`;
+  app.innerHTML = `<div class="top"><button class="back">${ic.back}Tillbaka</button><div class="ttl">Övningsblad</div><div style="width:86px"></div></div>
+  <div style="display:flex;gap:8px"><div class="seg" style="flex:1"><button>Lättare</button><button class="on">Svårare</button></div><div class="seg" style="flex:1"><button class="on">Med hjälp</button><button>Själv</button></div></div>
+  <div class="sec">GRUNDER</div>
+  <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','', 'later')}${t(2,'Divisionstabellen','20 tal','','later')}${t(3,'10, 100 och 1000','vänd på det','','later')}</div>
+  <div class="sec">RÄKNA</div>
+  <div class="tiles">${t(4,'Kort division','också tvåsiffrig nämnare','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
+  <div class="sec">TÄNKA</div>
+  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','','later')}${t(7,'Kluringar','rita stapeln','','later')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','','later')}</div>
+  <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
+  app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
+}
+
+/* ── kort division: 2745 / 48 = 57, rest 9 ── */
+const N = '2745', D = 48, CLS = ['Tu','H','T','E'];
+function kdShell(title) {
+  return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><div class="prog">1/8</div></div>`;
+}
+let kd = null;
+function kdView() {
+  view = 'kd'; typed = ''; padHandler = null;
+  kd = { step: 0 };
+  app.innerHTML = kdShell('Kort division') + `
+  <div class="card" id="card">
+    <div class="ask" id="ask"></div>
+    <div class="head"><span class="Tu">2</span><span class="H">7</span><span class="T">4</span><span class="E">5</span> / 48</div>
+    <div class="kd">
+      <div class="fr">
+        <div class="numrow">${[...N].map((d, i) => `<div class="dg ${CLS[i]}" id="d${i}"><span class="cap ${CLS[i]}">${CLS[i] === 'Tu' ? 'T' : CLS[i]}</span>${d}${i === 3 ? '<span class="rs" id="rs3"></span>' : ''}</div>`).join('')}</div>
+        <div class="den"><span>48</span></div>
+      </div>
+      <div class="eqs">=</div>
+      <div class="qbox"><div class="box" id="qT"><span class="cap T">T</span></div><div class="box" id="qE"><span class="cap E">E</span></div><span class="comma">,</span><div class="box rest" id="qR"><span class="cap" style="color:var(--lila)">rest</span></div></div>
+    </div>
+    <div class="think" id="think"><div class="tt">48:ANS TABELL</div></div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  kdStep();
+}
+const ask = (html) => { $('#ask').innerHTML = html; };
+const act = (html, fn) => { const a = $('#act'); a.innerHTML = html; const b = a.querySelector('button'); if (b && fn) b.onclick = fn; };
+const nextBtn = (label = 'Nästa') => `<button class="next">${label} ${ic.next}</button>`;
+
+async function showRows(rows, target) {
+  const th = $('#think'); th.querySelectorAll('.row').forEach(r => r.remove());
+  for (const m of rows) {
+    const p = D * m, over = p > target;
+    th.insertAdjacentHTML('beforeend', `<div class="row${over ? ' over' : ''}" data-m="${m}">48 · ${m} = ${p}<span class="cmp">${over ? 'större än ' + target : 'får plats'}</span></div>`);
+    const r = th.lastElementChild; await W(60); r.classList.add('in');
+    await W(PACE);
+    if (over) { r.classList.add('struck'); await W(PACE / 2); }
+  }
+}
+function pickRow(target, right) {
+  return new Promise(res => {
+    ask(`Hur många gånger får 48 plats i <b>${target}</b>? Tryck på raden.`);
+    $('#think').querySelectorAll('.row').forEach(r => r.onclick = () => {
+      const m = +r.dataset.m;
+      if (m === right) { r.classList.add('pick'); $('#think').querySelectorAll('.row').forEach(x => x.onclick = null); res(r); }
+      else { r.classList.add('nope'); setTimeout(() => r.classList.remove('nope'), 900);
+        ask(`<span class="soft">Inte riktigt – försök igen.</span>${D * m > target ? `${D * m} är större än ${target}.` : `Det finns en rad som får plats.`}`); }
+    });
+  });
+}
+function typeAnswer(box, right) {
+  return new Promise(res => {
+    document.querySelectorAll('.box').forEach(b => b.classList.remove('focus'));
+    box.classList.add('focus'); typed = ''; box.textContent = '';
+    padHandler = v => {
+      if (+v === right) { padHandler = null; box.classList.remove('focus'); box.classList.add('done'); $('#pad .wide').classList.remove('go'); res(); }
+      else { ask(`<span class="soft">Inte riktigt – försök igen.</span>${$('#ask').dataset.q || ''}`); typed = ''; box.textContent = ''; }
+    };
+  });
+}
+function grp(ix) { document.querySelectorAll('.dg').forEach((d, i) => { d.classList.toggle('grp', ix.includes(i)); d.classList.toggle('dim', ix.length && !ix.includes(i) && i < Math.min(...ix)); }); }
+
+async function kdStep() {
+  /* Steg 1: var börjar vi? (texten först, sedan markeringen) */
+  ask('48 får inte plats i 2 och inte i 27. Vi börjar med <b>274</b> tiotal.');
+  await W(PACE); grp([0,1,2]);
+  act(nextBtn('Visa 48:ans tabell'), async () => {
+    act('');
+    ask('Hur många gånger får 48 plats i <b>274</b>? Titta i tabellen.');
+    await showRows([5,6], 274);
+    const r = await pickRow(274, 5);
+    ask('<span class="ok">Rätt!</span>48 · 5 = 240 får plats. 5 skrivs i tiotalet.');
+    await W(PACE); await fly(r, $('#qT'), '5'); $('#qT').insertAdjacentText('beforeend', '5'); $('#qT').classList.add('done');
+    await W(PACE / 2);
+    act(nextBtn(), async () => {
+      act('');
+      ask('Hur mycket blir över när 240 tas från 274?'); $('#ask').dataset.q = 'Hur mycket blir över när 240 tas från 274?';
+      $('#sub').innerHTML = '274 − 240 = <div class="box" id="sb"></div>';
+      await typeAnswer($('#sb'), 34);
+      ask('<span class="ok">Rätt!</span>34 tiotal är kvar. De följer med till entalen.');
+      await W(PACE); const rs = $('#rs3'); rs.classList.add('slot');
+      await fly($('#sb'), rs, '34'); rs.textContent = '34';
+      grp([3]); $('#d3').classList.add('grp');
+      act(nextBtn(), async () => {
+        act(''); $('#sub').innerHTML = '';
+        ask('34 tiotal är 340 ental. Med 5 ental blir det <b>345</b>.');
+        await W(PACE * 1.5);
+        act(nextBtn('Visa 48:ans tabell'), async () => {
+          act('');
+          ask('Hur många gånger får 48 plats i <b>345</b>? Titta i tabellen.');
+          await showRows([7,8], 345);
+          const r2 = await pickRow(345, 7);
+          ask('<span class="ok">Rätt!</span>48 · 7 = 336 får plats. 7 skrivs i entalet.');
+          await W(PACE); await fly(r2, $('#qE'), '7'); $('#qE').insertAdjacentText('beforeend', '7'); $('#qE').classList.add('done');
+          act(nextBtn(), async () => {
+            act('');
+            ask('Hur mycket blir över när 336 tas från 345?'); $('#ask').dataset.q = 'Hur mycket blir över när 336 tas från 345?';
+            $('#sub').innerHTML = '345 − 336 = <div class="box" id="sb"></div>';
+            await typeAnswer($('#sb'), 9);
+            await fly($('#sb'), $('#qR'), '9'); $('#qR').insertAdjacentText('beforeend', '9'); $('#qR').classList.add('done');
+            grp([]); $('#sub').innerHTML = '';
+            ask('<span class="ok">Klart!</span>2745 / 48 = 57, rest 9.');
+            await W(PACE);
+            $('#think').innerHTML = '<div class="tt">KONTROLL</div><div class="row in" style="cursor:default">48 · 57 + 9 = 2745<span class="cmp" style="color:#15803d">som täljaren</span></div>';
+            act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
+          });
+        });
+      });
+    });
+  });
+}
+
+/* ── trappan: samma tal ── */
+/* rutnät 7 kolumner: 0 = nämnaren (2 rutor: 0–1), streck, 2–5 = täljarens siffror, 6 = rest */
+let T = null;
+function trapView() {
+  view = 'trap'; typed = ''; padHandler = null;
+  const rows = 6, cols = 7, cells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(`<div class="c" id="c${r}_${c}"></div>`);
+  app.innerHTML = kdShell('Trappan') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="trap" id="trap">${cells.join('')}</div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  const C = (r, c) => $(`#c${r}_${c}`);
+  /* rad 0: kvoten ovanför; rad 1: 48 | 2 7 4 5 */
+  C(1,0).textContent = '4'; C(1,1).textContent = '8';
+  [...N].forEach((d, i) => { const e = C(1, 2 + i); e.textContent = d; e.classList.add(CLS[i], 'bt'); });
+  C(1,2).classList.add('bl'); C(0,2).classList.add();
+  T = { C };
+  trapStep();
+}
+async function trapStep() {
+  const { C } = T;
+  const think = (h) => { $('#sub').innerHTML = h; };
+  ask('I trappan skriver vi allt vi räknar. 48 får inte plats i 2 eller i 27, så vi börjar med <b>274</b>.');
+  [2,3,4].forEach(c => C(1, c).classList.add('lit'));
+  act(nextBtn('Visa 48:ans tabell'), async () => {
+    act('');
+    think('<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">48:ANS TABELL</div></div>');
+    await showRows([5,6], 274);
+    const r = await pickRow(274, 5);
+    ask('<span class="ok">Rätt!</span>5 skrivs ovanför, över tiotalet.');
+    await W(PACE); await fly(r, C(0, 4), '5'); C(0, 4).textContent = '5'; C(0, 4).classList.add('T');
+    act(nextBtn(), async () => {
+      act(''); think('');
+      ask('Under 274 skriver vi vad 5 gånger 48 blir: <b>240</b>.');
+      await W(PACE);
+      C(2,1).textContent = '−'; C(2,1).classList.add('minus');
+      for (const [c, d] of [[2,'2'],[3,'4'],[4,'0']]) { const e = C(2, c); e.textContent = d; e.classList.add('appear', 'ul'); await W(PACE / 2); }
+      act(nextBtn(), async () => {
+        act('');
+        [2,3,4].forEach(c => C(1, c).classList.remove('lit'));
+        ask('Hur mycket blir över? Räkna 274 − 240.'); $('#ask').dataset.q = 'Hur mycket blir över? Räkna 274 − 240.';
+        think('274 − 240 = <div class="box" id="sb"></div>');
+        await typeAnswer($('#sb'), 34);
+        think('');
+        C(3,3).textContent = '3'; C(3,4).textContent = '4'; C(3,3).classList.add('appear'); C(3,4).classList.add('appear');
+        ask('<span class="ok">Rätt!</span>34 blev över. Nu flyttar vi ner nästa siffra, 5.');
+        act(nextBtn('Flytta ner 5'), async () => {
+          act(''); C(1,5).classList.add('src');
+          await W(PACE / 2);
+          C(3,5).textContent = '5'; C(3,5).classList.add('E', 'drop');
+          await W(PACE); C(1,5).classList.remove('src');
+          [3,4,5].forEach(c => C(3, c).classList.add('lit'));
+          ask('Nu står det <b>345</b>. Det är samma 345 som i kort division.');
+          act(nextBtn('Visa 48:ans tabell'), async () => {
+            act('');
+            think('<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">48:ANS TABELL</div></div>');
+            await showRows([7,8], 345);
+            const r2 = await pickRow(345, 7);
+            ask('<span class="ok">Rätt!</span>7 skrivs ovanför, över entalet.');
+            await W(PACE); await fly(r2, C(0, 5), '7'); C(0, 5).textContent = '7'; C(0, 5).classList.add('E');
+            act(nextBtn(), async () => {
+              act(''); think('');
+              ask('Under 345 skriver vi 7 gånger 48: <b>336</b>.');
+              C(4,2).textContent = '−'; C(4,2).classList.add('minus');
+              for (const [c, d] of [[3,'3'],[4,'3'],[5,'6']]) { const e = C(4, c); e.textContent = d; e.classList.add('appear', 'ul'); await W(PACE / 2); }
+              act(nextBtn(), async () => {
+                act(''); [3,4,5].forEach(c => C(3, c).classList.remove('lit'));
+                ask('Hur mycket blir över? Räkna 345 − 336.'); $('#ask').dataset.q = 'Hur mycket blir över? Räkna 345 − 336.';
+                think('345 − 336 = <div class="box" id="sb"></div>');
+                await typeAnswer($('#sb'), 9);
+                think('');
+                C(5,5).textContent = '9'; C(5,5).classList.add('appear'); C(5,5).style.color = 'var(--lila)';
+                ask('<span class="ok">Klart!</span>2745 / 48 = 57, rest 9.');
+                act(nextBtn('Varför är det samma som kort division?'), async () => {
+                  act('');
+                  ask('Talet <b>34</b> som blev över i trappan är den lilla siffran i kort division.');
+                  C(3,3).classList.add('src'); C(3,4).classList.add('src');
+                  think(`<div class="mirror">
+                    <div class="mini"><small>TRAPPAN</small><span>274 − 240 = <span class="hl">34</span></span></div>
+                    <div class="mini"><small>KORT DIVISION</small><span>2 7 4 <sup class="hl" style="font-size:15px">34</sup>5</span></div></div>`);
+                  act(`<button class="ghost" id="toKd">Tillbaka till kort division</button>`, () => go('kd'));
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+function go(v) {
+  if (v === 'restart') v = view;
+  document.querySelectorAll('#lab button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
+  ({ hub, kd: kdView, trap: trapView })[v]();
+}
+document.querySelectorAll('#lab button').forEach(b => b.onclick = () => go(b.dataset.go));
+go(location.hash.slice(1) || 'hub');
+</script>
+</body>
+</html>
