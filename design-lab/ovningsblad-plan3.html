@@ -148,6 +148,32 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .opt.nope{background:var(--peach);border-color:#fdba74}
 .opt.okopt{border-color:#22c55e;background:#f0fdf4;color:#15803d}
 .opt.ring{box-shadow:0 0 0 3px #bbf7d0,0 0 14px rgba(34,197,94,.45);border-radius:50px}
+.kbar{display:flex;flex-direction:column;gap:4px}
+.kbar .barrow .part.first{border-color:var(--org);background:#fff7ed}
+.kbar .barrow.sub2{height:34px}
+.kbar .barrow.sub2 .part.small{flex:none;width:calc(var(--w) / 2 - 2px);font-size:16px}
+.kbar .barrow.sub2 .part.last{border:2.5px solid var(--lila);background:#f5f3ff;color:var(--lila)}
+.kbar .spacer{visibility:hidden}
+.ansbig{display:inline-block;font:800 26px 'Baloo 2';color:#15803d;background:#f0fdf4;border-radius:12px;padding:0 12px;box-shadow:0 0 0 3px #bbf7d0,0 0 16px rgba(34,197,94,.4)}
+.kbar .barrow .part.filled{border:2.5px solid #86efac;background:#f0fdf4;color:#15803d}
+.venn{width:100%;height:auto;background:#fff;border-radius:16px}
+.venn .sh{fill:none;stroke:#94a3b8;stroke-width:2.5}
+.venn .both{fill:#a78bfa;opacity:0;transition:opacity .6s}
+.venn .both.on{opacity:.28}
+.venn .vn circle{fill:#fff;stroke:#c4b5fd;stroke-width:2}
+.venn .vn text{text-anchor:middle;font:800 17px 'Baloo 2';fill:var(--deep)}
+.venn .vn{cursor:pointer;transition:opacity .4s}
+.venn .vn.out{opacity:.18}
+.venn .vn.nope circle{fill:var(--peach);stroke:#fdba74}
+.venn .vn.win circle{fill:#f0fdf4;stroke:#22c55e;stroke-width:3}
+.dzrow{display:flex;align-items:center;justify-content:center;gap:8px;font:800 30px 'Baloo 2';color:var(--deep);background:#fff;border-radius:16px;padding:6px 10px;position:relative}
+.dzrow small{position:absolute;left:10px;top:4px;font:900 10px Nunito;color:var(--soft);letter-spacing:.05em}
+.dzrow.orig{padding-top:16px}
+.dzrow.flip{padding-top:16px;background:#faf5ff}
+.dzn{min-width:30px;text-align:center}
+.dzq{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;border-radius:12px;border:3px dashed var(--org);color:var(--org)}
+.dzn.ansq{color:#15803d;background:#f0fdf4;border-radius:12px;padding:0 8px;box-shadow:0 0 0 3px #bbf7d0,0 0 16px rgba(34,197,94,.4)}
+.dzrow .box{width:auto;min-width:76px;padding:0 6px}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -157,10 +183,13 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
   <button data-go="kd">Kort division</button>
   <button data-go="trap">Trappan</button>
   <button data-go="prob">Problemlösning</button>
+  <button data-go="klur">Kluringar</button>
+  <button data-go="venn">Vilket tal?</button>
+  <button data-go="dz">10/100/1000</button>
   <button data-go="restart">Börja om vyn</button>
 </div>
 <div class="app" id="app"></div>
-<p class="note" style="max-width:390px">Steg 1 av mockupen: hubben, kort division och trappan med samma tal (5736 / 7). Grunder och Tänka byggs i nästa steg.</p>
+<p class="note" style="max-width:390px">Mockup för plan 3: hubben, kort division och trappan (5736 / 7), problemlösning, kluringar, Vilket tal? och 10/100/1000. Dela och gruppera och Divisionstabellen är som i appen idag.</p>
 
 <script>
 'use strict';
@@ -188,7 +217,7 @@ app.addEventListener('click', e => {
   const k = b.dataset.k;
   if (k === 'e') typed = typed.slice(0, -1);
   else if (k === 'ok') { padHandler(typed); return; }
-  else if (typed.length < 3) typed += k;
+  else if (typed.length < 5) typed += k;
   const f = $('.box.focus'); if (f) f.textContent = typed;
   const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0);
 });
@@ -243,11 +272,11 @@ function hub() {
   app.innerHTML = `<div class="top"><button class="back">${ic.back}Tillbaka</button><div class="ttl">Övningsblad</div><div style="width:86px"></div></div>
   <div style="display:flex;gap:8px"><div class="seg" style="flex:1"><button>Lättare</button><button class="on">Svårare</button></div><div class="seg" style="flex:1"><button class="on">Med hjälp</button><button>Själv</button></div></div>
   <div class="sec">GRUNDER</div>
-  <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','', 'later')}${t(2,'Divisionstabellen','20 tal','','later')}${t(3,'10, 100 och 1000','vänd på det','','later')}</div>
+  <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','', 'later')}${t(2,'Divisionstabellen','20 tal','','later')}${t(3,'10, 100 och 1000','vänd på det','dz','new')}</div>
   <div class="sec">RÄKNA</div>
   <div class="tiles">${t(4,'Kort division','stora tal, steg för steg','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
   <div class="sec">TÄNKA</div>
-  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','rita stapeln','','later')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','','later')}</div>
+  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','rita stapeln','klur','new')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','venn','new')}</div>
   <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
 }
@@ -593,10 +622,167 @@ async function probEnd() {
   act(`<button class="ghost">Till hubben</button>`, hub);
 }
 
+/* ── Kluringar (32b, "hur fasen ska man ens tänka här?"): stapelmodellen framåt, sedan baklänges ── */
+function klurView() {
+  view = 'klur'; typed = ''; padHandler = null;
+  const a = 3, b = 2, k = 4, mid = k * b, tot = mid * a;   /* tänkta talet 24: 24 / 3 = 8, 8 / 2 = 4 */
+  app.innerHTML = kdShell('Kluringar') + `
+  <div class="card">
+    <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
+    <div class="why" id="why"></div>
+    <div class="kbar">
+      <div class="barlab" id="kTop">?</div>
+      <div class="barrow" id="kRow1"><div class="seg1"></div></div>
+      <div class="barrow sub2" id="kRow2" style="visibility:hidden"></div>
+    </div>
+    <div class="ask" id="ask"></div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  klurRun(a, b, k, mid, tot);
+}
+async function klurRun(a, b, k, mid, tot) {
+  ask('Rita det! Talet vi söker är en stapel. Vi vet inte hur lång den är än.');
+  why('En stapel gör det osynliga synligt: vi ser vad som händer med talet.');
+  await waitNext(`Dela med ${a}`);
+  /* framåt: stapeln delas i a delar, den första delen delas i b */
+  $('#kRow1').innerHTML = Array.from({ length: a }, (_, i) => `<div class="part${i === 0 ? ' first' : ''}" id="p1_${i}"><span>?</span></div>`).join('');
+  ask(`Talet delas med ${a}: stapeln blir ${a} lika delar.`); why('');
+  await waitNext(`Dela en del med ${b}`);
+  const r2 = $('#kRow2'); r2.style.visibility = 'visible';
+  r2.innerHTML = Array.from({ length: b }, (_, i) => `<div class="part small${i === 0 ? ' last' : ''}" id="p2_${i}"><span>${i === 0 ? k : '?'}</span></div>`).join('') + `<div class="spacer" style="flex:${a - 1}"></div>`;
+  r2.style.setProperty('--w', `calc(${100 / a}% - 3px)`);
+  ask(`En del delas med ${b}. Då blir det <b>${k}</b>. Nu vet vi hur stor den minsta biten är.`);
+  why(`Den lilla biten är ${k}. Därifrån kan vi gå baklänges.`);
+  /* baklänges: b bitar om k = en del; a delar = talet */
+  await waitNext('Gå baklänges');
+  why(`Delat med ${b} blev ${k}. Baklänges blir det gånger: ${b} bitar om ${k}.`);
+  for (let i = 1; i < b; i++) { await fly($('#p2_0 span'), $('#p2_' + i), String(k)); $('#p2_' + i).innerHTML = `<span>${k}</span>`; }
+  let q = `Hur stor är en del? Räkna ${b} · ${k}.`;
+  ask(q); $('#sub').innerHTML = `${b} · ${k} = <div class="box" id="sb"></div>`;
+  await typeAnswer($('#sb'), mid, q);
+  $('#p1_0').innerHTML = `<span>${mid}</span>`; $('#p1_0').classList.add('filled');
+  ask(`<span class="ok">Rätt!</span>En del är <b>${mid}</b>.`);
+  await waitNext('Och hela talet?');
+  why(`Delat med ${a} blev ${mid}. Baklänges blir det gånger: ${a} delar om ${mid}.`);
+  for (let i = 1; i < a; i++) { await fly($('#p1_0 span'), $('#p1_' + i), String(mid)); $('#p1_' + i).innerHTML = `<span>${mid}</span>`; $('#p1_' + i).classList.add('filled'); }
+  q = `Hur stort är hela talet? Räkna ${a} · ${mid}.`;
+  ask(q); $('#sub').innerHTML = `${a} · ${mid} = <div class="box" id="sb"></div>`;
+  await typeAnswer($('#sb'), tot, q);
+  $('#sub').innerHTML = '';
+  $('#kTop').innerHTML = `<span class="ansbig">${tot}</span>`;
+  ask(`<span class="ok">Klart!</span>Talet är <b>${tot}</b>.`);
+  why(`Kontroll framåt: ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}. Det stämmer med det jag tänkte.`);
+  act(`<button class="ghost">Till hubben</button>`, hub);
+}
+
+/* ── Vilket tal? (26b): Venndiagram, med hjälp tonas tal bort ledtråd för ledtråd (uteslutning) ── */
+const VN = [ [34,62,58],[21,70,152],[12,148,82],[15,160,146],[18,126,118],[20,236,58],[8,244,150],[35,306,28],[16,300,196],[27,46,208] ];
+const inSq = (x, y) => x > 40 && x < 190 && y > 30 && y < 180;
+const inCi = (x, y) => Math.hypot(x - 185, y - 110) < 78;
+function vennView() {
+  view = 'venn'; typed = ''; padHandler = null;
+  app.innerHTML = kdShell('Vilket tal?') + `
+  <div class="card">
+    <div class="story" id="clue">Talet är inuti <b class="tok" id="c1">både cirkeln och kvadraten</b>. Det kan delas <b class="tok" id="c2">jämnt med 4</b>.</div>
+    <div class="why" id="why"></div>
+    <svg class="venn" viewBox="0 0 340 230" id="venn">
+      <defs><clipPath id="sqc"><rect x="40" y="30" width="150" height="150"/></clipPath></defs>
+      <rect x="40" y="30" width="150" height="150" class="sh" id="shS"/>
+      <circle cx="185" cy="110" r="78" class="sh" id="shC"/>
+      <polygon points="215,205 335,120 335,222" class="sh" id="shT"/>
+      <circle cx="185" cy="110" r="78" clip-path="url(#sqc)" class="both" id="both"/>
+      ${VN.map(([n, x, y]) => `<g class="vn" data-n="${n}" transform="translate(${x},${y})"><circle r="16"/><text dy="6">${n}</text></g>`).join('')}
+    </svg>
+    <div class="ask" id="ask"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  vennRun();
+}
+async function vennRun() {
+  const gs = [...document.querySelectorAll('.vn')];
+  const pos = g => VN.find(v => v[0] === +g.dataset.n);
+  ask('Läs ledtrådarna en i taget. Vi stryker de tal som inte passar.');
+  why('Varje ledtråd tar bort tal. Till slut finns bara ett kvar.');
+  await waitNext('Ledtråd 1');
+  $('#c1').classList.add('litok'); $('#both').classList.add('on');
+  ask('Inuti <b>både</b> cirkeln och kvadraten: bara talen i det lila området.');
+  await W(PACE);
+  for (const g of gs) { const [, x, y] = pos(g); if (!(inSq(x, y) && inCi(x, y))) { g.classList.add('out'); await W(120); } }
+  why('Talen utanför det lila området är strukna. Kvar: 12, 15 och 18.');
+  await waitNext('Ledtråd 2');
+  $('#c2').classList.add('litok');
+  ask('Kan delas jämnt med 4: vilket av talen som är kvar går att dela med 4 utan rest?');
+  await W(PACE);
+  for (const g of gs) { const n = +g.dataset.n; if (!g.classList.contains('out') && n % 4) { g.classList.add('out'); await W(300); } }
+  why('15 / 4 = 3 rest 3 och 18 / 4 = 4 rest 2. De stryks. Bara ett tal är kvar.');
+  ask('Tryck på talet.');
+  await new Promise(res => gs.forEach(g => g.onclick = () => {
+    const n = +g.dataset.n;
+    if (n === 12) { g.classList.add('win'); gs.forEach(x => x.onclick = null); res(); }
+    else { g.classList.add('nope'); setTimeout(() => g.classList.remove('nope'), 900);
+      const [, x, y] = pos(g);
+      ask(`<span class="soft">Inte riktigt – försök igen.</span>${!(inSq(x, y) && inCi(x, y)) ? `${n} är inte i både cirkeln och kvadraten.` : `${n} går inte jämnt att dela med 4.`}`); }
+  }));
+  ask('<span class="ok">Klart!</span>Talet är <b>12</b>.');
+  why('12 ligger i både cirkeln och kvadraten, och 12 / 4 = 3 utan rest.');
+  act(`<button class="ghost">Till hubben</button>`, hub);
+}
+
+/* ── 10, 100 och 1000: vänd på det. Originalfrågan står kvar, den vända raden flyger fram under (Dennis 12/11) ── */
+const DZ = [
+  { a: 6000, b: '?', c: 6, ans: 1000, op: '/', x: 6000, y: 6, q: 'Vad ska 6000 delas med för att bli 6?',
+    flipWhy: 'Om 6000 delat med något blir 6, så blir 6000 delat med 6 just det något.',
+    calcWhy: `6000 är 6 tusenlappar ${icons(6, 0)}. Delat på 6 blir det 1 tusenlapp var: 1000.` },
+  { a: '?', b: 10, c: 30, ans: 300, op: '·', x: 10, y: 30, q: 'Vilket tal delat med 10 blir 30?',
+    flipWhy: 'Om något delat med 10 blir 30, så är något 10 gånger så stort som 30. Division baklänges är gånger.',
+    calcWhy: `30 tior ${icons(30, 2)} är 300 kronor. 10 · 30 = 300.` } ];
+function dzView(k = 0) {
+  view = 'dz'; typed = ''; padHandler = null;
+  const t = DZ[k];
+  const cell = (v, id) => v === '?' ? `<span class="dzq" id="${id}">?</span>` : `<span class="dzn" id="${id}">${v}</span>`;
+  app.innerHTML = kdShell('10, 100 och 1000') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="dzrow orig"><small>FRÅGAN</small>${cell(t.a, 'oa')} / ${cell(t.b, 'ob')} = ${cell(t.c, 'oc')}</div>
+    <div class="why" id="why"></div>
+    <div class="dzrow flip" id="flip" style="visibility:hidden"><small>VÄND PÅ DET</small><span class="dzn" id="fx"></span> <span id="fop">${t.op}</span> <span class="dzn" id="fy"></span> = <div class="box" id="fz"></div></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  dzRun(k);
+}
+async function dzRun(k) {
+  const t = DZ[k];
+  ask(t.q);
+  why('Det okända står inte sist. Då vänder vi på frågan, så att det okända hamnar där vi kan räkna fram det.');
+  await waitNext('Vänd på det');
+  $('#flip').style.visibility = 'visible';
+  why(t.flipWhy);
+  /* talen flyger från frågan till den vända raden: frågan står kvar ovanför */
+  const src = v => ['oa', 'ob', 'oc'].map(id => $('#' + id)).find(e => e.textContent === String(v));
+  await fly(src(t.x), $('#fx'), String(t.x)); $('#fx').textContent = t.x;
+  await fly(src(t.y), $('#fy'), String(t.y)); $('#fy').textContent = t.y;
+  await waitNext('Räkna');
+  why(t.calcWhy);
+  const q = `Räkna ${t.x} ${t.op} ${t.y}.`;
+  ask(q);
+  await typeAnswer($('#fz'), t.ans, q);
+  /* svaret flyger tillbaka upp till frågetecknet */
+  ask('<span class="ok">Rätt!</span>Nu flyttar vi svaret till frågan.');
+  const qm = $('#ob').textContent === '?' ? $('#ob') : $('#oa');
+  await fly($('#fz'), qm, String(t.ans)); qm.textContent = t.ans; qm.className = 'dzn ansq';
+  ask(`<span class="ok">Klart!</span>${t.a === '?' ? t.ans : t.a} / ${t.b === '?' ? t.ans : t.b} = ${t.c}.`);
+  why(t.a === '?' ? `Kontroll: ${t.ans} / 10 = ${t.c}. Stryk en nolla i ${t.ans}, så blir det ${t.c}.` : `Kontroll: ${t.a} / ${t.ans} = ${t.c}.`);
+  act(k + 1 < DZ.length ? `<button class="next">Nästa uppgift ${ic.next}</button>` : `<button class="ghost">Till hubben</button>`, () => k + 1 < DZ.length ? dzView(k + 1) : hub());
+}
+
 function go(v) {
   if (v === 'restart') v = view;
   document.querySelectorAll('#lab button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
-  ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView() })[v]();
+  ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView(), klur: klurView, venn: vennView, dz: () => dzView(0) })[v]();
 }
 document.querySelectorAll('#lab button').forEach(b => b.onclick = () => go(b.dataset.go));
 go(location.hash.slice(1) || 'hub');
