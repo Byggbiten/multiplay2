@@ -410,7 +410,7 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
-## Övningsblad · Division, plan 3 (v77, D47, D48)
+## Övningsblad · Division, plan 3 (v77, v79: beröm och utdelning; D47, D48)
 
 I Kort divisions lägesvy leder kortet **Övningsblad** till åtta moduler i tre avdelningar: **Grunder** (Dela och
 gruppera, Divisionstabellen, 10, 100 och 1000), **Räkna** (Kort division, Trappan) och **Tänka** (Problemlösning,
