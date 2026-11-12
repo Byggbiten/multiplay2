@@ -470,7 +470,33 @@ async function trapRun() {
       ask(`<span class="ok">Klart!</span>Svaret är <b>${P.quot}</b>, rest <b>${P.rest}</b>.`);
       why(`Varje person fick ${P.quot} kr, och ${P.rest} kr blev över.`);
       think(`<div class="answer"><span>${N} / ${D} =</span> <b class="aq">${P.quot}</b><span>, rest</span> <b class="ar">${P.rest}</b></div>`);
-      act(`<button class="ghost">Räkna samma tal i kort division</button>`, () => go('kd'));
+      act(`<button class="ghost" id="cmpBtn">Jämför med kort division</button>`);
+      $('#cmpBtn').onclick = async () => {
+        act('');
+        /* Spegeln (valfri): VARJE rest i trappan är en liten siffra i kort division, och det som blir över sist är resten */
+        const mid = P.steps.filter(x => !x.last);
+        let kd = '';
+        [...N].forEach((d, k) => { const sm = mid.find(x => x.i + 1 === k); kd += (sm ? `<sup class="sm" id="sm${k}">${sm.r}</sup>` : '') + `<span class="${CLS[k]}">${d}</span>`; });
+        think(`<div class="mirror"><div class="mini"><small>KORT DIVISION</small><span>${kd} = ${P.quot}, rest <span class="sm" id="smR">${P.rest}</span></span></div></div>`);
+        const rcells = k => { const x = P.steps[k], r = 3 + 2 * k, c = 1 + x.i; const L = String(x.r).length; return [...Array(L).keys()].map(j => C(r, c - L + 1 + j)); };
+        for (let k = 0; k < P.steps.length; k++) {
+          const x = P.steps[k];
+          document.querySelectorAll('.pair').forEach(e => e.classList.remove('pair'));
+          rcells(k).forEach(e => e.classList.add('pair'));
+          if (!x.last) {
+            const nx = P.ds[x.i + 1];
+            $('#sm' + (x.i + 1)).classList.add('pair');
+            ask(`Efter ${PLACE[x.i]}en blev <b>${x.r}</b> över. I kort division är det den lilla ${x.r}:an framför ${nx}:an.`);
+            why(`${nm(x.r, x.i)} ${icons(x.r, x.i)} växlas till ${x.r * 10} ${MONEY[x.i + 1].many}. Trappan skriver ut det, kort division skriver bara den lilla siffran.`);
+            await waitNext(k + 1 < P.steps.length - 1 ? 'Nästa växling' : 'Och sist?');
+          } else {
+            $('#smR').classList.add('pair');
+            ask(`Sist blev <b>${x.r}</b> över. Det finns inget mer att växla till, så det är resten – i båda.`);
+            why(`Varje växling i trappan är en liten siffra i kort division, och det som blir över sist är resten.`);
+            act(`<button class="ghost">Räkna samma tal i kort division</button>`, () => go('kd'));
+          }
+        }
+      };
     }
   }
 }

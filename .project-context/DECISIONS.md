@@ -771,9 +771,9 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   inte 'varför' siffrorna flyttas som de görs. Så jag skulle behöva mera förklaringar".
 
 - ✎ **2026-11-12, svaret i fokus, ingen jämförelsebild:** när uträkningen är klar lyser kvoten (grön) och resten (lila),
-  och svaret står för sig ("5736 / 7 = 819, rest 3"). Trappan slutar där, utan bilden som jämförde trappan med kort
-  division. Källa: Dennis: "själva svaret behöver få lite fokus/belysning i slutet. och restvärdet" och "vi struntar i
-  den där sista jämförelsebilden. Den förstör mer än den hjälper".
+  och svaret står för sig ("5736 / 7 = 819, rest 3"). Jämförelsen med kort division är valfri (knappen "Jämför med kort
+  division") och visar varje växling i par, inte bara den första. Källa: Dennis: "själva svaret behöver få lite fokus/belysning i slutet. och restvärdet" och "vi struntar i
+  den där sista jämförelsebilden. Den förstör mer än den hjälper", och sedan om parjämförelsen "ser jättebra ut".
 
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
