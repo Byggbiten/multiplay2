@@ -1278,5 +1278,11 @@ describe('D48: övningsbladens knappsats och Ledtråd i multiplikationen och kor
     expect(src).toMatch(/Ledtråd <small>\$\{lifelines\} kvar<\/small>/);
     expect(src).toMatch(/\.md-pad \.md-nk \{ width:auto; height:44px;/);
   });
+  it('Räkna med hjälp: svaret skrivs i en ruta i frågan, inte i ett eget fält (D48 ✎ "Direkt i cellen")', () => {
+    const help = src.slice(src.indexOf('  function helpPadHTML()'), src.indexOf('  function lifelineBtnHTML()'));
+    expect(help).not.toMatch(/md-help-field/);
+    expect(src).toMatch(/tx\.insertAdjacentHTML\('beforeend', '<span class="md-inl num" id="md-help-field">/);
+    expect(src).toMatch(/helpWantsInput\(\)\) helpRenderField\(\);/);
+  });
 });
 

@@ -696,6 +696,14 @@ const MultDivGame = (() => {
       font:900 14px Nunito,system-ui; padding:0 6px; cursor:pointer; white-space:nowrap; }
     .md-hint small { font:800 11px Nunito,system-ui; color:#64748b; margin-left:2px; }
     .md-hint:disabled { opacity:.5; cursor:default; }
+    /* D48 ✎: svaret skrivs i en ruta direkt i frågan ("Vad är 5 · 2? [10]"), inte i ett eget fält ovanför knapparna */
+    .md-inl { display:inline-flex; align-items:center; justify-content:center; gap:1px; min-width:52px; height:40px;
+      padding:0 8px; margin-left:6px; vertical-align:middle; border:2.5px solid #fb923c; border-radius:12px;
+      background:#fff7ed; font:800 24px 'Baloo 2',system-ui; color:var(--deep); box-shadow:0 0 0 3px #fed7aa; }
+    .md-inl.has-digits { background:#fff; }
+    .md-inl.wrong { border-color:#fdba74; background:#fff3e6; color:#9a3412; box-shadow:none; }   /* D39: mjuk persika */
+    .md-inl.shake { animation:md-shake 0.3s ease; }
+    .md-inl .md-caret { height:.9em; }
     /* D48: kladdens verktyg som övningsbladens – ikonrad överst med Ångra och Gör om */
     .md-scbar { display:flex; align-items:center; gap:5px; flex-shrink:0; }
     .md-scbar .md-kl { flex:1; font:900 12px Nunito,system-ui; color:#134e4a; letter-spacing:.05em; text-transform:uppercase; }
@@ -3352,6 +3360,7 @@ const MultDivGame = (() => {
     if (cur && html && cur.innerHTML === `<div class="md-tx">${html}</div>`) return;
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
     pulseRefs(area);
+    if (document.getElementById('md-help-submit') && helpWantsInput()) helpRenderField();   /* D48 ✎: svarsrutan i frågan */
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
@@ -3482,7 +3491,6 @@ const MultDivGame = (() => {
      — annars hoppar den nar bubblan byter fraga. */
   function helpPadHTML() {
     return `<div class="md-panel">
-      <div class="md-field md-field-sm num" id="md-help-field"><span class="md-caret"></span></div>
       <div class="md-pad">
         ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.helpKey('${k}')">${k}</button>`).join('')}
@@ -3537,8 +3545,18 @@ const MultDivGame = (() => {
     if (btn) btn.outerHTML = lifelineBtnHTML();
   }
 
+  /* steget väntar på ett skrivet svar (samma sorter som helpSubmit tar emot) */
+  function helpWantsInput() {
+    const it = helpItem();
+    return !!it && helpSub === 0 && !exInputLocked && ['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero', 'divrest0'].includes(it.kind);
+  }
   function helpRenderField() {
-    const field = document.getElementById('md-help-field');
+    let field = document.getElementById('md-help-field');
+    /* D48 ✎: rutan står sist i frågan i bubblan; ritas bubblan om under frågan läggs den tillbaka */
+    if (!field && document.getElementById('md-help-submit') && helpWantsInput()) {
+      const tx = document.querySelector('#md-bubble .md-tx');
+      if (tx) { tx.insertAdjacentHTML('beforeend', '<span class="md-inl num" id="md-help-field"><span class="md-caret"></span></span>'); field = document.getElementById('md-help-field'); }
+    }
     if (field) {
       field.classList.toggle('has-digits', helpInput.length > 0);
       field.innerHTML = (helpInput ? `<span>${helpInput}</span>` : '') + '<span class="md-caret"></span>';
