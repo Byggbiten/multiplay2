@@ -792,6 +792,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   "arbetar igenom dessa i mockupen med att man räknar själv … de behöver ändå nått slags 'semi-stöd' … Men det får
   inte ge för mycket".
 
+- ✎ **2026-11-12, Själv: rutorna visar hur många siffror svaret har:** i läget Själv har kvoten lika många rutor som
+  svaret har siffror, som i Med hjälp (i kort division och i trappan). Det avslöjar var man börjar, och det bjuder vi
+  på. Det förhindrar att resten hamnar i en kvotruta. Ledtråd 1 är kvar och förklarar varför man börjar där. Källa: Dennis:
+  "Vi kan va så pass snäll att vi ger dem hur många rutor som skall fyllas i i svaret. Jag råkade nyss fylla i 819
+  mde 3 i restvärd på entalscellen … Så vi bjuder på det att de redan i förhand vet pga. cellerna hur många siffror
+  svaret kommer att ge".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

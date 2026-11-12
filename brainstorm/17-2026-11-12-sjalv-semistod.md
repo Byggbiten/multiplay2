@@ -105,7 +105,7 @@ fungerande läsbar vy med kladden på begäran.
 
 ## Bygget – förfiningar som kom när mockupen byggdes (12/11, efter komprimeringen)
 
-- **En ruta per siffra i kvoten** (kort division och trappan), inte en per steg. Antalet rutor får inte avslöja var
+- ~~**En ruta per siffra i kvoten**~~ – ändrat av Dennis samma dag (D47 ✎): kvoten har en ruta per siffra i svaret. Antalet rutor fick inte avslöja var
   man börjar. En tom ruta eller 0 först räknas som rätt, och den tonas ner när uppgiften är klar. Resten står i en
   egen rad under ("rest [ ]"), så att uppställningen ryms i 390 px.
 - **Ledtrådarna i kort division och trappan:** ledtråd 1 är frågan för steget man står på ("7 får inte plats i 5.

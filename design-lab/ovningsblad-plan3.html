@@ -204,6 +204,8 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .box.miss,.ri.miss,.rs.miss,.es.miss{background:var(--peach)!important;border-color:#fdba74!important}
 .rs.slot.inp::after{content:"";position:absolute;inset:-12px -5px}
 .rs.focus,.ri.focus{border:2px solid #0f766e!important;box-shadow:0 0 0 2px var(--org)}
+.kd.self{margin-top:14px}
+.pad button:focus{outline:none}
 .kd.self .numrow{gap:15px;padding-left:16px}
 .kd.self .box{width:31px}
 .kd.self .dg{cursor:pointer;width:27px}
@@ -1119,7 +1121,7 @@ function kdSelf() {
         <div class="den"><span>${D}</span></div>
       </div>
       <div class="eqs">=</div>
-      <div class="qwrap"><div class="qrow">${[...N].map((_, i) => `<div class="box" id="q${i}"><span class="cap ${CLS[i]}">${CAP[CLS[i]]}</span></div>`).join('')}</div>
+      <div class="qwrap"><div class="qrow">${P.steps.map(s => `<div class="box" id="q${s.i}"><span class="cap ${CLS[s.i]}">${CAP[CLS[s.i]]}</span></div>`).join('')}</div>
         <div class="rrow">rest <div class="box rest" id="qR"></div></div></div>
     </div>
     ${toolsHTML(remsaBtn)}${remsaHTML(D)}
@@ -1128,17 +1130,15 @@ function kdSelf() {
   $('[data-hub]').onclick = hub;
   ask(`Räkna ${N} / ${D} själv. Skriv kvoten och resten i rutorna.<span class="kv">Tryck på en siffra för att stryka den. De små rutorna är för det som blir över.</span>`);
   document.querySelectorAll('.kd.self .dg').forEach(d => d.onclick = e => { if (!e.target.closest('.rs')) d.classList.toggle('struck'); });
-  const step = i => P.steps.find(s => s.i === i);
-  sfInit({
+  sfInit({   /* rutorna visar hur många siffror svaret har – det bjuder vi på (D47 ✎) */
     acc: KD.acc,
-    boxes: [...[...N].map((_, i) => { const s = step(i); return { el: $('#q' + i), need: !!s, ok: v => s ? v === String(s.q) : v === '' || v === '0' }; }),
+    boxes: [...P.steps.map(s => ({ el: $('#q' + s.i), ok: v => v === String(s.q) })),
       { el: $('#qR'), ok: v => v === String(P.rest) },
       ...[...N].slice(1).map((_, k) => ({ el: $('#rs' + (k + 1)), chain: false, need: false }))],
     hint: n => stepHint(n, s => $('#q' + s.i), cs => grp(cs === P.steps[0] ? [...Array(cs.i + 1).keys()] : [cs.i])),
     onRight: kv => {
       grp([]);
       P.steps.forEach(s => $('#q' + s.i).classList.add('ans')); $('#qR').classList.add('ans');
-      for (let i = 0; i < P.start; i++) $('#q' + i).classList.add('lead');
       ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
       if (KD.onDone) act(nextBtn('Tillbaka till berättelsen'), KD.onDone);
       else act(nextBtn('Ny uppgift'), () => { setTask(String(1000 + Math.floor(Math.random() * 9000)), 3 + Math.floor(Math.random() * 7)); kdView({}); });
@@ -1164,9 +1164,9 @@ function trapSelf() {
   C(1, 1).classList.add('bl');
   const tb = (r, c1, c2, id) => { const e = document.createElement('div'); e.className = 'box tb'; e.id = id; e.style.gridRow = String(r + 1); e.style.gridColumn = `${c1 + 1} / ${c2 + 2}`; $('#trap').appendChild(e); return e; };
   const step = i => P.steps.find(s => s.i === i);
-  const qs = [...N].map((_, k) => tb(0, 1 + k, 1 + k, 'tq' + k));
+  const qs = [...N].map((_, k) => step(k) ? tb(0, 1 + k, 1 + k, 'tq' + k) : null);   /* bara över svarets siffror (D47 ✎) */
   const total = 2 * P.steps.length, moved = new Set(); let done = 0;
-  const qFilled = () => qs.filter(e => getVal(e) !== '').length;
+  const qFilled = () => qs.filter(e => e && getVal(e) !== '').length;
   function addRow() {
     const k = Math.floor(done / 2), s = P.steps[k], col = 1 + s.i, len = String(s.cur).length;
     let e;
@@ -1200,18 +1200,17 @@ function trapSelf() {
   });
   ask(`Räkna ${N} / ${D} i trappan. Kvoten skrivs överst, en siffra i taget.<span class="kv">Under talet skriver du det som delas ut och det som blir över. Nästa ruta ger nästa rad.</span>`);
   sfInit({
-    boxes: qs.map((el, k) => { const s = step(k); return { el, chain: false, need: !!s, ok: v => s ? v === String(s.q) : v === '' || v === '0' }; }),
+    boxes: P.steps.map(s => ({ el: qs[s.i], chain: false, ok: v => v === String(s.q) })),
     grow, more: () => done < total,
     hint: n => stepHint(n, s => qs[s.i], cs => { if (cs === P.steps[0]) for (let c = 1; c <= 1 + cs.i; c++) C(1, c).classList.add('lit'); }),
     onRight: kv => {
       document.querySelectorAll('.c.lit').forEach(x => x.classList.remove('lit'));
       P.steps.forEach(s => qs[s.i].classList.add('ans'));
-      for (let i = 0; i < P.start; i++) qs[i].classList.add('lead');
       $('#tr' + (P.steps.length - 1)).classList.add('rest', 'ans');
       ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
       act(`<button class="ghost">Till hubben</button>`, hub);
     } });
-  sfFocus(qs[0]);
+  sfFocus(qs[P.start]);
 }
 
 /* Problemlösning: barnet bygger uträkningen genom att trycka på talen i berättelsen och på räknesättet (inget
