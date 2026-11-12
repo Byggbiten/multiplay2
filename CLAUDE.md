@@ -24,10 +24,11 @@ namn i uppgifterna.
 | Söker | Fil |
 |---|---|
 | Var vi slutade | senaste `logg/` |
-| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D46) |
+| Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D48) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
 | Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md` |
+| Tänket bakom övningsbladen (pilar, varför, pengar, takt) | `.project-context/METOD-OVNINGSBLAD.md` – läs före varje vy i övningsbladen |
 | Avfärdade idéer, arbetsvanor | `.project-context/AGENT_CONTEXT.md` |
 | Granskningar och tankepass | `brainstorm/README.md` |
 | Mockuper som är facit | `design-lab/README.md` |

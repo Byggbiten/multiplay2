@@ -746,7 +746,7 @@ const MatteProv = (() => {
   function askHTML(t) {
     const hb = IN.hb, q = IN.dealPending ? L.dealAsk(t) : L.boxAsk(t, hb.i), T = isOv(t) ? pvText : x => esc(x);
     return `<div class="mp-ask">${hb.ack ? `<div class="mp-ack">${svg('check')}${T(hb.ack)}</div>` : ''}
-      ${(t.type === 'ts' || t.type === 'dz') && !IN.dealPending ? `<div class="mp-q0">${pvHTML(t.n)} / ${pvHTML(t.d)}</div>` : ''}<div class="mp-q1">${isOv(t) ? pvText(q.text) : tokHTML(q.text)}</div>${hb.msg ? `<div class="mp-rqmsg ${hb.msg.kind}">${T(hb.msg.text)}</div>` : ''}</div>`;
+      ${L.taskHead(t) && !IN.dealPending ? `<div class="mp-q0">${L.taskHead(t).replace(/\d+/g, m => pvHTML(m))}</div>` : ''}<div class="mp-q1">${isOv(t) ? pvText(q.text) : tokHTML(q.text)}</div>${hb.msg ? `<div class="mp-rqmsg ${hb.msg.kind}">${T(hb.msg.text)}</div>` : ''}</div>`;
   }
   function introSteps(moment, lv) {
     const dv = divIntroSteps(moment);

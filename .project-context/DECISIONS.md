@@ -69,6 +69,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 - D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
+- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, ensiffrig nämnare (flersiffrig senare), kort division huvudsätt, trappan egen modul
+- D48 Övningsbladens knappsats, svarsknapp och kladd är appens standard (besvarar P18)
 
 ---
 
@@ -722,4 +724,95 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   att se att du kör ordning och reda och kontextkomprimering innan du når 95%" och "att de loggar och antecknar så vem
   som helst kan hoppa in och ta över deras arbete när som. Dvs. Repot = minnet".
 - **Var det bor:** `CLAUDE.md` (tabellen under Ordning och reda, stycket Kontoren), `agenter/README.md` (Rutinen).
+
+## D47 · 2026-11-12 · Övningsbladen för division: plan 3, för fyran och uppåt
+- **Beslut:** Övningsbladen byggs om efter plan 3 i `brainstorm/16`: åtta moduler i tre avdelningar. Grunder har Dela
+  och gruppera, Divisionstabellen och 10/100/1000 (vänd på det). Räkna har Kort division (långsam, synkad, växlingen
+  med block) och Trappan. Tänka har Problemlösning (flerval av uttryck, kort divisions motor, svarsbanken som
+  kontroll), Kluringar (32b med stapelmodellen) och Vilket tal? (Venndiagram). Begrepp och Varje talsort utgår,
+  Pengar går upp i Problemlösning. Målgruppen är åk 4 och uppåt: större tal, också med tvåsiffrig (eller större)
+  nämnare. Där blir trappan räknesättet, med tabellsökning mot nämnaren (53 · 4 = 212, 53 · 5 = 265 för stort). Nya
+  designregler: förståelseprovet (hjälpen slutar i en bild som visar varför) och att bandet inte tänker åt barnet.
+  Mockup först (en fil, flera vyer).
+- **Källa:** Dennis 2026-11-12: "toppen. och va inte för fokuserad på att [tvåan] skall kunna klara detta. det är mest
+  till för de som går i 4:an och uppåt. så vi behöver större tal också där nämnaren är 2 siffrigt eller mer", efter
+  "dessa tycker jag förtjänar mer emphasis" om sju sidor ur kopieringsunderlaget och kritiken i `brainstorm/15`.
+- ✎ **2026-11-12, kort division är huvudsättet:** också vid tvåsiffrig nämnare räknas med kort division, där
+  tabellraderna mot nämnaren visas som en tankerad. Trappan är stödet som visar varför resten hoppar, och liggande
+  stolen är en växel. Venndiagrammet besvaras genom att trycka på talet, utan knappsats. Källa: Dennis: "i huvudsak
+  kort division" och om Venndiagrammet "det är ok". P18 är fortfarande öppen.
+- ✎ **2026-11-12, trappan är en egen modul, och VD:n bygger själv:** trappan blir en egen modul i Räkna, så att
+  barnet lär sig även den metoden. Kort division är fortfarande huvudsättet. Mockupen och bygget görs av VD:n själv,
+  inte av en subagent. När Dennis är nöjd skrivs tänket och metodiken ner, så att en framtida agent kan ta över dem i
+  sitt kontor. Källa: Dennis: "gällande trappan så tänkte jag det som en egen 'modul' i övningsbladet. så man lär sig
+  dens metod också. men huvudsättet är kort division" och "det kanske är bättre att du personligen bygger detta. inte
+  en subagent. men att du ser till att om jag blir nöjd, spara tänket och metodiken och logga etc, så att en subagent
+  kan föra in det till sitt kontor för att kunna tänka som du i framtiden".
+
+- ✎ **2026-11-12, siffror som flyttas och pilar är kärnan:** i förklarande steg ritas först en streckad lila pil från
+  talet till rutan, sedan en paus, och sedan glider talet längs pilen. Takten är lugn: ungefär 900 ms per
+  förflyttning, och nästa steg kommer på klick. Pilen startar i själva siffran och böjer bort från text. Källa:
+  Dennis: "animationer där siffror flyttas i förklarande steg eller pilar 'såsom du gjorde kort divison' det är
+  superbra. nu gick som sagt animationen lite väl snabbt … men den va väldigt pedagogisk. så sånt tänk är jätteviktigt."
+
+- ✎ **2026-11-12, ensiffrig nämnare (ändrar D47):** övningsbladen följer häftet. Kapitel 3 har bara ensiffrig nämnare
+  (förutom 10, 100 och 1000), så kort division och trappan räknar med ensiffrig nämnare och större tal (till exempel
+  5736 / 7). Flersiffrig nämnare blir en senare modul, när barnet kommer dit (oftast i åk 5–6, i trappan med en lista
+  där nämnaren läggs till gång på gång). Kontrollerat: inga flersiffriga nämnare i `4A_kopieringsunderlag_kap3` eller
+  `4A_K_S_kapitel_3`. Källa: Dennis: "Om det inte finns flersiffriga nämnaer i division nånstans i miras övningsblad så
+  kör vi ensiffriga nämnare. Det får bli en senare modul när hon når dit."
+
+- ✎ **2026-11-12, varje flytt får ett varför, och det som är klart stryks:** i kort division stryks siffror som är
+  färdigräknade (snett streck), så att barnet inte tappar bort sig. Varje flytt i kort division och trappan får en
+  rad "Varför?". Den använder pengar i platsvärdets färger (tusenlappar, hundralappar, tior och kronor): "1
+  hundralapp växlas till 10 tior. Med de 3 vi redan har blir det 13 tior." Knappar som "Varför där?" och "Varför
+  flyttar vi ner 3?" ger förklaringen innan rörelsen. Källa: Dennis: "glöm inte att man bör stryka de tal som är
+  'klara' så man inte tappar bort sig", "när jag gick i skolan så fick vi aldrig lära oss trappan" och "jag förstår
+  inte 'varför' siffrorna flyttas som de görs. Så jag skulle behöva mera förklaringar".
+
+- ✎ **2026-11-12, svaret i fokus, ingen jämförelsebild:** när uträkningen är klar lyser kvoten (grön) och resten (lila),
+  och svaret står för sig ("5736 / 7 = 819, rest 3"). Jämförelsen med kort division är valfri (knappen "Jämför med kort
+  division") och visar varje växling i par, inte bara den första. Källa: Dennis: "själva svaret behöver få lite fokus/belysning i slutet. och restvärdet" och "vi struntar i
+  den där sista jämförelsebilden. Den förstör mer än den hjälper", och sedan om parjämförelsen "ser jättebra ut".
+
+- ✎ **2026-11-12, jämnt ut och uträkningen följer med:** går en delning jämnt ut ställs ingen subtraktionsfråga, bara
+  "4 · 7 = 28, precis lika mycket som 28. Inget blir över." I Problemlösning följer uträkningen med tillbaka till
+  berättelsen ("Din uträkning: 2856 / 4 = 714"), och svarsbanken med flerval är struken. Barnet svarar på frågan i
+  en mening ("En sträcka är ___ meter."). Flervalet av uträkning finns kvar. Källa: Dennis: "om det går jämt ut behövs
+  inte 28-28" och "uträkningen man fick med sig från föregående steg, bör man få med sig tillbaka, ifall man glömt den
+  … Så kanske flervalsalternativ inte är rätt för denna 'problemlösning'".
+
+- ✎ **2026-11-12, Kluringar som "vänd på det":** kluringen ställs upp som två divisioner efter varandra
+  (`? / 3 = □`, `□ / 2 = 4`) och löses baklänges som gångertal i raden "Vänd på det" (4 · 2 = 8, 8 · 3 = 24), med
+  pilar mellan raderna. Det är samma knep som i 10/100/1000. Stapeln utgår. Källa: Dennis: "Går det att göra den
+  istället så den påminner mer om hur vi normalt multiplicerar och dividerar?" och "ja, gör kluringar som vänd på det".
+
+- ✎ **2026-11-12, mockupen godkänd i sin helhet:** alla åtta moduler i `design-lab/ovningsblad-plan3.html` med hjälp.
+  Nästa är läget Själv med semistöd (`brainstorm/17`). Källa: Dennis: "Jag är supernöjd med detta. Mycket snyggt." och
+  "arbetar igenom dessa i mockupen med att man räknar själv … de behöver ändå nått slags 'semi-stöd' … Men det får
+  inte ge för mycket".
+
+- ✎ **2026-11-12, Själv: rutorna visar hur många siffror svaret har:** i läget Själv har kvoten lika många rutor som
+  svaret har siffror, som i Med hjälp (i kort division och i trappan). Det avslöjar var man börjar, och det bjuder vi
+  på. Det förhindrar att resten hamnar i en kvotruta. Ledtråd 1 är kvar och förklarar varför man börjar där. Källa: Dennis:
+  "Vi kan va så pass snäll att vi ger dem hur många rutor som skall fyllas i i svaret. Jag råkade nyss fylla i 819
+  mde 3 i restvärd på entalscellen … Så vi bjuder på det att de redan i förhand vet pga. cellerna hur många siffror
+  svaret kommer att ge".
+
+- ✎ **2026-11-12, Själv med semistöd godkänt:** läget Själv i alla åtta moduler enligt `brainstorm/17` med avsnittet
+  "Bygget" gäller. Det omfattar Kluringar och 10/100/1000 där stegen ges (frågeraden lyser, raden "Vänd på det" står
+  färdig med räknesättet, och barnet räknar), Problemlösning där talen är knappar och rutorna också går att skriva i,
+  och Vilket tal? med visuellt stöd (förevisning, bildförklaring, prickräknare). Källa: Dennis: "Hur kan vi göra en
+  kompromiss där de får hjälp i vilket steg man skall göra, men inte få allt serverat?", "helst med visuellt stöd än
+  text" och "Toppen! Då är jag nöjd".
+
+- ✎ **2026-11-12, telefon liggande krymper kortet:** i liggande telefonläge krymps övningsbladets kort så att det ryms
+  bredvid knappsatsen (70–99 %), i stället för att skrolla eller be om stående läge. Telefon stående och iPad i båda
+  lägena har kortet i full storlek. Källa: Dennis valde "Krymp innehållet" av tre alternativ.
+
+## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
+- **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
+  Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
+  Livlina, "Skriv svaret…", textknappar i kladden) anpassas efter dem. Det görs i en egen skiva efter övningsbladen.
+- **Källa:** Dennis 2026-11-12: "gällande utseende, kör övningsbladets."
 

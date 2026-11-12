@@ -19,3 +19,6 @@ Ett dokument per tankepass, utredning eller granskning: `NN-ÅÅÅÅ-MM-DD-tema.
 | 12 | `12-2026-11-11-ipad-matning.md` | iPad: mätning per vy och förslag (--k plus två spalter i liggande läge), plan i skivor, bifynd | Väntar på Dennis (D45) |
 | 13 | `13-2026-11-11-ovningsblad-division-barnen.md` | Övningsblad · Division genomspelat som två barn (åk 4, åk 2): 10 fynd, 10 mönster | Rättas av matteprov- och multdiv-agenterna |
 | 14 | `14-2026-11-11-ovningsblad-vd-genomspelning.md` | Övningsblad · Division genomspelat av VD:n efter runda 7: 6 fel (A), 8 förbättringar (B) | Runda 8: A1–A5, B1–B4, B6–B8 (Dennis val); A6/B5 utgår |
+| 15 | `15-2026-11-12-ovningsblad-omtag.md` | Övningsbladen efter Dennis prov av v76: överlapp, F1–F5, förslag 13 → 8 moduler | Väntar på Dennis |
+| 16 | `16-2026-11-12-ovningsblad-tankepass.md` | Iterativt tankepass i tre varv: Dennis kritik, perspektiven (en fyra, en tvåa, pedagogiken, pappret, P18, teknik), plan 3 Grunder · Räkna · Tänka, förståelseprovet, stapelmodellen | Väntar på Dennis tre frågor, sedan mockup |
+| 17 | `17-2026-11-12-sjalv-semistod.md` | Själv med semistöd, granskat i fyra varv: pappret ger strukturen men aldrig tanken, Själv per modul, ledtråd 1–2, rättning vid Klar, telefon och iPad i båda lägena | Väntar på Dennis, sedan mockup steg 3 |

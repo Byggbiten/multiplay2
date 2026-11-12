@@ -343,3 +343,24 @@ describe('runda 8: stegtexterna följer rutan och talet', () => {
     expect(a.lit).toContain('grp');
   });
 });
+
+describe('F1 (12/11): rubriken avslöjar aldrig svaret', () => {
+  const toks = s => (String(s).match(/\d+/g) || []).map(Number);
+  it('ingen modul och ingen nivå har svaret på det som efterfrågas i rubriken', () => {
+    const fel = [];
+    for (const id of L.DIV_IDS) for (const lv of LEVELS) for (let seed = 1; seed <= 40; seed++) {
+      for (const t of all(id, lv, seed)) {
+        const head = L.taskHead(t); if (!head) continue;
+        if (toks(head).includes(t.answer)) fel.push(`${id} ${lv}: "${head}" visar svaret ${t.answer}`);
+        if (t.type === 'dz' && t.form !== 'kvot' && !/\?/.test(head)) fel.push(`${id} ${lv}: "${head}" saknar det okända`);
+      }
+    }
+    expect(fel.slice(0, 5)).toEqual([]);
+  });
+  it('exemplen ur genomspelningen', () => {
+    expect(L.taskHead(L.makeDz('taljare', 30, 1))).toBe('? / 10 = 30');
+    expect(L.taskHead(L.makeDz('namnare', 8, 3))).toBe('8000 / ? = 8');
+    expect(L.taskHead(L.makeDz('kvot', 65, 2))).toBe('6500 / 100');
+    expect(L.taskHead(L.makeTs(8008, 4))).toBe('8008 / 4');
+  });
+});

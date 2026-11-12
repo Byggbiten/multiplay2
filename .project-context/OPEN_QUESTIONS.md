@@ -45,15 +45,10 @@ aldrig. Nya frågor får nästa P-nummer.
   tusentalsrad (värdet, varför så många nollor, nollorna). Öppet: lagom, eller kortare efter några uppgifter?
 - **P17 Tvåsiffrig faktors nolla i Dela upp.** Barnet skriver själv nollan i den grå rutan (D38 ✎), medan appen sätter
   nollorna vid ensiffrig faktor. Öppet: ska appen sätta den också?
-- **P18 En design för knappsats, svarsknapp och kladd.** Matteprovet och övningsbladen har en egen kompakt knappsats,
-  en svarsknapp och kladd med ikoner (D37/D38: "det vi gör nu om det avviker … skall bara ske isolerat i detta
-  matteprov"), medan multdiv (kort division, uppställd multiplikation) har runda knappar, svarsfält, Livlina och
-  kladd med textknappar. I övningsbladen ligger de nu sida vid sida och känns som två appar. Dennis 11/11: "att du
-  upplever kort division som en helt annan app är ett tecken på att ordning och reda inte skötts på alla beslut och
-  inriktningar och bestämmelser vi tagit med konsekvent design". Öppet: vilken blir appens standard, och när görs
-  bytet (inte i övningsbladens uppdrag)?
-
 ## Besvarade
+
+- ~~**P18 En design för knappsats, svarsknapp och kladd.** Övningsbladens eller multdivs?~~ → D48 (12/11):
+  övningsbladens är standard i hela appen.
 
 - ~~P13 Klar efter en enda siffra i fria lägen~~ → motorrundan 2026-11-11: Klar med tom ruta ger ett tips, ingen rättning.
 

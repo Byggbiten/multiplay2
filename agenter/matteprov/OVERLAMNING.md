@@ -9,12 +9,20 @@ och samordnarens resultatregel. Arbetet sker på `dev`. Rundornas grenar är sam
 `matteprov`, `matteprov-hjalp`, `matteprov-kladd`, `matteprov-radfraga`, `matteprov-snall`, `matteprov-enknapp`.
 Vitest 21/10 (efter D42): hela sviten 515, varav 97 i `tests/matteprov.test.mjs`.
 
+**LIVE v76 (2026-11-11):** övningsbladen till och med runda 8b + VD:ns puts (`tileText` håller ihop tal med ordet före, summabrickan lila) gick live i v76 (`main` = `a5344ea`). Kvar: TODO (kontrollraden, Själv i alla moduler genomspelat).
+
 **Läget nu (2026-11-11, övningsbladen):** Övningsblad · Division (D44 ✎) ligger på `dev` till och med runda 7
 (merge `34b4bfa`). Runda 8 ligger på grenen `ovningsblad-runda8` (pushad, ej mergad): A1–A5 ur
 `brainstorm/14-2026-11-11-ovningsblad-vd-genomspelning.md`, Dennis val B1–B4, B6–B8 och hans fall 8008/4. Kort
 division (A6, B5) ingår inte i uppdraget och rörs inte (multdiv-motorn). Etiketterna T H T E behålls (Dennis: färgen
 skiljer de två T:na). Runda 8b (nummerbrickorna och 12 px prickar) på samma gren. Hela sviten 594 gröna; svepet
 `tests/webblasare/band-svep.js` körs i båda nivåerna.
+
+**12/11:** v76 är live (övningsbladen till och med runda 8b). Ett omtag väntar på Dennis beslut
+(`brainstorm/15-2026-11-12-ovningsblad-omtag.md`, 13 moduler till 8); rör det inte förrän samordnaren säger till.
+F1 är rättad på grenen `ovningsblad-f1` (pushad, ej mergad): rubriken ovanför stegfrågan kommer ur `L.taskHead(t)`
+och visar det okända som "?" ("? / 10 = 30", "8000 / ? = 8"); svaret står aldrig i rubriken. Testet "F1 (12/11)"
+i `tests/ovningsblad.test.mjs` går igenom generatorn för alla moduler och båda nivåerna.
 
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
@@ -321,3 +329,9 @@ som funkar oavsett vilken siffra det gäller". En metod för alla källor och m�
 **Efter runda 9 (samordnaren 21/10):** nollornas förklaring förenklad efter Dennis ("nästan lite som en
 tungvrickare"): "8:an i hundratalet är egentligen 800." / "Vi skriver två nollor först – sedan räknar vi bara med
 8:an." (`zeroSteps`); provet en rad med samma tanke. Testerna uppdaterade.
+
+## 2026-11-12 · Övningsbladen plan 3 (v77)
+
+Övningsbladens nya version är en egen modul (`js/ovningsblad.js`, `js/ovningsblad-logic.js`), byggd av VD:n (D47 ✎).
+Kortet Övningsblad i Kort division öppnar den. Den här rollens övningsbladskod (D44: `ovdiv`, `DIV_IDS`, bandet) i
+`matteprov*.js` är bortkopplad och rivs som egen skiva (TODO). Matteprov 1 påverkas inte.
