@@ -51,6 +51,7 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | Dennis beslutar något | D-post med hans ord; stryk besvarad fråga; rad i loggen |
 | En punkt blir klar | bocka och stryk i TODO |
 | En fil skapas | rätt mapp + rad i registret |
+| Kod rivs eller flyttas | före/efter: ett skript som dumpar den kvarvarande logikens utfall (identiskt), ett skärmsvep med låst slump som hashar varje vy (kört två gånger först), flöden in i andra moduler spelade på riktigt, och en kontroll att varje anrop över modulgränsen har en mottagare (loggen 12/11, rivningen av D44) |
 | Ett fel rättas | loggraden "Varför fångade inte motorn detta?" + testet som fångar feltypen, provat mot felet först (15 § 5–6) |
 | En subagent rapporterar | fynden in i TODO med id; rapporten sparad i projektet (`brainstorm/`) |
 | En subagent levererar UI | granska själv innan det går till Dennis: egna skärmbilder i 390 × 797 av varje steg som ändrats, i alla nivåer (Lättare och Svårare är olika flöden) + förklaringsprov av en granskare utan kontext (ui-skolan steg 5); agentens egen mätning räknas inte som bevis |
