@@ -782,6 +782,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   inte 28-28" och "uträkningen man fick med sig från föregående steg, bör man få med sig tillbaka, ifall man glömt den
   … Så kanske flervalsalternativ inte är rätt för denna 'problemlösning'".
 
+- ✎ **2026-11-12, Kluringar som "vänd på det":** kluringen ställs upp som två divisioner efter varandra
+  (`? / 3 = □`, `□ / 2 = 4`) och löses baklänges som gångertal i raden "Vänd på det" (4 · 2 = 8, 8 · 3 = 24), med
+  pilar mellan raderna. Det är samma knep som i 10/100/1000. Stapeln utgår. Källa: Dennis: "Går det att göra den
+  istället så den påminner mer om hur vi normalt multiplicerar och dividerar?" och "ja, gör kluringar som vänd på det".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

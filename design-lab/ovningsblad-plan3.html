@@ -176,6 +176,9 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .dzrow .box{width:auto;min-width:76px;padding:0 6px}
 .carry{font:800 20px 'Baloo 2';color:var(--deep);background:#f0fdf4;border-radius:14px;padding:6px 14px;box-shadow:0 0 0 2px #bbf7d0}
 .carry b{color:#15803d}
+.dzrow.two{flex-direction:column;gap:4px;font-size:26px}
+.dzrow.two>div{display:flex;align-items:center;gap:8px}
+.dzrow.two .dzq{min-width:44px;height:40px}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -278,7 +281,7 @@ function hub() {
   <div class="sec">RÄKNA</div>
   <div class="tiles">${t(4,'Kort division','stora tal, steg för steg','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
   <div class="sec">TÄNKA</div>
-  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','rita stapeln','klur','new')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','venn','new')}</div>
+  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','vänd på det','klur','new')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','venn','new')}</div>
   <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
 }
@@ -633,58 +636,50 @@ async function probEnd() {
   act(`<button class="ghost">Till hubben</button>`, hub);
 }
 
-/* ── Kluringar (32b, "hur fasen ska man ens tänka här?"): stapelmodellen framåt, sedan baklänges ── */
+/* ── Kluringar (32b) som "vänd på det" (Dennis 12/11): frågan uppställd som två divisioner, baklänges som gångertal ── */
 function klurView() {
   view = 'klur'; typed = ''; padHandler = null;
   const a = 3, b = 2, k = 4, mid = k * b, tot = mid * a;   /* tänkta talet 24: 24 / 3 = 8, 8 / 2 = 4 */
+  const qb = id => `<span class="dzq" id="${id}">?</span>`;
   app.innerHTML = kdShell('Kluringar') + `
   <div class="card">
     <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
+    <div class="dzrow orig two"><small>FRÅGAN</small>
+      <div>${qb('kT')} / <span class="dzn" id="kA">${a}</span> = ${qb('kM1')}</div>
+      <div>${qb('kM2')} / <span class="dzn" id="kB">${b}</span> = <span class="dzn" id="kK">${k}</span></div></div>
     <div class="why" id="why"></div>
-    <div class="kbar">
-      <div class="barlab" id="kTop">?</div>
-      <div class="barrow" id="kRow1"><div class="seg1"></div></div>
-      <div class="barrow sub2" id="kRow2" style="visibility:hidden"></div>
-    </div>
+    <div class="dzrow flip two" id="flip" style="visibility:hidden"><small>VÄND PÅ DET</small>
+      <div id="fr1"><span class="dzn" id="f1x"></span> · <span class="dzn" id="f1y"></span> = <div class="box" id="f1z"></div></div>
+      <div id="fr2" style="visibility:hidden"><span class="dzn" id="f2x"></span> · <span class="dzn" id="f2y"></span> = <div class="box" id="f2z"></div></div></div>
     <div class="ask" id="ask"></div>
-    <div class="sub" id="sub"></div>
     <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
   </div>` + padHTML() + kladdHTML();
   $('[data-hub]').onclick = hub;
   klurRun(a, b, k, mid, tot);
 }
 async function klurRun(a, b, k, mid, tot) {
-  ask('Rita det! Talet vi söker är en stapel. Vi vet inte hur lång den är än.');
-  why('En stapel gör det osynliga synligt: vi ser vad som händer med talet.');
-  await waitNext(`Dela med ${a}`);
-  /* framåt: stapeln delas i a delar, den första delen delas i b */
-  $('#kRow1').innerHTML = Array.from({ length: a }, (_, i) => `<div class="part${i === 0 ? ' first' : ''}" id="p1_${i}"><span>?</span></div>`).join('');
-  ask(`Talet delas med ${a}: stapeln blir ${a} lika delar.`); why('');
-  await waitNext(`Dela en del med ${b}`);
-  const r2 = $('#kRow2'); r2.style.visibility = 'visible';
-  r2.innerHTML = Array.from({ length: b }, (_, i) => `<div class="part small${i === 0 ? ' last' : ''}" id="p2_${i}"><span>${i === 0 ? k : '?'}</span></div>`).join('') + `<div class="spacer" style="flex:${a - 1}"></div>`;
-  r2.style.setProperty('--w', `calc(${100 / a}% - 3px)`);
-  ask(`En del delas med ${b}. Då blir det <b>${k}</b>. Nu vet vi hur stor den minsta biten är.`);
-  why(`Den lilla biten är ${k}. Därifrån kan vi gå baklänges.`);
-  /* baklänges: b bitar om k = en del; a delar = talet */
-  await waitNext('Gå baklänges');
-  why(`Delat med ${b} blev ${k}. Baklänges blir det gånger: ${b} bitar om ${k}.`);
-  for (let i = 1; i < b; i++) { await fly($('#p2_0 span'), $('#p2_' + i), String(k)); $('#p2_' + i).innerHTML = `<span>${k}</span>`; }
-  let q = `Hur stor är en del? Räkna ${b} · ${k}.`;
-  ask(q); $('#sub').innerHTML = `${b} · ${k} = <div class="box" id="sb"></div>`;
-  await typeAnswer($('#sb'), mid, q);
-  $('#p1_0').innerHTML = `<span>${mid}</span>`; $('#p1_0').classList.add('filled');
-  ask(`<span class="ok">Rätt!</span>En del är <b>${mid}</b>.`);
-  await waitNext('Och hela talet?');
-  why(`Delat med ${a} blev ${mid}. Baklänges blir det gånger: ${a} delar om ${mid}.`);
-  for (let i = 1; i < a; i++) { await fly($('#p1_0 span'), $('#p1_' + i), String(mid)); $('#p1_' + i).innerHTML = `<span>${mid}</span>`; $('#p1_' + i).classList.add('filled'); }
-  q = `Hur stort är hela talet? Räkna ${a} · ${mid}.`;
-  ask(q); $('#sub').innerHTML = `${a} · ${mid} = <div class="box" id="sb"></div>`;
-  await typeAnswer($('#sb'), tot, q);
-  $('#sub').innerHTML = '';
-  $('#kTop').innerHTML = `<span class="ansbig">${tot}</span>`;
+  ask('Skriv det som två divisioner. Rutan i mitten är svaret efter första delningen.');
+  why('Vi vet bara slutet: 4. Därför börjar vi bakifrån.');
+  await waitNext('Vänd på det');
+  $('#flip').style.visibility = 'visible';
+  why(`Om något delat med ${b} blir ${k}, så är något ${b} gånger ${k}. Division baklänges är gånger.`);
+  await fly($('#kK'), $('#f1x'), String(k)); $('#f1x').textContent = k;
+  await fly($('#kB'), $('#f1y'), String(b)); $('#f1y').textContent = b;
+  let q = `Räkna ${k} · ${b}.`; ask(q);
+  await typeAnswer($('#f1z'), mid, q);
+  ask(`<span class="ok">Rätt!</span>Svaret efter första delningen är <b>${mid}</b>.`);
+  await fly($('#f1z'), $('#kM2'), String(mid)); $('#kM2').textContent = mid; $('#kM2').className = 'dzn';
+  await fly($('#f1z'), $('#kM1'), String(mid)); $('#kM1').textContent = mid; $('#kM1').className = 'dzn';
+  await waitNext('Och talet?');
+  $('#fr2').style.visibility = 'visible';
+  why(`Om talet delat med ${a} blir ${mid}, så är talet ${a} gånger ${mid}.`);
+  await fly($('#kM1'), $('#f2x'), String(mid)); $('#f2x').textContent = mid;
+  await fly($('#kA'), $('#f2y'), String(a)); $('#f2y').textContent = a;
+  q = `Räkna ${mid} · ${a}.`; ask(q);
+  await typeAnswer($('#f2z'), tot, q);
+  await fly($('#f2z'), $('#kT'), String(tot)); $('#kT').textContent = tot; $('#kT').className = 'dzn ansq';
   ask(`<span class="ok">Klart!</span>Talet är <b>${tot}</b>.`);
-  why(`Kontroll framåt: ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}. Det stämmer med det jag tänkte.`);
+  why(`Kontroll framåt: ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}. Det stämmer.`);
   act(`<button class="ghost">Till hubben</button>`, hub);
 }
 
