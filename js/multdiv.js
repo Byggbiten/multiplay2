@@ -4686,8 +4686,9 @@ const MultDivGame = (() => {
      Provets egna regler (den grå nollan m.m.) bor i matteprov; multdiv rörs inte. */
   function openProv() {
     App.Sound.play('click');
-    const kind = gameKind;                   // D44: från Kort division öppnas övningsbladen direkt
-    MatteProv.open(profile, () => { gameKind = kind; showModeSelect(); }, kind === 'div' ? 'ovdiv' : null);
+    const kind = gameKind, back = () => { gameKind = kind; showModeSelect(); };
+    if (kind === 'div' && window.Ovningsblad) return Ovningsblad.open(profile, back);   // D47: övningsbladen plan 3 (js/ovningsblad.js)
+    MatteProv.open(profile, back, null);
   }
 
   /* ── Navigation ─────────────────────────────────────────── */

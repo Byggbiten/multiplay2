@@ -329,3 +329,9 @@ som funkar oavsett vilken siffra det gäller". En metod för alla källor och m�
 **Efter runda 9 (samordnaren 21/10):** nollornas förklaring förenklad efter Dennis ("nästan lite som en
 tungvrickare"): "8:an i hundratalet är egentligen 800." / "Vi skriver två nollor först – sedan räknar vi bara med
 8:an." (`zeroSteps`); provet en rad med samma tanke. Testerna uppdaterade.
+
+## 2026-11-12 · Övningsbladen plan 3 (v77)
+
+Övningsbladens nya version är en egen modul (`js/ovningsblad.js`, `js/ovningsblad-logic.js`), byggd av VD:n (D47 ✎).
+Kortet Övningsblad i Kort division öppnar den. Den här rollens övningsbladskod (D44: `ovdiv`, `DIV_IDS`, bandet) i
+`matteprov*.js` är bortkopplad och rivs som egen skiva (TODO). Matteprov 1 påverkas inte.

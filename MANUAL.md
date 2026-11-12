@@ -410,7 +410,26 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
-## Övningsblad · Division (v76, D44 ✎)
+## Övningsblad · Division, plan 3 (v77, D47, D48)
+
+I Kort divisions lägesvy leder kortet **Övningsblad** till åtta moduler i tre avdelningar: **Grunder** (Dela och
+gruppera, Divisionstabellen, 10, 100 och 1000), **Räkna** (Kort division, Trappan) och **Tänka** (Problemlösning,
+Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Med hjälp** eller **Själv**; valet sparas.
+
+- **Med hjälp** visar varje steg: en pil ritas först, sedan glider talet längs pilen i lugn takt. En lila rad
+  "Varför?" förklarar flytten, ofta med pengar i platsvärdets färger (tusenlappar, hundralappar, tior, kronor).
+  Färdiga siffror stryks, och svaret får fokus på slutet.
+- **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
+  själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
+  persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och
+  10/100/1000 visar vilket steg man står på; Vilket tal? visar med en bild hur man kryssar.
+- En omgång är 2–4 uppgifter (Divisionstabellen ett blad med tio tal). Kvittot visar hur många som var rätt direkt
+  (och ledtrådarna i Själv), och hubben märker modulen med resultatet.
+- Talen är nya varje gång; nämnaren är ensiffrig (flersiffrig kommer i en senare modul).
+- Fungerar på telefon och iPad, stående och liggande. På små telefoner och i liggande läge krymps uppgiften så att
+  kladden får plats.
+
+## Övningsblad · Division (v76, D44 ✎) – ersatt av plan 3 i v77
 
 I Kort divisions lägesvy finns kortet **Övningsblad**. Det öppnar tretton moduler i kapitel 3:s olika sorters blad,
 med egna tal: Dela lika, Hur många grupper?, Divisionstabellen (20 tal, /20), Kontrollera med gånger, Division med
