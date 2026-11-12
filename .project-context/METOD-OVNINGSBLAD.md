@@ -21,6 +21,10 @@ fram en vy och *varför* den ser ut som den gör.
    Spela också det slarviga flödet: lämna valfria rutor tomma, tryck på knappen igen, skriv i fel ruta. Ett barn
    som fastnar utan ett ord är värre än ett fel (restrutan som krävde 0, 12/11).
 5. **Dennis ord blir D-post samma stund**, och loggen skrivs.
+6. **Bygget i appen** (v77): mockupens fasta tal och fasta ram döljer fel. Svep därför variationen: talens längd
+   (tre- och fyrsiffrigt, nolla i en siffra), skärmarna (375 × 667 till iPad liggande), appens globala stilar och
+   böjningen efter både antal och satsdel ("de växlas", "vi växlar dem"). Spela varje omgång till kvittot, och
+   tryck Avsluta mitt i en animation.
 
 ## 2. Pedagogiken: varje rörelse ska kunna förklaras
 
