@@ -420,6 +420,9 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
   "Varför?" förklarar flytten, ofta med pengar i platsvärdets färger (tusenlappar, hundralappar, tior, kronor).
   Färdiga siffror stryks, och svaret får fokus på slutet. I Dela och gruppera hoppar bollarna en och en från
   högen ner i påsen, utan pil.
+- **Beröm:** när en uppgift är klar snurrar ett ord in över kortet med konfetti, till exempel "Slay!", "Sheesh!" eller
+  "Grymt!". Ibland kommer ett sällsynt ord ("Sigma!", "GOAT!") eller ett legendariskt i guld ("Six seven!"). Samma
+  ord kommer aldrig två gånger i rad. Kvittot får konfetti när minst 60 % var rätt direkt.
 - **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
   själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
   persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och

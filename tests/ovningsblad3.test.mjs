@@ -184,3 +184,30 @@ describe('Dela och gruppera: utdelningen', () => {
     expect(deal).not.toMatch(/arrow\(/);
   });
 });
+
+describe('berömmet när uppgiften är klar (Dennis 12/11: "varierat så det inte bara är samma samma")', () => {
+  it('tre nivåer, inga dubbletter, inga ord med tvetydig bibetydelse', () => {
+    const all = [...O.HYPE.common, ...O.HYPE.rare, ...O.HYPE.legend];
+    expect(new Set(all).size).toBe(all.length);
+    expect(O.HYPE.common.length).toBeGreaterThanOrEqual(10);
+    for (const w of all) expect(w).not.toMatch(/rizz|gyatt|ohio|sus\b|fanum|mewing|fel/i);
+  });
+  it('aldrig samma ord två gånger i rad, och varje ord kommer innan något upprepas inom sin nivå', () => {
+    for (const s of SEEDS.slice(0, 20)) {
+      const pick = O.hypePicker(seeded(s)), got = Array.from({ length: 400 }, pick);
+      for (let i = 1; i < got.length; i++) expect(got[i].word).not.toBe(got[i - 1].word);
+      for (const tier of ['common', 'rare']) {
+        const words = got.filter(g => g.tier === tier).map(g => g.word), n = O.HYPE[tier].length;
+        expect(new Set(words.slice(0, n)).size).toBe(Math.min(n, words.length));
+      }
+      const share = t => got.filter(g => g.tier === t).length / got.length;
+      expect(share('common')).toBeGreaterThan(0.55); expect(share('legend')).toBeLessThan(0.15);
+    }
+  });
+  it('firas en gång per uppgift: när resultatet sparas, inte i trappans jämförelse (finish(null))', () => {
+    const v = src('js/ovningsblad.js');
+    expect(v).toMatch(/if \(res && RUN\.results\.length === RUN\.i\) \{ RUN\.results\.push\(res\); cheer\(\); \}/);
+    expect(v.match(/(?<!function )cheer\(\)/g)).toHaveLength(1);
+    expect(v).toMatch(/querySelectorAll\('\.ov-fly, \.ov-hype'\)/);
+  });
+});

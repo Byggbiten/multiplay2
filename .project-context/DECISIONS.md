@@ -820,6 +820,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   tal flyttas till en ruta. Källa: Dennis efter v78: "det tar för lång tid med fördelningen", "pilen behövs inte där"
   och "Bättre är att cirklarna rör sig ut som innan så där animationsartat".
 
+- ✎ **2026-11-12, beröm när uppgiften är klar:** när sista rutan är rätt och uppgiften klar snurrar ett ord in över
+  kortet (en av tre rörelser), med konfetti och ljud. Orden är ungdomsspråk i tre nivåer som korten i Capy: vanlig
+  (Slay!, W!, Sheesh!, Grymt! …), sällsynt med etikett (Sigma!, GOAT!, Aura +1000 …, 24 %) och legendarisk i guld
+  (Six seven!, Aura +9000 …, 6 %). Samma ord kommer aldrig två gånger i rad, och varje nivå töms innan den upprepas.
+  Listan står i `HYPE` i `js/ovningsblad-logic.js`. Kvittot får konfetti från 60 %. Källa: Dennis: "de måste få beröm
+  när de svarar rätt. Konfetti och så där. Gärna nån slags snurrande text … Slay! Sigma! … så det inte bara är samma
+  samma" och "när den sista inmatningen är rätt. så att uppgiften är klar".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
