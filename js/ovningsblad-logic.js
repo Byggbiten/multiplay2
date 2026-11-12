@@ -197,8 +197,38 @@
     return { ok, of, hints, high: of > 0 && ok / of >= 0.6 };
   }
 
+  /* Berömmet när en uppgift är klar (Dennis 12/11: "Konfetti och så där", "snurrande text", "coola ord som den yngre
+     generationen gillar", "varierat så det inte bara är samma samma"). Tre nivåer som korten i Capy: vanlig,
+     sällsynt och legendarisk, så att barnet ser fram emot nästa. Varje nivå är en påse som töms innan den fylls på
+     igen, och samma ord kommer aldrig två gånger i rad. Inga ord med tvetydig bibetydelse (rizz, gyatt, Ohio, sus). */
+  const HYPE = {
+    common: ['Slay!', 'W!', 'Fire!', 'Sheesh!', 'Grymt!', 'Ate!', 'No cap!', 'Sjukt bra!', 'Ballt!', 'Snyggt!', 'Easy!',
+      'Boom!', 'Galet bra!', 'Stenhårt!'],
+    rare: ['Sigma!', 'GOAT!', 'Big W!', 'Aura +1000', 'Goated!', 'Main character!', 'Ate that!', 'Hjärnkraft +100',
+      'Mattegeni!', 'Absolute cinema!', 'Matte-boss!', 'Insane!'],
+    legend: ['Six seven!', 'Aura +9000', 'Sigma-räknare!', 'GOAT-nivå!', 'Mega-slay!', 'Ultra-W!', 'Legendariskt!'],
+  };
+  const HYPE_ODDS = { legend: 0.06, rare: 0.24 };   /* resten vanliga */
+  function hypePicker(rand = Math.random) {
+    const bags = {}; let last = '';
+    const draw = tier => {
+      if (!bags[tier] || !bags[tier].length) {
+        const b = HYPE[tier].slice();
+        for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+        if (b.length > 1 && b[b.length - 1] === last) [b[0], b[b.length - 1]] = [b[b.length - 1], b[0]];
+        bags[tier] = b;
+      }
+      return bags[tier].pop();
+    };
+    return () => {
+      const x = rand(), tier = x < HYPE_ODDS.legend ? 'legend' : x < HYPE_ODDS.legend + HYPE_ODDS.rare ? 'rare' : 'common';
+      const word = draw(tier); last = word;
+      return { word, tier };
+    };
+  }
+
   const API = { MODULES, COUNT, LEVELS, MODES, plan, goodDiv, genKd, STORIES, genProb, genKlur, SHAPES, SLOTS, REGION_TEXT, genVenn, vennFits,
-    genDz, NAMES, genGrp, genTab, makeRound, summary };
+    genDz, NAMES, genGrp, genTab, makeRound, summary, HYPE, hypePicker };
   if (typeof window !== 'undefined') window.OvningsbladLogic = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })();

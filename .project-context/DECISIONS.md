@@ -810,6 +810,24 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   bredvid knappsatsen (70–99 %), i stället för att skrolla eller be om stående läge. Telefon stående och iPad i båda
   lägena har kortet i full storlek. Källa: Dennis valde "Krymp innehållet" av tre alternativ.
 
+- ✎ **2026-11-12, plan 3 inbyggd och driftsatt (v77, v78):** övningsbladen är en egen modul (`js/ovningsblad.js`,
+  `js/ovningsblad-logic.js`) med nya tal varje gång, omgångar med kvitto och appens kladd. Kortet krymps också på små
+  telefoner i stående läge, så att kladden får 100 px. Den gamla övningsbladskoden (D44) är bortkopplad och rivs i en
+  egen skiva. Källa: Dennis: "Då bygger vi in det här till våran dev-version och driftsätter sedan?"
+
+- ✎ **2026-11-12, Dela och gruppera: bollarna hoppar ner i påsen:** i Med hjälp flyttar ett tryck på högen bollarna en
+  och en till påsen (cirka 0,9 s för en påse), utan pil. Pilen och den långsamma flygningen gäller fortfarande när ett
+  tal flyttas till en ruta. Källa: Dennis efter v78: "det tar för lång tid med fördelningen", "pilen behövs inte där"
+  och "Bättre är att cirklarna rör sig ut som innan så där animationsartat".
+
+- ✎ **2026-11-12, beröm när uppgiften är klar:** när sista rutan är rätt och uppgiften klar snurrar ett ord in över
+  kortet (en av tre rörelser), med konfetti och ljud. Orden är ungdomsspråk i tre nivåer som korten i Capy: vanlig
+  (Slay!, W!, Sheesh!, Grymt! …), sällsynt med etikett (Sigma!, GOAT!, Aura +1000 …, 24 %) och legendarisk i guld
+  (Six seven!, Aura +9000 …, 6 %). Samma ord kommer aldrig två gånger i rad, och varje nivå töms innan den upprepas.
+  Listan står i `HYPE` i `js/ovningsblad-logic.js`. Kvittot får konfetti från 60 %. Källa: Dennis: "de måste få beröm
+  när de svarar rätt. Konfetti och så där. Gärna nån slags snurrande text … Slay! Sigma! … så det inte bara är samma
+  samma" och "när den sista inmatningen är rätt. så att uppgiften är klar".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

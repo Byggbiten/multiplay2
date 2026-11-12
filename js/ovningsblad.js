@@ -94,6 +94,19 @@ const CSS = `
 #ov-root .ghost{align-self:center;border:2px solid #c4b5fd;border-radius:14px;background:#fff;color:var(--lila);font:900 14px Nunito;min-height:44px;padding:0 16px;cursor:pointer}
 /* flygning */
 .ov-fly{position:fixed;z-index:50;pointer-events:none;font:800 30px 'Baloo 2';color:var(--lila);transition:transform .7s cubic-bezier(.34,1.2,.4,1)}
+/* berömmet när uppgiften är klar: ett ord som snurrar, studsar eller zoomar in över kortet och lyfter bort */
+.ov-hype{position:fixed;z-index:10000;pointer-events:none;text-align:center;white-space:nowrap;transform:translate(-50%,-50%);animation:ov-hype-spin 2.1s cubic-bezier(.2,.9,.3,1.15) forwards}
+.ov-hype.e1{animation-name:ov-hype-drop}
+.ov-hype.e2{animation-name:ov-hype-zoom}
+.ov-hype b{display:block;font-family:'Baloo 2',system-ui;font-weight:800;line-height:1.05;padding:0 6px;background:linear-gradient(100deg,#ec4899,#a855f7,#3b82f6,#10b981,#f59e0b,#ec4899);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 12px rgba(91,33,182,.35));animation:ov-hype-shine 1.4s linear infinite}
+.ov-hype small{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;font:900 12px Nunito,system-ui;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#7c3aed;box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.ov-hype.t-legend b{background-image:linear-gradient(100deg,#f59e0b,#fde047,#fff7ae,#f59e0b,#ea580c,#f59e0b)}
+.ov-hype.t-legend small{background:linear-gradient(90deg,#f59e0b,#ea580c);box-shadow:0 2px 10px rgba(245,158,11,.55)}
+@keyframes ov-hype-shine{to{background-position:-250% 0}}
+@keyframes ov-hype-spin{0%{transform:translate(-50%,-50%) scale(.1) rotate(-540deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(10deg);opacity:1}42%{transform:translate(-50%,-50%) scale(.94) rotate(-5deg)}54%{transform:translate(-50%,-50%) scale(1.05) rotate(2deg)}64%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-drop{0%{transform:translate(-50%,-260%) scale(1.1) rotate(-12deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2,.8) rotate(4deg);opacity:1}34%{transform:translate(-50%,-75%) scale(.92,1.08) rotate(-3deg)}46%{transform:translate(-50%,-50%) scale(1.06,.95)}56%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-zoom{0%{transform:translate(-50%,-50%) scale(3) rotate(8deg);opacity:0}24%{transform:translate(-50%,-50%) scale(.9) rotate(-6deg);opacity:1}34%{transform:translate(-50%,-50%) scale(1.12) rotate(5deg)}44%{transform:translate(-50%,-50%) scale(.97) rotate(-3deg)}54%{transform:translate(-50%,-50%) scale(1.02) rotate(1deg)}62%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ov-hype,.ov-hype.e1,.ov-hype.e2{animation:ov-fade .4s}.ov-hype b{animation:none}}
 /* ── trappan ── */
 #ov-root .trap{display:grid;grid-template-columns:repeat(7,30px);grid-auto-rows:32px;justify-content:center;margin-top:2px}
 #ov-root .c{display:flex;align-items:center;justify-content:center;font:800 24px 'Baloo 2';color:var(--deep);position:relative}
@@ -541,7 +554,7 @@ let P = plan(N, D);
 function setTask(n, d) { N = String(n); D = d; P = plan(N, D); const o = 4 - N.length; CLS = CLS4.slice(o); PLACE = PLACE4.slice(o); MONEY = MONEY4.slice(o); }
 let KD = {};
 /* ny vy: gamla pilar och flygande tal bort, och väntande animationer från förra vyn slutar */
-function clearFx() { GEN++; ov.querySelectorAll(':scope > path').forEach(p => p.remove()); document.querySelectorAll('.ov-fly').forEach(e => e.remove()); }
+function clearFx() { GEN++; ov.querySelectorAll(':scope > path').forEach(p => p.remove()); document.querySelectorAll('.ov-fly, .ov-hype').forEach(e => e.remove()); }
 function kdShell(title) {
   clearFx(); SF = null; app.classList.remove('hubv', 'klopen');
   return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><button class="back kbtn" data-kl>Kladd</button><div class="prog">${SELF() ? '<small class="selfb">Själv</small> ' : ''}${RUN ? `${RUN.i + 1}/${RUN.tasks.length}` : ''}</div></div>`;
@@ -1080,6 +1093,23 @@ function grpView() {
   afterRender();
   grpRun(tot, g, q, r);
 }
+/* Utdelningen: bollarna hoppar en och en från högen till sin plats i påsen, utan pil (Dennis 12/11: "för lång tid",
+   "pilen behövs inte", "cirklarna rör sig ut som innan" – samma rörelse som Matteprovets animateDeal). Påsen läggs in
+   först och kortet hinner passas in (fitCard) innan något mäts; förflyttningen räknas om till kortets skala. */
+async function deal(balls, bag) {
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const from = balls.map(b => b.getBoundingClientRect()), ins = [...bag.querySelectorAll('.ball.in')];
+  balls.forEach(b => { b.style.visibility = 'hidden'; });
+  const dur = 420, gap = 90;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) ins.forEach((b, k) => {
+    const r = b.getBoundingClientRect(), a = from[k] || from[0], s = (r.width / b.offsetWidth) || 1;
+    const dx = (a.left + a.width / 2 - r.left - r.width / 2) / s, dy = (a.top + a.height / 2 - r.top - r.height / 2) / s;
+    b.animate([{ transform: `translate(${dx}px,${dy}px) scale(${(a.width / r.width).toFixed(2)})` }, { transform: 'none' }],
+      { duration: dur * SPEED, delay: k * gap * SPEED, easing: 'cubic-bezier(.34,1.3,.4,1)', fill: 'backwards' });
+  });
+  await W(dur + gap * (ins.length - 1) + 60);
+  balls.forEach(b => b.classList.add('gone'));
+}
 async function grpRun(tot, g, q, r) {
   ask(`Tryck på högen: varje tryck lägger ${g} bollar i en påse.`);
   why(`Vi gör som på riktigt: en påse i taget, och vi räknar bollarna i hopp om ${g}.`);
@@ -1090,8 +1120,7 @@ async function grpRun(tot, g, q, r) {
       const balls = [...$('#heap').querySelectorAll('.ball:not(.gone)')].slice(0, g);
       n++;
       $('#bags').insertAdjacentHTML('beforeend', `<div class="bag" id="bag${n}"><b>${n * g}</b>${'<i class="ball in"></i>'.repeat(g)}</div>`);
-      const bag = $('#bag' + n); bag.style.opacity = 0;
-      await fly(balls[0], bag, '●'); balls.forEach(b => b.classList.add('gone')); bag.style.opacity = 1;
+      await deal(balls, $('#bag' + n));
       ask(`${n} ${n === 1 ? 'påse' : 'påsar'}: ${n * g} bollar. ${tot - n * g >= g ? 'Tryck igen.' : ''}`);
       delete $('#heap').dataset.busy;
       if (tot - n * g < g) { $('#heap').onclick = null; res(); }
@@ -1545,10 +1574,27 @@ function runTask() { ERR = false; PROB = null; TASK = RUN.tasks[RUN.i]; VIEWS[RU
 /* en uppgift är klar: resultatet sparas en gång, och knappen leder till nästa uppgift eller kvittot */
 function finish(res, extra = '') {
   if (!RUN) return;
-  if (res && RUN.results.length === RUN.i) RUN.results.push(res);
+  if (res && RUN.results.length === RUN.i) { RUN.results.push(res); cheer(); }
   const last = RUN.i + 1 >= RUN.tasks.length;
   act(`${extra}<button class="next" id="nextTask">${last ? 'Se kvittot' : 'Nästa uppgift'} ${ic.next}</button>`);
   $('#nextTask').onclick = () => { if (last) kvitto(); else { RUN.i++; runTask(); } };
+}
+/* Berömmet när sista rutan är rätt och uppgiften klar (Dennis 12/11): ett ord ur HYPE snurrar in över kortet,
+   konfetti och ljud. Sällsynt och legendariskt får en etikett, mer konfetti och fanfaren. Rörelsen lottas bland tre. */
+const hype = O.hypePicker();
+function cheer() {
+  const { word, tier } = hype();
+  document.querySelectorAll('.ov-hype').forEach(e => e.remove());
+  const c = app.querySelector('.card'), r = c ? c.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
+  const el = document.createElement('div');
+  el.className = `ov-hype t-${tier} e${Math.floor(Math.random() * 3)}`;
+  el.setAttribute('aria-hidden', 'true');
+  const fs = Math.max(30, Math.min(tier === 'common' ? 60 : 54, (Math.min(r.width, innerWidth) * 0.88) / (word.length * 0.56)));
+  el.innerHTML = `${tier === 'common' ? '' : `<small>${tier === 'legend' ? 'Legendarisk' : 'Sällsynt'}</small>`}<b style="font-size:${Math.round(fs)}px">${word}</b>`;
+  el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = (r.top + Math.min(r.height * 0.42, 260)) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2300);
+  try { App.Confetti.burst(tier === 'legend' ? 160 : tier === 'rare' ? 100 : 60); App.Sound.play(tier === 'common' ? 'correct' : 'fanfare'); } catch (_) { /* grädde, aldrig krav */ }
 }
 const done = () => finish(SF ? { first: !SF.acc.miss, hints: SF.acc.hints } : { first: !ERR, hints: 0 });
 /* kvittot (D39): beröm från 60 %, annars bara antalet; Själv visar också ledtrådarna */
@@ -1569,6 +1615,7 @@ function kvitto() {
     <div class="kvbtns"><button class="next" id="again">En omgång till ${ic.next}</button><button class="ghost" id="tohub">Till övningsbladen</button></div>
   </div>`;
   afterRender();
+  if (sum.high) try { App.Confetti.burst(90); } catch (_) {}
   $('#again').onclick = () => startModule(id);
   $('#tohub').onclick = hub;
 }

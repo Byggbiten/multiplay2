@@ -276,3 +276,9 @@ bandet). Lärdom: färgen ska betyda samma sak överallt – lila "härifrån", 
   stegtexten mot fokus men inte rubriken mot svaret. **Lärdom:** en regel som visar "hela uppgiften" ska kontrolleras
   mot vad som efterfrågas i varje form av uppgiften; text som barnet ser ska byggas i logiken så att den kan testas.
   Testet "F1 (12/11)" var rött mot den gamla regeln (bland annat "400 / 10" visade svaret 400) och är grönt nu.
+
+## 2026-11-12 · Övningsbladen flyttade (VD:n)
+
+Plan 3 byggdes av VD:n som egen modul (`js/ovningsblad.js`, D47 ✎) och är live i v77/v78. Rollens D44-kod i
+`matteprov*.js` är bortkopplad; rivningen är en egen skiva med granskning (TODO). Lärdom från porteringen: mockupens
+fasta tal och ram dolde fel som kom med variation (talens längd, skärmstorlek, böjning) – se METOD-OVNINGSBLAD § 1.6.

@@ -410,7 +410,7 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
-## Övningsblad · Division, plan 3 (v77, D47, D48)
+## Övningsblad · Division, plan 3 (v77, v79: beröm och utdelning; D47, D48)
 
 I Kort divisions lägesvy leder kortet **Övningsblad** till åtta moduler i tre avdelningar: **Grunder** (Dela och
 gruppera, Divisionstabellen, 10, 100 och 1000), **Räkna** (Kort division, Trappan) och **Tänka** (Problemlösning,
@@ -418,7 +418,11 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
 
 - **Med hjälp** visar varje steg: en pil ritas först, sedan glider talet längs pilen i lugn takt. En lila rad
   "Varför?" förklarar flytten, ofta med pengar i platsvärdets färger (tusenlappar, hundralappar, tior, kronor).
-  Färdiga siffror stryks, och svaret får fokus på slutet.
+  Färdiga siffror stryks, och svaret får fokus på slutet. I Dela och gruppera hoppar bollarna en och en från
+  högen ner i påsen, utan pil.
+- **Beröm:** när en uppgift är klar snurrar ett ord in över kortet med konfetti, till exempel "Slay!", "Sheesh!" eller
+  "Grymt!". Ibland kommer ett sällsynt ord ("Sigma!", "GOAT!") eller ett legendariskt i guld ("Six seven!"). Samma
+  ord kommer aldrig två gånger i rad. Kvittot får konfetti när minst 60 % var rätt direkt.
 - **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
   själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
   persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och
