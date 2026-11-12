@@ -36,7 +36,9 @@ Dennis 12/11: cellinmatningen i multiplikationen "är inte så smart" (erkänd b
 
 ## Skivor
 
-1. Övningsbladens hjälptrappa (`js/ovningsblad.js`: `typeAnswer`, `sfCheck` och modulernas egna rättningar).
+1. Övningsbladens hjälptrappa (`js/ovningsblad.js`: `typeAnswer`, `sfCheck` och modulernas egna rättningar). **Klar 12/11:**
+   alla åtta moduler i Själv och sju i Med hjälp spelade med bara fel svar till Nästa uppgift, utan beröm (Vilket tal? i
+   Med hjälp har bara tryckval och är oförändrad).
 2. Multiplikationen och kort division (`js/multdiv.js`), bara ytan: knappsatsen och svarsknappen som övningsbladens,
    inmatning direkt i cellen i Räkna med hjälp, Ledtråd i stället för Livlina, kladden med ikoner och Ångra/Gör om,
    berömmet med konfetti och snurrande ord. Logik, steg, texter i stegen och hjälptrappan rörs inte.

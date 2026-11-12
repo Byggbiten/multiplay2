@@ -425,7 +425,10 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
   ord kommer aldrig två gånger i rad. Kvittot får konfetti när minst 60 % var rätt direkt.
 - **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
   själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
-  persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och
+  persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift.
+- **Man fastnar aldrig** (v80, D48 ✎): blir det fel igen kommer en ledtråd av sig själv, och tredje gången visar appen
+  svaret i grå rutor med "Så här blir det" och knappen Nästa. Det gäller också Med hjälp. Uppgiften räknas då som med
+  hjälp och får inget beröm; berömmet kommer bara när barnet själv skrev rätt sist. Kluringar och
   10/100/1000 visar vilket steg man står på; Vilket tal? visar med en bild hur man kryssar.
 - En omgång är 2–4 uppgifter (Divisionstabellen ett blad med tio tal). Kvittot visar hur många som var rätt direkt
   (och ledtrådarna i Själv), och hubben märker modulen med resultatet.
