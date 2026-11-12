@@ -233,9 +233,12 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .box.sm{width:auto;min-width:52px;height:42px;font-size:24px;padding:0 6px}
 .c.tapme{cursor:pointer}
 .c.moved{opacity:.35}
-#flips .dzrow.flip{padding:14px 8px 4px;font-size:26px}
-#flips .box.sm,#flips .opc{height:38px}
-.opc{min-width:44px;height:42px;border-radius:12px;border:2px solid #c4b5fd;background:#fff;font:800 24px 'Baloo 2';color:var(--lila);cursor:pointer}
+#flips .dzrow.flip{padding:4px 8px 4px 82px;font-size:26px;min-height:50px}
+#flips .dzrow.flip small{top:50%;transform:translateY(-50%);width:68px;line-height:1.25}
+#flips .box.sm{height:38px}
+.fop{font:800 26px 'Baloo 2';color:var(--lila);min-width:18px;text-align:center}
+.dzrow.two>div.on{background:#fff7ed;border-radius:12px;box-shadow:0 0 0 2.5px var(--org);padding:2px 8px}
+.dzrow.two>div{padding:2px 8px}
 .dz0{font-style:normal;position:relative;cursor:pointer}
 .dz0.struck::after{content:"";position:absolute;left:-1px;right:-1px;top:52%;height:3px;background:#94a3b8;transform:rotate(-55deg);border-radius:2px}
 .dz0.struck{opacity:.5}
@@ -355,7 +358,6 @@ function setVal(el, v) {
 const getVal = el => { const s = el && el.querySelector('.v'); return s ? s.textContent : ''; };
 const toolsHTML = (extra = '') => `<div class="tools">${extra}<button class="tool" id="hintBtn">Ledtråd <small>2 kvar</small></button></div>`;
 const remsaBtn = '<button class="tool" id="remsaBtn">Räkneremsa</button>';
-const flipBtn = '<button class="tool" id="flipBtn">Vänd på det</button>';
 function remsaHTML(d) {   /* barnet skriver nämnarens tabell själv; den rättas inte */
   return `<div class="remsa" id="remsa" hidden><div class="tt">${d}:ANS TABELL – SKRIV SJÄLV</div><div class="rg">${[1,2,3,4,5,6,7,8,9,10].map(m => `<div class="rc"><small>·${m}</small><span class="ri" id="ri${m}"></span></div>`).join('')}</div></div>`;
 }
@@ -438,19 +440,6 @@ function stepHint(n, qOf, light) {
 /* Restrutan behöver inte fyllas för att Klar ska komma: går det jämnt ut är tom ruta (eller 0) rätt, annars rättas
    den vid Klar. Annars fastnar barnet på "Nästa ruta" när det inte skriver 0 (Dennis 12/11, 2856 / 4). */
 const restOk = r => v => v === String(r) || (r === 0 && v === '');
-function flipTool(max) {   /* en tom rad "Vänd på det" som barnet fyller själv; räknesättet väljs genom att trycka */
-  let n = 0; const btn = $('#flipBtn');
-  btn.onclick = () => {
-    if (n >= max || SF.done) return; n++;
-    const id = 'fl' + n;
-    $('#flips').insertAdjacentHTML('beforeend', `<div class="dzrow flip"><small>VÄND PÅ DET</small><div class="box sm" id="${id}a"></div><button class="opc" id="${id}o">?</button><div class="box sm" id="${id}b"></div><span>=</span><div class="box sm" id="${id}c"></div></div>`);
-    sfAdd(['a', 'b', 'c'].map(s => ({ el: $('#' + id + s), chain: false, need: false })));
-    const ops = ['·', '/', '+', '−'], o = $('#' + id + 'o'); let oi = -1;
-    o.onclick = () => { oi = (oi + 1) % ops.length; o.textContent = ops[oi]; };
-    sfFocus($('#' + id + 'a'));
-    if (n >= max) btn.disabled = true;
-  };
-}
 
 /* Flyg ett känt tal från ett element till ett annat (bandet/flygningen flyttar bara kända tal).
    Ordningen är alltid: pilen ritas (barnet ser vart), en paus, sedan glider talet längs pilen. Dennis: "animationer där
@@ -1284,28 +1273,50 @@ function probSelf(back) {
   label();
 }
 
-/* Kluringar: frågan uppställd som två divisioner med tomma rutor. Raden "Vänd på det" kan öppnas (högst två) och
-   fylls av barnet; räknesättet väljs genom att trycka. Inga pilar. */
+/* Kluringar Själv – stegen ges, räkningen gör barnet (Dennis 12/11: "en kompromiss där de får hjälp i vilket steg man
+   skall göra, men inte få allt serverat"). Frågeraden för steget lyser, och raden "Vänd på det" har gånger färdigt
+   (verktyget från Med hjälp). Barnet väljer talen, räknar och skriver svaret i frågan. Inga pilar, ingen flygning,
+   inget varför, ingen rättning före Klar. Mittenrutan är en ruta som syns i båda raderna. */
 function klurSelf(a, b, k, mid, tot) {
   const bx = id => `<div class="box sm" id="${id}"></div>`;
+  const flip = (n, lab) => `<div class="dzrow flip" id="st${n}"><small>${lab}</small>${bx('s' + n + 'a')}<span class="fop">·</span>${bx('s' + n + 'b')}<span>=</span>${bx('s' + n + 'c')}</div>`;
   app.innerHTML = kdShell('Kluringar') + `
   <div class="card">
     <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
-    <div class="dzrow orig two"><small>FRÅGAN</small>
-      <div>${bx('kT')} / <span class="dzn">${a}</span> = ${bx('kM1')}</div>
-      <div>${bx('kM2')} / <span class="dzn">${b}</span> = <span class="dzn">${k}</span></div></div>
-    <div id="flips" style="display:flex;flex-direction:column;gap:6px"></div>
     <div class="ask" id="ask"></div>
-    ${toolsHTML(flipBtn)}
+    <div class="dzrow orig two"><small>FRÅGAN</small>
+      <div id="rowA">${bx('kT')} / <span class="dzn">${a}</span> = <span class="dzq" id="mA">?</span></div>
+      <div id="rowB">${bx('kM')} / <span class="dzn">${b}</span> = <span class="dzn">${k}</span></div></div>
+    <div id="flips" style="display:flex;flex-direction:column;gap:6px">${flip(1, 'STEG 1<br>VÄND PÅ DET')}</div>
+    ${toolsHTML()}
     <div id="act" class="actrow"></div>
   </div>` + padHTML('Nästa ruta') + kladdHTML();
   $('[data-hub]').onclick = hub;
-  ask('Den första rutan är talet jag tänker på.');
+  const kM = $('#kM'), mA = $('#mA');
+  let step = 1;
+  const lit = r => { $('#rowA').classList.toggle('on', r === 'A'); $('#rowB').classList.toggle('on', r === 'B'); };
+  lit('B');
+  ask(`<span class="hint">STEG 1 · BÖRJA BAKIFRÅN</span>Vilket tal delat med ${b} blir ${k}? Vänd på det och räkna med gånger.`);
+  const row = n => ['a', 'b', 'c'].map(s => ({ el: $('#s' + n + s) }));
   sfInit({
-    boxes: [{ el: $('#kT'), ok: v => v === String(tot) }, { el: $('#kM1'), ok: v => v === String(mid) }, { el: $('#kM2'), ok: v => v === String(mid) }],
-    hint: n => n === 1 ? `Börja bakifrån. Vilket tal delat med ${b} blir ${k}?` : `Division baklänges är gånger: om något delat med ${b} blir ${k}, så är något ${k} · ${b}.`,
-    onRight: kv => { $('#kT').classList.add('ans'); ask(`<span class="ok">Klart!</span>Talet är <b>${tot}</b>. ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
-  flipTool(2);
+    boxes: [...row(1), { el: kM, ok: v => v === String(mid) }],
+    more: () => step < 2,
+    grow: () => {
+      if (step >= 2) return false;
+      step = 2; lit('A');
+      $('#flips').insertAdjacentHTML('beforeend', flip(2, 'STEG 2<br>VÄND PÅ DET'));
+      sfAdd([...row(2), { el: $('#kT'), ok: v => v === String(tot) }]);
+      ask(`<span class="hint">STEG 2</span>Vilket tal delat med ${a} blir ${getVal(kM) || '?'}? Vänd på det igen, och skriv talet i den första rutan.`);
+      sfFocus($('#s2a')); return true;
+    },
+    hint: n => step === 1
+      ? (n === 1 ? `Om något delat med ${b} blir ${k}, så är det ${b} gånger så stort som ${k}.` : `Raden blir ${k} · ${b}.`)
+      : (n === 1 ? `Om talet delat med ${a} blir ${mid}, så är talet ${a} gånger så stort som ${mid}.` : `Raden blir ${mid} · ${a}.`),
+    onRight: kv => { lit(''); $('#kT').classList.add('ans'); ask(`<span class="ok">Klart!</span>Talet är <b>${tot}</b>. ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
+  /* mittenrutan: det barnet skriver i rad B syns i rad A */
+  SF.onType = () => { mA.textContent = getVal(kM) || '?'; mA.className = getVal(kM) ? 'dzn' : 'dzq'; sfLabel(); };
+  /* kT står i frågan från början men fylls i steg 2 */
+  $('#kT').onclick = () => { if (step < 2) ask('Börja bakifrån: steg 1 först.'); };
 }
 
 /* Vilket tal?: barnet kryssar själv (ett tryck = kryss, ett till = ångra). När ett tal är kvar svarar man med det.
@@ -1341,31 +1352,31 @@ function vennSelf() {
   gs.forEach(g => g.onclick = () => { if (SF.done) return; g.classList.toggle('x'); gs.forEach(x => x.classList.remove('nope')); upd(); });
 }
 
-/* 10, 100 och 1000: frågan med en tom ruta. Raden "Vänd på det" kan öppnas och fyllas av barnet. Siffror stryks
-   med tryck (nollorna). */
+/* 10, 100 och 1000 Själv – samma kompromiss som Kluringar: raden "Vänd på det" står färdig med räknesättet, barnet
+   skriver talen i den nya ordningen, räknar och skriver svaret i frågan. Siffror stryks med tryck (nollorna). */
 function dzSelf(k) {
   const t = DZ[k];
   const digs = v => `<span class="dzn">${[...String(v)].map(c => `<i class="dz0">${c}</i>`).join('')}</span>`;
   const cell = v => v === '?' ? `<div class="box sm" id="dq"></div>` : digs(v);
+  const bx = id => `<div class="box sm" id="${id}"></div>`;
   app.innerHTML = kdShell('10, 100 och 1000') + `
   <div class="card">
     <div class="ask" id="ask"></div>
     <div class="dzrow orig"><small>FRÅGAN</small>${cell(t.a)} / ${cell(t.b)} = ${cell(t.c)}</div>
-    <div id="flips"></div>
-    ${toolsHTML(flipBtn)}
+    <div id="flips"><div class="dzrow flip"><small>VÄND PÅ DET</small>${bx('fa')}<span class="fop">${t.op}</span>${bx('fb')}<span>=</span>${bx('fc')}</div></div>
+    ${toolsHTML()}
     <div id="act" class="actrow"></div>
   </div>` + padHTML('Nästa ruta') + kladdHTML();
   $('[data-hub]').onclick = hub;
-  ask(`${t.q}<span class="kv">Tryck på en siffra för att stryka den.</span>`);
+  ask(`${t.q}<span class="kv">Vänd på frågan så att det okända hamnar sist. Räkna, och skriv svaret i frågan. Tryck på en siffra för att stryka den.</span>`);
   document.querySelectorAll('.dz0').forEach(z => z.onclick = () => z.classList.toggle('struck'));
-  sfInit({ boxes: [{ el: $('#dq'), ok: v => v === String(t.ans) }],
-    hint: n => n === 1 ? 'Det okända står inte sist. Vänd på frågan, så att det okända hamnar sist.' : t.calcWhy,
+  sfInit({ boxes: [{ el: $('#fa') }, { el: $('#fb') }, { el: $('#fc') }, { el: $('#dq'), ok: v => v === String(t.ans) }],
+    hint: n => n === 1 ? t.flipWhy : t.calcWhy,
     onRight: kv => {
       $('#dq').classList.add('ans');
       ask(`<span class="ok">Klart!</span>${t.a === '?' ? t.ans : t.a} / ${t.b === '?' ? t.ans : t.b} = ${t.c}.<span class="kv">${kv}</span>`);
       act(k + 1 < DZ.length ? nextBtn('Nästa uppgift') : `<button class="ghost">Till hubben</button>`, () => k + 1 < DZ.length ? dzView(k + 1) : hub());
     } });
-  flipTool(1);
 }
 
 /* Dela och gruppera: Svårare utan bild – berättelsen, divisionen och kontrollen skrivs av barnet. Lättare har kvar

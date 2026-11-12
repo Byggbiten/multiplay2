@@ -122,3 +122,7 @@ fungerande läsbar vy med kladden på begäran.
 - **När uppgiften är klar** göms verktygsraden (Ledtråd, Räkneremsa, Vänd på det), så att kladden behåller sina 100 px.
 - **Lägena:** telefon liggande har två spalter och kladden bakom knappen "Kladd". iPad stående och liggande har en stor
   kladd. På iPad förstoras kortet 1,3 gånger i mockupen (`zoom`); i appen görs det med `--k` (D45).
+- **Kluringar och 10/100/1000 – stegen ges** (efter Dennis "jag blir lite förvirrad", förslag): en helt fri rad
+  "Vänd på det" var för lite stöd. Nu lyser frågeraden för steget, och raden "Vänd på det" står färdig med
+  räknesättet. Barnet väljer talen, räknar och skriver svaret i frågan. Kompromissen: hjälp med *vilket steg*, inte
+  med talen.
