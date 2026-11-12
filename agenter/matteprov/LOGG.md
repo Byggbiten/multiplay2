@@ -265,3 +265,14 @@ VD:n rättade själv två fynd från den kontextfria granskaren: "resten 2." br�
 ihop ordet före, talet och skiljetecknet, `.mp-nw`), och summabrickan hade orange ram som rutan i fokus (nu lila som
 bandet). Lärdom: färgen ska betyda samma sak överallt – lila "härifrån", orange "hit".
 
+
+## 2026-11-12 · F1: rubriken avslöjade svaret i 10/100/1000
+- **Fyndet (brainstorm/15, F1):** "300 / 10" ovanför "Vilket tal delat med 10 blir 30?", "8000 / 1000" ovanför "Vad ska
+  8000 delas med för att bli 8?". Regeln "hela uppgiften syns" (runda 8, Dennis 8008/4) tillämpades som "visa n / d",
+  men i 10/100/1000 är täljaren eller nämnaren ibland det okända.
+- **Rättat:** rubriken byggs i logiken (`taskHead`) och visar det okända som "?". Regeln används bara i Varje talsort
+  och 10/100/1000 (`.mp-q0`); i Varje talsort är det okända kvoten, som inte står i rubriken.
+- **Varför fångade inte testerna det:** rubriken byggdes i UI-filen och testades aldrig mot svaret; svepet läste
+  stegtexten mot fokus men inte rubriken mot svaret. **Lärdom:** en regel som visar "hela uppgiften" ska kontrolleras
+  mot vad som efterfrågas i varje form av uppgiften; text som barnet ser ska byggas i logiken så att den kan testas.
+  Testet "F1 (12/11)" var rött mot den gamla regeln (bland annat "400 / 10" visade svaret 400) och är grönt nu.

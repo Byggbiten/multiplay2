@@ -18,6 +18,12 @@ division (A6, B5) ingår inte i uppdraget och rörs inte (multdiv-motorn). Etike
 skiljer de två T:na). Runda 8b (nummerbrickorna och 12 px prickar) på samma gren. Hela sviten 594 gröna; svepet
 `tests/webblasare/band-svep.js` körs i båda nivåerna.
 
+**12/11:** v76 är live (övningsbladen till och med runda 8b). Ett omtag väntar på Dennis beslut
+(`brainstorm/15-2026-11-12-ovningsblad-omtag.md`, 13 moduler till 8); rör det inte förrän samordnaren säger till.
+F1 är rättad på grenen `ovningsblad-f1` (pushad, ej mergad): rubriken ovanför stegfrågan kommer ur `L.taskHead(t)`
+och visar det okända som "?" ("? / 10 = 30", "8000 / ? = 8"); svaret står aldrig i rubriken. Testet "F1 (12/11)"
+i `tests/ovningsblad.test.mjs` går igenom generatorn för alla moduler och båda nivåerna.
+
 ## Läs först
 1. `CLAUDE.md` (absoluta regler: pedagogiken, språket, 390 × 844 utan scroll, 44 px, inga emojis i nytt).
 2. `.project-context/DECISIONS.md`:

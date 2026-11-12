@@ -986,6 +986,14 @@
     return { moment:'dz', type:'dz', form, n, d:D, q, z, answer:ans, key:`dz${form}${n}/${D}`, text:`${fmt(n)}/${fmt(D)}`,
              fields:ad.map((x, i) => ({ ans:x, place:ad.length - 1 - i })) };
   }
+  /* Rubriken ovanför stegfrågan: hela uppgiften (runda 8, Dennis 8008/4), med det okända som "?" (F1, 12/11: "300 / 10"
+     över "Vilket tal delat med 10 blir 30?" avslöjade svaret). Svaret står aldrig i rubriken. */
+  function taskHead(t) {
+    if (!t || (t.type !== 'ts' && t.type !== 'dz')) return '';
+    if (t.type === 'dz' && t.form === 'taljare') return `? / ${t.d} = ${t.q}`;
+    if (t.type === 'dz' && t.form === 'namnare') return `${t.n} / ? = ${t.q}`;
+    return `${t.n} / ${t.d}`;
+  }
   function genDzOne(level, form, r) {
     for (let g = 0; g < 500; g++) {
       const z = level === 'svar' ? rint(r, 1, 3) : rint(r, 1, 2);
@@ -1874,7 +1882,7 @@
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
     /* D44 ✎: övningsbladen */
     DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_START, BAND_TIP, BAND_ARROW, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
+    makeTs, genTsOne, genTalsort, taskHead, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_START, BAND_TIP, BAND_ARROW, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
     genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };
