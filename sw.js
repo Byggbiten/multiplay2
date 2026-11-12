@@ -1,7 +1,7 @@
 /* MULTIPLAY – Service Worker (PWA offline-stöd) */
 
 // VIKTIGT: Öka versionsnumret vid varje push (v2 → v3 → v4 osv)
-const CACHE_VERSION = 'v76';
+const CACHE_VERSION = 'v77';
 const CACHE = `multiplay-${CACHE_VERSION}`;
 
 const ASSETS = [
