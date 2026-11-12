@@ -63,3 +63,35 @@ Begrepp stryks.
 2. Slutledning: Venndiagrammet ur 26b (visuellt: tryck på talet som passar ledtrådarna), baklänges med bild (3 · 9 + 1 = 28), eller strykas?
 3. Pengar: som berättelser i Problemlösning, eller strykas helt?
 4. Trappan som eget räknesätt (29a/29c), nu eller senare?
+
+## Plan 2 (12/11, efter Dennis: "dessa tycker jag förtjänar mer emphasis … som kanske mira ändå bör öva på")
+
+De sju utdragna sidorna (26b, 29a, 29c, 31, 32a, 32b, 34b) blir kärnan. Bladen i övrigt (26a–36b) blir uppvärmning.
+
+**Uppvärmning (förenklas):**
+1. Grupper: Dela lika, Hur många grupper och Kontrollera i en modul.
+2. Med rest: Ingårs form.
+3. Divisionstabellen: oförändrad.
+4. 10/100/1000: frågan vänds om med en animation, originalfrågan står kvar.
+
+**Kärna (nytt eller omgjort):**
+5. **Dela på olika sätt** (29a + 29c): trappan, kort division och liggande stolen räknar samma tal och ger samma svar.
+   Med hjälp leds trappan cell för cell (subtraktionen, nästa siffra ner).
+6. **Kort division** med långsam och synkad tabellsökning (7 · 6 = 42, 7 · 7 = 49 stryks, 6:an hoppar). Talsortsblocken
+   kommer in här som hjälp på Lättare: när en siffra inte räcker växlas hundratalet till tio tiotal med en animation.
+   Varje talsort som egen modul utgår.
+7. **Problemlösning** (31, 32a, 34b), i tre steg:
+   - berättelsen
+   - välj uttrycket (flerval, platsen lottas enligt D17)
+   - räkna det i kort divisions motor med hjälp, och ringa in svaret i svarsbanken som på pappret
+   Pengar blir berättelser här.
+8. **Kluringar** (32b, "hur fasen ska man ens tänka här?"): varje typ får en bild som visar hur man tänker.
+   - "Vilket tal tänker jag på?": en kedja ÷2 → ÷4 → 5 som med hjälp vänds baklänges, · 4 och sedan · 2.
+   - Ben i ladugården: djur med ben som räknas.
+   - "Delas med sex blir åtta, med två i stället?": hitta talet först (6 · 8), sedan dela.
+   - Prisuppgifterna (penna och skrivbok) bara på Svårare.
+9. **Vilket tal?** (26b): Venndiagram med cirkel, kvadrat och triangel. Barnet trycker på talet som passar
+   ledtrådarna om delbarhet och rest.
+
+Begrepp utgår. Mockup först för 5, 8 och 9 (ny pedagogik); 7 byggs direkt på befintliga delar.
+Byggordning: 7 → 6 → 5 → 8 → 9 → 4 → 1–2.
