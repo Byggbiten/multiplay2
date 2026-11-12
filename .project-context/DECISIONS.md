@@ -762,6 +762,14 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   `4A_K_S_kapitel_3`. Källa: Dennis: "Om det inte finns flersiffriga nämnaer i division nånstans i miras övningsblad så
   kör vi ensiffriga nämnare. Det får bli en senare modul när hon når dit."
 
+- ✎ **2026-11-12, varje flytt får ett varför, och det som är klart stryks:** i kort division stryks siffror som är
+  färdigräknade (snett streck), så att barnet inte tappar bort sig. Varje flytt i kort division och trappan får en
+  rad "Varför?". Den använder pengar i platsvärdets färger (tusenlappar, hundralappar, tior och kronor): "1
+  hundralapp växlas till 10 tior. Med de 3 vi redan har blir det 13 tior." Knappar som "Varför där?" och "Varför
+  flyttar vi ner 3?" ger förklaringen innan rörelsen. Källa: Dennis: "glöm inte att man bör stryka de tal som är
+  'klara' så man inte tappar bort sig", "när jag gick i skolan så fick vi aldrig lära oss trappan" och "jag förstår
+  inte 'varför' siffrorna flyttas som de görs. Så jag skulle behöva mera förklaringar".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

@@ -18,7 +18,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .lab{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:390px;font:800 12px Nunito}
 .lab button{border:0;border-radius:10px;padding:6px 10px;background:#fff;color:var(--deep);font:800 12px Nunito;cursor:pointer}
 .lab button.on{background:var(--deep);color:#fff}
-.app{flex:none;width:390px;height:797px;background:var(--bg);border-radius:28px;box-shadow:0 10px 40px rgba(76,29,149,.18);display:flex;flex-direction:column;padding:10px 12px 12px;gap:8px;overflow:hidden;position:relative}
+.app{flex:none;width:390px;height:797px;background:var(--bg);border-radius:28px;box-shadow:0 10px 40px rgba(76,29,149,.18);display:flex;flex-direction:column;padding:10px 12px 12px;gap:6px;overflow:hidden;position:relative}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
 .back{display:flex;align-items:center;gap:4px;border:0;border-radius:22px;background:rgba(255,255,255,.85);padding:0 14px;height:40px;font:800 14px Nunito;color:var(--deep);cursor:pointer}
 .back svg{width:16px;height:16px}
@@ -26,12 +26,12 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .prog{min-width:70px;text-align:right;font:800 13px Nunito;color:var(--soft);background:rgba(255,255,255,.85);border-radius:22px;padding:10px 14px}
 .card{flex:none;background:rgba(255,255,255,.72);border-radius:24px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;position:relative}
 .top,.pad,.seg,.tiles,.sec{flex:none}
-.ask{font:900 16px/1.3 Nunito;color:#134e4a;min-height:42px}
+.ask{font:900 15.5px/1.28 Nunito;color:#134e4a;min-height:40px}
 .ask .ok{display:block;font:800 13px Nunito;color:#15803d}
 .ask .soft{display:block;font:800 13px Nunito;color:#b45309}
 .head{font:800 19px 'Baloo 2';letter-spacing:.02em}
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.pad button{height:46px;border:0;border-radius:14px;background:rgba(255,255,255,.95);font:800 22px 'Baloo 2';color:var(--deep);cursor:pointer;box-shadow:0 2px 6px rgba(93,63,158,.1)}
+.pad button{height:44px;border:0;border-radius:14px;background:rgba(255,255,255,.95);font:800 22px 'Baloo 2';color:var(--deep);cursor:pointer;box-shadow:0 2px 6px rgba(93,63,158,.1)}
 .pad .wide{grid-column:span 4;background:#e6f4f1;color:#134e4a;font:900 17px Nunito;border:2px solid #99d5c9}
 .pad .wide.go{background:var(--acc);color:#fff;border-color:var(--acc)}
 .pad .er svg{width:22px;height:22px}
@@ -77,7 +77,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .comma{font:800 26px 'Baloo 2';color:var(--deep);padding-bottom:6px}
 .restlab{font:900 12px Nunito;color:var(--lila);align-self:center;margin-bottom:-14px}
 /* tankeraden: nämnarens tabell */
-.think{background:#faf5ff;border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-height:112px}
+.think{background:#faf5ff;border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-height:92px}
 .think .tt{font:900 12px Nunito;color:var(--lila);letter-spacing:.04em}
 .row{display:flex;align-items:center;gap:8px;min-height:32px;padding:0 10px;border-radius:10px;font:800 21px 'Baloo 2';color:var(--deep);background:#fff;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,background .25s,box-shadow .25s;cursor:pointer;position:relative}
 .row.in{opacity:1;transform:none}
@@ -114,6 +114,17 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .mirror .mini{background:#fff;border-radius:14px;padding:6px 10px;font:800 22px 'Baloo 2';color:var(--deep);display:flex;flex-direction:column;align-items:center;gap:2px}
 .mirror .mini small{font:900 11px Nunito;color:var(--soft)}
 .hl{background:#f5f3ff;border-radius:6px;box-shadow:0 0 0 2px var(--lila);color:var(--lila);padding:0 2px}
+.why{display:none;background:#f5f3ff;border-radius:14px;padding:6px 10px;font:800 13px/1.45 Nunito;color:var(--deep)}
+.why.on{display:block}
+.why>b{color:var(--lila);margin-right:2px}
+.mn{display:inline-block;vertical-align:-1px;margin:0 1px}
+.mn.note{width:17px;height:10px;border-radius:2px}
+.mn.coin{width:11px;height:11px;border-radius:50%}
+.mn.Tu{background:#a78bfa}.mn.H{background:#f87171}.mn.T{background:#60a5fa}.mn.E{background:#4ade80}
+.mx{font:800 12px Nunito;color:var(--soft);margin-left:3px}
+.dg.struck::before{content:"";position:absolute;left:3px;right:3px;top:60%;height:3px;background:#94a3b8;transform:rotate(-55deg);border-radius:2px}
+.dg.struck{opacity:.55}
+.rs.struck{opacity:.5;text-decoration:line-through}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -272,7 +283,7 @@ function typeAnswer(box, right, q) {
     };
   });
 }
-const rows2 = s => s.q === 9 ? [8, 9] : [s.q, s.q + 1];   /* raden som passar och raden som är för stor */
+const rows2 = s => [s.q, s.q + 1];   /* raden som passar och raden som är för stor (också 7 · 10) */
 
 /* ── kort division ── */
 function kdView() {
@@ -281,7 +292,7 @@ function kdView() {
   app.innerHTML = kdShell('Kort division') + `
   <div class="card" id="card">
     <div class="ask" id="ask"></div>
-    <div class="head">${[...N].map((d, i) => `<span class="${CLS[i]}">${d}</span>`).join('')} / ${D}</div>
+    <div class="why" id="why"></div>
     <div class="kd">
       <div class="fr">
         <div class="numrow">${[...N].map((d, i) => `<div class="dg ${CLS[i]}" id="d${i}"><span class="cap ${CLS[i]}">${CAP[CLS[i]]}</span>${d}${i > 0 ? `<span class="rs" id="rs${i}"></span>` : ''}</div>`).join('')}</div>
@@ -298,36 +309,69 @@ function kdView() {
   kdRun();
 }
 function grp(ix) { document.querySelectorAll('.dg').forEach((d, i) => { d.classList.toggle('grp', ix.includes(i)); d.classList.toggle('dim', ix.length > 0 && i < Math.min(...ix)); }); }
+/* ── Varför? Pengar gör talsorterna konkreta: tusenlappar, hundralappar, tior och kronor, i platsvärdets färger.
+   Dennis: "jag förstår inte 'varför' siffrorna flyttas som de görs … mera förklaringar". Varje flytt får en mening. */
+const MONEY = [
+  { one:'tusenlapp', many:'tusenlappar', cls:'Tu', k:'note' }, { one:'hundralapp', many:'hundralappar', cls:'H', k:'note' },
+  { one:'tia', many:'tior', cls:'T', k:'coin' }, { one:'krona', many:'kronor', cls:'E', k:'coin' }];
+const nm = (n, i) => `${n} ${n === 1 ? MONEY[i].one : MONEY[i].many}`;
+function icons(n, i, max = 14) {
+  const m = MONEY[i], one = `<i class="mn ${m.k} ${m.cls}"></i>`;
+  return n <= max ? one.repeat(n) : `${one.repeat(3)}<span class="mx">… ${n} st</span>`;
+}
+function why(html) { const w = $('#why'); if (w) { w.innerHTML = html ? `<b>Varför?</b> ${html}` : ''; w.classList.toggle('on', !!html); } }
+function startWhy() {
+  const s0 = P.steps[0];
+  if (s0.i === 0) return `Tänk att ${N} kr ska delas lika mellan ${D}. Vi börjar med ${MONEY[0].many}.`;
+  const a = P.ds[0];
+  return `Tänk att ${N} kr ska delas lika mellan ${D}. ${nm(a, 0)} ${icons(a, 0)} räcker inte till ${D}.
+    Vi växlar dem till ${a * 10} ${MONEY[1].many}. Med de ${P.ds[1]} vi redan har blir det ${s0.cur} ${MONEY[1].many}.`;
+}
+const giveWhy = s => `Varje person får ${nm(s.q, s.i)}. Därför står ${s.q} i ${PLACE[s.i]}et.`;
+const prodWhy = s => `${D} personer får ${s.q} var: ${D} · ${s.q} = ${s.p} ${MONEY[s.i].many} delas ut.`;
+const restWhy = s => s.last ? `${nm(s.r, s.i)} ${icons(s.r, s.i)} blir kvar. ${s.r === 0 ? 'Allt gick jämnt ut.' : 'De räcker inte till alla, så det är resten.'}`
+  : `${nm(s.r, s.i)} ${icons(s.r, s.i)} räcker inte till alla ${D}. Den ska inte slängas – den växlas.`;
+const swapWhy = s => { const nx = P.ds[s.i + 1];
+  return `${nm(s.r, s.i)} ${icons(s.r, s.i)} växlas till ${s.r * 10} ${MONEY[s.i + 1].many} ${icons(s.r * 10, s.i + 1)}.
+    Med de ${nx} vi redan har blir det ${s.r * 10 + nx} ${MONEY[s.i + 1].many}.`; };
+
 async function kdRun() {
   const s0 = P.steps[0];
   const first = [...N].slice(0, s0.i + 1).join('');
   ask(`${D} får inte plats i ${N[0]}. Vi börjar med <b>${first}</b> ${PLACE[s0.i]}.`);
+  why(startWhy());
   await W(PACE); grp([...Array(s0.i + 1).keys()]);
   for (const s of P.steps) {
     await waitNext(`Visa ${D}:ans tabell`);
+    why('');
     ask(`Hur många gånger får ${D} plats i <b>${s.cur}</b>? Titta i tabellen.`);
     await showRows(rows2(s), s.cur);
     const r = await pickRow(s.cur, s.q);
     ask(`<span class="ok">Rätt!</span>${D} · ${s.q} = ${s.p}. ${s.q} skrivs i ${PLACE[s.i]}et.`);
+    why(giveWhy(s));
     await W(PACE / 2); await fly(r.querySelector('.m'), $('#q' + s.i), String(s.q));
     $('#q' + s.i).insertAdjacentText('beforeend', s.q); $('#q' + s.i).classList.add('done');
     await waitNext();
     const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
-    ask(q); $('#sub').innerHTML = `${s.cur} − ${s.p} = <div class="box" id="sb"></div>`;
+    ask(q); why(prodWhy(s)); $('#sub').innerHTML = `${s.cur} − ${s.p} = <div class="box" id="sb"></div>`;
     await typeAnswer($('#sb'), s.r, q);
+    why(restWhy(s));
+    /* det som är klart stryks, så att man inte tappar bort sig (som i appens kort division) */
+    for (let k = 0; k <= s.i; k++) { $('#d' + k).classList.add('struck'); const rs = $('#rs' + k); if (rs) rs.classList.add('struck'); }
     if (!s.last) {
       const nx = P.ds[s.i + 1];
-      ask(`<span class="ok">Rätt!</span>${s.r} ${PLACE[s.i]} är kvar. De följer med till ${PLACE[s.i + 1]}en.`);
+      ask(`<span class="ok">Rätt!</span>${s.r} ${PLACE[s.i]} är kvar. Den lilla siffran ${s.r} skrivs framför ${nx}:an.`);
+      await waitNext('Varför där?');
+      why(swapWhy(s));
       const rs = $('#rs' + (s.i + 1)); rs.classList.add('slot');
       await fly($('#sb'), rs, String(s.r)); rs.textContent = s.r;
       grp([s.i + 1]); $('#sub').innerHTML = '';
-      await waitNext();
-      ask(`${s.r} ${PLACE[s.i]} är ${s.r * 10} ${PLACE[s.i + 1]}. Med ${nx} ${PLACE[s.i + 1]} blir det <b>${s.r * 10 + nx}</b> ${PLACE[s.i + 1]}.`);
-      await W(PACE);
+      ask(`Nu står det <b>${s.r * 10 + nx}</b> ${PLACE[s.i + 1]}: den lilla ${s.r}:an och ${nx}:an hör ihop.`);
     } else {
       await fly($('#sb'), $('#qR'), String(s.r)); $('#qR').insertAdjacentText('beforeend', s.r); $('#qR').classList.add('done');
       grp([]); $('#sub').innerHTML = '';
       ask(`<span class="ok">Klart!</span>${N} / ${D} = ${P.quot}, rest ${P.rest}.`);
+      why(`Varje person fick ${P.quot} kr, och ${P.rest} kr blev över.`);
       await W(PACE);
       $('#think').innerHTML = `<div class="tt">KONTROLL</div><div class="row in" style="cursor:default">${D} · ${P.quot} + ${P.rest} = ${N}<span class="cmp" style="color:#15803d">som täljaren</span></div>`;
       act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
@@ -344,7 +388,8 @@ function trapView() {
   app.innerHTML = kdShell('Trappan') + `
   <div class="card">
     <div class="ask" id="ask"></div>
-    <div class="trap" id="trap" style="grid-template-columns:repeat(${cols},30px);grid-auto-rows:27px">${cells.join('')}</div>
+    <div class="why" id="why"></div>
+    <div class="trap" id="trap" style="grid-template-columns:repeat(${cols},30px);grid-auto-rows:25px">${cells.join('')}</div>
     <div class="sub" id="sub"></div>
     <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
   </div>` + padHTML() + kladdHTML();
@@ -364,47 +409,58 @@ async function trapRun() {
   const think = (h) => { $('#sub').innerHTML = h; };
   const s0 = P.steps[0];
   ask(`I trappan skriver vi allt vi räknar. ${D} får inte plats i ${N[0]}, så vi börjar med <b>${s0.cur}</b>.`);
-  let row = 1;                                      /* raden där "cur" står */
+  why(startWhy());
+  let row = 1;
   const lit = (r, a, b, on) => { for (let c = a; c <= b; c++) C(r, c).classList.toggle('lit', on); };
   lit(1, 1, 1 + s0.i, true);
   for (const s of P.steps) {
     const col = 1 + s.i, len = String(s.cur).length;
     await waitNext(`Visa ${D}:ans tabell`);
+    why('');
     think(`<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">${D}:ANS TABELL</div></div>`);
     ask(`Hur många gånger får ${D} plats i <b>${s.cur}</b>?`);
     await showRows(rows2(s), s.cur);
     const r = await pickRow(s.cur, s.q);
     ask(`<span class="ok">Rätt!</span>${s.q} skrivs ovanför, över ${PLACE[s.i]}et.`);
+    why(giveWhy(s));
     await W(PACE / 2); await fly(r.querySelector('.m'), C(0, col), String(s.q)); C(0, col).textContent = s.q; C(0, col).classList.add(CLS[s.i]);
     await waitNext();
     think('');
     ask(`Under ${s.cur} skriver vi ${s.q} gånger ${D}: <b>${s.p}</b>.`);
+    why(prodWhy(s) + ' Vi skriver det under, för att se vad som blir kvar.');
     await W(PACE / 2);
-    const pr = row + 1; C(pr, col - String(s.p).length).textContent = '−'; C(pr, col - String(s.p).length).classList.add('minus');
-    for (let k = 0; k < String(s.p).length; k++) { const e = C(pr, col - String(s.p).length + 1 + k); e.textContent = String(s.p)[k]; e.classList.add('appear', 'ul'); await W(PACE / 2); }
+    const pl = String(s.p).length, pr = row + 1;
+    C(pr, col - pl).textContent = '−'; C(pr, col - pl).classList.add('minus');
+    for (let k = 0; k < pl; k++) { const e = C(pr, col - pl + 1 + k); e.textContent = String(s.p)[k]; e.classList.add('appear', 'ul'); await W(PACE / 2); }
     for (let c = col - len + 1; c <= col; c++) C(pr, c).classList.add('ul');
     await waitNext();
     lit(row, col - len + 1, col, false);
     const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
-    ask(q); think(`${s.cur} − ${s.p} = <div class="box" id="sb"></div>`);
+    ask(q); why(''); think(`${s.cur} − ${s.p} = <div class="box" id="sb"></div>`);
     await typeAnswer($('#sb'), s.r, q);
     think('');
     const rr = row + 2; put(C, rr, col, s.r, ['appear']);
+    why(restWhy(s));
     if (!s.last) {
-      ask(`<span class="ok">Rätt!</span>${s.r} blev över. Nu flyttar vi ner nästa siffra, ${P.ds[s.i + 1]}.`);
-      await waitNext(`Flytta ner ${P.ds[s.i + 1]}`);
+      const nx = P.ds[s.i + 1];
+      ask(`<span class="ok">Rätt!</span>${s.r} blev över. Nu flyttar vi ner nästa siffra, ${nx}.`);
+      await waitNext(`Varför flyttar vi ner ${nx}?`);
+      why(swapWhy(s));
+      await waitNext(`Flytta ner ${nx}`);
       C(1, col + 1).classList.add('src');
-      await fly(C(1, col + 1), C(rr, col + 1), String(P.ds[s.i + 1]));
-      C(rr, col + 1).textContent = P.ds[s.i + 1]; C(rr, col + 1).classList.add(CLS[s.i + 1]); C(1, col + 1).classList.remove('src');
-      row = rr; const nl = String(s.r * 10 + P.ds[s.i + 1]).length;
+      await fly(C(1, col + 1), C(rr, col + 1), String(nx));
+      C(rr, col + 1).textContent = nx; C(rr, col + 1).classList.add(CLS[s.i + 1]); C(1, col + 1).classList.remove('src');
+      row = rr; const nl = String(s.r * 10 + nx).length;
       lit(row, col + 1 - nl + 1, col + 1, true);
-      ask(`Nu står det <b>${s.r * 10 + P.ds[s.i + 1]}</b>, samma tal som i kort division.`);
+      ask(`Nu står det <b>${s.r * 10 + nx}</b> ${PLACE[s.i + 1]}, samma tal som i kort division.`);
     } else {
       C(rr, col).style.color = 'var(--lila)';
       ask(`<span class="ok">Klart!</span>${N} / ${D} = ${P.quot}, rest ${P.rest}.`);
-      await waitNext('Varför är det samma som kort division?');
+      why(`Varje person fick ${P.quot} kr, och ${P.rest} kr blev över.`);
+      await waitNext('Jämför med kort division');
       const s1 = P.steps[0];
       ask(`Det som blev över i trappan, <b>${s1.r}</b>, är den lilla siffran i kort division.`);
+      why(`Båda sätten växlar ${nm(s1.r, s1.i)} till ${s1.r * 10} ${MONEY[s1.i + 1].many}. Trappan skriver ut det, kort division skriver bara den lilla siffran.`);
       put(C, 3, 1 + s1.i, s1.r, ['src']);
       think(`<div class="mirror">
         <div class="mini"><small>TRAPPAN</small><span>${s1.cur} − ${s1.p} = <span class="hl">${s1.r}</span></span></div>
@@ -413,7 +469,6 @@ async function trapRun() {
     }
   }
 }
-
 
 function go(v) {
   if (v === 'restart') v = view;
