@@ -61,5 +61,5 @@ Begrepp stryks.
 
 1. Planen med åtta moduler.
 2. Slutledning: Venndiagrammet ur 26b (visuellt: tryck på talet som passar ledtrådarna), baklänges med bild (3 · 9 + 1 = 28), eller strykas?
-4. Trappan som eget räknesätt (29a/29c), nu eller senare?
 3. Pengar: som berättelser i Problemlösning, eller strykas helt?
+4. Trappan som eget räknesätt (29a/29c), nu eller senare?
