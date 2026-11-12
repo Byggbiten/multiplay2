@@ -196,6 +196,88 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .trow.on{background:#fff7ed;box-shadow:0 0 0 2px var(--org)}
 .trow .box{width:44px;height:38px;font-size:22px}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
+/* ══ Själv med semistöd (brainstorm/17) ══ */
+.inp{cursor:pointer}
+.box.ans{border-style:solid;background:#f0fdf4}
+.box.rest.ans{background:#f5f3ff}
+.box.lead{opacity:.3}
+.box.miss,.ri.miss,.rs.miss,.es.miss{background:var(--peach)!important;border-color:#fdba74!important}
+.rs.slot.inp::after{content:"";position:absolute;inset:-12px -5px}
+.rs.focus,.ri.focus{border:2px solid #0f766e!important;box-shadow:0 0 0 2px var(--org)}
+.kd.self .numrow{gap:15px;padding-left:16px}
+.kd.self .box{width:31px}
+.kd.self .dg{cursor:pointer;width:27px}
+.kd.self .rs{left:-18px;top:15px;min-width:17px;height:20px;padding:0 1px;font-size:15px;line-height:16px;border-radius:6px}
+.qwrap{display:flex;flex-direction:column;align-items:flex-end;gap:12px;padding-bottom:4px}
+.qrow{display:flex;gap:3px}
+.rrow{display:flex;align-items:center;gap:6px;font:900 13px Nunito;color:var(--lila)}
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tool{min-height:44px;border:2px solid #c4b5fd;border-radius:14px;background:#fff;color:var(--lila);font:900 14px Nunito;padding:0 14px;cursor:pointer}
+.tool small{font:800 11px Nunito;color:var(--soft);margin-left:2px}
+.tool.on{background:#f5f3ff;border-color:var(--lila)}
+.tool:disabled{opacity:.5;cursor:default}
+.ask .hint{display:block;font:900 11.5px Nunito;color:var(--lila);letter-spacing:.06em}
+.ask .kv{display:block;font:800 12.5px/1.3 Nunito;color:var(--soft);margin-top:2px}
+.actrow{display:flex;justify-content:center}
+.actrow:empty{display:none}
+.remsa{background:#faf5ff;border-radius:14px;padding:6px 8px 8px}
+.remsa .tt{font:900 11.5px Nunito;color:var(--lila);letter-spacing:.04em;margin-bottom:3px}
+.rg{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.rc{display:flex;flex-direction:column;align-items:center;gap:1px}
+.rc small{font:800 11px Nunito;color:var(--soft)}
+.ri{width:100%;height:30px;border-radius:8px;border:2px dashed #c4b5fd;background:#fff;display:flex;align-items:center;justify-content:center;font:800 17px 'Baloo 2';color:var(--deep)}
+.box.tb{width:auto;height:27px;align-self:start;border-width:2px;border-radius:8px;font-size:21px;justify-content:flex-end;padding:0 6px;margin:0 1px;z-index:1}
+.box.tb.ans{transform:none}
+.box.sm{width:auto;min-width:52px;height:42px;font-size:24px;padding:0 6px}
+.c.tapme{cursor:pointer}
+.c.moved{opacity:.35}
+#flips .dzrow.flip{padding:14px 8px 4px;font-size:26px}
+#flips .box.sm,#flips .opc{height:38px}
+.opc{min-width:44px;height:42px;border-radius:12px;border:2px solid #c4b5fd;background:#fff;font:800 24px 'Baloo 2';color:var(--lila);cursor:pointer}
+.dz0{font-style:normal;position:relative;cursor:pointer}
+.dz0.struck::after{content:"";position:absolute;left:-1px;right:-1px;top:52%;height:3px;background:#94a3b8;transform:rotate(-55deg);border-radius:2px}
+.dz0.struck{opacity:.5}
+.venn .vn .xx{stroke:#64748b;stroke-width:3;stroke-linecap:round;opacity:0}
+.venn .vn.x .xx{opacity:1}
+.venn .vn.x circle{fill:#f1f5f9}
+.venn .vn.x text{opacity:.4}
+.ball.sel{background:var(--lila);box-shadow:0 0 0 2px #ddd6fe}
+.heap.self{cursor:default}.heap.self .ball{cursor:pointer;width:18px;height:18px}
+.bag.self{padding:6px}
+.expr{display:flex;justify-content:center;gap:8px;align-items:center}
+.es{min-width:76px;height:46px;border-radius:12px;border:3px dashed #a7d8cf;background:#fff;display:flex;align-items:center;justify-content:center;font:800 24px 'Baloo 2';color:var(--deep);cursor:pointer}
+.es.op{min-width:46px}
+.opsb{display:flex;gap:8px;justify-content:center}
+.opsb button{width:56px;height:46px;border-radius:14px;border:2.5px solid #ddd6fe;background:#fff;font:800 24px 'Baloo 2';color:var(--deep);cursor:pointer}
+.tok.tap{cursor:pointer;box-shadow:0 0 0 2px #ddd6fe}
+.kctl{display:flex;align-items:center;justify-content:center;gap:6px;font:800 22px 'Baloo 2';color:var(--deep);background:#fff;border-radius:16px;padding:16px 8px 6px;position:relative}
+.kctl small{position:absolute;left:10px;top:3px;font:900 10px Nunito;color:var(--soft);letter-spacing:.05em}
+.kctl .box.sm{min-width:44px}
+.selfb{font:900 10px Nunito;background:#ede9fe;color:var(--lila);border-radius:7px;padding:2px 5px;vertical-align:1px}
+.prog{white-space:nowrap;min-width:0!important;padding:10px 10px!important}
+.ttl{white-space:nowrap}
+/* ══ lägen: telefon och iPad, stående och liggande (brainstorm/17 varv 3) ══ */
+#stage{flex:none;position:relative}
+.kbtn{display:none!important}
+.app.pl{width:797px;height:390px;display:grid;grid-template-columns:1fr 300px;grid-template-rows:auto 1fr;gap:6px 12px}
+.app.pl>.top{grid-column:1/-1}
+.app.pl>.card{grid-column:1;grid-row:2;min-height:0;overflow:auto}
+.app.pl>.pad{grid-column:2;grid-row:2;align-self:start}
+.app.pl>.kladd{display:none}
+.app.pl .kbtn{display:flex!important}
+.app.pl.klopen>.pad{display:none}
+.app.pl.klopen>.kladd{display:flex;grid-column:2;grid-row:2}
+.app.ip{width:820px;height:1180px;padding:16px 24px 24px;gap:12px}
+.app.ip>.card,.app.ip>.pad{width:620px;align-self:center}
+.app.ip>.card,.app.il>.card,.app.ip>.top,.app.il>.top{zoom:1.3}   /* i appen: --k (D45), här bara för att visa storleken */
+.app.ip>.card{width:477px}
+.app.ip .pad button,.app.il .pad button{height:60px;font-size:28px;border-radius:16px}
+.app.il{width:1180px;height:820px;display:grid;grid-template-columns:1fr 440px;grid-template-rows:auto auto 1fr;gap:12px 20px;padding:16px 24px 24px}
+.app.il>.top{grid-column:1/-1}
+.app.il>.card{grid-column:1;grid-row:2/4;align-self:start;max-height:100%;overflow:auto}
+.app.il>.pad{grid-column:2;grid-row:2}
+.app.il>.kladd{grid-column:2;grid-row:3}
+.app.hubv.pl,.app.hubv.il{display:flex;overflow:auto}
 </style>
 </head>
 <body>
@@ -211,8 +293,13 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
   <button data-go="tab">Divisionstabellen</button>
   <button data-go="restart">Börja om vyn</button>
 </div>
-<div class="app" id="app"></div>
-<p class="note" style="max-width:390px">Mockup för plan 3: hubben, kort division och trappan (5736 / 7), problemlösning, kluringar, Vilket tal? och 10/100/1000. Alla åtta moduler finns med.</p>
+<div class="lab" id="lab2">
+  <button data-md="help">Med hjälp</button><button data-md="self">Själv</button>
+  <button data-lv="easy">Lättare</button><button data-lv="hard">Svårare</button>
+  <button data-sz="pp">Telefon stående</button><button data-sz="pl">Telefon liggande</button><button data-sz="ip">iPad stående</button><button data-sz="il">iPad liggande</button>
+</div>
+<div id="stage"><div class="app pp" id="app"></div></div>
+<p class="note" style="max-width:520px">Mockup för plan 3, alla åtta moduler. Med hjälp är godkänd. Själv (steg 3, brainstorm/17): appen ger det pappret ger – uppställningen, att stryka och kryssa, små restrutor, en räkneremsa man skriver själv – men aldrig tanken. Ledtråd högst två gånger, rättning vid Klar. Lägena visar layouten; på iPad skalas texten i appen med --k.</p>
 
 <script>
 'use strict';
@@ -241,9 +328,121 @@ app.addEventListener('click', e => {
   if (k === 'e') typed = typed.slice(0, -1);
   else if (k === 'ok') { padHandler(typed); return; }
   else if (typed.length < 5) typed += k;
-  const f = $('.box.focus'); if (f) f.textContent = typed;
-  const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0);
+  const f = $('#app .inp.focus') || $('.box.focus'); if (f) setVal(f, typed);
+  if (SF && padHandler === sfOk) sfLabel();
+  else { const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0); }
 });
+app.addEventListener('click', e => {   /* telefon liggande: kladden bakom en knapp, över knappsatsen */
+  const k = e.target.closest('[data-kl]'); if (!k) return;
+  const on = app.classList.toggle('klopen'); k.textContent = on ? 'Knappar' : 'Kladd';
+});
+
+/* ══ Själv med semistöd (brainstorm/17): appen ger det pappret ger – uppställningen, platsen, att stryka och kryssa –
+   men aldrig tanken: ingen pil, ingen varför-rad, inga tabellrader, ingen rättning ruta för ruta. Knappen heter
+   "Nästa ruta" tills allt är ifyllt och sedan "Klar" (D39 ✎). Vid Klar blir rutor som inte stämmer persika och töms.
+   Ledtråd högst två gånger per uppgift, och kvittot visar det. Strykningar, restrutor och räkneremsa rättas aldrig. ══ */
+let MODE = 'help', LEVEL = 'hard', SIZE = 'pp', SF = null;
+const SELF = () => MODE === 'self';
+function setVal(el, v) {
+  let s = el.querySelector('.v'); if (!s) { s = document.createElement('span'); s.className = 'v'; el.appendChild(s); }
+  s.textContent = v; if (v !== '') el.classList.remove('miss');
+}
+const getVal = el => { const s = el && el.querySelector('.v'); return s ? s.textContent : ''; };
+const toolsHTML = (extra = '') => `<div class="tools">${extra}<button class="tool" id="hintBtn">Ledtråd <small>2 kvar</small></button></div>`;
+const remsaBtn = '<button class="tool" id="remsaBtn">Räkneremsa</button>';
+const flipBtn = '<button class="tool" id="flipBtn">Vänd på det</button>';
+function remsaHTML(d) {   /* barnet skriver nämnarens tabell själv; den rättas inte */
+  return `<div class="remsa" id="remsa" hidden><div class="tt">${d}:ANS TABELL – SKRIV SJÄLV</div><div class="rg">${[1,2,3,4,5,6,7,8,9,10].map(m => `<div class="rc"><small>·${m}</small><span class="ri" id="ri${m}"></span></div>`).join('')}</div></div>`;
+}
+function sfInit(o) {
+  SF = { tries: 0, boxes: [], acc: o.acc || { miss: false, hints: 0 }, hint: o.hint, onRight: o.onRight, grow: o.grow, more: o.more };
+  sfAdd(o.boxes || []);
+  sfAdd([...document.querySelectorAll('#app .ri')].map(el => ({ el, chain: false, need: false })));
+  padHandler = sfOk;
+  const hb = $('#hintBtn'); if (hb) { hb.onclick = sfHint; sfHintLabel(); }
+  const rb = $('#remsaBtn'); if (rb) rb.onclick = () => { const r = $('#remsa'); r.hidden = !r.hidden; rb.classList.toggle('on', !r.hidden); };
+  const first = SF.boxes.find(b => b.chain); if (first) sfFocus(first.el); else sfLabel();
+}
+function sfAdd(list) {
+  list.forEach(b => {
+    b = { chain: true, need: true, ...b };
+    b.el.classList.add('inp');
+    b.el.onclick = e => { e.stopPropagation(); if (SF && !SF.done) sfFocus(b.el); };
+    SF.boxes.push(b);
+  });
+  sfLabel();
+}
+function sfFocus(el) {
+  if (!el) return;
+  document.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+  el.classList.add('focus'); typed = getVal(el); sfLabel();
+}
+const sfFull = () => SF.boxes.every(b => !b.need || getVal(b.el) !== '') && !(SF.more && SF.more());
+function sfLabel() {
+  const w = $('#pad .wide'); if (!w || !SF || SF.done) return;
+  const k = sfFull(); w.innerHTML = `${ic.check} ${k ? 'Klar' : 'Nästa ruta'}`; w.classList.toggle('go', k);
+}
+function sfOk() {
+  if (!SF || SF.done) return;
+  if (sfFull()) return sfCheck();
+  const i = SF.boxes.findIndex(b => b.el.classList.contains('focus'));
+  const empty = b => b.chain && b.need && getVal(b.el) === '';
+  let nx = SF.boxes.find((b, j) => j > i && empty(b));
+  if (!nx && SF.grow && SF.grow()) return;
+  nx = nx || SF.boxes.find(empty) || SF.boxes.find(b => b.need && getVal(b.el) === '');
+  if (nx) sfFocus(nx.el);
+}
+const kvText = () => `Kvittot: ${SF.acc.miss ? 'rätt efter nytt försök' : 'rätt på första försöket'} · ${SF.acc.hints ? `med ${SF.acc.hints} ledtråd${SF.acc.hints > 1 ? 'ar' : ''}` : 'utan ledtråd'}`;
+function sfCheck() {
+  SF.tries++;
+  const bad = SF.boxes.filter(b => b.ok && !b.ok(getVal(b.el)));
+  if (bad.length) {
+    SF.acc.miss = true;
+    bad.forEach(b => { setVal(b.el, ''); b.el.classList.add('miss'); });
+    ask(`<span class="soft">Inte riktigt – försök igen.</span>${bad.length === 1 ? 'Rutan som blev tom stämmer inte.' : `De ${bad.length} rutorna som blev tomma stämmer inte.`}`);
+    sfFocus(bad[0].el); return;
+  }
+  SF.done = true; padHandler = null;
+  document.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+  const w = $('#pad .wide'); if (w) w.classList.remove('go');
+  const tl = $('#app .tools'); if (tl) tl.style.display = 'none';   /* klart: verktygen gör ingen nytta längre */
+  SF.onRight(kvText());
+}
+function sfHintLabel() {
+  const hb = $('#hintBtn'); if (!hb || !SF) return;
+  const left = 2 - SF.acc.hints;
+  hb.innerHTML = left > 0 ? `Ledtråd <small>${left} kvar</small>` : 'Inga ledtrådar kvar';
+  hb.disabled = left <= 0 || !!SF.done;
+}
+function sfHint() {
+  if (!SF || SF.done || SF.acc.hints >= 2) return;
+  SF.acc.hints++;
+  ask(`<span class="hint">LEDTRÅD ${SF.acc.hints}</span>${SF.hint(SF.acc.hints)}`);
+  sfHintLabel();
+}
+/* Ledtråden i kort division och trappan: 1 = frågan för steget man står på (var man börjar), 2 = raden i tabellen
+   som är för stor. Aldrig svaret. Steget = första kvotsiffran som är tom. */
+function stepHint(n, qOf, light) {
+  const cs = P.steps.find(s => getVal(qOf(s)) === '') || P.steps[0];
+  if (n === 1) {
+    if (light) light(cs);
+    return `${cs === P.steps[0] && cs.i > 0 ? `${D} får inte plats i ${N[0]}. ` : ''}Hur många gånger får ${D} plats i <b>${cs.cur}</b>?`;
+  }
+  return `En rad ur ${D}:ans tabell: ${D} · ${cs.q + 1} = ${D * (cs.q + 1)}. Den är större än ${cs.cur}.`;
+}
+function flipTool(max) {   /* en tom rad "Vänd på det" som barnet fyller själv; räknesättet väljs genom att trycka */
+  let n = 0; const btn = $('#flipBtn');
+  btn.onclick = () => {
+    if (n >= max || SF.done) return; n++;
+    const id = 'fl' + n;
+    $('#flips').insertAdjacentHTML('beforeend', `<div class="dzrow flip"><small>VÄND PÅ DET</small><div class="box sm" id="${id}a"></div><button class="opc" id="${id}o">?</button><div class="box sm" id="${id}b"></div><span>=</span><div class="box sm" id="${id}c"></div></div>`);
+    sfAdd(['a', 'b', 'c'].map(s => ({ el: $('#' + id + s), chain: false, need: false })));
+    const ops = ['·', '/', '+', '−'], o = $('#' + id + 'o'); let oi = -1;
+    o.onclick = () => { oi = (oi + 1) % ops.length; o.textContent = ops[oi]; };
+    sfFocus($('#' + id + 'a'));
+    if (n >= max) btn.disabled = true;
+  };
+}
 
 /* Flyg ett känt tal från ett element till ett annat (bandet/flygningen flyttar bara kända tal).
    Ordningen är alltid: pilen ritas (barnet ser vart), en paus, sedan glider talet längs pilen. Dennis: "animationer där
@@ -290,10 +489,11 @@ async function fly(from, to, text) {
 
 /* ── hubben ── */
 function hub() {
-  view = 'hub'; padHandler = null;
+  view = 'hub'; padHandler = null; SF = null; app.classList.add('hubv'); app.classList.remove('klopen');
   const t = (n, name, sub, go, cls = '') => `<button class="tile ${cls}" ${go ? `data-open="${go}"` : ''}><b>${n}</b><span>${name}<small>${sub}</small></span></button>`;
+  const sg = (key, cur, opts) => `<div class="seg" style="flex:1">${opts.map(([v, l]) => `<button data-${key}="${v}" class="${cur === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   app.innerHTML = `<div class="top"><button class="back">${ic.back}Tillbaka</button><div class="ttl">Övningsblad</div><div style="width:86px"></div></div>
-  <div style="display:flex;gap:8px"><div class="seg" style="flex:1"><button>Lättare</button><button class="on">Svårare</button></div><div class="seg" style="flex:1"><button class="on">Med hjälp</button><button>Själv</button></div></div>
+  <div style="display:flex;gap:8px">${sg('lv', LEVEL, [['easy', 'Lättare'], ['hard', 'Svårare']])}${sg('md', MODE, [['help', 'Med hjälp'], ['self', 'Själv']])}</div>
   <div class="sec">GRUNDER</div>
   <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','grp','new')}${t(2,'Divisionstabellen','gånger bakom varje','tab','new')}${t(3,'10, 100 och 1000','vänd på det','dz','new')}</div>
   <div class="sec">RÄKNA</div>
@@ -302,6 +502,8 @@ function hub() {
   <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','vänd på det','klur','new')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','venn','new')}</div>
   <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
+  app.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { LEVEL = b.dataset.lv; hub(); syncLab(); });
+  app.querySelectorAll('[data-md]').forEach(b => b.onclick = () => { MODE = b.dataset.md; hub(); syncLab(); });
 }
 
 /* ── Kort division och trappan med samma tal: 5736 / 7 = 819, rest 3 (D47 ✎: ensiffrig nämnare, större tal) ── */
@@ -324,7 +526,8 @@ let P = plan(N, D);
 function setTask(n, d) { N = n; D = d; P = plan(N, D); }
 let KD = {};
 function kdShell(title) {
-  return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><div class="prog">1/8</div></div>`;
+  SF = null; app.classList.remove('hubv', 'klopen');
+  return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><button class="back kbtn" data-kl>Kladd</button><div class="prog">${SELF() ? '<small class="selfb">Själv</small> ' : ''}1/8</div></div>`;
 }
 const ask = (html) => { $('#ask').innerHTML = html; };
 const act = (html, fn) => { const a = $('#act'); a.innerHTML = html; const b = a.querySelector('button'); if (b && fn) b.onclick = fn; };
@@ -367,6 +570,7 @@ const rows2 = s => [s.q, s.q + 1];   /* raden som passar och raden som är för 
 function kdView(o) {
   view = 'kd'; typed = ''; padHandler = null;
   KD = o || {}; if (!o) setTask('5736', 7);
+  if (SELF()) return kdSelf();
   const nq = N.length - P.start;
   app.innerHTML = kdShell(KD.title || 'Kort division') + `
   <div class="card" id="card">
@@ -475,6 +679,7 @@ let T = null;
 function trapView() {
   setTask('5736', 7);
   view = 'trap'; typed = ''; padHandler = null;
+  if (SELF()) return trapSelf();
   const rows = 2 + 2 * P.steps.length, cols = N.length + 2, cells = [];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(`<div class="c" id="c${r}_${c}"></div>`);
   app.innerHTML = kdShell('Trappan') + `
@@ -593,7 +798,8 @@ let PROB = null;
 function probView(back) {
   view = 'prob'; typed = ''; padHandler = null;
   const n = 2856, d = 4, q = n / d;
-  PROB = { n, d, q };
+  PROB = { n, d, q, acc: back && PROB && PROB.acc ? PROB.acc : { miss: false, hints: 0 } };
+  if (SELF()) return probSelf(back);
   app.innerHTML = kdShell('Problemlösning') + `
   <div class="card">
     <div class="story" id="story">Stafettbanan är <b class="tok" id="tN">${n}</b> meter. Den delas i <b class="tok" id="tD">${d}</b> lika långa sträckor. Hur lång är en sträcka?</div>
@@ -658,6 +864,7 @@ async function probEnd() {
 function klurView() {
   view = 'klur'; typed = ''; padHandler = null;
   const a = 3, b = 2, k = 4, mid = k * b, tot = mid * a;   /* tänkta talet 24: 24 / 3 = 8, 8 / 2 = 4 */
+  if (SELF()) return klurSelf(a, b, k, mid, tot);
   const qb = id => `<span class="dzq" id="${id}">?</span>`;
   app.innerHTML = kdShell('Kluringar') + `
   <div class="card">
@@ -707,6 +914,7 @@ const inSq = (x, y) => x > 40 && x < 190 && y > 30 && y < 180;
 const inCi = (x, y) => Math.hypot(x - 185, y - 110) < 78;
 function vennView() {
   view = 'venn'; typed = ''; padHandler = null;
+  if (SELF()) return vennSelf();
   app.innerHTML = kdShell('Vilket tal?') + `
   <div class="card">
     <div class="story" id="clue">Talet är inuti <b class="tok" id="c1">både cirkeln och kvadraten</b>. Det kan delas <b class="tok" id="c2">jämnt med 4</b>.</div>
@@ -766,6 +974,7 @@ const DZ = [
 function dzView(k = 0) {
   view = 'dz'; typed = ''; padHandler = null;
   const t = DZ[k];
+  if (SELF()) return dzSelf(k);
   const cell = (v, id) => v === '?' ? `<span class="dzq" id="${id}">?</span>` : `<span class="dzn" id="${id}">${v}</span>`;
   app.innerHTML = kdShell('10, 100 och 1000') + `
   <div class="card">
@@ -806,6 +1015,7 @@ async function dzRun(k) {
 /* ── Dela och gruppera (Grunder): ringa in grupper med hoppräkning, skriv divisionen själv, kontrollera med gånger ── */
 function grpView() {
   view = 'grp'; typed = ''; padHandler = null;
+  if (SELF()) return grpSelf();
   const tot = 23, g = 5, q = Math.floor(tot / g), r = tot % g;
   app.innerHTML = kdShell('Dela och gruppera') + `
   <div class="card">
@@ -872,6 +1082,7 @@ async function grpRun(tot, g, q, r) {
 function tabView() {
   view = 'tab'; typed = ''; padHandler = null;
   const items = [[42,7],[24,6],[36,9],[28,4],[45,5],[56,8],[18,3],[63,7],[32,8],[54,6]];
+  if (SELF()) return tabSelf(items);
   app.innerHTML = kdShell('Divisionstabellen') + `
   <div class="card">
     <div class="ask" id="ask"></div>
@@ -894,13 +1105,327 @@ function tabView() {
   })();
 }
 
+/* ══════════ SJÄLV, modul för modul (brainstorm/17, tabellen i varv 2) ══════════ */
+
+/* Kort division: uppställningen med en ruta under varje siffra (antalet rutor avslöjar inte var man börjar; en
+   tom ruta eller 0 först är rätt), små restrutor framför siffrorna, strykning med tryck, räkneremsan. */
+function kdSelf() {
+  app.innerHTML = kdShell(KD.title || 'Kort division') + `
+  <div class="card" id="card">
+    <div class="ask" id="ask"></div>
+    <div class="kd self">
+      <div class="fr">
+        <div class="numrow">${[...N].map((d, i) => `<div class="dg ${CLS[i]}" id="d${i}"><span class="cap ${CLS[i]}">${CAP[CLS[i]]}</span>${d}${i > 0 ? `<span class="rs slot" id="rs${i}"></span>` : ''}</div>`).join('')}</div>
+        <div class="den"><span>${D}</span></div>
+      </div>
+      <div class="eqs">=</div>
+      <div class="qwrap"><div class="qrow">${[...N].map((_, i) => `<div class="box" id="q${i}"><span class="cap ${CLS[i]}">${CAP[CLS[i]]}</span></div>`).join('')}</div>
+        <div class="rrow">rest <div class="box rest" id="qR"></div></div></div>
+    </div>
+    ${toolsHTML(remsaBtn)}${remsaHTML(D)}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  ask(`Räkna ${N} / ${D} själv. Skriv kvoten och resten i rutorna.<span class="kv">Tryck på en siffra för att stryka den. De små rutorna är för det som blir över.</span>`);
+  document.querySelectorAll('.kd.self .dg').forEach(d => d.onclick = e => { if (!e.target.closest('.rs')) d.classList.toggle('struck'); });
+  const step = i => P.steps.find(s => s.i === i);
+  sfInit({
+    acc: KD.acc,
+    boxes: [...[...N].map((_, i) => { const s = step(i); return { el: $('#q' + i), need: !!s, ok: v => s ? v === String(s.q) : v === '' || v === '0' }; }),
+      { el: $('#qR'), ok: v => v === String(P.rest) },
+      ...[...N].slice(1).map((_, k) => ({ el: $('#rs' + (k + 1)), chain: false, need: false }))],
+    hint: n => stepHint(n, s => $('#q' + s.i), cs => grp(cs === P.steps[0] ? [...Array(cs.i + 1).keys()] : [cs.i])),
+    onRight: kv => {
+      grp([]);
+      P.steps.forEach(s => $('#q' + s.i).classList.add('ans')); $('#qR').classList.add('ans');
+      for (let i = 0; i < P.start; i++) $('#q' + i).classList.add('lead');
+      ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
+      if (KD.onDone) act(nextBtn('Tillbaka till berättelsen'), KD.onDone);
+      else act(nextBtn('Ny uppgift'), () => { setTask(String(1000 + Math.floor(Math.random() * 9000)), 3 + Math.floor(Math.random() * 7)); kdView({}); });
+    } });
+}
+
+/* Trappan: rutnätet växer en rad i taget (formen avslöjas inte i förväg). Barnet skriver kvoten överst, produkten och
+   resten, och flyttar ner nästa siffra genom att trycka på den – den hamnar i rutan, utan pil. */
+function trapSelf() {
+  const rows = 2 + 2 * P.steps.length, cols = N.length + 2, cells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(`<div class="c" id="c${r}_${c}" style="grid-row:${r + 1};grid-column:${c + 1}"></div>`);
+  app.innerHTML = kdShell('Trappan') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="trap self" id="trap" style="grid-template-columns:repeat(${cols},32px);grid-auto-rows:30px">${cells.join('')}</div>
+    ${toolsHTML(remsaBtn)}${remsaHTML(D)}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  const C = (r, c) => $(`#c${r}_${c}`);
+  C(1, 0).textContent = D;
+  [...N].forEach((d, k) => { const e = C(1, 1 + k); e.textContent = d; e.classList.add(CLS[k], 'bt'); });
+  C(1, 1).classList.add('bl');
+  const tb = (r, c1, c2, id) => { const e = document.createElement('div'); e.className = 'box tb'; e.id = id; e.style.gridRow = String(r + 1); e.style.gridColumn = `${c1 + 1} / ${c2 + 2}`; $('#trap').appendChild(e); return e; };
+  const step = i => P.steps.find(s => s.i === i);
+  const qs = [...N].map((_, k) => tb(0, 1 + k, 1 + k, 'tq' + k));
+  const total = 2 * P.steps.length, moved = new Set(); let done = 0;
+  const qFilled = () => qs.filter(e => getVal(e) !== '').length;
+  function addRow() {
+    const k = Math.floor(done / 2), s = P.steps[k], col = 1 + s.i, len = String(s.cur).length;
+    let e;
+    if (done % 2 === 0) {           /* raden med det som delas ut */
+      const r = 2 + 2 * k;
+      C(r, col - len).textContent = '−'; C(r, col - len).classList.add('minus');
+      for (let c = col - len + 1; c <= col; c++) C(r, c).classList.add('ul');
+      e = tb(r, col - len + 1, col, 'tp' + k); sfAdd([{ el: e, ok: v => v === String(s.p) }]);
+    } else {                         /* raden med det som blir över */
+      e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, ok: v => v === String(s.r) }]);
+    }
+    e.classList.add('appear'); sfFocus(e); done++;
+  }
+  function grow() {
+    if (done >= total) return false;
+    const k = Math.floor(done / 2);
+    if (done % 2 === 0 && k > 0 && !moved.has(k)) { ask('Flytta ner nästa siffra: tryck på den i talet.'); return true; }
+    if (done % 2 === 0 && qFilled() < k + 1) { ask(k === 0 ? 'Skriv först kvotens första siffra i rätt ruta överst.' : 'Skriv nästa siffra i kvoten överst.'); return true; }
+    addRow(); return true;
+  }
+  [...N].forEach((d, j) => {
+    const e = C(1, 1 + j); e.classList.add('tapme');
+    e.onclick = () => {
+      if (!SF || SF.done) return;
+      const k = P.steps.findIndex(s => s.i === j);
+      if (k < 1 || moved.has(k)) return;
+      if (done < 2 * k) { ask('<span class="soft">Inte än.</span>Ta siffrorna i tur och ordning: räkna klart raden ovanför först.'); return; }
+      const t = C(1 + 2 * k, 1 + j); t.textContent = d; t.classList.add(CLS[j], 'drop'); e.classList.add('moved'); moved.add(k);
+      if (qFilled() >= k + 1) addRow(); else { ask('Skriv nästa siffra i kvoten överst.'); sfFocus(qs[j]); }
+    };
+  });
+  ask(`Räkna ${N} / ${D} i trappan. Kvoten skrivs överst, en siffra i taget.<span class="kv">Under talet skriver du det som delas ut och det som blir över. Nästa ruta ger nästa rad.</span>`);
+  sfInit({
+    boxes: qs.map((el, k) => { const s = step(k); return { el, chain: false, need: !!s, ok: v => s ? v === String(s.q) : v === '' || v === '0' }; }),
+    grow, more: () => done < total,
+    hint: n => stepHint(n, s => qs[s.i], cs => { if (cs === P.steps[0]) for (let c = 1; c <= 1 + cs.i; c++) C(1, c).classList.add('lit'); }),
+    onRight: kv => {
+      document.querySelectorAll('.c.lit').forEach(x => x.classList.remove('lit'));
+      P.steps.forEach(s => qs[s.i].classList.add('ans'));
+      for (let i = 0; i < P.start; i++) qs[i].classList.add('lead');
+      $('#tr' + (P.steps.length - 1)).classList.add('rest', 'ans');
+      ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
+      act(`<button class="ghost">Till hubben</button>`, hub);
+    } });
+  sfFocus(qs[0]);
+}
+
+/* Problemlösning: barnet bygger uträkningen genom att trycka på talen i berättelsen och på räknesättet (inget
+   flerval), räknar i kort division (Själv) och svarar i meningen. Ingen stapel. */
+function probSelf(back) {
+  const { n, d, q } = PROB;
+  app.innerHTML = kdShell('Problemlösning') + `
+  <div class="card">
+    <div class="story">Stafettbanan är <b class="tok tap" data-t="${n}">${n}</b> meter. Den delas i <b class="tok tap" data-t="${d}">${d}</b> lika långa sträckor. Hur lång är en sträcka?</div>
+    <div class="ask" id="ask"></div>
+    <div id="work" style="display:flex;flex-direction:column;gap:8px"></div>
+    ${toolsHTML()}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  if (back) {
+    $('#work').innerHTML = `<div class="carry">Din uträkning: ${n} / ${d} = <b>${q}</b></div><div class="sub">En sträcka är <div class="box" id="sb"></div> meter.</div>`;
+    ask('Svara nu på frågan i berättelsen.');
+    sfInit({ acc: PROB.acc, boxes: [{ el: $('#sb'), ok: v => v === String(q) }],
+      hint: () => 'Kvoten i din uträkning är längden på en sträcka.',
+      onRight: kv => { $('#sb').classList.add('ans'); ask(`<span class="ok">Klart!</span>En sträcka är <b>${q} meter</b>.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
+    return;
+  }
+  $('#work').innerHTML = `<div class="dzrow orig"><small>UTRÄKNING</small><div class="expr"><span class="es" id="e1"></span><span class="es op" id="eo"></span><span class="es" id="e2"></span></div></div>
+    <div class="opsb">${['/', '·', '−', '+'].map(o => `<button data-op="${o}">${o}</button>`).join('')}</div>`;
+  ask('Skriv uträkningen: tryck på talen i berättelsen och på ett räknesätt.<span class="kv">Tryck på en ruta för att tömma den.</span>');
+  sfInit({ acc: PROB.acc, boxes: [],
+    hint: k => k === 1 ? 'Banan ska delas i lika långa sträckor. Vilket räknesätt delar?' : 'Talet som delas står först, sedan antalet delar.',
+    onRight: () => {} });
+  padHandler = null;
+  const pw = $('#pad .wide'); pw.innerHTML = `${ic.check} Nästa ruta`; pw.classList.remove('go');   /* knappsatsen vilar tills räkningen */
+  const ex = { e1: '', eo: '', e2: '' };
+  const check = () => {
+    if (ex.e1 === String(n) && ex.eo === '/' && ex.e2 === String(d)) {
+      ask(`<span class="ok">Rätt!</span>Räkna nu ${n} / ${d} i kort division.`);
+      act(nextBtn('Räkna i kort division'), () => { setTask(String(n), d); kdView({ title: 'Problemlösning', onDone: () => probView(true), acc: PROB.acc }); });
+    } else {
+      PROB.acc.miss = true; ex.e1 = ex.eo = ex.e2 = ''; draw();
+      ['e1', 'eo', 'e2'].forEach(k => $('#' + k).classList.add('miss'));
+      ask('<span class="soft">Inte riktigt – försök igen.</span>Läs berättelsen en gång till.');
+    }
+  };
+  const draw = () => { ['e1', 'eo', 'e2'].forEach(k => { $('#' + k).textContent = ex[k]; if (ex[k]) $('#' + k).classList.remove('miss'); }); act(ex.e1 && ex.eo && ex.e2 ? nextBtn('Räkna') : '', check); };
+  document.querySelectorAll('.tok.tap').forEach(t => t.onclick = () => { if (!ex.e1) ex.e1 = t.dataset.t; else if (!ex.e2) ex.e2 = t.dataset.t; draw(); });
+  document.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { ex.eo = b.dataset.op; draw(); });
+  ['e1', 'eo', 'e2'].forEach(k => $('#' + k).onclick = () => { ex[k] = ''; draw(); });
+}
+
+/* Kluringar: frågan uppställd som två divisioner med tomma rutor. Raden "Vänd på det" kan öppnas (högst två) och
+   fylls av barnet; räknesättet väljs genom att trycka. Inga pilar. */
+function klurSelf(a, b, k, mid, tot) {
+  const bx = id => `<div class="box sm" id="${id}"></div>`;
+  app.innerHTML = kdShell('Kluringar') + `
+  <div class="card">
+    <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
+    <div class="dzrow orig two"><small>FRÅGAN</small>
+      <div>${bx('kT')} / <span class="dzn">${a}</span> = ${bx('kM1')}</div>
+      <div>${bx('kM2')} / <span class="dzn">${b}</span> = <span class="dzn">${k}</span></div></div>
+    <div id="flips" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div class="ask" id="ask"></div>
+    ${toolsHTML(flipBtn)}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  ask('Den första rutan är talet jag tänker på.');
+  sfInit({
+    boxes: [{ el: $('#kT'), ok: v => v === String(tot) }, { el: $('#kM1'), ok: v => v === String(mid) }, { el: $('#kM2'), ok: v => v === String(mid) }],
+    hint: n => n === 1 ? `Börja bakifrån. Vilket tal delat med ${b} blir ${k}?` : `Division baklänges är gånger: om något delat med ${b} blir ${k}, så är något ${k} · ${b}.`,
+    onRight: kv => { $('#kT').classList.add('ans'); ask(`<span class="ok">Klart!</span>Talet är <b>${tot}</b>. ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
+  flipTool(2);
+}
+
+/* Vilket tal?: barnet kryssar själv (ett tryck = kryss, ett till = ångra). När ett tal är kvar svarar man med det.
+   Inget tonas bort, inget lila område (det är ledtråd 1). Ingen knappsats (D47 ✎). */
+function vennSelf() {
+  app.innerHTML = kdShell('Vilket tal?') + `
+  <div class="card">
+    <div class="story">Talet är inuti <b class="tok">både cirkeln och kvadraten</b>. Det kan delas <b class="tok">jämnt med 4</b>.</div>
+    <svg class="venn" viewBox="0 0 340 230" id="venn">
+      <defs><clipPath id="sqc"><rect x="40" y="30" width="150" height="150"/></clipPath></defs>
+      <rect x="40" y="30" width="150" height="150" class="sh"/><circle cx="185" cy="110" r="78" class="sh"/><polygon points="215,205 335,120 335,222" class="sh"/>
+      <circle cx="185" cy="110" r="78" clip-path="url(#sqc)" class="both" id="both"/>
+      ${VN.map(([n, x, y]) => `<g class="vn" data-n="${n}" transform="translate(${x},${y})"><circle r="16"/><text dy="6">${n}</text><path class="xx" d="M-12 -12L12 12M12 -12L-12 12"/></g>`).join('')}
+    </svg>
+    <div class="ask" id="ask"></div>
+    ${toolsHTML()}
+    <div id="act" class="actrow"></div>
+  </div>` + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  const gs = [...document.querySelectorAll('.vn')];
+  ask('Kryssa de tal som inte passar: tryck på ett tal. Tryck igen för att ångra.');
+  sfInit({ boxes: [], onRight: () => {},
+    hint: n => { if (n === 1) { $('#both').classList.add('on'); return 'Det lila området är inuti både cirkeln och kvadraten.'; } return 'Tal som kan delas jämnt med 4: 4, 8, 12, 16, 20, 24, 28, 32 …'; } });
+  padHandler = null;
+  const answer = g => {
+    SF.tries++;
+    if (+g.dataset.n === 12) {
+      SF.done = true; g.classList.add('win'); $('#app .tools').style.display = 'none';
+      ask(`<span class="ok">Klart!</span>Talet är <b>12</b>.<span class="kv">${kvText()}</span>`); act(`<button class="ghost">Till hubben</button>`, hub);
+    } else { SF.acc.miss = true; g.classList.add('nope'); ask('<span class="soft">Inte riktigt – försök igen.</span>Läs ledtrådarna en gång till.'); }
+  };
+  const upd = () => { const left = gs.filter(g => !g.classList.contains('x')); act(left.length === 1 ? nextBtn(`Talet är ${left[0].dataset.n}`) : '', () => answer(left[0])); };
+  gs.forEach(g => g.onclick = () => { if (SF.done) return; g.classList.toggle('x'); gs.forEach(x => x.classList.remove('nope')); upd(); });
+}
+
+/* 10, 100 och 1000: frågan med en tom ruta. Raden "Vänd på det" kan öppnas och fyllas av barnet. Siffror stryks
+   med tryck (nollorna). */
+function dzSelf(k) {
+  const t = DZ[k];
+  const digs = v => `<span class="dzn">${[...String(v)].map(c => `<i class="dz0">${c}</i>`).join('')}</span>`;
+  const cell = v => v === '?' ? `<div class="box sm" id="dq"></div>` : digs(v);
+  app.innerHTML = kdShell('10, 100 och 1000') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="dzrow orig"><small>FRÅGAN</small>${cell(t.a)} / ${cell(t.b)} = ${cell(t.c)}</div>
+    <div id="flips"></div>
+    ${toolsHTML(flipBtn)}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  ask(`${t.q}<span class="kv">Tryck på en siffra för att stryka den.</span>`);
+  document.querySelectorAll('.dz0').forEach(z => z.onclick = () => z.classList.toggle('struck'));
+  sfInit({ boxes: [{ el: $('#dq'), ok: v => v === String(t.ans) }],
+    hint: n => n === 1 ? 'Det okända står inte sist. Vänd på frågan, så att det okända hamnar sist.' : t.calcWhy,
+    onRight: kv => {
+      $('#dq').classList.add('ans');
+      ask(`<span class="ok">Klart!</span>${t.a === '?' ? t.ans : t.a} / ${t.b === '?' ? t.ans : t.b} = ${t.c}.<span class="kv">${kv}</span>`);
+      act(k + 1 < DZ.length ? nextBtn('Nästa uppgift') : `<button class="ghost">Till hubben</button>`, () => k + 1 < DZ.length ? dzView(k + 1) : hub());
+    } });
+  flipTool(1);
+}
+
+/* Dela och gruppera: Svårare utan bild – berättelsen, divisionen och kontrollen skrivs av barnet. Lättare har kvar
+   bilden, men barnet ringar in påsarna själv (5 bollar i taget), utan hoppräkning. */
+function grpSelf() {
+  const easy = LEVEL === 'easy', tot = easy ? 20 : 23, g = 5, q = Math.floor(tot / g), r = tot % g;
+  const bx = (id, cap, rest) => `<div class="box sm${rest ? ' rest' : ''}" id="${id}">${cap ? `<span class="cap"${rest ? ' style="color:var(--lila)"' : ''}>${cap}</span>` : ''}</div>`;
+  app.innerHTML = kdShell('Dela och gruppera') + `
+  <div class="card">
+    <div class="story">Ali har <b class="tok">${tot}</b> bollar. Han lägger <b class="tok">${g}</b> i varje påse. Hur många påsar blir fulla${easy ? '' : ', och hur många bollar blir över'}?</div>
+    ${easy ? `<div class="heap self" id="heap">${'<i class="ball"></i>'.repeat(tot)}</div><div class="bags" id="bags"></div>` : ''}
+    <div class="ask" id="ask"></div>
+    <div class="gdiv" style="margin-top:10px"><div class="frac2">${bx('gN')}<div class="fl"></div>${bx('gD')}</div><span>=</span>${bx('gQ', 'påsar')}${easy ? '' : `<span>,</span>${bx('gR', 'över', true)}`}</div>
+    <div class="kctl"><small>KONTROLL</small>${bx('k1')}<span>·</span>${bx('k2')}${easy ? '' : `<span>+</span>${bx('k3')}`}<span>=</span>${bx('k4')}</div>
+    ${toolsHTML()}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  ask(easy ? 'Gör påsar: tryck på 5 bollar, så blir de en påse. Skriv sedan divisionen och kontrollen.' : 'Skriv divisionen och kontrollen själv.');
+  if (easy) $('#heap').onclick = e => {
+    const b = e.target.closest('.ball'); if (!b) return;
+    b.classList.toggle('sel');
+    const sel = [...$('#heap').querySelectorAll('.ball.sel')];
+    if (sel.length === g) { sel.forEach(x => x.remove()); $('#bags').insertAdjacentHTML('beforeend', `<div class="bag self">${'<i class="ball in"></i>'.repeat(g)}</div>`); }
+  };
+  const pair = other => v => { const o = getVal($('#' + other)); return (v === String(g) && o === String(q)) || (v === String(q) && o === String(g)); };
+  const boxes = [{ el: $('#gN'), ok: v => v === String(tot) }, { el: $('#gD'), ok: v => v === String(g) }, { el: $('#gQ'), ok: v => v === String(q) }];
+  if (!easy) boxes.push({ el: $('#gR'), ok: v => v === String(r) });
+  boxes.push({ el: $('#k1'), ok: pair('k2') }, { el: $('#k2'), ok: pair('k1') });
+  if (!easy) boxes.push({ el: $('#k3'), ok: v => v === String(r) });
+  boxes.push({ el: $('#k4'), ok: v => v === String(tot) });
+  sfInit({ boxes,
+    hint: n => n === 1 ? 'Täljaren är alla bollar från början. Nämnaren är hur många som ryms i en påse.' : `Kontrollen: påsarna gånger bollarna i varje påse${easy ? '' : ', plus de som blev över'}, ska bli alla bollarna.`,
+    onRight: kv => { $('#gQ').classList.add('ans'); if (!easy) $('#gR').classList.add('ans');
+      ask(`<span class="ok">Klart!</span>${tot} / ${g} = <b>${q}</b>${easy ? '' : `, rest <b>${r}</b>`}.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
+}
+
+/* Divisionstabellen: rutnätet utan "Tänk gånger". Ledtråden visar gångertalet för rutan man står i. */
+function tabSelf(items) {
+  app.innerHTML = kdShell('Divisionstabellen') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="tgrid">${items.map(([a, b], i) => `<div class="trow" id="tr${i}"><span>${a} / ${b} =</span><div class="box" id="tb${i}"></div></div>`).join('')}</div>
+    ${toolsHTML()}
+    <div id="act" class="actrow"></div>
+  </div>` + padHTML('Nästa ruta') + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  ask('Skriv svaren. Tryck på en ruta för att välja den.');
+  sfInit({ boxes: items.map(([a, b], i) => ({ el: $('#tb' + i), ok: v => v === String(a / b) })),
+    hint: n => { const i = Math.max(0, items.findIndex((_, j) => $('#tb' + j).classList.contains('focus'))); const [a, b] = items[i];
+      return n === 1 ? `Tänk gånger: ${b} · ? = ${a}.` : `Räkna i ${b}-hopp: ${b}, ${2 * b}, ${3 * b} … tills du når ${a}.`; },
+    onRight: kv => { ask(`<span class="ok">Klart!</span>Alla tio stämmer.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
+}
+
+/* ── labbet: läge, nivå och storlek ── */
+const DIM = { pp: [390, 797], pl: [797, 390], ip: [820, 1180], il: [1180, 820] };
+function fit() {
+  const [w, h] = DIM[SIZE], k = Math.min(1, (window.innerWidth - 4) / w);
+  app.style.transformOrigin = '0 0'; app.style.transform = k < 1 ? `scale(${k})` : '';
+  const st = $('#stage'); st.style.width = w * k + 'px'; st.style.height = h * k + 'px';
+}
+function syncLab() {
+  document.querySelectorAll('#lab2 [data-md]').forEach(b => b.classList.toggle('on', b.dataset.md === MODE));
+  document.querySelectorAll('#lab2 [data-lv]').forEach(b => b.classList.toggle('on', b.dataset.lv === LEVEL));
+  document.querySelectorAll('#lab2 [data-sz]').forEach(b => b.classList.toggle('on', b.dataset.sz === SIZE));
+}
+function setSize(s) { SIZE = s; app.classList.remove('pp', 'pl', 'ip', 'il', 'klopen'); app.classList.add(s); const kb = $('[data-kl]'); if (kb) kb.textContent = 'Kladd'; fit(); syncLab(); }
+window.addEventListener('resize', fit);
+document.querySelectorAll('#lab2 [data-md]').forEach(b => b.onclick = () => { MODE = b.dataset.md; syncLab(); go('restart'); });
+document.querySelectorAll('#lab2 [data-lv]').forEach(b => b.onclick = () => { LEVEL = b.dataset.lv; syncLab(); go('restart'); });
+document.querySelectorAll('#lab2 [data-sz]').forEach(b => b.onclick = () => setSize(b.dataset.sz));
+
 function go(v) {
   if (v === 'restart') v = view;
   document.querySelectorAll('#lab button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
   ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView(), klur: klurView, venn: vennView, dz: () => dzView(0), grp: grpView, tab: tabView })[v]();
 }
 document.querySelectorAll('#lab button').forEach(b => b.onclick = () => go(b.dataset.go));
-go(location.hash.slice(1) || 'hub');
+/* länk som #kd,self,pl öppnar vyn i rätt läge och storlek */
+const hp = location.hash.slice(1).split(',');
+if (hp.includes('self')) MODE = 'self';
+if (hp.includes('easy')) LEVEL = 'easy';
+setSize(hp.find(x => DIM[x]) || 'pp');
+go(hp[0] && hp[0] in DIM === false && hp[0] !== 'self' && hp[0] !== 'easy' ? hp[0] : 'hub');
 </script>
 </body>
 </html>

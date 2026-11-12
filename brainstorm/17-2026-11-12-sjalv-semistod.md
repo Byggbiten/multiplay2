@@ -102,3 +102,23 @@ fungerande läsbar vy med kladden på begäran.
 3. Räkneremsan och knappen "Ledtråd" (1–2) som gemensamma delar.
 4. Ett labbreglage för storlek: telefon stående, telefon liggande, iPad stående, iPad liggande, så att Dennis kan se
    vyerna i alla lägen.
+
+## Bygget – förfiningar som kom när mockupen byggdes (12/11, efter komprimeringen)
+
+- **En ruta per siffra i kvoten** (kort division och trappan), inte en per steg. Antalet rutor får inte avslöja var
+  man börjar. En tom ruta eller 0 först räknas som rätt, och den tonas ner när uppgiften är klar. Resten står i en
+  egen rad under ("rest [ ]"), så att uppställningen ryms i 390 px.
+- **Ledtrådarna i kort division och trappan:** ledtråd 1 är frågan för steget man står på ("7 får inte plats i 5.
+  Hur många gånger får 7 plats i 57?"), och startsiffrorna lyser. Ledtråd 2 är raden i tabellen som är *för stor*
+  ("7 · 9 = 63. Den är större än 57."). Barnet drar själv slutsatsen. Steget är den första kvotsiffran som är tom.
+- **Trappan växer på "Nästa ruta":** först kvotsiffran, sedan raden med det som delas ut, sedan resten. Nästa siffra
+  flyttas ner genom att man trycker på den, och då kommer nästa rad. Står man fast säger appen vad pappret kräver
+  ("Flytta ner nästa siffra", "Skriv nästa siffra i kvoten överst"), aldrig vad det blir.
+- **Problemlösning:** uträkningen kontrolleras när barnet trycker Räkna, eftersom kort division behöver rätt tal.
+  Kvittot gäller hela uppgiften: uträkningen, räkningen och svaret.
+- **Vilket tal?:** knappen "Talet är 12" dyker upp när ett tal är kvar okryssat, som när man stryker på papper.
+- **Dela och gruppera, Lättare:** man trycker på fem bollar, så blir de en påse, utan hoppräkning. Kontrollen skrivs
+  också själv (`[ ] · [ ] = [ ]`), och faktorerna får stå i vilken ordning som helst.
+- **När uppgiften är klar** göms verktygsraden (Ledtråd, Räkneremsa, Vänd på det), så att kladden behåller sina 100 px.
+- **Lägena:** telefon liggande har två spalter och kladden bakom knappen "Kladd". iPad stående och liggande har en stor
+  kladd. På iPad förstoras kortet 1,3 gånger i mockupen (`zoom`); i appen görs det med `--k` (D45).
