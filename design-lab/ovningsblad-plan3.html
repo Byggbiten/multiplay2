@@ -179,6 +179,22 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .dzrow.two{flex-direction:column;gap:4px;font-size:26px}
 .dzrow.two>div{display:flex;align-items:center;gap:8px}
 .dzrow.two .dzq{min-width:44px;height:40px}
+.heap{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:8px;border-radius:16px;border:2.5px dashed #fdba74;background:#fff7ed;cursor:pointer;min-height:40px}
+.ball{width:14px;height:14px;border-radius:50%;background:#475569;display:inline-block}
+.ball.gone{visibility:hidden;width:0;margin:0}
+.bags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.bag{position:relative;display:flex;gap:3px;padding:12px 6px 6px;border-radius:12px;border:2.5px solid #a78bfa;background:#f5f3ff;transition:opacity .3s}
+.bag b{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font:800 13px 'Baloo 2';background:#7c3aed;color:#fff;border-radius:10px;padding:0 6px}
+.ball.in{width:11px;height:11px}
+.gdiv{display:flex;align-items:center;justify-content:center;gap:6px;font:800 26px 'Baloo 2';color:var(--deep)}
+.frac2{display:flex;flex-direction:column;align-items:center;gap:3px}
+.frac2 .fl{width:56px;height:3.5px;background:var(--deep);border-radius:2px}
+.gdiv .box{width:auto;min-width:48px;height:42px;padding:0 4px}
+.box .cap{white-space:nowrap}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.trow{display:flex;align-items:center;justify-content:flex-end;gap:6px;font:800 20px 'Baloo 2';color:var(--deep);border-radius:12px;padding:2px 6px}
+.trow.on{background:#fff7ed;box-shadow:0 0 0 2px var(--org)}
+.trow .box{width:44px;height:38px;font-size:22px}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -191,10 +207,12 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
   <button data-go="klur">Kluringar</button>
   <button data-go="venn">Vilket tal?</button>
   <button data-go="dz">10/100/1000</button>
+  <button data-go="grp">Dela och gruppera</button>
+  <button data-go="tab">Divisionstabellen</button>
   <button data-go="restart">Börja om vyn</button>
 </div>
 <div class="app" id="app"></div>
-<p class="note" style="max-width:390px">Mockup för plan 3: hubben, kort division och trappan (5736 / 7), problemlösning, kluringar, Vilket tal? och 10/100/1000. Dela och gruppera och Divisionstabellen är som i appen idag.</p>
+<p class="note" style="max-width:390px">Mockup för plan 3: hubben, kort division och trappan (5736 / 7), problemlösning, kluringar, Vilket tal? och 10/100/1000. Alla åtta moduler finns med.</p>
 
 <script>
 'use strict';
@@ -277,7 +295,7 @@ function hub() {
   app.innerHTML = `<div class="top"><button class="back">${ic.back}Tillbaka</button><div class="ttl">Övningsblad</div><div style="width:86px"></div></div>
   <div style="display:flex;gap:8px"><div class="seg" style="flex:1"><button>Lättare</button><button class="on">Svårare</button></div><div class="seg" style="flex:1"><button class="on">Med hjälp</button><button>Själv</button></div></div>
   <div class="sec">GRUNDER</div>
-  <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','', 'later')}${t(2,'Divisionstabellen','20 tal','','later')}${t(3,'10, 100 och 1000','vänd på det','dz','new')}</div>
+  <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','grp','new')}${t(2,'Divisionstabellen','gånger bakom varje','tab','new')}${t(3,'10, 100 och 1000','vänd på det','dz','new')}</div>
   <div class="sec">RÄKNA</div>
   <div class="tiles">${t(4,'Kort division','stora tal, steg för steg','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
   <div class="sec">TÄNKA</div>
@@ -785,10 +803,101 @@ async function dzRun(k) {
   act(k + 1 < DZ.length ? `<button class="next">Nästa uppgift ${ic.next}</button>` : `<button class="ghost">Till hubben</button>`, () => k + 1 < DZ.length ? dzView(k + 1) : hub());
 }
 
+/* ── Dela och gruppera (Grunder): ringa in grupper med hoppräkning, skriv divisionen själv, kontrollera med gånger ── */
+function grpView() {
+  view = 'grp'; typed = ''; padHandler = null;
+  const tot = 23, g = 5, q = Math.floor(tot / g), r = tot % g;
+  app.innerHTML = kdShell('Dela och gruppera') + `
+  <div class="card">
+    <div class="story">Ali har <b class="tok" id="gT">${tot}</b> bollar. Han lägger <b class="tok" id="gG">${g}</b> i varje påse. Hur många påsar blir fulla, och hur många bollar blir över?</div>
+    <div class="why" id="why"></div>
+    <div class="heap" id="heap">${'<i class="ball"></i>'.repeat(tot)}</div>
+    <div class="bags" id="bags"></div>
+    <div class="ask" id="ask"></div>
+    <div class="gdiv" id="gdiv" style="visibility:hidden">
+      <div class="frac2"><div class="box" id="gN"></div><div class="fl"></div><div class="box" id="gD"></div></div>
+      <span>=</span><div class="box" id="gQ"><span class="cap">påsar</span></div><span>,</span><div class="box rest" id="gR"><span class="cap" style="color:var(--lila)">över</span></div>
+    </div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  grpRun(tot, g, q, r);
+}
+async function grpRun(tot, g, q, r) {
+  ask('Tryck på högen: varje tryck lägger 5 bollar i en påse.');
+  why('Vi gör som på riktigt: en påse i taget, och vi räknar bollarna i hopp om 5.');
+  let n = 0;
+  await new Promise(res => {
+    $('#heap').onclick = async () => {
+      if ($('#heap').dataset.busy) return; $('#heap').dataset.busy = 1;
+      const balls = [...$('#heap').querySelectorAll('.ball:not(.gone)')].slice(0, g);
+      n++;
+      $('#bags').insertAdjacentHTML('beforeend', `<div class="bag" id="bag${n}"><b>${n * g}</b>${'<i class="ball in"></i>'.repeat(g)}</div>`);
+      const bag = $('#bag' + n); bag.style.opacity = 0;
+      await fly(balls[0], bag, '●'); balls.forEach(b => b.classList.add('gone')); bag.style.opacity = 1;
+      ask(`${n} ${n === 1 ? 'påse' : 'påsar'}: ${n * g} bollar. ${tot - n * g >= g ? 'Tryck igen.' : ''}`);
+      delete $('#heap').dataset.busy;
+      if (tot - n * g < g) { $('#heap').onclick = null; res(); }
+    };
+  });
+  why(`${r} bollar räcker inte till en påse till. De blir över.`);
+  ask(`<span class="ok">Klart!</span>${q} fulla påsar och ${r} bollar över.`);
+  await waitNext('Skriv divisionen');
+  /* barnet skriver täljare och nämnare själv (Ingårs form) */
+  $('#gdiv').style.visibility = 'visible';
+  why('Täljaren är alla bollar från början. Nämnaren är hur många som ryms i en påse.');
+  let qq = 'Hur många bollar fanns från början? Det står i berättelsen.'; ask(qq);
+  await typeAnswer($('#gN'), tot, qq);
+  qq = 'Hur många bollar ryms i en påse?'; ask(qq);
+  await typeAnswer($('#gD'), g, qq);
+  ask('Nu flyttar vi svaren från påsarna.');
+  why('Antalet fulla påsar är kvoten. Det som blev över är resten.');
+  await fly($('#bag' + q).querySelector('b'), $('#gQ'), String(q)); $('#gQ').insertAdjacentText('beforeend', q); $('#gQ').classList.add('done');
+  await fly($('#heap'), $('#gR'), String(r)); $('#gR').insertAdjacentText('beforeend', r); $('#gR').classList.add('done');
+  await waitNext('Kontrollera med gånger');
+  /* kontrollen: faktorerna lyser medan barnet räknar, täljaren först efteråt (B1) */
+  $('#gD').classList.add('ans'); $('#gQ').classList.add('ans');
+  qq = `Räkna ${g} · ${q} + ${r}.`; ask(qq);
+  why(`${q} påsar med ${g} i varje, plus ${r} över, ska bli alla bollarna.`);
+  $('#sub').innerHTML = `${g} · ${q} + ${r} = <div class="box" id="sb"></div>`;
+  await typeAnswer($('#sb'), tot, qq);
+  $('#gN').classList.add('ans');
+  ask(`<span class="ok">Klart!</span>${tot} / ${g} = <b>${q}</b>, rest <b>${r}</b>. ✓ Samma som täljaren.`.replace(' ✓', ''));
+  why(`${g} · ${q} + ${r} = ${tot}, precis alla bollarna.`);
+  act(`<button class="ghost">Till hubben</button>`, hub);
+}
+
+/* ── Divisionstabellen (Grunder): 20 tal i rutnät; med hjälp visas gångertalet bakom divisionen ── */
+function tabView() {
+  view = 'tab'; typed = ''; padHandler = null;
+  const items = [[42,7],[24,6],[36,9],[28,4],[45,5],[56,8],[18,3],[63,7],[32,8],[54,6]];
+  app.innerHTML = kdShell('Divisionstabellen') + `
+  <div class="card">
+    <div class="ask" id="ask"></div>
+    <div class="tgrid">${items.map(([a, b], i) => `<div class="trow" id="tr${i}"><span>${a} / ${b} =</span><div class="box" id="tb${i}"></div></div>`).join('')}</div>
+    <div class="why" id="why"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  (async () => {
+    for (let i = 0; i < items.length; i++) {
+      const [a, b] = items[i], q = a / b;
+      document.querySelectorAll('.trow').forEach(r => r.classList.remove('on')); $('#tr' + i).classList.add('on');
+      ask(`${a} / ${b} = ?`);
+      why(`Tänk gånger: ${b} · ? = ${a}.`);
+      await typeAnswer($('#tb' + i), q, `Tänk gånger: ${b} · ? = ${a}. Vilket tal i ${b}:ans tabell ger ${a}?`);
+    }
+    ask('<span class="ok">Klart!</span>10 av 10.');
+    why('Varje division har ett gångertal bakom sig. Den som kan tabellerna kan dividera.');
+    act(`<button class="ghost">Till hubben</button>`, hub);
+  })();
+}
+
 function go(v) {
   if (v === 'restart') v = view;
   document.querySelectorAll('#lab button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
-  ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView(), klur: klurView, venn: vennView, dz: () => dzView(0) })[v]();
+  ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView(), klur: klurView, venn: vennView, dz: () => dzView(0), grp: grpView, tab: tabView })[v]();
 }
 document.querySelectorAll('#lab button').forEach(b => b.onclick = () => go(b.dataset.go));
 go(location.hash.slice(1) || 'hub');
