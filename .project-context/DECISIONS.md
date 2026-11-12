@@ -70,6 +70,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 - D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
 - D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, tvåsiffrig nämnare, kort division huvudsätt
+- D48 Övningsbladens knappsats, svarsknapp och kladd är appens standard (besvarar P18)
 
 ---
 
@@ -740,4 +741,17 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   tabellraderna mot nämnaren visas som en tankerad. Trappan är stödet som visar varför resten hoppar, och liggande
   stolen är en växel. Venndiagrammet besvaras genom att trycka på talet, utan knappsats. Källa: Dennis: "i huvudsak
   kort division" och om Venndiagrammet "det är ok". P18 är fortfarande öppen.
+- ✎ **2026-11-12, trappan är en egen modul, och VD:n bygger själv:** trappan blir en egen modul i Räkna, så att
+  barnet lär sig även den metoden. Kort division är fortfarande huvudsättet. Mockupen och bygget görs av VD:n själv,
+  inte av en subagent. När Dennis är nöjd skrivs tänket och metodiken ner, så att en framtida agent kan ta över dem i
+  sitt kontor. Källa: Dennis: "gällande trappan så tänkte jag det som en egen 'modul' i övningsbladet. så man lär sig
+  dens metod också. men huvudsättet är kort division" och "det kanske är bättre att du personligen bygger detta. inte
+  en subagent. men att du ser till att om jag blir nöjd, spara tänket och metodiken och logga etc, så att en subagent
+  kan föra in det till sitt kontor för att kunna tänka som du i framtiden".
+
+## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
+- **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
+  Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
+  Livlina, "Skriv svaret…", textknappar i kladden) anpassas efter dem. Det görs i en egen skiva efter övningsbladen.
+- **Källa:** Dennis 2026-11-12: "gällande utseende, kör övningsbladets."
 
