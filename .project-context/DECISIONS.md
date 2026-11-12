@@ -828,9 +828,17 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   när de svarar rätt. Konfetti och så där. Gärna nån slags snurrande text … Slay! Sigma! … så det inte bara är samma
   samma" och "när den sista inmatningen är rätt. så att uppgiften är klar".
 
+- ✎ **2026-11-12, v79 godkänd, rivningen nästa:** Dennis har provat v79 och är nöjd. Förklaringsprovet med en
+  granskare utan kontext behövs inte nu. Den gamla övningsbladskoden (D44) rivs. Källa: Dennis: "jag har testat och är
+  nöjd", "behövs inte nu" och "ja, riv den".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
   Livlina, "Skriv svaret…", textknappar i kladden) anpassas efter dem. Det görs i en egen skiva efter övningsbladen.
 - **Källa:** Dennis 2026-11-12: "gällande utseende, kör övningsbladets."
+- ✎ **2026-11-12, VD:n gör D48 personligen:** anpassningen av kort division och uppställd multiplikation görs av VD:n
+  själv, inte beställd av en subagent. Efter D48 stannar arbetet: iPad-planen (D45) och Matteprov 1 tas upp först när
+  Dennis fått frågan. Källa: Dennis: "det kräver finess och nogrannhet. det får du göra personligen och inte beställa
+  av en subagent" och "vi gör allt ovan, sen när vi kommer hit så säger du till".
 
