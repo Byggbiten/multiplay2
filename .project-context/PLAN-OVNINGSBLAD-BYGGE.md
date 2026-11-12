@@ -44,8 +44,8 @@ ledtrådarna. Kvitto efter omgången: "x av n rätt på första försöket", led
 
 ## Läget
 
-- [x] Skiva 1 · [x] Skiva 2 · [x] Skiva 3 · [x] Skiva 4 (svep i webbläsaren: alla 32 omgångar till kvittot, lägena
-  375 × 667 till 1180 × 820, språksvep) · [ ] Skiva 5 (v77, sedan rivningen)
+- Klart 12/11: skiva 1–4 (svep i webbläsaren: alla 32 omgångar till kvittot, lägena 375 × 667 till 1180 × 820,
+  språksvep), merge till dev. Kvar: skiva 5 (release v77, sedan rivningen av den gamla koden).
 - Avvikelser från planen: kortet krymps också i telefon stående när kladden annars blir under 100 px (små telefoner);
   iPad skalar inte texten än (zoom fungerar inte på iPadOS, `--k` kommer med iPad-planen D45); läget Med hjälp räknar
   "direkt" som utan fel; förklaringsprovet är Dennis eget prov av mockupen (vyerna är desamma), inget nytt prov med
