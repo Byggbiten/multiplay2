@@ -231,3 +231,12 @@ describe('hjälptrappan: man fastnar aldrig (D48 ✎, Dennis: "man aldrig får m
     expect(rv).toMatch(/GAVE = true/); expect(rv).toMatch(/if \(SF\.after\) SF\.after\(\); else done\(\);/);
   });
 });
+
+describe('trappan i Själv: tvåsiffriga tal står siffra för siffra i sina kolumner (Dennis 12/11)', () => {
+  const v = src('js/ovningsblad.js');
+  it('de breda rutorna ritar varje siffra i en egen kolumnbredd', () => {
+    expect(v).toMatch(/if \(el\.classList\.contains\('tb'\)\) s\.innerHTML = \[\.\.\.String\(v\)\]\.map\(d => `<i>\$\{d\}<\/i>`\)/);
+    expect(v).toMatch(/#ov-root \.box\.tb \.v i\{font-style:normal;width:30px;text-align:center\}/);
+    expect(v).toMatch(/grid-template-columns:repeat\(7,30px\)/);   // samma bredd som rutnätets kolumner
+  });
+});

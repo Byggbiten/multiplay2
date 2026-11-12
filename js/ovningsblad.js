@@ -235,8 +235,10 @@ const CSS = `
 #ov-root .rc{display:flex;flex-direction:column;align-items:center;gap:1px}
 #ov-root .rc small{font:800 11px Nunito;color:var(--soft)}
 #ov-root .ri{width:100%;height:30px;border-radius:8px;border:2px dashed #c4b5fd;background:#fff;display:flex;align-items:center;justify-content:center;font:800 17px 'Baloo 2';color:var(--deep)}
-#ov-root .box.tb{width:auto;height:27px;align-self:start;border-width:2px;border-radius:8px;font-size:21px;justify-content:flex-end;padding:0 6px;margin:0 1px;z-index:1}
+#ov-root .box.tb{width:auto;height:27px;align-self:start;border-width:2px;border-radius:8px;font-size:21px;justify-content:flex-end;padding:0;margin:0 1px;z-index:1}
 #ov-root .box.tb.ans{transform:none}
+#ov-root .box.tb .v{display:flex;margin-right:-1px}   /* uppmätt: siffrornas mitt inom ±1 px från kolumnens mitt */
+#ov-root .box.tb .v i{font-style:normal;width:30px;text-align:center}
 #ov-root .box.sm{width:auto;min-width:52px;height:42px;font-size:24px;padding:0 6px}
 #ov-root .c.tapme{cursor:pointer}
 #ov-root .c.moved{opacity:.35}
@@ -397,7 +399,10 @@ let MODE = 'help', LEVEL = 'hard', SF = null;
 const SELF = () => MODE === 'self';
 function setVal(el, v) {
   let s = el.querySelector('.v'); if (!s) { s = document.createElement('span'); s.className = 'v'; el.appendChild(s); }
-  s.textContent = v; if (v !== '') el.classList.remove('miss');
+  /* trappans breda rutor: varje siffra får en kolumns bredd, så att "28" står med 2:an under tiotalet och 8:an under
+     entalet (Dennis 12/11: "är cellerna korrekt placerade här?") */
+  if (el.classList.contains('tb')) s.innerHTML = [...String(v)].map(d => `<i>${d}</i>`).join(''); else s.textContent = v;
+  if (v !== '') el.classList.remove('miss');
 }
 const getVal = el => { const s = el && el.querySelector('.v'); return s ? s.textContent : ''; };
 const toolsHTML = (extra = '') => `<div class="tools">${extra}<button class="tool" id="hintBtn">Ledtråd <small>2 kvar</small></button></div>`;
