@@ -1491,7 +1491,20 @@ function syncLab() {
   document.querySelectorAll('#lab2 [data-lv]').forEach(b => b.classList.toggle('on', b.dataset.lv === LEVEL));
   document.querySelectorAll('#lab2 [data-sz]').forEach(b => b.classList.toggle('on', b.dataset.sz === SIZE));
 }
-function setSize(s) { SIZE = s; app.classList.remove('pp', 'pl', 'ip', 'il', 'klopen'); app.classList.add(s); const kb = $('[data-kl]'); if (kb) kb.textContent = 'Kladd'; fit(); syncLab(); }
+/* Telefon liggande: kortet krymps så att det ryms i spalten, i stället för att skrolla (Dennis 12/11: "Krymp
+   innehållet"). Räknas om varje gång innehållet ändras (trappan växer, rader fälls ut). Krymper bara det som behövs. */
+let fitQ = false;
+function fitCard() {
+  const card = $('#app .card'); if (!card) return;
+  if (SIZE !== 'pl') { card.style.zoom = ''; return; }
+  card.style.zoom = 1;
+  const z = Math.min(1, card.clientHeight / card.scrollHeight);
+  card.style.zoom = z < 1 ? Math.max(0.55, z - 0.005).toFixed(3) : '';
+}
+new MutationObserver(() => { if (fitQ) return; fitQ = true; requestAnimationFrame(() => { fitQ = false; fitCard(); }); })
+  .observe(app, { childList: true, subtree: true, characterData: true });
+if (document.fonts) document.fonts.ready.then(fitCard);   /* typsnittet ändrar höjden utan att innehållet ändras */
+function setSize(s) { SIZE = s; app.classList.remove('pp', 'pl', 'ip', 'il', 'klopen'); app.classList.add(s); const kb = $('[data-kl]'); if (kb) kb.textContent = 'Kladd'; fit(); fitCard(); syncLab(); }
 window.addEventListener('resize', fit);
 document.querySelectorAll('#lab2 [data-md]').forEach(b => b.onclick = () => { MODE = b.dataset.md; syncLab(); go('restart'); });
 document.querySelectorAll('#lab2 [data-lv]').forEach(b => b.onclick = () => { LEVEL = b.dataset.lv; syncLab(); go('restart'); });

@@ -806,6 +806,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   kompromiss där de får hjälp i vilket steg man skall göra, men inte få allt serverat?", "helst med visuellt stöd än
   text" och "Toppen! Då är jag nöjd".
 
+- ✎ **2026-11-12, telefon liggande krymper kortet:** i liggande telefonläge krymps övningsbladets kort så att det ryms
+  bredvid knappsatsen (70–99 %), i stället för att skrolla eller be om stående läge. Telefon stående och iPad i båda
+  lägena har kortet i full storlek. Källa: Dennis valde "Krymp innehållet" av tre alternativ.
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
