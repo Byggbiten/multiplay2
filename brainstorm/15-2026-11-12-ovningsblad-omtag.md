@@ -64,7 +64,7 @@ Begrepp stryks.
 3. Pengar: som berättelser i Problemlösning, eller strykas helt?
 4. Trappan som eget räknesätt (29a/29c), nu eller senare?
 
-## Plan 2 (12/11, efter Dennis: "dessa tycker jag förtjänar mer emphasis … som kanske mira ändå bör öva på")
+## Plan 2 (12/11, efter Dennis: "dessa tycker jag förtjänar mer emphasis … som kanske [barnet] ändå bör öva på")
 
 De sju utdragna sidorna (26b, 29a, 29c, 31, 32a, 32b, 34b) blir kärnan. Bladen i övrigt (26a–36b) blir uppvärmning.
 
