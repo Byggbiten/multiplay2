@@ -799,6 +799,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   mde 3 i restvärd på entalscellen … Så vi bjuder på det att de redan i förhand vet pga. cellerna hur många siffror
   svaret kommer att ge".
 
+- ✎ **2026-11-12, Själv med semistöd godkänt:** läget Själv i alla åtta moduler enligt `brainstorm/17` med avsnittet
+  "Bygget" gäller. Det omfattar Kluringar och 10/100/1000 där stegen ges (frågeraden lyser, raden "Vänd på det" står
+  färdig med räknesättet, och barnet räknar), Problemlösning där talen är knappar och rutorna också går att skriva i,
+  och Vilket tal? med visuellt stöd (förevisning, bildförklaring, prickräknare). Källa: Dennis: "Hur kan vi göra en
+  kompromiss där de får hjälp i vilket steg man skall göra, men inte få allt serverat?", "helst med visuellt stöd än
+  text" och "Toppen! Då är jag nöjd".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

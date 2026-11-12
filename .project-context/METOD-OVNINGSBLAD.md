@@ -16,6 +16,8 @@ fram en vy och *varför* den ser ut som den gör.
 3. **Mockup, en vy i taget**, byggd av VD:n själv. Dennis bedömer konkret UI, inte beskrivningar.
 4. **Spela igenom själv** i 390 × 797 med skärmbild före varje leverans. Felen hittas där: en tvetydig fråga när två
    rader "får plats", en ikon utan storlek, en rad som är för bred.
+   Mät kladden (≥ 100 px) genom *hela* förloppet, inte bara startläget, och svep alla vyer i alla storlekar
+   (telefon och iPad, stående och liggande) före leverans.
    Spela också det slarviga flödet: lämna valfria rutor tomma, tryck på knappen igen, skriv i fel ruta. Ett barn
    som fastnar utan ett ord är värre än ett fel (restrutan som krävde 0, 12/11).
 5. **Dennis ord blir D-post samma stund**, och loggen skrivs.

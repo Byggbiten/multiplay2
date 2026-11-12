@@ -178,16 +178,20 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .carry b{color:#15803d}
 .dzrow.two{flex-direction:column;gap:4px;font-size:26px}
 .dzrow.two>div{display:flex;align-items:center;gap:8px}
-.dzrow.two .dzq{min-width:44px;height:40px}
-.heap{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:8px;border-radius:16px;border:2.5px dashed #fdba74;background:#fff7ed;cursor:pointer;min-height:40px}
+.dzrow.two .dzq{min-width:44px;height:36px}
+.dzrow.two .box{height:40px;font-size:24px}
+.dzrow.two{font-size:24px!important;gap:2px!important}
+.dzrow.flip.two{padding-top:14px}
+.heap{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:5px 8px;border-radius:16px;border:2.5px dashed #fdba74;background:#fff7ed;cursor:pointer;min-height:40px}
 .ball{width:14px;height:14px;border-radius:50%;background:#475569;display:inline-block}
 .ball.gone{visibility:hidden;width:0;margin:0}
-.bags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.bag{position:relative;display:flex;gap:3px;padding:12px 6px 6px;border-radius:12px;border:2.5px solid #a78bfa;background:#f5f3ff;transition:opacity .3s}
+.bags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.bag{position:relative;display:flex;gap:2px;padding:11px 5px 5px;border-radius:12px;border:2.5px solid #a78bfa;background:#f5f3ff;transition:opacity .3s}
 .bag b{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font:800 13px 'Baloo 2';background:#7c3aed;color:#fff;border-radius:10px;padding:0 6px}
-.ball.in{width:11px;height:11px}
+.ball.in{width:9px;height:9px}
 .gdiv{display:flex;align-items:center;justify-content:center;gap:6px;font:800 26px 'Baloo 2';color:var(--deep)}
 .frac2{display:flex;flex-direction:column;align-items:center;gap:3px}
+.frac2 .box{height:36px!important}
 .frac2 .fl{width:56px;height:3.5px;background:var(--deep);border-radius:2px}
 .gdiv .box{width:auto;min-width:48px;height:42px;padding:0 4px}
 .box .cap{white-space:nowrap}
@@ -222,6 +226,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .ask .kv{display:block;font:800 12.5px/1.3 Nunito;color:var(--soft);margin-top:2px}
 .actrow{display:flex;justify-content:center}
 .actrow:empty{display:none}
+#grpcard .sub:empty{display:none}   /* tomma rader tar ingen plats, så att kladden behåller 100 px */
 .remsa{background:#faf5ff;border-radius:14px;padding:6px 8px 8px}
 .remsa .tt{font:900 11.5px Nunito;color:var(--lila);letter-spacing:.04em;margin-bottom:3px}
 .rg{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
@@ -236,6 +241,13 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 #flips .dzrow.flip{padding:4px 8px 4px 82px;font-size:26px;min-height:50px}
 #flips .dzrow.flip small{top:50%;transform:translateY(-50%);width:68px;line-height:1.25}
 #flips .box.sm{height:38px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kgrid .dzrow{padding:16px 4px 6px!important;gap:4px!important;font-size:21px!important}
+.kgrid .dzrow.two>div{height:42px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border-radius:12px}
+.kgrid .box,.kgrid .box.sm{min-width:38px!important;height:36px!important;font-size:21px!important;padding:0 4px}
+.kgrid .dzq{min-width:32px!important;height:32px!important}
+.kgrid .dzn{min-width:0}
+.kgrid .fop{font-size:21px;min-width:8px}
 .fop{font:800 26px 'Baloo 2';color:var(--lila);min-width:18px;text-align:center}
 .dzrow.two>div.on{background:#fff7ed;border-radius:12px;box-shadow:0 0 0 2.5px var(--org);padding:2px 8px}
 .dzrow.two>div{padding:2px 8px}
@@ -878,13 +890,15 @@ function klurView() {
   app.innerHTML = kdShell('Kluringar') + `
   <div class="card">
     <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
-    <div class="dzrow orig two"><small>FRÅGAN</small>
-      <div>${qb('kT')} / <span class="dzn" id="kA">${a}</span> = ${qb('kM1')}</div>
-      <div>${qb('kM2')} / <span class="dzn" id="kB">${b}</span> = <span class="dzn" id="kK">${k}</span></div></div>
+    <div class="kgrid">   <!-- varje frågerad har sin vända rad bredvid sig; man börjar nerifrån (bakifrån) -->
+      <div class="dzrow orig two"><small>FRÅGAN</small>
+        <div>${qb('kT')} / <span class="dzn" id="kA">${a}</span> = ${qb('kM1')}</div>
+        <div>${qb('kM2')} / <span class="dzn" id="kB">${b}</span> = <span class="dzn" id="kK">${k}</span></div></div>
+      <div class="dzrow flip two" id="flip" style="visibility:hidden"><small>VÄND PÅ DET</small>
+        <div id="fr2" style="visibility:hidden"><span class="dzn" id="f2x"></span> · <span class="dzn" id="f2y"></span> = <div class="box" id="f2z"></div></div>
+        <div id="fr1"><span class="dzn" id="f1x"></span> · <span class="dzn" id="f1y"></span> = <div class="box" id="f1z"></div></div></div>
+    </div>
     <div class="why" id="why"></div>
-    <div class="dzrow flip two" id="flip" style="visibility:hidden"><small>VÄND PÅ DET</small>
-      <div id="fr1"><span class="dzn" id="f1x"></span> · <span class="dzn" id="f1y"></span> = <div class="box" id="f1z"></div></div>
-      <div id="fr2" style="visibility:hidden"><span class="dzn" id="f2x"></span> · <span class="dzn" id="f2y"></span> = <div class="box" id="f2z"></div></div></div>
     <div class="ask" id="ask"></div>
     <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
   </div>` + padHTML() + kladdHTML();
@@ -892,7 +906,7 @@ function klurView() {
   klurRun(a, b, k, mid, tot);
 }
 async function klurRun(a, b, k, mid, tot) {
-  ask('Skriv det som två divisioner. Rutan i mitten är svaret efter första delningen.');
+  ask('Rutan i mitten är svaret efter första delningen.');
   why('Vi vet bara slutet: 4. Därför börjar vi bakifrån.');
   await waitNext('Vänd på det');
   $('#flip').style.visibility = 'visible';
@@ -1027,7 +1041,7 @@ function grpView() {
   if (SELF()) return grpSelf();
   const tot = 23, g = 5, q = Math.floor(tot / g), r = tot % g;
   app.innerHTML = kdShell('Dela och gruppera') + `
-  <div class="card">
+  <div class="card" id="grpcard">
     <div class="story">Ali har <b class="tok" id="gT">${tot}</b> bollar. Han lägger <b class="tok" id="gG">${g}</b> i varje påse. Hur många påsar blir fulla, och hur många bollar blir över?</div>
     <div class="why" id="why"></div>
     <div class="heap" id="heap">${'<i class="ball"></i>'.repeat(tot)}</div>
@@ -1038,7 +1052,7 @@ function grpView() {
       <span>=</span><div class="box" id="gQ"><span class="cap">påsar</span></div><span>,</span><div class="box rest" id="gR"><span class="cap" style="color:var(--lila)">över</span></div>
     </div>
     <div class="sub" id="sub"></div>
-    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+    <div id="act" class="actrow"></div>
   </div>` + padHTML() + kladdHTML();
   $('[data-hub]').onclick = hub;
   grpRun(tot, g, q, r);
@@ -1291,22 +1305,24 @@ function probSelf(back) {
    inget varför, ingen rättning före Klar. Mittenrutan är en ruta som syns i båda raderna. */
 function klurSelf(a, b, k, mid, tot) {
   const bx = id => `<div class="box sm" id="${id}"></div>`;
-  const flip = (n, lab) => `<div class="dzrow flip" id="st${n}"><small>${lab}</small>${bx('s' + n + 'a')}<span class="fop">·</span>${bx('s' + n + 'b')}<span>=</span>${bx('s' + n + 'c')}</div>`;
+  const fl = n => `${bx('s' + n + 'a')}<span class="fop">·</span>${bx('s' + n + 'b')}<span>=</span>${bx('s' + n + 'c')}`;
   app.innerHTML = kdShell('Kluringar') + `
   <div class="card">
     <div class="story">Vilket tal tänker jag på? Först delar jag det med <b class="tok">${a}</b>. Sedan delar jag svaret med <b class="tok">${b}</b>. Då får jag <b class="tok">${k}</b>.</div>
     <div class="ask" id="ask"></div>
-    <div class="dzrow orig two"><small>FRÅGAN</small>
-      <div id="rowA">${bx('kT')} / <span class="dzn">${a}</span> = <span class="dzq" id="mA">?</span></div>
-      <div id="rowB">${bx('kM')} / <span class="dzn">${b}</span> = <span class="dzn">${k}</span></div></div>
-    <div id="flips" style="display:flex;flex-direction:column;gap:6px">${flip(1, 'STEG 1<br>VÄND PÅ DET')}</div>
+    <div class="kgrid">   <!-- samma uppställning som Med hjälp: frågeraden till vänster, dess vända rad till höger -->
+      <div class="dzrow orig two"><small>FRÅGAN</small>
+        <div id="rowA">${bx('kT')} / <span class="dzn">${a}</span> = <span class="dzq" id="mA">?</span></div>
+        <div id="rowB">${bx('kM')} / <span class="dzn">${b}</span> = <span class="dzn">${k}</span></div></div>
+      <div class="dzrow flip two"><small>VÄND PÅ DET</small><div id="st2"></div><div id="st1">${fl(1)}</div></div>
+    </div>
     ${toolsHTML()}
     <div id="act" class="actrow"></div>
   </div>` + padHTML('Nästa ruta') + kladdHTML();
   $('[data-hub]').onclick = hub;
   const kM = $('#kM'), mA = $('#mA');
   let step = 1;
-  const lit = r => { $('#rowA').classList.toggle('on', r === 'A'); $('#rowB').classList.toggle('on', r === 'B'); };
+  const lit = r => { ['rowA', 'st2'].forEach(id => $('#' + id).classList.toggle('on', r === 'A')); ['rowB', 'st1'].forEach(id => $('#' + id).classList.toggle('on', r === 'B')); };
   lit('B');
   ask(`<span class="hint">STEG 1 · BÖRJA BAKIFRÅN</span>Vilket tal delat med ${b} blir ${k}? Vänd på det och räkna med gånger.`);
   const row = n => ['a', 'b', 'c'].map(s => ({ el: $('#s' + n + s) }));
@@ -1316,7 +1332,7 @@ function klurSelf(a, b, k, mid, tot) {
     grow: () => {
       if (step >= 2) return false;
       step = 2; lit('A');
-      $('#flips').insertAdjacentHTML('beforeend', flip(2, 'STEG 2<br>VÄND PÅ DET'));
+      $('#st2').innerHTML = fl(2);
       sfAdd([...row(2), { el: $('#kT'), ok: v => v === String(tot) }]);
       ask(`<span class="hint">STEG 2</span>Vilket tal delat med ${a} blir ${getVal(kM) || '?'}? Vänd på det igen, och skriv talet i den första rutan.`);
       sfFocus($('#s2a')); return true;
