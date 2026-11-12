@@ -3,7 +3,7 @@
 ## Öppet
 
 - [ ] Senare modul: division med flersiffrig nämnare (trappan, nämnaren läggs till gång på gång), när barnet når dit (D47 ✎).
-- [ ] D48: kort division och uppställd multiplikation får övningsbladens knappsats, svarsknapp och kladd (egen skiva efter rivningen; VD:n personligen, ingen subagent – D48 ✎).
+- [ ] D48: kort division och uppställd multiplikation får övningsbladens knappsats, svarsknapp och kladd (egen skiva efter rivningen; VD:n personligen, ingen subagent – D48 ✎). Bara polering: logik och pedagogik i multiplikationen rörs inte. Jämför också övningsbladen mot multiplikationen: fel som återkommer, aldrig misslyckas helt, flera försök, hjälp vidare.
 - [x] ~~Övningsblad plan 3: bygget i appen och v77~~ (12/11, `js/ovningsblad.js`, PLAN-OVNINGSBLAD-BYGGE.md)
 - [ ] Riv den gamla övningsbladskoden (D44: `ovdiv`, `DIV_IDS`, typerna `dr ts dz pt kd prob`, bandet, `tests/ovningsblad.test.mjs`, `tests/webblasare/band-svep.js`) i `matteprov*.js` som egen skiva med granskning
 - [x] ~~Övningsbladen: Dennis prövar v77 på telefonen; ett förklaringsprov med en granskare utan kontext på appens vyer~~ – Dennis provade v79 och är nöjd; förklaringsprovet behövs inte nu (D47 ✎ 12/11)
