@@ -770,6 +770,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   'klara' så man inte tappar bort sig", "när jag gick i skolan så fick vi aldrig lära oss trappan" och "jag förstår
   inte 'varför' siffrorna flyttas som de görs. Så jag skulle behöva mera förklaringar".
 
+- ✎ **2026-11-12, svaret i fokus, ingen jämförelsebild:** när uträkningen är klar lyser kvoten (grön) och resten (lila),
+  och svaret står för sig ("5736 / 7 = 819, rest 3"). Trappan slutar där, utan bilden som jämförde trappan med kort
+  division. Källa: Dennis: "själva svaret behöver få lite fokus/belysning i slutet. och restvärdet" och "vi struntar i
+  den där sista jämförelsebilden. Den förstör mer än den hjälper".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
