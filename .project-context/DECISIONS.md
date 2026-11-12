@@ -69,7 +69,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 - D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
-- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, tvåsiffrig nämnare i trappan
+- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, tvåsiffrig nämnare, kort division huvudsätt
 
 ---
 
@@ -736,6 +736,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - **Källa:** Dennis 2026-11-12: "toppen. och va inte för fokuserad på att [tvåan] skall kunna klara detta. det är mest
   till för de som går i 4:an och uppåt. så vi behöver större tal också där nämnaren är 2 siffrigt eller mer", efter
   "dessa tycker jag förtjänar mer emphasis" om sju sidor ur kopieringsunderlaget och kritiken i `brainstorm/15`.
-- **Förval tills Dennis svarat:** trappan är huvudsättet vid tvåsiffrig nämnare och kort division vid ensiffrig.
-  Venndiagrammet besvaras genom att trycka på talet. Övningsbladens stil gäller för det nya (P18 öppen).
+- ✎ **2026-11-12, kort division är huvudsättet:** också vid tvåsiffrig nämnare räknas med kort division, där
+  tabellraderna mot nämnaren visas som en tankerad. Trappan är stödet som visar varför resten hoppar, och liggande
+  stolen är en växel. Venndiagrammet besvaras genom att trycka på talet, utan knappsats. Källa: Dennis: "i huvudsak
+  kort division" och om Venndiagrammet "det är ok". P18 är fortfarande öppen.
 
