@@ -433,7 +433,7 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
 - Fungerar på telefon och iPad, stående och liggande. På små telefoner och i liggande läge krymps uppgiften så att
   kladden får plats.
 
-## Övningsblad · Division (v76, D44 ✎) – ersatt av plan 3 i v77
+## Övningsblad · Division (v76, D44 ✎) – ersatt av plan 3 i v77, koden riven 12/11
 
 I Kort divisions lägesvy finns kortet **Övningsblad**. Det öppnar tretton moduler i kapitel 3:s olika sorters blad,
 med egna tal: Dela lika, Hur många grupper?, Divisionstabellen (20 tal, /20), Kontrollera med gånger, Division med

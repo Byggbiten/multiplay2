@@ -841,4 +841,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   själv, inte beställd av en subagent. Efter D48 stannar arbetet: iPad-planen (D45) och Matteprov 1 tas upp först när
   Dennis fått frågan. Källa: Dennis: "det kräver finess och nogrannhet. det får du göra personligen och inte beställa
   av en subagent" och "vi gör allt ovan, sen när vi kommer hit så säger du till".
+- ✎ **2026-11-12, D48 är polering, inte ny pedagogik:** i multiplikationen (och kort division) ändras varken logiken
+  eller pedagogiken. D48 gäller ytan: konfetti och beröm, knappval, layout. Samtidigt jämförs divisionens
+  övningsblad med multiplikationen: det som saknas där läggs till, till exempel att det man svarar fel på kommer
+  tillbaka, att man aldrig misslyckas helt och att appen ger flera försök och hjälper en vidare när man fastnar.
+  Källa: Dennis: "multiplikationsmodulen har jag ju lagt ned mycket tid på och är relativt nöjd med. Så jag vill inte
+  att vi ändrar hur logiken och pedagogiken är. utan snarare handlar det väl då om polering? t.ex. det där med
+  konfettin, knappvalen, layout. och kanske det finns nått där som vi missat i divisionen? t.ex. att sånt man svarar
+  fel på kan återkomma och att man aldrig får misslyckas helt, utan appen ger en flera försök och hjälper en vidare om
+  man fastnar".
 

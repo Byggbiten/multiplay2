@@ -69,7 +69,7 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 | Roll | Agent-id | Rapport | Överlämning + logg |
 |---|---|---|---|
 | Geografi (mockupen, bygget) | `acf985ddd0b12ab7f` | dagens logg | `agenter/geografi/OVERLAMNING.md`, `LOGG.md` |
-| Matteprov (Matteprov 4:an D37–D42, övningsblad för division D44) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
+| Matteprov (Matteprov 4:an D37–D42; dess övningsblad D44 är rivna, ersatta av plan 3) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
 | Uppställd multiplikation och kort division (multdiv, D40–D43, motorrundan) | `a566d8b8d8411628d` | dagens logg | `agenter/multdiv/OVERLAMNING.md`, `LOGG.md` |
 
 VD:n skriver sina dokument i en egen arbetskopia (`git worktree add ~/multiplay-wt-docs origin/dev -b docs-tmp`,

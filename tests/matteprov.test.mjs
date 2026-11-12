@@ -1073,3 +1073,24 @@ describe('frågan ruta för ruta (D42)', () => {
     for (const t of [L.makeTalsorter(9, 98), L.makeTiotal(8, 9, 0, 1)]) for (let i = 0; i < t.fields.length; i++) expect(L.askPlain(L.boxAsk(t, i).text).length).toBeLessThanOrEqual(70);
   });
 });
+
+/* Rivningen av övningsbladen D44 (12/11): vyn anropade L.hbClass, som bara fanns i den rivna delen. Testerna för
+   logiken ser inte ett anrop från vyn, så det här låser att varje L.<namn> i vyn finns i logikens export. */
+import { readFileSync as readSrc } from 'node:fs';
+describe('vyn och logiken hänger ihop', () => {
+  const view = readSrc(new URL('../js/matteprov.js', import.meta.url), 'utf8');
+  it('varje L.<namn> som vyn använder finns i MatteProvLogic', () => {
+    const used = [...new Set([...view.matchAll(/\bL\.([A-Za-z_][A-Za-z0-9_]*)/g)].map(m => m[1]))];
+    expect(used.length).toBeGreaterThan(30);
+    expect(used.filter(n => !(n in L))).toEqual([]);
+  });
+  it('ingen kod från de gamla övningsbladen finns kvar (D44 rivs, plan 3 ersätter)', () => {
+    const logic = readSrc(new URL('../js/matteprov-logic.js', import.meta.url), 'utf8');
+    for (const src of [view, logic]) expect(src).not.toMatch(/DIV_IDS|kind:'ovning'|isOv\(|bandRoute|showOvning|kind:kd/);
+    expect(L.PROVS.map(p => p.id)).toEqual(['prov1']);
+    /* övningsbladens band (ett svg-element) hade regeln #mp-root .mp-band{position:absolute;…}, som också träffade
+       tabellsprintens resultatrader (div.mp-band) och staplade dem på varandra */
+    expect(view.match(/#mp-root \.mp-band\{[^}]*\}/g)).toEqual([expect.not.stringMatching(/position:absolute/)]);
+    expect(L.MOMENTS.map(m => m.id)).toEqual(['tabell', 'tiotal', 'talsorter', 'uppstallning', 'problem']);
+  });
+});

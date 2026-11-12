@@ -9,7 +9,7 @@ VD:n bygger själv (D47 ✎). Gren `ovningsblad3`, tagg `fore-ovningsblad3` på 
 - **Egen modul**, inte en del av Matteprov-motorn: `js/ovningsblad-logic.js` (ren logik, testbar i node) och
   `js/ovningsblad.js` (vyerna, porterade från mockupen, allt under `#ov-root`). Skärmen `screen-ovningsblad` i
   `index.html`. Knappen "Övningsblad" i divisionens lägesvy (`multdiv.js` `openProv`) öppnar `Ovningsblad.open`.
-- **Den gamla övningsbladskoden** (D44, 13 blad i `matteprov*.js`, `tests/ovningsblad.test.mjs`) kopplas bort men
+- **Den gamla övningsbladskoden** (D44, 13 blad i `matteprov*.js`, `tests/ovningsblad.test.mjs`; riven 12/11) kopplas bort men
   rivs i en egen skiva efter v77, med egen granskning ("grön svit bevisar inget om rivning").
 - **Kladden** är appens (ritkod som i `matteprov.js` `scratchHTML`/`scSetup`, pennan, suddet, Ångra/Gör om).
 - **Lagring** per profil: `ovningsblad_${id}` = `{ mode, level, res: { [modul]: { level, mode, ok, of, hints, at } } }`,
@@ -45,8 +45,8 @@ ledtrådarna. Kvitto efter omgången: "x av n rätt på första försöket", led
 ## Läget
 
 - Klart 12/11: skiva 1–4 (svep i webbläsaren: alla 32 omgångar till kvittot, lägena 375 × 667 till 1180 × 820,
-  språksvep), merge till dev, release v77 och v78 (böjningen "växlar dem"). Kvar: Dennis prov på telefonen, ett
-  förklaringsprov utan kontext och rivningen av den gamla koden (TODO).
+  språksvep), merge till dev, release v77 och v78 (böjningen "växlar dem"), v79 (beröm, utdelningen). Dennis har
+  provat och är nöjd; förklaringsprovet behövs inte nu. Den gamla koden är riven 12/11 (gren `riv-d44`). Klart.
 - Avvikelser från planen: kortet krymps också i telefon stående när kladden annars blir under 100 px (små telefoner);
   iPad skalar inte texten än (zoom fungerar inte på iPadOS, `--k` kommer med iPad-planen D45); läget Med hjälp räknar
   "direkt" som utan fel; förklaringsprovet är Dennis eget prov av mockupen (vyerna är desamma), inget nytt prov med

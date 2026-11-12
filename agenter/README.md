@@ -6,7 +6,7 @@ En mapp per roll med `OVERLAMNING.md` (tillståndet nu, skrivs om) och `LOGG.md`
 | Mapp | Roll | Filer |
 |---|---|---|
 | `geografi/` | Geografi: mockupen (D24–D34) och bygget in i appen (D35) | `OVERLAMNING.md`, `LOGG.md` |
-| `matteprov/` | Matteprov: Matteprov 4:an med Matteprov 1 (D37–D42); divisionens gamla övningsblad (D44) är bortkopplade i v77 och rivs | `OVERLAMNING.md`, `LOGG.md` |
+| `matteprov/` | Matteprov: Matteprov 4:an med Matteprov 1 (D37–D42); divisionens gamla övningsblad (D44) är rivna 12/11 (plan 3 i `js/ovningsblad.js` ersätter dem) | `OVERLAMNING.md`, `LOGG.md` |
 | `multdiv/` | Uppställd multiplikation: nivå 4, den osynliga nollan, pekningen, delraderna i Räkna själv, kroken `runTask`, kort division med rest och decimaler (D40–D43) och motorrundan 11/11 | `OVERLAMNING.md`, `LOGG.md` |
 
 ## Rutinen
