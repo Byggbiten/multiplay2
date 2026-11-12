@@ -410,6 +410,16 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
+## Multiplikation och kort division: övningsbladens yta (v80, D48)
+
+- **Knappsatsen** är densamma som i övningsbladen i båda lägena: fem tangenter per rad, Sudda, **Ledtråd** (förut
+  Livlina) och en bred svarsknapp (Svara i Räkna med hjälp, Klar/Nästa rad i Räkna själv).
+- **Räkna med hjälp:** svaret skrivs i en ruta direkt i frågan ("Vad är 5 · 2? [10]"); siffran flyger sedan till sin
+  cell som förut. Inget eget svarsfält ovanför knapparna.
+- **Kladden** har ikonrad överst: Rita, Sudda, Ångra, Gör om, Rensa (Rensa går att ångra).
+- **Beröm:** när en uppgift är klar och rätt snurrar ett ord in med konfetti, som i övningsbladen. Matteprovets lånade
+  uppställning har inget beröm.
+
 ## Övningsblad · Division, plan 3 (v77, v79: beröm och utdelning; D47, D48)
 
 I Kort divisions lägesvy leder kortet **Övningsblad** till åtta moduler i tre avdelningar: **Grunder** (Dela och

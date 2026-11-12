@@ -856,4 +856,8 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   försök igen → ledtråd → svaret visas och Nästa, och kvittot räknar det som med hjälp. Fel uppgifter läggs inte sist
   i omgången igen. Källa: Dennis valde "Direkt i cellen", "Ledtråd överallt" och bara "Hjälptrappa" av två
   tillägg. Inventeringen: `.project-context/PLAN-D48.md`.
+- ✎ **2026-11-12, D48 ersätter två äldre regler:** övningsbladens knappsats ersätter fria lägets fyrkolumnsrutnät
+  (Dennis 23/9: "livlinan mindre, under 9:an och Klar; Klar tre rader hög"), och berömmet med konfetti ersätter
+  motorrundans "ingen konfetti" (granskningen `brainstorm/13`, 11/11). Källa: D48 ("kör övningsbladets") och D48 ✎
+  ("det där med konfettin, knappvalen, layout"). Emojis i konfettin kommer från appens gemensamma konfetti, som i v79.
 

@@ -42,4 +42,7 @@ Dennis 12/11: cellinmatningen i multiplikationen "är inte så smart" (erkänd b
 2. Multiplikationen och kort division (`js/multdiv.js`), bara ytan: knappsatsen och svarsknappen som övningsbladens,
    inmatning direkt i cellen i Räkna med hjälp, Ledtråd i stället för Livlina, kladden med ikoner och Ångra/Gör om,
    berömmet med konfetti och snurrande ord. Logik, steg, texter i stegen och hjälptrappan rörs inte.
+   **Klar 12/11** i fyra steg: kladden (ikonrad, Ångra/Gör om, 44 px), knappsatsen i båda lägena och Ledtråd, svaret
+   i en ruta i frågan (multisiffriga svar som 24 kan inte stå i en cell; flygningen till cellen är kvar), berömmet via
+   `Ovningsblad.cheer` när uppgiften är klar och rätt (inte i Matteprovet).
 3. Svep före/efter i båda lägena och nivåerna, skärmbilder bredvid övningsbladen, Dennis provar.

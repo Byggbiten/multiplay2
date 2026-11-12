@@ -4488,6 +4488,9 @@ const MultDivGame = (() => {
      Klart-bubblan (hjälpläget) eller de godkända rutorna (fria läget) kvar, och en knapp går vidare. */
   function finishTask(correct) {
     if (host) { hostFinish(); return; }
+    /* D48 ✎: samma beröm som övningsbladen när uppgiften är klar och rätt – konfetti och ett snurrande ord
+       (Dennis: "det där med konfettin"). Ersätter motorrundans "ingen konfetti" (brainstorm/13). */
+    if (correct && window.Ovningsblad && Ovningsblad.cheer) { try { Ovningsblad.cheer(document.getElementById('md-table-wrap') || document.getElementById('md-main')); } catch (_) {} }
     const ui = document.getElementById('md-ui');
     const sista = exerciseIdx + 1 >= 5;
     if (!ui) { finishNext(); return; }

@@ -94,19 +94,6 @@ const CSS = `
 #ov-root .ghost{align-self:center;border:2px solid #c4b5fd;border-radius:14px;background:#fff;color:var(--lila);font:900 14px Nunito;min-height:44px;padding:0 16px;cursor:pointer}
 /* flygning */
 .ov-fly{position:fixed;z-index:50;pointer-events:none;font:800 30px 'Baloo 2';color:var(--lila);transition:transform .7s cubic-bezier(.34,1.2,.4,1)}
-/* berömmet när uppgiften är klar: ett ord som snurrar, studsar eller zoomar in över kortet och lyfter bort */
-.ov-hype{position:fixed;z-index:10000;pointer-events:none;text-align:center;white-space:nowrap;transform:translate(-50%,-50%);animation:ov-hype-spin 2.1s cubic-bezier(.2,.9,.3,1.15) forwards}
-.ov-hype.e1{animation-name:ov-hype-drop}
-.ov-hype.e2{animation-name:ov-hype-zoom}
-.ov-hype b{display:block;font-family:'Baloo 2',system-ui;font-weight:800;line-height:1.05;padding:0 6px;background:linear-gradient(100deg,#ec4899,#a855f7,#3b82f6,#10b981,#f59e0b,#ec4899);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 12px rgba(91,33,182,.35));animation:ov-hype-shine 1.4s linear infinite}
-.ov-hype small{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;font:900 12px Nunito,system-ui;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#7c3aed;box-shadow:0 2px 8px rgba(124,58,237,.4)}
-.ov-hype.t-legend b{background-image:linear-gradient(100deg,#f59e0b,#fde047,#fff7ae,#f59e0b,#ea580c,#f59e0b)}
-.ov-hype.t-legend small{background:linear-gradient(90deg,#f59e0b,#ea580c);box-shadow:0 2px 10px rgba(245,158,11,.55)}
-@keyframes ov-hype-shine{to{background-position:-250% 0}}
-@keyframes ov-hype-spin{0%{transform:translate(-50%,-50%) scale(.1) rotate(-540deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(10deg);opacity:1}42%{transform:translate(-50%,-50%) scale(.94) rotate(-5deg)}54%{transform:translate(-50%,-50%) scale(1.05) rotate(2deg)}64%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@keyframes ov-hype-drop{0%{transform:translate(-50%,-260%) scale(1.1) rotate(-12deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2,.8) rotate(4deg);opacity:1}34%{transform:translate(-50%,-75%) scale(.92,1.08) rotate(-3deg)}46%{transform:translate(-50%,-50%) scale(1.06,.95)}56%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@keyframes ov-hype-zoom{0%{transform:translate(-50%,-50%) scale(3) rotate(8deg);opacity:0}24%{transform:translate(-50%,-50%) scale(.9) rotate(-6deg);opacity:1}34%{transform:translate(-50%,-50%) scale(1.12) rotate(5deg)}44%{transform:translate(-50%,-50%) scale(.97) rotate(-3deg)}54%{transform:translate(-50%,-50%) scale(1.02) rotate(1deg)}62%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@media (prefers-reduced-motion:reduce){.ov-hype,.ov-hype.e1,.ov-hype.e2{animation:ov-fade .4s}.ov-hype b{animation:none}}
 /* ── trappan ── */
 #ov-root .trap{display:grid;grid-template-columns:repeat(7,30px);grid-auto-rows:32px;justify-content:center;margin-top:2px}
 #ov-root .c{display:flex;align-items:center;justify-content:center;font:800 24px 'Baloo 2';color:var(--deep);position:relative}
@@ -1637,10 +1624,27 @@ function finish(res, extra = '') {
 /* Berömmet när sista rutan är rätt och uppgiften klar (Dennis 12/11): ett ord ur HYPE snurrar in över kortet,
    konfetti och ljud. Sällsynt och legendariskt får en etikett, mer konfetti och fanfaren. Rörelsen lottas bland tre. */
 const hype = O.hypePicker();
-function cheer() {
+/* Stilen ligger i sidans head, så att också multiplikationen och kort division kan använda berömmet (D48 ✎) */
+const HYPE_CSS = `/* berömmet när uppgiften är klar: ett ord som snurrar, studsar eller zoomar in över kortet och lyfter bort */
+.ov-hype{position:fixed;z-index:10000;pointer-events:none;text-align:center;white-space:nowrap;transform:translate(-50%,-50%);animation:ov-hype-spin 2.1s cubic-bezier(.2,.9,.3,1.15) forwards}
+.ov-hype.e1{animation-name:ov-hype-drop}
+.ov-hype.e2{animation-name:ov-hype-zoom}
+.ov-hype b{display:block;font-family:'Baloo 2',system-ui;font-weight:800;line-height:1.05;padding:0 6px;background:linear-gradient(100deg,#ec4899,#a855f7,#3b82f6,#10b981,#f59e0b,#ec4899);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 12px rgba(91,33,182,.35));animation:ov-hype-shine 1.4s linear infinite}
+.ov-hype small{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;font:900 12px Nunito,system-ui;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#7c3aed;box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.ov-hype.t-legend b{background-image:linear-gradient(100deg,#f59e0b,#fde047,#fff7ae,#f59e0b,#ea580c,#f59e0b)}
+.ov-hype.t-legend small{background:linear-gradient(90deg,#f59e0b,#ea580c);box-shadow:0 2px 10px rgba(245,158,11,.55)}
+@keyframes ov-hype-shine{to{background-position:-250% 0}}
+@keyframes ov-hype-spin{0%{transform:translate(-50%,-50%) scale(.1) rotate(-540deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(10deg);opacity:1}42%{transform:translate(-50%,-50%) scale(.94) rotate(-5deg)}54%{transform:translate(-50%,-50%) scale(1.05) rotate(2deg)}64%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-drop{0%{transform:translate(-50%,-260%) scale(1.1) rotate(-12deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2,.8) rotate(4deg);opacity:1}34%{transform:translate(-50%,-75%) scale(.92,1.08) rotate(-3deg)}46%{transform:translate(-50%,-50%) scale(1.06,.95)}56%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-zoom{0%{transform:translate(-50%,-50%) scale(3) rotate(8deg);opacity:0}24%{transform:translate(-50%,-50%) scale(.9) rotate(-6deg);opacity:1}34%{transform:translate(-50%,-50%) scale(1.12) rotate(5deg)}44%{transform:translate(-50%,-50%) scale(.97) rotate(-3deg)}54%{transform:translate(-50%,-50%) scale(1.02) rotate(1deg)}62%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ov-hype,.ov-hype.e1,.ov-hype.e2{animation:ov-hype-fade .4s}.ov-hype b{animation:none}}
+@keyframes ov-hype-fade{from{opacity:0}to{opacity:1}}
+`;
+if (!document.getElementById('ov-hype-css')) document.head.insertAdjacentHTML('beforeend', `<style id="ov-hype-css">${HYPE_CSS}</style>`);
+function cheer(anchor) {
   const { word, tier } = hype();
   document.querySelectorAll('.ov-hype').forEach(e => e.remove());
-  const c = app.querySelector('.card'), r = c ? c.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
+  const c = anchor || app.querySelector('.card'), r = c ? c.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
   const el = document.createElement('div');
   el.className = `ov-hype t-${tier} e${Math.floor(Math.random() * 3)}`;
   el.setAttribute('aria-hidden', 'true');
@@ -1829,6 +1833,6 @@ function open(p, back) {
   if (typeof Router !== 'undefined') Router.show('screen-ovningsblad');
 }
 
-return { open, _t: () => ({ TASK, P, RUN, MODE, LEVEL, SIZE }), _speed: v => { SPEED = v; } };   /* _t: bara för genomspelningen i webbläsaren */
+return { open, cheer: el => cheer(el), _t: () => ({ TASK, P, RUN, MODE, LEVEL, SIZE }), _speed: v => { SPEED = v; } };   /* _t: bara för genomspelningen i webbläsaren */
 })();
 if (typeof window !== 'undefined') window.Ovningsblad = Ovningsblad;

@@ -1249,10 +1249,11 @@ describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emoji
     expect(src).toMatch(/const MEM_COLOR = '#7c3aed';/);
     expect(src).toMatch(/divChipEl\('md-rest md-chip-sm chip-mem'/);
   });
-  it('inga emojis, ingen konfetti; träffytor minst 44 px', () => {
+  it('inga emojis, ingen egen konfetti (berömmet är övningsbladens, D48 ✎); träffytor minst 44 px', () => {
     const emoji = src.match(/[☀-➿\u{1F300}-\u{1FAFF}]/gu) || [];
     expect(emoji.filter(c => c !== '✎' && c !== '✓')).toEqual([]);
     expect(src).not.toMatch(/App\.Confetti/);
+    expect(src).toMatch(/if \(host\) \{ hostFinish\(\); return; \}\n[\s\S]{0,260}if \(correct && window\.Ovningsblad && Ovningsblad\.cheer\)/);   // D48 ✎: beröm när uppgiften är klar och rätt, inte i matteprovet
     expect(src).toMatch(/\.md-cell\.md-ntap::after \{[^}]*width:max\(44px/);
     expect(src).toMatch(/\.md-cell \.md-remin::after \{[^}]*\n?\s*width:44px; height:44px;/);
     expect(src).toMatch(/width:max\(44px,140%\); height:max\(44px,140%\)/);              // minnesspalten
