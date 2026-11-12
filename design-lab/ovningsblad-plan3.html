@@ -131,7 +131,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 const $ = (s, r = document) => r.querySelector(s);
 const app = $('#app');
 const W = ms => new Promise(r => setTimeout(r, ms));
-const PACE = 700; /* barnets takt: en förflyttning åt gången (Dennis: "för fort och osynkat") */
+const PACE = 900; /* barnets takt: en förflyttning åt gången (Dennis: "för fort och osynkat") */
 const ic = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
@@ -157,16 +157,46 @@ app.addEventListener('click', e => {
   const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0);
 });
 
-/* flyg ett känt tal från ett element till ett annat (bandet/flygningen flyttar bara kända tal) */
+/* Flyg ett känt tal från ett element till ett annat (bandet/flygningen flyttar bara kända tal).
+   Ordningen är alltid: pilen ritas (barnet ser vart), en paus, sedan glider talet längs pilen. Dennis: "animationer där
+   siffror flyttas i förklarande steg eller pilar … är superbra", men inte för snabbt. */
+const ov = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ov.setAttribute('style', 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:40;overflow:visible');
+ov.innerHTML = '<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7c3aed"/></marker></defs>';
+document.body.appendChild(ov);
+function arrow(a, b) {
+  const x1 = a.left + a.width / 2, y1 = a.top + a.height / 2, x2 = b.left + b.width / 2, y2 = b.top + b.height / 2;
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+  const p1 = Math.min(a.width, a.height) / 2 + 4, p2 = Math.min(b.width, b.height) / 2 + 6;   /* utanför rutorna */
+  const sx = x1 + dx / len * p1, sy = y1 + dy / len * p1, ex = x2 - dx / len * p2, ey = y2 - dy / len * p2;
+  const bend = Math.min(36, len / 4), mx = (sx + ex) / 2 - dy / len * bend, my = (sy + ey) / 2 + dx / len * bend;
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  p.setAttribute('d', `M${sx} ${sy} Q${mx} ${my} ${ex} ${ey}`);
+  p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#7c3aed'); p.setAttribute('stroke-width', '3');
+  p.setAttribute('stroke-dasharray', '6 6'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('marker-end', 'url(#ah)');
+  ov.appendChild(p); p.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+  return { p, mx, my };
+}
 async function fly(from, to, text) {
   const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
-  const f = document.createElement('div'); f.className = 'fly'; f.textContent = text;
+  const ar = arrow(a, b);
+  await W(PACE);                                            /* först pilen: vart ska talet? */
+  const f = document.createElement('div'); f.className = 'fly'; f.textContent = text; f.style.transition = 'none';
   document.body.appendChild(f);
   const fw = f.getBoundingClientRect();
-  f.style.left = (a.left + a.width / 2 - fw.width / 2) + 'px'; f.style.top = (a.top + a.height / 2 - fw.height / 2) + 'px';
-  await W(30);
-  f.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px,${b.top + b.height / 2 - (a.top + a.height / 2)}px)`;
-  await W(PACE + 50); f.remove();
+  const ax = a.left + a.width / 2, ay = a.top + a.height / 2, bx = b.left + b.width / 2, by = b.top + b.height / 2;
+  f.style.left = (ax - fw.width / 2) + 'px'; f.style.top = (ay - fw.height / 2) + 'px';
+  const t0 = performance.now(), dur = PACE * 1.3;
+  await new Promise(res => {
+    const step = now => {
+      let t = Math.min(1, (now - t0) / dur); t = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const x = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * ar.mx + t * t * bx, y = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * ar.my + t * t * by;
+      f.style.transform = `translate(${x - ax}px,${y - ay}px)`;
+      if (t < 1) requestAnimationFrame(step); else res();
+    };
+    requestAnimationFrame(step);
+  });
+  f.remove(); await W(250); ar.p.remove();
 }
 
 /* ── hubben ── */
@@ -221,7 +251,7 @@ async function showRows(rows, target) {
   const th = $('#think'); th.querySelectorAll('.row').forEach(r => r.remove());
   for (const m of rows) {
     const p = D * m, over = p > target;
-    th.insertAdjacentHTML('beforeend', `<div class="row${over ? ' over' : ''}" data-m="${m}">48 · ${m} = ${p}<span class="cmp">${over ? 'större än ' + target : 'får plats'}</span></div>`);
+    th.insertAdjacentHTML('beforeend', `<div class="row${over ? ' over' : ''}" data-m="${m}">48 · <span class="m">${m}</span> = ${p}<span class="cmp">${over ? 'större än ' + target : 'får plats'}</span></div>`);
     const r = th.lastElementChild; await W(60); r.classList.add('in');
     await W(PACE);
     if (over) { r.classList.add('struck'); await W(PACE / 2); }
@@ -260,7 +290,7 @@ async function kdStep() {
     await showRows([5,6], 274);
     const r = await pickRow(274, 5);
     ask('<span class="ok">Rätt!</span>48 · 5 = 240 får plats. 5 skrivs i tiotalet.');
-    await W(PACE); await fly(r, $('#qT'), '5'); $('#qT').insertAdjacentText('beforeend', '5'); $('#qT').classList.add('done');
+    await W(PACE); await fly(r.querySelector(".m"), $('#qT'), '5'); $('#qT').insertAdjacentText('beforeend', '5'); $('#qT').classList.add('done');
     await W(PACE / 2);
     act(nextBtn(), async () => {
       act('');
@@ -281,7 +311,7 @@ async function kdStep() {
           await showRows([7,8], 345);
           const r2 = await pickRow(345, 7);
           ask('<span class="ok">Rätt!</span>48 · 7 = 336 får plats. 7 skrivs i entalet.');
-          await W(PACE); await fly(r2, $('#qE'), '7'); $('#qE').insertAdjacentText('beforeend', '7'); $('#qE').classList.add('done');
+          await W(PACE); await fly(r2.querySelector(".m"), $('#qE'), '7'); $('#qE').insertAdjacentText('beforeend', '7'); $('#qE').classList.add('done');
           act(nextBtn(), async () => {
             act('');
             ask('Hur mycket blir över när 336 tas från 345?'); $('#ask').dataset.q = 'Hur mycket blir över när 336 tas från 345?';
@@ -334,7 +364,7 @@ async function trapStep() {
     await showRows([5,6], 274);
     const r = await pickRow(274, 5);
     ask('<span class="ok">Rätt!</span>5 skrivs ovanför, över tiotalet.');
-    await W(PACE); await fly(r, C(0, 4), '5'); C(0, 4).textContent = '5'; C(0, 4).classList.add('T');
+    await W(PACE); await fly(r.querySelector(".m"), C(0, 4), '5'); C(0, 4).textContent = '5'; C(0, 4).classList.add('T');
     act(nextBtn(), async () => {
       act(''); think('');
       ask('Under 274 skriver vi vad 5 gånger 48 blir: <b>240</b>.');
@@ -352,9 +382,9 @@ async function trapStep() {
         ask('<span class="ok">Rätt!</span>34 blev över. Nu flyttar vi ner nästa siffra, 5.');
         act(nextBtn('Flytta ner 5'), async () => {
           act(''); C(1,5).classList.add('src');
-          await W(PACE / 2);
-          C(3,5).textContent = '5'; C(3,5).classList.add('E', 'drop');
-          await W(PACE); C(1,5).classList.remove('src');
+          await fly(C(1,5), C(3,5), '5');
+          C(3,5).textContent = '5'; C(3,5).classList.add('E');
+          C(1,5).classList.remove('src');
           [3,4,5].forEach(c => C(3, c).classList.add('lit'));
           ask('Nu står det <b>345</b>. Det är samma 345 som i kort division.');
           act(nextBtn('Visa 48:ans tabell'), async () => {
@@ -363,7 +393,7 @@ async function trapStep() {
             await showRows([7,8], 345);
             const r2 = await pickRow(345, 7);
             ask('<span class="ok">Rätt!</span>7 skrivs ovanför, över entalet.');
-            await W(PACE); await fly(r2, C(0, 5), '7'); C(0, 5).textContent = '7'; C(0, 5).classList.add('E');
+            await W(PACE); await fly(r2.querySelector(".m"), C(0, 5), '7'); C(0, 5).textContent = '7'; C(0, 5).classList.add('E');
             act(nextBtn(), async () => {
               act(''); think('');
               ask('Under 345 skriver vi 7 gånger 48: <b>336</b>.');
