@@ -43,8 +43,23 @@
 
 Begrepp stryks.
 
+## Dennis utdrag ur kopieringsunderlaget (12/11, filnamnen är hans kommentarer)
+
+- **34b Problemlösning:** "Här kan man göra ett liknande med flervalsalternativ. Att man kan välja olika uttryck för
+  hur man skall räkna ut rätt svar." Problemlösning börjar alltså med att barnet väljer rätt uttryck (till exempel
+  1458 / 2, 1458 · 2 eller 1458 − 2), och platsen lottas (D17). Med hjälp räknas uttrycket sedan i kort divisions motor.
+- **31 och 32a Problemlösning:** berättelser om sträckor, knappar och böcker med en svarsbank ("ringa in svaret").
+- **32b Samlad problemlösning:** "hur fasen ska man ens tänka här?" Det är förlagan till dagens Slutledning
+  ("först delar jag det med två och sedan med fyra").
+- **26b Slutledningsförmåga:** "Vilket tal?" med ett Venndiagram (cirkel, kvadrat, triangel) och ledtrådar som
+  "kan delas jämnt med sex" eller "delat med fem ger kvoten 4, rest 1". Det är en visuell slutledning, en tänkbar ny
+  form för modul 8.
+- **29a Division i trappan** och **29c Du kan dela på olika sätt** (trappan, kort division, liggande stolen). Appen har
+  aldrig haft trappan; multdiv har bara kort division (D43).
+
 ## Frågor till Dennis
 
 1. Planen med åtta moduler.
-2. Slutledning: göras om med bild (grupper plus rest bygger talet: 3 · 9 + 1 = 28, "baklänges") eller strykas?
+2. Slutledning: Venndiagrammet ur 26b (visuellt: tryck på talet som passar ledtrådarna), baklänges med bild (3 · 9 + 1 = 28), eller strykas?
+4. Trappan som eget räknesätt (29a/29c), nu eller senare?
 3. Pengar: som berättelser i Problemlösning, eller strykas helt?
