@@ -623,14 +623,14 @@ function iconsM(n, m, max = 14) {
 const icons = (n, i, max) => iconsM(n, MONEY[i], max);
 function why(html) { const w = $('#why'); if (w) { w.innerHTML = html ? `<b>Varför?</b> ${html}` : ''; w.classList.toggle('on', !!html); } }
 /* Texterna böjs efter talet (1 tusenlapp → "den", 2 tior → "de"), och en nolla blir "inga" (språksvepet 12/11) */
-const den = n => n === 1 ? 'den' : 'de', Den = n => n === 1 ? 'Den' : 'De';
+const den = n => n === 1 ? 'den' : 'de', Den = n => n === 1 ? 'Den' : 'De', dem = n => n === 1 ? 'den' : 'dem';   /* subjekt de, objekt dem */
 const have = (n, i) => n ? `Med ${nm(n, i)} som vi redan har blir det` : `Vi har inga andra ${MONEY[i].many}, så det blir`;
 function startWhy() {
   const s0 = P.steps[0];
   if (s0.i === 0) return `Tänk att ${N} kr ska delas lika mellan ${D}. Vi börjar med ${MONEY[0].many}.`;
   const a = P.ds[0];
   return `Tänk att ${N} kr ska delas lika mellan ${D}. ${nm(a, 0)} ${icons(a, 0)} räcker inte till ${D}.
-    Vi växlar ${den(a)} till ${a * 10} ${MONEY[1].many}. ${have(P.ds[1], 1)} ${s0.cur} ${MONEY[1].many}.`;
+    Vi växlar ${dem(a)} till ${a * 10} ${MONEY[1].many}. ${have(P.ds[1], 1)} ${s0.cur} ${MONEY[1].many}.`;
 }
 const giveWhy = s => `Varje person får ${nm(s.q, s.i)}. Därför står ${s.q} i ${PLACE[s.i]}et.`;
 const prodWhy = s => `${D} personer får ${s.q} var: ${D} · ${s.q} = ${s.p} ${MONEY[s.i].many} delas ut.`;
