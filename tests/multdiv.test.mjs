@@ -932,7 +932,7 @@ describe('D41: kroken runTask och dess utfall', () => {
     const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
     expect(src).toMatch(/let host = null;/);
     expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
-    expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
+    expect(src).toMatch(/ll = !host,/); expect(src).toMatch(/\$\{ll \? freeLifelineBtnHTML\(/);   // ingen ledtråd i en lånad uppgift (D48: ny knappsats)
     expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk, dchk\);\n\s+\} else \{/);
     // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
     expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
@@ -1249,14 +1249,16 @@ describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emoji
     expect(src).toMatch(/const MEM_COLOR = '#7c3aed';/);
     expect(src).toMatch(/divChipEl\('md-rest md-chip-sm chip-mem'/);
   });
-  it('inga emojis, ingen konfetti; träffytor minst 44 px', () => {
+  it('inga emojis, ingen egen konfetti (berömmet är övningsbladens, D48 ✎); träffytor minst 44 px', () => {
     const emoji = src.match(/[☀-➿\u{1F300}-\u{1FAFF}]/gu) || [];
     expect(emoji.filter(c => c !== '✎' && c !== '✓')).toEqual([]);
     expect(src).not.toMatch(/App\.Confetti/);
+    expect(src).toMatch(/if \(host\) \{ hostFinish\(\); return; \}\n[\s\S]{0,260}if \(correct && window\.Ovningsblad && Ovningsblad\.cheer\)/);   // D48 ✎: beröm när uppgiften är klar och rätt, inte i matteprovet
     expect(src).toMatch(/\.md-cell\.md-ntap::after \{[^}]*width:max\(44px/);
     expect(src).toMatch(/\.md-cell \.md-remin::after \{[^}]*\n?\s*width:44px; height:44px;/);
     expect(src).toMatch(/width:max\(44px,140%\); height:max\(44px,140%\)/);              // minnesspalten
-    expect((src.match(/height:46px;border-radius:12px;font-weight:800;font-size:12px/g) || []).length).toBe(3);   // Rita, Sudd, Rensa
+    expect(src).toMatch(/\.md-scb \{ width:44px; height:44px;/);   // kladdens ikonknappar (D48): Rita, Sudda, Ångra, Gör om, Rensa
+    expect(src).toMatch(/mdUndoStep\(\)', 'Ångra'/); expect(src).toMatch(/mdRedoStep\(\)', 'Gör om'/);   // D48: Ångra och Gör om som i övningsbladen
   });
   it('klickstyrt (D3): uppgiften byts på knapp, kvittensen med platsord står kvar tills Nästa', () => {
     const ft = src.slice(src.indexOf('  function finishTask(correct)'), src.indexOf('  function finishNext()'));
@@ -1265,3 +1267,23 @@ describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emoji
     expect(src).toMatch(/if \(item\.which === 3\) doHighlight\(\{ phase: 'add', g: -1 \}\);/);
   });
 });
+
+describe('D48: övningsbladens knappsats och Ledtråd i multiplikationen och kort division', () => {
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+  it('båda lägena har samma knappsats (fem per rad), svarsknappen heter Svara/Klar, och Livlina heter Ledtråd', () => {
+    const help = src.slice(src.indexOf('  function helpPadHTML()'), src.indexOf('  function lifelineBtnHTML()'));
+    const free = src.slice(src.indexOf('  function renderFreePad()'), src.indexOf('  function freeLifelineBtnHTML('));
+    for (const p of [help, free]) expect(p).toMatch(/<div class="md-pad">/);
+    expect(help).toMatch(/<span>Svara<\/span>/);
+    expect(src).not.toMatch(/>Livlina|Livlina \(|<span>Livlina<\/span>/);
+    expect(src).toMatch(/Ledtråd <small>\$\{lifelines\} kvar<\/small>/);
+    expect(src).toMatch(/\.md-pad \.md-nk \{ width:auto; height:44px;/);
+  });
+  it('Räkna med hjälp: svaret skrivs i en ruta i frågan, inte i ett eget fält (D48 ✎ "Direkt i cellen")', () => {
+    const help = src.slice(src.indexOf('  function helpPadHTML()'), src.indexOf('  function lifelineBtnHTML()'));
+    expect(help).not.toMatch(/md-help-field/);
+    expect(src).toMatch(/tx\.insertAdjacentHTML\('beforeend', '<span class="md-inl num" id="md-help-field">/);
+    expect(src).toMatch(/helpWantsInput\(\)\) helpRenderField\(\);/);
+  });
+});
+

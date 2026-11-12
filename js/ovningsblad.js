@@ -94,19 +94,6 @@ const CSS = `
 #ov-root .ghost{align-self:center;border:2px solid #c4b5fd;border-radius:14px;background:#fff;color:var(--lila);font:900 14px Nunito;min-height:44px;padding:0 16px;cursor:pointer}
 /* flygning */
 .ov-fly{position:fixed;z-index:50;pointer-events:none;font:800 30px 'Baloo 2';color:var(--lila);transition:transform .7s cubic-bezier(.34,1.2,.4,1)}
-/* berömmet när uppgiften är klar: ett ord som snurrar, studsar eller zoomar in över kortet och lyfter bort */
-.ov-hype{position:fixed;z-index:10000;pointer-events:none;text-align:center;white-space:nowrap;transform:translate(-50%,-50%);animation:ov-hype-spin 2.1s cubic-bezier(.2,.9,.3,1.15) forwards}
-.ov-hype.e1{animation-name:ov-hype-drop}
-.ov-hype.e2{animation-name:ov-hype-zoom}
-.ov-hype b{display:block;font-family:'Baloo 2',system-ui;font-weight:800;line-height:1.05;padding:0 6px;background:linear-gradient(100deg,#ec4899,#a855f7,#3b82f6,#10b981,#f59e0b,#ec4899);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 12px rgba(91,33,182,.35));animation:ov-hype-shine 1.4s linear infinite}
-.ov-hype small{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;font:900 12px Nunito,system-ui;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#7c3aed;box-shadow:0 2px 8px rgba(124,58,237,.4)}
-.ov-hype.t-legend b{background-image:linear-gradient(100deg,#f59e0b,#fde047,#fff7ae,#f59e0b,#ea580c,#f59e0b)}
-.ov-hype.t-legend small{background:linear-gradient(90deg,#f59e0b,#ea580c);box-shadow:0 2px 10px rgba(245,158,11,.55)}
-@keyframes ov-hype-shine{to{background-position:-250% 0}}
-@keyframes ov-hype-spin{0%{transform:translate(-50%,-50%) scale(.1) rotate(-540deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(10deg);opacity:1}42%{transform:translate(-50%,-50%) scale(.94) rotate(-5deg)}54%{transform:translate(-50%,-50%) scale(1.05) rotate(2deg)}64%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@keyframes ov-hype-drop{0%{transform:translate(-50%,-260%) scale(1.1) rotate(-12deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2,.8) rotate(4deg);opacity:1}34%{transform:translate(-50%,-75%) scale(.92,1.08) rotate(-3deg)}46%{transform:translate(-50%,-50%) scale(1.06,.95)}56%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@keyframes ov-hype-zoom{0%{transform:translate(-50%,-50%) scale(3) rotate(8deg);opacity:0}24%{transform:translate(-50%,-50%) scale(.9) rotate(-6deg);opacity:1}34%{transform:translate(-50%,-50%) scale(1.12) rotate(5deg)}44%{transform:translate(-50%,-50%) scale(.97) rotate(-3deg)}54%{transform:translate(-50%,-50%) scale(1.02) rotate(1deg)}62%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
-@media (prefers-reduced-motion:reduce){.ov-hype,.ov-hype.e1,.ov-hype.e2{animation:ov-fade .4s}.ov-hype b{animation:none}}
 /* ── trappan ── */
 #ov-root .trap{display:grid;grid-template-columns:repeat(7,30px);grid-auto-rows:32px;justify-content:center;margin-top:2px}
 #ov-root .c{display:flex;align-items:center;justify-content:center;font:800 24px 'Baloo 2';color:var(--deep);position:relative}
@@ -217,6 +204,8 @@ const CSS = `
 #ov-root .box.ans{border-style:solid;background:#f0fdf4}
 #ov-root .box.rest.ans{background:#f5f3ff}
 #ov-root .box.lead{opacity:.3}
+/* svaret som appen gav i hjälptrappans sista steg (D48 ✎): lugnt grått, inte rättat och inte berömt */
+#ov-root .box.given,#ov-root .es.given{border-style:solid;border-color:#cbd5e1;background:#f1f5f9;color:#475569}
 #ov-root .box.miss,#ov-root .ri.miss,#ov-root .rs.miss,#ov-root .es.miss{background:var(--peach)!important;border-color:#fdba74!important}
 #ov-root .rs.slot.inp::after{content:"";position:absolute;inset:-12px -5px}
 #ov-root .rs.focus,#ov-root .ri.focus{border:2px solid #0f766e!important;box-shadow:0 0 0 2px var(--org)}
@@ -246,8 +235,10 @@ const CSS = `
 #ov-root .rc{display:flex;flex-direction:column;align-items:center;gap:1px}
 #ov-root .rc small{font:800 11px Nunito;color:var(--soft)}
 #ov-root .ri{width:100%;height:30px;border-radius:8px;border:2px dashed #c4b5fd;background:#fff;display:flex;align-items:center;justify-content:center;font:800 17px 'Baloo 2';color:var(--deep)}
-#ov-root .box.tb{width:auto;height:27px;align-self:start;border-width:2px;border-radius:8px;font-size:21px;justify-content:flex-end;padding:0 6px;margin:0 1px;z-index:1}
+#ov-root .box.tb{width:auto;height:27px;align-self:start;border-width:2px;border-radius:8px;font-size:21px;justify-content:flex-end;padding:0;margin:0 1px;z-index:1}
 #ov-root .box.tb.ans{transform:none}
+#ov-root .box.tb .v{display:flex;margin-right:-1px}   /* uppmätt: siffrornas mitt inom ±1 px från kolumnens mitt */
+#ov-root .box.tb .v i{font-style:normal;width:30px;text-align:center}
 #ov-root .box.sm{width:auto;min-width:52px;height:42px;font-size:24px;padding:0 6px}
 #ov-root .c.tapme{cursor:pointer}
 #ov-root .c.moved{opacity:.35}
@@ -408,7 +399,10 @@ let MODE = 'help', LEVEL = 'hard', SF = null;
 const SELF = () => MODE === 'self';
 function setVal(el, v) {
   let s = el.querySelector('.v'); if (!s) { s = document.createElement('span'); s.className = 'v'; el.appendChild(s); }
-  s.textContent = v; if (v !== '') el.classList.remove('miss');
+  /* trappans breda rutor: varje siffra får en kolumns bredd, så att "28" står med 2:an under tiotalet och 8:an under
+     entalet (Dennis 12/11: "är cellerna korrekt placerade här?") */
+  if (el.classList.contains('tb')) s.innerHTML = [...String(v)].map(d => `<i>${d}</i>`).join(''); else s.textContent = v;
+  if (v !== '') el.classList.remove('miss');
 }
 const getVal = el => { const s = el && el.querySelector('.v'); return s ? s.textContent : ''; };
 const toolsHTML = (extra = '') => `<div class="tools">${extra}<button class="tool" id="hintBtn">Ledtråd <small>2 kvar</small></button></div>`;
@@ -417,7 +411,7 @@ function remsaHTML(d) {   /* barnet skriver nämnarens tabell själv; den rätta
   return `<div class="remsa" id="remsa" hidden><div class="tt">${d}:ANS TABELL – SKRIV SJÄLV</div><div class="rg">${[1,2,3,4,5,6,7,8,9,10].map(m => `<div class="rc"><small>·${m}</small><span class="ri" id="ri${m}"></span></div>`).join('')}</div></div>`;
 }
 function sfInit(o) {
-  SF = { tries: 0, boxes: [], acc: o.acc || { miss: false, hints: 0 }, hint: o.hint, onRight: o.onRight, grow: o.grow, more: o.more };
+  SF = { tries: 0, wrong: 0, boxes: [], acc: o.acc || { miss: false, hints: 0 }, hint: o.hint, onRight: o.onRight, grow: o.grow, more: o.more, facit: o.facit, after: o.after };
   sfAdd(o.boxes || []);
   sfAdd([...app.querySelectorAll('.ri')].map(el => ({ el, chain: false, need: false })));
   padHandler = sfOk;
@@ -459,16 +453,34 @@ function sfCheck() {
   SF.tries++;
   const bad = SF.boxes.filter(b => b.ok && !b.ok(getVal(b.el)));
   if (bad.length) {
-    SF.acc.miss = true;
+    SF.acc.miss = true; SF.wrong++;
+    /* hjälptrappan (D48 ✎): försök igen → ledtråd (om en finns kvar) → svaret och Nästa */
+    if (SF.wrong >= 2 && !(SF.hint && SF.acc.hints < 2 && SF.wrong === 2)) return sfReveal(bad);
     bad.forEach(b => { setVal(b.el, ''); b.el.classList.add('miss'); });
-    ask(`<span class="soft">Inte riktigt – försök igen.</span>${bad.length === 1 ? 'Rutan som blev tom stämmer inte.' : `De ${bad.length} rutorna som blev tomma stämmer inte.`}`);
+    const what = bad.length === 1 ? 'Rutan som blev tom stämmer inte.' : `De ${bad.length} rutorna som blev tomma stämmer inte.`;
+    if (SF.wrong === 1) ask(`<span class="soft">Inte riktigt – försök igen.</span>${what}`);
+    else { SF.acc.hints++; ask(`<span class="soft">Inte riktigt.</span><span class="hint">LEDTRÅD ${SF.acc.hints}</span>${SF.hint(SF.acc.hints)}`); sfHintLabel(); }
     sfFocus(bad[0].el); return;
   }
-  SF.done = true; padHandler = null;
+  SF.done = true; padHandler = null; GAVE = false;   /* barnet skrev rätt sist */
   app.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
   const w = $('#pad .wide'); if (w) w.classList.remove('go');
   const tl = $('.tools'); if (tl) tl.style.display = 'none';   /* klart: verktygen gör ingen nytta längre */
   SF.onRight(kvText());
+}
+/* Sista steget i trappan: rutorna som inte stämmer får svaret (låsta), facit visas, och Nästa går vidare */
+function sfReveal(bad) {
+  GAVE = true; SF.done = true; padHandler = null;
+  /* rutor som var fel eller står tomma får svaret; gamla persikomarkeringar och ledtrådens markeringar försvinner */
+  SF.boxes.forEach(b => {
+    b.el.classList.remove('miss');
+    if (b.ans != null && (bad.includes(b) || getVal(b.el) === '')) { setVal(b.el, String(b.ans)); b.el.classList.add('given'); }
+  });
+  app.querySelectorAll('.focus, .lit').forEach(x => x.classList.remove('focus', 'lit'));
+  const w = $('#pad .wide'); if (w) w.classList.remove('go');
+  const tl = $('.tools'); if (tl) tl.style.display = 'none';
+  ask(`<span class="soft">Så här blir det.</span>${SF.facit ? SF.facit() : 'Svaren står nu i rutorna.'}`);
+  if (SF.after) SF.after(); else done();
 }
 function sfHintLabel() {
   const hb = $('#hintBtn'); if (!hb || !SF) return;
@@ -584,13 +596,24 @@ function pickRow(target, right) {
     });
   });
 }
-function typeAnswer(box, right, q) {
+/* Hjälptrappan (D48 ✎, Dennis: "man aldrig får misslyckas helt"): fel → försök igen → ledtråd → svaret och Nästa.
+   Ett svar som appen gav räknas som med hjälp och får inget beröm (GAVE). */
+function typeAnswer(box, right, q, hint) {
   return new Promise(res => {
     app.querySelectorAll('.box').forEach(b => b.classList.remove('focus'));
     box.classList.add('focus'); typed = ''; box.textContent = '';
+    let wrong = 0;
     padHandler = v => {
-      if (v !== '' && +v === right) { padHandler = null; box.classList.remove('focus'); box.classList.add('done'); $('#pad .wide').classList.remove('go'); res(); }
-      else { ERR = true; ask(`<span class="soft">Inte riktigt – försök igen.</span>${q}`); typed = ''; box.textContent = ''; }
+      if (v !== '' && +v === right) { GAVE = false; padHandler = null; box.classList.remove('focus'); box.classList.add('done'); $('#pad .wide').classList.remove('go'); res(); return; }
+      ERR = true; wrong++; typed = ''; box.textContent = '';
+      if (wrong === 1) ask(`<span class="soft">Inte riktigt – försök igen.</span>${q}`);
+      else if (wrong === 2) ask(`<span class="hint">LEDTRÅD</span>${hint || q}`);
+      else {
+        GAVE = true; padHandler = null; box.classList.remove('focus'); box.classList.add('given'); box.textContent = right;
+        $('#pad .wide').classList.remove('go');
+        ask(`<span class="soft">Så här blir det.</span>Svaret är <b>${right}</b>.`);
+        waitNext('Nästa').then(res);
+      }
     };
   });
 }
@@ -1210,10 +1233,12 @@ function kdSelf() {
   app.querySelectorAll('.kd.self .dg').forEach(d => d.onclick = e => { if (!e.target.closest('.rs')) d.classList.toggle('struck'); });
   sfInit({   /* rutorna visar hur många siffror svaret har – det bjuder vi på (D47 ✎) */
     acc: KD.acc,
-    boxes: [...P.steps.map(s => ({ el: $('#q' + s.i), ok: v => v === String(s.q) })),
-      { el: $('#qR'), need: false, ok: restOk(P.rest) },
+    boxes: [...P.steps.map(s => ({ el: $('#q' + s.i), ok: v => v === String(s.q), ans: s.q })),
+      { el: $('#qR'), need: false, ok: restOk(P.rest), ans: P.rest },
       ...[...N].slice(1).map((_, k) => ({ el: $('#rs' + (k + 1)), chain: false, need: false }))],
     hint: n => stepHint(n, s => $('#q' + s.i), cs => grp(cs === P.steps[0] ? [...Array(cs.i + 1).keys()] : [cs.i])),
+    facit: () => { grp([]); return `${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.`; },
+    after: KD.onDone ? () => act(nextBtn('Tillbaka till berättelsen'), KD.onDone) : null,
     onRight: kv => {
       grp([]);
       P.steps.forEach(s => $('#q' + s.i).classList.add('ans')); $('#qR').classList.add('ans');
@@ -1253,9 +1278,9 @@ function trapSelf() {
       const r = 2 + 2 * k;
       C(r, col - len).textContent = '−'; C(r, col - len).classList.add('minus');
       for (let c = col - len + 1; c <= col; c++) C(r, c).classList.add('ul');
-      e = tb(r, col - len + 1, col, 'tp' + k); sfAdd([{ el: e, ok: v => v === String(s.p) }]);
+      e = tb(r, col - len + 1, col, 'tp' + k); sfAdd([{ el: e, ok: v => v === String(s.p), ans: s.p }]);
     } else {                         /* raden med det som blir över */
-      e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, need: false, ok: restOk(s.r) }]);
+      e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, need: false, ok: restOk(s.r), ans: s.r }]);
     }
     e.classList.add('appear'); grown++; sfFocus(e);
   }
@@ -1279,7 +1304,8 @@ function trapSelf() {
   });
   ask(`Räkna ${N} / ${D} i trappan. Kvoten skrivs överst, en siffra i taget.<span class="kv">Under talet skriver du det som delas ut och det som blir över. Nästa ruta ger nästa rad.</span>`);
   sfInit({
-    boxes: P.steps.map(s => ({ el: qs[s.i], chain: false, ok: v => v === String(s.q) })),
+    boxes: P.steps.map(s => ({ el: qs[s.i], chain: false, ok: v => v === String(s.q), ans: s.q })),
+    facit: () => `${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.`,
     grow, more: () => grown < total,
     hint: n => stepHint(n, s => qs[s.i], cs => { if (cs === P.steps[0]) for (let c = 1; c <= 1 + cs.i; c++) C(1, c).classList.add('lit'); }),
     onRight: kv => {
@@ -1309,7 +1335,7 @@ function probSelf(back) {
   if (back) {
     $('#work').innerHTML = `<div class="carry">Din uträkning: ${n} / ${d} = <b>${q}</b></div><div class="sub">${st.pre} <div class="box" id="sb"></div> ${st.post}</div>`;
     ask('Svara nu på frågan i berättelsen.');
-    sfInit({ acc: PROB.acc, boxes: [{ el: $('#sb'), ok: v => v === String(q) }],
+    sfInit({ acc: PROB.acc, boxes: [{ el: $('#sb'), ok: v => v === String(q), ans: q }], facit: () => `${st.pre} <b>${q}</b> ${st.post}`,
       hint: () => 'Kvoten i din uträkning är svaret: hur mycket det blir i en av delarna.',
       onRight: kv => { $('#sb').classList.add('ans'); ask(`<span class="ok">Klart!</span>${st.pre} <b>${q}</b> ${st.post}<span class="kv">${kv}</span>`); done(); } });
     return;
@@ -1332,10 +1358,19 @@ function probSelf(back) {
       const w = $('#pad .wide'); w.innerHTML = `${ic.check} Nästa ruta`; w.classList.remove('go');
       ask(`<span class="ok">Rätt!</span>Räkna nu ${n} / ${d} i kort division.`);
       act(nextBtn('Räkna i kort division'), () => { setTask(String(n), d); kdView({ title: 'Problemlösning', onDone: () => probView(true), acc: PROB.acc }); });
+    } else if (++SF.wrong >= 3) {   /* hjälptrappan (D48 ✎): tredje gången står uträkningen färdig */
+      PROB.acc.miss = true; setVal(e1, String(n)); setVal(e2, String(d)); eo.textContent = '/';
+      [e1, eo, e2].forEach(x => { x.classList.remove('miss'); x.classList.add('given'); });
+      padHandler = null; SF.onType = null; SF.done = true;
+      app.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
+      const w = $('#pad .wide'); w.innerHTML = `${ic.check} Nästa ruta`; w.classList.remove('go');
+      ask(`<span class="soft">Så här blir uträkningen.</span>${st.what[0].toUpperCase() + st.what.slice(1)} delas i ${d} lika delar: <b>${n} / ${d}</b>. Räkna nu i kort division.`);
+      act(nextBtn('Räkna i kort division'), () => { setTask(String(n), d); kdView({ title: 'Problemlösning', onDone: () => probView(true), acc: PROB.acc }); });
     } else {
       PROB.acc.miss = true; setVal(e1, ''); setVal(e2, ''); eo.textContent = '';
       [e1, eo, e2].forEach(x => x.classList.add('miss')); sfFocus(e1); label();
-      ask('<span class="soft">Inte riktigt – försök igen.</span>Läs berättelsen en gång till.');
+      if (SF.wrong === 1) ask('<span class="soft">Inte riktigt – försök igen.</span>Läs berättelsen en gång till.');
+      else { PROB.acc.hints++; ask(`<span class="soft">Inte riktigt.</span><span class="hint">LEDTRÅD</span>${SF.hint(1)} ${SF.hint(2)}`); sfHintLabel(); }
     }
   };
   SF.onType = label;
@@ -1384,13 +1419,14 @@ function klurSelf(a, b, k, mid, tot) {
   ask(`<span class="hint">STEG 1 · BÖRJA BAKIFRÅN</span>Vilket tal delat med ${b} blir ${k}? Vänd på det och räkna med gånger.`);
   const row = n => ['a', 'b', 'c'].map(s => ({ el: $('#s' + n + s) }));
   sfInit({
-    boxes: [...row(1), { el: kM, ok: v => v === String(mid) }],
+    boxes: [...row(1), { el: kM, ok: v => v === String(mid), ans: mid }],
+    facit: () => `Talet är <b>${tot}</b>: ${tot} / ${a} = ${mid}, och ${mid} / ${b} = ${k}.`,
     more: () => step < 2,
     grow: () => {
       if (step >= 2) return false;
       step = 2; lit('A');
       $('#st2').innerHTML = fl(2);
-      sfAdd([...row(2), { el: $('#kT'), ok: v => v === String(tot) }]);
+      sfAdd([...row(2), { el: $('#kT'), ok: v => v === String(tot), ans: tot }]);
       ask(`<span class="hint">STEG 2</span>Vilket tal delat med ${a} blir ${getVal(kM) || '?'}? Vänd på det igen, och skriv talet i den första rutan.`);
       sfFocus($('#s2a')); return true;
     },
@@ -1433,7 +1469,16 @@ function vennSelf() {
     if (+g.dataset.n === t.answer) {
       SF.done = true; g.classList.add('win'); $('.tools').style.display = 'none';
       ask(`<span class="ok">Klart!</span>Talet är <b>${t.answer}</b>.<span class="kv">${kvText()}</span>`); done();
-    } else { SF.acc.miss = true; g.classList.add('nope'); ask('<span class="soft">Inte riktigt – försök igen.</span>Läs ledtrådarna en gång till.'); }
+    } else if (++SF.wrong >= 3) {   /* hjälptrappan (D48 ✎): tredje gången visas talet */
+      SF.acc.miss = true; GAVE = true; SF.done = true; g.classList.add('nope');
+      const w = gs.find(x => +x.dataset.n === t.answer); if (w) w.classList.add('win');
+      $('.tools').style.display = 'none';
+      ask(`<span class="soft">Så här blir det.</span>Talet är <b>${t.answer}</b>: det är ${t.clue1} och kan delas jämnt med ${t.k}.`); done();
+    } else {
+      SF.acc.miss = true; g.classList.add('nope');
+      if (SF.wrong === 1 || SF.acc.hints >= 2) ask('<span class="soft">Inte riktigt – försök igen.</span>Läs ledtrådarna en gång till.');
+      else { SF.acc.hints++; ask(`<span class="soft">Inte riktigt.</span><span class="hint">LEDTRÅD ${SF.acc.hints}</span>${SF.hint(SF.acc.hints)}`); sfHintLabel(); }
+    }
   };
   const upd = () => {
     const left = gs.filter(g => !g.classList.contains('x'));
@@ -1473,7 +1518,8 @@ function dzSelf() {
   afterRender();
   ask(`${tx.q}<span class="kv">Vänd på frågan så att det okända hamnar sist. Räkna, och skriv svaret i frågan. Tryck på en siffra för att stryka den.</span>`);
   app.querySelectorAll('.dz0').forEach(z => z.onclick = () => z.classList.toggle('struck'));
-  sfInit({ boxes: [{ el: $('#fa') }, { el: $('#fb') }, { el: $('#fc') }, { el: $('#dq'), ok: v => v === String(t.ans) }],
+  sfInit({ boxes: [{ el: $('#fa') }, { el: $('#fb') }, { el: $('#fc') }, { el: $('#dq'), ok: v => v === String(t.ans), ans: t.ans }],
+    facit: () => `${t.a === '?' ? t.ans : t.a} / ${t.b === '?' ? t.ans : t.b} = ${t.c}.`,
     hint: n => n === 1 ? tx.flipWhy : tx.calcWhy,
     onRight: kv => {
       $('#dq').classList.add('ans');
@@ -1506,12 +1552,12 @@ function grpSelf() {
     if (sel.length === g) { sel.forEach(x => x.remove()); $('#bags').insertAdjacentHTML('beforeend', `<div class="bag self">${'<i class="ball in"></i>'.repeat(g)}</div>`); }
   };
   const pair = other => v => { const o = getVal($('#' + other)); return (v === String(g) && o === String(q)) || (v === String(q) && o === String(g)); };
-  const boxes = [{ el: $('#gN'), ok: v => v === String(tot) }, { el: $('#gD'), ok: v => v === String(g) }, { el: $('#gQ'), ok: v => v === String(q) }];
-  if (!easy) boxes.push({ el: $('#gR'), ok: v => v === String(r) });
-  boxes.push({ el: $('#k1'), ok: pair('k2') }, { el: $('#k2'), ok: pair('k1') });
-  if (!easy) boxes.push({ el: $('#k3'), ok: v => v === String(r) });
-  boxes.push({ el: $('#k4'), ok: v => v === String(tot) });
-  sfInit({ boxes,
+  const boxes = [{ el: $('#gN'), ok: v => v === String(tot), ans: tot }, { el: $('#gD'), ok: v => v === String(g), ans: g }, { el: $('#gQ'), ok: v => v === String(q), ans: q }];
+  if (!easy) boxes.push({ el: $('#gR'), ok: v => v === String(r), ans: r });
+  boxes.push({ el: $('#k1'), ok: pair('k2'), ans: g }, { el: $('#k2'), ok: pair('k1'), ans: q });
+  if (!easy) boxes.push({ el: $('#k3'), ok: v => v === String(r), ans: r });
+  boxes.push({ el: $('#k4'), ok: v => v === String(tot), ans: tot });
+  sfInit({ boxes, facit: () => `${tot} / ${g} = <b>${q}</b>${easy ? '' : `, rest <b>${r}</b>`}.`,
     hint: n => n === 1 ? 'Täljaren är alla bollar från början. Nämnaren är hur många som ryms i en påse.' : `Kontrollen: påsarna gånger bollarna i varje påse${easy ? '' : ', plus de som blev över'}, ska bli alla bollarna.`,
     onRight: kv => { $('#gQ').classList.add('ans'); if (!easy) $('#gR').classList.add('ans');
       ask(`<span class="ok">Klart!</span>${tot} / ${g} = <b>${q}</b>${easy ? '' : `, rest <b>${r}</b>`}.<span class="kv">${kv}</span>`); done(); } });
@@ -1528,7 +1574,8 @@ function tabSelf(items) {
   </div>` + padHTML('Nästa ruta') + kladdHTML();
   afterRender();
   ask('Skriv svaren. Tryck på en ruta för att välja den.');
-  sfInit({ boxes: items.map(([a, b], i) => ({ el: $('#tb' + i), ok: v => v === String(a / b) })),
+  sfInit({ boxes: items.map(([a, b], i) => ({ el: $('#tb' + i), ok: v => v === String(a / b), ans: a / b })),
+    facit: () => 'Svaren står nu i rutorna som var fel.',
     hint: n => { const i = Math.max(0, items.findIndex((_, j) => $('#tb' + j).classList.contains('focus'))); const [a, b] = items[i];
       return n === 1 ? `Tänk gånger: ${b} · ? = ${a}.` : `Räkna i ${b}-hopp: ${b}, ${2 * b}, ${3 * b} … tills du når ${a}.`; },
     onRight: kv => { ask(`<span class="ok">Klart!</span>Alla tio stämmer.<span class="kv">${kv}</span>`); done(); } });
@@ -1536,7 +1583,7 @@ function tabSelf(items) {
 
 
 /* ══════════ Stommen: hubben, omgången, kvittot, lagringen, kladden och lägena ══════════ */
-let RUN = null, TASK = null, ERR = false, profile = null, onBack = null, ROOT = null;
+let RUN = null, TASK = null, ERR = false, GAVE = false, profile = null, onBack = null, ROOT = null;
 const KEY = () => `ovningsblad_${profile && profile.id}`;
 function readSt() { try { return JSON.parse(localStorage.getItem(KEY())) || {}; } catch (_) { return {}; } }
 function writeSt(s) {
@@ -1570,11 +1617,11 @@ function hub() {
 const VIEWS = { kd: () => kdView({ task: TASK }), trap: () => trapView(), prob: () => probView(), klur: () => klurView(),
   venn: () => vennView(), dz: () => dzView(), grp: () => grpView(), tab: () => tabView() };
 function startModule(id) { RUN = { id, tasks: O.makeRound(id, LEVEL), i: 0, results: [] }; runTask(); }
-function runTask() { ERR = false; PROB = null; TASK = RUN.tasks[RUN.i]; VIEWS[RUN.id](); }
+function runTask() { ERR = false; GAVE = false; PROB = null; TASK = RUN.tasks[RUN.i]; VIEWS[RUN.id](); }
 /* en uppgift är klar: resultatet sparas en gång, och knappen leder till nästa uppgift eller kvittot */
 function finish(res, extra = '') {
   if (!RUN) return;
-  if (res && RUN.results.length === RUN.i) { RUN.results.push(res); cheer(); }
+  if (res && RUN.results.length === RUN.i) { RUN.results.push(res); if (!GAVE) cheer(); }   /* beröm bara när barnet skrev rätt sist */
   const last = RUN.i + 1 >= RUN.tasks.length;
   act(`${extra}<button class="next" id="nextTask">${last ? 'Se kvittot' : 'Nästa uppgift'} ${ic.next}</button>`);
   $('#nextTask').onclick = () => { if (last) kvitto(); else { RUN.i++; runTask(); } };
@@ -1582,10 +1629,27 @@ function finish(res, extra = '') {
 /* Berömmet när sista rutan är rätt och uppgiften klar (Dennis 12/11): ett ord ur HYPE snurrar in över kortet,
    konfetti och ljud. Sällsynt och legendariskt får en etikett, mer konfetti och fanfaren. Rörelsen lottas bland tre. */
 const hype = O.hypePicker();
-function cheer() {
+/* Stilen ligger i sidans head, så att också multiplikationen och kort division kan använda berömmet (D48 ✎) */
+const HYPE_CSS = `/* berömmet när uppgiften är klar: ett ord som snurrar, studsar eller zoomar in över kortet och lyfter bort */
+.ov-hype{position:fixed;z-index:10000;pointer-events:none;text-align:center;white-space:nowrap;transform:translate(-50%,-50%);animation:ov-hype-spin 2.1s cubic-bezier(.2,.9,.3,1.15) forwards}
+.ov-hype.e1{animation-name:ov-hype-drop}
+.ov-hype.e2{animation-name:ov-hype-zoom}
+.ov-hype b{display:block;font-family:'Baloo 2',system-ui;font-weight:800;line-height:1.05;padding:0 6px;background:linear-gradient(100deg,#ec4899,#a855f7,#3b82f6,#10b981,#f59e0b,#ec4899);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 12px rgba(91,33,182,.35));animation:ov-hype-shine 1.4s linear infinite}
+.ov-hype small{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;font:900 12px Nunito,system-ui;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#7c3aed;box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.ov-hype.t-legend b{background-image:linear-gradient(100deg,#f59e0b,#fde047,#fff7ae,#f59e0b,#ea580c,#f59e0b)}
+.ov-hype.t-legend small{background:linear-gradient(90deg,#f59e0b,#ea580c);box-shadow:0 2px 10px rgba(245,158,11,.55)}
+@keyframes ov-hype-shine{to{background-position:-250% 0}}
+@keyframes ov-hype-spin{0%{transform:translate(-50%,-50%) scale(.1) rotate(-540deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(10deg);opacity:1}42%{transform:translate(-50%,-50%) scale(.94) rotate(-5deg)}54%{transform:translate(-50%,-50%) scale(1.05) rotate(2deg)}64%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-drop{0%{transform:translate(-50%,-260%) scale(1.1) rotate(-12deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2,.8) rotate(4deg);opacity:1}34%{transform:translate(-50%,-75%) scale(.92,1.08) rotate(-3deg)}46%{transform:translate(-50%,-50%) scale(1.06,.95)}56%,80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@keyframes ov-hype-zoom{0%{transform:translate(-50%,-50%) scale(3) rotate(8deg);opacity:0}24%{transform:translate(-50%,-50%) scale(.9) rotate(-6deg);opacity:1}34%{transform:translate(-50%,-50%) scale(1.12) rotate(5deg)}44%{transform:translate(-50%,-50%) scale(.97) rotate(-3deg)}54%{transform:translate(-50%,-50%) scale(1.02) rotate(1deg)}62%,80%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-150%) scale(.85);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ov-hype,.ov-hype.e1,.ov-hype.e2{animation:ov-hype-fade .4s}.ov-hype b{animation:none}}
+@keyframes ov-hype-fade{from{opacity:0}to{opacity:1}}
+`;
+if (!document.getElementById('ov-hype-css')) document.head.insertAdjacentHTML('beforeend', `<style id="ov-hype-css">${HYPE_CSS}</style>`);
+function cheer(anchor) {
   const { word, tier } = hype();
   document.querySelectorAll('.ov-hype').forEach(e => e.remove());
-  const c = app.querySelector('.card'), r = c ? c.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
+  const c = anchor || app.querySelector('.card'), r = c ? c.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
   const el = document.createElement('div');
   el.className = `ov-hype t-${tier} e${Math.floor(Math.random() * 3)}`;
   el.setAttribute('aria-hidden', 'true');
@@ -1774,6 +1838,6 @@ function open(p, back) {
   if (typeof Router !== 'undefined') Router.show('screen-ovningsblad');
 }
 
-return { open, _t: () => ({ TASK, P, RUN, MODE, LEVEL, SIZE }), _speed: v => { SPEED = v; } };   /* _t: bara för genomspelningen i webbläsaren */
+return { open, cheer: el => cheer(el), _t: () => ({ TASK, P, RUN, MODE, LEVEL, SIZE }), _speed: v => { SPEED = v; } };   /* _t: bara för genomspelningen i webbläsaren */
 })();
 if (typeof window !== 'undefined') window.Ovningsblad = Ovningsblad;

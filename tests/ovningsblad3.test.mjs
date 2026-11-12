@@ -206,8 +206,37 @@ describe('berömmet när uppgiften är klar (Dennis 12/11: "varierat så det int
   });
   it('firas en gång per uppgift: när resultatet sparas, inte i trappans jämförelse (finish(null))', () => {
     const v = src('js/ovningsblad.js');
-    expect(v).toMatch(/if \(res && RUN\.results\.length === RUN\.i\) \{ RUN\.results\.push\(res\); cheer\(\); \}/);
+    expect(v).toMatch(/if \(res && RUN\.results\.length === RUN\.i\) \{ RUN\.results\.push\(res\); if \(!GAVE\) cheer\(\); \}/);
     expect(v.match(/(?<!function )cheer\(\)/g)).toHaveLength(1);
     expect(v).toMatch(/querySelectorAll\('\.ov-fly, \.ov-hype'\)/);
+  });
+});
+
+describe('hjälptrappan: man fastnar aldrig (D48 ✎, Dennis: "man aldrig får misslyckas helt")', () => {
+  const v = src('js/ovningsblad.js');
+  it('Med hjälp: försök igen, ledtråd, sedan svaret och Nästa', () => {
+    const ta = v.slice(v.indexOf('function typeAnswer'), v.indexOf('const rows2'));
+    expect(ta).toMatch(/wrong === 1\) ask\(`<span class="soft">Inte riktigt – försök igen/);
+    expect(ta).toMatch(/wrong === 2\) ask\(`<span class="hint">LEDTRÅD/);
+    expect(ta).toMatch(/GAVE = true;[\s\S]*waitNext\('Nästa'\)\.then\(res\)/);
+  });
+  it('Själv: varje ruta som rättas har ett svar som trappan kan visa', () => {
+    const boxes = [...v.matchAll(/\{ el: [^{}]*?\bok: [^{}]*?\}/g)].map(m => m[0]);
+    expect(boxes.length).toBeGreaterThan(12);
+    expect(boxes.filter(b => !/\bans: /.test(b))).toEqual([]);
+  });
+  it('ett svar som appen gav får inget beröm, och sista steget går alltid vidare', () => {
+    expect(v).toMatch(/if \(!GAVE\) cheer\(\)/);
+    const rv = v.slice(v.indexOf('function sfReveal'), v.indexOf('function sfHintLabel'));
+    expect(rv).toMatch(/GAVE = true/); expect(rv).toMatch(/if \(SF\.after\) SF\.after\(\); else done\(\);/);
+  });
+});
+
+describe('trappan i Själv: tvåsiffriga tal står siffra för siffra i sina kolumner (Dennis 12/11)', () => {
+  const v = src('js/ovningsblad.js');
+  it('de breda rutorna ritar varje siffra i en egen kolumnbredd', () => {
+    expect(v).toMatch(/if \(el\.classList\.contains\('tb'\)\) s\.innerHTML = \[\.\.\.String\(v\)\]\.map\(d => `<i>\$\{d\}<\/i>`\)/);
+    expect(v).toMatch(/#ov-root \.box\.tb \.v i\{font-style:normal;width:30px;text-align:center\}/);
+    expect(v).toMatch(/grid-template-columns:repeat\(7,30px\)/);   // samma bredd som rutnätets kolumner
   });
 });

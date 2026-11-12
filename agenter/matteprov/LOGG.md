@@ -282,3 +282,11 @@ bandet). Lärdom: färgen ska betyda samma sak överallt – lila "härifrån", 
 Plan 3 byggdes av VD:n som egen modul (`js/ovningsblad.js`, D47 ✎) och är live i v77/v78. Rollens D44-kod i
 `matteprov*.js` är bortkopplad; rivningen är en egen skiva med granskning (TODO). Lärdom från porteringen: mockupens
 fasta tal och ram dolde fel som kom med variation (talens längd, skärmstorlek, böjning) – se METOD-OVNINGSBLAD § 1.6.
+
+## 2026-11-12 · Rivningen av D44 (VD:n)
+
+Rollens övningsbladskod är riven ur `matteprov*.js` (logiken 1 891 → 1 126 rader, vyn 2 505 → 1 819). Lärdom: en
+rivning bryter anrop som testerna inte ser. Vyn anropade `L.hbClass` (bara i den rivna delen) när sista rutan i Med
+hjälp var klar; testerna för logiken märkte inget. Nu låser `tests/matteprov.test.mjs` att varje `L.<namn>` i vyn
+finns i logikens export. CSS-rensningen tog först bort en regel vars klass sätts av `shared.js`; klassnamn ska sökas i
+alla appens filer, inte bara i modulen.

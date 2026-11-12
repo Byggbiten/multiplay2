@@ -27,7 +27,7 @@ namn i uppgifterna.
 | Ett beslut och varför | `.project-context/DECISIONS.md` (D1–D48) |
 | Det olösta | `.project-context/OPEN_QUESTIONS.md` |
 | Vad vi bygger: moduler, `shared.js`, lagringsnycklar | `.project-context/DESIGN.md` |
-| Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md`, `.project-context/PLAN-OVNINGSBLAD-BYGGE.md` |
+| Specar och planer | `.project-context/SPEC-*.md`, `.project-context/PLAN-RENOVERING.md`, `.project-context/PLAN-OVNINGSBLAD-BYGGE.md`, `.project-context/PLAN-D48.md` |
 | Tänket bakom övningsbladen (pilar, varför, pengar, takt) | `.project-context/METOD-OVNINGSBLAD.md` – läs före varje vy i övningsbladen |
 | Avfärdade idéer, arbetsvanor | `.project-context/AGENT_CONTEXT.md` |
 | Granskningar och tankepass | `brainstorm/README.md` |
@@ -51,6 +51,7 @@ Inte bara städning. "… och fortsätt" = kör passet och fortsätt med första
 | Dennis beslutar något | D-post med hans ord; stryk besvarad fråga; rad i loggen |
 | En punkt blir klar | bocka och stryk i TODO |
 | En fil skapas | rätt mapp + rad i registret |
+| Kod rivs eller flyttas | före/efter: ett skript som dumpar den kvarvarande logikens utfall (identiskt), ett skärmsvep med låst slump som hashar varje vy (kört två gånger först), flöden in i andra moduler spelade på riktigt, och en kontroll att varje anrop över modulgränsen har en mottagare (loggen 12/11, rivningen av D44) |
 | Ett fel rättas | loggraden "Varför fångade inte motorn detta?" + testet som fångar feltypen, provat mot felet först (15 § 5–6) |
 | En subagent rapporterar | fynden in i TODO med id; rapporten sparad i projektet (`brainstorm/`) |
 | En subagent levererar UI | granska själv innan det går till Dennis: egna skärmbilder i 390 × 797 av varje steg som ändrats, i alla nivåer (Lättare och Svårare är olika flöden) + förklaringsprov av en granskare utan kontext (ui-skolan steg 5); agentens egen mätning räknas inte som bevis |
@@ -69,7 +70,7 @@ Städkontrollen: `python3 -I ~/OneDrive/claude-verkstad/skills/rutiner-och-verkt
 | Roll | Agent-id | Rapport | Överlämning + logg |
 |---|---|---|---|
 | Geografi (mockupen, bygget) | `acf985ddd0b12ab7f` | dagens logg | `agenter/geografi/OVERLAMNING.md`, `LOGG.md` |
-| Matteprov (Matteprov 4:an D37–D42, övningsblad för division D44) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
+| Matteprov (Matteprov 4:an D37–D42; dess övningsblad D44 är rivna, ersatta av plan 3) | `a820dd6909744826e` | dagens logg | `agenter/matteprov/OVERLAMNING.md`, `LOGG.md` |
 | Uppställd multiplikation och kort division (multdiv, D40–D43, motorrundan) | `a566d8b8d8411628d` | dagens logg | `agenter/multdiv/OVERLAMNING.md`, `LOGG.md` |
 
 VD:n skriver sina dokument i en egen arbetskopia (`git worktree add ~/multiplay-wt-docs origin/dev -b docs-tmp`,

@@ -410,6 +410,16 @@ Samma sort kommer aldrig tre gånger i rad på nivå 3 och 4.
 
 Kortet **Matteprov 4:an** ligger i samma vy, under Svårighetsgrad (se nästa avsnitt).
 
+## Multiplikation och kort division: övningsbladens yta (v80, D48)
+
+- **Knappsatsen** är densamma som i övningsbladen i båda lägena: fem tangenter per rad, Sudda, **Ledtråd** (förut
+  Livlina) och en bred svarsknapp (Svara i Räkna med hjälp, Klar/Nästa rad i Räkna själv).
+- **Räkna med hjälp:** svaret skrivs i en ruta direkt i frågan ("Vad är 5 · 2? [10]"); siffran flyger sedan till sin
+  cell som förut. Inget eget svarsfält ovanför knapparna.
+- **Kladden** har ikonrad överst: Rita, Sudda, Ångra, Gör om, Rensa (Rensa går att ångra).
+- **Beröm:** när en uppgift är klar och rätt snurrar ett ord in med konfetti, som i övningsbladen. Matteprovets lånade
+  uppställning har inget beröm.
+
 ## Övningsblad · Division, plan 3 (v77, v79: beröm och utdelning; D47, D48)
 
 I Kort divisions lägesvy leder kortet **Övningsblad** till åtta moduler i tre avdelningar: **Grunder** (Dela och
@@ -425,7 +435,10 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
   ord kommer aldrig två gånger i rad. Kvittot får konfetti när minst 60 % var rätt direkt.
 - **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
   själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
-  persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och
+  persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift.
+- **Man fastnar aldrig** (v80, D48 ✎): blir det fel igen kommer en ledtråd av sig själv, och tredje gången visar appen
+  svaret i grå rutor med "Så här blir det" och knappen Nästa. Det gäller också Med hjälp. Uppgiften räknas då som med
+  hjälp och får inget beröm; berömmet kommer bara när barnet själv skrev rätt sist. Kluringar och
   10/100/1000 visar vilket steg man står på; Vilket tal? visar med en bild hur man kryssar.
 - En omgång är 2–4 uppgifter (Divisionstabellen ett blad med tio tal). Kvittot visar hur många som var rätt direkt
   (och ledtrådarna i Själv), och hubben märker modulen med resultatet.
@@ -433,7 +446,7 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
 - Fungerar på telefon och iPad, stående och liggande. På små telefoner och i liggande läge krymps uppgiften så att
   kladden får plats.
 
-## Övningsblad · Division (v76, D44 ✎) – ersatt av plan 3 i v77
+## Övningsblad · Division (v76, D44 ✎) – ersatt av plan 3 i v77, koden riven 12/11
 
 I Kort divisions lägesvy finns kortet **Övningsblad**. Det öppnar tretton moduler i kapitel 3:s olika sorters blad,
 med egna tal: Dela lika, Hur många grupper?, Divisionstabellen (20 tal, /20), Kontrollera med gånger, Division med

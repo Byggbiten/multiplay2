@@ -828,9 +828,36 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   när de svarar rätt. Konfetti och så där. Gärna nån slags snurrande text … Slay! Sigma! … så det inte bara är samma
   samma" och "när den sista inmatningen är rätt. så att uppgiften är klar".
 
+- ✎ **2026-11-12, v79 godkänd, rivningen nästa:** Dennis har provat v79 och är nöjd. Förklaringsprovet med en
+  granskare utan kontext behövs inte nu. Den gamla övningsbladskoden (D44) rivs. Källa: Dennis: "jag har testat och är
+  nöjd", "behövs inte nu" och "ja, riv den".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
   Livlina, "Skriv svaret…", textknappar i kladden) anpassas efter dem. Det görs i en egen skiva efter övningsbladen.
 - **Källa:** Dennis 2026-11-12: "gällande utseende, kör övningsbladets."
+- ✎ **2026-11-12, VD:n gör D48 personligen:** anpassningen av kort division och uppställd multiplikation görs av VD:n
+  själv, inte beställd av en subagent. Efter D48 stannar arbetet: iPad-planen (D45) och Matteprov 1 tas upp först när
+  Dennis fått frågan. Källa: Dennis: "det kräver finess och nogrannhet. det får du göra personligen och inte beställa
+  av en subagent" och "vi gör allt ovan, sen när vi kommer hit så säger du till".
+- ✎ **2026-11-12, D48 är polering, inte ny pedagogik:** i multiplikationen (och kort division) ändras varken logiken
+  eller pedagogiken. D48 gäller ytan: konfetti och beröm, knappval, layout. Samtidigt jämförs divisionens
+  övningsblad med multiplikationen: det som saknas där läggs till, till exempel att det man svarar fel på kommer
+  tillbaka, att man aldrig misslyckas helt och att appen ger flera försök och hjälper en vidare när man fastnar.
+  Källa: Dennis: "multiplikationsmodulen har jag ju lagt ned mycket tid på och är relativt nöjd med. Så jag vill inte
+  att vi ändrar hur logiken och pedagogiken är. utan snarare handlar det väl då om polering? t.ex. det där med
+  konfettin, knappvalen, layout. och kanske det finns nått där som vi missat i divisionen? t.ex. att sånt man svarar
+  fel på kan återkomma och att man aldrig får misslyckas helt, utan appen ger en flera försök och hjälper en vidare om
+  man fastnar".
+- ✎ **2026-11-12, D48:s tre val:** (1) Räkna med hjälp i multiplikationen och kort division skriver direkt i cellen
+  med fokus, som övningsbladen och Räkna själv; frågan och stegen är kvar. (2) Hjälpknappen heter **Ledtråd** överallt
+  (multiplikationens Livlina byter namn). (3) Övningsbladen får en hjälptrappa så att barnet aldrig fastnar: fel →
+  försök igen → ledtråd → svaret visas och Nästa, och kvittot räknar det som med hjälp. Fel uppgifter läggs inte sist
+  i omgången igen. Källa: Dennis valde "Direkt i cellen", "Ledtråd överallt" och bara "Hjälptrappa" av två
+  tillägg. Inventeringen: `.project-context/PLAN-D48.md`.
+- ✎ **2026-11-12, D48 ersätter två äldre regler:** övningsbladens knappsats ersätter fria lägets fyrkolumnsrutnät
+  (Dennis 23/9: "livlinan mindre, under 9:an och Klar; Klar tre rader hög"), och berömmet med konfetti ersätter
+  motorrundans "ingen konfetti" (granskningen `brainstorm/13`, 11/11). Källa: D48 ("kör övningsbladets") och D48 ✎
+  ("det där med konfettin, knappvalen, layout"). Emojis i konfettin kommer från appens gemensamma konfetti, som i v79.
 

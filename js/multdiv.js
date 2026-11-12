@@ -681,6 +681,37 @@ const MultDivGame = (() => {
       cursor:crosshair; border-radius:10px;
       border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
       background:rgba(255,255,255,0.8); }
+    /* D48: knappsatsen som övningsbladens – fem tangenter per rad, fyrkantiga vita brickor; under dem Sudda,
+       Ledtråd och en bred svarsknapp. Samma i Räkna med hjälp och Räkna själv. */
+    .md-pad { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; width:100%; }
+    .md-pad .md-nk { width:auto; height:44px; border:0; border-radius:14px; background:rgba(255,255,255,.95);
+      font:800 22px 'Baloo 2',system-ui; color:var(--deep); box-shadow:0 2px 6px rgba(93,63,158,.1); }
+    .md-pad .md-nk:hover { transform:none; }
+    .md-pad .k-erase { display:grid; place-items:center; }
+    .md-pad .k-erase svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linejoin:round; stroke-linecap:round; }
+    .md-pad .s2 { grid-column:span 2; } .md-pad .s3 { grid-column:span 3; } .md-pad .s4 { grid-column:span 4; }
+    .md-pad .md-klar { flex:none; height:44px; flex-direction:row; gap:6px; border-radius:14px; font:900 17px Nunito,system-ui; }
+    .md-pad .md-klar svg { width:20px; height:20px; }
+    .md-hint { height:44px; border:2px solid #c4b5fd; border-radius:14px; background:#fff; color:#7c3aed;
+      font:900 14px Nunito,system-ui; padding:0 6px; cursor:pointer; white-space:nowrap; }
+    .md-hint small { font:800 11px Nunito,system-ui; color:#64748b; margin-left:2px; }
+    .md-hint:disabled { opacity:.5; cursor:default; }
+    /* D48 ✎: svaret skrivs i en ruta direkt i frågan ("Vad är 5 · 2? [10]"), inte i ett eget fält ovanför knapparna */
+    .md-inl { display:inline-flex; align-items:center; justify-content:center; gap:1px; min-width:52px; height:40px;
+      padding:0 8px; margin-left:6px; vertical-align:middle; border:2.5px solid #fb923c; border-radius:12px;
+      background:#fff7ed; font:800 24px 'Baloo 2',system-ui; color:var(--deep); box-shadow:0 0 0 3px #fed7aa; }
+    .md-inl.has-digits { background:#fff; }
+    .md-inl.wrong { border-color:#fdba74; background:#fff3e6; color:#9a3412; box-shadow:none; }   /* D39: mjuk persika */
+    .md-inl.shake { animation:md-shake 0.3s ease; }
+    .md-inl .md-caret { height:.9em; }
+    /* D48: kladdens verktyg som övningsbladens – ikonrad överst med Ångra och Gör om */
+    .md-scbar { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .md-scbar .md-kl { flex:1; font:900 12px Nunito,system-ui; color:#134e4a; letter-spacing:.05em; text-transform:uppercase; }
+    .md-scb { width:44px; height:44px; border-radius:10px;   /* träffyta ≥ 44 px (CLAUDE.md) */ border:2px solid #cfe9e3; background:#fff; display:flex;
+      align-items:center; justify-content:center; color:#134e4a; cursor:pointer; padding:0; }
+    .md-scb.on { background:#3b8f82; border-color:#3b8f82; color:#fff; }
+    .md-scb.off { opacity:.35; }
+    .md-scb svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 
     /* Landskap med begränsad höjd (t.ex. iPad 1180×820): nivå 4:s höga
        tabell + numpad-panelen måste rymmas i vänsterspalten utan scroll */
@@ -3329,6 +3360,7 @@ const MultDivGame = (() => {
     if (cur && html && cur.innerHTML === `<div class="md-tx">${html}</div>`) return;
     area.innerHTML = html ? `<div class="md-thought"><div class="md-tx">${html}</div></div>` : '';
     pulseRefs(area);
+    if (document.getElementById('md-help-submit') && helpWantsInput()) helpRenderField();   /* D48 ✎: svarsrutan i frågan */
   }
 
   /* v31: basvärdet för minnespåminnelsen = kolumnsvaret UTAN minne */
@@ -3459,32 +3491,23 @@ const MultDivGame = (() => {
      — annars hoppar den nar bubblan byter fraga. */
   function helpPadHTML() {
     return `<div class="md-panel">
-      <div class="md-field md-field-sm num" id="md-help-field"><span class="md-caret"></span></div>
-      <div class="md-numpad">
+      <div class="md-pad">
         ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.helpKey('${k}')">${k}</button>`).join('')}
-      </div>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="md-btn" onclick="MultDivGame.helpErase()"
-          style="width:52px;flex-shrink:0;height:44px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
+        <button class="md-nk k-erase" aria-label="Sudda" onclick="MultDivGame.helpErase()">${ICON_ERASE}</button>
         ${lifelineBtnHTML()}
-        <button class="md-btn" id="md-help-submit" onclick="MultDivGame.helpSubmit()" disabled
-          style="flex:1.1;min-width:0;height:44px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:0.95rem;border-radius:var(--radius-full)">Skriv svaret…</button>
+        <button class="md-klar s2" id="md-help-submit" onclick="MultDivGame.helpSubmit()" disabled>${ICON_CHECK}<span>Svara</span></button>
       </div>
     </div>`;
   }
 
   /* ── LIVLINOR (v31) — 2/runda; visar svaret, barnet skriver själv ── */
   function lifelineBtnHTML() {
+    /* D48 ✎: hjälpknappen heter Ledtråd överallt (förut Livlina); samma knapp som övningsbladens */
     const on = lifelines > 0;
-    /* Samma knapprad som ⌫/Klar ⇒ ingen extra höjd (390×664-budgeten),
-       ändå ≥44px hög tap-yta. Grå + disabled när 0 kvar. */
-    return `<button class="md-btn" id="md-lifeline" onclick="MultDivGame.useLifeline()"
-      ${on ? '' : 'disabled'}
-      style="flex:1;min-width:0;height:44px;padding:0 4px;white-space:nowrap;
-      color:#fff;font-size:0.8rem;border-radius:var(--radius-full);
-      background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'};display:flex;align-items:center;justify-content:center;gap:5px">${ICON_BUOY.replace('<svg ', '<svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" ')}Livlina (${lifelines} kvar)</button>`;
+    return `<button class="md-hint s2" id="md-lifeline" onclick="MultDivGame.useLifeline()" ${on ? '' : 'disabled'}>${on ? `Ledtråd <small>${lifelines} kvar</small>` : 'Inga ledtrådar kvar'}</button>`;
   }
+
 
   /* Vagen visas pa ETT stalle. Livlinan kostar en pollett; efter tredje
      felsvaret pa samma fraga visas samma sak GRATIS.
@@ -3522,21 +3545,24 @@ const MultDivGame = (() => {
     if (btn) btn.outerHTML = lifelineBtnHTML();
   }
 
+  /* steget väntar på ett skrivet svar (samma sorter som helpSubmit tar emot) */
+  function helpWantsInput() {
+    const it = helpItem();
+    return !!it && helpSub === 0 && !exInputLocked && ['mult', 'add', 'memwrite', 'divq', 'divrest', 'divrestb', 'divzero', 'divrest0'].includes(it.kind);
+  }
   function helpRenderField() {
-    const field = document.getElementById('md-help-field');
+    let field = document.getElementById('md-help-field');
+    /* D48 ✎: rutan står sist i frågan i bubblan; ritas bubblan om under frågan läggs den tillbaka */
+    if (!field && document.getElementById('md-help-submit') && helpWantsInput()) {
+      const tx = document.querySelector('#md-bubble .md-tx');
+      if (tx) { tx.insertAdjacentHTML('beforeend', '<span class="md-inl num" id="md-help-field"><span class="md-caret"></span></span>'); field = document.getElementById('md-help-field'); }
+    }
     if (field) {
       field.classList.toggle('has-digits', helpInput.length > 0);
       field.innerHTML = (helpInput ? `<span>${helpInput}</span>` : '') + '<span class="md-caret"></span>';
     }
     const btn = document.getElementById('md-help-submit');
-    if (btn) {
-      const ready = helpInput.length > 0;
-      btn.disabled = !ready;
-      btn.style.background = ready
-        ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
-        : 'linear-gradient(135deg,#cbd5e1,#94a3b8)';
-      btn.textContent = ready ? 'Klar ✓' : 'Skriv svaret…';
-    }
+    if (btn) btn.disabled = !(helpInput.length > 0);   /* D48: "Svara", ljus tills något är skrivet */
   }
 
   function helpClearWrong() {
@@ -3740,16 +3766,18 @@ const MultDivGame = (() => {
     /* Dennis 23/9: livlinan mindre, under 9:an och Klar; Klar tre rader
        hög; 0:an lika stor som de andra. Ett grid i fyra kolumner — samma
        i division och multiplikation. */
+    /* D48: övningsbladens knappsats (ersätter fyrkolumnsrutnätet från 23/9). Sista raden: Sudda, (komma), Ledtråd och
+       Klar; i matteprovet (host) finns ingen ledtråd, och Klar tar platsen. */
+    const dec = isDecFree(), ll = !host, klarSpan = 5 - 1 - (dec ? 1 : 0) - (ll ? (dec ? 1 : 2) : 0);
     ui.innerHTML = `<div class="md-panel md-free-card">
-      <div class="md-free-keys k4${isDecFree() ? ' kc' : ''}">
-        ${[1,2,3,4,5,6,7,8,9].map(k =>
+      <div class="md-pad">
+        ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.exFreePress('${k}')">${k}</button>`).join('')}
         <button class="md-nk k-erase" aria-label="Sudda sista siffran"
           onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
-        <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
-        ${isDecFree() ? `<button class="md-nk md-kcomma" aria-label="Kommatecken" onclick="MultDivGame.exFreePress(',')">,</button>` : ''}
-        ${host ? '' : freeLifelineBtnHTML()}
-        <button class="md-klar" id="md-free-submit" disabled
+        ${dec ? `<button class="md-nk md-kcomma" aria-label="Kommatecken" onclick="MultDivGame.exFreePress(',')">,</button>` : ''}
+        ${ll ? freeLifelineBtnHTML(dec ? '' : 's2') : ''}
+        <button class="md-klar s${klarSpan}" id="md-free-submit" disabled
           onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
     </div>`;
@@ -3763,13 +3791,11 @@ const MultDivGame = (() => {
      multiplikation — tabellfaktan och minnet in ("9 · 9 = 81, och 8 i
      minne"); nivå 4 med tvåsiffrig faktor — de två delprodukterna, som
      barnet skriver i rad 1 och rad 2. */
-  function freeLifelineBtnHTML() {
+  function freeLifelineBtnHTML(span) {
     const on = lifelines > 0;
-    return `<button class="md-btn md-free-ll" id="md-free-lifeline"
-      ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()"
-      style="background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'}">` +
-      `${ICON_BUOY}<span>Livlina</span><span class="ll-n">${lifelines}</span></button>`;
+    return `<button class="md-hint${span ? ' ' + span : ''}" id="md-free-lifeline" ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()">${on ? `Ledtråd <small>${lifelines}</small>` : 'Ledtråd <small>0</small>'}</button>`;
   }
+
 
   /* Vilken kvotsiffra står fokusringen på? Den siffrans arbetstal är det
      raden ska handla om. */
@@ -3801,7 +3827,7 @@ const MultDivGame = (() => {
       lifelines--;
       App.Sound.play('click');
       const btn = document.getElementById('md-free-lifeline');
-      if (btn) btn.outerHTML = freeLifelineBtnHTML();
+      if (btn) btn.outerHTML = freeLifelineBtnHTML(isDecFree() ? '' : 's2');
       helpBubble(multLifelineHTML());
       return;
     }
@@ -3810,7 +3836,7 @@ const MultDivGame = (() => {
     lifelines--;
     App.Sound.play('click');
     const btn = document.getElementById('md-free-lifeline');
-    if (btn) btn.outerHTML = freeLifelineBtnHTML();
+    if (btn) btn.outerHTML = freeLifelineBtnHTML(isDecFree() ? '' : 's2');
     const b = document.getElementById('md-bubble');
     if (b) b.innerHTML = `<div class="md-thought"><div class="md-tx">${tabellradHTML(numB, st.cur, st.g)}</div></div>`;
     pulseRefs(b);
@@ -4462,6 +4488,9 @@ const MultDivGame = (() => {
      Klart-bubblan (hjälpläget) eller de godkända rutorna (fria läget) kvar, och en knapp går vidare. */
   function finishTask(correct) {
     if (host) { hostFinish(); return; }
+    /* D48 ✎: samma beröm som övningsbladen när uppgiften är klar och rätt – konfetti och ett snurrande ord
+       (Dennis: "det där med konfettin"). Ersätter motorrundans "ingen konfetti" (brainstorm/13). */
+    if (correct && window.Ovningsblad && Ovningsblad.cheer) { try { Ovningsblad.cheer(document.getElementById('md-table-wrap') || document.getElementById('md-main')); } catch (_) {} }
     const ui = document.getElementById('md-ui');
     const sista = exerciseIdx + 1 >= 5;
     if (!ui) { finishNext(); return; }
@@ -4522,21 +4551,18 @@ const MultDivGame = (() => {
   }
 
   /* ── Kladd (Fas 3.2: fyller ledig yta + bitmapp-synk) ───── */
+  /* D48: kladden som övningsbladens (ikonrad överst: Rita, Sudda, Ångra, Gör om, Rensa) */
+  const MD_SC_IC = {
+    draw: '<path d="M4 20l1.2-4.4L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M13.8 7l3.2 3.2"/>',
+    erase: '<path d="M8.5 19.5h11"/><path d="M4.6 14.6l8.8-8.8a2 2 0 0 1 2.8 0l2.4 2.4a2 2 0 0 1 0 2.8L12 17.6a2 2 0 0 1-2.8 0z"/><path d="M8.8 10.4l5.2 5.2"/>',
+    undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+    clear: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>' };
   function scratchHTML() {
+    const b = (id, fn, label, cls) => `<button class="md-scb${cls ? ' ' + cls : ''}" id="md-${id}" onclick="MultDivGame.${fn}" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${MD_SC_IC[id]}</svg></button>`;
     return `<div class="md-scratch">
-      <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">Kladd</div>
+      <div class="md-scbar"><span class="md-kl">Kladd</span>${b('draw', 'mdToggleEraser(false)', 'Rita', 'on')}${b('erase', 'mdToggleEraser(true)', 'Sudda')}${b('undo', 'mdUndoStep()', 'Ångra', 'off')}${b('redo', 'mdRedoStep()', 'Gör om', 'off')}${b('clear', 'mdClearCanvas()', 'Rensa kladden')}</div>
       <canvas id="md-canvas" class="md-canvas"></canvas>
-      <div style="display:flex;gap:5px;flex-shrink:0">
-        <button onclick="MultDivGame.mdToggleEraser(false)" id="md-draw"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 20l4-1 10-10-3-3L5 16z"/></svg>Rita</button>
-        <button onclick="MultDivGame.mdToggleEraser(true)" id="md-erase"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 20H9l-5-5 9-9 7 7-6 6"/></svg>Sudd</button>
-        <button onclick="MultDivGame.mdClearCanvas()"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Rensa</button>
-      </div>
     </div>`;
   }
 
@@ -4545,7 +4571,7 @@ const MultDivGame = (() => {
     if (mdResizeObs) { mdResizeObs.disconnect(); mdResizeObs = null; }
     mdCanvas = el;
     if (!mdCanvas) return;
-    mdErasing = false;
+    mdErasing = false; mdUndoSt = []; mdRedoSt = [];
     requestAnimationFrame(() => {
       if (!mdCanvas || !mdCanvas.isConnected) return;
       const r = mdCanvas.getBoundingClientRect();
@@ -4577,8 +4603,32 @@ const MultDivGame = (() => {
     mdCtx.drawImage(tmp, 0, 0);
   }
 
+  /* Ångra/Gör om (D48): en bild av kladden före varje drag och före Rensa */
+  let mdUndoSt = [], mdRedoSt = [];
+  function mdSnap() {
+    if (!mdCtx || !mdCanvas) return;
+    try { mdUndoSt.push(mdCtx.getImageData(0, 0, mdCanvas.width, mdCanvas.height)); } catch (_) { return; }
+    if (mdUndoSt.length > 30) mdUndoSt.shift();
+    mdRedoSt = []; mdHistBtns();
+  }
+  function mdHistBtns() {
+    const u = document.getElementById('md-undo'), r = document.getElementById('md-redo');
+    if (u) u.classList.toggle('off', !mdUndoSt.length);
+    if (r) r.classList.toggle('off', !mdRedoSt.length);
+  }
+  function mdSwap(from, to) {
+    if (!mdCtx || !mdCanvas || !from.length) return;
+    to.push(mdCtx.getImageData(0, 0, mdCanvas.width, mdCanvas.height));
+    mdCtx.globalCompositeOperation = 'source-over';
+    mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height);
+    mdCtx.putImageData(from.pop(), 0, 0);
+    mdHistBtns();
+  }
+  function mdUndoStep() { mdSwap(mdUndoSt, mdRedoSt); }
+  function mdRedoStep() { mdSwap(mdRedoSt, mdUndoSt); }
+
   function mdPD(e) {
-    e.preventDefault(); mdDrawing = true;
+    e.preventDefault(); mdSnap(); mdDrawing = true;
     const r = mdCanvas.getBoundingClientRect();
     mdLastX = (e.clientX - r.left) * (mdCanvas.width / r.width);
     mdLastY = (e.clientY - r.top)  * (mdCanvas.height / r.height);
@@ -4606,12 +4656,12 @@ const MultDivGame = (() => {
     mdErasing = on;
     const d = document.getElementById('md-draw');
     const e = document.getElementById('md-erase');
-    if (d) { d.style.background = on ? 'var(--tint)' : 'var(--accent)'; d.style.color = on ? 'var(--deep)' : '#fff'; }
-    if (e) { e.style.background = on ? 'var(--accent)' : 'var(--tint)'; e.style.color = on ? '#fff' : 'var(--deep)'; }
+    if (d) d.classList.toggle('on', !on);
+    if (e) e.classList.toggle('on', !!on);
   }
 
   function mdClearCanvas() {
-    if (mdCtx && mdCanvas) mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height);
+    if (mdCtx && mdCanvas) { mdSnap(); mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height); }
   }
 
   /* ── Ljud + konfetti ────────────────────────────────────── */
@@ -4711,7 +4761,7 @@ const MultDivGame = (() => {
     exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeFocusRest, finishNext, exFreeRemTap,
     avslutaOvning, avslutaAngra,           // bekraftelse nar en runda ar pabörjad
     useFreeLifeline,                       // livlinan i fria laget (22/9)
-    mdToggleEraser, mdClearCanvas,
+    mdToggleEraser, mdClearCanvas, mdUndoStep, mdRedoStep,
     exitToApp,
     openProv,                              // D37: Matteprov 4:an
     runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn

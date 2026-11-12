@@ -125,3 +125,11 @@ siffra framför nästa siffra, bråkstreck, nämnaren under, kvoten efter "=" (r
 ## Nästa steg
 - Vänta på Dennis synpunkter på v70.
 - P13 och P14 med Dennis.
+
+## 2026-11-12 · D48 görs av VD:n
+
+D48 (övningsbladens knappsats, svarsknapp och kladd som standard) görs av VD:n personligen, inte av den här rollen
+(D48 ✎: "det får du göra personligen och inte beställa av en subagent"). Logik och pedagogik i multiplikationen och
+kort division rörs inte; det gäller ytan (knappar, layout, beröm). Värdläget `runTask({ kind:'div' })` anropas inte
+längre sedan rivningen av övningsbladen D44 och kan tas bort i D48.
+

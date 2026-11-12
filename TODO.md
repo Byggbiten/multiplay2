@@ -3,12 +3,14 @@
 ## Öppet
 
 - [ ] Senare modul: division med flersiffrig nämnare (trappan, nämnaren läggs till gång på gång), när barnet når dit (D47 ✎).
-- [ ] D48: kort division och uppställd multiplikation får övningsbladens knappsats, svarsknapp och kladd (egen skiva efter övningsbladen).
+- [x] ~~D48: kort division och uppställd multiplikation får övningsbladens knappsats, svarsknapp och kladd (egen skiva efter rivningen; VD:n personligen, ingen subagent – D48 ✎). Bara polering: logik och pedagogik i multiplikationen rörs inte. Jämför också övningsbladen mot multiplikationen: fel som återkommer, aldrig misslyckas helt, flera försök, hjälp vidare. Dennis: cellinmatningen i multiplikationens motor "är inte så smart" (erkänd brist) – titta på den. Ta bort värdläget `runTask({ kind:'div' })` i `multdiv.js`, som inget anropar efter rivningen.~~ (12/11, v80 på dev: hjälptrappan i övningsbladen, kladden, knappsatsen, Ledtråd, svaret i frågan, berömmet; väntar på Dennis prov)
+- [ ] Övningsbladens kladdknappar är 44 × 36 px (under 44 px-regeln); multiplikationens är 44 × 44. Gör övningsbladens lika och mät kladden på små telefoner.
+- [ ] Döda CSS-regler i `multdiv.js` efter D48: `.md-free-keys`, `.md-numpad`, `.md-field-sm`, `.md-free-ll` (används inte längre). Värdläget `runTask({ kind:'div' })` likaså.
 - [x] ~~Övningsblad plan 3: bygget i appen och v77~~ (12/11, `js/ovningsblad.js`, PLAN-OVNINGSBLAD-BYGGE.md)
-- [ ] Riv den gamla övningsbladskoden (D44: `ovdiv`, `DIV_IDS`, typerna `dr ts dz pt kd prob`, bandet, `tests/ovningsblad.test.mjs`, `tests/webblasare/band-svep.js`) i `matteprov*.js` som egen skiva med granskning
-- [ ] Övningsbladen: Dennis prövar v77 på telefonen; ett förklaringsprov med en granskare utan kontext på appens vyer
-- [ ] iPad-planen (D45 ✎, `brainstorm/12`) – nu när v76 är live.
-- [ ] Matteprov 1: rätta de 15 fynden i `brainstorm/11` (D44), efter divisionens övningsblad.
+- [x] ~~Riv den gamla övningsbladskoden (D44: `ovdiv`, `DIV_IDS`, typerna `dr ts dz pt kd prob`, bandet, `tests/ovningsblad.test.mjs`, `tests/webblasare/band-svep.js`) i `matteprov*.js` som egen skiva med granskning~~ (12/11, gren `riv-d44`: logik och skärmar för Matteprov 1 oförändrade enligt svep före/efter)
+- [x] ~~Övningsbladen: Dennis prövar v77 på telefonen; ett förklaringsprov med en granskare utan kontext på appens vyer~~ – Dennis provade v79 och är nöjd; förklaringsprovet behövs inte nu (D47 ✎ 12/11)
+- [ ] iPad-planen (D45 ✎, `brainstorm/12`) – fråga Dennis först, efter rivningen och D48 (D48 ✎ 12/11).
+- [ ] Matteprov 1: rätta de 15 fynden i `brainstorm/11` (D44) – fråga Dennis först, efter rivningen och D48.
 - [ ] P16, P17 (uppställningen): ta upp med Dennis.
 - [ ] P14 (skakningar, röd puls): ta upp med Dennis.
 - [ ] Matteprovet: ta bort den oanvända uttryckslogiken (`parseExpr`, `exprOk`, problemlösningsdelen av `check`) och dess tester, nu när problemlösningen går i ledda steg (D39 ✎).
