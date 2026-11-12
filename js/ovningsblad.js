@@ -622,20 +622,24 @@ function iconsM(n, m, max = 14) {
 }
 const icons = (n, i, max) => iconsM(n, MONEY[i], max);
 function why(html) { const w = $('#why'); if (w) { w.innerHTML = html ? `<b>Varför?</b> ${html}` : ''; w.classList.toggle('on', !!html); } }
+/* Texterna böjs efter talet (1 tusenlapp → "den", 2 tior → "de"), och en nolla blir "inga" (språksvepet 12/11) */
+const den = n => n === 1 ? 'den' : 'de', Den = n => n === 1 ? 'Den' : 'De';
+const have = (n, i) => n ? `Med ${nm(n, i)} som vi redan har blir det` : `Vi har inga andra ${MONEY[i].many}, så det blir`;
 function startWhy() {
   const s0 = P.steps[0];
   if (s0.i === 0) return `Tänk att ${N} kr ska delas lika mellan ${D}. Vi börjar med ${MONEY[0].many}.`;
   const a = P.ds[0];
   return `Tänk att ${N} kr ska delas lika mellan ${D}. ${nm(a, 0)} ${icons(a, 0)} räcker inte till ${D}.
-    Vi växlar dem till ${a * 10} ${MONEY[1].many}. Med de ${P.ds[1]} vi redan har blir det ${s0.cur} ${MONEY[1].many}.`;
+    Vi växlar ${den(a)} till ${a * 10} ${MONEY[1].many}. ${have(P.ds[1], 1)} ${s0.cur} ${MONEY[1].many}.`;
 }
 const giveWhy = s => `Varje person får ${nm(s.q, s.i)}. Därför står ${s.q} i ${PLACE[s.i]}et.`;
 const prodWhy = s => `${D} personer får ${s.q} var: ${D} · ${s.q} = ${s.p} ${MONEY[s.i].many} delas ut.`;
-const restWhy = s => s.r === 0 ? `Allt gick jämnt ut – inget blir kvar av ${MONEY[s.i].many}.` : s.last ? `${nm(s.r, s.i)} ${icons(s.r, s.i)} blir kvar. ${s.r === 0 ? 'Allt gick jämnt ut.' : 'De räcker inte till alla, så det är resten.'}`
-  : `${nm(s.r, s.i)} ${icons(s.r, s.i)} räcker inte till alla ${D}. Den ska inte slängas – den växlas.`;
+const restWhy = s => s.r === 0 ? `Allt gick jämnt ut – inget blir kvar av ${MONEY[s.i].many}.`
+  : s.last ? `${nm(s.r, s.i)} ${icons(s.r, s.i)} blir kvar. ${Den(s.r)} räcker inte till alla, så det är resten.`
+  : `${nm(s.r, s.i)} ${icons(s.r, s.i)} räcker inte till alla ${D}. ${Den(s.r)} ska inte slängas – ${den(s.r)} växlas.`;
 const swapWhy = s => { const nx = P.ds[s.i + 1];
   return `${nm(s.r, s.i)} ${icons(s.r, s.i)} växlas till ${s.r * 10} ${MONEY[s.i + 1].many} ${icons(s.r * 10, s.i + 1)}.
-    Med de ${nx} vi redan har blir det ${s.r * 10 + nx} ${MONEY[s.i + 1].many}.`; };
+    ${have(nx, s.i + 1)} ${s.r * 10 + nx} ${MONEY[s.i + 1].many}.`; };
 
 async function kdRun() {
   const s0 = P.steps[0];
@@ -1553,7 +1557,7 @@ function kvitto() {
   const st = readSt(); st.res = st.res || {};
   st.res[id] = { level: LEVEL, mode: MODE, ok: sum.ok, of: sum.of, hints: sum.hints, at: Date.now() };
   writeSt(st);
-  const tail = MODE === 'self' ? ' på första försöket' : ' utan fel';
+  const tail = ' direkt';   /* som Matteprov: "Du fick 1 av 3 rätt direkt" fungerar i alla tre formerna av MP.resultNote */
   /* Divisionstabellen är ett blad med tio tal: kvittot säger det, inte "1 av 1" */
   const note = sum.of === 1 ? (sum.ok ? `Alla tio rätt${tail}!` : 'Alla tio är rätt nu.')
     : window.MP && MP.resultNote ? MP.resultNote(sum.ok, sum.of, tail) : `Du fick ${sum.ok} av ${sum.of} rätt${tail}.`;
