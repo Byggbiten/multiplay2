@@ -174,6 +174,8 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .dzq{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;border-radius:12px;border:3px dashed var(--org);color:var(--org)}
 .dzn.ansq{color:#15803d;background:#f0fdf4;border-radius:12px;padding:0 8px;box-shadow:0 0 0 3px #bbf7d0,0 0 16px rgba(34,197,94,.4)}
 .dzrow .box{width:auto;min-width:76px;padding:0 6px}
+.carry{font:800 20px 'Baloo 2';color:var(--deep);background:#f0fdf4;border-radius:14px;padding:6px 14px;box-shadow:0 0 0 2px #bbf7d0}
+.carry b{color:#15803d}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -408,15 +410,21 @@ async function kdRun() {
     await W(PACE / 2); await fly(r.querySelector('.m'), $('#q' + s.i), String(s.q));
     $('#q' + s.i).insertAdjacentText('beforeend', s.q); $('#q' + s.i).classList.add('done');
     await waitNext();
-    const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
-    ask(q); why(prodWhy(s)); $('#sub').innerHTML = `${s.cur} − ${s.p} = <div class="box" id="sb"></div>`;
-    await typeAnswer($('#sb'), s.r, q);
+    if (s.r === 0) {
+      /* går det jämnt ut behövs ingen subtraktion (Dennis: "om det går jämt ut behövs inte 28-28") */
+      ask(`${D} · ${s.q} = ${s.p}, precis lika mycket som ${s.cur}. Inget blir över.`);
+      $('#sub').innerHTML = `<div class="box done" id="sb" style="visibility:hidden">0</div>`;
+    } else {
+      const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
+      ask(q); why(prodWhy(s)); $('#sub').innerHTML = `${s.cur} − ${s.p} = <div class="box" id="sb"></div>`;
+      await typeAnswer($('#sb'), s.r, q);
+    }
     why(restWhy(s));
     /* det som är klart stryks, så att man inte tappar bort sig (som i appens kort division) */
     for (let k = 0; k <= s.i; k++) { $('#d' + k).classList.add('struck'); const rs = $('#rs' + k); if (rs) rs.classList.add('struck'); }
     if (!s.last && s.r === 0) {
       const nx = P.ds[s.i + 1];
-      ask(`<span class="ok">Rätt!</span>Inget blev över. Vi fortsätter med <b>${nx}</b> ${PLACE[s.i + 1]}.`);
+      ask(`Inget blev över. Vi fortsätter med <b>${nx}</b> ${PLACE[s.i + 1]}.`);
       grp([s.i + 1]); $('#sub').innerHTML = '';
     } else if (!s.last) {
       const nx = P.ds[s.i + 1];
@@ -498,10 +506,13 @@ async function trapRun() {
     for (let c = col - len + 1; c <= col; c++) C(pr, c).classList.add('ul');
     await waitNext();
     lit(row, col - len + 1, col, false);
-    const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
-    ask(q); why(''); think(`${s.cur} − ${s.p} = <div class="box" id="sb"></div>`);
-    await typeAnswer($('#sb'), s.r, q);
-    think('');
+    if (s.r === 0) { ask(`${D} · ${s.q} = ${s.p}, precis lika mycket som ${s.cur}. Inget blir över.`); why(''); }
+    else {
+      const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
+      ask(q); why(''); think(`${s.cur} − ${s.p} = <div class="box" id="sb"></div>`);
+      await typeAnswer($('#sb'), s.r, q);
+      think('');
+    }
     const rr = row + 2; put(C, rr, col, s.r, ['appear']);
     why(restWhy(s));
     if (!s.last) {
@@ -607,17 +618,17 @@ async function probRun() {
 async function probEnd() {
   const { n, d, q } = PROB;
   $('#barrow').innerHTML = Array.from({ length: d }, () => '<div class="part"><span>?</span></div>').join('');
-  ask(`Du räknade ${n} / ${d}. Ringa in svaret i svarsbanken, som på bladet.`);
-  why('Svarsbanken är en kontroll: står ditt svar där har du troligen räknat rätt.');
-  const bank = shuffle([q, q - 100, q + 10, q - 10, q * 2]).map(v => `${v} m`);
-  $('#opts').innerHTML = bank.map(o => `<button class="opt bank" data-o="${o}">${o}</button>`).join('');
-  await new Promise(res => $('#opts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
-    if (b.dataset.o === `${q} m`) { b.classList.add('okopt', 'ring'); res(); }
-    else { b.classList.add('nope'); setTimeout(() => b.classList.remove('nope'), 900); ask(`<span class="soft">Inte riktigt – försök igen.</span>Vad blev kvoten i kort division?`); }
-  }));
+  /* uträkningen följer med tillbaka, så att man inte behöver räkna om (Dennis 12/11) */
+  $('#opts').innerHTML = `<div class="carry">Din uträkning: ${n} / ${d} = <b id="carryQ">${q}</b></div>`;
+  ask('Svara nu på frågan i berättelsen: hur lång är en sträcka?');
+  why('Kvoten är längden på en av de lika långa delarna.');
+  $('#sub').innerHTML = `En sträcka är <div class="box" id="sb"></div> meter.`;
+  await typeAnswer($('#sb'), q, 'Hur lång är en sträcka? Titta på din uträkning.');
   /* förståelseprovet: svaret fyller stapelns delar */
   ask(`<span class="ok">Klart!</span>En sträcka är <b>${q} meter</b>.`);
-  for (const p of $('#barrow').querySelectorAll('.part')) { p.innerHTML = `<span>${q} m</span>`; p.classList.add('filled'); await W(PACE / 2); }
+  const parts = [...$('#barrow').querySelectorAll('.part')];
+  await fly($('#carryQ'), parts[0], String(q));
+  for (const p of parts) { p.innerHTML = `<span>${q} m</span>`; p.classList.add('filled'); await W(PACE / 3); }
   why(`${d} sträckor om ${q} m blir hela banan: ${d} · ${q} = ${n}.`);
   act(`<button class="ghost">Till hubben</button>`, hub);
 }

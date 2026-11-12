@@ -39,6 +39,8 @@ fram en vy och *varför* den ser ut som den gör.
 - **Barnet gör tanken, appen flyttar.** Barnet väljer raden och räknar subtraktionen själv. Pilen och flygningen
   flyttar bara tal som redan är kända (D47: bandet tänker inte åt barnet).
 - **Förståelseprovet:** efter en uppgift med hjälp ska barnet kunna säga varför svaret blev som det blev.
+- **Ingen onödig räkning:** går det jämnt ut ställs ingen subtraktion. Det barnet räknat i ett steg följer med till
+  nästa, så att inget behöver räknas om.
 - **Mindre är mer.** En förklaring som pekar ut en detalj utan sammanhang förvirrar (jämförelsen som bara visade den
   första resten). Antingen visas hela mönstret, alla växlingar i par, eller ingenting. Jämförelser är valfria knappar.
 

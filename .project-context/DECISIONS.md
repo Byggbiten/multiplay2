@@ -775,6 +775,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   division") och visar varje växling i par, inte bara den första. Källa: Dennis: "själva svaret behöver få lite fokus/belysning i slutet. och restvärdet" och "vi struntar i
   den där sista jämförelsebilden. Den förstör mer än den hjälper", och sedan om parjämförelsen "ser jättebra ut".
 
+- ✎ **2026-11-12, jämnt ut och uträkningen följer med:** går en delning jämnt ut ställs ingen subtraktionsfråga, bara
+  "4 · 7 = 28, precis lika mycket som 28. Inget blir över." I Problemlösning följer uträkningen med tillbaka till
+  berättelsen ("Din uträkning: 2856 / 4 = 714"), och svarsbanken med flerval är struken. Barnet svarar på frågan i
+  en mening ("En sträcka är ___ meter."). Flervalet av uträkning finns kvar. Källa: Dennis: "om det går jämt ut behövs
+  inte 28-28" och "uträkningen man fick med sig från föregående steg, bör man få med sig tillbaka, ifall man glömt den
+  … Så kanske flervalsalternativ inte är rätt för denna 'problemlösning'".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
