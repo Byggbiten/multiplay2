@@ -1080,6 +1080,23 @@ function grpView() {
   afterRender();
   grpRun(tot, g, q, r);
 }
+/* Utdelningen: bollarna hoppar en och en från högen till sin plats i påsen, utan pil (Dennis 12/11: "för lång tid",
+   "pilen behövs inte", "cirklarna rör sig ut som innan" – samma rörelse som Matteprovets animateDeal). Påsen läggs in
+   först och kortet hinner passas in (fitCard) innan något mäts; förflyttningen räknas om till kortets skala. */
+async function deal(balls, bag) {
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const from = balls.map(b => b.getBoundingClientRect()), ins = [...bag.querySelectorAll('.ball.in')];
+  balls.forEach(b => { b.style.visibility = 'hidden'; });
+  const dur = 420, gap = 90;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) ins.forEach((b, k) => {
+    const r = b.getBoundingClientRect(), a = from[k] || from[0], s = (r.width / b.offsetWidth) || 1;
+    const dx = (a.left + a.width / 2 - r.left - r.width / 2) / s, dy = (a.top + a.height / 2 - r.top - r.height / 2) / s;
+    b.animate([{ transform: `translate(${dx}px,${dy}px) scale(${(a.width / r.width).toFixed(2)})` }, { transform: 'none' }],
+      { duration: dur * SPEED, delay: k * gap * SPEED, easing: 'cubic-bezier(.34,1.3,.4,1)', fill: 'backwards' });
+  });
+  await W(dur + gap * (ins.length - 1) + 60);
+  balls.forEach(b => b.classList.add('gone'));
+}
 async function grpRun(tot, g, q, r) {
   ask(`Tryck på högen: varje tryck lägger ${g} bollar i en påse.`);
   why(`Vi gör som på riktigt: en påse i taget, och vi räknar bollarna i hopp om ${g}.`);
@@ -1090,8 +1107,7 @@ async function grpRun(tot, g, q, r) {
       const balls = [...$('#heap').querySelectorAll('.ball:not(.gone)')].slice(0, g);
       n++;
       $('#bags').insertAdjacentHTML('beforeend', `<div class="bag" id="bag${n}"><b>${n * g}</b>${'<i class="ball in"></i>'.repeat(g)}</div>`);
-      const bag = $('#bag' + n); bag.style.opacity = 0;
-      await fly(balls[0], bag, '●'); balls.forEach(b => b.classList.add('gone')); bag.style.opacity = 1;
+      await deal(balls, $('#bag' + n));
       ask(`${n} ${n === 1 ? 'påse' : 'påsar'}: ${n * g} bollar. ${tot - n * g >= g ? 'Tryck igen.' : ''}`);
       delete $('#heap').dataset.busy;
       if (tot - n * g < g) { $('#heap').onclick = null; res(); }

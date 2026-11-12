@@ -815,6 +815,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   telefoner i stående läge, så att kladden får 100 px. Den gamla övningsbladskoden (D44) är bortkopplad och rivs i en
   egen skiva. Källa: Dennis: "Då bygger vi in det här till våran dev-version och driftsätter sedan?"
 
+- ✎ **2026-11-12, Dela och gruppera: bollarna hoppar ner i påsen:** i Med hjälp flyttar ett tryck på högen bollarna en
+  och en till påsen (cirka 0,9 s för en påse), utan pil. Pilen och den långsamma flygningen gäller fortfarande när ett
+  tal flyttas till en ruta. Källa: Dennis efter v78: "det tar för lång tid med fördelningen", "pilen behövs inte där"
+  och "Bättre är att cirklarna rör sig ut som innan så där animationsartat".
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,

@@ -418,7 +418,8 @@ Kluringar, Vilket tal?). Överst väljer barnet Lättare eller Svårare och **Me
 
 - **Med hjälp** visar varje steg: en pil ritas först, sedan glider talet längs pilen i lugn takt. En lila rad
   "Varför?" förklarar flytten, ofta med pengar i platsvärdets färger (tusenlappar, hundralappar, tior, kronor).
-  Färdiga siffror stryks, och svaret får fokus på slutet.
+  Färdiga siffror stryks, och svaret får fokus på slutet. I Dela och gruppera hoppar bollarna en och en från
+  högen ner i påsen, utan pil.
 - **Själv** ger det pappret ger: uppställningen, att stryka och kryssa, små restrutor och en räkneremsa man skriver
   själv. Ingen pil och inget varför. Knappen heter "Nästa ruta" och sedan "Klar"; rutor som inte stämmer blir
   persika och töms ("Inte riktigt – försök igen"). **Ledtråd** finns två gånger per uppgift. Kluringar och

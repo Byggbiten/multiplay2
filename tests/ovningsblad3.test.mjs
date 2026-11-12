@@ -173,3 +173,14 @@ describe('språket i förklaringarna', () => {
     expect(v).toMatch(/dem = n => n === 1 \? 'den' : 'dem'/);
   });
 });
+
+describe('Dela och gruppera: utdelningen', () => {
+  it('bollarna hoppar ner i påsen utan pil (Dennis 12/11: för långsamt, pilen behövs inte)', () => {
+    const v = src('js/ovningsblad.js');
+    const run = v.slice(v.indexOf('async function grpRun'), v.indexOf("await waitNext('Skriv divisionen')"));
+    expect(run).toMatch(/await deal\(balls, \$\('#bag' \+ n\)\)/);
+    expect(run).not.toMatch(/fly\(/);
+    const deal = v.slice(v.indexOf('async function deal'), v.indexOf('async function grpRun'));
+    expect(deal).not.toMatch(/arrow\(/);
+  });
+});
