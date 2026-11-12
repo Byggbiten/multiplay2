@@ -334,4 +334,6 @@ tungvrickare"): "8:an i hundratalet är egentligen 800." / "Vi skriver två noll
 
 Övningsbladens nya version är en egen modul (`js/ovningsblad.js`, `js/ovningsblad-logic.js`), byggd av VD:n (D47 ✎).
 Kortet Övningsblad i Kort division öppnar den. Den här rollens övningsbladskod (D44: `ovdiv`, `DIV_IDS`, bandet) i
-`matteprov*.js` är bortkopplad och rivs som egen skiva (TODO). Matteprov 1 påverkas inte.
+`matteprov*.js` är riven 12/11 av VD:n (gren `riv-d44`, taggen `fore-riv-d44`). Matteprov 1 är oförändrat: logiken
+gav samma utfall före och efter, och skärmsvepet (alla moment, båda nivåerna, Med hjälp och Själv, uppställningen
+spelad i motorn) gav samma skärmar. Avsnitten om D44 nedan är historik.

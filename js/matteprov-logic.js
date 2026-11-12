@@ -17,28 +17,11 @@
     { id:'talsorter',    nr:3, short:'Dela upp T och E',     title:'Dela upp i tiotal och ental', desc:'Som 4 · 28 = 4 · 20 + 4 · 8' },
     { id:'uppstallning', nr:4, short:'Uppställning',         title:'Uppställning',                desc:'Med en- och tvåsiffrig faktor' },
     { id:'problem',      nr:5, short:'Problemlösning',       title:'Problemlösning i två steg',   desc:'Prislistan och gånger först' },
-    /* D44 ✎: Övningsblad · Division — moduler i kopieringsunderlagets olika sorters blad, inget prov */
-    { id:'dela',      nr:1,  short:'Dela lika',          title:'Dela lika',                 desc:'Dela ut till barnen, skriv divisionen' },
-    { id:'grupper',   nr:2,  short:'Hur många grupper?', title:'Hur många grupper?',        desc:'Ringa in grupper, skriv divisionen' },
-    { id:'dtabell',   nr:3,  short:'Divisionstabellen',  title:'Divisionstabellen',         desc:'Dela med tabellerna', sheet:'Divisionstest' },
-    { id:'dkontroll', nr:4,  short:'Kontrollera',        title:'Kontrollera med gånger',    desc:'12/4 = 3, för 4 · 3 = 12' },
-    { id:'drest',     nr:5,  short:'Division med rest',  title:'Division med rest',         desc:'Bollar och tallinje, kvot och rest' },
-    { id:'ingar',     nr:6,  short:'Ingår hur många?',   title:'Ingår hur många gånger?',   desc:'Hur många gånger ingår 5 i 23?' },
-    { id:'talsort',   nr:7,  short:'Varje talsort',      title:'Dividera varje talsort',    desc:'Plattor, stavar och ental delas för sig' },
-    { id:'dz',        nr:8,  short:'Med 10, 100, 1000',  title:'Division med 10, 100 och 1000', desc:'Nollorna försvinner' },
-    { id:'kortdiv',   nr:9,  short:'Kort division',      title:'Kort division',             desc:'Siffra för siffra, nollor och rest' },
-    { id:'pengar',    nr:10, short:'Pengar',             title:'Pengar och tabeller',       desc:'Hur många får du, och vad blir över?' },
-    { id:'begrepp',   nr:11, short:'Begrepp',            title:'Täljare, nämnare och kvot', desc:'Vad är nämnaren om …' },
-    { id:'dproblem',  nr:12, short:'Problemlösning',     title:'Problemlösning',            desc:'Dela lika, grupper och det som blir över' },
-    { id:'slutled',   nr:13, short:'Slutledning',        title:'Vilket tal tänker jag på?', desc:'Räkna baklänges' },
   ];
   const PROVS = [
     { id:'prov1', title:'Matteprov 1', sub:'Multiplikation', moments:['tabell', 'tiotal', 'talsorter', 'uppstallning', 'problem'], sprint:true,
       /* uppgifter per moment i "Gör provet" */
       provCount:{ tabell:20, tiotal:4, talsorter:2, uppstallning:4, problem:4 } },
-    /* D44 ✎: övningsbladen är ingen prov-post i listan, men samma ram (kind 'ovning': inget prov, inget Mitt prov) */
-    { id:'ovdiv', kind:'ovning', title:'Övningsblad', sub:'Division',
-      moments:['dela', 'grupper', 'dtabell', 'dkontroll', 'drest', 'ingar', 'talsort', 'dz', 'kortdiv', 'pengar', 'begrepp', 'dproblem', 'slutled'], provCount:{} },
   ];
   const LEVELS = [{ id:'latt', name:'Lättare' }, { id:'svar', name:'Svårare' }];
   const OVA_COUNT = 8;          // uppgifter i ett övningspass
@@ -278,7 +261,6 @@
   const NOLLOR = ['', 'en nolla', 'två nollor', 'tre nollor', 'fyra nollor'];
   /* Frågan om ruta i (tio: 0 = antal tiotal/hundratal, 1 = talet; te: 0 tiotalen, 1 entalen, 2 a·T, 3 a·E, 4 summan) */
   function boxAsk(t, i) {
-    if (t.type === 'dr' || t.type === 'ts' || t.type === 'dz' || t.type === 'pt') return divAsk(t, i);
     if (t.type === 'tio') {
       const xa = tok(t.a, PLACE_ID[t.za]), yb = tok(t.b, PLACE_ID[t.zb]);
       if (i === 0) {
@@ -303,7 +285,6 @@
   }
   /* Den andra hjälpen för rutan (efter "försök igen"); den tredje är svaret. */
   function boxHint(t, i) {
-    if (t.type === 'dr' || t.type === 'ts' || t.type === 'dz' || t.type === 'pt') return divHint(t, i);
     const tab = (a, b) => b > 1 ? `${a} · ${b - 1} = ${a * (b - 1)}. Lägg till en ${a}:a.` : 'Ett gånger ett tal är talet självt.';
     if (t.type === 'tio') return i === 0 ? tab(t.a, t.b) : `Skriv ${t.fact} och lägg till ${NOLLOR[t.zeros]}.` + (t.trap ? ` Nollan i ${t.fact} står kvar.` : '');
     if (t.type === 'te') {
@@ -320,7 +301,6 @@
   }
   /* Kort kvittens efter rätt svar i ruta i (före nästa ruta) */
   function boxAck(t, i) {
-    if (t.type === 'dr' || t.type === 'ts' || t.type === 'dz' || t.type === 'pt') return divAck(t, i);
     if (t.type === 'tio') return i === 0 ? `Rätt! ${t.a} · ${t.b} = ${t.fact}.` : 'Rätt!';
     if (t.type === 'te') return [`Rätt! Tiotalen är ${t.T}.`, `Rätt! ${t.b} = ${t.T} + ${t.E}.`, `Rätt! ${t.a} · ${t.T} = ${t.a * t.T}.`, `Rätt! ${t.a} · ${t.E} = ${t.a * t.E}.`, 'Rätt!'][i];
     return 'Rätt!';
@@ -686,17 +666,15 @@
   function checkProbStep(step, vals) {
     const v = (vals || []).map(x => x === '' || x == null ? null : +x), [a, b, c] = step.ans;
     let wrong;
-    if (step.op === '−' || step.op === '/') wrong = [v[0] !== a, v[1] !== b];      // minus och division: ordningen gäller
+    if (step.op === '−') wrong = [v[0] !== a, v[1] !== b];                         // minus: ordningen gäller
     else {
       const same = (v[0] === a && v[1] === b) || (v[0] === b && v[1] === a);
       wrong = same ? [false, false] : [v[0] !== a && v[0] !== b, v[1] !== a && v[1] !== b || (v[0] === v[1] && a !== b)];
     }
     wrong.push(v[2] !== c);
-    if (step.rest) wrong.push(v[3] !== step.ans[3]);                               // D44: ", rest [ ]"
     return { ok:!wrong.some(Boolean), wrong };
   }
   function probStepHint(t, k) {
-    if (DIV_IDS.includes(t.moment)) return dprobHint(t, k);
     const st = t.flow[k];
     if (st.op === '·') {
       if (t.kind === 'omvand') return 'Hur många domare, och hur många poäng gav var och en?';
@@ -710,7 +688,7 @@
   }
   function probStepBit(t, k) {
     const [a, b] = t.flow[k].ans;
-    return { text:t.flow[k].rest ? 'Talen står nu i rutorna. Räkna ut kvoten och resten.' : `Talen står nu i rutorna. Räkna ut svaret.`, fill:{ 0:a, 1:b } };
+    return { text:'Talen står nu i rutorna. Räkna ut svaret.', fill:{ 0:a, 1:b } };
   }
   function probConclusion(t) { if (t.concl) return t.concl; return `Uttrycket blir ${t.expr} = ${t.answer}${t.unit ? ' ' + t.unit : ''}.`; }
   const PROB_HELP = ['retry', 'bit', 'svar'];
@@ -807,676 +785,14 @@
   }
 
   /* ══════════════════════════════════════════════════════════
-     ÖVNINGSBLAD · DIVISION (D44 ✎)
-     Inget prov: en lista med övningsmoduler i kapitel 3:s olika sorters blad,
-     med egna tal. Principen (D44): uppställningen, rutans plats och det som
-     lyser säger vad som ska fyllas i; texten är reserv. Designreglerna i
-     brainstorm/11 gäller (rutan visar svarets form, fel ruta töms, rest lila,
-     inga lika tal i olika roller, kontrollen som mall [d] · [kvot] + [rest] = [n]).
-  ══════════════════════════════════════════════════════════ */
-  const DIV_IDS = ['dela', 'grupper', 'dtabell', 'dkontroll', 'drest', 'ingar', 'talsort', 'dz', 'kortdiv', 'pengar', 'begrepp', 'dproblem', 'slutled'];
-  /* Kort division som på papperet, vänster till höger: kvotsiffror, rest, mellanrester, hopp (144/3) och nollor */
-  function dPass(n, d) {
-    const ds = digitsOf(n).reverse(), L = ds.length, qd = [];
-    let rem = 0, started = false, skip = false, mid = false;
-    for (let i = 0; i < L; i++) {
-      const cur = rem * 10 + ds[i];
-      if (!started && cur < d && i < L - 1) { skip = true; rem = cur; continue; }
-      started = true;
-      const q = Math.floor(cur / d);
-      rem = cur - q * d; qd.push(q);
-      if (i < L - 1 && rem > 0) mid = true;
-    }
-    return { q:Math.floor(n / d), r:n % d, qd, skip, mid, qzero:qd.includes(0), midZero:qd.slice(1).includes(0) };
-  }
-  const distinct = (...xs) => new Set(xs).size === xs.length;
-  /* Ett tal med samma siffra två gånger i rad (22, 344) undviks i de små uppgifterna (designregel 9) */
-  const twinDigits = n => /(\d)\1/.test(String(n));
-  /* brainstorm/13 fynd 8: täljarens siffror får inte vara nämnaren (505/5, 24/2) */
-  const digitClash = (n, d) => d < 10 && String(n).includes(String(d));
-  /* brainstorm/13 fynd 6: Lättare håller sig till 2:an, 5:an och 10:an, med tvåsiffriga tal */
-  const EASY_D = [2, 5, 10];
-
-  /* ── 3. Divisionstabellen (26a): 20 tal, /20 ── */
-  function makeDtab(n, d) {
-    return { moment:'dtabell', type:'num', op:'/', x:n, y:d, answer:n / d, key:`dtab${n}/${d}`, text:`${n}/${d}` };
-  }
-  function genDtabell(level, n, r) {
-    r = r || Math.random;
-    const D = level === 'svar' ? [3, 4, 6, 7, 8, 9, 6, 7, 8, 9] : EASY_D;
-    const out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 2000) {
-      const d = pick(r, D), q = rint(r, 2, 10);
-      const t = makeDtab(d * q, d);
-      if ((seen.has(t.key) || digitClash(d * q, d)) && guard < 1500) continue;
-      seen.add(t.key); out.push(t);
-    }
-    return out;
-  }
-
-  /* ── 1, 2, 4, 5, 6: divisionen i rutor ──
-     Mallen: [n]/[d] = [kvot](, rest [rest]) och Kontrollera: [d] · [kvot] (+ [rest]) = [n].
-     pic: 'dela' (d barn får lika många), 'grupp' (grupper med d), 'linje' (hopp om d på tallinjen) eller null.
-     Bilden är interaktiv: varje tryck delar ut ett varv, ringar in en grupp eller tar ett hopp.
-     write = barnet skriver själv täljare och nämnare ("Skriv divisionen"); kGiven = nämnaren står redan i kontrollen. */
-  function makeDr(o) {
-    const { n, d, moment } = o, q = Math.floor(n / d), r = n % d;
-    const rest = !!o.rest, kontroll = o.kontroll !== false, kGiven = !!o.kGiven;
-    const roles = [].concat(o.write ? ['n', 'd'] : [], ['q'], rest ? ['r'] : [],
-      kontroll ? (kGiven ? [] : ['k1']).concat(['k2'], rest ? ['k3'] : [], ['k4']) : []);
-    const ans = { n, d, q, r, k1:d, k2:q, k3:r, k4:n };
-    return { moment, type:'dr', pic:o.pic || null, kind:o.pic || 'tal', n, d, q, r, rest, kontroll, kGiven, write:!!o.write, prompt:o.prompt || '',
-             answer:q, key:`dr${moment}${n}/${d}`, text:`${n}/${d}`, fields:roles.map(role => ({ role, ans:ans[role] })) };
-  }
-  const drField = (t, role) => t.fields.findIndex(f => f.role === role);
-  /* Talen: n, d, kvot, rest och d · kvot är olika tal; inga dubbelsiffror */
-  function drNums(r, o) {
-    for (let g = 0; g < 2000; g++) {
-      const d = o.ds ? pick(r, o.ds) : rint(r, o.d[0], o.d[1]), q = rint(r, o.q[0], o.q[1]);
-      const rest = o.rest ? rint(r, 1, d - 1) : 0, n = q * d + rest;
-      if (n < o.n[0] || n > o.n[1] || twinDigits(n) || digitClash(n, d)) continue;
-      if (o.rest ? !distinct(n, d, q, rest, d * q) : !distinct(n, d, q)) continue;
-      return { n, d };
-    }
-    return o.rest ? { n:17, d:5 } : { n:12, d:4 };
-  }
-  const PROMPT = {
-    dela:t => `Dela lika mellan ${t.d} barn.`,
-    grupp:t => `Grupper med ${t.d} i varje.`,
-    linje:t => `Hoppa ${t.d} steg i taget.`,
-    ingar:t => `Hur många gånger ingår ${t.d} i ${t.n}?`,
-  };
-  function genDrMod(moment, level, n, r) {
-    r = r || Math.random;
-    const sv = level === 'svar', out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 500) {
-      const k = out.length;
-      let o;
-      if (moment === 'dela' || moment === 'grupper') {
-        const pic = moment === 'dela' ? 'dela' : 'grupp';
-        o = Object.assign(drNums(r, sv ? { d:[2, 6], q:[2, 6], n:[10, 36], rest:false } : { ds:moment === 'dela' ? [2, 5] : EASY_D, q:[2, 9], n:[10, 40], rest:false }),
-          { moment, pic, write:sv, kGiven:!sv, prompt:pic });
-      } else if (moment === 'dkontroll') {
-        const big = sv && k % 3 === 2;                         // Svårare: ibland tvåsiffrigt, som 84/4
-        o = Object.assign(big ? drNums(r, { d:[2, 4], q:[11, 24], n:[24, 96], rest:false }) : drNums(r, sv ? { d:[3, 9], q:[3, 9], n:[6, 81], rest:false } : { ds:EASY_D, q:[2, 9], n:[10, 90], rest:false }),
-          { moment, kGiven:!sv });
-      } else if (moment === 'drest') {
-        const pic = sv ? ['linje', 'grupp', 'linje', 'dela'][k % 4] : ['grupp', 'dela'][k % 2];
-        o = Object.assign(drNums(r, sv ? { d:[3, 7], q:[3, 8], n:[20, 60], rest:true } : { ds:[2, 5], q:[2, 6], n:[10, 30], rest:true }),
-          { moment, pic, rest:true, kGiven:!sv, prompt:pic });
-      } else {                                                    // ingar: "Hur många gånger ingår 5 i 23?"
-        o = Object.assign(drNums(r, sv ? { d:[3, 9], q:[3, 9], n:[20, 89], rest:true } : { ds:[2, 5], q:[2, 9], n:[10, 49], rest:true }),
-          { moment, rest:true, write:true, kontroll:sv, prompt:'ingar' });
-      }
-      const t = makeDr(o);
-      t.prompt = o.prompt ? PROMPT[o.prompt](t) : '';
-      if (seen.has(t.key)) continue;
-      seen.add(t.key); out.push(t);
-    }
-    return out;
-  }
-  /* vals i fältens ordning. Kontrollens två första rutor får stå i valfri ordning (d · kvot eller kvot · d).
-     Stämmer inte divisionen pekas bara den ut: kontrollen rättas när divisionen stämmer. */
-  function checkDrest(t, vals) {
-    const v = t.fields.map((_, i) => (vals || [])[i] == null || vals[i] === '' ? null : +vals[i]);
-    const get = role => { const i = drField(t, role); return i < 0 ? ({ k1:t.d, n:t.n, d:t.d, r:0, k3:0 })[role] : v[i]; };
-    const k1 = get('k1'), k2 = get('k2');
-    const pairOk = (k1 === t.d && k2 === t.q) || (k1 === t.q && k2 === t.d);
-    const div = ['n', 'd', 'q', 'r'];
-    const divWrong = div.some(x => drField(t, x) >= 0 && get(x) !== t.fields[drField(t, x)].ans);
-    const wrong = t.fields.map(f => {
-      if (div.includes(f.role)) return get(f.role) !== f.ans;
-      if (divWrong) return false;
-      if (f.role === 'k1') return !pairOk && k1 !== t.d && k1 !== t.q;
-      if (f.role === 'k2') return !pairOk && (k2 !== t.d && k2 !== t.q || k1 === k2);
-      return get(f.role) !== f.ans;
-    });
-    if (!divWrong && !wrong.some(Boolean)) return { ok:true, cls:'ok', wrong };
-    const q = get('q'), rr = get('r');
-    let cls = 'kvot';
-    if (t.write && (get('n') !== t.n || get('d') !== t.d)) cls = 'skriv';
-    else if (!divWrong) cls = 'kontroll';
-    else if (t.rest && q != null && q < t.q && rr != null && rr >= t.d) cls = 'stor';      // resten större än nämnaren: en grupp till ryms
-    return { ok:false, cls, wrong };
-  }
-  /* Bilden: hur långt barnet har kommit (made = varv, grupper eller hopp) och om det går att fortsätta */
-  const picMax = t => t.type === 'dz' ? t.z : t.q;       // dz: nollorna som stryks (fynd 9: varje verb är en gest)
-  const picLeft = (t, made) => t.n - made * t.d;
-
-  /* ── 7. Dividera varje talsort (K_S 67, 83): varje siffra går jämnt att dela ── */
-  function makeTs(n, d) {
-    const nd = digitsOf(n).reverse();                        // vänster → höger
-    const fields = nd.map((x, i) => ({ ans:x / d, dig:x, place:nd.length - 1 - i }));
-    return { moment:'talsort', type:'ts', n, d, answer:n / d, key:`ts${n}/${d}`, text:`${n}/${d}`, fields };
-  }
-  /* Siffrorna som går jämnt med d: 0, d, 2d, …; d · d undviks (9/3 = 3 ger 3:an två roller) */
-  const tsDigits = d => [0, 1, 2, 3, 4].map(k => k * d).filter(x => x <= 9 && x !== d * d && x !== d);   // inte nämnaren själv (fynd 8)
-  function genTsOne(level, r) {
-    for (let g = 0; g < 500; g++) {
-      const d = level === 'svar' ? pick(r, [2, 3, 4, 2, 3, 4]) : 2;
-      const len = level === 'svar' ? rint(r, 3, 4) : rint(r, 2, 3);
-      const D = tsDigits(d), first = D.filter(x => x >= d);
-      if (!first.length) continue;
-      const digs = [pick(r, first)];
-      for (let i = 1; i < len; i++) digs.push(pick(r, D));
-      if (level === 'svar' && !digs.slice(1).includes(0)) digs[rint(r, 1, len - 1)] = 0;   // Svårare: minst en nolla i kvoten
-      if (len > 2 && digs.slice(1).every(x => x === 0)) continue;                           // inte bara "6000/3"
-      const n = +digs.join('');
-      if (twinDigits(n) && !/00/.test(String(n))) continue;
-      return makeTs(n, d);
-    }
-    return makeTs(level === 'svar' ? 8406 : 86, 2);
-  }
-  function genTalsort(level, n, r) {
-    r = r || Math.random;
-    const out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 500) { const t = genTsOne(level, r); if (seen.has(t.key)) continue; seen.add(t.key); out.push(t); }
-    return out;
-  }
-
-  /* ── 8. Division med 10, 100 och 1000 (36a): kvoten, nämnaren eller täljaren saknas ──
-     Svaret skrivs en siffra per ruta, så att rutan visar svarets form (designregel 1). */
-  function makeDz(form, q, z) {
-    const D = Math.pow(10, z), n = q * D;
-    const ans = form === 'kvot' ? q : form === 'namnare' ? D : n;
-    const ad = digitsOf(ans).reverse();
-    return { moment:'dz', type:'dz', form, n, d:D, q, z, answer:ans, key:`dz${form}${n}/${D}`, text:`${fmt(n)}/${fmt(D)}`,
-             fields:ad.map((x, i) => ({ ans:x, place:ad.length - 1 - i })) };
-  }
-  /* Rubriken ovanför stegfrågan: hela uppgiften (runda 8, Dennis 8008/4), med det okända som "?" (F1, 12/11: "300 / 10"
-     över "Vilket tal delat med 10 blir 30?" avslöjade svaret). Svaret står aldrig i rubriken. */
-  function taskHead(t) {
-    if (!t || (t.type !== 'ts' && t.type !== 'dz')) return '';
-    if (t.type === 'dz' && t.form === 'taljare') return `? / ${t.d} = ${t.q}`;
-    if (t.type === 'dz' && t.form === 'namnare') return `${t.n} / ? = ${t.q}`;
-    return `${t.n} / ${t.d}`;
-  }
-  function genDzOne(level, form, r) {
-    for (let g = 0; g < 500; g++) {
-      const z = level === 'svar' ? rint(r, 1, 3) : rint(r, 1, 2);
-      const q = pick(r, [rint(r, 2, 9), rint(r, 2, 9) * 10, rint(r, 12, 98), rint(r, 2, 9) * 100, rint(r, 12, 98) * 10]);
-      const n = q * Math.pow(10, z);
-      if (n > 9900 || n < 30 || q === Math.pow(10, z) || twinDigits(q) && q % 100) continue;
-      return makeDz(form, q, z);
-    }
-    return makeDz(form, 65, 2);
-  }
-  function genDz(level, n, r) {
-    r = r || Math.random;
-    const forms = level === 'svar' ? ['kvot', 'namnare', 'taljare'] : ['kvot', 'kvot', 'taljare'];
-    const out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 500) { const t = genDzOne(level, forms[out.length % forms.length], r); if (seen.has(t.key)) continue; seen.add(t.key); out.push(t); }
-    return out;
-  }
-  /* rutorna i ts, dz och pengar: per ruta rätt eller fel */
-  function checkBoxes(t, vals) {
-    const wrong = t.fields.map((f, i) => (vals || [])[i] == null || vals[i] === '' || +vals[i] !== f.ans);
-    return { ok:!wrong.some(Boolean), cls:wrong.some(Boolean) ? 'fel' : 'ok', wrong };
-  }
-
-  /* ── 9. Kort division (motorn i multdiv, runTask kind 'div') ── typerna, verifierade på den framräknade divisionen */
-  const KD_TYPES = {
-    'tva-utan':  { len:2, d:[2, 4], rest:false, ok:p => !p.mid && !p.skip && !p.qzero },
-    'tva-med':   { len:2, d:[2, 6], rest:false, ok:p => p.mid && !p.skip && !p.qzero },
-    'tre-jamn':  { len:3, d:[2, 5], rest:false, ok:p => p.mid && !p.skip && !p.qzero },
-    'tre-rest':  { len:3, d:[3, 9], rest:true,  ok:p => p.mid && !p.skip && !p.qzero },
-    'fyra':      { len:4, d:[3, 9], rest:false, ok:p => p.mid && !p.skip && !p.qzero },
-    'fyra-rest': { len:4, d:[2, 9], rest:true,  ok:p => p.mid && !p.skip && !p.qzero },
-    'noll-mitt': { len:3, d:[2, 6], rest:false, ok:p => !p.skip && p.midZero },
-    'noll-forst':{ len:3, d:[2, 6], rest:false, ok:p => p.skip && !p.qzero },
-    'noll-rest': { len:3, d:[3, 9], rest:true,  ok:p => !p.skip && p.midZero },
-    'fyra-noll': { len:4, d:[2, 9], rest:null,  ok:p => p.midZero || p.skip },
-  };
-  const KD_BAG = { latt:['tva-utan', 'tva-med', 'tva-utan', 'tva-med'],
-                   svar:['tre-rest', 'fyra', 'noll-mitt', 'fyra-rest', 'noll-forst', 'noll-rest', 'fyra-noll'] };
-  const KD_LABEL = { 'tva-utan':'Tvåsiffrigt', 'tva-med':'Tvåsiffrigt med minnessiffra', 'tre-jamn':'Tresiffrigt', 'tre-rest':'Tresiffrigt med rest',
-    'fyra':'Fyrsiffrigt', 'fyra-rest':'Fyrsiffrigt med rest', 'noll-mitt':'En nolla i kvoten', 'noll-forst':'En nolla i början av kvoten',
-    'noll-rest':'Nolla i kvoten och rest', 'fyra-noll':'Fyrsiffrigt med nolla' };
-  function makeKd(n, d, ktype) {
-    const p = dPass(n, d);
-    return { moment:'kortdiv', type:'kd', ktype, n, d, q:p.q, r:p.r, mid:p.mid, skip:p.skip, qzero:p.qzero, answer:p.q, key:`kd${n}/${d}`, text:`${n}/${d}` };
-  }
-  function genKdType(ktype, r, ds) {
-    const T = KD_TYPES[ktype], lo = Math.pow(10, T.len - 1), hi = Math.pow(10, T.len) - 1;
-    for (let g = 0; g < 4000; g++) {
-      const d = ds ? pick(r, ds) : rint(r, T.d[0], T.d[1]);
-      const rest = T.rest === true || (T.rest === null && r() < 0.5) ? rint(r, 1, d - 1) : 0;
-      const qlo = Math.ceil((lo - rest) / d), qhi = Math.floor((hi - rest) / d);
-      if (qhi < qlo) continue;
-      const q = rint(r, qlo, qhi), n = q * d + rest, p = dPass(n, d);
-      if ((twinDigits(n) && T.len < 4) || digitClash(n, d)) continue;
-      if (T.ok(p) && (T.rest === null || (p.r > 0) === (rest > 0)) && distinct(n, d, q)) return makeKd(n, d, ktype);
-    }
-    const fall = { 'tva-utan':[48, 4], 'tva-med':[54, 2], 'tre-jamn':[256, 2], 'tre-rest':[586, 3], 'fyra':[5976, 3], 'fyra-rest':[7405, 3],
-      'noll-mitt':[618, 3], 'noll-forst':[156, 4], 'noll-rest':[823, 4], 'fyra-noll':[8016, 4] }[ktype];
-    return makeKd(fall[0], fall[1], ktype);
-  }
-  function genKortdiv(level, n, r) {
-    r = r || Math.random;
-    const bag = shuffle(r, KD_BAG[level === 'svar' ? 'svar' : 'latt']), out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 500) {
-      const t = genKdType(bag[out.length % bag.length], r, level === 'svar' ? null : [2, 5]);
-      if (seen.has(t.key) && guard < 400) continue;
-      seen.add(t.key); out.push(t);
-    }
-    return out;
-  }
-  /* Motorns fria läge rättar kvot och rest (tom restruta = 0) */
-  function checkKd(t, resp) {
-    const q = resp && resp.q != null ? resp.q : null, rr = resp && resp.r != null ? resp.r : 0;
-    const ok = q === t.q && rr === t.r;
-    return { ok, cls:ok ? 'ok' : (q === t.q ? 'rest' : 'fel') };
-  }
-
-  /* ── 10. Pengar och tabeller (33b): summa pengar, priset på ett inköp, hur många du får, hur mycket som blir över ──
-     form 'antal': priset står, barnet skriver hur många och hur mycket som blir över.
-     form 'pris':  hur många och vad som blev över står, barnet skriver priset. */
-  function makePt(form, sum, price) {
-    const q = Math.floor(sum / price), r = sum % price;
-    const fields = form === 'pris' ? [{ role:'pris', ans:price }] : [{ role:'q', ans:q }, { role:'r', ans:r }];
-    return { moment:'pengar', type:'pt', form, sum, price, n:sum, d:price, q, r, answer:form === 'pris' ? price : q, key:`pt${form}${sum}/${price}`, text:`${sum} kr`, fields };
-  }
-  function genPengar(level, n, r) {
-    r = r || Math.random;
-    const sv = level === 'svar', out = [], seen = new Set();
-    let guard = 0;
-    while (out.length < n && guard++ < 2000) {
-      const form = sv && out.length % 3 === 2 ? 'pris' : 'antal';
-      const price = sv ? pick(r, [rint(r, 3, 9), rint(r, 11, 25), pick(r, [10, 20, 50])]) : pick(r, EASY_D);
-      const q = sv ? rint(r, 2, 9) : rint(r, 2, 6), rest = rint(r, form === 'pris' ? 1 : 0, Math.min(price - 1, 9));
-      const sum = q * price + rest;
-      if (sum > (sv ? 300 : 60) || !distinct(sum, price, q) || (rest && !distinct(sum, price, q, rest)) || twinDigits(sum) || digitClash(sum, price)) continue;
-      const t = makePt(form, sum, price);
-      if (seen.has(t.key)) continue;
-      seen.add(t.key); out.push(t);
-    }
-    return out;
-  }
-
-  /* ── Bandets väg (runda 4): bandet får aldrig korsa text, siffror, etiketter eller bilder ──
-     Ren geometri (testbar): S = källans ruta, T = målets ruta, rects = hinder, box = kortets kant, alla { l, t, r, b }.
-     Prövar i ordning: en rak kurva (alla par av sidor), en väg via en fri vågrät korridor (under eller ovanför blocket),
-     en väg runt i marginalen till vänster eller höger. Ger { d, pts, end:{ x, y, dir } } eller null (då ritas inget band). */
-  function bezierPts(p0, c1, c2, p3, n) {
-    const out = [];
-    for (let i = 0; i <= n; i++) {
-      const u = i / n, a = (1 - u) * (1 - u) * (1 - u), b = 3 * (1 - u) * (1 - u) * u, c = 3 * (1 - u) * u * u, e = u * u * u;
-      out.push({ x:a * p0.x + b * c1.x + c * c2.x + e * p3.x, y:a * p0.y + b * c1.y + c * c2.y + e * p3.y });
-    }
-    return out;
-  }
-  function polyPts(ps, step) {
-    const out = [];
-    for (let i = 1; i < ps.length; i++) {
-      const a = ps[i - 1], b = ps[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / (step || 4)));
-      for (let k = 0; k <= n; k++) out.push({ x:a.x + (b.x - a.x) * k / n, y:a.y + (b.y - a.y) * k / n });
-    }
-    return out;
-  }
-  function pathHits(pts, rects, pad) {
-    const p = pad == null ? 2 : pad;
-    return pts.some(q => rects.some(r => q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p));
-  }
-  /* Fästpunkterna (runda 7, Dennis: "fästpunkterna för strecket blir programmatiskt bra, istället för 'ungefär eller
-     uppskattade'"): starten ligger BAND_START px utanför siffrornas egen ruta, mitt på sidan mot målet; pilspetsen
-     ligger BAND_TIP px utanför rutans ram (ramen ingår i rutans mått), och kurvan slutar BAND_ARROW längre ut, där
-     pilen tar vid. Handtagen går vinkelrätt ut från sidorna; i linje blir bandet rakt. */
-  const BAND_START = 3, BAND_TIP = 3, BAND_ARROW = 6, BAND_GAP = BAND_TIP + BAND_ARROW;
-  /* Bästa möjliga kompromiss (Dennis 11/11: "det blir ju inte heller bra om den streckade linjen blir överdrivet lång",
-     "det får bli en slags 'bästa möjliga kompromiss i vissa lägen'"). Varje väg får poäng: längden mot det raka
-     avståndet, plus straff för att snudda vid bilder och, lättare (w), vid etiketterna (mjuka hinder, hard:false) och för att gå längre än
-     1,5 gånger eller 160 px. Aldrig genom läsbar text eller siffror (hard:true), aldrig över 2 gånger det raka avståndet
-     eller 220 px: då null, och källan och rutan får ringen i stället. Vägarna: en kurva mellan alla par av sidor, eller
-     en väg med ett rundat hörn. Ger { d, pts, end, score } eller null. */
-  const BAND_MAX = 160, BAND_RATIO = 1.5, BAND_HARD_RATIO = 2, BAND_HARD_MAX = 220;
-  const ptsLen = pts => pts.reduce((a, q, i) => i ? a + Math.hypot(q.x - pts[i - 1].x, q.y - pts[i - 1].y) : 0, 0);
-  function bandScore(pts, rects, straight) {
-    const len = ptsLen(pts);
-    if (len > Math.min(BAND_HARD_MAX, BAND_HARD_RATIO * straight)) return null;
-    let soft = 0;
-    for (const q of pts) for (const r of rects) {
-      const p = r.pad == null ? 2 : r.pad;                 // andra tal har marginal (runda 5): nära ett tal läses som "därifrån"
-      if (q.x > r.l - p && q.x < r.r + p && q.y > r.t - p && q.y < r.b + p) { if (r.hard || r.pic) return null; soft += r.w == null ? 1 : r.w; }   // runda 7: aldrig genom bilden (grupperna, högen, barnen, tallinjen, blocken)
-    }
-    return len / straight + soft * 0.15 + (len > Math.min(BAND_MAX, BAND_RATIO * straight) ? 0.5 : 0);
-  }
-  /* Runda 5 (samordnarens mätning: vägar som gick ut åt fel håll och in i målet underifrån): sidorna vänder sig mot
-     varandra. Källans utgång pekar inte bort från målet, och målets ingång vetter mot källan; är källan ovanför går man
-     aldrig in underifrån. */
-  const SIDE = { b:[0, 1], t:[0, -1], r:[1, 0], l:[-1, 0] };
-  function sidesFace(S, T, sideS, sideT) {
-    const sc = { x:(S.l + S.r) / 2, y:(S.t + S.b) / 2 }, tc = { x:(T.l + T.r) / 2, y:(T.t + T.b) / 2 };
-    const dx = tc.x - sc.x, dy = tc.y - sc.y, [ax, ay] = SIDE[sideS], [bx, by] = SIDE[sideT];
-    const above = S.b <= T.t + 4, below = S.t >= T.b - 4;
-    if (above && sideT === 'b') return false;
-    if (below && sideT === 't') return false;
-    if (above && sideS === 't') return false;
-    if (below && sideS === 'b') return false;
-    return ax * dx + ay * dy >= -4 && -(bx * dx + by * dy) >= -4;
-  }
-  /* bandet går aldrig in i källans eller målets egen ruta, utom vid ändarna */
-  function entersRect(pts, R) {
-    return pts.slice(2, -2).some(q => q.x > R.l && q.x < R.r && q.y > R.t && q.y < R.b);
-  }
-  function bandRoute(S, T, rects, box) {
-    const cx = R => (R.l + R.r) / 2, cy = R => (R.t + R.b) / 2;
-    const o = BAND_START;
-    const sa = { b:{ x:cx(S), y:S.b + o, dx:0, dy:1 }, t:{ x:cx(S), y:S.t - o, dx:0, dy:-1 }, r:{ x:S.r + o, y:cy(S), dx:1, dy:0 }, l:{ x:S.l - o, y:cy(S), dx:-1, dy:0 } };
-    const ta = { t:{ x:cx(T), y:T.t - BAND_GAP, dx:0, dy:-1, dir:'down' }, l:{ x:T.l - BAND_GAP, y:cy(T), dx:-1, dy:0, dir:'right' },
-                 r:{ x:T.r + BAND_GAP, y:cy(T), dx:1, dy:0, dir:'left' }, b:{ x:cx(T), y:T.b + BAND_GAP, dx:0, dy:1, dir:'up' } };
-    const straight = Math.max(20, Math.hypot(cx(T) - cx(S), cy(T) - cy(S)));
-    const inBox = pts => pts.every(q => q.x >= box.l && q.x <= box.r && q.y >= box.t && q.y <= box.b);
-    let best = null;
-    const consider = c => { if (!inBox(c.pts) || entersRect(c.pts, S) || entersRect(c.pts, T)) return; const sc = bandScore(c.pts, rects, straight); if (sc != null && (!best || sc < best.score)) best = Object.assign(c, { score:sc }); };
-    for (const [ks, s] of Object.entries(sa)) for (const [kt, e] of Object.entries(ta)) {
-      if (!sidesFace(S, T, ks, kt)) continue;
-      const dist = Math.hypot(e.x - s.x, e.y - s.y), k = Math.max(12, dist / 2.6);
-      const inLine = (s.dx === 0 && e.dx === 0 && Math.abs(s.x - e.x) < 1.5) || (s.dy === 0 && e.dy === 0 && Math.abs(s.y - e.y) < 1.5);
-      if (inLine) consider({ d:`M${s.x} ${s.y} L ${e.x} ${e.y}`, pts:polyPts([s, e], 2), end:e });
-      else {
-        const c1 = { x:s.x + s.dx * k, y:s.y + s.dy * k }, c2 = { x:e.x + e.dx * k, y:e.y + e.dy * k };
-        consider({ d:`M${s.x} ${s.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${e.x} ${e.y}`, pts:bezierPts(s, c1, c2, e, 40), end:e });
-      }
-      /* ett hörn: ut från källan rakt, in i rutan rakt */
-      const corner = s.dx !== 0 ? { x:e.x, y:s.y } : { x:s.x, y:e.y };
-      const straightIn = s.dx !== 0 ? e.dx === 0 : e.dy === 0;
-      if (straightIn && (corner.x - s.x) * (s.dx || 0) >= 0 && (corner.y - s.y) * (s.dy || 0) >= 0) {
-        const la = Math.hypot(corner.x - s.x, corner.y - s.y), lb = Math.hypot(e.x - corner.x, e.y - corner.y), rr = Math.min(8, la / 2, lb / 2);
-        const p1 = { x:corner.x - (corner.x - s.x) * rr / (la || 1), y:corner.y - (corner.y - s.y) * rr / (la || 1) };
-        const p2 = { x:corner.x + (e.x - corner.x) * rr / (lb || 1), y:corner.y + (e.y - corner.y) * rr / (lb || 1) };
-        consider({ d:`M${s.x} ${s.y} L ${p1.x} ${p1.y} Q ${corner.x} ${corner.y}, ${p2.x} ${p2.y} L ${e.x} ${e.y}`, pts:polyPts([s, corner, e]), end:e });
-      }
-    }
-    return best;
-  }
-
-
-
-  /* ── Frågan om rutan med fokus (Med hjälp), dess ledtråd och kvittens ──
-     lit: det som lyser när frågan står (n = täljaren, d = nämnaren, grp = grupperna/barnen i bilden,
-     pile = högen som ska delas ut, rest = det som blir över, box:i = ruta i, x:g = täljarsiffran i
-     talsort g, blk:g = blocken i talsort g, nz/dz = nollorna, prompt = frågan). */
-  const drNoun = t => t.pic === 'linje' ? 'hopp' : t.pic === 'dela' ? 'i varje' : 'grupper';
-  function divAsk(t, i) {
-    if (t.type === 'dr') {
-      const role = t.fields[i].role, B = k => 'box:' + drField(t, k);
-      const kd = t.kGiven ? ['kd'] : [B('k1')];
-      if (role === 'n' && t.moment === 'grupper' && !t.r) return { text:`Skriv divisionen. Räkna i hopp om ${t.d}: hur många från början?`, lit:['prompt', 'grp', B('n')] };   // runda 8 (B2)
-      if (role === 'n') return { text:t.pic ? 'Skriv divisionen. Hur många är det från början?' : 'Skriv divisionen. Vilket tal delas?', lit:['prompt', 'pile', B('n')] };
-      if (role === 'd') return { text:t.pic === 'dela' ? 'Hur många barn delar?' : t.pic ? `Hur många är det i varje ${t.pic === 'linje' ? 'hopp' : 'grupp'}?` : 'Vad delar du med?', lit:['prompt', B('d')] };   // runda 7: grupperna lyser inte här – svaret är talet i frågan, inte antalet grupper
-      if (role === 'q') {
-        if (t.pic === 'grupp') return { text:'Hur många hela grupper blev det?', lit:['grp', B('q')] };
-        if (t.pic === 'dela') return { text:'Hur många fick varje barn?', lit:['grp', B('q')] };
-        if (t.pic === 'linje') return { text:'Hur många hela hopp blev det?', lit:['grp', B('q')] };
-        return { text:`Hur många ${t.d}:or ryms i ${t.n}?`, lit:['n', 'd', B('q')] };
-      }
-      if (role === 'r') return { text:t.pic === 'linje' ? `Hur långt är det kvar till ${t.n}?` : t.pic ? 'Hur många blev över?' : 'Vad blir resten?', lit:['rest', B('r')] };
-      if (role === 'k1') return { text:'Kontrollera med gånger. Skriv nämnaren.', lit:['d', B('k1')] };
-      if (role === 'k2') return { text:t.kGiven ? 'Kontrollera med gånger. Skriv kvoten.' : 'Skriv kvoten.', lit:[B('q'), B('k2')].concat(kd) };
-      if (role === 'k3') return { text:'Skriv resten.', lit:[B('r'), B('k3')] };
-      return { text:t.rest ? `Vad blir ${t.d} · ${t.q} + ${t.r}?` : `Vad blir ${t.d} · ${t.q}?`, lit:[B('k2'), B('k4')].concat(t.rest ? [B('k3')] : [], kd) };
-    }
-    if (t.type === 'ts') {
-      const f = t.fields[i];
-      /* runda 8 (B7, Dennis): talsorten sägs ut, "6 tiotal delat med 2", inte "6/2" */
-      /* runda 8 (Dennis: "det står vad är 8 tusental delat med 4. men det står 8008?"): stegfrågan säger att den är en del */
-      const DEF = ['entalen', 'tiotalen', 'hundratalen', 'tusentalen'], first = t.fields.findIndex(x => x.dig != null) === i;
-      return { text:`${first ? 'Börja med' : 'Sedan'} ${DEF[f.place]}: ${tok(f.dig, PLACE_ID[f.place])} ${UNIT[f.place]} delat med ${t.d}.`, lit:['x:' + f.place, 'blk:' + f.place, 'd', 'box:' + i] };
-    }
-    if (t.type === 'dz') {
-      const all = t.fields.map((_, k) => 'box:' + k);
-      if (t.form === 'kvot') return { text:`Stryk ${NOLLOR[t.z]} i ${fmt(t.n)}. Vad blir kvar?`, lit:['nz', 'dz'].concat(all) };
-      if (t.form === 'namnare') return { text:`Vad ska ${fmt(t.n)} delas med för att bli ${fmt(t.q)}?`, lit:['nz'].concat(all) };
-      return { text:`Vilket tal delat med ${fmt(t.d)} blir ${fmt(t.q)}?`, lit:['dz'].concat(all) };
-    }
-    if (t.type === 'pt') {
-      const role = t.fields[i].role;
-      if (role === 'q') return { text:`Hur många får du för ${t.sum} kr?`, lit:['sum', 'price', 'box:' + i] };
-      if (role === 'r') return { text:'Hur mycket pengar är det över?', lit:['sum', 'box:' + i] };
-      return { text:`Vad kostar ett, om ${t.q} kostar ${t.sum - t.r} kr?`, lit:['q', 'r', 'sum', 'box:' + i] };
-    }
-    return null;
-  }
-  /* Frågan innan rutorna, när bilden ska delas ut först (Med hjälp) */
-  function dealAsk(t) {
-    if (t.type === 'dz') return { text:`Tryck på en nolla i ${fmt(t.d)}. Den stryks, och en nolla i ${fmt(t.n)} med den.`, lit:['dz', 'nz'] };
-    if (t.pic === 'dela') return { text:'Tryck på högen. Varje tryck ger en till varje barn.', lit:['pile'] };
-    if (t.pic === 'linje') return { text:`Tryck på tallinjen. Varje tryck hoppar ${t.d} steg.`, lit:['pile'] };
-    return { text:`Tryck på högen. Varje tryck ringar in en grupp med ${t.d}.`, lit:['pile'] };
-  }
-  function dealDone(t) {
-    if (t.type === 'dz') return 'Nu är nollorna strukna.';
-    if (t.pic === 'dela') return t.r ? 'Nu räcker det inte till ett varv till.' : 'Nu är allt utdelat.';
-    if (t.pic === 'linje') return t.r ? 'Nu räcker det inte till ett hopp till.' : `Nu är du framme vid ${t.n}.`;
-    return t.r ? 'Nu räcker det inte till en grupp till.' : 'Nu är alla i grupper.';
-  }
-  function divHint(t, i) {
-    if (t.type === 'dr') {
-      const role = t.fields[i].role;
-      if (role === 'n') return 'Täljaren är talet som delas. Det står överst.';
-      if (role === 'd') return 'Nämnaren är det du delar med. Den står under strecket.';
-      if (role === 'q') return t.pic ? `Räkna dem i bilden.` : `Räkna ${t.d}, ${2 * t.d}, ${3 * t.d} … så långt det går utan att bli mer än ${t.n}.`;
-      if (role === 'r') return `${t.d} · ${t.q} = ${t.d * t.q}. Hur många fattas till ${t.n}?`;
-      if (role === 'k1') return 'Nämnaren är talet under strecket.';
-      if (role === 'k2') return 'Kvoten är talet du skrev efter likhetstecknet.';
-      if (role === 'k3') return 'Resten är talet efter ordet rest.';
-      return t.rest ? `${t.d} · ${t.q} = ${t.d * t.q}. Lägg till ${t.r}.` : `Räkna ${t.d}, ${2 * t.d}, ${3 * t.d} …`;
-    }
-    if (t.type === 'ts') { const f = t.fields[i]; return f.dig === 0 ? 'Noll delat med något är noll.' : `Vilket tal gånger ${t.d} blir ${f.dig}?`; }
-    if (t.type === 'dz') {
-      if (t.form === 'kvot') return `${fmt(t.d)} har ${NOLLOR[t.z]}. Lika många nollor försvinner från ${fmt(t.n)}.`;
-      if (t.form === 'namnare') return 'Nämnaren är 10, 100 eller 1000: en nolla för varje nolla som försvinner.';
-      return `Kontrollera med gånger: ${fmt(t.q)} · ${fmt(t.d)}.`;
-    }
-    if (t.type === 'pt') {
-      const role = t.fields[i].role;
-      if (role === 'q') return `Räkna ${t.price}, ${2 * t.price}, ${3 * t.price} … kr så långt pengarna räcker.`;
-      if (role === 'r') return `${t.q} · ${t.price} = ${t.q * t.price} kr. Hur mycket är kvar av ${t.sum} kr?`;
-      return `Ta bort det som blev över: ${t.sum} − ${t.r}. Dela sedan med ${t.q}.`;
-    }
-    return '';
-  }
-  function divAck(t, i) {
-    if (t.type === 'dr') {
-      const role = t.fields[i].role;
-      if (role === 'q' && t.pic === 'grupp') return `Rätt! ${t.q} hela grupper.`;
-      if (role === 'q' && t.pic === 'dela') return `Rätt! ${t.q} till varje barn.`;
-      if (role === 'r') return `Rätt! ${t.r} blir över.`;
-      if (role === 'k4') return `Rätt! Det blir ${t.n}, som täljaren. Divisionen stämmer.`;
-      return 'Rätt!';
-    }
-    if (t.type === 'dz') return i === t.fields.length - 1 ? `Rätt! ${t.text} = ${fmt(t.q)}.` : 'Rätt!';
-    return 'Rätt!';
-  }
-  /* Klassen för "Öva mer på" efter ett pass med hjälp: vilka rutor behövde hjälp? */
-  function hbClass(t, outc) {
-    if (t.type !== 'dr') return null;
-    const need = role => { const i = drField(t, role); return i >= 0 && outc[i] && outc[i] !== 'direkt'; };
-    if (need('n') || need('d')) return 'skriv';
-    if (need('q') || need('r')) return 'kvot';
-    if (['k1', 'k2', 'k3', 'k4'].some(need)) return 'kontroll';
-    return null;
-  }
-
-  /* ── 11, 12, 13: Begrepp, problemlösning och slutledning i ledda steg (mallen [ ] op [ ] = [ ]) ── */
-  const THINGS = [
-    { one:'knapp', many:'knappar' }, { one:'pärla', many:'pärlor' }, { one:'kula', many:'kulor' }, { one:'bulle', many:'bullar' },
-    { one:'penna', many:'pennor' }, { one:'kotte', many:'kottar' }, { one:'klistermärke', many:'klistermärken' },
-    { one:'spik', many:'spikar' }, { one:'kaka', many:'kakor' } ];
-  const CONTS = [ { one:'påse', many:'påsar' }, { one:'låda', many:'lådor' }, { one:'burk', many:'burkar' }, { one:'ask', many:'askar' },
-    { one:'korg', many:'korgar' } ];
-  function dprob(moment, kind, text, flow, answer, concl, key) {
-    return { moment, type:'prob', kind, needExpr:false, shop:false, text, flow, answer, concl, key, unit:'',
-             expr:flow.map(s => `${s.ans[0]} ${s.op} ${s.ans[1]}`).join(', ') };
-  }
-  function makeDdela(name, th, co, n, d) {
-    const q = n / d;
-    return dprob('dproblem', 'dela', `${name} delar ${n} ${th.many} lika i ${d} ${co.many}. Hur många ${th.many} blir det i varje ${co.one}?`,
-      [{ q:`Hur många ${th.many} i varje ${co.one}?`, op:'/', ans:[n, d, q], unit:th.many }], q,
-      `${n}/${d} = ${q}. Det blir ${q} ${th.many} i varje ${co.one}.`, `pd${n}/${d}`);
-  }
-  function makeDgrupp(name, th, co, n, d) {
-    const q = n / d;
-    return dprob('dproblem', 'grupp', `${name} har ${n} ${th.many} och lägger ${d} i varje ${co.one}. Hur många ${co.many} blir det?`,
-      [{ q:`Hur många ${co.many}?`, op:'/', ans:[n, d, q], unit:co.many }], q, `${n}/${d} = ${q}. Det blir ${q} ${co.many}.`, `pg${n}/${d}`);
-  }
-  function makeDrestP(name, th, co, n, d) {
-    const q = Math.floor(n / d), r = n % d;
-    return dprob('dproblem', 'rest', `${name} lägger ${n} ${th.many} i ${co.many}, ${d} i varje. Hur många ${co.many} blir fulla, och hur många ${th.many} blir över?`,
-      [{ q:'Dela, och skriv resten.', op:'/', ans:[n, d, q, r], rest:true }], q,
-      `${n}/${d} = ${q}, rest ${r}. ${q} ${co.many} blir fulla och ${r} ${r === 1 ? th.one : th.many} blir över.`, `pr${n}/${d}`);
-  }
-  function makeDbehovs(name, th, co, n, d) {
-    const q = Math.floor(n / d), r = n % d;
-    return dprob('dproblem', 'behovs', `${name} ska packa ${n} ${th.many} i ${co.many}. Det får plats ${d} i varje ${co.one}. Hur många ${co.many} behövs för att alla ska få plats?`,
-      [{ q:'Dela, och skriv resten.', op:'/', ans:[n, d, q, r], rest:true },
-       { q:`De ${r} som blir över behöver också en ${co.one}.`, op:'+', ans:[q, 1, q + 1], unit:co.many }], q + 1,
-      `${q} ${co.many} blir fulla, och en till behövs för resten. Det behövs ${q + 1} ${co.many}.`, `pb${n}/${d}`);
-  }
-  function makeDtva(name, th, co, n, d, k, plus) {
-    const q = n / d, a = plus ? q + k : q - k;
-    const text = plus
-      ? `${name} delar ${n} ${th.many} lika i ${d} ${co.many}. Sedan lägger ${name} ${k} ${th.many} till i varje ${co.one}. Hur många ${th.many} är det i varje ${co.one} nu?`
-      : `${name} delar ${n} ${th.many} lika i ${d} ${co.many}. Sedan tar ${name} bort ${k} ${th.many} ur varje ${co.one}. Hur många ${th.many} är det kvar i varje ${co.one}?`;
-    return dprob('dproblem', 'tva', text,
-      [{ q:`Hur många i varje ${co.one} först?`, op:'/', ans:[n, d, q], unit:th.many },
-       { q:plus ? `Och när ${k} till har kommit?` : `Och när ${k} är borta?`, op:plus ? '+' : '−', ans:[q, k, a], unit:th.many }], a,
-      `${n}/${d} = ${q} och ${q} ${plus ? '+' : '−'} ${k} = ${a}. Det är ${a} ${th.many} i varje ${co.one}.`, `pt${n}/${d}${plus ? 'p' : 'm'}${k}`);
-  }
-  /* Begreppen (36b, 37a): kvoten, nämnaren och täljaren ur de andra */
-  function makeBkvot(n, d) {
-    const q = n / d;
-    return dprob('begrepp', 'kvot', `Vad är kvoten när täljaren är ${n} och nämnaren är ${d}?`,
-      [{ q:'Skriv divisionen och räkna ut kvoten.', op:'/', ans:[n, d, q] }], q, `${n}/${d} = ${q}. Kvoten är ${q}.`, `bk${n}/${d}`);
-  }
-  function makeBnamnare(n, q) {
-    const d = n / q;
-    return dprob('begrepp', 'namnare', `Vad är nämnaren om täljaren är ${n} och kvoten är ${q}?`,
-      /* runda 8 (A2): med hjälp följer stegets text rutan i fokus (täljaren först), fq per ruta */
-      [{ q:'Skriv divisionen. Vad ska stå under strecket?', fq:['Skriv divisionen. Täljaren står överst.', 'Vad ska stå under strecket?', 'Och kvoten?'], op:'/', ans:[n, d, q] }], d, `${n}/${d} = ${q}. Nämnaren är ${d}.`, `bn${n}/${q}`);
-  }
-  function makeDtaljare(d, q, r) {
-    const n = d * q + r;
-    if (!r) return dprob('begrepp', 'taljare', `Vad är täljaren om nämnaren är ${d} och kvoten är ${q}?`,
-      [{ q:'Kontrollera baklänges: nämnaren gånger kvoten.', op:'·', ans:[d, q, n] }], n, `${d} · ${q} = ${n}. Täljaren är ${n}, för ${n}/${d} = ${q}.`, `bt${d}x${q}`);
-    return dprob('begrepp', 'taljare', `Vad är täljaren om nämnaren är ${d}, kvoten är ${q} och resten är ${r}?`,
-      [{ q:'Nämnaren gånger kvoten.', op:'·', ans:[d, q, d * q] }, { q:'Lägg till resten.', op:'+', ans:[d * q, r, n] }], n,
-      `${d} · ${q} + ${r} = ${n}. Täljaren är ${n}, för ${n}/${d} = ${q}, rest ${r}.`, `bt${d}x${q}r${r}`);
-  }
-  /* Slutledning (32b): "Vilket tal tänker jag på?" — räkna baklänges, ett steg i taget */
-  const ORD = ['', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio'];
-  function makeTanker(a, b, q) {
-    const mid = q * b, n = mid * a;
-    return dprob('slutled', 'tanker', `Vilket tal tänker jag på? Först delar jag det med ${ORD[a]} och sedan med ${ORD[b]}. Då får jag kvoten ${q}.`,
-      [{ q:`Baklänges: före den sista divisionen var det kvoten gånger ${ORD[b]}.`, op:'·', ans:[q, b, mid] },
-       { q:`Och före den första: gånger ${ORD[a]}.`, op:'·', ans:[mid, a, n] }], n,
-      `Talet är ${n}: ${n}/${a} = ${mid} och ${mid}/${b} = ${q}.`, `sl${a}x${b}q${q}`);
-  }
-  function makeTankerRest(d, q, r) {
-    const n = d * q + r;
-    return dprob('slutled', 'tankerrest', `Vilket tal tänker jag på? Om jag delar det med ${ORD[d]} blir kvoten ${q} och resten ${r}.`,
-      [{ q:'Nämnaren gånger kvoten.', op:'·', ans:[d, q, d * q] }, { q:'Lägg till resten.', op:'+', ans:[d * q, r, n] }], n,
-      `Talet är ${n}: ${n}/${d} = ${q}, rest ${r}.`, `slr${d}x${q}r${r}`);
-  }
-  const DPROB_KINDS = { latt:['dela', 'grupp', 'rest', 'dela'], svar:['rest', 'behovs', 'tva', 'dela', 'grupp', 'behovs'] };
-  function genDprobOne(level, kind, r) {
-    const sv = level === 'svar', name = pick(r, NAMES), th = pick(r, THINGS), co = pick(r, CONTS);
-    for (let g = 0; g < 1000; g++) {
-      const d = sv ? rint(r, 3, 9) : pick(r, EASY_D);
-      if (kind === 'dela' || kind === 'grupp' || kind === 'tva') {
-        const q = sv ? rint(r, 21, kind === 'tva' ? 199 : 999) : rint(r, 3, 49);
-        const n = q * d;
-        if (n < (sv ? 100 : 20) || n > (sv ? 9999 : 99) || !distinct(n, d, q) || twinDigits(n) || digitClash(n, d)) continue;
-        if (kind === 'tva') {
-          const k = rint(r, 2, 9), plus = r() < 0.5;
-          if (!distinct(n, d, q, k, plus ? q + k : q - k) || (!plus && q - k < 2)) continue;
-          return makeDtva(name, th, co, n, d, k, plus);
-        }
-        return kind === 'dela' ? makeDdela(name, th, co, n, d) : makeDgrupp(name, th, co, n, d);
-      }
-      /* rest och behovs */
-      const dd = !sv && d === 2 && kind === 'behovs' ? 5 : d;      // behövs: resten minst 2
-      const q = sv ? rint(r, 11, 199) : rint(r, 4, 19), rest = rint(r, kind === 'behovs' ? 2 : 1, dd - 1), n = q * dd + rest;
-      if (n > (sv ? 2000 : 99) || twinDigits(n) || digitClash(n, dd)) continue;
-      if (dd !== d) return kind === 'rest' ? makeDrestP(name, th, co, n, dd) : makeDbehovs(name, th, co, n, dd);
-      if (!distinct(n, d, q, rest) || (kind === 'behovs' && !distinct(n, d, q, rest, q + 1, 1))) continue;
-      return kind === 'rest' ? makeDrestP(name, th, co, n, d) : makeDbehovs(name, th, co, n, d);
-    }
-    return makeDdela('Leo', THINGS[2], CONTS[2], 84, 4);
-  }
-  function genBegreppOne(level, kind, r) {
-    const sv = level === 'svar';
-    for (let g = 0; g < 1000; g++) {
-      const d = sv ? rint(r, 3, 9) : pick(r, EASY_D), q = sv ? rint(r, 6, 19) : rint(r, 2, 9), rest = sv && kind === 'taljare' && r() < 0.6 ? rint(r, 1, d - 1) : 0;
-      if (!distinct(d, q, d * q + rest) || (rest && !distinct(d, q, rest, d * q, d * q + rest)) || twinDigits(d * q + rest) || digitClash(d * q + rest, d)) continue;
-      if (kind === 'kvot') return makeBkvot(d * q, d);
-      if (kind === 'namnare') return makeBnamnare(d * q, q);
-      return makeDtaljare(d, q, rest);
-    }
-    return makeBkvot(96, 4);
-  }
-  function genTankerOne(level, r) {
-    for (let g = 0; g < 500; g++) {
-      if (level !== 'svar' || r() < 0.4) {
-        const d = level === 'svar' ? rint(r, 2, 9) : pick(r, [2, 5]), q = rint(r, 3, 9), rest = rint(r, 1, d - 1);
-        if (distinct(d, q, rest, d * q, d * q + rest)) return makeTankerRest(d, q, rest);
-        continue;
-      }
-      const a = rint(r, 2, 5), b = rint(r, 2, 5), q = rint(r, 2, 9);
-      if (distinct(a, b, q, q * b, q * b * a)) return makeTanker(a, b, q);
-    }
-    return makeTanker(2, 4, 5);
-  }
-  function genFlow(moment) {
-    return (level, n, r) => {
-      r = r || Math.random;
-      const kinds = moment === 'begrepp' ? (level === 'svar' ? ['namnare', 'taljare', 'kvot', 'taljare'] : ['kvot', 'taljare', 'kvot', 'namnare']) : DPROB_KINDS[level === 'svar' ? 'svar' : 'latt'];
-      const out = [], seen = new Set();
-      let guard = 0;
-      while (out.length < n && guard++ < 2000) {
-        const k = kinds[out.length % kinds.length];
-        const t = moment === 'begrepp' ? genBegreppOne(level, k, r) : moment === 'slutled' ? genTankerOne(level, r) : genDprobOne(level, k, r);
-        if (seen.has(t.key) && guard < 1500) continue;
-        seen.add(t.key); out.push(t);
-      }
-      return out;
-    };
-  }
-  function dprobHint(t, k) {
-    const st = t.flow[k];
-    if (t.moment === 'slutled') return st.op === '·' ? 'Gånger tar bort en division: räkna baklänges.' : 'Lägg till resten.';
-    if (t.moment === 'begrepp') {
-      if (t.kind === 'kvot') return 'Kvoten är svaret när du delar täljaren med nämnaren.';
-      if (t.kind === 'namnare') return 'Vilket tal går kvoten gånger för att bli täljaren?';
-      return st.op === '·' ? 'Kontrollen baklänges: nämnaren gånger kvoten.' : 'Lägg till resten.';
-    }
-    if (st.op === '/') {
-      if (t.kind === 'dela' || t.kind === 'tva') return 'Fördelas lika: dela det totala med antalet delar.';
-      if (t.kind === 'grupp') return 'Hur många gånger ryms det som läggs i varje i det totala? Det är en division.';
-      return 'Dela det totala med hur många som får plats i varje. Det som inte går jämnt ut är resten.';
-    }
-    if (t.kind === 'behovs') return 'Lägg till en för resten.';
-    return 'Ta svaret från steg 1.';
-  }
-
-  /* ══════════════════════════════════════════════════════════
      PASS OCH PROV
   ══════════════════════════════════════════════════════════ */
-  const GEN = { tabell:genTabell, tiotal:genTiotal, talsorter:genTalsorter, uppstallning:genUppstallning, problem:genProblem,
-    dela:(l, n, r) => genDrMod('dela', l, n, r), grupper:(l, n, r) => genDrMod('grupper', l, n, r), dtabell:genDtabell,
-    dkontroll:(l, n, r) => genDrMod('dkontroll', l, n, r), drest:(l, n, r) => genDrMod('drest', l, n, r), ingar:(l, n, r) => genDrMod('ingar', l, n, r),
-    talsort:genTalsort, dz:genDz, kortdiv:genKortdiv, pengar:genPengar, begrepp:genFlow('begrepp'), dproblem:genFlow('dproblem'), slutled:genFlow('slutled') };
+  const GEN = { tabell:genTabell, tiotal:genTiotal, talsorter:genTalsorter, uppstallning:genUppstallning, problem:genProblem };
   const isSheetMoment = id => !!(MOMENTS.find(m => m.id === id) || {}).sheet;
   function genMoment(moment, level, n, r) { return GEN[moment](level, n, r || Math.random); }
   /* Tabellerna som bladets tabelltest: 20 tal i två kolumner på EN sida, rättas med /20 */
-  function makeSheet(level, r, moment) {
-    const m = moment === 'dtabell' ? 'dtabell' : 'tabell';
-    return { moment:m, type:'sheet', items:GEN[m](level, TABELLTEST_COUNT, r || Math.random), key:m === 'tabell' ? 'sheet' : 'dsheet' };
+  function makeSheet(level, r) {
+    return { moment:'tabell', type:'sheet', items:GEN.tabell(level, TABELLTEST_COUNT, r || Math.random), key:'sheet' };
   }
   /* D39: en tom ruta rättas aldrig (per[i] = null) och räknas inte som fel. Klar rättar bara när inga rutor
      är tomma (sheetEmpty === 0); knappen heter Klar först då (oneButton). */
@@ -1512,7 +828,7 @@
     const P = PROVS.find(p => p.id === provId) || PROVS[0];
     const out = [];
     for (const m of P.moments) {
-      if (isSheetMoment(m)) out.push(makeSheet(level, r, m));
+      if (isSheetMoment(m)) out.push(makeSheet(level, r));
       else out.push(...genMoment(m, level, P.provCount[m], r));
     }
     return out;
@@ -1536,9 +852,6 @@
     if (t.type === 'sheet') return checkSheet(t, resp);
     if (t.type === 'te') { const c = checkTalsorter(t, resp || []); return { ok:c.ok, cls:c.ok ? 'ok' : 'fel', wrong:c.wrong }; }
     if (t.type === 'upp') { const cls = classifyUpp(t, resp || {}); return { ok:cls === 'ok', cls }; }
-    if (t.type === 'dr') return checkDrest(t, resp);
-    if (t.type === 'ts' || t.type === 'dz' || t.type === 'pt') return checkBoxes(t, resp);
-    if (t.type === 'kd') return checkKd(t, resp);
     return { ok:false, cls:'fel' };
   }
   /* Kvittot: rätt per moment och färgen (grön/gul) */
@@ -1582,14 +895,6 @@
         omvand:'Räkna först poängen från domarna som ger lika. Ta sedan bort dem från summan.' }[t.kind] || 'Skriv ett uttryck med gånger i.';
       return 'Räkna gånger först, sedan plus eller minus.';
     }
-    if (t.type === 'dr') return { stor:`Resten ska vara mindre än ${t.d}. Ryms en ${t.d}:a till?`,
-      kontroll:t.rest ? 'Kontrollera: nämnaren gånger kvoten, plus resten, ska bli täljaren.' : 'Kontrollera: nämnaren gånger kvoten ska bli täljaren.',
-      skriv:'Täljaren är talet som delas, och nämnaren är det du delar med.' }[cls]
-      || (t.pic ? 'Tryck på bilden och räkna.' : `Räkna ${t.d}, ${2 * t.d}, ${3 * t.d} … så långt det går utan att bli mer än ${t.n}.`);
-    if (t.type === 'pt') return divHint(t, 0);
-    if (t.type === 'ts') return 'Dela en talsort i taget, från vänster. En nolla delat med något är noll.';
-    if (t.type === 'dz') return divHint(t, 0);
-    if (t.type === 'num' && t.op === '/') return `Tänk gånger: vad gånger ${t.y} blir ${t.x}?`;
     if (t.type === 'num') {
       const k = Math.min(t.x, t.y) > 2 ? Math.min(t.x, t.y) - 1 : null;
       return k ? `Ta ett gångertal du kan, som ${k} · ${Math.max(t.x, t.y)}, och lägg till.` : 'Räkna upp i tabellen.';
@@ -1637,30 +942,6 @@
         { text:`Räkna sedan ${last}.`, fill:{ boxes:first, n:k.length } },
       ];
     }
-    if (t.type === 'dr') {
-      const boxes = {};
-      for (const x of ['n', 'd', 'q', 'r']) if (drField(t, x) >= 0) boxes[drField(t, x)] = t.fields[drField(t, x)].ans;
-      return [
-        { text:t.pic === 'linje' ? `Tallinjen visar hoppen om ${t.d}.` : t.pic === 'dela' ? `Bilden visar ${t.n} delade lika mellan ${t.d} barn.`
-          : `Bilden visar ${t.n} i grupper med ${t.d}.`, fill:{ pic:true } },
-        { text:t.kontroll ? `Divisionen står nu i rutorna. Skriv kontrollen.` : 'Divisionen står nu i rutorna.', fill:{ pic:true, boxes } },
-      ];
-    }
-    if (t.type === 'ts') {
-      const half = Math.ceil(t.fields.length / 2), boxes = {};
-      t.fields.slice(0, half).forEach((f, i) => { boxes[i] = f.ans; });
-      return [
-        { text:t.fields.map(f => `${f.dig}/${t.d} = ${f.ans}`).slice(0, 2).join(', ') + ' …', fill:null },
-        { text:'De första talsorterna står nu i rutorna. Dela resten.', fill:{ boxes } },
-      ];
-    }
-    if (t.type === 'dz') return [{ text:divHint(t, 0), fill:null }, { text:`Kontrollera med gånger: ${fmt(t.q)} · ${fmt(t.d)} = ${fmt(t.n)}.`, fill:null }];
-    if (t.type === 'pt') return [{ text:divHint(t, 0), fill:null }, { text:divHint(t, t.fields.length - 1), fill:null }];
-    if (t.type === 'num' && t.op === '/') {
-      const q = t.answer, d = t.y;
-      return [{ text:`Räkna ${d}, ${2 * d}, ${3 * d} … tills du kommer till ${t.x}.`, fill:null },
-              { text:q > 2 ? `${d} · ${q - 1} = ${d * (q - 1)}. Ett steg till.` : `${d} · 2 = ?`, fill:null }];
-    }
     if (t.type === 'num') {
       const a = Math.min(t.x, t.y), b = Math.max(t.x, t.y);
       return a > 2
@@ -1693,42 +974,18 @@
  'upp:minnesumma':'Minne i summan',
     'prob:tillbaka':'Växel', 'prob:omvand':'Omvända uppgifter', 'prob:kop2':'Två sorters varor', 'prob:ordning':'Gånger först',
     'prob:uttryck':'Skriva uttrycket',
-    /* D44 ✎: övningsbladen (taggen = modulens id, ibland med en del efter kolon) */
-    'dela':'Dela lika', 'grupper':'Hur många grupper', 'dkontroll':'Kontrollera med gånger', 'drest':'Division med rest', 'ingar':'Ingår hur många gånger',
-    'kortdiv:mellan':'Minnessiffran i kort division', 'kortdiv:rest':'Resten i kort division',
-    'talsort':'Dela varje talsort', 'dz:kvot':'Dela med 10, 100 och 1000', 'dz:namnare':'Skriv nämnaren', 'dz:taljare':'Skriv täljaren',
-    'pengar:antal':'Hur många får du', 'pengar:pris':'Vad kostar ett',
-    'dproblem:dela':'Dela lika', 'dproblem:grupp':'Hur många grupper', 'dproblem:rest':'Det som blir över', 'dproblem:behovs':'Hur många som behövs',
-    'dproblem:tva':'Två steg', 'begrepp:kvot':'Kvoten', 'begrepp:namnare':'Nämnaren', 'begrepp:taljare':'Täljaren', 'slutled:tanker':'Räkna baklänges', 'slutled:tankerrest':'Baklänges med rest',
   };
   function tagLabel(tag) {
     if (tag.startsWith('tab:')) { const [a, b] = tag.slice(4).split('x'); return `Tabellen ${a} · ${b}`; }
-    if (tag.startsWith('dtab:')) return `Division ${tag.slice(5)}`;
-    if (tag.startsWith('kortdiv:') && KD_LABEL[tag.slice(8)]) return KD_LABEL[tag.slice(8)];
-    const sub = { kontroll:'Kontrollera med gånger', stor:'Resten mindre än nämnaren', skriv:'Skriva divisionen' }[tag.split(':')[1]];
-    if (sub) return sub;
     return TAG_LABEL[tag] || tag;
   }
   const tagMoment = tag => tag.startsWith('tab:') ? 'tabell' : tag.startsWith('tio:') ? 'tiotal' : tag === 'te' ? 'talsorter' : tag.startsWith('upp:') ? 'uppstallning'
-    : tag.startsWith('dtab:') ? 'dtabell' : DIV_IDS.includes(tag.split(':')[0]) ? tag.split(':')[0] : 'problem';
-  const dtabTag = (n, d) => `dtab:${n}/${d}`;
-  /* Kort division: typen, och minnessiffran och resten när uppgiften har dem */
-  const kdTags = t => [`kortdiv:${t.ktype}`].concat(t.mid ? ['kortdiv:mellan'] : [], t.r > 0 ? ['kortdiv:rest'] : []);
-  /* Rutorna i divisionen: modulen, och kontrollen, för stor rest och att skriva divisionen som egna saker att öva på.
-     (dr:-taggarna hör till modulen via t.moment i hardFor; de räknas här bara som etiketter) */
-  const drTags = t => [t.moment].concat(t.kontroll ? [`${t.moment}:kontroll`] : [], t.rest ? [`${t.moment}:stor`] : [], t.write ? [`${t.moment}:skriv`] : []);
+    : 'problem';
   function tioType(t) { const hi = Math.max(t.za, t.zb); return t.za && t.zb ? (hi >= 2 ? 'tio:tusental' : 'tio:tvatiotal') : hi >= 2 ? 'tio:hundratal' : 'tio:tiotal'; }
   /* Allt en uppgift övar (en lyckad uppgift räknas för alla dessa) */
   const factTag = (a, b) => `tab:${Math.min(a, b)}x${Math.max(a, b)}`;
   function tagsCovered(t) {
     if (t.moment === 'tabell') return [factTag(t.x, t.y)];
-    if (t.moment === 'dtabell') return [dtabTag(t.x, t.y)];
-    if (t.type === 'dr') return drTags(t);
-    if (t.type === 'kd') return kdTags(t);
-    if (t.type === 'ts') return ['talsort'];
-    if (t.type === 'dz') return [`dz:${t.form}`];
-    if (t.type === 'pt') return [`pengar:${t.form}`];
-    if (DIV_IDS.includes(t.moment) && t.type === 'prob') return [`${t.moment}:${t.kind}`];
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
@@ -1742,17 +999,7 @@
   /* Det som var svårt i en uppgift som krävde hjälp: typen + felklassen.
      Uppställningen skickar även detaljerna: { rows:[rader som fick hjälp], grey:true om nollan blev fel } */
   function tagsHard(t, cls, detail) {
-    if (t.moment === 'tabell' || t.moment === 'dtabell') return tagsCovered(t);
-    if (t.type === 'dr') return [t.moment].concat(['kontroll', 'stor', 'skriv'].includes(cls) ? [`${t.moment}:${cls}`] : []);
-    if (t.type === 'kd') {
-      /* motorns klass: mellanrest (minnessiffran), rest eller en nolla; tabellfakta som fick fel svar blir divisionsfakta */
-      const out = [`kortdiv:${t.ktype}`];
-      if (cls === 'mellanrest') out.push('kortdiv:mellan');
-      if (cls === 'rest') out.push('kortdiv:rest');
-      for (const [d, q] of (detail && detail.facts) || []) { const f = dtabTag(d * q, d); if (!out.includes(f)) out.push(f); }
-      return out;
-    }
-    if (DIV_IDS.includes(t.moment)) return tagsCovered(t);
+    if (t.moment === 'tabell') return tagsCovered(t);
     if (t.type === 'tio') return [tioType(t)].concat(t.trap ? ['tio:falla'] : []);
     if (t.type === 'te') return ['te'];
     if (t.type === 'upp') {
@@ -1786,8 +1033,6 @@
     return hard;
   }
   const MOMENT_ORDER = MOMENTS.map(m => m.id);
-  /* D44 ✎: "Öva mer på" i övningsbladens lista — de svåra typerna som hör till modulen */
-  const hardFor = (hard, moment) => Object.keys(hard || {}).filter(tag => tagMoment(tag) === moment);
   /* De svåra typerna i ordning: momentens ordning, "fick svaret" före "fick hjälp" */
   function hardList(hard) {
     return Object.keys(hard || {}).sort((a, b) =>
@@ -1797,7 +1042,6 @@
   /* En ny uppgift av samma svåra typ, på minst Svårare */
   function genForTag(tag, r) {
     const lv = 'svar';
-    if (DIV_IDS.includes(tag.split(':')[0])) return null;      // övningsbladen har inget Mitt prov
     if (tag.startsWith('tio:')) {
       const form = { 'tio:falla':pick(r, [[1, 1], [2, 0], [0, 2]]), 'tio:tvatiotal':[1, 1], 'tio:tiotal':[1, 1],
         'tio:hundratal':pick(r, [[2, 0], [0, 2]]), 'tio:tusental':pick(r, [[2, 1], [1, 2]]) }[tag] || [1, 1];
@@ -1819,13 +1063,7 @@
   function buildMittProv(hard, r) {
     r = r || Math.random;
     const tags = hardList(hard), out = [], seen = new Set();
-    const facts = tags.filter(t => t.startsWith('tab:')), dfacts = tags.filter(t => t.startsWith('dtab:'));
-    if (dfacts.length) {                         /* divisionsfakta: talet och dess tvilling (56/8 och 56/7) */
-      const items = [];
-      for (const f of dfacts) { const [n, d] = f.slice(5).split('/').map(Number); items.push([n, d], [n, n / d]); }
-      const uniq = items.filter(([a, b], i) => items.findIndex(([c, e]) => c === a && e === b) === i).slice(0, TABELLTEST_COUNT);
-      out.push({ moment:'dtabell', type:'sheet', key:'mittdsheet', items:shuffle(r, uniq).map(([n, d]) => makeDtab(n, d)) });
-    }
+    const facts = tags.filter(t => t.startsWith('tab:'));
     if (facts.length) {
       const items = [];
       for (const f of facts) { const [a, b] = f.slice(4).split('x').map(Number); items.push([a, b], [b, a]); }
@@ -1834,7 +1072,7 @@
         items:shuffle(r, uniq).map(([x, y]) => ({ moment:'tabell', type:'num', x, y, answer:x * y, key:`tab${x}x${y}`, text:`${x} · ${y}` })) });
     }
     /* varje svår typ får minst en uppgift; två var när det ryms inom MITT_MAX */
-    const rest = tags.filter(t => !t.startsWith('tab:') && !t.startsWith('dtab:'));
+    const rest = tags.filter(t => !t.startsWith('tab:'));
     const per = rest.length * MITT_PER_TAG <= MITT_MAX ? MITT_PER_TAG : 1;
     for (const tag of rest) {
       let made = 0, guard = 0;
@@ -1880,10 +1118,7 @@
     OVA_MODES, ovaMode, passHelp, PLACE_ID, pvNum, askPlain, askTokens, boxAsk, boxHint, boxAck, boxHelpStep, boxAnswer, rowQuestion, rowBook, rowHelpStep, rowHint, createHistory, factTag,
     checkProbStep, probStepHint, probStepBit, probConclusion, probHelpStep,
     HELP_STEPS, helpStep, helpHint, helpBits, carriesOf, addCarries, noCarrySumN, enAddCarries, EN_TOP_MIN,
-    /* D44 ✎: övningsbladen */
-    DIV_IDS, dPass, makeDtab, genDtabell, makeDr, genDrMod, drNums, checkDrest, drField, picMax, picLeft, KD_TYPES, KD_BAG, makeKd, genKdType, genKortdiv, checkKd,
-    makeTs, genTsOne, genTalsort, taskHead, makeDz, genDzOne, genDz, checkBoxes, makePt, genPengar, divAsk, dealAsk, dealDone, divHint, divAck, hbClass, isSheetMoment, twinDigits, digitClash, EASY_D, bandRoute, pathHits, bezierPts, polyPts, BAND_GAP, BAND_START, BAND_TIP, BAND_ARROW, BAND_MAX, BAND_RATIO, BAND_HARD_RATIO, BAND_HARD_MAX, ptsLen, bandScore, sidesFace, entersRect,
-    genDprobOne, genBegreppOne, genTankerOne, dprobHint, makeDtaljare, makeDbehovs, makeDrestP, makeBkvot, makeBnamnare, makeTanker, makeTankerRest, THINGS, CONTS, hardFor,
+    isSheetMoment,
     FORGET_AFTER, tagLabel, tagMoment, tagsCovered, tagsHard, recordOutcome, hardList, genForTag, buildMittProv, MITT_PER_TAG, MITT_MAX,
   };
   if (typeof window !== 'undefined') window.MatteProvLogic = API;
