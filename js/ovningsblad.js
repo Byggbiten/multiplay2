@@ -154,14 +154,7 @@ const CSS = `
 #ov-root .opt.nope{background:var(--peach);border-color:#fdba74}
 #ov-root .opt.okopt{border-color:#22c55e;background:#f0fdf4;color:#15803d}
 #ov-root .opt.ring{box-shadow:0 0 0 3px #bbf7d0,0 0 14px rgba(34,197,94,.45);border-radius:50px}
-#ov-root .kbar{display:flex;flex-direction:column;gap:4px}
-#ov-root .kbar .barrow .part.first{border-color:var(--org);background:#fff7ed}
-#ov-root .kbar .barrow.sub2{height:34px}
-#ov-root .kbar .barrow.sub2 .part.small{flex:none;width:calc(var(--w) / 2 - 2px);font-size:16px}
-#ov-root .kbar .barrow.sub2 .part.last{border:2.5px solid var(--lila);background:#f5f3ff;color:var(--lila)}
-#ov-root .kbar .spacer{visibility:hidden}
 #ov-root .ansbig{display:inline-block;font:800 26px 'Baloo 2';color:#15803d;background:#f0fdf4;border-radius:12px;padding:0 12px;box-shadow:0 0 0 3px #bbf7d0,0 0 16px rgba(34,197,94,.4)}
-#ov-root .kbar .barrow .part.filled{border:2.5px solid #86efac;background:#f0fdf4;color:#15803d}
 #ov-root .venn{width:100%;height:auto;background:#fff;border-radius:16px}
 #ov-root .venn .sh{fill:none;stroke:#94a3b8;stroke-width:2.5}
 #ov-root .venn .both{fill:#a78bfa;opacity:0;transition:opacity .6s}
@@ -325,13 +318,15 @@ const CSS = `
 #ov-root .kvbig svg{width:44px;height:44px;color:#16a34a}
 #ov-root .kvnote{font:900 16px/1.35 Nunito;color:#134e4a;text-align:center}
 #ov-root .kvbtns{display:flex;flex-direction:column;gap:8px;align-items:center}
-#ov-root .kladd .kbar{display:flex;align-items:center;gap:5px}
+#ov-root .kladd .scbar{display:flex;align-items:center;gap:5px}
 #ov-root .kladd .kl{flex:1;font:900 12px Nunito;color:#134e4a;letter-spacing:.05em}
 #ov-root .scb{width:44px;height:36px;border-radius:10px;border:2px solid #cfe9e3;background:#fff;display:flex;align-items:center;justify-content:center;color:#134e4a;cursor:pointer;padding:0}
 #ov-root .scb.on{background:#3b8f82;border-color:#3b8f82;color:#fff}
 #ov-root .scb.off{opacity:.35}
 #ov-root .scb svg{width:20px;height:20px}
 #ov-root .kcanvas{flex:1;min-height:40px;width:100%;display:block;touch-action:none;cursor:crosshair;border:2px dashed #bfe0d9;border-radius:14px;background:rgba(255,255,255,.5)}
+#ov-root svg{display:inline-block;vertical-align:middle}
+#ov-root .pad .wide,#ov-root .next{display:flex;align-items:center;justify-content:center;gap:6px}
 #ov-root .cardin{display:contents}
 #ov-root .app.pl .cardin{display:flex;flex-direction:column;gap:6px;transform-origin:top center}
 
@@ -339,7 +334,11 @@ const CSS = `
 
 const $ = (s, r = app) => r.querySelector(s);
 let app = null;   /* sätts i open() */
-const W = ms => new Promise(r => setTimeout(r, ms));
+let SPEED = 1;   /* 1 i appen; genomspelningen i webbläsaren kör snabbare via _speed */
+/* GEN räknas upp för varje ny vy. En paus eller flygning från en vy som lämnats (Avsluta mitt i en animation) slutar
+   tyst i stället för att fortsätta i nästa vy. */
+let GEN = 0;
+const W = ms => { const g = GEN; return new Promise(r => setTimeout(() => { if (g === GEN) r(); }, ms * SPEED)); };
 const PACE = 900; /* barnets takt: en förflyttning åt gången (Dennis: "för fort och osynkat") */
 const ic = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -363,7 +362,7 @@ app.addEventListener('click', e => {
   if (k === 'e') typed = typed.slice(0, -1);
   else if (k === 'ok') { padHandler(typed); return; }
   else if (typed.length < 5) typed += k;
-  const f = $('#app .inp.focus') || $('.box.focus'); if (f) setVal(f, typed);
+  const f = $('.inp.focus') || $('.box.focus'); if (f) setVal(f, typed);
   if (SF && SF.onType) SF.onType();
   else if (SF && padHandler === sfOk) sfLabel();
   else { const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0); }
@@ -398,7 +397,7 @@ function remsaHTML(d) {   /* barnet skriver nämnarens tabell själv; den rätta
 function sfInit(o) {
   SF = { tries: 0, boxes: [], acc: o.acc || { miss: false, hints: 0 }, hint: o.hint, onRight: o.onRight, grow: o.grow, more: o.more };
   sfAdd(o.boxes || []);
-  sfAdd([...app.querySelectorAll('#app .ri')].map(el => ({ el, chain: false, need: false })));
+  sfAdd([...app.querySelectorAll('.ri')].map(el => ({ el, chain: false, need: false })));
   padHandler = sfOk;
   const hb = $('#hintBtn'); if (hb) { hb.onclick = sfHint; sfHintLabel(); }
   const rb = $('#remsaBtn'); if (rb) rb.onclick = () => { const r = $('#remsa'); r.hidden = !r.hidden; rb.classList.toggle('on', !r.hidden); };
@@ -415,7 +414,7 @@ function sfAdd(list) {
 }
 function sfFocus(el) {
   if (!el) return;
-  app.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+  app.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
   el.classList.add('focus'); typed = getVal(el); sfLabel();
 }
 const sfFull = () => SF.boxes.every(b => !b.need || getVal(b.el) !== '') && !(SF.more && SF.more());
@@ -444,9 +443,9 @@ function sfCheck() {
     sfFocus(bad[0].el); return;
   }
   SF.done = true; padHandler = null;
-  app.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+  app.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
   const w = $('#pad .wide'); if (w) w.classList.remove('go');
-  const tl = $('#app .tools'); if (tl) tl.style.display = 'none';   /* klart: verktygen gör ingen nytta längre */
+  const tl = $('.tools'); if (tl) tl.style.display = 'none';   /* klart: verktygen gör ingen nytta längre */
   SF.onRight(kvText());
 }
 function sfHintLabel() {
@@ -497,6 +496,7 @@ function arrow(a, b) {
   return { p, mx, my };
 }
 async function fly(from, to, text) {
+  const gen = GEN;
   const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
   const ar = arrow(a, b);
   await W(PACE);                                            /* först pilen: vart ska talet? */
@@ -505,12 +505,13 @@ async function fly(from, to, text) {
   const fw = f.getBoundingClientRect();
   const ax = a.left + a.width / 2, ay = a.top + a.height / 2, bx = b.left + b.width / 2, by = b.top + b.height / 2;
   f.style.left = (ax - fw.width / 2) + 'px'; f.style.top = (ay - fw.height / 2) + 'px';
-  const t0 = performance.now(), dur = PACE * 1.3;
+  const t0 = performance.now(), dur = PACE * 1.3 * SPEED;
   await new Promise(res => {
     const step = now => {
       let t = Math.min(1, (now - t0) / dur); t = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       const x = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * ar.mx + t * t * bx, y = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * ar.my + t * t * by;
       f.style.transform = `translate(${x - ax}px,${y - ay}px)`;
+      if (gen !== GEN) { f.remove(); ar.p.remove(); return; }
       if (t < 1) requestAnimationFrame(step); else res();
     };
     requestAnimationFrame(step);
@@ -530,8 +531,10 @@ const plan = (n, d) => O.plan(n, d);
 let P = plan(N, D);
 function setTask(n, d) { N = String(n); D = d; P = plan(N, D); const o = 4 - N.length; CLS = CLS4.slice(o); PLACE = PLACE4.slice(o); MONEY = MONEY4.slice(o); }
 let KD = {};
+/* ny vy: gamla pilar och flygande tal bort, och väntande animationer från förra vyn slutar */
+function clearFx() { GEN++; ov.querySelectorAll(':scope > path').forEach(p => p.remove()); document.querySelectorAll('.ov-fly').forEach(e => e.remove()); }
 function kdShell(title) {
-  SF = null; app.classList.remove('hubv', 'klopen');
+  clearFx(); SF = null; app.classList.remove('hubv', 'klopen');
   return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><button class="back kbtn" data-kl>Kladd</button><div class="prog">${SELF() ? '<small class="selfb">Själv</small> ' : ''}${RUN ? `${RUN.i + 1}/${RUN.tasks.length}` : ''}</div></div>`;
 }
 const ask = (html) => { $('#ask').innerHTML = html; };
@@ -712,7 +715,7 @@ async function trapRun() {
   const { C } = T;
   const think = (h) => { $('#sub').innerHTML = h; };
   const s0 = P.steps[0];
-  ask(`I trappan skriver vi allt vi räknar. ${D} får inte plats i ${N[0]}, så vi börjar med <b>${s0.cur}</b>.`);
+  ask(`I trappan skriver vi allt vi räknar. ${s0.i > 0 ? `${D} får inte plats i ${N[0]}, så vi börjar med` : 'Vi börjar med'} <b>${s0.cur}</b>.`);
   why(startWhy());
   let row = 1;
   const lit = (r, a, b, on) => { for (let c = a; c <= b; c++) C(r, c).classList.toggle('lit', on); };
@@ -1199,12 +1202,12 @@ function trapSelf() {
   const tb = (r, c1, c2, id) => { const e = document.createElement('div'); e.className = 'box tb'; e.id = id; e.style.gridRow = String(r + 1); e.style.gridColumn = `${c1 + 1} / ${c2 + 2}`; $('#trap').appendChild(e); return e; };
   const step = i => P.steps.find(s => s.i === i);
   const qs = [...N].map((_, k) => step(k) ? tb(0, 1 + k, 1 + k, 'tq' + k) : null);   /* bara över svarets siffror (D47 ✎) */
-  const total = 2 * P.steps.length, moved = new Set(); let done = 0;
+  const total = 2 * P.steps.length, moved = new Set(); let grown = 0;
   const qFilled = () => qs.filter(e => e && getVal(e) !== '').length;
   function addRow() {
-    const k = Math.floor(done / 2), s = P.steps[k], col = 1 + s.i, len = String(s.cur).length;
+    const k = Math.floor(grown / 2), s = P.steps[k], col = 1 + s.i, len = String(s.cur).length;
     let e;
-    if (done % 2 === 0) {           /* raden med det som delas ut */
+    if (grown % 2 === 0) {           /* raden med det som delas ut */
       const r = 2 + 2 * k;
       C(r, col - len).textContent = '−'; C(r, col - len).classList.add('minus');
       for (let c = col - len + 1; c <= col; c++) C(r, c).classList.add('ul');
@@ -1212,22 +1215,22 @@ function trapSelf() {
     } else {                         /* raden med det som blir över */
       e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, need: false, ok: restOk(s.r) }]);
     }
-    e.classList.add('appear'); done++; sfFocus(e);
+    e.classList.add('appear'); grown++; sfFocus(e);
   }
   function grow() {
-    if (done >= total) return false;
-    const k = Math.floor(done / 2);
-    if (done % 2 === 0 && k > 0 && !moved.has(k)) { ask('Flytta ner nästa siffra: tryck på den i talet.'); return true; }
-    if (done % 2 === 0 && qFilled() < k + 1) { ask(k === 0 ? 'Skriv först kvotens första siffra i rätt ruta överst.' : 'Skriv nästa siffra i kvoten överst.'); return true; }
+    if (grown >= total) return false;
+    const k = Math.floor(grown / 2);
+    if (grown % 2 === 0 && k > 0 && !moved.has(k)) { ask('Flytta ner nästa siffra: tryck på den i talet.'); return true; }
+    if (grown % 2 === 0 && qFilled() < k + 1) { ask(k === 0 ? 'Skriv först kvotens första siffra i rätt ruta överst.' : 'Skriv nästa siffra i kvoten överst.'); return true; }
     addRow(); return true;
   }
   [...N].forEach((d, j) => {
     const e = C(1, 1 + j); e.classList.add('tapme');
     e.onclick = () => {
-      if (!SF || SF.done) return;
+      if (!SF || SF.grown) return;
       const k = P.steps.findIndex(s => s.i === j);
       if (k < 1 || moved.has(k)) return;
-      if (done < 2 * k) { ask('<span class="soft">Inte än.</span>Ta siffrorna i tur och ordning: räkna klart raden ovanför först.'); return; }
+      if (grown < 2 * k) { ask('<span class="soft">Inte än.</span>Ta siffrorna i tur och ordning: räkna klart raden ovanför först.'); return; }
       const t = C(1 + 2 * k, 1 + j); t.textContent = d; t.classList.add(CLS[j], 'drop'); e.classList.add('moved'); moved.add(k);
       if (qFilled() >= k + 1) addRow(); else { ask('Skriv nästa siffra i kvoten överst.'); sfFocus(qs[j]); }
     };
@@ -1235,7 +1238,7 @@ function trapSelf() {
   ask(`Räkna ${N} / ${D} i trappan. Kvoten skrivs överst, en siffra i taget.<span class="kv">Under talet skriver du det som delas ut och det som blir över. Nästa ruta ger nästa rad.</span>`);
   sfInit({
     boxes: P.steps.map(s => ({ el: qs[s.i], chain: false, ok: v => v === String(s.q) })),
-    grow, more: () => done < total,
+    grow, more: () => grown < total,
     hint: n => stepHint(n, s => qs[s.i], cs => { if (cs === P.steps[0]) for (let c = 1; c <= 1 + cs.i; c++) C(1, c).classList.add('lit'); }),
     onRight: kv => {
       app.querySelectorAll('.c.lit').forEach(x => x.classList.remove('lit'));
@@ -1283,7 +1286,7 @@ function probSelf(back) {
   const check = () => {
     if (getVal(e1) === String(n) && eo.textContent === '/' && getVal(e2) === String(d)) {
       padHandler = null; SF.onType = null; SF.done = true;
-      app.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+      app.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
       const w = $('#pad .wide'); w.innerHTML = `${ic.check} Nästa ruta`; w.classList.remove('go');
       ask(`<span class="ok">Rätt!</span>Räkna nu ${n} / ${d} i kort division.`);
       act(nextBtn('Räkna i kort division'), () => { setTask(String(n), d); kdView({ title: 'Problemlösning', onDone: () => probView(true), acc: PROB.acc }); });
@@ -1500,13 +1503,14 @@ function writeSt(s) {
 function savePrefs() { const s = readSt(); s.mode = MODE; s.level = LEVEL; writeSt(s); }
 
 function hub() {
+  clearFx();
   view = 'hub'; padHandler = null; SF = null; RUN = null; TASK = null;
   app.classList.add('hubv'); app.classList.remove('klopen');
   const st = readSt();
   const badge = id => {
     const r = st.res && st.res[id];
     if (!r || r.level !== LEVEL || r.mode !== MODE) return '';
-    return `<em class="badge${r.of && r.ok / r.of >= 0.6 ? ' g' : ''}">${r.ok}/${r.of}</em>`;
+    return `<em class="badge${r.of && r.ok / r.of >= 0.6 ? ' g' : ''}">${r.of === 1 ? 'Klart' : `${r.ok}/${r.of}`}</em>`;
   };
   const tile = m => `<button class="tile" data-open="${m.id}"><b>${m.nr}</b><span>${m.name}<small>${m.sub}</small></span>${badge(m.id)}</button>`;
   const sg = (key, cur, opts) => `<div class="seg" style="flex:1">${opts.map(o => `<button data-${key}="${o.id}" class="${cur === o.id ? 'on' : ''}" aria-pressed="${cur === o.id}">${o.name}</button>`).join('')}</div>`;
@@ -1541,10 +1545,12 @@ function kvitto() {
   st.res[id] = { level: LEVEL, mode: MODE, ok: sum.ok, of: sum.of, hints: sum.hints, at: Date.now() };
   writeSt(st);
   const tail = MODE === 'self' ? ' på första försöket' : ' utan fel';
-  const note = window.MP && MP.resultNote ? MP.resultNote(sum.ok, sum.of, tail) : `Du fick ${sum.ok} av ${sum.of} rätt${tail}.`;
+  /* Divisionstabellen är ett blad med tio tal: kvittot säger det, inte "1 av 1" */
+  const note = sum.of === 1 ? (sum.ok ? `Alla tio rätt${tail}!` : 'Alla tio är rätt nu.')
+    : window.MP && MP.resultNote ? MP.resultNote(sum.ok, sum.of, tail) : `Du fick ${sum.ok} av ${sum.of} rätt${tail}.`;
   app.innerHTML = kdShell(m.name) + `
   <div class="card kvcard">
-    <div class="kvbig${sum.high ? ' good' : ''}">${sum.high ? ic.check : ''}<span>${sum.ok}<small>/${sum.of}</small></span></div>
+    <div class="kvbig${sum.high ? ' good' : ''}">${sum.high ? ic.check : ''}${sum.of === 1 ? '' : `<span>${sum.ok}<small>/${sum.of}</small></span>`}</div>
     <div class="kvnote">${note}</div>
     ${MODE === 'self' ? `<p class="note">${sum.hints ? `Ledtrådar: ${sum.hints}` : 'Utan ledtråd'}</p>` : ''}
     <div class="kvbtns"><button class="next" id="again">En omgång till ${ic.next}</button><button class="ghost" id="tohub">Till övningsbladen</button></div>
@@ -1601,7 +1607,7 @@ const SC_IC = {
   clear: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>' };
 function kladdHTML() {
   const b = (k, label, on) => `<button class="scb${on ? ' on' : ''}" id="ov-sc-${k}" data-sc="${k}" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${SC_IC[k]}</svg></button>`;
-  return `<div class="kladd"><div class="kbar"><span class="kl">KLADD</span>${b('pen', 'Rita', true)}${b('erase', 'Sudda')}${b('undo', 'Ångra')}${b('redo', 'Gör om')}${b('clear', 'Rensa kladden')}</div><canvas id="ov-canvas" class="kcanvas"></canvas></div>`;
+  return `<div class="kladd"><div class="scbar"><span class="kl">KLADD</span>${b('pen', 'Rita', true)}${b('erase', 'Sudda')}${b('undo', 'Ångra')}${b('redo', 'Gör om')}${b('clear', 'Rensa kladden')}</div><canvas id="ov-canvas" class="kcanvas"></canvas></div>`;
 }
 function createHistory() {
   let ops = [], idx = 0;
@@ -1692,6 +1698,6 @@ function open(p, back) {
   if (typeof Router !== 'undefined') Router.show('screen-ovningsblad');
 }
 
-return { open };
+return { open, _t: () => ({ TASK, P, RUN, MODE, LEVEL, SIZE }), _speed: v => { SPEED = v; } };   /* _t: bara för genomspelningen i webbläsaren */
 })();
 if (typeof window !== 'undefined') window.Ovningsblad = Ovningsblad;
