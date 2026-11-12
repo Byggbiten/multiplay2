@@ -43,6 +43,9 @@ fram en vy och *varför* den ser ut som den gör.
 - **Förståelseprovet:** efter en uppgift med hjälp ska barnet kunna säga varför svaret blev som det blev.
 - **Ingen onödig räkning:** går det jämnt ut ställs ingen subtraktion. Det barnet räknat i ett steg följer med till
   nästa, så att inget behöver räknas om.
+- **Visa gesten, beskriv den inte.** Ska barnet trycka, kryssa eller stryka visas det med bild: en kort
+  förevisning, en bildförklaring (tal → överkryssat tal) och en räknare som syns. Text är sista utvägen. Dennis:
+  "helst med visuellt stöd än text" (12/11).
 - **Mindre är mer.** En förklaring som pekar ut en detalj utan sammanhang förvirrar (jämförelsen som bara visade den
   första resten). Antingen visas hela mönstret, alla växlingar i par, eller ingenting. Jämförelser är valfria knappar.
 

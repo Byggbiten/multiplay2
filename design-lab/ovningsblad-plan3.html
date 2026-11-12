@@ -242,10 +242,22 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .dz0{font-style:normal;position:relative;cursor:pointer}
 .dz0.struck::after{content:"";position:absolute;left:-1px;right:-1px;top:52%;height:3px;background:#94a3b8;transform:rotate(-55deg);border-radius:2px}
 .dz0.struck{opacity:.5}
-.venn .vn .xx{stroke:#64748b;stroke-width:3;stroke-linecap:round;opacity:0}
+.venn .vn .xx{stroke:#3b1d6e;stroke-width:4;stroke-linecap:round;opacity:0;transition:opacity .25s}
 .venn .vn.x .xx{opacity:1}
-.venn .vn.x circle{fill:#f1f5f9}
-.venn .vn.x text{opacity:.4}
+.venn .vn.x circle{fill:#e2e8f0;stroke:#94a3b8}
+.venn .vn.x text{opacity:.3}
+.venn .ripple{fill:none;stroke:#7c3aed;stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center;pointer-events:none}
+.venn .ripple.go{animation:ripple .9s ease-out 2}
+@keyframes ripple{from{transform:scale(.6);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.vlegend{display:flex;align-items:center;justify-content:center;gap:6px;font:900 14px Nunito;color:var(--lila)}
+.vlegend svg{width:34px;height:34px}.vlegend svg.arr{width:22px;height:22px}
+.vdots{display:flex;gap:5px;justify-content:center;align-items:center}
+.vdots i{width:16px;height:16px;border-radius:50%;border:2px solid #c4b5fd;background:#fff;position:relative;transition:background .25s}
+.vdots i.x{background:#e2e8f0;border-color:#94a3b8}
+.vdots i.x::before,.vdots i.x::after{content:"";position:absolute;left:-1px;right:-1px;top:5px;height:2.5px;background:#3b1d6e;border-radius:2px;transform:rotate(45deg)}
+.vdots i.x::after{transform:rotate(-45deg)}
+.vdots i.one{border-color:#22c55e;box-shadow:0 0 0 3px #bbf7d0}
+.vdots b{font:900 13px Nunito;color:var(--soft);margin-left:6px}
 .ball.sel{background:var(--lila);box-shadow:0 0 0 2px #ddd6fe}
 .heap.self{cursor:default}.heap.self .ball{cursor:pointer;width:18px;height:18px}
 .bag.self{padding:6px}
@@ -1322,22 +1334,29 @@ function klurSelf(a, b, k, mid, tot) {
 /* Vilket tal?: barnet kryssar själv (ett tryck = kryss, ett till = ångra). När ett tal är kvar svarar man med det.
    Inget tonas bort, inget lila område (det är ledtråd 1). Ingen knappsats (D47 ✎). */
 function vennSelf() {
+  /* Visuellt stöd framför text (Dennis 12/11: "Gör det lite tydligare att man skall kryssa bort de tal som inte ska vara
+     med" – "helst med visuellt stöd än text"): en bildförklaring (tal → överkryssat tal), en kort förevisning där
+     ett tryck kryssar 35 och krysset försvinner igen, och tio prickar som räknar ner till ett. */
+  const pic = (x) => `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="${x ? '#e2e8f0' : '#fff'}" stroke="${x ? '#94a3b8' : '#c4b5fd'}" stroke-width="2.5"/><text x="20" y="26" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="#3b1d6e" opacity="${x ? .3 : 1}">9</text>${x ? '<path d="M8 8L32 32M32 8L8 32" stroke="#3b1d6e" stroke-width="4" stroke-linecap="round"/>' : ''}</svg>`;
   app.innerHTML = kdShell('Vilket tal?') + `
   <div class="card">
     <div class="story">Talet är inuti <b class="tok">både cirkeln och kvadraten</b>. Det kan delas <b class="tok">jämnt med 4</b>.</div>
+    <div class="vlegend">${pic(false)}<svg viewBox="0 0 24 24" class="arr"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>${pic(true)}<span>tryck = stryk</span></div>
     <svg class="venn" viewBox="0 0 340 230" id="venn">
       <defs><clipPath id="sqc"><rect x="40" y="30" width="150" height="150"/></clipPath></defs>
       <rect x="40" y="30" width="150" height="150" class="sh"/><circle cx="185" cy="110" r="78" class="sh"/><polygon points="215,205 335,120 335,222" class="sh"/>
       <circle cx="185" cy="110" r="78" clip-path="url(#sqc)" class="both" id="both"/>
-      ${VN.map(([n, x, y]) => `<g class="vn" data-n="${n}" transform="translate(${x},${y})"><circle r="16"/><text dy="6">${n}</text><path class="xx" d="M-12 -12L12 12M12 -12L-12 12"/></g>`).join('')}
+      ${VN.map(([n, x, y]) => `<g class="vn" data-n="${n}" transform="translate(${x},${y})"><circle r="16"/><text dy="6">${n}</text><path class="xx" d="M-13 -13L13 13M13 -13L-13 13"/></g>`).join('')}
+      <circle class="ripple" id="ripple" cx="306" cy="28" r="18"/>
     </svg>
+    <div class="vdots" id="vdots">${VN.map(() => '<i></i>').join('')}<b id="vleft">10 kvar</b></div>
     <div class="ask" id="ask"></div>
     ${toolsHTML()}
     <div id="act" class="actrow"></div>
   </div>` + kladdHTML();
   $('[data-hub]').onclick = hub;
   const gs = [...document.querySelectorAll('.vn')];
-  ask('Kryssa de tal som inte passar: tryck på ett tal. Tryck igen för att ångra.');
+  ask('Stryk talen som inte passar, tills ett är kvar.');
   sfInit({ boxes: [], onRight: () => {},
     hint: n => { if (n === 1) { $('#both').classList.add('on'); return 'Det lila området är inuti både cirkeln och kvadraten.'; } return 'Tal som kan delas jämnt med 4: 4, 8, 12, 16, 20, 24, 28, 32 …'; } });
   padHandler = null;
@@ -1348,8 +1367,21 @@ function vennSelf() {
       ask(`<span class="ok">Klart!</span>Talet är <b>12</b>.<span class="kv">${kvText()}</span>`); act(`<button class="ghost">Till hubben</button>`, hub);
     } else { SF.acc.miss = true; g.classList.add('nope'); ask('<span class="soft">Inte riktigt – försök igen.</span>Läs ledtrådarna en gång till.'); }
   };
-  const upd = () => { const left = gs.filter(g => !g.classList.contains('x')); act(left.length === 1 ? nextBtn(`Talet är ${left[0].dataset.n}`) : '', () => answer(left[0])); };
-  gs.forEach(g => g.onclick = () => { if (SF.done) return; g.classList.toggle('x'); gs.forEach(x => x.classList.remove('nope')); upd(); });
+  const upd = () => {
+    const left = gs.filter(g => !g.classList.contains('x'));
+    [...document.querySelectorAll('#vdots i')].forEach((d, k) => { d.classList.toggle('x', k >= left.length); d.classList.toggle('one', left.length === 1 && k === 0); });
+    $('#vleft').textContent = `${left.length} kvar`;
+    act(left.length === 1 ? nextBtn(`Talet är ${left[0].dataset.n}`) : '', () => answer(left[0]));
+  };
+  /* förevisningen: tryckringen pulserar på 35, krysset kommer och går igen – avbryts om barnet själv trycker */
+  const demo = gs.find(g => g.dataset.n === '35'); let demoOn = true;
+  const stopDemo = () => { if (!demoOn) return; demoOn = false; $('#ripple').remove(); demo.classList.remove('x', 'demo'); };
+  $('#ripple').classList.add('go');
+  setTimeout(() => { if (demoOn) demo.classList.add('x', 'demo'); }, 1100);
+  setTimeout(() => { if (demoOn) demo.classList.remove('x'); }, 2600);
+  setTimeout(stopDemo, 3000);
+  gs.forEach(g => g.onclick = () => { if (SF.done) return; stopDemo(); g.classList.toggle('x'); gs.forEach(x => x.classList.remove('nope')); upd(); });
+  upd();
 }
 
 /* 10, 100 och 1000 Själv – samma kompromiss som Kluringar: raden "Vänd på det" står färdig med räknesättet, barnet
