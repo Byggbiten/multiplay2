@@ -166,6 +166,7 @@ const Store = {
       `platsvarde_log_${id}`,           // platsvarde.js
       `multdiv_log_${id}`,              // multdiv.js
       `matteprov_${id}`,                // matteprov.js (Matteprov 4:an: nivå, övning, prov, sprint; D37)
+      `ovningsblad_${id}`,              // ovningsblad.js (Övningsblad · Division plan 3: läge, nivå, kvitton; D47)
       `np_svenska_log_${id}`,           // np-svenska.js
       `np_matte_muntligt_stats_${id}`,  // np-matte-muntligt.js
       `np_matte_skriftlig_stats_${id}`, // np-matte-skriftlig.js

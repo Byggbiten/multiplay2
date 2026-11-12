@@ -26,6 +26,8 @@ const ASSETS = [
   './js/multdiv.js',
   './js/matteprov-logic.js',
   './js/matteprov.js',
+  './js/ovningsblad-logic.js',
+  './js/ovningsblad.js',
   './js/geografi-data.js',
   './js/geografi-logic.js',
   './js/geografi.js',
