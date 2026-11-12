@@ -133,3 +133,35 @@ describe('kvittot (D39)', () => {
     expect(O.summary([{ first: false }, { first: true }, { first: false }]).high).toBe(false);
   });
 });
+
+/* Inkopplingen och felklasserna som genomspelningen 12/11 hittade (15 § 5–6: testet fångar feltypen) */
+import { readFileSync } from 'node:fs';
+const src = f => readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+describe('inkopplingen i appen', () => {
+  it('index.html laddar logiken före vyerna och har skärmen', () => {
+    const h = src('index.html');
+    const a = h.indexOf('<script src="js/ovningsblad-logic.js">'), b = h.indexOf('<script src="js/ovningsblad.js">');
+    expect(a).toBeGreaterThan(0); expect(a).toBeLessThan(b);
+    expect(h).toMatch(/id="screen-ovningsblad"[\s\S]{0,80}id="ov-root"/);
+  });
+  it('servicearbetaren cachar båda filerna, och profilens nyckel tas bort med profilen', () => {
+    expect(src('sw.js')).toMatch(/'\.\/js\/ovningsblad-logic\.js'/);
+    expect(src('sw.js')).toMatch(/'\.\/js\/ovningsblad\.js'/);
+    expect(src('js/app.js')).toMatch(/`ovningsblad_\$\{id\}`/);
+  });
+  it('divisionens knapp Övningsblad öppnar plan 3', () => {
+    expect(src('js/multdiv.js')).toMatch(/kind === 'div' && window\.Ovningsblad\) return Ovningsblad\.open\(profile, back\)/);
+  });
+});
+describe('vyerna: felklasser från porteringen av mockupen', () => {
+  const v = src('js/ovningsblad.js');
+  it('inga selektorer mot mockupens #app (roten heter #ov-app)', () => { expect(v).not.toMatch(/['"`]#app[ .]/); });
+  it('ingen lokal variabel som skuggar done()', () => { expect(v).not.toMatch(/\b(let|var) done\b/); expect(v.match(/\bconst done\b/g)).toHaveLength(1); });
+  it('ingen labbkod kvar (go, syncLab, DZ, VN)', () => { expect(v).not.toMatch(/\bgo\(|syncLab|\bDZ\[|\bVN\b/); });
+  it('Router nås som global const, inte som window.Router', () => { expect(v).not.toMatch(/window\.Router/); });
+  it('pauser och flygningar från en lämnad vy slutar (GEN), och varje ny vy räknar upp', () => {
+    expect(v).toMatch(/const W = ms => \{ const g = GEN;/);
+    expect(v).toMatch(/function clearFx\(\) \{ GEN\+\+;/);
+    expect(v).toMatch(/function kdShell\(title\) \{\n  clearFx\(\);/);
+  });
+});

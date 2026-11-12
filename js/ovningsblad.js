@@ -291,7 +291,7 @@ const CSS = `
 #ov-root .ttl{white-space:nowrap}
 /* ══ lägen: telefon och iPad, stående och liggande (brainstorm/17 varv 3) ══ */
 #ov-root .kbtn{display:none!important}
-#ov-root .app.pl{max-width:none;display:grid;grid-template-columns:1fr 300px;grid-template-rows:auto 1fr;gap:6px 12px}
+#ov-root .app.pl{max-width:none;display:grid;grid-template-columns:1fr minmax(220px,34%);grid-template-rows:auto 1fr;gap:6px 12px}
 #ov-root .app.pl>.top{grid-column:1/-1}
 #ov-root .app.pl>.card{grid-column:1;grid-row:2;min-height:0;overflow:hidden;display:block}
 #ov-root .app.pl>.pad{grid-column:2;grid-row:2;align-self:start}
@@ -327,8 +327,17 @@ const CSS = `
 #ov-root .kcanvas{flex:1;min-height:40px;width:100%;display:block;touch-action:none;cursor:crosshair;border:2px dashed #bfe0d9;border-radius:14px;background:rgba(255,255,255,.5)}
 #ov-root svg{display:inline-block;vertical-align:middle}
 #ov-root .pad .wide,#ov-root .next{display:flex;align-items:center;justify-content:center;gap:6px}
+/* kort division med hjälp ryms också på 375 px breda telefoner */
+#ov-root .kd:not(.self) .numrow{gap:6px}
+#ov-root .kd:not(.self) .qbox{gap:2px}
+#ov-root .kd:not(.self) .qbox .box{width:33px}
+#ov-root .kd:not(.self) .dg{width:27px}
+@media (max-width:389px){#ov-root .card{padding:10px 8px}#ov-root .kd.self .numrow{gap:12px}}
 #ov-root .cardin{display:contents}
 #ov-root .app.pl .cardin{display:flex;flex-direction:column;gap:6px;transform-origin:top center}
+#ov-root .app.fitv>.card{overflow:hidden;display:block}
+#ov-root .app.pl .venn{max-width:250px;align-self:center}
+#ov-root .app.fitv .cardin{display:flex;flex-direction:column;gap:6px;transform-origin:top center}
 
 `;
 
@@ -1583,19 +1592,35 @@ function applySize() {
   }
   fitCard(); requestAnimationFrame(scSync);
 }
-/* Telefon liggande: kortets innehåll krymps (transform, inte zoom – zoom skalar inte text på iOS) så att det ryms */
+/* Kortet krymps (transform, inte zoom – zoom skalar inte text på iOS) när det inte ryms:
+   - telefon liggande: så att kortet ryms i sin spalt bredvid knappsatsen (D47 ✎);
+   - telefon stående: bara så mycket att kladden får sina 100 px (små telefoner, t.ex. 375 × 667), aldrig under 60 %. */
 let fitQ = false;
 function fitCard() {
   const card = $('.card'); if (!card) return;
   let inner = card.firstElementChild;
-  if (SIZE !== 'pl') { if (inner && inner.classList.contains('cardin')) inner.style.transform = ''; return; }
   if (!inner || !inner.classList.contains('cardin') || card.children.length > 1) {
     inner = document.createElement('div'); inner.className = 'cardin';
     while (card.firstChild) inner.appendChild(card.firstChild);
     card.appendChild(inner);
   }
-  const z = Math.min(1, card.clientHeight / Math.max(1, inner.offsetHeight + 4));
-  inner.style.transform = z < 1 ? `scale(${Math.max(0.55, z).toFixed(3)})` : '';
+  inner.style.transform = ''; card.style.height = ''; app.classList.remove('fitv');
+  if (SIZE === 'pl') {
+    const cs = getComputedStyle(card), room = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const z = Math.min(1, room / Math.max(1, inner.offsetHeight + 2));
+    if (z < 1) inner.style.transform = `scale(${Math.max(0.55, z).toFixed(3)})`;
+    return;
+  }
+  if (SIZE !== 'pp') return;
+  const kl = $('.kladd'); if (!kl || getComputedStyle(kl).display === 'none') return;
+  /* kladden har min-height 100 px; mät det som syns ovanför appens nederkant */
+  const ab = app.getBoundingClientRect().bottom - parseFloat(getComputedStyle(app).paddingBottom), kr = kl.getBoundingClientRect();
+  const need = 100 - (Math.min(kr.bottom, ab) - kr.top);
+  if (need <= 1) return;
+  app.classList.add('fitv');
+  const H = inner.offsetHeight, cardH = card.offsetHeight, z = Math.max(0.6, (H - need) / H);
+  card.style.height = Math.round(cardH - H * (1 - z)) + 'px';
+  inner.style.transform = `scale(${z.toFixed(3)})`;
 }
 
 /* ── Kladden: appens kladd (D48), samma ritkod som matteprov.js scratchHTML/scSetup: penna, sudd, Ångra/Gör om, rensa ── */
@@ -1688,7 +1713,7 @@ function open(p, back) {
     app = ROOT.querySelector('#ov-app');
     bindApp();
     window.addEventListener('resize', applySize);
-    new MutationObserver(() => { if (fitQ || SIZE !== 'pl') return; fitQ = true; requestAnimationFrame(() => { fitQ = false; fitCard(); }); })
+    new MutationObserver(() => { if (fitQ || SIZE === 'ip' || SIZE === 'il') return; fitQ = true; requestAnimationFrame(() => { fitQ = false; fitCard(); }); })
       .observe(app, { childList: true, subtree: true, characterData: true });
     if (document.fonts) document.fonts.ready.then(fitCard);
     ROOT._ovBound = true;
