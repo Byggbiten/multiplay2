@@ -1,8 +1,6 @@
 # OPEN_QUESTIONS — det olösta
 
-Öppna frågor står under `## Öppna`. Besvarad fråga flyttas till `## Besvarade
-
-- **P18 En design för knappsats, svarsknapp och kladd.** Besvarad 12/11: övningsbladens (D48).`, stryks `~~text~~ → Dn` och raderas
+Öppna frågor står under `## Öppna`. Besvarad fråga flyttas till `## Besvarade`, stryks `~~text~~ → Dn` och raderas
 aldrig. Nya frågor får nästa P-nummer.
 
 ## Öppna
@@ -48,6 +46,9 @@ aldrig. Nya frågor får nästa P-nummer.
 - **P17 Tvåsiffrig faktors nolla i Dela upp.** Barnet skriver själv nollan i den grå rutan (D38 ✎), medan appen sätter
   nollorna vid ensiffrig faktor. Öppet: ska appen sätta den också?
 ## Besvarade
+
+- ~~**P18 En design för knappsats, svarsknapp och kladd.** Övningsbladens eller multdivs?~~ → D48 (12/11):
+  övningsbladens är standard i hela appen.
 
 - ~~P13 Klar efter en enda siffra i fria lägen~~ → motorrundan 2026-11-11: Klar med tom ruta ger ett tips, ingen rättning.
 
