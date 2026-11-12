@@ -850,4 +850,10 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   konfettin, knappvalen, layout. och kanske det finns nått där som vi missat i divisionen? t.ex. att sånt man svarar
   fel på kan återkomma och att man aldrig får misslyckas helt, utan appen ger en flera försök och hjälper en vidare om
   man fastnar".
+- ✎ **2026-11-12, D48:s tre val:** (1) Räkna med hjälp i multiplikationen och kort division skriver direkt i cellen
+  med fokus, som övningsbladen och Räkna själv; frågan och stegen är kvar. (2) Hjälpknappen heter **Ledtråd** överallt
+  (multiplikationens Livlina byter namn). (3) Övningsbladen får en hjälptrappa så att barnet aldrig fastnar: fel →
+  försök igen → ledtråd → svaret visas och Nästa, och kvittot räknar det som med hjälp. Fel uppgifter läggs inte sist
+  i omgången igen. Källa: Dennis valde "Direkt i cellen", "Ledtråd överallt" och bara "Hjälptrappa" av två
+  tillägg. Inventeringen: `.project-context/PLAN-D48.md`.
 
