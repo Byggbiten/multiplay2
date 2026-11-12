@@ -932,7 +932,7 @@ describe('D41: kroken runTask och dess utfall', () => {
     const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
     expect(src).toMatch(/let host = null;/);
     expect(src).toMatch(/function finishTask\(correct\) \{\n\s+if \(host\) \{ hostFinish\(\); return; \}/);
-    expect(src).toMatch(/\$\{host \? '' : freeLifelineBtnHTML\(\)\}/);
+    expect(src).toMatch(/ll = !host,/); expect(src).toMatch(/\$\{ll \? freeLifelineBtnHTML\(/);   // ingen ledtråd i en lånad uppgift (D48: ny knappsats)
     expect(src).toMatch(/\} else if \(host\) \{\n\s+hostFreeWrong\(val, chk, dchk\);\n\s+\} else \{/);
     // multdivs val (nivå, räknesätt, läge) återställs efter varje lånad uppgift
     expect(src).toMatch(/saved: \{ difficulty, gameKind, helpMode \}/);
@@ -1266,3 +1266,17 @@ describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emoji
     expect(src).toMatch(/if \(item\.which === 3\) doHighlight\(\{ phase: 'add', g: -1 \}\);/);
   });
 });
+
+describe('D48: övningsbladens knappsats och Ledtråd i multiplikationen och kort division', () => {
+  const src = readFileSync(new URL('../js/multdiv.js', import.meta.url), 'utf8');
+  it('båda lägena har samma knappsats (fem per rad), svarsknappen heter Svara/Klar, och Livlina heter Ledtråd', () => {
+    const help = src.slice(src.indexOf('  function helpPadHTML()'), src.indexOf('  function lifelineBtnHTML()'));
+    const free = src.slice(src.indexOf('  function renderFreePad()'), src.indexOf('  function freeLifelineBtnHTML('));
+    for (const p of [help, free]) expect(p).toMatch(/<div class="md-pad">/);
+    expect(help).toMatch(/<span>Svara<\/span>/);
+    expect(src).not.toMatch(/>Livlina|Livlina \(|<span>Livlina<\/span>/);
+    expect(src).toMatch(/Ledtråd <small>\$\{lifelines\} kvar<\/small>/);
+    expect(src).toMatch(/\.md-pad \.md-nk \{ width:auto; height:44px;/);
+  });
+});
+

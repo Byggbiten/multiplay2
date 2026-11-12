@@ -681,6 +681,21 @@ const MultDivGame = (() => {
       cursor:crosshair; border-radius:10px;
       border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
       background:rgba(255,255,255,0.8); }
+    /* D48: knappsatsen som övningsbladens – fem tangenter per rad, fyrkantiga vita brickor; under dem Sudda,
+       Ledtråd och en bred svarsknapp. Samma i Räkna med hjälp och Räkna själv. */
+    .md-pad { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; width:100%; }
+    .md-pad .md-nk { width:auto; height:44px; border:0; border-radius:14px; background:rgba(255,255,255,.95);
+      font:800 22px 'Baloo 2',system-ui; color:var(--deep); box-shadow:0 2px 6px rgba(93,63,158,.1); }
+    .md-pad .md-nk:hover { transform:none; }
+    .md-pad .k-erase { display:grid; place-items:center; }
+    .md-pad .k-erase svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linejoin:round; stroke-linecap:round; }
+    .md-pad .s2 { grid-column:span 2; } .md-pad .s3 { grid-column:span 3; } .md-pad .s4 { grid-column:span 4; }
+    .md-pad .md-klar { flex:none; height:44px; flex-direction:row; gap:6px; border-radius:14px; font:900 17px Nunito,system-ui; }
+    .md-pad .md-klar svg { width:20px; height:20px; }
+    .md-hint { height:44px; border:2px solid #c4b5fd; border-radius:14px; background:#fff; color:#7c3aed;
+      font:900 14px Nunito,system-ui; padding:0 6px; cursor:pointer; white-space:nowrap; }
+    .md-hint small { font:800 11px Nunito,system-ui; color:#64748b; margin-left:2px; }
+    .md-hint:disabled { opacity:.5; cursor:default; }
     /* D48: kladdens verktyg som övningsbladens – ikonrad överst med Ångra och Gör om */
     .md-scbar { display:flex; align-items:center; gap:5px; flex-shrink:0; }
     .md-scbar .md-kl { flex:1; font:900 12px Nunito,system-ui; color:#134e4a; letter-spacing:.05em; text-transform:uppercase; }
@@ -3468,31 +3483,23 @@ const MultDivGame = (() => {
   function helpPadHTML() {
     return `<div class="md-panel">
       <div class="md-field md-field-sm num" id="md-help-field"><span class="md-caret"></span></div>
-      <div class="md-numpad">
+      <div class="md-pad">
         ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.helpKey('${k}')">${k}</button>`).join('')}
-      </div>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="md-btn" onclick="MultDivGame.helpErase()"
-          style="width:52px;flex-shrink:0;height:44px;background:var(--tint);color:var(--deep);border:2px solid color-mix(in srgb, var(--accent) 30%, transparent);font-size:1.2rem;border-radius:var(--radius-full)">⌫</button>
+        <button class="md-nk k-erase" aria-label="Sudda" onclick="MultDivGame.helpErase()">${ICON_ERASE}</button>
         ${lifelineBtnHTML()}
-        <button class="md-btn" id="md-help-submit" onclick="MultDivGame.helpSubmit()" disabled
-          style="flex:1.1;min-width:0;height:44px;background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;font-size:0.95rem;border-radius:var(--radius-full)">Skriv svaret…</button>
+        <button class="md-klar s2" id="md-help-submit" onclick="MultDivGame.helpSubmit()" disabled>${ICON_CHECK}<span>Svara</span></button>
       </div>
     </div>`;
   }
 
   /* ── LIVLINOR (v31) — 2/runda; visar svaret, barnet skriver själv ── */
   function lifelineBtnHTML() {
+    /* D48 ✎: hjälpknappen heter Ledtråd överallt (förut Livlina); samma knapp som övningsbladens */
     const on = lifelines > 0;
-    /* Samma knapprad som ⌫/Klar ⇒ ingen extra höjd (390×664-budgeten),
-       ändå ≥44px hög tap-yta. Grå + disabled när 0 kvar. */
-    return `<button class="md-btn" id="md-lifeline" onclick="MultDivGame.useLifeline()"
-      ${on ? '' : 'disabled'}
-      style="flex:1;min-width:0;height:44px;padding:0 4px;white-space:nowrap;
-      color:#fff;font-size:0.8rem;border-radius:var(--radius-full);
-      background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'};display:flex;align-items:center;justify-content:center;gap:5px">${ICON_BUOY.replace('<svg ', '<svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" ')}Livlina (${lifelines} kvar)</button>`;
+    return `<button class="md-hint s2" id="md-lifeline" onclick="MultDivGame.useLifeline()" ${on ? '' : 'disabled'}>${on ? `Ledtråd <small>${lifelines} kvar</small>` : 'Inga ledtrådar kvar'}</button>`;
   }
+
 
   /* Vagen visas pa ETT stalle. Livlinan kostar en pollett; efter tredje
      felsvaret pa samma fraga visas samma sak GRATIS.
@@ -3537,14 +3544,7 @@ const MultDivGame = (() => {
       field.innerHTML = (helpInput ? `<span>${helpInput}</span>` : '') + '<span class="md-caret"></span>';
     }
     const btn = document.getElementById('md-help-submit');
-    if (btn) {
-      const ready = helpInput.length > 0;
-      btn.disabled = !ready;
-      btn.style.background = ready
-        ? 'linear-gradient(135deg,var(--accent),var(--accent-light))'
-        : 'linear-gradient(135deg,#cbd5e1,#94a3b8)';
-      btn.textContent = ready ? 'Klar ✓' : 'Skriv svaret…';
-    }
+    if (btn) btn.disabled = !(helpInput.length > 0);   /* D48: "Svara", ljus tills något är skrivet */
   }
 
   function helpClearWrong() {
@@ -3748,16 +3748,18 @@ const MultDivGame = (() => {
     /* Dennis 23/9: livlinan mindre, under 9:an och Klar; Klar tre rader
        hög; 0:an lika stor som de andra. Ett grid i fyra kolumner — samma
        i division och multiplikation. */
+    /* D48: övningsbladens knappsats (ersätter fyrkolumnsrutnätet från 23/9). Sista raden: Sudda, (komma), Ledtråd och
+       Klar; i matteprovet (host) finns ingen ledtråd, och Klar tar platsen. */
+    const dec = isDecFree(), ll = !host, klarSpan = 5 - 1 - (dec ? 1 : 0) - (ll ? (dec ? 1 : 2) : 0);
     ui.innerHTML = `<div class="md-panel md-free-card">
-      <div class="md-free-keys k4${isDecFree() ? ' kc' : ''}">
-        ${[1,2,3,4,5,6,7,8,9].map(k =>
+      <div class="md-pad">
+        ${[1,2,3,4,5,6,7,8,9,0].map(k =>
           `<button class="md-nk" onclick="MultDivGame.exFreePress('${k}')">${k}</button>`).join('')}
         <button class="md-nk k-erase" aria-label="Sudda sista siffran"
           onclick="MultDivGame.exFreeErase()">${ICON_ERASE}</button>
-        <button class="md-nk" onclick="MultDivGame.exFreePress('0')">0</button>
-        ${isDecFree() ? `<button class="md-nk md-kcomma" aria-label="Kommatecken" onclick="MultDivGame.exFreePress(',')">,</button>` : ''}
-        ${host ? '' : freeLifelineBtnHTML()}
-        <button class="md-klar" id="md-free-submit" disabled
+        ${dec ? `<button class="md-nk md-kcomma" aria-label="Kommatecken" onclick="MultDivGame.exFreePress(',')">,</button>` : ''}
+        ${ll ? freeLifelineBtnHTML(dec ? '' : 's2') : ''}
+        <button class="md-klar s${klarSpan}" id="md-free-submit" disabled
           onclick="MultDivGame.exFreeSubmit()">${ICON_CHECK}<span>Klar</span></button>
       </div>
     </div>`;
@@ -3771,13 +3773,11 @@ const MultDivGame = (() => {
      multiplikation — tabellfaktan och minnet in ("9 · 9 = 81, och 8 i
      minne"); nivå 4 med tvåsiffrig faktor — de två delprodukterna, som
      barnet skriver i rad 1 och rad 2. */
-  function freeLifelineBtnHTML() {
+  function freeLifelineBtnHTML(span) {
     const on = lifelines > 0;
-    return `<button class="md-btn md-free-ll" id="md-free-lifeline"
-      ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()"
-      style="background:${on ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'linear-gradient(135deg,#cbd5e1,#94a3b8)'}">` +
-      `${ICON_BUOY}<span>Livlina</span><span class="ll-n">${lifelines}</span></button>`;
+    return `<button class="md-hint${span ? ' ' + span : ''}" id="md-free-lifeline" ${on ? '' : 'disabled'} onclick="MultDivGame.useFreeLifeline()">${on ? `Ledtråd <small>${lifelines}</small>` : 'Ledtråd <small>0</small>'}</button>`;
   }
+
 
   /* Vilken kvotsiffra står fokusringen på? Den siffrans arbetstal är det
      raden ska handla om. */
@@ -3809,7 +3809,7 @@ const MultDivGame = (() => {
       lifelines--;
       App.Sound.play('click');
       const btn = document.getElementById('md-free-lifeline');
-      if (btn) btn.outerHTML = freeLifelineBtnHTML();
+      if (btn) btn.outerHTML = freeLifelineBtnHTML(isDecFree() ? '' : 's2');
       helpBubble(multLifelineHTML());
       return;
     }
@@ -3818,7 +3818,7 @@ const MultDivGame = (() => {
     lifelines--;
     App.Sound.play('click');
     const btn = document.getElementById('md-free-lifeline');
-    if (btn) btn.outerHTML = freeLifelineBtnHTML();
+    if (btn) btn.outerHTML = freeLifelineBtnHTML(isDecFree() ? '' : 's2');
     const b = document.getElementById('md-bubble');
     if (b) b.innerHTML = `<div class="md-thought"><div class="md-tx">${tabellradHTML(numB, st.cur, st.g)}</div></div>`;
     pulseRefs(b);
