@@ -681,6 +681,14 @@ const MultDivGame = (() => {
       cursor:crosshair; border-radius:10px;
       border:2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
       background:rgba(255,255,255,0.8); }
+    /* D48: kladdens verktyg som övningsbladens – ikonrad överst med Ångra och Gör om */
+    .md-scbar { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .md-scbar .md-kl { flex:1; font:900 12px Nunito,system-ui; color:#134e4a; letter-spacing:.05em; text-transform:uppercase; }
+    .md-scb { width:44px; height:44px; border-radius:10px;   /* träffyta ≥ 44 px (CLAUDE.md) */ border:2px solid #cfe9e3; background:#fff; display:flex;
+      align-items:center; justify-content:center; color:#134e4a; cursor:pointer; padding:0; }
+    .md-scb.on { background:#3b8f82; border-color:#3b8f82; color:#fff; }
+    .md-scb.off { opacity:.35; }
+    .md-scb svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 
     /* Landskap med begränsad höjd (t.ex. iPad 1180×820): nivå 4:s höga
        tabell + numpad-panelen måste rymmas i vänsterspalten utan scroll */
@@ -4522,21 +4530,18 @@ const MultDivGame = (() => {
   }
 
   /* ── Kladd (Fas 3.2: fyller ledig yta + bitmapp-synk) ───── */
+  /* D48: kladden som övningsbladens (ikonrad överst: Rita, Sudda, Ångra, Gör om, Rensa) */
+  const MD_SC_IC = {
+    draw: '<path d="M4 20l1.2-4.4L15.6 5.2a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M13.8 7l3.2 3.2"/>',
+    erase: '<path d="M8.5 19.5h11"/><path d="M4.6 14.6l8.8-8.8a2 2 0 0 1 2.8 0l2.4 2.4a2 2 0 0 1 0 2.8L12 17.6a2 2 0 0 1-2.8 0z"/><path d="M8.8 10.4l5.2 5.2"/>',
+    undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+    clear: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>' };
   function scratchHTML() {
+    const b = (id, fn, label, cls) => `<button class="md-scb${cls ? ' ' + cls : ''}" id="md-${id}" onclick="MultDivGame.${fn}" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${MD_SC_IC[id]}</svg></button>`;
     return `<div class="md-scratch">
-      <div style="font-size:10px;font-weight:800;color:var(--deep);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0">Kladd</div>
+      <div class="md-scbar"><span class="md-kl">Kladd</span>${b('draw', 'mdToggleEraser(false)', 'Rita', 'on')}${b('erase', 'mdToggleEraser(true)', 'Sudda')}${b('undo', 'mdUndoStep()', 'Ångra', 'off')}${b('redo', 'mdRedoStep()', 'Gör om', 'off')}${b('clear', 'mdClearCanvas()', 'Rensa kladden')}</div>
       <canvas id="md-canvas" class="md-canvas"></canvas>
-      <div style="display:flex;gap:5px;flex-shrink:0">
-        <button onclick="MultDivGame.mdToggleEraser(false)" id="md-draw"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--accent);color:#fff;border:1.5px solid var(--accent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 20l4-1 10-10-3-3L5 16z"/></svg>Rita</button>
-        <button onclick="MultDivGame.mdToggleEraser(true)" id="md-erase"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 20H9l-5-5 9-9 7 7-6 6"/></svg>Sudd</button>
-        <button onclick="MultDivGame.mdClearCanvas()"
-          style="flex:1;height:46px;border-radius:12px;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px;
-          cursor:pointer;background:var(--tint);color:var(--deep);border:1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Rensa</button>
-      </div>
     </div>`;
   }
 
@@ -4545,7 +4550,7 @@ const MultDivGame = (() => {
     if (mdResizeObs) { mdResizeObs.disconnect(); mdResizeObs = null; }
     mdCanvas = el;
     if (!mdCanvas) return;
-    mdErasing = false;
+    mdErasing = false; mdUndoSt = []; mdRedoSt = [];
     requestAnimationFrame(() => {
       if (!mdCanvas || !mdCanvas.isConnected) return;
       const r = mdCanvas.getBoundingClientRect();
@@ -4577,8 +4582,32 @@ const MultDivGame = (() => {
     mdCtx.drawImage(tmp, 0, 0);
   }
 
+  /* Ångra/Gör om (D48): en bild av kladden före varje drag och före Rensa */
+  let mdUndoSt = [], mdRedoSt = [];
+  function mdSnap() {
+    if (!mdCtx || !mdCanvas) return;
+    try { mdUndoSt.push(mdCtx.getImageData(0, 0, mdCanvas.width, mdCanvas.height)); } catch (_) { return; }
+    if (mdUndoSt.length > 30) mdUndoSt.shift();
+    mdRedoSt = []; mdHistBtns();
+  }
+  function mdHistBtns() {
+    const u = document.getElementById('md-undo'), r = document.getElementById('md-redo');
+    if (u) u.classList.toggle('off', !mdUndoSt.length);
+    if (r) r.classList.toggle('off', !mdRedoSt.length);
+  }
+  function mdSwap(from, to) {
+    if (!mdCtx || !mdCanvas || !from.length) return;
+    to.push(mdCtx.getImageData(0, 0, mdCanvas.width, mdCanvas.height));
+    mdCtx.globalCompositeOperation = 'source-over';
+    mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height);
+    mdCtx.putImageData(from.pop(), 0, 0);
+    mdHistBtns();
+  }
+  function mdUndoStep() { mdSwap(mdUndoSt, mdRedoSt); }
+  function mdRedoStep() { mdSwap(mdRedoSt, mdUndoSt); }
+
   function mdPD(e) {
-    e.preventDefault(); mdDrawing = true;
+    e.preventDefault(); mdSnap(); mdDrawing = true;
     const r = mdCanvas.getBoundingClientRect();
     mdLastX = (e.clientX - r.left) * (mdCanvas.width / r.width);
     mdLastY = (e.clientY - r.top)  * (mdCanvas.height / r.height);
@@ -4606,12 +4635,12 @@ const MultDivGame = (() => {
     mdErasing = on;
     const d = document.getElementById('md-draw');
     const e = document.getElementById('md-erase');
-    if (d) { d.style.background = on ? 'var(--tint)' : 'var(--accent)'; d.style.color = on ? 'var(--deep)' : '#fff'; }
-    if (e) { e.style.background = on ? 'var(--accent)' : 'var(--tint)'; e.style.color = on ? '#fff' : 'var(--deep)'; }
+    if (d) d.classList.toggle('on', !on);
+    if (e) e.classList.toggle('on', !!on);
   }
 
   function mdClearCanvas() {
-    if (mdCtx && mdCanvas) mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height);
+    if (mdCtx && mdCanvas) { mdSnap(); mdCtx.clearRect(0, 0, mdCanvas.width, mdCanvas.height); }
   }
 
   /* ── Ljud + konfetti ────────────────────────────────────── */
@@ -4711,7 +4740,7 @@ const MultDivGame = (() => {
     exFreePress, exFreeErase, exFreeSubmit, exFreeFocus, exFreeFocusRest, finishNext, exFreeRemTap,
     avslutaOvning, avslutaAngra,           // bekraftelse nar en runda ar pabörjad
     useFreeLifeline,                       // livlinan i fria laget (22/9)
-    mdToggleEraser, mdClearCanvas,
+    mdToggleEraser, mdClearCanvas, mdUndoStep, mdRedoStep,
     exitToApp,
     openProv,                              // D37: Matteprov 4:an
     runTask, hostNext, hostAbort,          // D41: matteprovet lånar motorn

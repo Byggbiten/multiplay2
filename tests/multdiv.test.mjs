@@ -1256,7 +1256,8 @@ describe('motorrundan: svar efter fråga, mellanrestens plats, Klar, lila, emoji
     expect(src).toMatch(/\.md-cell\.md-ntap::after \{[^}]*width:max\(44px/);
     expect(src).toMatch(/\.md-cell \.md-remin::after \{[^}]*\n?\s*width:44px; height:44px;/);
     expect(src).toMatch(/width:max\(44px,140%\); height:max\(44px,140%\)/);              // minnesspalten
-    expect((src.match(/height:46px;border-radius:12px;font-weight:800;font-size:12px/g) || []).length).toBe(3);   // Rita, Sudd, Rensa
+    expect(src).toMatch(/\.md-scb \{ width:44px; height:44px;/);   // kladdens ikonknappar (D48): Rita, Sudda, Ångra, Gör om, Rensa
+    expect(src).toMatch(/mdUndoStep\(\)', 'Ångra'/); expect(src).toMatch(/mdRedoStep\(\)', 'Gör om'/);   // D48: Ångra och Gör om som i övningsbladen
   });
   it('klickstyrt (D3): uppgiften byts på knapp, kvittensen med platsord står kvar tills Nästa', () => {
     const ft = src.slice(src.indexOf('  function finishTask(correct)'), src.indexOf('  function finishNext()'));
