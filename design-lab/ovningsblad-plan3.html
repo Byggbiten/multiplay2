@@ -133,6 +133,21 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .answer{display:flex;align-items:baseline;justify-content:center;gap:6px;font:800 22px 'Baloo 2';color:var(--deep);background:#fff;border-radius:16px;padding:6px 14px;box-shadow:0 2px 10px rgba(93,63,158,.12)}
 .answer .aq{font-size:30px;color:#15803d}.answer .ar{font-size:30px;color:var(--lila)}
 .mini .sm{font-size:14px;color:var(--lila);padding:0 2px}
+.story{font:800 16px/1.45 Nunito;color:var(--deep);background:#fff;border-radius:16px;padding:10px 12px}
+.tok{display:inline-block;padding:0 6px;border-radius:8px;background:#f3e8ff;font-family:'Baloo 2';font-size:18px;transition:box-shadow .3s}
+.tok.litok{box-shadow:0 0 0 2.5px var(--lila)}
+.bar{display:flex;flex-direction:column;gap:3px}
+.barlab{text-align:center;font:800 15px 'Baloo 2';color:var(--lila)}
+.barrow{display:flex;gap:4px;height:40px}
+.barrow .seg1{flex:1;border-radius:10px;background:#ede9fe;border:2.5px solid #a78bfa}
+.barrow .part{flex:1;border-radius:10px;background:#f5f3ff;border:2.5px dashed #a78bfa;display:flex;align-items:center;justify-content:center;font:800 15px 'Baloo 2';color:var(--soft);animation:fade .5s}
+.barrow .part.filled{background:#f0fdf4;border:2.5px solid #86efac;color:#15803d}
+.opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.opt{min-height:46px;min-width:110px;border:2.5px solid #ddd6fe;border-radius:14px;background:#fff;font:800 20px 'Baloo 2';color:var(--deep);cursor:pointer;padding:0 12px}
+.opt.bank{min-width:80px;font-size:17px}
+.opt.nope{background:var(--peach);border-color:#fdba74}
+.opt.okopt{border-color:#22c55e;background:#f0fdf4;color:#15803d}
+.opt.ring{box-shadow:0 0 0 3px #bbf7d0,0 0 14px rgba(34,197,94,.45);border-radius:50px}
 .note{font:800 12.5px/1.35 Nunito;color:var(--soft);text-align:center}
 </style>
 </head>
@@ -141,6 +156,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
   <button data-go="hub">Hubben</button>
   <button data-go="kd">Kort division</button>
   <button data-go="trap">Trappan</button>
+  <button data-go="prob">Problemlösning</button>
   <button data-go="restart">Börja om vyn</button>
 </div>
 <div class="app" id="app"></div>
@@ -231,13 +247,13 @@ function hub() {
   <div class="sec">RÄKNA</div>
   <div class="tiles">${t(4,'Kort division','stora tal, steg för steg','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
   <div class="sec">TÄNKA</div>
-  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','','later')}${t(7,'Kluringar','rita stapeln','','later')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','','later')}</div>
+  <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','prob','new')}${t(7,'Kluringar','rita stapeln','','later')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','','later')}</div>
   <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
 }
 
 /* ── Kort division och trappan med samma tal: 5736 / 7 = 819, rest 3 (D47 ✎: ensiffrig nämnare, större tal) ── */
-const N = '5736', D = 7;
+let N = '5736', D = 7;
 const CLS = ['Tu','H','T','E'], CAP = { Tu:'T', H:'H', T:'T', E:'E' };
 const PLACE = ['tusental','hundratal','tiotal','ental'];
 /* Stegen räknas fram ur talet, så att samma motor bär alla tal */
@@ -252,7 +268,9 @@ function plan(n, d) {
   }
   return { ds, start: steps[0].i, steps, quot: steps.map(s => s.q).join(''), rest: steps[steps.length - 1].r };
 }
-const P = plan(N, D);
+let P = plan(N, D);
+function setTask(n, d) { N = n; D = d; P = plan(N, D); }
+let KD = {};
 function kdShell(title) {
   return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><div class="prog">1/8</div></div>`;
 }
@@ -294,10 +312,11 @@ function typeAnswer(box, right, q) {
 const rows2 = s => [s.q, s.q + 1];   /* raden som passar och raden som är för stor (också 7 · 10) */
 
 /* ── kort division ── */
-function kdView() {
+function kdView(o) {
   view = 'kd'; typed = ''; padHandler = null;
+  KD = o || {}; if (!o) setTask('5736', 7);
   const nq = N.length - P.start;
-  app.innerHTML = kdShell('Kort division') + `
+  app.innerHTML = kdShell(KD.title || 'Kort division') + `
   <div class="card" id="card">
     <div class="ask" id="ask"></div>
     <div class="why" id="why"></div>
@@ -337,7 +356,7 @@ function startWhy() {
 }
 const giveWhy = s => `Varje person får ${nm(s.q, s.i)}. Därför står ${s.q} i ${PLACE[s.i]}et.`;
 const prodWhy = s => `${D} personer får ${s.q} var: ${D} · ${s.q} = ${s.p} ${MONEY[s.i].many} delas ut.`;
-const restWhy = s => s.last ? `${nm(s.r, s.i)} ${icons(s.r, s.i)} blir kvar. ${s.r === 0 ? 'Allt gick jämnt ut.' : 'De räcker inte till alla, så det är resten.'}`
+const restWhy = s => s.r === 0 ? `Allt gick jämnt ut – inget blir kvar av ${MONEY[s.i].many}.` : s.last ? `${nm(s.r, s.i)} ${icons(s.r, s.i)} blir kvar. ${s.r === 0 ? 'Allt gick jämnt ut.' : 'De räcker inte till alla, så det är resten.'}`
   : `${nm(s.r, s.i)} ${icons(s.r, s.i)} räcker inte till alla ${D}. Den ska inte slängas – den växlas.`;
 const swapWhy = s => { const nx = P.ds[s.i + 1];
   return `${nm(s.r, s.i)} ${icons(s.r, s.i)} växlas till ${s.r * 10} ${MONEY[s.i + 1].many} ${icons(s.r * 10, s.i + 1)}.
@@ -346,7 +365,7 @@ const swapWhy = s => { const nx = P.ds[s.i + 1];
 async function kdRun() {
   const s0 = P.steps[0];
   const first = [...N].slice(0, s0.i + 1).join('');
-  ask(`${D} får inte plats i ${N[0]}. Vi börjar med <b>${first}</b> ${PLACE[s0.i]}.`);
+  ask(s0.i > 0 ? `${D} får inte plats i ${N[0]}. Vi börjar med <b>${first}</b> ${PLACE[s0.i]}.` : `Vi börjar med <b>${first}</b> ${PLACE[0]}.`);
   why(startWhy());
   await W(PACE); grp([...Array(s0.i + 1).keys()]);
   for (const s of P.steps) {
@@ -366,7 +385,11 @@ async function kdRun() {
     why(restWhy(s));
     /* det som är klart stryks, så att man inte tappar bort sig (som i appens kort division) */
     for (let k = 0; k <= s.i; k++) { $('#d' + k).classList.add('struck'); const rs = $('#rs' + k); if (rs) rs.classList.add('struck'); }
-    if (!s.last) {
+    if (!s.last && s.r === 0) {
+      const nx = P.ds[s.i + 1];
+      ask(`<span class="ok">Rätt!</span>Inget blev över. Vi fortsätter med <b>${nx}</b> ${PLACE[s.i + 1]}.`);
+      grp([s.i + 1]); $('#sub').innerHTML = '';
+    } else if (!s.last) {
       const nx = P.ds[s.i + 1];
       ask(`<span class="ok">Rätt!</span>${s.r} ${PLACE[s.i]} är kvar. Den lilla siffran ${s.r} skrivs framför ${nx}:an.`);
       await waitNext('Varför där?');
@@ -383,7 +406,8 @@ async function kdRun() {
       why(`Varje person fick ${P.quot} kr, och ${P.rest} kr blev över.`);
       await W(PACE);
       $('#think').innerHTML = `<div class="tt">KONTROLL</div><div class="row in" style="cursor:default">${D} · ${P.quot} + ${P.rest} = ${N}<span class="cmp" style="color:#15803d">som täljaren</span></div>`;
-      act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
+      if (KD.onDone) act(`<button class="next">Tillbaka till berättelsen ${ic.next}</button>`, KD.onDone);
+      else act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
     }
   }
 }
@@ -391,6 +415,7 @@ async function kdRun() {
 /* ── trappan: samma tal ── */
 let T = null;
 function trapView() {
+  setTask('5736', 7);
   view = 'trap'; typed = ''; padHandler = null;
   const rows = 2 + 2 * P.steps.length, cols = N.length + 2, cells = [];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(`<div class="c" id="c${r}_${c}"></div>`);
@@ -501,10 +526,77 @@ async function trapRun() {
   }
 }
 
+/* ── Problemlösning (31, 32a, 34b): berättelse → stapelmodellen → välj uträkning → räkna i kort division → svarsbanken ── */
+const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);   /* platsen lottas (D17) */
+let PROB = null;
+function probView(back) {
+  view = 'prob'; typed = ''; padHandler = null;
+  const n = 2856, d = 4, q = n / d;
+  PROB = { n, d, q };
+  app.innerHTML = kdShell('Problemlösning') + `
+  <div class="card">
+    <div class="story" id="story">Stafettbanan är <b class="tok" id="tN">${n}</b> meter. Den delas i <b class="tok" id="tD">${d}</b> lika långa sträckor. Hur lång är en sträcka?</div>
+    <div class="why" id="why"></div>
+    <div class="bar" id="bar"><div class="barlab" id="barlab">${n} m</div><div class="barrow" id="barrow"><div class="seg1"></div></div></div>
+    <div class="ask" id="ask"></div>
+    <div class="opts" id="opts"></div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  if (back) return probEnd();
+  probRun();
+}
+async function probRun() {
+  const { n, d } = PROB;
+  ask('Läs berättelsen. Vad ska delas, och i hur många delar?');
+  await waitNext('Rita stapeln');
+  /* stapelmodellen: hela sträckan som en stapel, delad i d lika delar */
+  why(`Hela sträckan är en stapel. Den ska delas i ${d} lika långa delar, så stapeln delas i ${d}.`);
+  $('#tN').classList.add('litok');
+  await W(PACE);
+  $('#barrow').innerHTML = Array.from({ length: d }, () => '<div class="part"><span>?</span></div>').join('');
+  $('#tD').classList.add('litok');
+  await W(PACE);
+  ask('Vilken uträkning ger längden på en sträcka? Tryck på den.');
+  const right = `${n} / ${d}`;
+  const opts = shuffle([right, `${n} · ${d}`, `${n} − ${d}`, `${n} + ${d}`]);
+  $('#opts').innerHTML = opts.map(o => `<button class="opt" data-o="${o}">${o}</button>`).join('');
+  await new Promise(res => $('#opts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    if (b.dataset.o === right) { b.classList.add('okopt'); $('#opts').querySelectorAll('.opt').forEach(x => x.onclick = null); res(); }
+    else { b.classList.add('nope'); setTimeout(() => b.classList.remove('nope'), 900);
+      const o = b.dataset.o;
+      ask(`<span class="soft">Inte riktigt – försök igen.</span>${o.includes('·') ? 'Gånger gör sträckan längre. Vi ska dela den.' : o.includes('−') ? `Minus tar bort ${d} meter. Vi ska dela i ${d} delar.` : `Plus gör sträckan längre. Vi ska dela den.`}`); }
+  }));
+  ask(`<span class="ok">Rätt!</span>${right}: sträckan delas i ${d} lika delar.`);
+  why(`Lika långa delar betyder division. Stapelns ${d} delar är svaret på ${right}.`);
+  await waitNext('Räkna i kort division');
+  /* räkna i kort division med hjälp, sedan tillbaka hit */
+  setTask(String(n), d);
+  kdView({ title: 'Problemlösning', onDone: () => probView(true) });
+}
+async function probEnd() {
+  const { n, d, q } = PROB;
+  $('#barrow').innerHTML = Array.from({ length: d }, () => '<div class="part"><span>?</span></div>').join('');
+  ask(`Du räknade ${n} / ${d}. Ringa in svaret i svarsbanken, som på bladet.`);
+  why('Svarsbanken är en kontroll: står ditt svar där har du troligen räknat rätt.');
+  const bank = shuffle([q, q - 100, q + 10, q - 10, q * 2]).map(v => `${v} m`);
+  $('#opts').innerHTML = bank.map(o => `<button class="opt bank" data-o="${o}">${o}</button>`).join('');
+  await new Promise(res => $('#opts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    if (b.dataset.o === `${q} m`) { b.classList.add('okopt', 'ring'); res(); }
+    else { b.classList.add('nope'); setTimeout(() => b.classList.remove('nope'), 900); ask(`<span class="soft">Inte riktigt – försök igen.</span>Vad blev kvoten i kort division?`); }
+  }));
+  /* förståelseprovet: svaret fyller stapelns delar */
+  ask(`<span class="ok">Klart!</span>En sträcka är <b>${q} meter</b>.`);
+  for (const p of $('#barrow').querySelectorAll('.part')) { p.innerHTML = `<span>${q} m</span>`; p.classList.add('filled'); await W(PACE / 2); }
+  why(`${d} sträckor om ${q} m blir hela banan: ${d} · ${q} = ${n}.`);
+  act(`<button class="ghost">Till hubben</button>`, hub);
+}
+
 function go(v) {
   if (v === 'restart') v = view;
   document.querySelectorAll('#lab button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
-  ({ hub, kd: kdView, trap: trapView })[v]();
+  ({ hub, kd: () => kdView(), trap: trapView, prob: () => probView() })[v]();
 }
 document.querySelectorAll('#lab button').forEach(b => b.onclick = () => go(b.dataset.go));
 go(location.hash.slice(1) || 'hub');
