@@ -2,6 +2,7 @@
 
 ## Öppet
 
+- [ ] Senare modul: division med flersiffrig nämnare (trappan, nämnaren läggs till gång på gång), när barnet når dit (D47 ✎).
 - [ ] D48: kort division och uppställd multiplikation får övningsbladens knappsats, svarsknapp och kladd (egen skiva efter övningsbladen).
 - [ ] Övningsblad, småputs: kontrollraden luftigare ("Kontrollera med gånger" på en rad); Själv i alla tretton moduler genomspelat av VD:n (gjort: Dela, Ingår, Talsort).
 - [ ] iPad-planen (D45 ✎, `brainstorm/12`) – nu när v76 är live.

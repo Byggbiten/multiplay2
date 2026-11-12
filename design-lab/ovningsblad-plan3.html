@@ -35,6 +35,7 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .pad .wide{grid-column:span 4;background:#e6f4f1;color:#134e4a;font:900 17px Nunito;border:2px solid #99d5c9}
 .pad .wide.go{background:var(--acc);color:#fff;border-color:var(--acc)}
 .pad .er svg{width:22px;height:22px}
+.pad .wide svg{width:20px;height:20px;vertical-align:-3px}
 .kladd{flex:1;min-height:100px;background:rgba(255,255,255,.6);border-radius:20px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .kladd .kt{display:flex;justify-content:space-between;align-items:center;font:900 12px Nunito;color:#134e4a;letter-spacing:.05em}
 .kladd .kt span{display:flex;gap:6px}
@@ -55,10 +56,10 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .tile.later{opacity:.55;cursor:default}
 .tile.new{box-shadow:0 0 0 2px #a78bfa,0 2px 8px rgba(93,63,158,.08)}
 /* ── kort division ── */
-.kd{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-top:4px}
+.kd{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-top:4px}
 .fr{display:flex;flex-direction:column;align-items:stretch}
-.numrow{display:flex;align-items:flex-end;gap:12px;padding:0 6px;border-bottom:3.5px solid var(--deep)}
-.dg{position:relative;width:34px;height:52px;display:flex;align-items:flex-end;justify-content:center;font:800 36px/1 'Baloo 2';border-radius:10px;transition:background .25s,box-shadow .25s}
+.numrow{display:flex;align-items:flex-end;gap:9px;padding:0 2px 0 10px;border-bottom:3.5px solid var(--deep)}
+.dg{position:relative;width:30px;height:52px;display:flex;align-items:flex-end;justify-content:center;font:800 36px/1 'Baloo 2';border-radius:10px;transition:background .25s,box-shadow .25s}
 .dg .cap{position:absolute;top:-2px;left:0;right:0;text-align:center;font:900 10px Nunito}
 .dg.grp{background:#fff7ed;box-shadow:0 0 0 2.5px var(--org)}
 .dg.dim{opacity:.35}
@@ -67,8 +68,8 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .den{display:flex;justify-content:center;font:800 32px 'Baloo 2';color:var(--deep);padding-top:2px}
 .den span{background:#f3e8ff;border-radius:10px;padding:0 10px}
 .eqs{font:800 34px 'Baloo 2';color:var(--deep);padding-bottom:18px}
-.qbox{display:flex;align-items:flex-end;gap:5px;padding-bottom:12px}
-.box{position:relative;width:40px;height:50px;border-radius:12px;border:3px dashed #a7d8cf;background:#fff;display:flex;align-items:center;justify-content:center;font:800 30px 'Baloo 2'}
+.qbox{display:flex;align-items:flex-end;gap:4px;padding-bottom:12px}
+.box{position:relative;width:36px;height:48px;border-radius:12px;border:3px dashed #a7d8cf;background:#fff;display:flex;align-items:center;justify-content:center;font:800 30px 'Baloo 2'}
 .box .cap{position:absolute;top:-17px;left:0;right:0;text-align:center;font:900 10px Nunito}
 .box.focus{border-style:solid;border-color:#0f766e;box-shadow:0 0 0 3px var(--org)}
 .box.done{border-style:solid;border-color:#86efac;background:#f0fdf4}
@@ -119,12 +120,12 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 <body>
 <div class="lab" id="lab">
   <button data-go="hub">Hubben</button>
-  <button data-go="kd">Kort division · tvåsiffrig nämnare</button>
+  <button data-go="kd">Kort division</button>
   <button data-go="trap">Trappan</button>
   <button data-go="restart">Börja om vyn</button>
 </div>
 <div class="app" id="app"></div>
-<p class="note" style="max-width:390px">Steg 1 av mockupen: hubben, kort division och trappan med samma tal. Grunder och Tänka byggs i nästa steg.</p>
+<p class="note" style="max-width:390px">Steg 1 av mockupen: hubben, kort division och trappan med samma tal (5736 / 7). Grunder och Tänka byggs i nästa steg.</p>
 
 <script>
 'use strict';
@@ -209,50 +210,42 @@ function hub() {
   <div class="sec">GRUNDER</div>
   <div class="tiles">${t(1,'Dela och gruppera','lika delar, grupper, rest','', 'later')}${t(2,'Divisionstabellen','20 tal','','later')}${t(3,'10, 100 och 1000','vänd på det','','later')}</div>
   <div class="sec">RÄKNA</div>
-  <div class="tiles">${t(4,'Kort division','också tvåsiffrig nämnare','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
+  <div class="tiles">${t(4,'Kort division','stora tal, steg för steg','kd','new')}${t(5,'Trappan','samma tal, steg för steg','trap','new')}</div>
   <div class="sec">TÄNKA</div>
   <div class="tiles">${t(6,'Problemlösning','välj uträkning, räkna','','later')}${t(7,'Kluringar','rita stapeln','','later')}${t(8,'Vilket tal?','cirkel, kvadrat, triangel','','later')}</div>
   <p class="note">Ljusare rutor kommer i nästa steg av mockupen. Lila ram = nytt i plan 3.</p>`;
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => go(b.dataset.open));
 }
 
-/* ── kort division: 2745 / 48 = 57, rest 9 ── */
-const N = '2745', D = 48, CLS = ['Tu','H','T','E'];
+/* ── Kort division och trappan med samma tal: 5736 / 7 = 819, rest 3 (D47 ✎: ensiffrig nämnare, större tal) ── */
+const N = '5736', D = 7;
+const CLS = ['Tu','H','T','E'], CAP = { Tu:'T', H:'H', T:'T', E:'E' };
+const PLACE = ['tusental','hundratal','tiotal','ental'];
+/* Stegen räknas fram ur talet, så att samma motor bär alla tal */
+function plan(n, d) {
+  const ds = [...n].map(Number); let i = 0, cur = ds[0];
+  while (cur < d && i < ds.length - 1) { i++; cur = cur * 10 + ds[i]; }
+  const steps = [];
+  for (; i < ds.length; i++) {
+    const q = Math.floor(cur / d), r = cur - q * d;
+    steps.push({ i, cur, q, p: q * d, r, last: i === ds.length - 1 });
+    if (i < ds.length - 1) cur = r * 10 + ds[i + 1];
+  }
+  return { ds, start: steps[0].i, steps, quot: steps.map(s => s.q).join(''), rest: steps[steps.length - 1].r };
+}
+const P = plan(N, D);
 function kdShell(title) {
   return `<div class="top"><button class="back" data-hub>${ic.back}Avsluta</button><div class="ttl">${title}</div><div class="prog">1/8</div></div>`;
-}
-let kd = null;
-function kdView() {
-  view = 'kd'; typed = ''; padHandler = null;
-  kd = { step: 0 };
-  app.innerHTML = kdShell('Kort division') + `
-  <div class="card" id="card">
-    <div class="ask" id="ask"></div>
-    <div class="head"><span class="Tu">2</span><span class="H">7</span><span class="T">4</span><span class="E">5</span> / 48</div>
-    <div class="kd">
-      <div class="fr">
-        <div class="numrow">${[...N].map((d, i) => `<div class="dg ${CLS[i]}" id="d${i}"><span class="cap ${CLS[i]}">${CLS[i] === 'Tu' ? 'T' : CLS[i]}</span>${d}${i === 3 ? '<span class="rs" id="rs3"></span>' : ''}</div>`).join('')}</div>
-        <div class="den"><span>48</span></div>
-      </div>
-      <div class="eqs">=</div>
-      <div class="qbox"><div class="box" id="qT"><span class="cap T">T</span></div><div class="box" id="qE"><span class="cap E">E</span></div><span class="comma">,</span><div class="box rest" id="qR"><span class="cap" style="color:var(--lila)">rest</span></div></div>
-    </div>
-    <div class="think" id="think"><div class="tt">48:ANS TABELL</div></div>
-    <div class="sub" id="sub"></div>
-    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
-  </div>` + padHTML() + kladdHTML();
-  $('[data-hub]').onclick = hub;
-  kdStep();
 }
 const ask = (html) => { $('#ask').innerHTML = html; };
 const act = (html, fn) => { const a = $('#act'); a.innerHTML = html; const b = a.querySelector('button'); if (b && fn) b.onclick = fn; };
 const nextBtn = (label = 'Nästa') => `<button class="next">${label} ${ic.next}</button>`;
-
+const waitNext = (label) => new Promise(res => act(nextBtn(label), () => { act(''); res(); }));
 async function showRows(rows, target) {
   const th = $('#think'); th.querySelectorAll('.row').forEach(r => r.remove());
   for (const m of rows) {
     const p = D * m, over = p > target;
-    th.insertAdjacentHTML('beforeend', `<div class="row${over ? ' over' : ''}" data-m="${m}">48 · <span class="m">${m}</span> = ${p}<span class="cmp">${over ? 'större än ' + target : 'får plats'}</span></div>`);
+    th.insertAdjacentHTML('beforeend', `<div class="row${over ? ' over' : ''}" data-m="${m}">${D} · <span class="m">${m}</span> = ${p}<span class="cmp">${over ? 'större än ' + target : 'får plats'}</span></div>`);
     const r = th.lastElementChild; await W(60); r.classList.add('in');
     await W(PACE);
     if (over) { r.classList.add('struck'); await W(PACE / 2); }
@@ -260,7 +253,7 @@ async function showRows(rows, target) {
 }
 function pickRow(target, right) {
   return new Promise(res => {
-    ask(`Hur många gånger får 48 plats i <b>${target}</b>? Tryck på raden.`);
+    ask(`Hur många gånger får ${D} plats i <b>${target}</b>? Tryck på raden.`);
     $('#think').querySelectorAll('.row').forEach(r => r.onclick = () => {
       const m = +r.dataset.m;
       if (m === right) { r.classList.add('pick'); $('#think').querySelectorAll('.row').forEach(x => x.onclick = null); res(r); }
@@ -269,162 +262,158 @@ function pickRow(target, right) {
     });
   });
 }
-function typeAnswer(box, right) {
+function typeAnswer(box, right, q) {
   return new Promise(res => {
     document.querySelectorAll('.box').forEach(b => b.classList.remove('focus'));
     box.classList.add('focus'); typed = ''; box.textContent = '';
     padHandler = v => {
-      if (+v === right) { padHandler = null; box.classList.remove('focus'); box.classList.add('done'); $('#pad .wide').classList.remove('go'); res(); }
-      else { ask(`<span class="soft">Inte riktigt – försök igen.</span>${$('#ask').dataset.q || ''}`); typed = ''; box.textContent = ''; }
+      if (v !== '' && +v === right) { padHandler = null; box.classList.remove('focus'); box.classList.add('done'); $('#pad .wide').classList.remove('go'); res(); }
+      else { ask(`<span class="soft">Inte riktigt – försök igen.</span>${q}`); typed = ''; box.textContent = ''; }
     };
   });
 }
-function grp(ix) { document.querySelectorAll('.dg').forEach((d, i) => { d.classList.toggle('grp', ix.includes(i)); d.classList.toggle('dim', ix.length && !ix.includes(i) && i < Math.min(...ix)); }); }
+const rows2 = s => s.q === 9 ? [8, 9] : [s.q, s.q + 1];   /* raden som passar och raden som är för stor */
 
-async function kdStep() {
-  /* Steg 1: var börjar vi? (texten först, sedan markeringen) */
-  ask('48 får inte plats i 2 och inte i 27. Vi börjar med <b>274</b> tiotal.');
-  await W(PACE); grp([0,1,2]);
-  act(nextBtn('Visa 48:ans tabell'), async () => {
-    act('');
-    ask('Hur många gånger får 48 plats i <b>274</b>? Titta i tabellen.');
-    await showRows([5,6], 274);
-    const r = await pickRow(274, 5);
-    ask('<span class="ok">Rätt!</span>48 · 5 = 240 får plats. 5 skrivs i tiotalet.');
-    await W(PACE); await fly(r.querySelector(".m"), $('#qT'), '5'); $('#qT').insertAdjacentText('beforeend', '5'); $('#qT').classList.add('done');
-    await W(PACE / 2);
-    act(nextBtn(), async () => {
-      act('');
-      ask('Hur mycket blir över när 240 tas från 274?'); $('#ask').dataset.q = 'Hur mycket blir över när 240 tas från 274?';
-      $('#sub').innerHTML = '274 − 240 = <div class="box" id="sb"></div>';
-      await typeAnswer($('#sb'), 34);
-      ask('<span class="ok">Rätt!</span>34 tiotal är kvar. De följer med till entalen.');
-      await W(PACE); const rs = $('#rs3'); rs.classList.add('slot');
-      await fly($('#sb'), rs, '34'); rs.textContent = '34';
-      grp([3]); $('#d3').classList.add('grp');
-      act(nextBtn(), async () => {
-        act(''); $('#sub').innerHTML = '';
-        ask('34 tiotal är 340 ental. Med 5 ental blir det <b>345</b>.');
-        await W(PACE * 1.5);
-        act(nextBtn('Visa 48:ans tabell'), async () => {
-          act('');
-          ask('Hur många gånger får 48 plats i <b>345</b>? Titta i tabellen.');
-          await showRows([7,8], 345);
-          const r2 = await pickRow(345, 7);
-          ask('<span class="ok">Rätt!</span>48 · 7 = 336 får plats. 7 skrivs i entalet.');
-          await W(PACE); await fly(r2.querySelector(".m"), $('#qE'), '7'); $('#qE').insertAdjacentText('beforeend', '7'); $('#qE').classList.add('done');
-          act(nextBtn(), async () => {
-            act('');
-            ask('Hur mycket blir över när 336 tas från 345?'); $('#ask').dataset.q = 'Hur mycket blir över när 336 tas från 345?';
-            $('#sub').innerHTML = '345 − 336 = <div class="box" id="sb"></div>';
-            await typeAnswer($('#sb'), 9);
-            await fly($('#sb'), $('#qR'), '9'); $('#qR').insertAdjacentText('beforeend', '9'); $('#qR').classList.add('done');
-            grp([]); $('#sub').innerHTML = '';
-            ask('<span class="ok">Klart!</span>2745 / 48 = 57, rest 9.');
-            await W(PACE);
-            $('#think').innerHTML = '<div class="tt">KONTROLL</div><div class="row in" style="cursor:default">48 · 57 + 9 = 2745<span class="cmp" style="color:#15803d">som täljaren</span></div>';
-            act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
-          });
-        });
-      });
-    });
-  });
+/* ── kort division ── */
+function kdView() {
+  view = 'kd'; typed = ''; padHandler = null;
+  const nq = N.length - P.start;
+  app.innerHTML = kdShell('Kort division') + `
+  <div class="card" id="card">
+    <div class="ask" id="ask"></div>
+    <div class="head">${[...N].map((d, i) => `<span class="${CLS[i]}">${d}</span>`).join('')} / ${D}</div>
+    <div class="kd">
+      <div class="fr">
+        <div class="numrow">${[...N].map((d, i) => `<div class="dg ${CLS[i]}" id="d${i}"><span class="cap ${CLS[i]}">${CAP[CLS[i]]}</span>${d}${i > 0 ? `<span class="rs" id="rs${i}"></span>` : ''}</div>`).join('')}</div>
+        <div class="den"><span>${D}</span></div>
+      </div>
+      <div class="eqs">=</div>
+      <div class="qbox">${P.steps.map(s => `<div class="box" id="q${s.i}"><span class="cap ${CLS[s.i]}">${CAP[CLS[s.i]]}</span></div>`).join('')}<span class="comma">,</span><div class="box rest" id="qR"><span class="cap" style="color:var(--lila)">rest</span></div></div>
+    </div>
+    <div class="think" id="think"><div class="tt">${D}:ANS TABELL</div></div>
+    <div class="sub" id="sub"></div>
+    <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
+  </div>` + padHTML() + kladdHTML();
+  $('[data-hub]').onclick = hub;
+  kdRun();
+}
+function grp(ix) { document.querySelectorAll('.dg').forEach((d, i) => { d.classList.toggle('grp', ix.includes(i)); d.classList.toggle('dim', ix.length > 0 && i < Math.min(...ix)); }); }
+async function kdRun() {
+  const s0 = P.steps[0];
+  const first = [...N].slice(0, s0.i + 1).join('');
+  ask(`${D} får inte plats i ${N[0]}. Vi börjar med <b>${first}</b> ${PLACE[s0.i]}.`);
+  await W(PACE); grp([...Array(s0.i + 1).keys()]);
+  for (const s of P.steps) {
+    await waitNext(`Visa ${D}:ans tabell`);
+    ask(`Hur många gånger får ${D} plats i <b>${s.cur}</b>? Titta i tabellen.`);
+    await showRows(rows2(s), s.cur);
+    const r = await pickRow(s.cur, s.q);
+    ask(`<span class="ok">Rätt!</span>${D} · ${s.q} = ${s.p}. ${s.q} skrivs i ${PLACE[s.i]}et.`);
+    await W(PACE / 2); await fly(r.querySelector('.m'), $('#q' + s.i), String(s.q));
+    $('#q' + s.i).insertAdjacentText('beforeend', s.q); $('#q' + s.i).classList.add('done');
+    await waitNext();
+    const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
+    ask(q); $('#sub').innerHTML = `${s.cur} − ${s.p} = <div class="box" id="sb"></div>`;
+    await typeAnswer($('#sb'), s.r, q);
+    if (!s.last) {
+      const nx = P.ds[s.i + 1];
+      ask(`<span class="ok">Rätt!</span>${s.r} ${PLACE[s.i]} är kvar. De följer med till ${PLACE[s.i + 1]}en.`);
+      const rs = $('#rs' + (s.i + 1)); rs.classList.add('slot');
+      await fly($('#sb'), rs, String(s.r)); rs.textContent = s.r;
+      grp([s.i + 1]); $('#sub').innerHTML = '';
+      await waitNext();
+      ask(`${s.r} ${PLACE[s.i]} är ${s.r * 10} ${PLACE[s.i + 1]}. Med ${nx} ${PLACE[s.i + 1]} blir det <b>${s.r * 10 + nx}</b> ${PLACE[s.i + 1]}.`);
+      await W(PACE);
+    } else {
+      await fly($('#sb'), $('#qR'), String(s.r)); $('#qR').insertAdjacentText('beforeend', s.r); $('#qR').classList.add('done');
+      grp([]); $('#sub').innerHTML = '';
+      ask(`<span class="ok">Klart!</span>${N} / ${D} = ${P.quot}, rest ${P.rest}.`);
+      await W(PACE);
+      $('#think').innerHTML = `<div class="tt">KONTROLL</div><div class="row in" style="cursor:default">${D} · ${P.quot} + ${P.rest} = ${N}<span class="cmp" style="color:#15803d">som täljaren</span></div>`;
+      act(`<button class="ghost" id="toTrap">Se samma tal i trappan</button>`, () => go('trap'));
+    }
+  }
 }
 
 /* ── trappan: samma tal ── */
-/* rutnät 7 kolumner: 0 = nämnaren (2 rutor: 0–1), streck, 2–5 = täljarens siffror, 6 = rest */
 let T = null;
 function trapView() {
   view = 'trap'; typed = ''; padHandler = null;
-  const rows = 6, cols = 7, cells = [];
+  const rows = 2 + 2 * P.steps.length, cols = N.length + 2, cells = [];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(`<div class="c" id="c${r}_${c}"></div>`);
   app.innerHTML = kdShell('Trappan') + `
   <div class="card">
     <div class="ask" id="ask"></div>
-    <div class="trap" id="trap">${cells.join('')}</div>
+    <div class="trap" id="trap" style="grid-template-columns:repeat(${cols},30px);grid-auto-rows:27px">${cells.join('')}</div>
     <div class="sub" id="sub"></div>
     <div id="act" style="display:flex;justify-content:center;min-height:46px"></div>
   </div>` + padHTML() + kladdHTML();
   $('[data-hub]').onclick = hub;
   const C = (r, c) => $(`#c${r}_${c}`);
-  /* rad 0: kvoten ovanför; rad 1: 48 | 2 7 4 5 */
-  C(1,0).textContent = '4'; C(1,1).textContent = '8';
-  [...N].forEach((d, i) => { const e = C(1, 2 + i); e.textContent = d; e.classList.add(CLS[i], 'bt'); });
-  C(1,2).classList.add('bl'); C(0,2).classList.add();
-  T = { C };
-  trapStep();
+  /* kolumn 0 = nämnaren, kolumn 1+k = täljarens siffra k; rad 0 = kvoten, rad 1 = talet */
+  C(1, 0).textContent = D;
+  [...N].forEach((d, k) => { const e = C(1, 1 + k); e.textContent = d; e.classList.add(CLS[k], 'bt'); });
+  C(1, 1).classList.add('bl');
+  T = { C }; trapRun();
 }
-async function trapStep() {
+function put(C, row, endCol, num, cls) {   /* skriv ett tal högerjusterat så att sista siffran hamnar i endCol */
+  const s = String(num); [...s].forEach((d, k) => { const e = C(row, endCol - s.length + 1 + k); e.textContent = d; if (cls) e.classList.add(...cls); });
+}
+async function trapRun() {
   const { C } = T;
   const think = (h) => { $('#sub').innerHTML = h; };
-  ask('I trappan skriver vi allt vi räknar. 48 får inte plats i 2 eller i 27, så vi börjar med <b>274</b>.');
-  [2,3,4].forEach(c => C(1, c).classList.add('lit'));
-  act(nextBtn('Visa 48:ans tabell'), async () => {
-    act('');
-    think('<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">48:ANS TABELL</div></div>');
-    await showRows([5,6], 274);
-    const r = await pickRow(274, 5);
-    ask('<span class="ok">Rätt!</span>5 skrivs ovanför, över tiotalet.');
-    await W(PACE); await fly(r.querySelector(".m"), C(0, 4), '5'); C(0, 4).textContent = '5'; C(0, 4).classList.add('T');
-    act(nextBtn(), async () => {
-      act(''); think('');
-      ask('Under 274 skriver vi vad 5 gånger 48 blir: <b>240</b>.');
-      await W(PACE);
-      C(2,1).textContent = '−'; C(2,1).classList.add('minus');
-      for (const [c, d] of [[2,'2'],[3,'4'],[4,'0']]) { const e = C(2, c); e.textContent = d; e.classList.add('appear', 'ul'); await W(PACE / 2); }
-      act(nextBtn(), async () => {
-        act('');
-        [2,3,4].forEach(c => C(1, c).classList.remove('lit'));
-        ask('Hur mycket blir över? Räkna 274 − 240.'); $('#ask').dataset.q = 'Hur mycket blir över? Räkna 274 − 240.';
-        think('274 − 240 = <div class="box" id="sb"></div>');
-        await typeAnswer($('#sb'), 34);
-        think('');
-        C(3,3).textContent = '3'; C(3,4).textContent = '4'; C(3,3).classList.add('appear'); C(3,4).classList.add('appear');
-        ask('<span class="ok">Rätt!</span>34 blev över. Nu flyttar vi ner nästa siffra, 5.');
-        act(nextBtn('Flytta ner 5'), async () => {
-          act(''); C(1,5).classList.add('src');
-          await fly(C(1,5), C(3,5), '5');
-          C(3,5).textContent = '5'; C(3,5).classList.add('E');
-          C(1,5).classList.remove('src');
-          [3,4,5].forEach(c => C(3, c).classList.add('lit'));
-          ask('Nu står det <b>345</b>. Det är samma 345 som i kort division.');
-          act(nextBtn('Visa 48:ans tabell'), async () => {
-            act('');
-            think('<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">48:ANS TABELL</div></div>');
-            await showRows([7,8], 345);
-            const r2 = await pickRow(345, 7);
-            ask('<span class="ok">Rätt!</span>7 skrivs ovanför, över entalet.');
-            await W(PACE); await fly(r2.querySelector(".m"), C(0, 5), '7'); C(0, 5).textContent = '7'; C(0, 5).classList.add('E');
-            act(nextBtn(), async () => {
-              act(''); think('');
-              ask('Under 345 skriver vi 7 gånger 48: <b>336</b>.');
-              C(4,2).textContent = '−'; C(4,2).classList.add('minus');
-              for (const [c, d] of [[3,'3'],[4,'3'],[5,'6']]) { const e = C(4, c); e.textContent = d; e.classList.add('appear', 'ul'); await W(PACE / 2); }
-              act(nextBtn(), async () => {
-                act(''); [3,4,5].forEach(c => C(3, c).classList.remove('lit'));
-                ask('Hur mycket blir över? Räkna 345 − 336.'); $('#ask').dataset.q = 'Hur mycket blir över? Räkna 345 − 336.';
-                think('345 − 336 = <div class="box" id="sb"></div>');
-                await typeAnswer($('#sb'), 9);
-                think('');
-                C(5,5).textContent = '9'; C(5,5).classList.add('appear'); C(5,5).style.color = 'var(--lila)';
-                ask('<span class="ok">Klart!</span>2745 / 48 = 57, rest 9.');
-                act(nextBtn('Varför är det samma som kort division?'), async () => {
-                  act('');
-                  ask('Talet <b>34</b> som blev över i trappan är den lilla siffran i kort division.');
-                  C(3,3).classList.add('src'); C(3,4).classList.add('src');
-                  think(`<div class="mirror">
-                    <div class="mini"><small>TRAPPAN</small><span>274 − 240 = <span class="hl">34</span></span></div>
-                    <div class="mini"><small>KORT DIVISION</small><span>2 7 4 <sup class="hl" style="font-size:15px">34</sup>5</span></div></div>`);
-                  act(`<button class="ghost" id="toKd">Tillbaka till kort division</button>`, () => go('kd'));
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  });
+  const s0 = P.steps[0];
+  ask(`I trappan skriver vi allt vi räknar. ${D} får inte plats i ${N[0]}, så vi börjar med <b>${s0.cur}</b>.`);
+  let row = 1;                                      /* raden där "cur" står */
+  const lit = (r, a, b, on) => { for (let c = a; c <= b; c++) C(r, c).classList.toggle('lit', on); };
+  lit(1, 1, 1 + s0.i, true);
+  for (const s of P.steps) {
+    const col = 1 + s.i, len = String(s.cur).length;
+    await waitNext(`Visa ${D}:ans tabell`);
+    think(`<div class="think" id="think" style="flex:1;min-height:0"><div class="tt">${D}:ANS TABELL</div></div>`);
+    ask(`Hur många gånger får ${D} plats i <b>${s.cur}</b>?`);
+    await showRows(rows2(s), s.cur);
+    const r = await pickRow(s.cur, s.q);
+    ask(`<span class="ok">Rätt!</span>${s.q} skrivs ovanför, över ${PLACE[s.i]}et.`);
+    await W(PACE / 2); await fly(r.querySelector('.m'), C(0, col), String(s.q)); C(0, col).textContent = s.q; C(0, col).classList.add(CLS[s.i]);
+    await waitNext();
+    think('');
+    ask(`Under ${s.cur} skriver vi ${s.q} gånger ${D}: <b>${s.p}</b>.`);
+    await W(PACE / 2);
+    const pr = row + 1; C(pr, col - String(s.p).length).textContent = '−'; C(pr, col - String(s.p).length).classList.add('minus');
+    for (let k = 0; k < String(s.p).length; k++) { const e = C(pr, col - String(s.p).length + 1 + k); e.textContent = String(s.p)[k]; e.classList.add('appear', 'ul'); await W(PACE / 2); }
+    for (let c = col - len + 1; c <= col; c++) C(pr, c).classList.add('ul');
+    await waitNext();
+    lit(row, col - len + 1, col, false);
+    const q = `Hur mycket blir över? Räkna ${s.cur} − ${s.p}.`;
+    ask(q); think(`${s.cur} − ${s.p} = <div class="box" id="sb"></div>`);
+    await typeAnswer($('#sb'), s.r, q);
+    think('');
+    const rr = row + 2; put(C, rr, col, s.r, ['appear']);
+    if (!s.last) {
+      ask(`<span class="ok">Rätt!</span>${s.r} blev över. Nu flyttar vi ner nästa siffra, ${P.ds[s.i + 1]}.`);
+      await waitNext(`Flytta ner ${P.ds[s.i + 1]}`);
+      C(1, col + 1).classList.add('src');
+      await fly(C(1, col + 1), C(rr, col + 1), String(P.ds[s.i + 1]));
+      C(rr, col + 1).textContent = P.ds[s.i + 1]; C(rr, col + 1).classList.add(CLS[s.i + 1]); C(1, col + 1).classList.remove('src');
+      row = rr; const nl = String(s.r * 10 + P.ds[s.i + 1]).length;
+      lit(row, col + 1 - nl + 1, col + 1, true);
+      ask(`Nu står det <b>${s.r * 10 + P.ds[s.i + 1]}</b>, samma tal som i kort division.`);
+    } else {
+      C(rr, col).style.color = 'var(--lila)';
+      ask(`<span class="ok">Klart!</span>${N} / ${D} = ${P.quot}, rest ${P.rest}.`);
+      await waitNext('Varför är det samma som kort division?');
+      const s1 = P.steps[0];
+      ask(`Det som blev över i trappan, <b>${s1.r}</b>, är den lilla siffran i kort division.`);
+      put(C, 3, 1 + s1.i, s1.r, ['src']);
+      think(`<div class="mirror">
+        <div class="mini"><small>TRAPPAN</small><span>${s1.cur} − ${s1.p} = <span class="hl">${s1.r}</span></span></div>
+        <div class="mini"><small>KORT DIVISION</small><span>${N.slice(0, s1.i + 1).split('').join(' ')} <sup class="hl" style="font-size:15px">${s1.r}</sup>${N[s1.i + 1]}</span></div></div>`);
+      act(`<button class="ghost">Tillbaka till kort division</button>`, () => go('kd'));
+    }
+  }
 }
+
 
 function go(v) {
   if (v === 'restart') v = view;

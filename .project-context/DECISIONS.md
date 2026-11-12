@@ -69,7 +69,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 - D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
-- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, tvåsiffrig nämnare, kort division huvudsätt
+- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, ensiffrig nämnare (flersiffrig senare), kort division huvudsätt, trappan egen modul
 - D48 Övningsbladens knappsats, svarsknapp och kladd är appens standard (besvarar P18)
 
 ---
@@ -754,6 +754,13 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   förflyttning, och nästa steg kommer på klick. Pilen startar i själva siffran och böjer bort från text. Källa:
   Dennis: "animationer där siffror flyttas i förklarande steg eller pilar 'såsom du gjorde kort divison' det är
   superbra. nu gick som sagt animationen lite väl snabbt … men den va väldigt pedagogisk. så sånt tänk är jätteviktigt."
+
+- ✎ **2026-11-12, ensiffrig nämnare (ändrar D47):** övningsbladen följer häftet. Kapitel 3 har bara ensiffrig nämnare
+  (förutom 10, 100 och 1000), så kort division och trappan räknar med ensiffrig nämnare och större tal (till exempel
+  5736 / 7). Flersiffrig nämnare blir en senare modul, när barnet kommer dit (oftast i åk 5–6, i trappan med en lista
+  där nämnaren läggs till gång på gång). Kontrollerat: inga flersiffriga nämnare i `4A_kopieringsunderlag_kap3` eller
+  `4A_K_S_kapitel_3`. Källa: Dennis: "Om det inte finns flersiffriga nämnaer i division nånstans i miras övningsblad så
+  kör vi ensiffriga nämnare. Det får bli en senare modul när hon når dit."
 
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
