@@ -810,6 +810,11 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   bredvid knappsatsen (70–99 %), i stället för att skrolla eller be om stående läge. Telefon stående och iPad i båda
   lägena har kortet i full storlek. Källa: Dennis valde "Krymp innehållet" av tre alternativ.
 
+- ✎ **2026-11-12, plan 3 inbyggd och driftsatt (v77, v78):** övningsbladen är en egen modul (`js/ovningsblad.js`,
+  `js/ovningsblad-logic.js`) med nya tal varje gång, omgångar med kvitto och appens kladd. Kortet krymps också på små
+  telefoner i stående läge, så att kladden får 100 px. Den gamla övningsbladskoden (D44) är bortkopplad och rivs i en
+  egen skiva. Källa: Dennis: "Då bygger vi in det här till våran dev-version och driftsätter sedan?"
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
