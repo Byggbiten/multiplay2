@@ -432,6 +432,9 @@ function stepHint(n, qOf, light) {
   }
   return `En rad ur ${D}:ans tabell: ${D} · ${cs.q + 1} = ${D * (cs.q + 1)}. Den är större än ${cs.cur}.`;
 }
+/* Restrutan behöver inte fyllas för att Klar ska komma: går det jämnt ut är tom ruta (eller 0) rätt, annars rättas
+   den vid Klar. Annars fastnar barnet på "Nästa ruta" när det inte skriver 0 (Dennis 12/11, 2856 / 4). */
+const restOk = r => v => v === String(r) || (r === 0 && v === '');
 function flipTool(max) {   /* en tom rad "Vänd på det" som barnet fyller själv; räknesättet väljs genom att trycka */
   let n = 0; const btn = $('#flipBtn');
   btn.onclick = () => {
@@ -1133,12 +1136,13 @@ function kdSelf() {
   sfInit({   /* rutorna visar hur många siffror svaret har – det bjuder vi på (D47 ✎) */
     acc: KD.acc,
     boxes: [...P.steps.map(s => ({ el: $('#q' + s.i), ok: v => v === String(s.q) })),
-      { el: $('#qR'), ok: v => v === String(P.rest) },
+      { el: $('#qR'), need: false, ok: restOk(P.rest) },
       ...[...N].slice(1).map((_, k) => ({ el: $('#rs' + (k + 1)), chain: false, need: false }))],
     hint: n => stepHint(n, s => $('#q' + s.i), cs => grp(cs === P.steps[0] ? [...Array(cs.i + 1).keys()] : [cs.i])),
     onRight: kv => {
       grp([]);
       P.steps.forEach(s => $('#q' + s.i).classList.add('ans')); $('#qR').classList.add('ans');
+      if (getVal($('#qR')) === '') setVal($('#qR'), '0');
       ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
       if (KD.onDone) act(nextBtn('Tillbaka till berättelsen'), KD.onDone);
       else act(nextBtn('Ny uppgift'), () => { setTask(String(1000 + Math.floor(Math.random() * 9000)), 3 + Math.floor(Math.random() * 7)); kdView({}); });
@@ -1176,9 +1180,9 @@ function trapSelf() {
       for (let c = col - len + 1; c <= col; c++) C(r, c).classList.add('ul');
       e = tb(r, col - len + 1, col, 'tp' + k); sfAdd([{ el: e, ok: v => v === String(s.p) }]);
     } else {                         /* raden med det som blir över */
-      e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, ok: v => v === String(s.r) }]);
+      e = tb(3 + 2 * k, col - len + 1, col, 'tr' + k); sfAdd([{ el: e, need: false, ok: restOk(s.r) }]);
     }
-    e.classList.add('appear'); sfFocus(e); done++;
+    e.classList.add('appear'); done++; sfFocus(e);
   }
   function grow() {
     if (done >= total) return false;
@@ -1207,6 +1211,7 @@ function trapSelf() {
       document.querySelectorAll('.c.lit').forEach(x => x.classList.remove('lit'));
       P.steps.forEach(s => qs[s.i].classList.add('ans'));
       $('#tr' + (P.steps.length - 1)).classList.add('rest', 'ans');
+      document.querySelectorAll('[id^="tr"].tb').forEach(e => { if (getVal(e) === '') setVal(e, '0'); });
       ask(`<span class="ok">Klart!</span>${N} / ${D} = <b>${P.quot}</b>, rest <b>${P.rest}</b>.<span class="kv">${kv}</span>`);
       act(`<button class="ghost">Till hubben</button>`, hub);
     } });
