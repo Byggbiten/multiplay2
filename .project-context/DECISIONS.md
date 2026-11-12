@@ -69,6 +69,7 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
 - D44 Matteprov 2 · Division ur kapitel 3; principen: det ska synas vad man fyller i, texten är reserv (gäller båda proven) ✎ övningsblad i stället för prov ✎ det visuella först, hjälpen ska lära ✎ fokus och bandet ska betyda något
 - D45 iPad: hela appen ska utnyttja skärmen i stående och liggande läge (iPhone-layouten oförändrad) ✎ hela planen, parallella Sonnet-agenter, efter övningsbladen
 - D46 Arbetssättet: granska själv (skärmbilder + kontextfritt prov), agenternas kontor, ordning och reda som rutin genom komprimeringar ✎ repot är minnet, mät kontexten, konsekvent design
+- D47 Övningsbladen plan 3: Grunder · Räkna · Tänka, för fyran och uppåt, tvåsiffrig nämnare i trappan
 
 ---
 
@@ -722,4 +723,19 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   att se att du kör ordning och reda och kontextkomprimering innan du når 95%" och "att de loggar och antecknar så vem
   som helst kan hoppa in och ta över deras arbete när som. Dvs. Repot = minnet".
 - **Var det bor:** `CLAUDE.md` (tabellen under Ordning och reda, stycket Kontoren), `agenter/README.md` (Rutinen).
+
+## D47 · 2026-11-12 · Övningsbladen för division: plan 3, för fyran och uppåt
+- **Beslut:** Övningsbladen byggs om efter plan 3 i `brainstorm/16`: åtta moduler i tre avdelningar. Grunder har Dela
+  och gruppera, Divisionstabellen och 10/100/1000 (vänd på det). Räkna har Kort division (långsam, synkad, växlingen
+  med block) och Trappan. Tänka har Problemlösning (flerval av uttryck, kort divisions motor, svarsbanken som
+  kontroll), Kluringar (32b med stapelmodellen) och Vilket tal? (Venndiagram). Begrepp och Varje talsort utgår,
+  Pengar går upp i Problemlösning. Målgruppen är åk 4 och uppåt: större tal, också med tvåsiffrig (eller större)
+  nämnare. Där blir trappan räknesättet, med tabellsökning mot nämnaren (53 · 4 = 212, 53 · 5 = 265 för stort). Nya
+  designregler: förståelseprovet (hjälpen slutar i en bild som visar varför) och att bandet inte tänker åt barnet.
+  Mockup först (en fil, flera vyer).
+- **Källa:** Dennis 2026-11-12: "toppen. och va inte för fokuserad på att [tvåan] skall kunna klara detta. det är mest
+  till för de som går i 4:an och uppåt. så vi behöver större tal också där nämnaren är 2 siffrigt eller mer", efter
+  "dessa tycker jag förtjänar mer emphasis" om sju sidor ur kopieringsunderlaget och kritiken i `brainstorm/15`.
+- **Förval tills Dennis svarat:** trappan är huvudsättet vid tvåsiffrig nämnare och kort division vid ensiffrig.
+  Venndiagrammet besvaras genom att trycka på talet. Övningsbladens stil gäller för det nya (P18 öppen).
 
