@@ -165,3 +165,11 @@ describe('vyerna: felklasser från porteringen av mockupen', () => {
     expect(v).toMatch(/function kdShell\(title\) \{\n  clearFx\(\);/);
   });
 });
+
+describe('språket i förklaringarna', () => {
+  it('objektet heter dem/den, inte de ("Vi växlar dem till 50 hundralappar")', () => {
+    const v = src('js/ovningsblad.js');
+    expect(v).toMatch(/Vi växlar \$\{dem\(a\)\} till/);
+    expect(v).toMatch(/dem = n => n === 1 \? 'den' : 'dem'/);
+  });
+});
