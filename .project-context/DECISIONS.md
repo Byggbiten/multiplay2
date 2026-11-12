@@ -749,6 +749,12 @@ daterar annorlunda (kort division "23/9") gäller datumet här.
   en subagent. men att du ser till att om jag blir nöjd, spara tänket och metodiken och logga etc, så att en subagent
   kan föra in det till sitt kontor för att kunna tänka som du i framtiden".
 
+- ✎ **2026-11-12, siffror som flyttas och pilar är kärnan:** i förklarande steg ritas först en streckad lila pil från
+  talet till rutan, sedan en paus, och sedan glider talet längs pilen. Takten är lugn: ungefär 900 ms per
+  förflyttning, och nästa steg kommer på klick. Pilen startar i själva siffran och böjer bort från text. Källa:
+  Dennis: "animationer där siffror flyttas i förklarande steg eller pilar 'såsom du gjorde kort divison' det är
+  superbra. nu gick som sagt animationen lite väl snabbt … men den va väldigt pedagogisk. så sånt tänk är jätteviktigt."
+
 ## D48 · 2026-11-12 · Övningsbladens utseende är appens standard (besvarar P18)
 - **Beslut:** övningsbladens knappsats (stora fyrkantiga sifferknappar, en svarsknapp), svarsknapp och kladd (ikoner,
   Ångra/Gör om) är standard i hela appen. Kort division och uppställd multiplikation (runda knappar, svarsfält,
