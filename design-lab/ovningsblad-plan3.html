@@ -251,7 +251,9 @@ body{font-family:Nunito,sans-serif;font-weight:700;color:var(--ink);background:#
 .es.op{min-width:46px}
 .opsb{display:flex;gap:8px;justify-content:center}
 .opsb button{width:56px;height:46px;border-radius:14px;border:2.5px solid #ddd6fe;background:#fff;font:800 24px 'Baloo 2';color:var(--deep);cursor:pointer}
-.tok.tap{cursor:pointer;box-shadow:0 0 0 2px #ddd6fe}
+.tok.tap{cursor:pointer;box-shadow:0 0 0 2px #c4b5fd;border:0;color:var(--deep);font-weight:800;min-height:32px;padding:0 10px;margin:2px 0;touch-action:manipulation}
+.es.op{border-style:dashed;padding:0}
+.expr .box.sm{min-width:80px;height:46px}
 .kctl{display:flex;align-items:center;justify-content:center;gap:6px;font:800 22px 'Baloo 2';color:var(--deep);background:#fff;border-radius:16px;padding:16px 8px 6px;position:relative}
 .kctl small{position:absolute;left:10px;top:3px;font:900 10px Nunito;color:var(--soft);letter-spacing:.05em}
 .kctl .box.sm{min-width:44px}
@@ -331,7 +333,8 @@ app.addEventListener('click', e => {
   else if (k === 'ok') { padHandler(typed); return; }
   else if (typed.length < 5) typed += k;
   const f = $('#app .inp.focus') || $('.box.focus'); if (f) setVal(f, typed);
-  if (SF && padHandler === sfOk) sfLabel();
+  if (SF && SF.onType) SF.onType();
+  else if (SF && padHandler === sfOk) sfLabel();
   else { const ok = $('#pad .wide'); if (ok) ok.classList.toggle('go', typed.length > 0); }
 });
 app.addEventListener('click', e => {   /* telefon liggande: kladden bakom en knapp, över knappsatsen */
@@ -1224,7 +1227,7 @@ function probSelf(back) {
   const { n, d, q } = PROB;
   app.innerHTML = kdShell('Problemlösning') + `
   <div class="card">
-    <div class="story">Stafettbanan är <b class="tok tap" data-t="${n}">${n}</b> meter. Den delas i <b class="tok tap" data-t="${d}">${d}</b> lika långa sträckor. Hur lång är en sträcka?</div>
+    <div class="story">Stafettbanan är <button class="tok tap" data-t="${n}">${n}</button> meter. Den delas i <button class="tok tap" data-t="${d}">${d}</button> lika långa sträckor. Hur lång är en sträcka?</div>
     <div class="ask" id="ask"></div>
     <div id="work" style="display:flex;flex-direction:column;gap:8px"></div>
     ${toolsHTML()}
@@ -1239,29 +1242,46 @@ function probSelf(back) {
       onRight: kv => { $('#sb').classList.add('ans'); ask(`<span class="ok">Klart!</span>En sträcka är <b>${q} meter</b>.<span class="kv">${kv}</span>`); act(`<button class="ghost">Till hubben</button>`, hub); } });
     return;
   }
-  $('#work').innerHTML = `<div class="dzrow orig"><small>UTRÄKNING</small><div class="expr"><span class="es" id="e1"></span><span class="es op" id="eo"></span><span class="es" id="e2"></span></div></div>
+  /* Talen i berättelsen är riktiga knappar (Safari på iPhone tar inte tryck på vanlig text), och rutorna går också att
+     fylla med knappsatsen (D48), så att det fungerar hur barnet än försöker (Dennis 12/11: "Här kan jag inte trycka"). */
+  $('#work').innerHTML = `<div class="dzrow orig"><small>UTRÄKNING</small><div class="expr"><div class="box sm" id="e1"></div><button class="es op" id="eo"></button><div class="box sm" id="e2"></div></div></div>
     <div class="opsb">${['/', '·', '−', '+'].map(o => `<button data-op="${o}">${o}</button>`).join('')}</div>`;
-  ask('Skriv uträkningen: tryck på talen i berättelsen och på ett räknesätt.<span class="kv">Tryck på en ruta för att tömma den.</span>');
-  sfInit({ acc: PROB.acc, boxes: [],
+  ask('Skriv uträkningen: tryck på talen i berättelsen, eller skriv dem, och välj ett räknesätt.');
+  const e1 = $('#e1'), e2 = $('#e2'), eo = $('#eo');
+  sfInit({ acc: PROB.acc, boxes: [{ el: e1 }, { el: e2 }],
     hint: k => k === 1 ? 'Banan ska delas i lika långa sträckor. Vilket räknesätt delar?' : 'Talet som delas står först, sedan antalet delar.',
     onRight: () => {} });
-  padHandler = null;
-  const pw = $('#pad .wide'); pw.innerHTML = `${ic.check} Nästa ruta`; pw.classList.remove('go');   /* knappsatsen vilar tills räkningen */
-  const ex = { e1: '', eo: '', e2: '' };
+  const full = () => getVal(e1) && getVal(e2) && eo.textContent;
+  const label = () => { const w = $('#pad .wide'); w.innerHTML = `${ic.check} ${full() ? 'Räkna' : 'Nästa ruta'}`; w.classList.toggle('go', !!full()); act(full() ? nextBtn('Räkna') : '', check); };
   const check = () => {
-    if (ex.e1 === String(n) && ex.eo === '/' && ex.e2 === String(d)) {
+    if (getVal(e1) === String(n) && eo.textContent === '/' && getVal(e2) === String(d)) {
+      padHandler = null; SF.onType = null; SF.done = true;
+      document.querySelectorAll('#app .focus').forEach(x => x.classList.remove('focus'));
+      const w = $('#pad .wide'); w.innerHTML = `${ic.check} Nästa ruta`; w.classList.remove('go');
       ask(`<span class="ok">Rätt!</span>Räkna nu ${n} / ${d} i kort division.`);
       act(nextBtn('Räkna i kort division'), () => { setTask(String(n), d); kdView({ title: 'Problemlösning', onDone: () => probView(true), acc: PROB.acc }); });
     } else {
-      PROB.acc.miss = true; ex.e1 = ex.eo = ex.e2 = ''; draw();
-      ['e1', 'eo', 'e2'].forEach(k => $('#' + k).classList.add('miss'));
+      PROB.acc.miss = true; setVal(e1, ''); setVal(e2, ''); eo.textContent = '';
+      [e1, eo, e2].forEach(x => x.classList.add('miss')); sfFocus(e1); label();
       ask('<span class="soft">Inte riktigt – försök igen.</span>Läs berättelsen en gång till.');
     }
   };
-  const draw = () => { ['e1', 'eo', 'e2'].forEach(k => { $('#' + k).textContent = ex[k]; if (ex[k]) $('#' + k).classList.remove('miss'); }); act(ex.e1 && ex.eo && ex.e2 ? nextBtn('Räkna') : '', check); };
-  document.querySelectorAll('.tok.tap').forEach(t => t.onclick = () => { if (!ex.e1) ex.e1 = t.dataset.t; else if (!ex.e2) ex.e2 = t.dataset.t; draw(); });
-  document.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { ex.eo = b.dataset.op; draw(); });
-  ['e1', 'eo', 'e2'].forEach(k => $('#' + k).onclick = () => { ex[k] = ''; draw(); });
+  SF.onType = label;
+  padHandler = () => {   /* svarsknappen: nästa tomma ruta, sedan Räkna */
+    const empty = [e1, e2].find(x => getVal(x) === '');
+    if (empty) sfFocus(empty);
+    else if (!eo.textContent) ask('Välj ett räknesätt: tryck på / · − eller +.');
+    else check();
+  };
+  document.querySelectorAll('.tok.tap').forEach(t => t.onclick = () => {
+    const f = [e1, e2].find(x => x.classList.contains('focus') && getVal(x) === '') || [e1, e2].find(x => getVal(x) === '');
+    if (!f) return;
+    setVal(f, t.dataset.t); f.classList.remove('miss');
+    const nx = [e1, e2].find(x => getVal(x) === ''); sfFocus(nx || f); label();
+  });
+  document.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { eo.textContent = b.dataset.op; eo.classList.remove('miss'); label(); });
+  eo.onclick = () => { eo.textContent = ''; label(); };
+  label();
 }
 
 /* Kluringar: frågan uppställd som två divisioner med tomma rutor. Raden "Vänd på det" kan öppnas (högst två) och
